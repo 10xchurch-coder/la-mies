@@ -88,6 +88,7 @@ export default function Cuentas() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 <Tag text={r.has_mfa ? 'Dos pasos: sí' : 'Dos pasos: no'} tone={r.has_mfa ? 'green' : 'amber'} />
                 {r.disabled_at ? <Tag text="Desactivada" tone="red" /> : null}
+                {r.deletion_requested_at ? <Tag text={`Pidió eliminar su cuenta ${fmtRelativeDay(r.deletion_requested_at)}`} tone="red" /> : null}
                 <Tag text={r.last_sign_in ? `Entró ${fmtRelativeDay(r.last_sign_in)}` : 'Nunca entró'} tone="gray" />
               </View>
               {r.id !== profile?.id ? (

@@ -274,4 +274,4 @@ export type ReadingReward = { days: number; label: string; earned: boolean };
 export type ReadingStreak = { current: number; best: number; total: number; read_today: boolean; rewards: ReadingReward[] };
 export type ReadingBoardRow = { user_id: string; display_name: string; photo_path: string | null; current_streak: number; best_streak: number };
 
-export type AccountRow = { id: string; display_name: string; email: string; role: Role; disabled_at: string | null; has_mfa: boolean; last_sign_in: string | null };
+export type AccountRow = { id: string; display_name: string; email: string; role: Role; disabled_at: string | null; has_mfa: boolean; last_sign_in: string | null; deletion_requested_at: string | null };

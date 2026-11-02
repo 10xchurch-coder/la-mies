@@ -282,3 +282,7 @@ export async function accountsOverview(): Promise<AccountRow[]> {
 export async function setAccountDisabled(userId: string, disabled: boolean): Promise<void> {
   ok(await supabase.rpc('set_account_disabled', { p_user: userId, p_disabled: disabled }));
 }
+
+export async function requestAccountDeletion(): Promise<void> {
+  ok(await supabase.rpc('request_account_deletion'));
+}

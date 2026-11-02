@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Avatar, Card, Choice, RowLink, SectionTitle, Toggle } from '@/components/ui';
 import { biometricsAvailable } from '@/components/LockGate';
-import { updateProfile } from '@/lib/api';
+import { requestAccountDeletion, updateProfile } from '@/lib/api';
 import { ROLE_LABEL, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -90,6 +90,34 @@ export default function Ajustes() {
             icon="log-out"
             danger
             onPress={() => Alert.alert('Cerrar sesión', '¿Salir de la app en este teléfono?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => signOut().then(() => router.replace('/login')) }])}
+          />
+          <RowLink
+            title="Eliminar mi cuenta"
+            subtitle="Borra tu cuenta y tus datos personales"
+            icon="trash-2"
+            danger
+            onPress={() =>
+              Alert.alert(
+                'Eliminar mi cuenta',
+                'Vamos a borrar tu cuenta y tus datos personales (foto, teléfono, dirección, DNI) dentro de los 10 días hábiles. Las fichas de las personas que visitaste quedan en la iglesia para su seguimiento. ¿Seguro?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  {
+                    text: 'Eliminar', style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await requestAccountDeletion();
+                        await signOut();
+                        router.replace('/login');
+                        Alert.alert('Pedido recibido', 'La iglesia va a borrar tu cuenta dentro de los 10 días hábiles. Si cambiás de idea, escribí a info@iglesiavictoria.com.');
+                      } catch (e) {
+                        Alert.alert('No se pudo', e instanceof Error ? e.message : 'Probá de nuevo');
+                      }
+                    },
+                  },
+                ],
+              )
+            }
           />
         </Card>
         <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión 0.4 · {church?.name ?? ''}</Text>

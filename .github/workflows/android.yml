@@ -1,0 +1,60 @@
+# Compila la app de Android en la nube de Expo (EAS).
+# Se usa desde GitHub: Actions → "App Android" → Run workflow → elegir el tipo.
+#   prueba → un archivo .apk para instalar directo en cualquier Android (link para compartir).
+#   tienda → un archivo .aab para subir a Google Play.
+# Necesita el secreto EXPO_TOKEN (Settings → Secrets and variables → Actions).
+name: App Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      tipo:
+        description: "prueba (APK para instalar directo) o tienda (AAB para Google Play)"
+        type: choice
+        options: [prueba, tienda]
+        default: prueba
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # La primera vez: crea el proyecto en la cuenta de Expo y guarda su número en app.json.
+      - name: Vincular con Expo (solo la primera vez)
+        run: |
+          if node -e "process.exit(require('./app.json').expo.extra?.eas?.projectId ? 0 : 1)"; then
+            echo "Ya está vinculado."
+          else
+            eas init --non-interactive --force
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app.json
+            git commit -m "Vincular la app con Expo (EAS)"
+            git push
+          fi
+
+      - name: Compilar
+        env:
+          PERFIL: ${{ inputs.tipo == 'tienda' && 'production' || 'preview' }}
+        run: |
+          eas build --platform android --profile "$PERFIL" --non-interactive --json > build.json
+          cat build.json
+          node -e "const b=require('./build.json')[0]; console.log('\n=== LISTO ==='); console.log('Archivo: ' + (b.artifacts?.buildUrl || b.artifacts?.applicationArchiveUrl || '(ver expo.dev)')); console.log('Página de la compilación: https://expo.dev/accounts/' + b.project.ownerAccount.name + '/projects/' + b.project.slug + '/builds/' + b.id)" | tee -a "$GITHUB_STEP_SUMMARY"
