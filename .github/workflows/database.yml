@@ -35,7 +35,7 @@ jobs:
           fi
           case "$ARCHIVO" in supabase/*.sql) ;; *) echo "::error::Solo archivos .sql dentro de supabase/"; exit 1;; esac
           # La dirección copiada de Supabase trae [YOUR-PASSWORD]; la contraseña va aparte, así no importa si tiene símbolos.
-          URL=$(printf '%s' "$DB_URL" | tr -d ' \n\r' | sed -E 's#:\[YOUR-PASSWORD\]@#@#; s#^(postgres(ql)?://[^:/@]+):[^@]*@#\1@#')
+          URL=$(printf '%s' "$DB_URL" | tr -d ' \n\r' | sed -E 's#:\[YOUR-PASSWORD\]@#@#; s#^(postgres(ql)?://[^:/@]+):.*@#\1@#')
           echo "Corriendo $ARCHIVO ..."
           psql "$URL" -v ON_ERROR_STOP=1 -q -f "$ARCHIVO"
           echo "Listo. Comprobación:"
