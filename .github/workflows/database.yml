@@ -1,0 +1,42 @@
+# Corre un archivo SQL en la base de datos de Supabase, sin tener que pegarlo a mano.
+# Se usa desde GitHub: Actions → "Actualizar base de datos" → Run workflow.
+# Necesita dos secretos del repositorio (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL       la dirección "Session pooler" que muestra Supabase en el botón Connect
+#   SUPABASE_DB_PASSWORD  la contraseña de la base de datos
+name: Actualizar base de datos
+
+on:
+  workflow_dispatch:
+    inputs:
+      archivo:
+        description: Archivo SQL a correr
+        required: true
+        default: supabase/PEGAR_EN_SUPABASE_2.sql
+
+permissions:
+  contents: read
+
+jobs:
+  sql:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar psql
+        run: command -v psql || (sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client)
+      - name: Correr el SQL
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          ARCHIVO: ${{ inputs.archivo }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$PGPASSWORD" ]; then
+            echo "::error::Faltan los secretos SUPABASE_DB_URL y/o SUPABASE_DB_PASSWORD."
+            exit 1
+          fi
+          case "$ARCHIVO" in supabase/*.sql) ;; *) echo "::error::Solo archivos .sql dentro de supabase/"; exit 1;; esac
+          # La dirección copiada de Supabase trae [YOUR-PASSWORD]; la contraseña va aparte, así no importa si tiene símbolos.
+          URL=$(printf '%s' "$DB_URL" | tr -d ' \n\r' | sed -E 's#:\[YOUR-PASSWORD\]@#@#; s#^(postgres(ql)?://[^:/@]+):[^@]*@#\1@#')
+          echo "Corriendo $ARCHIVO ..."
+          psql "$URL" -v ON_ERROR_STOP=1 -q -f "$ARCHIVO"
+          echo "Listo. Comprobación:"
+          psql "$URL" -At -c "select 'servicios: ' || count(*) from public.church_services" || true
