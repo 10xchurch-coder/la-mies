@@ -1,0 +1,77 @@
+// La iglesia: lo que me toca esta semana y todo lo de la iglesia (asistencia, clases, ministerios, material...).
+import React, { useCallback, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useRouter, type Href } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
+import { Header, Screen } from '@/components/Screen';
+import { Card, SectionTitle } from '@/components/ui';
+import { UpcomingList } from '@/components/Upcoming';
+import { listMinistries, ministryMembers, myUpcoming } from '@/lib/api';
+import { useAuth } from '@/store/auth';
+import { colors } from '@/theme';
+import type { UpcomingItem } from '@/types';
+
+type IconName = React.ComponentProps<typeof Feather>['name'];
+
+export default function Iglesia() {
+  const router = useRouter();
+  const { profile, church, isStaff, isLeader } = useAuth();
+  const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
+  const [takesAttendance, setTakesAttendance] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      myUpcoming(21).then(setUpcoming).catch(() => undefined);
+      Promise.all([listMinistries(), ministryMembers()]).then(([ms, mm]) => {
+        const att = new Set(ms.filter((m) => m.can_take_attendance).map((m) => m.id));
+        setTakesAttendance(mm.some((x) => x.profile_id === profile?.id && att.has(x.ministry_id)));
+      }).catch(() => undefined);
+    }, [profile?.id]),
+  );
+
+  const tiles: { icon: IconName; label: string; to: Href; show: boolean; tone?: 'green' }[] = [
+    { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: isLeader || takesAttendance || !!profile?.takes_attendance, tone: 'green' },
+    { icon: 'book-open', label: 'Clases', to: '/clases', show: true },
+    { icon: 'heart', label: 'Ministerios', to: '/ministerios', show: true },
+    { icon: 'book', label: 'Material', to: '/materiales', show: true },
+    { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
+    { icon: 'compass', label: 'Capacitación', to: '/capacitacion', show: true },
+    { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader },
+    { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
+    { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
+    { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
+    { icon: 'shield', label: 'Roles y cuentas', to: '/admin/miembros', show: isStaff },
+  ];
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <Header title={church?.name ?? 'Iglesia'} subtitle="Todo lo de la iglesia en un lugar" />
+      <Screen>
+        <SectionTitle>Esta semana te toca</SectionTitle>
+        <UpcomingList items={upcoming.slice(0, 4)} />
+
+        <View style={styles.grid}>
+          {tiles.filter((t) => t.show).map((t) => (
+            <Pressable key={t.label} onPress={() => router.push(t.to)} accessibilityRole="button" style={({ pressed }) => [styles.tile, t.tone === 'green' && styles.tileGreen, pressed && { opacity: 0.8 }]}>
+              <Feather name={t.icon} size={26} color={t.tone === 'green' ? '#FFF' : colors.green} />
+              <Text style={{ fontSize: 14, fontWeight: '800', color: t.tone === 'green' ? '#FFF' : colors.text, textAlign: 'center' }}>{t.label}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <Feather name="map" size={22} color={colors.green} />
+          <Text style={{ flex: 1, fontSize: 13, color: colors.text, lineHeight: 18 }}>
+            Para salir a evangelizar o a repartir volantes, andá a la pestaña Mapa y tocá Iniciar salida.
+          </Text>
+        </Card>
+      </Screen>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  tile: { width: '31%', flexGrow: 1, minHeight: 96, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 },
+  tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
+});

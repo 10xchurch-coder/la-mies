@@ -1,0 +1,32 @@
+// Prueba las migraciones y las reglas de seguridad en un Postgres local.
+// Uso: PGHOST=/tmp PGPORT=5433 PGUSER=postgres node scripts/test-sql.mjs
+// (necesita psql instalado; crea y borra una base "lamies_test").
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const db = 'lamies_test';
+const env = { ...process.env, PGDATABASE: 'postgres' };
+const psql = (args, options = {}) =>
+  execFileSync('psql', ['-v', 'ON_ERROR_STOP=1', '-q', ...args], { stdio: 'inherit', env, ...options });
+
+psql(['-c', `drop database if exists ${db}`]);
+psql(['-c', `create database ${db}`]);
+const tenv = { ...env, PGDATABASE: db };
+const files = [
+  'scripts/local-auth-stub.sql',
+  'supabase/migrations/0001_schema.sql',
+  'supabase/migrations/0002_security.sql',
+  'supabase/migrations/0003_functions.sql',
+  'supabase/tests/rls_test.sql',
+  'supabase/migrations/0004_church.sql',
+  'supabase/tests/rls_test_2.sql',
+  'supabase/migrations/0005_attendance_takers.sql',
+  'supabase/tests/rls_test_3.sql',
+];
+for (const f of files) {
+  console.log(`▶ ${f}`);
+  execFileSync('psql', ['-v', 'ON_ERROR_STOP=1', '-q', '-f', path.join(root, f)], { stdio: 'inherit', env: tenv });
+}
+console.log('✔ SQL y seguridad: todo pasó');
