@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Button, Field } from '@/components/ui';
 import { supabase, errorMessage, supabaseConfigured } from '@/lib/supabase';
+import { WEB_URL } from '@/lib/share';
 import { colors } from '@/theme';
 
 export default function Login() {
@@ -13,14 +14,50 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Verificación en dos pasos: si la cuenta la tiene, después de la contraseña se pide el código.
+  const [factorId, setFactorId] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+
+  const finish = async () => {
+    const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2') {
+      const { data: f } = await supabase.auth.mfa.listFactors();
+      const totp = f?.totp?.find((x) => x.status === 'verified') ?? f?.totp?.[0];
+      if (totp) {
+        setFactorId(totp.id);
+        return;
+      }
+    }
+    router.replace('/');
+  };
 
   const signIn = async () => {
     setBusy(true);
     setError(null);
     const { error: e } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    if (e) {
+      setBusy(false);
+      setError(errorMessage(e));
+      return;
+    }
+    await finish();
+    setBusy(false);
+  };
+
+  const verify = async () => {
+    if (!factorId) return;
+    setBusy(true);
+    setError(null);
+    const { error: e } = await supabase.auth.mfa.challengeAndVerify({ factorId, code: code.replace(/\D/g, '') });
     setBusy(false);
     if (e) setError(errorMessage(e));
     else router.replace('/');
+  };
+
+  const cancelMfa = async () => {
+    await supabase.auth.signOut();
+    setFactorId(null);
+    setCode('');
   };
 
   const reset = async () => {
@@ -28,9 +65,32 @@ export default function Login() {
       setError('Escribí tu correo y volvé a tocar "¿Olvidaste tu contraseña?"');
       return;
     }
-    const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase());
-    setError(e ? errorMessage(e) : 'Te mandamos un correo para cambiar la contraseña.');
+    const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: `${WEB_URL}/recuperar` });
+    setError(e ? errorMessage(e) : 'Te mandamos un correo para cambiar la contraseña. Abrí el link que trae.');
   };
+
+  if (factorId) {
+    return (
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Screen style={{ paddingTop: 72, paddingHorizontal: 24, gap: 18 }}>
+          <View style={{ alignItems: 'center', gap: 10 }}>
+            <View style={styles.logo}>
+              <Feather name="shield" size={38} color="#FFFFFF" />
+            </View>
+            <Text style={styles.title}>Un paso más</Text>
+            <Text style={[styles.subtitle, { textAlign: 'center' }]}>Abrí tu app de autenticación (Google Authenticator u otra) y escribí el código de 6 números.</Text>
+          </View>
+          <Field label="Código" keyboardType="number-pad" autoComplete="one-time-code" textContentType="oneTimeCode" value={code} onChangeText={setCode} maxLength={6} />
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Button title="Verificar" onPress={verify} loading={busy} disabled={code.replace(/\D/g, '').length !== 6} />
+          <Pressable onPress={cancelMfa} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: colors.muted, fontSize: 13 }}>Cancelar</Text>
+          </Pressable>
+          <Text style={[styles.verse, { fontStyle: 'normal' }]}>¿Perdiste el teléfono con la app de autenticación? Pedile al pastor que te quite la verificación en dos pasos.</Text>
+        </Screen>
+      </KeyboardAvoidingView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

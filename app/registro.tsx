@@ -4,6 +4,9 @@ import { useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Field } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
+import { checkPassword } from '@/lib/password';
+import { PasswordField } from '@/components/PasswordField';
+import { WEB_URL } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 
@@ -33,11 +36,12 @@ export default function Registro() {
         await join();
         return;
       }
-      if (password.length < 8) throw new Error('La contraseña tiene que tener al menos 8 caracteres');
+      const check = checkPassword(password, [name, email.split('@')[0] ?? '']);
+      if (!check.ok) throw new Error(check.problems[0]);
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-        options: { data: { display_name: name.trim() } },
+        options: { data: { display_name: name.trim() }, emailRedirectTo: `${WEB_URL}/login` },
       });
       if (error) throw error;
       if (!data.session) {
@@ -60,7 +64,7 @@ export default function Registro() {
         {!session ? (
           <>
             <Field label="Correo" autoCapitalize="none" keyboardType="email-address" autoComplete="email" value={email} onChangeText={setEmail} />
-            <Field label="Contraseña" hint="(mínimo 8 caracteres)" secureTextEntry autoComplete="new-password" value={password} onChangeText={setPassword} />
+            <PasswordField label="Contraseña" value={password} onChangeText={setPassword} personal={[name, email.split('@')[0] ?? '']} />
           </>
         ) : null}
         <Field label="Tu celular" hint="(así te encontramos si la iglesia ya te tiene cargado)" keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} placeholder="Ej: 376 455-1234" />

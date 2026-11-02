@@ -262,7 +262,8 @@ export default function PersonaDetalle() {
             ) : null}
             {c.member_since ? <Row k="Miembro desde" v={fmtDateOnly(c.member_since)} /> : null}
             <Row k="Discipulado" v={c.discipleship_since ? `Desde ${fmtDateOnly(c.discipleship_since)}` : 'Todavía no'} />
-            <Row k="Bautismo" v={c.baptized_on ? fmtDateOnly(c.baptized_on) : 'Todavía no'} />
+            <Row k="Bautismo" v={c.baptized || c.baptized_on ? (c.baptized_on ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)'} />
+            {c.dni ? <Row k="DNI" v={c.dni} /> : null}
             <Row k="Vino a la iglesia" v={attendances.length ? `${attendances.length} ${attendances.length === 1 ? 'vez' : 'veces'} · última ${fmtDateOnly(attendances[0].attended_on)}` : 'Todavía no'} />
             {faith && isLeader ? (
               <Row k="Fidelidad (12 semanas)" v={faith.possible ? `${faith.attended} de ${faith.possible} cultos · ${FAITH_LABEL[faith.cat].label}` : 'Recién agregado'} />
@@ -304,7 +305,7 @@ export default function PersonaDetalle() {
               <Button title="Marcar que vino a una reunión" icon="check-circle" variant="outline" small onPress={markAttendance} />
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {!c.discipleship_since ? <Button title="Empezó discipulado" variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, 'Anotado: empezó discipulado')} style={{ flex: 1 }} /> : null}
-                {!c.baptized_on ? <Button title="Se bautizó" variant="outline" small onPress={() => update({ baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó')} style={{ flex: 1 }} /> : null}
+                {!c.baptized && !c.baptized_on ? <Button title="Se bautizó" variant="outline" small onPress={() => update({ baptized: true, baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó')} style={{ flex: 1 }} /> : null}
               </View>
             </Card>
           ) : null}

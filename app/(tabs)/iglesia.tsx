@@ -6,7 +6,9 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, SectionTitle } from '@/components/ui';
 import { UpcomingList } from '@/components/Upcoming';
-import { listMinistries, ministryMembers, myUpcoming } from '@/lib/api';
+import { dailyFor, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
+import { VerseCard } from '@/components/VerseCard';
+import type { DailyContent } from '@/types';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { UpcomingItem } from '@/types';
@@ -18,10 +20,14 @@ export default function Iglesia() {
   const { profile, church, isStaff, isLeader } = useAuth();
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [takesAttendance, setTakesAttendance] = useState(false);
+  const [daily, setDaily] = useState<DailyContent | null>(null);
+  const [streak, setStreak] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
       myUpcoming(21).then(setUpcoming).catch(() => undefined);
+      dailyFor(null).then(setDaily).catch(() => undefined);
+      readingStreak().then((r) => setStreak(r.current)).catch(() => undefined);
       Promise.all([listMinistries(), ministryMembers()]).then(([ms, mm]) => {
         const att = new Set(ms.filter((m) => m.can_take_attendance).map((m) => m.id));
         setTakesAttendance(mm.some((x) => x.profile_id === profile?.id && att.has(x.ministry_id)));
@@ -39,14 +45,26 @@ export default function Iglesia() {
     { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader },
     { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
     { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
+    { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
     { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
-    { icon: 'shield', label: 'Roles y cuentas', to: '/admin/miembros', show: isStaff },
+    { icon: 'users', label: 'Roles', to: '/admin/miembros', show: isStaff },
+    { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
   ];
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={church?.name ?? 'Iglesia'} subtitle="Todo lo de la iglesia en un lugar" />
       <Screen>
+        {daily ? (
+          <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
+            <VerseCard item={daily} church={church?.name} compact />
+            <View style={styles.dailyBar}>
+              <Feather name="book-open" size={16} color={colors.greenText} />
+              <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: colors.greenText }}>Devocional de hoy · tocá para leer y compartir</Text>
+              {streak ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>⚡ {streak}</Text> : null}
+            </View>
+          </Pressable>
+        ) : null}
         <SectionTitle>Esta semana te toca</SectionTitle>
         <UpcomingList items={upcoming.slice(0, 4)} />
 
@@ -74,4 +92,5 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   tile: { width: '31%', flexGrow: 1, minHeight: 96, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
+  dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
 });

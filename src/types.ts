@@ -32,6 +32,7 @@ export type Profile = {
   biometric_lock: boolean;
   push_token?: string | null;
   takes_attendance?: boolean;
+  disabled_at?: string | null;
 };
 
 export type Session = {
@@ -105,6 +106,9 @@ export type Contact = {
   gospel_presented: boolean;
   discipleship_since: string | null;
   baptized_on: string | null;
+  /** Bautismo después de creer en Cristo (no cuenta el de bebé). */
+  baptized: boolean;
+  dni: string | null;
   share_mode: 'group' | 'me' | 'custom';
   follow_up_user_id: string | null;
   archived: boolean;
@@ -251,3 +255,23 @@ export type AbsenceRow = {
   contact_id: string; name: string; photo_path: string | null; phone: string | null; status: PersonStatus;
   group_id: string | null; group_name: string | null; last_attended: string | null;
 };
+
+// ---------- Parte 3: versículo del día, devocional, racha ----------
+export type DailyContent = {
+  id: string;
+  church_id: string | null;
+  on_date: string;
+  reference: string;
+  verse: string;
+  message: string | null;
+  devotional: string | null;
+  background: string;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type ReadingReward = { days: number; label: string; earned: boolean };
+export type ReadingStreak = { current: number; best: number; total: number; read_today: boolean; rewards: ReadingReward[] };
+export type ReadingBoardRow = { user_id: string; display_name: string; photo_path: string | null; current_streak: number; best_streak: number };
+
+export type AccountRow = { id: string; display_name: string; email: string; role: Role; disabled_at: string | null; has_mfa: boolean; last_sign_in: string | null };

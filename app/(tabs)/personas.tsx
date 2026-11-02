@@ -15,6 +15,7 @@ import type { Contact, Group } from '@/types';
 
 type Scope = 'street' | 'visitor' | 'member' | 'all';
 type Filter = 'all' | 'mine' | 'promised' | 'very' | 'week';
+type MemberFilter = 'all' | 'unbaptized';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -25,6 +26,7 @@ export default function Personas() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [scope, setScope] = useState<Scope>('street');
   const [filter, setFilter] = useState<Filter>('all');
+  const [mfilter, setMfilter] = useState<MemberFilter>('all');
   const [route, setRoute] = useState<string>('all');
   const [q, setQ] = useState('');
   const { isWide } = useLayout();
@@ -54,11 +56,14 @@ export default function Personas() {
           if (filter === 'very' && c.interest !== 'very') return false;
           if (filter === 'week' && new Date(c.created_at).getTime() < weekAgo) return false;
         }
+        if (scope === 'member' || scope === 'visitor') {
+          if (mfilter === 'unbaptized' && (c.baptized || c.baptized_on)) return false;
+        }
         if (s && !norm(`${c.name} ${c.address_hint ?? ''} ${c.address ?? ''} ${c.phone ?? ''}`).includes(s)) return false;
         return true;
       })
       .sort((a, b) => (scope === 'street' ? b.created_at.localeCompare(a.created_at) : a.name.localeCompare(b.name)));
-  }, [rows, scope, filter, route, q, me]);
+  }, [rows, scope, filter, mfilter, route, q, me]);
 
   const counts = useMemo(() => ({
     street: rows.filter((c) => c.status === 'contact').length,
@@ -94,13 +99,20 @@ export default function Personas() {
             value={filter}
             onChange={setFilter}
           />
-        ) : groups.length ? (
-          <Choice
-            options={[{ value: 'all', label: `Todos los ${groupWord(church?.grouping, true).toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
-            value={route}
-            onChange={setRoute}
-          />
-        ) : null}
+        ) : (
+          <>
+            {groups.length ? (
+              <Choice
+                options={[{ value: 'all', label: `Todos los ${groupWord(church?.grouping, true).toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
+                value={route}
+                onChange={setRoute}
+              />
+            ) : null}
+            {scope === 'member' || scope === 'visitor' ? (
+              <Choice options={[{ value: 'all', label: 'Todos' }, { value: 'unbaptized', label: 'Sin bautizar' }]} value={mfilter} onChange={setMfilter} />
+            ) : null}
+          </>
+        )}
       </View>
       <FlatList
         key={cols}
@@ -128,7 +140,7 @@ export default function Personas() {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 {c.status !== 'contact' ? <Tag text={STATUS_LABEL[c.status]} tone={c.status === 'member' ? 'green' : 'blue'} /> : <Tag text={INTEREST_LABEL[c.interest]} tone={c.interest === 'very' ? 'green' : c.interest === 'some' ? 'blue' : c.interest === 'none' ? 'red' : 'gray'} />}
                 {c.promise_day && c.status === 'contact' ? <Tag text={`Prometió: ${PROMISE_LABEL[c.promise_day]}${c.pickup && c.pickup_time ? ` · buscarlo ${c.pickup_time}` : ''}`} tone="amber" /> : null}
-                {c.baptized_on ? <Tag text="Bautizado" tone="blue" /> : c.discipleship_since ? <Tag text="En discipulado" tone="blue" /> : null}
+                {c.baptized || c.baptized_on ? <Tag text="Bautizado" tone="blue" /> : c.discipleship_since ? <Tag text="En discipulado" tone="blue" /> : null}
                 {c.group_id && groupName.get(c.group_id) ? <Tag text={groupName.get(c.group_id) as string} tone="gray" /> : null}
                 {c.profile_id ? <Tag text="Usa la app" tone="gray" /> : null}
               </View>

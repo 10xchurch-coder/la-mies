@@ -35,37 +35,28 @@ export const colors = {
 export const radius = { card: 14, button: 14, pill: 999, input: 12 } as const;
 
 /** Color de una vereda según cuándo se cubrió por última vez. Un solo color por "edad", no por persona.
- *  Evangelismo: verde y azules. Volantes: naranjas. */
+ *  Evangelismo: verde, azul y gris. Volantes: naranjas. */
 export function coverageColor(lastCoveredAt: string | Date, kind: 'soulwinning' | 'flyers' = 'soulwinning'): string {
-  if (kind === 'flyers') {
-    const ageF = Date.now() - new Date(lastCoveredAt).getTime();
-    const dayF = 24 * 3600 * 1000;
-    if (ageF <= dayF && new Date(lastCoveredAt).toDateString() === new Date().toDateString()) return colors.orange;
-    if (ageF <= 7 * dayF) return colors.orangeMid;
-    if (ageF <= 30 * dayF) return colors.orangeLight;
-    return colors.tan;
-  }
   const age = Date.now() - new Date(lastCoveredAt).getTime();
   const day = 24 * 3600 * 1000;
-  const now = new Date();
-  const d = new Date(lastCoveredAt);
-  const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-  if (sameDay) return colors.green;
-  if (age <= 7 * day) return colors.blue;
-  if (age <= 30 * day) return colors.blueLight;
+  if (kind === 'flyers') {
+    if (age <= 7 * day) return colors.orange;
+    if (age <= 30 * day) return colors.orangeLight;
+    return colors.tan;
+  }
+  if (age <= 7 * day) return colors.green;
+  if (age <= 30 * day) return colors.blue;
   return colors.gray;
 }
 
 export const COVERAGE_LEGEND = [
-  { color: colors.green, label: 'Hoy' },
-  { color: colors.blue, label: 'Esta semana' },
-  { color: colors.blueLight, label: 'Este mes' },
+  { color: colors.green, label: 'Esta semana' },
+  { color: colors.blue, label: 'Este mes' },
   { color: colors.gray, label: 'Hace más de un mes' },
 ];
 
 export const FLYERS_LEGEND = [
-  { color: colors.orange, label: 'Hoy' },
-  { color: colors.orangeMid, label: 'Esta semana' },
+  { color: colors.orange, label: 'Esta semana' },
   { color: colors.orangeLight, label: 'Este mes' },
   { color: colors.tan, label: 'Hace más de un mes' },
 ];

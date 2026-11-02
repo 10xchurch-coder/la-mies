@@ -19,7 +19,8 @@ export const supabase = createClient(url ?? 'https://falta-configurar.invalid', 
     storage: Platform.OS === 'web' ? undefined : new LargeSecureStore(),
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    // En la web, el link del correo (confirmar cuenta, cambiar contraseña) trae la sesión en la dirección.
+    detectSessionInUrl: Platform.OS === 'web',
   },
 });
 
@@ -39,6 +40,10 @@ export function errorMessage(e: unknown): string {
   if (/email not confirmed/i.test(m)) return 'Primero confirmá tu correo (mirá tu bandeja de entrada)';
   if (/network request failed/i.test(m)) return 'Sin conexión. Probá de nuevo cuando tengas señal.';
   if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Iniciá sesión.';
-  if (/password should be at least/i.test(m)) return 'La contraseña tiene que tener al menos 8 caracteres';
+  if (/password should be at least/i.test(m)) return 'La contraseña tiene que tener al menos 10 caracteres';
+  if (/weak password|password is too weak|known to be weak/i.test(m)) return 'Esa contraseña es muy fácil de adivinar. Usá letras, números y más de 10 caracteres.';
+  if (/invalid totp code|invalid code|code has expired/i.test(m)) return 'Código incorrecto o vencido. Mirá el nuevo código en tu app de autenticación.';
+  if (/aal2|mfa/i.test(m) && /required/i.test(m)) return 'Falta el código de verificación en dos pasos.';
+  if (/rate limit|too many requests/i.test(m)) return 'Demasiados intentos. Esperá unos minutos y probá de nuevo.';
   return m;
 }

@@ -60,3 +60,19 @@ Period: last outing / week / month. Totals, pending pickups (promised but never 
 
 ## Not built yet
 Weekly report email/PDF · network dashboard screen · photos/documents in chat · 2FA for admins.
+
+
+## v0.4 — Devocional, seguridad y ficha
+
+- **Versículo del día** (RV1960) como tarjeta vertical con fondo de color o foto, lista para compartir como historia de WhatsApp/Instagram (imagen en el teléfono, texto en la web). Pestaña Iglesia y "Yo → Devocional".
+- **Devocional diario**: el pastor o la secretaría cargan, por fecha, cita + versículo + frase corta + lectura (Iglesia → Devocionales). Si un día no tiene nada, se muestra un versículo general (40 incluidos, rotan por día del año).
+- **Racha de lectura**: abrir el devocional cuenta como leído; racha actual, mejor racha, total y premios a los 7, 30 y 365 días seguidos. Tablero "Lectores de la Palabra" por iglesia.
+- **Contraseñas**: 10+ caracteres con letras y números, sin nombre/correo ni contraseñas comunes (revisión en la app con medidor de fuerza). Campo con ojo para verla.
+- **Verificación en dos pasos (TOTP)**: cada persona la activa en "Seguridad de mi cuenta" con Google Authenticator u otra app (QR o clave). Al entrar se pide el código de 6 números.
+- **Recuperar contraseña**: el correo lleva a la web (`/recuperar`) donde se escribe la nueva.
+- **Cuentas** (pastor/secretaría): lista con correo, rol, si tiene dos pasos, último ingreso; mandar correo para cambiar contraseña; el pastor puede **desactivar** una cuenta (pierde acceso al instante, sin borrar datos).
+- **Ficha**: DNI opcional; casilla **Bautizado** ("bautismo después de poner la fe en Cristo; el de bebé no cuenta"); filtro "Sin bautizar" en Personas (miembros y visitas).
+- **Mapa**: colores por período reducidos a tres (esta semana / este mes / más de un mes). El estilo Simple en la web usa OpenStreetMap en gris (sin clave).
+- **Web**: publicada en GitHub Pages (`https://10xchurch-coder.github.io/la-mies/`) por GitHub Actions en cada cambio.
+
+Pendiente de configurar en Supabase (Authentication → URL Configuration): Site URL = `https://10xchurch-coder.github.io/la-mies/` y Redirect URLs `https://10xchurch-coder.github.io/la-mies/**`, para que los links de correo abran la web y no den error.

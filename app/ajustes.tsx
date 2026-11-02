@@ -84,6 +84,7 @@ export default function Ajustes() {
 
         <SectionTitle>Cuenta</SectionTitle>
         <Card style={{ padding: 0 }}>
+          <RowLink title="Seguridad de mi cuenta" subtitle="Contraseña y verificación en dos pasos" icon="shield" onPress={() => router.push('/seguridad')} />
           <RowLink
             title="Cerrar sesión"
             icon="log-out"
@@ -91,7 +92,7 @@ export default function Ajustes() {
             onPress={() => Alert.alert('Cerrar sesión', '¿Salir de la app en este teléfono?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => signOut().then(() => router.replace('/login')) }])}
           />
         </Card>
-        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión 0.3 · {church?.name ?? ''}</Text>
+        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión 0.4 · {church?.name ?? ''}</Text>
       </Screen>
     </View>
   );

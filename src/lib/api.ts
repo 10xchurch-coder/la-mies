@@ -5,7 +5,7 @@ import type {
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
   ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage,
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
-  TrainingItem, UpcomingItem,
+  TrainingItem, UpcomingItem, DailyContent, ReadingStreak, ReadingBoardRow, AccountRow,
 } from '../types';
 
 function ok<T>(res: { data: T | null; error: unknown }): T {
@@ -241,4 +241,44 @@ export async function listSermons(): Promise<Sermon[]> {
 }
 export async function getSermon(id: string): Promise<Sermon | null> {
   return ok(await supabase.from('sermons').select('*').eq('id', id).maybeSingle());
+}
+
+// ---------- Parte 3: versículo del día, devocional, racha, cuentas ----------
+export async function dailyFor(date: string | null = null): Promise<DailyContent | null> {
+  const d = ok(await supabase.rpc('daily_for', { p_date: date })) as DailyContent | null;
+  return d && d.id ? d : null;
+}
+
+export async function listDailyContent(from: string, to: string): Promise<DailyContent[]> {
+  return ok(await supabase.from('daily_content').select('*').gte('on_date', from).lte('on_date', to).order('on_date')) ?? [];
+}
+
+export async function saveDailyContent(row: Partial<DailyContent> & { on_date: string; reference: string; verse: string }): Promise<void> {
+  const { id, church_id: _c, created_by: _b, created_at: _a, ...rest } = row;
+  if (id) ok(await supabase.from('daily_content').update(rest).eq('id', id));
+  else ok(await supabase.from('daily_content').insert(rest));
+}
+
+export async function deleteDailyContent(id: string): Promise<void> {
+  ok(await supabase.from('daily_content').delete().eq('id', id));
+}
+
+export async function markReading(): Promise<ReadingStreak> {
+  return ok(await supabase.rpc('mark_reading'));
+}
+
+export async function readingStreak(): Promise<ReadingStreak> {
+  return ok(await supabase.rpc('reading_streak'));
+}
+
+export async function readingBoard(): Promise<ReadingBoardRow[]> {
+  return ok(await supabase.rpc('reading_board')) ?? [];
+}
+
+export async function accountsOverview(): Promise<AccountRow[]> {
+  return ok(await supabase.rpc('accounts_overview')) ?? [];
+}
+
+export async function setAccountDisabled(userId: string, disabled: boolean): Promise<void> {
+  ok(await supabase.rpc('set_account_disabled', { p_user: userId, p_disabled: disabled }));
 }

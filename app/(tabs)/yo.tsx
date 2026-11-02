@@ -101,10 +101,12 @@ export default function Yo() {
 
         <Card style={{ padding: 0 }}>
           <RowLink title="Avisos" subtitle={unread ? `${unread} sin leer` : 'Recordatorios y anuncios'} icon="bell" onPress={() => router.push('/avisos')} />
+          <RowLink title="Devocional y mi racha" subtitle="Versículo del día, lectura y premios" icon="book-open" onPress={() => router.push('/devocional')} />
           <RowLink title="Mi progreso y niveles" icon="award" onPress={() => router.push('/progreso')} />
           <RowLink title="Mis salidas" subtitle="Ver o recortar una salida que me olvidé de apagar" icon="clock" onPress={() => router.push('/salidas')} />
           {me ? <RowLink title="Mis datos" subtitle="Teléfono, dirección, hijos" icon="user" onPress={() => router.push({ pathname: '/persona/nueva', params: { id: me.id } })} /> : null}
           {isLeader ? <RowLink title="Panel del pastor" subtitle="Reportes, hermanos y código de la iglesia" icon="bar-chart-2" onPress={() => router.push('/panel')} /> : null}
+          <RowLink title="Seguridad de mi cuenta" subtitle="Contraseña y verificación en dos pasos" icon="shield" onPress={() => router.push('/seguridad')} />
           <RowLink title="Ajustes" subtitle="Compartir, Face ID, cerrar sesión" icon="settings" onPress={() => router.push('/ajustes')} />
         </Card>
       </Screen>

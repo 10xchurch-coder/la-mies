@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
-import { Button, Card, Choice, Field, Loading, SectionTitle } from '@/components/ui';
+import { Button, Card, Choice, Field, Loading, SectionTitle, Toggle } from '@/components/ui';
 import { addPerson, listGroups, updateContact } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -32,6 +32,8 @@ export default function NuevaPersona() {
   const [marital, setMarital] = useState<Contact['marital']>(null);
   const [address, setAddress] = useState('');
   const [email, setEmail] = useState('');
+  const [dni, setDni] = useState('');
+  const [baptized, setBaptized] = useState(false);
   const [groupId, setGroupId] = useState<string>('none');
   const [status, setStatus] = useState<PersonStatus>(
     initialStatus === 'member' && isStaff ? 'member' : initialStatus === 'contact' ? 'contact' : 'visitor',
@@ -58,6 +60,8 @@ export default function NuevaPersona() {
         setMarital(x.marital);
         setAddress(x.address ?? x.address_hint ?? '');
         setEmail(x.email ?? '');
+        setDni(x.dni ?? '');
+        setBaptized(!!x.baptized || !!x.baptized_on);
         setGroupId(x.group_id ?? 'none');
         setStatus(x.status);
       }
@@ -92,6 +96,9 @@ export default function NuevaPersona() {
         marital,
         address: address.trim() || null,
         email: email.trim().toLowerCase() || null,
+        dni: dni.replace(/\D/g, '') || null,
+        baptized,
+        baptized_on: baptized ? (orig?.baptized_on ?? isoDate(new Date())) : null,
         group_id: groupId === 'none' ? null : groupId,
         photo_path: photo,
       };
@@ -158,6 +165,15 @@ export default function NuevaPersona() {
         </View>
         <Field label="Dirección" hint="(calle y número, barrio)" value={address} onChangeText={setAddress} />
         <Field label="Correo" hint="(opcional)" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+        <Field label="DNI" hint="(opcional)" keyboardType="number-pad" value={dni} onChangeText={(t) => setDni(t.replace(/\D/g, ''))} maxLength={10} />
+        <Card>
+          <Toggle
+            label="Bautizado"
+            hint="Bautismo después de poner la fe en Cristo. El bautismo de bebé o anterior a creer no cuenta."
+            value={baptized}
+            onChange={setBaptized}
+          />
+        </Card>
 
         {groups.length ? (
           <View style={{ gap: 6 }}>

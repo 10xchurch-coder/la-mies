@@ -29,9 +29,18 @@ export type MapViewProps = {
 
 const MapCtx = createContext<L.Map | null>(null);
 
+// Estilo del modo "Simple": calles en gris claro para que las veredas pintadas resalten.
+if (typeof document !== 'undefined' && !document.getElementById('lamies-map-css')) {
+  const st = document.createElement('style');
+  st.id = 'lamies-map-css';
+  st.textContent = '.lamies-simple { filter: grayscale(1) brightness(1.08) contrast(0.85); }';
+  document.head.appendChild(st);
+}
+
 const TILES = {
   standard: { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap', maxZoom: 19 },
-  simple: { url: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 },
+  // "Simple": el mismo mapa de calles, pero en gris suave (sin clave de API).
+  simple: { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap', maxZoom: 19, className: 'lamies-simple' },
   satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 19 },
 };
 
@@ -88,7 +97,7 @@ export function MapView(props: MapViewProps) {
     if (!map) return;
     tiles.current?.remove();
     const t = TILES[kind];
-    tiles.current = L.tileLayer(t.url, { attribution: t.attribution, maxZoom: t.maxZoom }).addTo(map);
+    tiles.current = L.tileLayer(t.url, { attribution: t.attribution, maxZoom: t.maxZoom, className: (t as { className?: string }).className }).addTo(map);
   }, [map, kind]);
 
   // Avisar cuando el usuario mueve el mapa.
