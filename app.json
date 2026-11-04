@@ -96,7 +96,10 @@
     },
     "extra": {
       "supabaseUrl": "https://kntylzdronpglqqgroqv.supabase.co",
-      "supabaseAnonKey": "sb_publishable_81akQST1pxlBbECLsn1vSg_ipsZgl0c"
+      "supabaseAnonKey": "sb_publishable_81akQST1pxlBbECLsn1vSg_ipsZgl0c",
+      "eas": {
+        "projectId": "e56b4a45-747b-4dfa-8424-ed0b9c479a58"
+      }
     },
     "runtimeVersion": {
       "policy": "appVersion"
@@ -110,6 +113,10 @@
       "lang": "es",
       "backgroundColor": "#FFFFFF",
       "themeColor": "#1F6B45"
+    },
+    "owner": "hopeforargentinas-team",
+    "updates": {
+      "url": "https://u.expo.dev/e56b4a45-747b-4dfa-8424-ed0b9c479a58"
     }
   }
 }
