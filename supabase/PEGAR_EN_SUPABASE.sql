@@ -3037,3 +3037,7 @@ begin
   delete from public.app_errors where id in (select id from public.app_errors order by created_at desc offset 2000);
 end $$;
 grant execute on function public.log_app_error(text, text, jsonb, text, text) to authenticated, anon;
+-- Devocional: además de la lectura corta, un "estudio completo" (5–10 min, con pasajes) y una oración breve.
+alter table public.daily_content
+  add column if not exists study text,
+  add column if not exists prayer text;

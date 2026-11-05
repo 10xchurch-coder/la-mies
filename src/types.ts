@@ -265,6 +265,10 @@ export type DailyContent = {
   verse: string;
   message: string | null;
   devotional: string | null;
+  /** Estudio completo (5–10 min, con pasajes en texto completo). */
+  study: string | null;
+  /** Oración breve para cerrar. */
+  prayer: string | null;
   background: string;
   created_by: string | null;
   created_at: string;

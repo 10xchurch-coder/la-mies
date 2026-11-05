@@ -254,6 +254,7 @@ export async function listDailyContent(from: string, to: string): Promise<DailyC
 }
 
 export async function saveDailyContent(row: Partial<DailyContent> & { on_date: string; reference: string; verse: string }): Promise<void> {
+  // study/prayer pueden faltar en bases viejas; se mandan solo si tienen valor.
   const { id, church_id: _c, created_by: _b, created_at: _a, ...rest } = row;
   if (id) ok(await supabase.from('daily_content').update(rest).eq('id', id));
   else ok(await supabase.from('daily_content').insert(rest));

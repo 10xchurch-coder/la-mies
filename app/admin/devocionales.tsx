@@ -14,7 +14,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { DailyContent } from '@/types';
 
-const EMPTY = (d: string): Partial<DailyContent> => ({ on_date: d, reference: '', verse: '', message: '', devotional: '', background: 'campo' });
+const EMPTY = (d: string): Partial<DailyContent> => ({ on_date: d, reference: '', verse: '', message: '', devotional: '', study: '', prayer: '', background: 'campo' });
 
 export default function Devocionales() {
   const router = useRouter();
@@ -45,6 +45,8 @@ export default function Devocionales() {
         verse: editing.verse.trim(),
         message: editing.message?.trim() || null,
         devotional: editing.devotional?.trim() || null,
+        study: editing.study?.trim() || null,
+        prayer: editing.prayer?.trim() || null,
         background: editing.background || 'campo',
       });
       setEditing(null);
@@ -77,7 +79,7 @@ export default function Devocionales() {
   if (editing) {
     const preview: DailyContent = {
       id: editing.id ?? 'x', church_id: church?.id ?? null, on_date: editing.on_date as string, reference: editing.reference || 'Juan 3:16',
-      verse: editing.verse || 'El texto del versículo va a aparecer acá.', message: editing.message || null, devotional: editing.devotional || null,
+      verse: editing.verse || 'El texto del versículo va a aparecer acá.', message: editing.message || null, devotional: editing.devotional || null, study: editing.study || null, prayer: editing.prayer || null,
       background: editing.background || 'campo', created_by: null, created_at: '',
     };
     return (
@@ -96,7 +98,9 @@ export default function Devocionales() {
               onChange={(v) => (v === '__photo' ? choosePhoto() : setEditing({ ...editing, background: v }))}
             />
           </View>
-          <Field label="Devocional (lectura del día)" hint="(opcional; separá los párrafos con una línea en blanco)" value={editing.devotional ?? ''} onChangeText={(t) => setEditing({ ...editing, devotional: t })} multiline style={{ minHeight: 180 }} />
+          <Field label="Devocional (lectura del día)" hint="(1 o 2 párrafos; separalos con una línea en blanco)" value={editing.devotional ?? ''} onChangeText={(t) => setEditing({ ...editing, devotional: t })} multiline style={{ minHeight: 160 }} />
+          <Field label="Estudio completo" hint="(opcional, 5–10 min; pasajes en texto completo)" value={editing.study ?? ''} onChangeText={(t) => setEditing({ ...editing, study: t })} multiline style={{ minHeight: 160 }} />
+          <Field label="Oración breve" hint="(opcional)" value={editing.prayer ?? ''} onChangeText={(t) => setEditing({ ...editing, prayer: t })} multiline style={{ minHeight: 80 }} />
           <Button title="Guardar" onPress={save} loading={busy} />
           <Button title="Cancelar" variant="ghost" onPress={() => setEditing(null)} />
         </Screen>

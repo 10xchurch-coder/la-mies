@@ -21,6 +21,7 @@ export default function Devocional() {
   const [item, setItem] = useState<DailyContent | null | undefined>(undefined);
   const [streak, setStreak] = useState<ReadingStreak | null>(null);
   const [big, setBig] = useState(false);
+  const [showStudy, setShowStudy] = useState(false);
   const cardRef = useRef<CardHandle>(null);
   const bigRef = useRef<CardHandle>(null);
   const isToday = !fecha || fecha === isoDate(new Date());
@@ -128,6 +129,26 @@ export default function Devocional() {
                 </Text>
               </Card>
             )}
+            {item.study ? (
+              <>
+                <SectionTitle>Estudio completo</SectionTitle>
+                <Card style={{ gap: 12 }}>
+                  {!showStudy ? (
+                    <Button title="Leer el estudio (5 a 10 minutos)" variant="outline" icon="book" onPress={() => setShowStudy(true)} />
+                  ) : (
+                    item.study.split(/\n{2,}/).map((p, i) => (
+                      <Text key={i} style={styles.para}>{p.trim()}</Text>
+                    ))
+                  )}
+                </Card>
+              </>
+            ) : null}
+            {item.prayer ? (
+              <Card style={{ gap: 6, backgroundColor: colors.greenSoft }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText, textTransform: 'uppercase', letterSpacing: 1 }}>Oración</Text>
+                <Text style={[styles.para, { fontStyle: 'italic' }]}>{item.prayer}</Text>
+              </Card>
+            ) : null}
           </>
         )}
 
