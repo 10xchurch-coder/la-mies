@@ -57,4 +57,4 @@ jobs:
         run: |
           eas build --platform android --profile "$PERFIL" --non-interactive --json > build.json
           cat build.json
-          node -e "const b=require('./build.json')[0]; console.log('\n=== LISTO ==='); console.log('Archivo: ' + (b.artifacts?.buildUrl || b.artifacts?.applicationArchiveUrl || '(ver expo.dev)')); console.log('Página de la compilación: https://expo.dev/accounts/' + b.project.ownerAccount.name + '/projects/' + b.project.slug + '/builds/' + b.id)" | tee -a "$GITHUB_STEP_SUMMARY"
+          node -e "const b=require('./build.json')[0]; console.log('\n=== LISTO ==='); console.log('Archivo: ' + (b.artifacts?.buildUrl || b.artifacts?.applicationArchiveUrl || '(ver expo.dev)')); console.log('Página de la compilación: https://expo.dev/accounts/hopeforargentinas-team/projects/la-mies/builds/' + b.id)" | tee -a "$GITHUB_STEP_SUMMARY"
