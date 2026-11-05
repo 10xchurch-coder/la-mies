@@ -60,13 +60,24 @@ export default function Login() {
     setCode('');
   };
 
+  const [resetState, setResetState] = useState<'idle' | 'sending' | 'sent'>('idle');
   const reset = async () => {
+    if (resetState !== 'idle') return;
     if (!email.trim()) {
       setError('Escribí tu correo y volvé a tocar "¿Olvidaste tu contraseña?"');
       return;
     }
+    // Aviso inmediato, antes de esperar al servidor, para que nadie toque dos veces.
+    setResetState('sending');
+    setError('Enviando el correo…');
     const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: `${WEB_URL}/recuperar` });
-    setError(e ? errorMessage(e) : 'Te mandamos un correo para cambiar la contraseña. Abrí el link que trae.');
+    if (e) {
+      setResetState('idle');
+      setError(errorMessage(e));
+    } else {
+      setResetState('sent');
+      setError(`Listo: te mandamos un correo a ${email.trim().toLowerCase()}. Abrí el link que trae (mirá también en spam).`);
+    }
   };
 
   if (factorId) {
@@ -109,8 +120,10 @@ export default function Login() {
         <Field label="Contraseña" secureTextEntry autoComplete="password" textContentType="password" value={password} onChangeText={setPassword} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button title="Entrar" onPress={signIn} loading={busy} disabled={!email || !password} />
-        <Pressable onPress={reset} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.green, fontWeight: '600' }}>¿Olvidaste tu contraseña?</Text>
+        <Pressable onPress={reset} disabled={resetState !== 'idle'} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: resetState === 'idle' ? colors.green : colors.muted, fontWeight: '600' }}>
+            {resetState === 'sending' ? 'Enviando…' : resetState === 'sent' ? 'Correo enviado ✓' : '¿Olvidaste tu contraseña?'}
+          </Text>
         </Pressable>
         <Pressable onPress={() => router.push('/registro')} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ color: colors.muted, fontSize: 13 }}>
