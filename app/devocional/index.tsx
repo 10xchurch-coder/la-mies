@@ -10,7 +10,6 @@ import {
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DayBackground, VerseCard } from '@/components/VerseCard';
 import { Face } from '@/components/Face';
@@ -18,7 +17,6 @@ import { Button } from '@/components/ui';
 import {
   dailyComments, dailyFor, dailyRange, dailySocial, deleteDailyComment, markReading, readingStreak, sendDailyComment, setDailyLike,
 } from '@/lib/api';
-import { dailyPhotoId, photoUrl } from '@/lib/backgrounds';
 import { shareImage, shareText, WEB_URL } from '@/lib/share';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, fmtTime, isoDate } from '@/lib/format';
@@ -514,7 +512,7 @@ function DaysSheet({ visible, current, today, onPick, onClose }: { visible: bool
             contentContainerStyle={{ padding: 12, gap: 8 }}
             renderItem={({ item: d }) => (
               <Pressable onPress={() => onPick(d.on_date)} style={[styles.dayRow, d.on_date === current && { borderColor: colors.green, backgroundColor: colors.greenSoft }]} accessibilityRole="button">
-                <Image source={{ uri: photoUrl(dailyPhotoId(d.on_date), 120, 160) }} style={styles.dayThumb} contentFit="cover" cachePolicy="memory-disk" />
+                <View style={styles.dayThumb}><DayBackground background={d.background} date={d.on_date} width={60} height={80} /></View>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase' }}>{dayLabel(d.on_date, today)}</Text>
                   <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{d.reference}</Text>
@@ -595,7 +593,7 @@ const styles = themed(() => StyleSheet.create({
   input: { flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1.5, borderColor: colors.input, borderRadius: 14, paddingHorizontal: 12, paddingTop: 11, fontSize: 15, color: colors.text },
   sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' },
   dayRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgSoft },
-  dayThumb: { width: 54, height: 72, borderRadius: 10, backgroundColor: '#1F3B2C' },
+  dayThumb: { width: 54, height: 72, borderRadius: 10, overflow: 'hidden', backgroundColor: '#1F3B2C' },
   flame: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' },
   reward: { flex: 1, alignItems: 'center', gap: 4, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgSoft },
   rewardOn: { backgroundColor: colors.green, borderColor: colors.green },

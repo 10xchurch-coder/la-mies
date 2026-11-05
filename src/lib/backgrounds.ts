@@ -52,6 +52,11 @@ export function dailyPhotoId(dateIso: string): string {
   return DAILY_PHOTOS[((days % DAILY_PHOTOS.length) + DAILY_PHOTOS.length) % DAILY_PHOTOS.length];
 }
 
+/** Foto elegida a mano para un versículo: el fondo se guarda como "u:<id de Unsplash>". */
+export function chosenPhotoId(background: string | null | undefined): string | null {
+  return background && background.startsWith('u:') && background.length > 2 ? background.slice(2) : null;
+}
+
 /** Dirección de la foto, recortada al tamaño que se va a mostrar. */
 export function photoUrl(id: string, width: number, height: number): string {
   const w = Math.min(1440, Math.max(200, Math.round(width)));

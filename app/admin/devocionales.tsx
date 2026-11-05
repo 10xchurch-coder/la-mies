@@ -64,6 +64,10 @@ export default function Devocionales() {
       { text: 'Borrar', style: 'destructive', onPress: () => deleteDailyContent(row.id).then(load).catch((e) => Alert.alert('No se pudo', e instanceof Error ? e.message : '')) },
     ]);
 
+  // Si ese día tiene una foto elegida para el versículo ("u:<id>"), se ofrece para poder volver a ella.
+  const saved = editing?.id ? rows?.find((r) => r.id === editing.id)?.background : null;
+  const versePhoto = saved && saved.startsWith('u:') ? saved : editing?.background?.startsWith('u:') ? editing.background : null;
+
   const choosePhoto = async () => {
     if (!church || !editing) return;
     try {
@@ -93,8 +97,13 @@ export default function Devocionales() {
           <View style={{ gap: 6 }}>
             <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fondo de la tarjeta</Text>
             <Choice
-              options={[{ value: 'auto', label: 'Foto del día' }, ...BACKGROUND_NAMES.map((n) => ({ value: n, label: BACKGROUNDS[n].label })), { value: '__photo', label: 'Mi foto…' }]}
-              value={!editing.background || editing.background === 'auto' ? 'auto' : BACKGROUNDS[editing.background] ? editing.background : '__photo'}
+              options={[
+                ...(versePhoto ? [{ value: versePhoto, label: 'Foto del versículo' }] : []),
+                { value: 'auto', label: 'Foto del día' },
+                ...BACKGROUND_NAMES.map((n) => ({ value: n, label: BACKGROUNDS[n].label })),
+                { value: '__photo', label: 'Mi foto…' },
+              ]}
+              value={!editing.background || editing.background === 'auto' ? 'auto' : BACKGROUNDS[editing.background] || editing.background === versePhoto ? editing.background : '__photo'}
               onChange={(v) => (v === '__photo' ? choosePhoto() : setEditing({ ...editing, background: v }))}
             />
           </View>

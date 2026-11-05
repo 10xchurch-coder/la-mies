@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, SectionTitle } from '@/components/ui';
 import { UpcomingList } from '@/components/Upcoming';
+import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { dailyFor, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
@@ -32,17 +33,18 @@ export default function Iglesia() {
   const [daily, setDaily] = useState<DailyContent | null>(null);
   const [streak, setStreak] = useState(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      myUpcoming(21).then(setUpcoming).catch(() => undefined);
-      dailyFor(null).then(setDaily).catch(() => undefined);
-      readingStreak().then((r) => setStreak(r.current)).catch(() => undefined);
-      Promise.all([listMinistries(), ministryMembers()]).then(([ms, mm]) => {
-        const att = new Set(ms.filter((m) => m.can_take_attendance).map((m) => m.id));
-        setTakesAttendance(mm.some((x) => x.profile_id === profile?.id && att.has(x.ministry_id)));
-      }).catch(() => undefined);
-    }, [profile?.id]),
-  );
+  const refresh = useCallback(() => {
+    myUpcoming(21).then(setUpcoming).catch(() => undefined);
+    dailyFor(null).then(setDaily).catch(() => undefined);
+    readingStreak().then((r) => setStreak(r.current)).catch(() => undefined);
+    Promise.all([listMinistries(), ministryMembers()]).then(([ms, mm]) => {
+      const att = new Set(ms.filter((m) => m.can_take_attendance).map((m) => m.id));
+      setTakesAttendance(mm.some((x) => x.profile_id === profile?.id && att.has(x.ministry_id)));
+    }).catch(() => undefined);
+  }, [profile?.id]);
+  useFocusEffect(refresh);
+  // Si la app quedó abierta de un día para el otro (o en otra pestaña del navegador), se actualiza sola.
+  useRefreshOnResume(refresh);
 
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
 

@@ -7,7 +7,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { cachedSignedUrl } from '../lib/files';
-import { dailyPhotoId, photoUrl } from '../lib/backgrounds';
+import { chosenPhotoId, dailyPhotoId, photoUrl } from '../lib/backgrounds';
 import type { DailyContent } from '../types';
 import { themed } from '../theme';
 
@@ -29,8 +29,10 @@ export function DayBackground({ background, date, width = 1080, height = 1920, d
   background: string | null | undefined; date: string; width?: number; height?: number; dim?: 'normal' | 'strong';
 }) {
   const bg = background && BACKGROUNDS[background];
-  const uploaded = !bg && background && background !== 'auto' ? cachedSignedUrl('photos', background) : null;
-  const uri = bg ? null : uploaded ?? photoUrl(dailyPhotoId(date), width * 2, height * 2);
+  // "u:<id>" = una foto de Unsplash elegida para ese versículo; "auto" = la foto que toca ese día.
+  const chosen = chosenPhotoId(background);
+  const uploaded = !bg && !chosen && background && background !== 'auto' ? cachedSignedUrl('photos', background) : null;
+  const uri = bg ? null : uploaded ?? photoUrl(chosen ?? dailyPhotoId(date), width * 2, height * 2);
   return (
     <>
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#1F3B2C' }]} />
