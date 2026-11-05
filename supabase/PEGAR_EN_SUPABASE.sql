@@ -2997,17 +2997,12 @@ begin
 end $$;
 grant execute on function public.request_account_deletion() to authenticated;
 
-drop function if exists public.accounts_overview();
-create or replace function public.accounts_overview()
-returns table (id uuid, display_name text, email text, role text, disabled_at timestamptz, has_mfa boolean,
-               last_sign_in timestamptz, deletion_requested_at timestamptz)
+-- Pedidos pendientes, para la pantalla Cuentas (pastor y secretaría).
+create or replace function public.account_deletion_requests()
+returns table (id uuid, deletion_requested_at timestamptz)
 language sql stable security definer set search_path = public as $$
-  select p.id, p.display_name, u.email::text, p.role::text, p.disabled_at,
-         exists (select 1 from auth.mfa_factors f where f.user_id = p.id and f.status = 'verified'),
-         u.last_sign_in_at, p.deletion_requested_at
+  select p.id, p.deletion_requested_at
   from public.profiles p
-  join auth.users u on u.id = p.id
-  where public.is_staff() and p.church_id = public.current_church_id()
-  order by p.deletion_requested_at desc nulls last, p.display_name
+  where public.is_staff() and p.church_id = public.current_church_id() and p.deletion_requested_at is not null
 $$;
-grant execute on function public.accounts_overview() to authenticated;
+grant execute on function public.account_deletion_requests() to authenticated;

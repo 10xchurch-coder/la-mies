@@ -7,7 +7,7 @@ do $$ begin
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', false);
 do $$ begin
-  if not exists (select 1 from public.accounts_overview() where deletion_requested_at is not null) then raise exception 'FALLO: la secretaría no ve el pedido'; end if;
+  if not exists (select 1 from public.account_deletion_requests()) then raise exception 'FALLO: la secretaría no ve el pedido'; end if;
   if not exists (select 1 from public.notifications where kind = 'account' and user_id = auth.uid()) then raise exception 'FALLO: no llegó el aviso'; end if;
 end $$;
 reset role;

@@ -276,7 +276,16 @@ export async function readingBoard(): Promise<ReadingBoardRow[]> {
 }
 
 export async function accountsOverview(): Promise<AccountRow[]> {
-  return ok(await supabase.rpc('accounts_overview')) ?? [];
+  const [rows, reqs] = await Promise.all([
+    supabase.rpc('accounts_overview'),
+    supabase.rpc('account_deletion_requests'),
+  ]);
+  const list = (ok(rows) ?? []) as AccountRow[];
+  // Si la función de pedidos todavía no existe en la base, se sigue sin ese dato.
+  const pending = new Map(((reqs.data ?? []) as { id: string; deletion_requested_at: string }[]).map((r) => [r.id, r.deletion_requested_at]));
+  return list
+    .map((r) => ({ ...r, deletion_requested_at: pending.get(r.id) ?? null }))
+    .sort((a, b) => (b.deletion_requested_at ? 1 : 0) - (a.deletion_requested_at ? 1 : 0));
 }
 
 export async function setAccountDisabled(userId: string, disabled: boolean): Promise<void> {
