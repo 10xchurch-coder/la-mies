@@ -112,3 +112,6 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - **Prédicas**: se cargaron las 30 prédicas del canal de YouTube (mayo a noviembre 2026) con su link, pasaje y fecha (`supabase/seed/predicas_youtube_2026.sql`).
 - **Foto según el versículo**: el fondo puede ser `u:<id de Unsplash>` = una foto elegida para ese versículo (por ejemplo, un farol en un sendero para Salmos 119:105). Noviembre ya tiene la suya en 23 de los 26 días que quedan (`supabase/seed/fotos_versiculos_noviembre_2026.sql`); los demás siguen con la foto del día. En Devocionales el admin ve la opción "Foto del versículo".
 - **Se actualiza sola**: la pestaña Iglesia vuelve a cargar el versículo cuando la app vuelve a primer plano (o la pestaña del navegador se vuelve a mirar) y cuando cambia el día con la app abierta. Antes, un aparato que había quedado abierto desde el día anterior seguía mostrando el versículo de ayer.
+
+## v0.6.1
+- **Comentarios del día**: al abrirlos, la pantalla parpadeaba sin parar (la lista se volvía a cargar en bucle). Arreglado.

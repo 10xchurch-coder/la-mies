@@ -393,9 +393,13 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
   const [busy, setBusy] = useState(false);
   const open = date === today;
 
+  // onCount viene de la pantalla de arriba y cambia en cada dibujo: se guarda aparte para que
+  // la carga no se vuelva a disparar sola (eso hacía parpadear toda la pantalla).
+  const countRef = useRef(onCount);
+  countRef.current = onCount;
   const load = useCallback(() => {
-    dailyComments(date).then((r) => { setRows(r); onCount(r.length); }).catch(() => setRows([]));
-  }, [date, onCount]);
+    dailyComments(date).then((r) => { setRows(r); countRef.current(r.length); }).catch(() => setRows([]));
+  }, [date]);
 
   useEffect(() => {
     if (!visible) return;
