@@ -58,7 +58,9 @@ export function LockGate({ enabled, children }: { enabled: boolean; children: Re
       return;
     }
     setLocked(true);
-    authenticate();
+    // En Android, pedir la huella en el mismo instante en que abre la app falla; esperamos un momento.
+    const t = setTimeout(authenticate, 450);
+    return () => clearTimeout(t);
   }, [enabled, authenticate]);
 
   useEffect(() => {

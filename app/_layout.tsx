@@ -10,6 +10,17 @@ import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
 import { Loading } from '@/components/ui';
+import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
+
+// Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
+const RNErrorUtils = (globalThis as { ErrorUtils?: { getGlobalHandler: () => (e: Error, fatal?: boolean) => void; setGlobalHandler: (h: (e: Error, fatal?: boolean) => void) => void } }).ErrorUtils;
+if (RNErrorUtils) {
+  const previous = RNErrorUtils.getGlobalHandler();
+  RNErrorUtils.setGlobalHandler((e, fatal) => {
+    reportError(e, { fatal: !!fatal, where: 'global' });
+    previous?.(e, fatal);
+  });
+}
 
 if (Platform.OS !== 'web') {
   Notifications.setNotificationHandler({
@@ -56,7 +67,9 @@ export default function RootLayout() {
       <AuthProvider>
         <OutingProvider>
           <StatusBar style="dark" />
-          <Gate />
+          <ErrorBoundary>
+            <Gate />
+          </ErrorBoundary>
         </OutingProvider>
       </AuthProvider>
     </SafeAreaProvider>

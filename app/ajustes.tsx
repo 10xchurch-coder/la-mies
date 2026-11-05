@@ -10,6 +10,7 @@ import { requestAccountDeletion, updateProfile } from '@/lib/api';
 import { ROLE_LABEL, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { APP_VERSION } from '@/components/ErrorScreen';
 
 export default function Ajustes() {
   const router = useRouter();
@@ -120,7 +121,7 @@ export default function Ajustes() {
             }
           />
         </Card>
-        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión 0.4 · {church?.name ?? ''}</Text>
+        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión {APP_VERSION} · {church?.name ?? ''}</Text>
       </Screen>
     </View>
   );

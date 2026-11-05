@@ -1,12 +1,9 @@
-// Configuración de la app. Toma app.json y agrega lo que no debe estar en el código:
-// la clave de Google Maps para Android viene de una variable de entorno (EAS → Environment variables).
-const base = require('./app.json');
-
-module.exports = () => {
-  const expo = { ...base.expo };
+// Configuración de la app. Expo lee app.json y la pasa acá como "config"; agregamos lo que no debe
+// estar en el código: la clave de Google Maps para Android viene de EAS (Environment variables).
+module.exports = ({ config }) => {
   const mapsKey = process.env.GOOGLE_MAPS_ANDROID_KEY;
   if (mapsKey) {
-    expo.android = { ...expo.android, config: { ...(expo.android?.config ?? {}), googleMaps: { apiKey: mapsKey } } };
+    config.android = { ...config.android, config: { ...(config.android?.config ?? {}), googleMaps: { apiKey: mapsKey } } };
   }
-  return { expo };
+  return config;
 };
