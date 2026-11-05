@@ -27,17 +27,50 @@ export async function reportError(err: unknown, info?: Record<string, unknown>):
 
 type State = { error: Error | null };
 
+/** En la web, cuando se publica una versión nueva, la pestaña que quedó abierta busca archivos que ya no existen.
+ *  No es un error de verdad: alcanza con recargar la página para traer la versión nueva. */
+export function isStaleBundleError(e: unknown): boolean {
+  const m = e instanceof Error ? `${e.name} ${e.message}` : String(e);
+  return /Loading module .* failed|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError|Loading chunk .* failed/i.test(m);
+}
+
+function reloadForNewVersion(): boolean {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
+  try {
+    // Una sola vez cada 30 segundos, para no quedar recargando en bucle si de verdad falta un archivo.
+    const last = Number(window.sessionStorage.getItem('la-mies-reload') ?? 0);
+    if (Date.now() - last < 30_000) return false;
+    window.sessionStorage.setItem('la-mies-reload', String(Date.now()));
+  } catch {
+    // sin sessionStorage igual recargamos
+  }
+  window.location.reload();
+  return true;
+}
+
 export class ErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
   state: State = { error: null };
   static getDerivedStateFromError(error: Error): State {
     return { error };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    if (isStaleBundleError(error) && reloadForNewVersion()) return;
     reportError(error, { componentStack: (info.componentStack ?? '').slice(0, 3000) });
   }
   render() {
     if (!this.state.error) return this.props.children;
     const e = this.state.error;
+    const stale = isStaleBundleError(e);
+    if (stale && Platform.OS === 'web') {
+      return (
+        <View style={styles.wrap}>
+          <Feather name="refresh-cw" size={36} color={colors.green} />
+          <Text style={styles.title}>Hay una versión nueva</Text>
+          <Text style={styles.text}>La app se actualizó mientras la tenías abierta. Tocá para cargar la versión nueva.</Text>
+          <Button title="Actualizar" onPress={() => window.location.reload()} />
+        </View>
+      );
+    }
     return (
       <View style={styles.wrap}>
         <Feather name="alert-triangle" size={40} color={colors.amberText} />

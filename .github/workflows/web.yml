@@ -28,6 +28,20 @@ jobs:
       - run: npx expo export --platform web
       # GitHub Pages no conoce las direcciones internas de la app; con esta copia, recargar la página no da error.
       - run: cp dist/index.html dist/404.html
+      # Se dejan también los archivos de la versión anterior: así, quien tenga la app abierta mientras se publica
+      # no se queda con "Loading module ... failed" (la app además recarga sola si pasa).
+      - run: cp -r dist/_expo fresh_expo
+      - uses: actions/cache/restore@v4
+        with:
+          path: prev
+          key: web-static-${{ github.run_id }}
+          restore-keys: web-static-
+      - run: if [ -d prev/_expo ]; then cp -rn prev/_expo/. dist/_expo/; fi
+      - run: rm -rf prev && mkdir prev && mv fresh_expo prev/_expo
+      - uses: actions/cache/save@v4
+        with:
+          path: prev
+          key: web-static-${{ github.run_id }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
