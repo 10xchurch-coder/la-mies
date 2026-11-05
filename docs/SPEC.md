@@ -98,3 +98,15 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - **Turnos de ministerio**: una sola lista para elegir a la persona (primero los del ministerio); si usa la app le llega el aviso del lunes, si no, se le avisa a mano.
 - **Ficha y Fidelidad**: los ministerios de una persona se ven en su ficha aunque no use la app; el filtro "Sirve en un ministerio" también los cuenta.
 - **Chat del ministerio en Android**: el mensaje "Todavía no hay mensajes" salía espejado (parecía otro idioma); ahora se muestra fuera de la lista. El texto que se escribe se lee bien en modo oscuro.
+
+## v0.6 — Versículo con foto, comentarios del día y capacitación nueva
+
+- **Abre en Iglesia** (o en el Mapa si hay una salida en curso). Encabezado: el nombre de la iglesia, abajo "Más como Cristo cada día" y el saludo según la hora ("Buen día / Buenas tardes / Buenas noches, Nombre").
+- **Versículo del día con foto de fondo**: una foto distinta cada día (42 fotos de Unsplash, licencia libre, en `src/lib/backgrounds.ts`; el fondo `auto` es el de siempre). Arriba "Versículo del día" chiquito y la cita, después el versículo y la frase. El admin puede elegir un color o subir su foto.
+- **Pantalla completa**: al tocar la tarjeta se abre el devocional en diapositivas que se pasan con el dedo (versículo, frase, lectura de hoy, devocional completo). Cada una se comparte como imagen (foto, nombre de la iglesia y RV1960); el devocional completo también como texto.
+- **Comentarios del día**: un solo chat por día para toda la iglesia. Se comenta solo el mismo día (hora de la iglesia); los días anteriores se pueden leer. Corazón con contador. Tablas `daily_comments` y `daily_likes` (migración `0012`, aplicada, con tiempo real).
+- **Días anteriores**: hasta 31 días para atrás, con su foto.
+- **Sesión en Android**: la sesión guardada se podía romper cuando dos lecturas/escrituras se cruzaban, y la app quedaba sin poder leer ("todavía no hay versículo para hoy"). Se reescribió el guardado (`secureStoreCore.ts`, con cola y clave propia) y la sesión se renueva sola al abrir la app.
+- **Ofrendar**: el titular ya no tiene "Copiar" (solo CBU y alias).
+- **Capacitación**: "Tips para recordar" arriba; "Presentación del evangelio" → "Cómo presentar el evangelio" (los Diez Mandamientos, al estilo de Ray Comfort, con los versículos completos); "Objeciones comunes" con las 10 más frecuentes en la calle. Se quitaron "Antes de salir" y "Al tocar la puerta". Se ordena por `sort_order`.
+- **Prédicas**: se cargaron las 30 prédicas del canal de YouTube (mayo a noviembre 2026) con su link, pasaje y fecha (`supabase/seed/predicas_youtube_2026.sql`).

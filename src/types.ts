@@ -290,3 +290,8 @@ export type ReadingStreak = { current: number; best: number; total: number; read
 export type ReadingBoardRow = { user_id: string; display_name: string; photo_path: string | null; current_streak: number; best_streak: number };
 
 export type AccountRow = { id: string; display_name: string; email: string; role: Role; disabled_at: string | null; has_mfa: boolean; last_sign_in: string | null; deletion_requested_at: string | null };
+
+// ---------- Devocional: comentarios del día y me gusta ----------
+export type DailyComment = { id: string; user_id: string; name: string; photo_path: string | null; body: string; created_at: string; mine: boolean };
+/** Cuántos comentarios y corazones tiene un día; "open" = todavía se puede comentar (es hoy). */
+export type DailySocial = { comments: number; likes: number; liked: boolean; open: boolean };

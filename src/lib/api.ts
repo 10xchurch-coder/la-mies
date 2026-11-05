@@ -5,7 +5,7 @@ import type {
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
   ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage, MinistryPerson, MinistryPersonRow,
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
-  TrainingItem, UpcomingItem, DailyContent, ReadingStreak, ReadingBoardRow, AccountRow,
+  TrainingItem, UpcomingItem, DailyContent, ReadingStreak, ReadingBoardRow, AccountRow, DailyComment, DailySocial,
 } from '../types';
 
 function ok<T>(res: { data: T | null; error: unknown }): T {
@@ -89,7 +89,7 @@ export async function trimSession(sessionId: string, cutoff: Date): Promise<Sess
 }
 
 export async function listTraining(): Promise<TrainingItem[]> {
-  return ok(await supabase.from('training_items').select('*').order('category').order('sort_order')) ?? [];
+  return ok(await supabase.from('training_items').select('*').eq('published', true).order('sort_order').order('title')) ?? [];
 }
 
 export async function getTraining(id: string): Promise<TrainingItem | null> {
@@ -289,6 +289,31 @@ export async function getSermon(id: string): Promise<Sermon | null> {
 export async function dailyFor(date: string | null = null): Promise<DailyContent | null> {
   const d = ok(await supabase.rpc('daily_for', { p_date: date })) as DailyContent | null;
   return d && d.id ? d : null;
+}
+
+/** Lo de los últimos días (hoy primero), como máximo 31. */
+export async function dailyRange(days = 31): Promise<DailyContent[]> {
+  return ((ok(await supabase.rpc('daily_range', { p_days: days })) ?? []) as DailyContent[]).filter((d) => d && d.id);
+}
+export async function dailyComments(date: string): Promise<DailyComment[]> {
+  return ok(await supabase.rpc('daily_comments_list', { p_date: date })) ?? [];
+}
+export async function sendDailyComment(date: string, body: string): Promise<void> {
+  ok(await supabase.from('daily_comments').insert({ on_date: date, body }));
+}
+export async function deleteDailyComment(id: string): Promise<void> {
+  ok(await supabase.from('daily_comments').delete().eq('id', id));
+}
+export async function dailySocial(date: string): Promise<DailySocial> {
+  const rows = (ok(await supabase.rpc('daily_social', { p_date: date })) ?? []) as DailySocial[];
+  return rows[0] ?? { comments: 0, likes: 0, liked: false, open: false };
+}
+export async function setDailyLike(date: string, liked: boolean): Promise<void> {
+  if (liked) ok(await supabase.from('daily_likes').upsert({ on_date: date }, { onConflict: 'church_id,on_date,user_id', ignoreDuplicates: true }));
+  else {
+    const me = await uid();
+    ok(await supabase.from('daily_likes').delete().eq('on_date', date).eq('user_id', me));
+  }
 }
 
 export async function listDailyContent(from: string, to: string): Promise<DailyContent[]> {

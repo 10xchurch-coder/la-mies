@@ -24,11 +24,16 @@ export const supabase = createClient(url ?? 'https://falta-configurar.invalid', 
   },
 });
 
-// Renueva el token solo mientras la app está en primer plano.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') supabase.auth.startAutoRefresh();
-  else supabase.auth.stopAutoRefresh();
-});
+// Renueva el token solo mientras la app está en primer plano (en la web lo hace el navegador solo).
+// Hay que arrancarlo también al abrir la app: el aviso de "volvió al frente" no llega en el primer arranque,
+// y sin esto la sesión vencía a la hora de uso y la app pedía los datos como si no hubiera nadie conectado.
+if (Platform.OS !== 'web') {
+  if (AppState.currentState === 'active') supabase.auth.startAutoRefresh();
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') supabase.auth.startAutoRefresh();
+    else supabase.auth.stopAutoRefresh();
+  });
+}
 
 /** Mensaje legible para mostrar en pantalla. */
 export function errorMessage(e: unknown): string {

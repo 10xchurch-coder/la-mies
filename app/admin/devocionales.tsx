@@ -14,7 +14,7 @@ import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { DailyContent } from '@/types';
 
-const EMPTY = (d: string): Partial<DailyContent> => ({ on_date: d, reference: '', verse: '', message: '', devotional: '', study: '', prayer: '', background: 'campo' });
+const EMPTY = (d: string): Partial<DailyContent> => ({ on_date: d, reference: '', verse: '', message: '', devotional: '', study: '', prayer: '', background: 'auto' });
 
 export default function Devocionales() {
   const router = useRouter();
@@ -47,7 +47,7 @@ export default function Devocionales() {
         devotional: editing.devotional?.trim() || null,
         study: editing.study?.trim() || null,
         prayer: editing.prayer?.trim() || null,
-        background: editing.background || 'campo',
+        background: editing.background || 'auto',
       });
       setEditing(null);
       load();
@@ -80,7 +80,7 @@ export default function Devocionales() {
     const preview: DailyContent = {
       id: editing.id ?? 'x', church_id: church?.id ?? null, on_date: editing.on_date as string, reference: editing.reference || 'Juan 3:16',
       verse: editing.verse || 'El texto del versículo va a aparecer acá.', message: editing.message || null, devotional: editing.devotional || null, study: editing.study || null, prayer: editing.prayer || null,
-      background: editing.background || 'campo', created_by: null, created_at: '',
+      background: editing.background || 'auto', created_by: null, created_at: '',
     };
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -93,8 +93,8 @@ export default function Devocionales() {
           <View style={{ gap: 6 }}>
             <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fondo de la tarjeta</Text>
             <Choice
-              options={[...BACKGROUND_NAMES.map((n) => ({ value: n, label: BACKGROUNDS[n].label })), { value: '__photo', label: 'Foto…' }]}
-              value={BACKGROUNDS[editing.background ?? ''] ? (editing.background as string) : '__photo'}
+              options={[{ value: 'auto', label: 'Foto del día' }, ...BACKGROUND_NAMES.map((n) => ({ value: n, label: BACKGROUNDS[n].label })), { value: '__photo', label: 'Mi foto…' }]}
+              value={!editing.background || editing.background === 'auto' ? 'auto' : BACKGROUNDS[editing.background] ? editing.background : '__photo'}
               onChange={(v) => (v === '__photo' ? choosePhoto() : setEditing({ ...editing, background: v }))}
             />
           </View>

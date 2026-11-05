@@ -1,35 +1,44 @@
-// Devocional del día, en cuatro "diapositivas" que se pasan con el dedo:
-// 1) el versículo (tarjeta para compartir), 2) la frase del día, 3) la lectura corta,
-// 4) el estudio completo, que se abre a pantalla completa y termina con una oración.
-// Abajo, la racha de días seguidos con sus premios. Abrir la lectura cuenta como "leído".
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+// El devocional del día a pantalla completa, como en la app de la Biblia.
+// Se pasa con el dedo: versículo → frase → lectura de hoy → devocional completo (lectura + estudio + oración).
+// Abajo: compartir (la diapositiva como imagen), comentarios del día (un chat de 24 horas para la iglesia),
+// corazón y días anteriores (hasta 31 días). Abrir el de hoy cuenta para la racha.
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  useWindowDimensions,
+} from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Header, Screen } from '@/components/Screen';
-import { BACKGROUNDS, VerseCard, type CardHandle } from '@/components/VerseCard';
-import { Button, Card, Empty, Loading, SectionTitle } from '@/components/ui';
-import { dailyFor, markReading, readingStreak } from '@/lib/api';
+import { DayBackground, VerseCard } from '@/components/VerseCard';
+import { Face } from '@/components/Face';
+import { Button } from '@/components/ui';
+import {
+  dailyComments, dailyFor, dailyRange, dailySocial, deleteDailyComment, markReading, readingStreak, sendDailyComment, setDailyLike,
+} from '@/lib/api';
+import { dailyPhotoId, photoUrl } from '@/lib/backgrounds';
 import { shareImage, shareText, WEB_URL } from '@/lib/share';
-import { fmtDateShort, isoDate } from '@/lib/format';
+import { supabase, errorMessage } from '@/lib/supabase';
+import { addDays, fmtDateShort, fmtTime, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
-import type { DailyContent, ReadingStreak } from '@/types';
+import type { DailyComment, DailyContent, DailySocial, ReadingStreak } from '@/types';
 
-/** Párrafos del texto. Un párrafo escrito entre ** ** es un título. */
-function Paragraphs({ text, size = 16 }: { text: string; size?: number }) {
+type Slide = 'verse' | 'phrase' | 'reading' | 'full';
+
+/** Párrafos del texto. Un párrafo escrito entre ** ** es un título; **palabra** sale en negrita. */
+function Paragraphs({ text, size = 16, color, headingColor }: { text: string; size?: number; color?: string; headingColor?: string }) {
   return (
     <>
       {text.split(/\n{2,}/).map((raw, i) => {
         const p = raw.trim();
         const heading = p.match(/^\*\*(.+)\*\*$/);
-        if (heading) return <Text key={i} style={[styles.heading, i === 0 && { marginTop: 0 }]}>{heading[1]}</Text>;
-        // Negritas sueltas dentro del párrafo (**palabra**) se muestran en negrita.
+        if (heading) return <Text key={i} style={[styles.heading, { color: headingColor ?? colors.text }, i === 0 && { marginTop: 0 }]}>{heading[1]}</Text>;
         const parts = p.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
         return (
-          <Text key={i} style={[styles.para, { fontSize: size, lineHeight: Math.round(size * 1.55) }]}>
+          <Text key={i} style={{ fontSize: size, lineHeight: Math.round(size * 1.55), color: color ?? colors.text }}>
             {parts.map((part, j) => (part.startsWith('**') ? <Text key={j} style={{ fontWeight: '800' }}>{part.slice(2, -2)}</Text> : part))}
           </Text>
         );
@@ -38,249 +47,555 @@ function Paragraphs({ text, size = 16 }: { text: string; size?: number }) {
   );
 }
 
+/** Texto plano para compartir (sin los ** de los títulos). */
+function plain(text: string): string {
+  return text.split(/\n{2,}/).map((p) => {
+    const t = p.trim();
+    const h = t.match(/^\*\*(.+)\*\*$/);
+    return h ? h[1].toUpperCase() : t.replace(/\*\*([^*]+)\*\*/g, '$1');
+  }).join('\n\n');
+}
+
+function dayLabel(date: string, today: string): string {
+  if (date === today) return 'Hoy';
+  if (date === isoDate(addDays(new Date(`${today}T12:00:00`), -1))) return 'Ayer';
+  return fmtDateShort(date);
+}
+
 export default function Devocional() {
   const router = useRouter();
   const { fecha } = useLocalSearchParams<{ fecha?: string }>();
   const { church, isStaff } = useAuth();
-  const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const { width: winW, height: winH } = useWindowDimensions();
+  const W = Math.min(winW, 520);
+  const H = winH;
+  const today = isoDate(new Date());
+  const [date, setDate] = useState<string>(fecha || today);
   const [item, setItem] = useState<DailyContent | null | undefined>(undefined);
+  const [failed, setFailed] = useState(false);
+  const [social, setSocial] = useState<DailySocial>({ comments: 0, likes: 0, liked: false, open: false });
   const [streak, setStreak] = useState<ReadingStreak | null>(null);
-  const [big, setBig] = useState(false);
-  const [reader, setReader] = useState(false);
   const [page, setPage] = useState(0);
-  const cardRef = useRef<CardHandle>(null);
-  const bigRef = useRef<CardHandle>(null);
-  const isToday = !fecha || fecha === isoDate(new Date());
-  const slideW = Math.min(width, 520) - 32;
+  const [sheet, setSheet] = useState<null | 'comments' | 'days' | 'streak' | 'reader'>(null);
+  const pager = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  const slideRefs = useRef<Record<string, React.ComponentRef<typeof View> | null>>({});
+
+  const load = useCallback(async (d: string) => {
+    setItem(undefined);
+    setFailed(false);
+    try {
+      const it = await dailyFor(d === today ? null : d);
+      setItem(it);
+      dailySocial(it?.on_date ?? d).then(setSocial).catch(() => undefined);
+    } catch {
+      setFailed(true);
+      setItem(null);
+    }
+    (d === today ? markReading() : readingStreak()).then(setStreak).catch(() => undefined);
+  }, [today]);
 
   useFocusEffect(
     useCallback(() => {
-      dailyFor(fecha ?? null).then(setItem).catch(() => setItem(null));
-      (isToday ? markReading() : readingStreak()).then(setStreak).catch(() => undefined);
-    }, [fecha, isToday]),
+      load(date);
+    }, [date, load]),
   );
 
   useEffect(() => {
-    if (streak?.read_today && streak.current > 0 && [7, 30, 365].includes(streak.current)) {
+    if (streak?.read_today && streak.current > 0 && [7, 30, 365].includes(streak.current) && date === today) {
       const label = streak.current === 7 ? 'una semana' : streak.current === 30 ? 'un mes' : 'un año';
       Alert.alert('¡Felicitaciones!', `Llevás ${label} seguida leyendo la Palabra cada día. Seguí así.`);
     }
   }, [streak?.current, streak?.read_today]);
 
-  const text = item ? `"${item.verse}"\n${item.reference} (RV1960)${item.message ? `\n\n${item.message}` : ''}\n\n${church?.name ?? 'La Mies'} · ${WEB_URL}` : '';
+  const slides: Slide[] = useMemo(() => (item
+    ? ['verse', ...(item.message ? ['phrase' as const] : []), ...(item.devotional ? ['reading' as const] : []), ...(item.study || item.prayer || item.devotional ? ['full' as const] : [])]
+    : []), [item]);
 
-  const shareStory = async () => {
+  const goTo = (i: number) => {
+    pager.current?.scrollTo({ x: i * W, animated: true });
+    setPage(i);
+  };
+
+  const openDay = (d: string) => {
+    setSheet(null);
+    setPage(0);
+    pager.current?.scrollTo({ x: 0, animated: false });
+    setDate(d);
+  };
+
+  const churchName = church?.name ?? 'La Mies';
+  const verseText = item ? `"${item.verse}"\n${item.reference} (RV1960)` : '';
+  const fullText = item
+    ? [
+      `${item.reference} (RV1960)`, `"${item.verse}"`, item.message ?? '',
+      item.devotional ? `LECTURA DE HOY\n${plain(item.devotional)}` : '',
+      item.study ? `ESTUDIO\n${plain(item.study)}` : '',
+      item.prayer ? `ORACIÓN\n${item.prayer}` : '',
+      `${churchName} · ${WEB_URL}`,
+    ].filter(Boolean).join('\n\n')
+    : '';
+
+  const share = async () => {
     if (!item) return;
+    const kind = slides[page] ?? 'verse';
+    if (kind === 'full') return shareFull();
+    const fallback = kind === 'phrase'
+      ? `${item.message}\n${item.reference}\n\n${churchName} · ${WEB_URL}`
+      : kind === 'reading'
+        ? `${verseText}\n\n${plain(item.devotional ?? '')}\n\n${churchName} · ${WEB_URL}`
+        : `${verseText}${item.message ? `\n\n${item.message}` : ''}\n\n${churchName} · ${WEB_URL}`;
     try {
-      const capture = async () => {
-        const { captureRef } = await import('react-native-view-shot');
-        return captureRef((bigRef.current ?? cardRef.current) as unknown as number, { format: 'png', quality: 1, result: 'tmpfile' });
-      };
-      const ok = await shareImage(capture);
+      const ref = slideRefs.current[kind];
+      const ok = ref
+        ? await shareImage(async () => {
+          const { captureRef } = await import('react-native-view-shot');
+          return captureRef(ref as unknown as number, { format: 'png', quality: 1, result: 'tmpfile' });
+        })
+        : false;
       if (!ok) {
-        const r = await shareText(text);
-        if (r === 'copied') Alert.alert('Texto copiado', 'En la computadora se copia el texto del versículo. Para compartir la imagen, usá la app del teléfono.');
+        const r = await shareText(fallback);
+        if (r === 'copied') Alert.alert('Texto copiado', 'Quedó copiado para pegarlo donde quieras. Para compartirlo como imagen, usá la app del teléfono.');
       }
     } catch (e) {
-      Alert.alert('No se pudo compartir', e instanceof Error ? e.message : 'Probá de nuevo');
+      Alert.alert('No se pudo compartir', errorMessage(e));
     }
   };
 
-  const shareDevotional = async () => {
+  const shareFull = async () => {
     if (!item) return;
-    const r = await shareText(`${text}${item.devotional ? `\n\n${item.devotional}` : ''}`);
-    if (r === 'copied') Alert.alert('Copiado', 'El devocional quedó copiado para pegarlo donde quieras.');
+    const r = await shareText(fullText, `Devocional · ${item.reference}`);
+    if (r === 'copied') Alert.alert('Copiado', 'El devocional completo quedó copiado para pegarlo donde quieras.');
   };
 
-  if (item === undefined) return <Loading />;
+  const toggleLike = async () => {
+    if (!item) return;
+    const next = !social.liked;
+    setSocial({ ...social, liked: next, likes: Math.max(0, social.likes + (next ? 1 : -1)) });
+    try {
+      await setDailyLike(item.on_date, next);
+    } catch (e) {
+      setSocial(social);
+      Alert.alert('No se pudo', errorMessage(e));
+    }
+  };
 
-  if (big && item) {
+  // ---------- pantallas de carga y error ----------
+  if (item === undefined) {
     return (
-      <Pressable onPress={() => setBig(false)} style={{ flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center', padding: 12 }}>
-        <View style={{ width: '100%', maxWidth: 420 }}>
-          <VerseCard ref={bigRef} item={item} church={church?.name} style={{ maxHeight: 760 }} />
-        </View>
-        <View style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}>
-          <Button title="Compartir" icon="share-2" onPress={shareStory} />
-          <Button title="Cerrar" variant="outline" onPress={() => setBig(false)} />
-        </View>
-      </Pressable>
+      <View style={styles.black}>
+        <StatusBar style="light" />
+        <ActivityIndicator color="#FFF" />
+      </View>
+    );
+  }
+  if (!item) {
+    return (
+      <View style={[styles.black, { padding: 32, gap: 14 }]}>
+        <StatusBar style="light" />
+        <Feather name={failed ? 'wifi-off' : 'book-open'} size={40} color="#FFF" />
+        <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '800', textAlign: 'center' }}>
+          {failed ? 'No se pudo cargar el devocional' : 'Todavía no hay versículo para este día'}
+        </Text>
+        <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, textAlign: 'center', lineHeight: 20 }}>
+          {failed ? 'Revisá la conexión y probá de nuevo. Si sigue igual, cerrá la app y volvé a abrirla.' : isStaff ? 'Cargalo desde Iglesia → Devocionales.' : 'El pastor o la secretaría lo van a cargar.'}
+        </Text>
+        {failed ? <Button title="Reintentar" icon="refresh-cw" onPress={() => load(date)} /> : null}
+        <Button title="Cerrar" variant="outline" onPress={() => router.back()} />
+      </View>
     );
   }
 
-  const bg = item ? BACKGROUNDS[item.background]?.colors ?? ['#1F6B45', '#2F8F5B', '#9CCB8E'] : null;
-  const slides: ('verse' | 'phrase' | 'reading' | 'study')[] = item
-    ? ['verse', ...(item.message ? ['phrase' as const] : []), ...(item.devotional ? ['reading' as const] : []), ...(item.study || item.prayer ? ['study' as const] : [])]
-    : [];
+  const slideH = H;
+  const padTop = insets.top + 92;
+  const padBottom = insets.bottom + 104;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header
-        title="Devocional"
-        subtitle={item ? (isToday ? 'Hoy' : fmtDateShort(item.on_date)) : undefined}
-        back
-        right={isStaff ? (
-          <Pressable onPress={() => router.push('/admin/devocionales')} accessibilityRole="button" accessibilityLabel="Cargar devocionales" style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <Feather name="edit-3" size={22} color={colors.green} />
-          </Pressable>
-        ) : undefined}
-      />
-      <Screen>
-        {!item ? (
-          <Empty icon="book-open" title="Todavía no hay versículo para hoy" text={isStaff ? 'Cargalo tocando el lápiz arriba a la derecha.' : 'El pastor o la secretaría lo van a cargar.'} />
-        ) : (
-          <>
-            {/* Las diapositivas: se pasan con el dedo, de a una. */}
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              decelerationRate="fast"
-              snapToInterval={slideW + 12}
-              snapToAlignment="start"
-              contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
-              style={{ marginHorizontal: -16 }}
-              onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / (slideW + 12)))}
-              onScroll={Platform.OS === 'web' ? (e) => setPage(Math.round(e.nativeEvent.contentOffset.x / (slideW + 12))) : undefined}
-              scrollEventThrottle={64}
-            >
-              {slides.map((s) => (
-                <View key={s} style={{ width: slideW }}>
-                  {s === 'verse' ? (
-                    <Pressable onPress={() => setBig(true)} accessibilityRole="button" accessibilityLabel="Ver la tarjeta grande">
-                      <VerseCard ref={cardRef} item={item} church={church?.name} compact lines={11} hideMessage={!!item.message} style={styles.slide} />
-                    </Pressable>
-                  ) : s === 'phrase' ? (
-                    <View style={[styles.slide, styles.phraseCard]}>
-                      <LinearGradient colors={bg as [string, string, string]} start={{ x: 0.9, y: 0 }} end={{ x: 0.1, y: 1 }} style={StyleSheet.absoluteFill} />
-                      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.25)' }]} />
-                      <Text style={styles.slideLabel}>Para pensar hoy</Text>
-                      <Text style={styles.phrase}>{item.message}</Text>
-                      <Text style={styles.slideFoot}>{item.reference}</Text>
-                    </View>
-                  ) : s === 'reading' ? (
-                    <View style={[styles.slide, styles.readingCard]}>
-                      <Text style={styles.readingLabel}>Lectura de hoy</Text>
-                      <ScrollView nestedScrollEnabled style={{ flex: 1 }} contentContainerStyle={{ gap: 12, paddingBottom: 6 }}>
-                        <Paragraphs text={item.devotional as string} size={16} />
-                      </ScrollView>
-                      <Button title="Compartir el devocional" variant="outline" icon="send" small onPress={shareDevotional} />
-                    </View>
-                  ) : (
-                    <Pressable onPress={() => setReader(true)} style={[styles.slide, styles.studyCard]} accessibilityRole="button">
-                      <LinearGradient colors={['#101512', '#1F6B45']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-                      <Feather name="book-open" size={44} color="#FFFFFF" />
-                      <Text style={styles.studyTitle}>{item.study ? 'Devocional completo' : 'Oración del día'}</Text>
-                      <Text style={styles.studyText}>
-                        {item.study ? 'Un estudio de 5 a 10 minutos sobre el versículo, a pantalla completa, que termina con una oración.' : 'Una oración para cerrar la lectura de hoy.'}
-                      </Text>
-                      <View style={styles.studyBtn}>
-                        <Feather name="maximize-2" size={16} color={colors.green} />
-                        <Text style={{ color: colors.green, fontWeight: '800', fontSize: 14 }}>{item.study ? 'Leer ahora' : 'Abrir'}</Text>
-                      </View>
-                    </Pressable>
-                  )}
+    <View style={styles.black}>
+      <StatusBar style="light" />
+      <View style={{ width: W, height: H, alignSelf: 'center' }}>
+        <ScrollView
+          ref={pager}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / W))}
+          onScroll={Platform.OS === 'web' ? (e) => setPage(Math.round(e.nativeEvent.contentOffset.x / W)) : undefined}
+          scrollEventThrottle={64}
+          style={{ width: W, height: H }}
+        >
+          {slides.map((s) => (
+            <View key={s} style={{ width: W, height: slideH }}>
+              {s === 'verse' ? (
+                <View ref={(r) => { slideRefs.current.verse = r; }} collapsable={false} style={{ flex: 1 }}>
+                  <VerseCard item={item} church={churchName} hideMessage={!!item.message} width={W} height={H}
+                    style={{ paddingTop: padTop, paddingBottom: padBottom }} />
                 </View>
-              ))}
-            </ScrollView>
-            {slides.length > 1 ? (
-              <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 6 }}>
-                {slides.map((s, i) => <View key={s} style={[styles.dot, i === page && styles.dotOn]} />)}
-              </View>
-            ) : null}
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Button title={Platform.OS === 'web' ? 'Compartir versículo' : 'Compartir como historia'} icon="share-2" onPress={shareStory} style={{ flex: 1 }} />
-              <Button title="Ver grande" variant="outline" icon="maximize-2" onPress={() => setBig(true)} />
+              ) : s === 'phrase' ? (
+                <View ref={(r) => { slideRefs.current.phrase = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
+                  <DayBackground background={item.background} date={item.on_date} width={W} height={H} />
+                  <Text style={styles.slideLabel}>Para pensar hoy</Text>
+                  <View style={{ flex: 1, justifyContent: 'center', gap: 18 }}>
+                    <Text style={styles.phrase}>{item.message}</Text>
+                    <Text style={styles.slideRef}>{item.reference}</Text>
+                  </View>
+                  <Text style={styles.foot}>{churchName} · RV1960</Text>
+                </View>
+              ) : s === 'reading' ? (
+                <View ref={(r) => { slideRefs.current.reading = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
+                  <DayBackground background={item.background} date={item.on_date} width={W} height={H} dim="strong" />
+                  <Text style={styles.slideLabel}>Lectura de hoy · {item.reference}</Text>
+                  <ScrollView style={{ flex: 1, marginVertical: 14 }} contentContainerStyle={{ gap: 14, flexGrow: 1, justifyContent: 'center' }} nestedScrollEnabled>
+                    <Paragraphs text={item.devotional as string} size={18} color="#FFFFFF" headingColor="#FFFFFF" />
+                  </ScrollView>
+                  <Text style={styles.foot}>{churchName}</Text>
+                </View>
+              ) : (
+                <View style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
+                  <DayBackground background={item.background} date={item.on_date} width={W} height={H} dim="strong" />
+                  <Feather name="book-open" size={50} color="#FFFFFF" />
+                  <Text style={styles.fullTitle}>Devocional completo</Text>
+                  <Text style={styles.fullText}>
+                    La lectura de hoy, {item.study ? 'el estudio de 5 a 10 minutos ' : ''}y una oración para terminar. Para leer con calma y compartir.
+                  </Text>
+                  <Pressable onPress={() => setSheet('reader')} style={styles.readBtn} accessibilityRole="button">
+                    <Feather name="maximize-2" size={17} color="#1F6B45" />
+                    <Text style={{ color: '#1F6B45', fontWeight: '800', fontSize: 16 }}>Leer ahora</Text>
+                  </Pressable>
+                </View>
+              )}
             </View>
-          </>
-        )}
+          ))}
+        </ScrollView>
 
-        <SectionTitle right={<Pressable onPress={() => router.push('/devocional/lectores')}><Text style={{ color: colors.green, fontWeight: '700', fontSize: 13 }}>Ver la iglesia</Text></Pressable>}>Mi racha</SectionTitle>
-        <Card style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <View style={styles.flame}>
-              <Feather name="zap" size={26} color={streak?.current ? '#FFF' : colors.muted} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 24, fontWeight: '800', color: colors.text }}>{streak?.current ?? 0} {streak?.current === 1 ? 'día' : 'días'} seguidos</Text>
-              <Text style={{ fontSize: 13, color: colors.muted }}>Mejor racha: {streak?.best ?? 0} · Total leídos: {streak?.total ?? 0}</Text>
-            </View>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {(streak?.rewards ?? [{ days: 7, label: 'Una semana', earned: false }, { days: 30, label: 'Un mes', earned: false }, { days: 365, label: 'Un año', earned: false }]).map((r) => (
-              <View key={r.days} style={[styles.reward, r.earned && styles.rewardOn]}>
-                <Feather name={r.earned ? 'award' : 'lock'} size={20} color={r.earned ? '#FFF' : colors.muted} />
-                <Text style={{ fontSize: 12, fontWeight: '800', color: r.earned ? '#FFF' : colors.muted, textAlign: 'center' }}>{r.label}</Text>
-                <Text style={{ fontSize: 10, color: r.earned ? 'rgba(255,255,255,0.9)' : colors.muted }}>{r.days} días</Text>
-              </View>
+        {/* Arriba: barras de avance, cerrar, día y racha. */}
+        <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            {slides.map((s, i) => (
+              <Pressable key={s} onPress={() => goTo(i)} style={{ flex: 1, paddingVertical: 6 }} accessibilityLabel={`Ir a la parte ${i + 1}`}>
+                <View style={[styles.seg, i <= page && styles.segOn]} />
+              </Pressable>
             ))}
           </View>
-          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-            La racha cuenta cada día que abrís el devocional. Si un día no lo abrís, vuelve a cero, pero la mejor racha y los premios quedan.
-          </Text>
-        </Card>
-      </Screen>
-
-      {/* El devocional completo, a pantalla completa, que termina con la oración. */}
-      <Modal visible={reader && !!item} animationType="slide" onRequestClose={() => setReader(false)} presentationStyle="fullScreen">
-        <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
-          <View style={styles.readerBar}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Pressable onPress={() => router.back()} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel="Cerrar">
+              <Feather name="x" size={22} color="#FFF" />
+            </Pressable>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1 }}>Devocional completo</Text>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{item?.reference}{item ? ` · ${isToday ? 'Hoy' : fmtDateShort(item.on_date)}` : ''}</Text>
+              <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '800' }} numberOfLines={1}>{dayLabel(item.on_date, today)}</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }} numberOfLines={1}>Devocional · {churchName}</Text>
             </View>
-            <Pressable onPress={() => setReader(false)} accessibilityRole="button" accessibilityLabel="Cerrar" style={styles.closeBtn}>
-              <Feather name="x" size={22} color={colors.text} />
+            {isStaff ? (
+              <Pressable onPress={() => router.push('/admin/devocionales')} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel="Cargar devocionales">
+                <Feather name="edit-3" size={18} color="#FFF" />
+              </Pressable>
+            ) : null}
+            <Pressable onPress={() => setSheet('streak')} style={styles.streakChip} accessibilityRole="button" accessibilityLabel="Mi racha">
+              <Feather name="zap" size={15} color="#FFD54A" />
+              <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>{streak?.current ?? 0}</Text>
             </Pressable>
           </View>
-          <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14, maxWidth: 680, width: '100%', alignSelf: 'center' }}>
-            {item ? (
-              <>
-                <View style={styles.readerVerse}>
-                  <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontWeight: '600', fontStyle: 'italic' }}>{item.verse}</Text>
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} · RV1960</Text>
-                </View>
-                {item.study ? <Paragraphs text={item.study} size={17} /> : item.devotional ? <Paragraphs text={item.devotional} size={17} /> : null}
-                {item.prayer ? (
-                  <View style={styles.prayer}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Feather name="heart" size={16} color={colors.greenText} />
-                      <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText, textTransform: 'uppercase', letterSpacing: 1 }}>Oración</Text>
-                    </View>
-                    <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontStyle: 'italic' }}>{item.prayer}</Text>
-                  </View>
-                ) : null}
-                <Button title="Terminé de leer" icon="check" onPress={() => setReader(false)} />
-              </>
-            ) : null}
-          </ScrollView>
         </View>
-      </Modal>
+
+        {/* Abajo: compartir, comentarios, corazón y días anteriores. */}
+        <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 14 }]}>
+          <Action icon={<Feather name="share-2" size={24} color="#FFF" />} label="Compartir" onPress={share} />
+          <Action icon={<Feather name="message-circle" size={24} color="#FFF" />} label={social.comments ? String(social.comments) : 'Comentar'} onPress={() => setSheet('comments')} />
+          <Action
+            icon={<Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={26} color={social.liked ? '#FF5A6E' : '#FFF'} />}
+            label={social.likes ? String(social.likes) : 'Me gusta'}
+            onPress={toggleLike}
+          />
+          <Action icon={<Feather name="calendar" size={24} color="#FFF" />} label="Días anteriores" onPress={() => setSheet('days')} />
+        </View>
+      </View>
+
+      <CommentsSheet visible={sheet === 'comments'} date={item.on_date} today={today} isStaff={isStaff} onClose={() => setSheet(null)}
+        onCount={(n) => setSocial((s) => ({ ...s, comments: n }))} />
+      <DaysSheet visible={sheet === 'days'} current={item.on_date} today={today} onPick={openDay} onClose={() => setSheet(null)} />
+      <StreakSheet visible={sheet === 'streak'} streak={streak} onClose={() => setSheet(null)} onBoard={() => { setSheet(null); router.push('/devocional/lectores'); }} />
+      <ReaderSheet visible={sheet === 'reader'} item={item} label={dayLabel(item.on_date, today)} social={social}
+        onShare={shareFull} onComments={() => setSheet('comments')} onClose={() => setSheet(null)} />
     </View>
   );
 }
 
+function Action({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={styles.action} accessibilityRole="button" accessibilityLabel={label}>
+      {icon}
+      <Text style={styles.actionLabel} numberOfLines={1}>{label}</Text>
+    </Pressable>
+  );
+}
+
+// ---------- Devocional completo (lectura + estudio + oración) ----------
+function ReaderSheet({ visible, item, label, social, onShare, onComments, onClose }: {
+  visible: boolean; item: DailyContent; label: string; social: DailySocial; onShare: () => void; onComments: () => void; onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose} presentationStyle="fullScreen">
+      <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+        <StatusBar style="auto" />
+        <View style={styles.readerBar}>
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Cerrar">
+            <Feather name="x" size={22} color={colors.text} />
+          </Pressable>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1 }}>Devocional completo</Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{item.reference} · {label}</Text>
+          </View>
+          <Pressable onPress={onShare} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Compartir el devocional completo">
+            <Feather name="share-2" size={20} color={colors.green} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14, maxWidth: 680, width: '100%', alignSelf: 'center' }}>
+          <View style={styles.readerVerse}>
+            <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontWeight: '600', fontStyle: 'italic' }}>{item.verse}</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} · RV1960</Text>
+          </View>
+          {item.devotional ? (
+            <>
+              <Text style={styles.readerSection}>Lectura de hoy</Text>
+              <Paragraphs text={item.devotional} size={17} />
+            </>
+          ) : null}
+          {item.study ? (
+            <>
+              <Text style={styles.readerSection}>Estudio</Text>
+              <Paragraphs text={item.study} size={17} />
+            </>
+          ) : null}
+          {item.prayer ? (
+            <View style={styles.prayer}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Feather name="heart" size={16} color={colors.greenText} />
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText, textTransform: 'uppercase', letterSpacing: 1 }}>Oración</Text>
+              </View>
+              <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontStyle: 'italic' }}>{item.prayer}</Text>
+            </View>
+          ) : null}
+          <Button title="Compartir el devocional completo" icon="share-2" onPress={onShare} />
+          <Button title={social.comments ? `Comentarios del día (${social.comments})` : 'Comentar con la iglesia'} icon="message-circle" variant="outline" onPress={onComments} />
+          <Button title="Terminé de leer" variant="ghost" icon="check" onPress={onClose} />
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
+// ---------- Comentarios del día ----------
+function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
+  visible: boolean; date: string; today: string; isStaff: boolean; onClose: () => void; onCount: (n: number) => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [rows, setRows] = useState<DailyComment[] | null>(null);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const open = date === today;
+
+  const load = useCallback(() => {
+    dailyComments(date).then((r) => { setRows(r); onCount(r.length); }).catch(() => setRows([]));
+  }, [date, onCount]);
+
+  useEffect(() => {
+    if (!visible) return;
+    setRows(null);
+    load();
+    const ch = supabase
+      .channel(`daily-comments-${date}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'daily_comments', filter: `on_date=eq.${date}` }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [visible, date, load]);
+
+  const send = async () => {
+    const body = text.trim();
+    if (!body) return;
+    setBusy(true);
+    try {
+      await sendDailyComment(date, body);
+      setText('');
+      load();
+    } catch (e) {
+      Alert.alert('No se envió', errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const remove = (c: DailyComment) => {
+    if (!c.mine && !isStaff) return;
+    Alert.alert('Borrar comentario', '¿Borrar este comentario?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Borrar', style: 'destructive', onPress: () => deleteDailyComment(c.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+    ]);
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.sheet, { paddingBottom: insets.bottom + 10, height: '78%' }]}>
+        <View style={styles.sheetHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.sheetTitle}>Comentarios del día{rows?.length ? ` · ${rows.length}` : ''}</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{open ? 'Lo ve toda la iglesia. Se puede comentar hasta la medianoche.' : 'Este día ya cerró: se puede leer lo que comentaron.'}</Text>
+          </View>
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Cerrar"><Feather name="x" size={20} color={colors.text} /></Pressable>
+        </View>
+        {rows === null ? (
+          <ActivityIndicator style={{ marginTop: 30 }} color={colors.green} />
+        ) : !rows.length ? (
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24 }}>
+            <Feather name="message-circle" size={34} color={colors.muted} />
+            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{open ? 'Sé el primero en comentar' : 'Nadie comentó este día'}</Text>
+            {open ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>¿Qué te habló Dios hoy con este pasaje?</Text> : null}
+          </View>
+        ) : (
+          <FlatList
+            data={rows}
+            keyExtractor={(c) => c.id}
+            contentContainerStyle={{ padding: 16, gap: 14 }}
+            renderItem={({ item: c }) => (
+              <Pressable onLongPress={() => remove(c)} style={{ flexDirection: 'row', gap: 10 }}>
+                <Face name={c.name} path={c.photo_path} size={36} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>
+                    {c.name}<Text style={{ fontWeight: '500', color: colors.muted }}>  {fmtTime(c.created_at)}</Text>
+                  </Text>
+                  <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{c.body}</Text>
+                  {c.mine || isStaff ? <Text onPress={() => remove(c)} style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>Borrar</Text> : null}
+                </View>
+              </Pressable>
+            )}
+          />
+        )}
+        {open ? (
+          <View style={styles.inputRow}>
+            <TextInput value={text} onChangeText={setText} placeholder="Escribí un comentario…" placeholderTextColor="#8B918C" multiline maxLength={1000}
+              style={styles.input} />
+            <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityLabel="Enviar">
+              {busy ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
+            </Pressable>
+          </View>
+        ) : null}
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+// ---------- Días anteriores ----------
+function DaysSheet({ visible, current, today, onPick, onClose }: { visible: boolean; current: string; today: string; onPick: (d: string) => void; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+  const [rows, setRows] = useState<DailyContent[] | null>(null);
+  useEffect(() => {
+    if (!visible) return;
+    setRows(null);
+    dailyRange(31).then(setRows).catch(() => setRows([]));
+  }, [visible]);
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} />
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + 10, height: '80%' }]}>
+        <View style={styles.sheetHead}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.sheetTitle}>Días anteriores</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>El último mes. Tocá uno para volver a leerlo o compartirlo.</Text>
+          </View>
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Cerrar"><Feather name="x" size={20} color={colors.text} /></Pressable>
+        </View>
+        {rows === null ? <ActivityIndicator style={{ marginTop: 30 }} color={colors.green} /> : (
+          <FlatList
+            data={rows}
+            keyExtractor={(d) => d.on_date}
+            contentContainerStyle={{ padding: 12, gap: 8 }}
+            renderItem={({ item: d }) => (
+              <Pressable onPress={() => onPick(d.on_date)} style={[styles.dayRow, d.on_date === current && { borderColor: colors.green, backgroundColor: colors.greenSoft }]} accessibilityRole="button">
+                <Image source={{ uri: photoUrl(dailyPhotoId(d.on_date), 120, 160) }} style={styles.dayThumb} contentFit="cover" cachePolicy="memory-disk" />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase' }}>{dayLabel(d.on_date, today)}</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{d.reference}</Text>
+                  {d.message ? <Text style={{ fontSize: 13, color: colors.muted }} numberOfLines={2}>{d.message}</Text> : null}
+                </View>
+                <Feather name="chevron-right" size={18} color={colors.muted} />
+              </Pressable>
+            )}
+          />
+        )}
+      </View>
+    </Modal>
+  );
+}
+
+// ---------- Mi racha ----------
+function StreakSheet({ visible, streak, onClose, onBoard }: { visible: boolean; streak: ReadingStreak | null; onClose: () => void; onBoard: () => void }) {
+  const insets = useSafeAreaInsets();
+  const rewards = streak?.rewards ?? [{ days: 7, label: 'Una semana', earned: false }, { days: 30, label: 'Un mes', earned: false }, { days: 365, label: 'Un año', earned: false }];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} />
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, gap: 14, padding: 18 }]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View style={styles.flame}><Feather name="zap" size={26} color={streak?.current ? '#FFF' : colors.muted} /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 24, fontWeight: '800', color: colors.text }}>{streak?.current ?? 0} {streak?.current === 1 ? 'día' : 'días'} seguidos</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>Mejor racha: {streak?.best ?? 0} · Total leídos: {streak?.total ?? 0}</Text>
+          </View>
+        </View>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {rewards.map((r) => (
+            <View key={r.days} style={[styles.reward, r.earned && styles.rewardOn]}>
+              <Feather name={r.earned ? 'award' : 'lock'} size={20} color={r.earned ? '#FFF' : colors.muted} />
+              <Text style={{ fontSize: 12, fontWeight: '800', color: r.earned ? '#FFF' : colors.muted, textAlign: 'center' }}>{r.label}</Text>
+              <Text style={{ fontSize: 10, color: r.earned ? 'rgba(255,255,255,0.9)' : colors.muted }}>{r.days} días</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
+          La racha cuenta cada día que abrís el devocional de hoy. Si un día no lo abrís, vuelve a cero, pero la mejor racha y los premios quedan.
+        </Text>
+        <Button title="Ver los lectores de la iglesia" variant="outline" icon="users" onPress={onBoard} />
+      </View>
+    </Modal>
+  );
+}
+
 const styles = themed(() => StyleSheet.create({
-  slide: { height: 340, maxHeight: 340, borderRadius: 18 },
-  phraseCard: { overflow: 'hidden', padding: 22, justifyContent: 'center', gap: 14, backgroundColor: '#1F6B45' },
-  slideLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
-  phrase: { color: '#FFFFFF', fontSize: 27, lineHeight: 36, fontWeight: '800', letterSpacing: -0.3, textShadowColor: 'rgba(0,0,0,0.35)', textShadowRadius: 6, textShadowOffset: { width: 0, height: 1 } },
-  slideFoot: { color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: '700' },
-  readingCard: { padding: 18, gap: 10, backgroundColor: colors.bgSoft, borderWidth: 1, borderColor: colors.border },
-  readingLabel: { fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1 },
-  studyCard: { overflow: 'hidden', padding: 22, alignItems: 'center', justifyContent: 'center', gap: 12, backgroundColor: '#1F6B45' },
-  studyTitle: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', textAlign: 'center' },
-  studyText: { color: 'rgba(255,255,255,0.88)', fontSize: 14, lineHeight: 20, textAlign: 'center' },
-  studyBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFFFFF', paddingHorizontal: 18, height: 42, borderRadius: 999, marginTop: 4 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.input },
-  dotOn: { backgroundColor: colors.green, width: 20 },
-  heading: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 10 },
-  para: { color: colors.text },
+  black: { flex: 1, backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' },
+  slide: { flex: 1, overflow: 'hidden', paddingHorizontal: 28, backgroundColor: '#1F3B2C' },
+  slideLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
+  phrase: { color: '#FFFFFF', fontSize: 30, lineHeight: 40, fontWeight: '800', letterSpacing: -0.3, textShadowColor: 'rgba(0,0,0,0.4)', textShadowRadius: 8, textShadowOffset: { width: 0, height: 1 } },
+  slideRef: { color: 'rgba(255,255,255,0.95)', fontSize: 15, fontWeight: '700' },
+  foot: { color: 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  fullTitle: { color: '#FFFFFF', fontSize: 26, fontWeight: '800', textAlign: 'center' },
+  fullText: { color: 'rgba(255,255,255,0.9)', fontSize: 15, lineHeight: 22, textAlign: 'center', maxWidth: 320 },
+  readBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#FFFFFF', paddingHorizontal: 22, height: 48, borderRadius: 999, marginTop: 6 },
+  topBar: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 14, gap: 6 },
+  seg: { height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.35)' },
+  segOn: { backgroundColor: '#FFFFFF' },
+  roundBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
+  streakChip: { flexDirection: 'row', alignItems: 'center', gap: 4, height: 34, paddingHorizontal: 12, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.35)' },
+  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-around', paddingTop: 10, paddingHorizontal: 8 },
+  action: { alignItems: 'center', gap: 4, minWidth: 70, paddingVertical: 4 },
+  actionLabel: { color: '#FFFFFF', fontSize: 11, fontWeight: '700', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  heading: { fontSize: 18, fontWeight: '800', marginTop: 10 },
   readerBar: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.bg },
-  closeBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgSoft },
+  closeBtn: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgSoft },
   readerVerse: { padding: 16, borderRadius: 14, backgroundColor: colors.bgSoft, borderLeftWidth: 4, borderLeftColor: colors.green },
+  readerSection: { fontSize: 13, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1, marginTop: 6 },
   prayer: { gap: 10, padding: 18, borderRadius: 16, backgroundColor: colors.greenSoft, marginTop: 6 },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.bg, borderTopLeftRadius: 22, borderTopRightRadius: 22, maxWidth: 640, alignSelf: 'center', width: '100%' },
+  sheetHead: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 18, paddingTop: 16, paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+  sheetTitle: { fontSize: 18, fontWeight: '800', color: colors.text },
+  inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
+  input: { flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1.5, borderColor: colors.input, borderRadius: 14, paddingHorizontal: 12, paddingTop: 11, fontSize: 15, color: colors.text },
+  sendBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' },
+  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgSoft },
+  dayThumb: { width: 54, height: 72, borderRadius: 10, backgroundColor: '#1F3B2C' },
   flame: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' },
   reward: { flex: 1, alignItems: 'center', gap: 4, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bgSoft },
   rewardOn: { backgroundColor: colors.green, borderColor: colors.green },

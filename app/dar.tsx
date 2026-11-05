@@ -65,19 +65,28 @@ export default function Dar() {
               Podés ofrendar por transferencia. Tocá un dato para copiarlo y pegalo en la app de tu banco o billetera.
             </Text>
             <Card style={{ padding: 0 }}>
-              {FIELDS.filter((f) => g[f.key]).map((f, i, arr) => (
-                <Pressable key={f.key} onPress={() => copy(f.key, g[f.key] as string)} accessibilityRole="button" accessibilityLabel={`Copiar ${f.label}`}
-                  style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderBottomWidth: i < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border, backgroundColor: pressed ? colors.bgSoft : colors.bg })}>
+              {FIELDS.filter((f) => g[f.key]).map((f, i, arr) => {
+                // El nombre del titular solo se muestra (no hace falta copiarlo).
+                const copyable = f.key !== 'titular';
+                const rowStyle = { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 12, padding: 14, borderBottomWidth: i < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border };
+                const value = (
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted }}>{f.label}</Text>
                     <Text selectable style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{g[f.key]}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: copied === f.key ? colors.green : colors.greenSoft }}>
-                    <Feather name={copied === f.key ? 'check' : 'copy'} size={16} color={copied === f.key ? '#FFF' : colors.greenText} />
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: copied === f.key ? '#FFF' : colors.greenText }}>{copied === f.key ? 'Copiado' : 'Copiar'}</Text>
-                  </View>
-                </Pressable>
-              ))}
+                );
+                if (!copyable) return <View key={f.key} style={[rowStyle, { backgroundColor: colors.bg }]}>{value}</View>;
+                return (
+                  <Pressable key={f.key} onPress={() => copy(f.key, g[f.key] as string)} accessibilityRole="button" accessibilityLabel={`Copiar ${f.label}`}
+                    style={({ pressed }) => [rowStyle, { backgroundColor: pressed ? colors.bgSoft : colors.bg }]}>
+                    {value}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: copied === f.key ? colors.green : colors.greenSoft }}>
+                      <Feather name={copied === f.key ? 'check' : 'copy'} size={16} color={copied === f.key ? '#FFF' : colors.greenText} />
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: copied === f.key ? '#FFF' : colors.greenText }}>{copied === f.key ? 'Copiado' : 'Copiar'}</Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
             </Card>
             {g.nota ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{g.nota}</Text> : null}
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19, fontStyle: 'italic' }}>

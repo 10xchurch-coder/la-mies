@@ -1,4 +1,5 @@
-// La iglesia: lo que me toca esta semana y todo lo de la iglesia (asistencia, clases, ministerios, material...).
+// La iglesia: la pantalla con la que abre la app. Saludo según la hora, el versículo del día,
+// lo que me toca esta semana y todo lo de la iglesia (asistencia, clases, ministerios, material...).
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
@@ -14,6 +15,14 @@ import { colors, themed } from '@/theme';
 import type { UpcomingItem } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
+
+/** "Buen día", "Buenas tardes" o "Buenas noches" según la hora del teléfono. */
+export function greeting(d = new Date()): string {
+  const h = d.getHours();
+  if (h >= 5 && h < 13) return 'Buen día';
+  if (h >= 13 && h < 20) return 'Buenas tardes';
+  return 'Buenas noches';
+}
 
 export default function Iglesia() {
   const router = useRouter();
@@ -35,6 +44,8 @@ export default function Iglesia() {
     }, [profile?.id]),
   );
 
+  const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
+
   const tiles: { icon: IconName; label: string; to: Href; show: boolean; tone?: 'green' }[] = [
     { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: isLeader || takesAttendance || !!profile?.takes_attendance, tone: 'green' },
     { icon: 'book-open', label: 'Clases', to: '/clases', show: true },
@@ -53,8 +64,9 @@ export default function Iglesia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={church?.name ?? 'Iglesia'} subtitle="Todo lo de la iglesia en un lugar" />
+      <Header title={church?.name ?? 'Iglesia'} subtitle="Más como Cristo cada día" />
       <Screen>
+        <Text style={styles.hello}>{greeting()}{firstName ? `, ${firstName}` : ''}</Text>
         {daily ? (
           <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
             <VerseCard item={daily} church={church?.name} compact />
@@ -89,6 +101,7 @@ export default function Iglesia() {
 }
 
 const styles = themed(() => StyleSheet.create({
+  hello: { fontSize: 24, fontWeight: '800', color: colors.text, letterSpacing: -0.3, marginBottom: -4 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   tile: { width: '31%', flexGrow: 1, minHeight: 96, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
