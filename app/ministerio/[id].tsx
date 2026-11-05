@@ -1,4 +1,5 @@
 // Un ministerio: chat del grupo (el líder puede mandar anuncios a todos), turnos, integrantes y recomendaciones.
+// Los integrantes se eligen por ficha: no hace falta que usen la app (los que la usan, además, tienen el chat y los avisos).
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,12 +8,15 @@ import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Empty, Loading, RowLink, Segmented, Tag } from '@/components/ui';
-import { listDuties, listMinistries, listPeople, listProfiles, ministryMembers, ministryMessages, sendMinistryMessage } from '@/lib/api';
+import {
+  addMinistryPerson, listDuties, listMinistries, listPeople, listProfiles, ministryMembers, ministryMessages, ministryPeople, removeMinistryPerson,
+  sendMinistryMessage, setMinistryPersonLeader,
+} from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateShort, fmtRelativeDay, fmtTime, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
-import type { Contact, Duty, Ministry, MinistryMember, MinistryMessage, Profile } from '@/types';
+import type { Contact, Duty, Ministry, MinistryMember, MinistryMessage, MinistryPerson, Profile } from '@/types';
 
 type Tab = 'chat' | 'duties' | 'people' | 'tips';
 
@@ -22,6 +26,7 @@ export default function MinisterioDetalle() {
   const { profile, isStaff } = useAuth();
   const [m, setM] = useState<Ministry | null | undefined>(undefined);
   const [members, setMembers] = useState<MinistryMember[]>([]);
+  const [crew, setCrew] = useState<MinistryPerson[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [msgs, setMsgs] = useState<MinistryMessage[]>([]);
@@ -34,10 +39,11 @@ export default function MinisterioDetalle() {
 
   const load = useCallback(async () => {
     try {
-      const [ms, mm, p] = await Promise.all([listMinistries(), ministryMembers(id), listProfiles()]);
+      const [ms, mm, p, cr] = await Promise.all([listMinistries(), ministryMembers(id), listProfiles(), ministryPeople(id)]);
       setM(ms.find((x) => x.id === id) ?? null);
       setMembers(mm);
       setPeople(p);
+      setCrew(cr);
       ministryMessages(id).then(setMsgs).catch(() => setMsgs([]));
       listDuties(id, isoDate(new Date())).then(setDuties).catch(() => setDuties([]));
       listPeople().then(setContacts).catch(() => undefined);
@@ -86,11 +92,14 @@ export default function MinisterioDetalle() {
     }
   };
 
-  const addMember = async (pid: string | null) => {
+  const addMember = async (contactId: string | null) => {
     setPicker(null);
-    if (!pid) return;
-    const { error } = await supabase.from('ministry_members').upsert({ ministry_id: id, profile_id: pid });
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (!contactId) return;
+    try {
+      await addMinistryPerson(id, contactId);
+    } catch (e) {
+      Alert.alert('No se pudo', errorMessage(e));
+    }
     load();
   };
 
@@ -98,23 +107,30 @@ export default function MinisterioDetalle() {
     setPicker(null);
     const { error } = await supabase.from('ministries').update({ leader_id: pid }).eq('id', id);
     if (error) Alert.alert('No se pudo', errorMessage(error));
-    if (pid) await supabase.from('ministry_members').upsert({ ministry_id: id, profile_id: pid, is_leader: true });
+    // El líder queda en la lista del ministerio (por su ficha).
+    const card = pid ? contacts.find((c) => c.profile_id === pid) : null;
+    if (card) await addMinistryPerson(id, card.id).then(() => setMinistryPersonLeader(id, card.id, true)).catch(() => undefined);
+    else if (pid) await supabase.from('ministry_members').upsert({ ministry_id: id, profile_id: pid, is_leader: true });
     load();
   };
 
-  const memberMenu = (mm: MinistryMember) => {
-    if (!isLeader) return;
-    Alert.alert(nameOf(mm.profile_id), undefined, [
-      { text: mm.is_leader ? 'Quitar como colíder' : 'Hacer colíder', onPress: async () => {
-        await supabase.from('ministry_members').update({ is_leader: !mm.is_leader }).eq('ministry_id', id).eq('profile_id', mm.profile_id);
-        load();
-      } },
-      { text: 'Sacar del ministerio', style: 'destructive', onPress: async () => {
-        await supabase.from('ministry_members').delete().eq('ministry_id', id).eq('profile_id', mm.profile_id);
-        load();
-      } },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+  const memberMenu = (p: MinistryPerson) => {
+    const isMainLeader = !!p.profile_id && m?.leader_id === p.profile_id;
+    const options: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [
+      { text: 'Ver su ficha', onPress: () => router.push({ pathname: '/contacto/[id]', params: { id: p.contact_id } }) },
+    ];
+    if (isLeader && p.profile_id && !isMainLeader) {
+      options.push({ text: p.is_leader ? 'Quitar como colíder' : 'Hacer colíder', onPress: () => {
+        setMinistryPersonLeader(id, p.contact_id, !p.is_leader).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+      } });
+    }
+    if (isLeader && !isMainLeader) {
+      options.push({ text: 'Sacar del ministerio', style: 'destructive', onPress: () => {
+        removeMinistryPerson(id, p.contact_id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+      } });
+    }
+    options.push({ text: 'Cancelar', style: 'cancel' });
+    Alert.alert(p.name, p.profile_id ? undefined : 'No usa la app: no ve el chat ni recibe avisos. Los turnos se los avisás vos.', options);
   };
 
   if (m === undefined) return <Loading />;
@@ -124,7 +140,7 @@ export default function MinisterioDetalle() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={0}>
-      <Header title={m.name} subtitle={`${members.length} integrantes · líder: ${m.leader_id ? nameOf(m.leader_id) : 'sin asignar'}`} back />
+      <Header title={m.name} subtitle={`${crew.length} ${crew.length === 1 ? 'integrante' : 'integrantes'} · líder: ${m.leader_id ? nameOf(m.leader_id) : 'sin asignar'}`} back />
       <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <Segmented options={[{ value: 'chat', label: 'Chat' }, { value: 'duties', label: 'Turnos' }, { value: 'tips', label: 'Consejos' }, { value: 'people', label: 'Gente' }]} value={tab} onChange={setTab} />
       </View>
@@ -132,13 +148,17 @@ export default function MinisterioDetalle() {
       {tab === 'chat' ? (
         isMember ? (
           <View style={{ flex: 1 }}>
+            {!chat.length ? (
+              <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Empty icon="message-circle" title="Todavía no hay mensajes" text="Escribí el primero. Todos los del ministerio con la app lo ven." />
+              </View>
+            ) : (
             <FlatList
               ref={listRef}
               data={chat}
               inverted
               keyExtractor={(x) => x.id}
               contentContainerStyle={{ padding: 12, gap: 8 }}
-              ListEmptyComponent={<View style={{ transform: [{ scaleY: -1 }] }}><Empty icon="message-circle" title="Todavía no hay mensajes" text="Escribí el primero. Todos los del ministerio lo ven." /></View>}
               renderItem={({ item }) => {
                 const mine = item.user_id === profile?.id;
                 if (item.kind === 'announcement') {
@@ -158,6 +178,7 @@ export default function MinisterioDetalle() {
                 );
               }}
             />
+            )}
             <View style={{ padding: 10, paddingBottom: 24, gap: 6, borderTopWidth: 1, borderTopColor: colors.border }}>
               {isLeader ? (
                 <Pressable onPress={() => setAnnounce(!announce)} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -167,7 +188,7 @@ export default function MinisterioDetalle() {
               ) : null}
               <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
                 <TextInput value={text} onChangeText={setText} placeholder="Escribí un mensaje" placeholderTextColor="#8B918C" multiline
-                  style={{ flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1.5, borderColor: colors.input, borderRadius: 14, paddingHorizontal: 12, paddingTop: 11, fontSize: 15 }} />
+                  style={{ flex: 1, minHeight: 44, maxHeight: 120, borderWidth: 1.5, borderColor: colors.input, borderRadius: 14, paddingHorizontal: 12, paddingTop: 11, fontSize: 15, color: colors.text }} />
                 <Pressable onPress={() => send(announce ? 'announcement' : 'message')} accessibilityLabel="Enviar" style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: announce ? colors.amber : colors.green, alignItems: 'center', justifyContent: 'center' }}>
                   <Feather name="send" size={20} color="#FFF" />
                 </Pressable>
@@ -186,7 +207,7 @@ export default function MinisterioDetalle() {
             <Card key={d} style={{ padding: 0 }}>
               <Text style={{ padding: 12, paddingBottom: 4, fontSize: 13, fontWeight: '800', color: colors.muted }}>{fmtDateShort(d).toUpperCase()}</Text>
               {list.map((x) => {
-                const who = x.profile_id ? nameOf(x.profile_id) : contacts.find((c) => c.id === x.contact_id)?.name ?? 'Alguien';
+                const who = contacts.find((c) => c.id === x.contact_id)?.name ?? (x.profile_id ? nameOf(x.profile_id) : 'Alguien');
                 return (
                   <RowLink
                     key={x.id}
@@ -215,7 +236,7 @@ export default function MinisterioDetalle() {
           {isLeader ? (
             <Card style={{ gap: 8 }}>
               <TextInput value={text} onChangeText={setText} placeholder="Nueva recomendación (ej: llegar una hora antes, orar juntos antes de abrir)" multiline placeholderTextColor="#8B918C"
-                style={{ minHeight: 80, borderWidth: 1.5, borderColor: colors.input, borderRadius: 12, padding: 10, fontSize: 15, textAlignVertical: 'top' }} />
+                style={{ minHeight: 80, borderWidth: 1.5, borderColor: colors.input, borderRadius: 12, padding: 10, fontSize: 15, textAlignVertical: 'top', color: colors.text }} />
               <Button title="Guardar recomendación" small onPress={() => send('recommendation')} />
             </Card>
           ) : null}
@@ -224,24 +245,30 @@ export default function MinisterioDetalle() {
 
       {tab === 'people' ? (
         <Screen>
-          {members.map((mm) => {
-            const c = contacts.find((x) => x.profile_id === mm.profile_id);
-            return (
-              <Pressable key={mm.profile_id} onPress={() => memberMenu(mm)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Face name={nameOf(mm.profile_id)} path={c?.photo_path} size={44} />
-                <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{nameOf(mm.profile_id)}</Text>
-                {mm.is_leader || m.leader_id === mm.profile_id ? <Tag text="Líder" tone="green" /> : null}
-              </Pressable>
-            );
-          })}
-          {!members.length ? <Empty icon="users" title="Sin integrantes todavía" /> : null}
+          {crew.map((p) => (
+            <Pressable key={p.contact_id} onPress={() => memberMenu(p)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityRole="button">
+              <Face name={p.name} path={p.photo_path} size={44} />
+              <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{p.name}</Text>
+              {p.is_leader ? <Tag text="Líder" tone="green" /> : null}
+              {!p.profile_id ? <Tag text="Sin la app" tone="gray" /> : null}
+            </Pressable>
+          ))}
+          {!crew.length ? <Empty icon="users" title="Sin integrantes todavía" /> : null}
           {isLeader ? <Button title="Agregar integrante" icon="user-plus" variant="outline" onPress={() => setPicker('member')} /> : null}
+          {isLeader ? (
+            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
+              Podés agregar a cualquier persona de la iglesia, aunque no use la app. Los que usan la app además ven el chat y reciben el aviso de sus turnos.
+            </Text>
+          ) : null}
           {isStaff ? <Button title="Cambiar líder" icon="award" variant="ghost" onPress={() => setPicker('leader')} /> : null}
         </Screen>
       ) : null}
 
       <PickerModal visible={picker === 'member'} title="Agregar al ministerio"
-        items={people.filter((p) => !members.some((x) => x.profile_id === p.id)).map((p) => ({ id: p.id, title: p.display_name, photo: contacts.find((c) => c.profile_id === p.id)?.photo_path }))}
+        items={contacts
+          .filter((c) => c.status !== 'contact' && !crew.some((x) => x.contact_id === c.id))
+          .sort((a, b) => Number(b.status === 'member') - Number(a.status === 'member') || a.name.localeCompare(b.name))
+          .map((c) => ({ id: c.id, title: c.name, subtitle: `${c.status === 'member' ? 'Miembro' : 'Visita'}${c.profile_id ? '' : ' · sin la app'}`, photo: c.photo_path }))}
         onClose={() => setPicker(null)} onPick={addMember} />
       <PickerModal visible={picker === 'leader'} title="Líder del ministerio" allowNone
         items={people.map((p) => ({ id: p.id, title: p.display_name, photo: contacts.find((c) => c.profile_id === p.id)?.photo_path }))}

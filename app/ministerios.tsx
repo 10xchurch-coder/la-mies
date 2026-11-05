@@ -5,10 +5,10 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Tag } from '@/components/ui';
-import { listMinistries, listProfiles, ministryMembers } from '@/lib/api';
+import { listMinistries, listProfiles, ministryMembers, ministryPeopleRows } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
-import type { Ministry, MinistryMember, Profile } from '@/types';
+import type { Ministry, MinistryMember, Profile, MinistryPersonRow } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -18,13 +18,15 @@ export default function Ministerios() {
   const [rows, setRows] = useState<Ministry[] | null>(null);
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
+  const [crewRows, setCrewRows] = useState<MinistryPersonRow[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([listMinistries(), ministryMembers(), listProfiles()]).then(([m, mm, p]) => {
+      Promise.all([listMinistries(), ministryMembers(), listProfiles(), ministryPeopleRows()]).then(([m, mm, p, mp]) => {
         setRows(m);
         setMembers(mm);
         setPeople(p);
+        setCrewRows(mp);
       }).catch(() => setRows([]));
     }, []),
   );
@@ -39,7 +41,7 @@ export default function Ministerios() {
         {rows && !rows.length ? <Empty icon="heart" title="Todavía no hay ministerios" /> : null}
         {sorted.map((m) => {
           const mine = isMine(m);
-          const count = members.filter((x) => x.ministry_id === m.id).length;
+          const count = crewRows.filter((x) => x.ministry_id === m.id).length;
           const leader = people.find((p) => p.id === m.leader_id)?.display_name;
           return (
             <Pressable key={m.id} onPress={() => router.push({ pathname: '/ministerio/[id]', params: { id: m.id } })} accessibilityRole="button">

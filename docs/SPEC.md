@@ -90,3 +90,11 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - **Devocional en diapositivas**: versículo → frase del día → lectura corta → "Devocional completo" a pantalla completa (estudio de 5–10 minutos con los pasajes en texto completo) que termina con una oración. En el editor, un título va entre `**` `**`.
 - **Devocionales de noviembre 2026** (5 al 30) cargados para la iglesia: Palabra (sem. 1), oración (sem. 2), la mies (sem. 3–4), gratitud, confianza y perseverancia (`supabase/seed/devocionales_noviembre_2026.sql`).
 - Base: migración `0010_familia_bautismo_turnos.sql` (aplicada).
+
+## v0.5.1 / próxima versión — Ministerios por ficha
+
+- **Mapa en Android**: arreglado. La app ahora sabe que la clave de Google Maps está por una marca en `extra.googleMapsAndroid` (Expo no deja leer la clave misma).
+- **Integrantes sin app**: en Ministerio → Gente → "Agregar integrante" se elige a cualquier miembro o visita por su ficha. Los que no usan la app aparecen con la etiqueta "Sin la app"; los que la usan, además, tienen el chat y los avisos. Cuando a una ficha se le vincula una cuenta, entra sola al chat de sus ministerios. Tabla `ministry_people` (migración `0011`, aplicada), sincronizada con `ministry_members`.
+- **Turnos de ministerio**: una sola lista para elegir a la persona (primero los del ministerio); si usa la app le llega el aviso del lunes, si no, se le avisa a mano.
+- **Ficha y Fidelidad**: los ministerios de una persona se ven en su ficha aunque no use la app; el filtro "Sirve en un ministerio" también los cuenta.
+- **Chat del ministerio en Android**: el mensaje "Todavía no hay mensajes" salía espejado (parecía otro idioma); ahora se muestra fuera de la lista. El texto que se escribe se lee bien en modo oscuro.

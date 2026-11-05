@@ -10,7 +10,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  familyChildren, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryMembers, personJourney, setAttendance, updateContact,
+  familyChildren, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -83,13 +83,11 @@ export default function PersonaDetalle() {
       listAllServices().then(setServices).catch(() => undefined);
       listGroups().then(setGroups).catch(() => undefined);
       listProfiles().then(setPeople).catch(() => undefined);
-      if (r.contact?.profile_id) {
-        const [mm, ms] = await Promise.all([ministryMembers(), listMinistries()]);
-        const mine = new Set(mm.filter((m) => m.profile_id === r.contact?.profile_id).map((m) => m.ministry_id));
+      // Ministerios donde sirve (por su ficha: también si no usa la app).
+      Promise.all([ministryPeopleRows({ contactId: id }), listMinistries()]).then(([mp, ms]) => {
+        const mine = new Set(mp.map((x) => x.ministry_id));
         setMinistries(ms.filter((m) => mine.has(m.id)));
-      } else {
-        setMinistries([]);
-      }
+      }).catch(() => setMinistries([]));
     } catch {
       // sin señal
     } finally {

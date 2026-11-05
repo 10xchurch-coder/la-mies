@@ -6,7 +6,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Choice, Empty, Loading, Segmented, Tag } from '@/components/ui';
-import { listPeople, ministryMembers, peopleEngagement } from '@/lib/api';
+import { listPeople, peopleEngagement, ministryPeopleRows } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { FAITH_LABEL, fmtDateOnly } from '@/lib/format';
 import { colors } from '@/theme';
@@ -45,7 +45,7 @@ export default function Fidelidad() {
       setRows(null);
       peopleEngagement(Number(weeks)).then(setRows).catch(() => setRows([]));
       listPeople().then(setPeople).catch(() => undefined);
-      ministryMembers().then((mm) => setServing(new Set(mm.map((m) => m.profile_id)))).catch(() => undefined);
+      ministryPeopleRows().then((mp) => setServing(new Set(mp.map((m) => m.contact_id)))).catch(() => undefined);
       supabase.from('sessions').select('user_id').eq('kind', 'soulwinning').limit(5000)
         .then(({ data }) => setSoulwinners(new Set(((data ?? []) as { user_id: string }[]).map((r) => r.user_id))));
     }, [weeks]),
@@ -68,7 +68,7 @@ export default function Fidelidad() {
       case 'bautismo': return !!c.baptized_on;
       case 'miembro': return c.status === 'member';
       case 'evangelismo': return !!c.profile_id && soulwinners.has(c.profile_id);
-      case 'ministerio': return !!c.profile_id && serving.has(c.profile_id);
+      case 'ministerio': return serving.has(c.id);
       default: return false;
     }
   }, [eng, serving, soulwinners]);

@@ -3,7 +3,7 @@ import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
-  ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage,
+  ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage, MinistryPerson, MinistryPersonRow,
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
   TrainingItem, UpcomingItem, DailyContent, ReadingStreak, ReadingBoardRow, AccountRow,
 } from '../types';
@@ -229,6 +229,26 @@ export async function ministryMembers(ministryId?: string): Promise<MinistryMemb
   let q = supabase.from('ministry_members').select('*');
   if (ministryId) q = q.eq('ministry_id', ministryId);
   return ok(await q) ?? [];
+}
+/** Integrantes de un ministerio por ficha, con nombre y foto (incluye a los que no tienen la app). */
+export async function ministryPeople(ministryId: string): Promise<MinistryPerson[]> {
+  return ok(await supabase.rpc('ministry_people_list', { p_ministry: ministryId })) ?? [];
+}
+/** Todas las filas ministerio-ficha (para contar integrantes o ver dónde sirve alguien). */
+export async function ministryPeopleRows(filter?: { ministryId?: string; contactId?: string }): Promise<MinistryPersonRow[]> {
+  let q = supabase.from('ministry_people').select('*');
+  if (filter?.ministryId) q = q.eq('ministry_id', filter.ministryId);
+  if (filter?.contactId) q = q.eq('contact_id', filter.contactId);
+  return ok(await q) ?? [];
+}
+export async function addMinistryPerson(ministryId: string, contactId: string): Promise<void> {
+  ok(await supabase.from('ministry_people').upsert({ ministry_id: ministryId, contact_id: contactId }, { onConflict: 'ministry_id,contact_id', ignoreDuplicates: true }));
+}
+export async function removeMinistryPerson(ministryId: string, contactId: string): Promise<void> {
+  ok(await supabase.from('ministry_people').delete().eq('ministry_id', ministryId).eq('contact_id', contactId));
+}
+export async function setMinistryPersonLeader(ministryId: string, contactId: string, isLeader: boolean): Promise<void> {
+  ok(await supabase.from('ministry_people').update({ is_leader: isLeader }).eq('ministry_id', ministryId).eq('contact_id', contactId));
 }
 export async function ministryMessages(ministryId: string): Promise<MinistryMessage[]> {
   return ok(await supabase.from('ministry_messages').select('*').eq('ministry_id', ministryId).order('created_at', { ascending: false }).limit(200)) ?? [];

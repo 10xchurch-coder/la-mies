@@ -1,15 +1,16 @@
 // Cargar o cambiar un turno: fecha, quién, qué tarea y a qué hora llegar.
+// Se elige a la persona por su ficha; si usa la app, el lunes le llega el aviso.
 import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { DateChips, PickerModal } from '@/components/Picker';
 import { Button, Card, Field, RowLink } from '@/components/ui';
-import { listPeople, listProfiles, listServices, ministryMembers } from '@/lib/api';
+import { listPeople, listProfiles, listServices, ministryPeopleRows } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateShort, upcomingDates } from '@/lib/format';
 import { colors } from '@/theme';
-import type { ChurchService, Contact, Duty, MinistryMember, Profile } from '@/types';
+import type { ChurchService, Contact, Duty, Profile } from '@/types';
 
 export default function TurnoMinisterio() {
   const router = useRouter();
@@ -17,29 +18,29 @@ export default function TurnoMinisterio() {
   const [services, setServices] = useState<ChurchService[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [members, setMembers] = useState<MinistryMember[]>([]);
+  const [inMinistry, setInMinistry] = useState<Set<string>>(new Set());
   const [date, setDate] = useState('');
   const [who, setWho] = useState<{ profile?: string; contact?: string } | null>(null);
   const [task, setTask] = useState('');
   const [arrive, setArrive] = useState('');
   const [note, setNote] = useState('');
-  const [picker, setPicker] = useState<null | 'app' | 'noapp'>(null);
+  const [picker, setPicker] = useState(false);
   const [busy, setBusy] = useState(false);
   const [repeat, setRepeat] = useState(1);
 
   useEffect(() => {
-    Promise.all([listServices(), listProfiles(), listPeople(), ministryMembers(ministry)]).then(([s, p, c, mm]) => {
+    Promise.all([listServices(), listProfiles(), listPeople(), ministryPeopleRows({ ministryId: ministry })]).then(([s, p, c, mp]) => {
       setServices(s);
       setPeople(p);
       setContacts(c);
-      setMembers(mm);
+      setInMinistry(new Set(mp.map((x) => x.contact_id)));
     }).catch(() => undefined);
     if (duty) {
       supabase.from('duties').select('*').eq('id', duty).maybeSingle().then(({ data }) => {
         const d = data as Duty | null;
         if (!d) return;
         setDate(d.on_date);
-        setWho(d.profile_id ? { profile: d.profile_id } : { contact: d.contact_id ?? undefined });
+        setWho({ profile: d.profile_id ?? undefined, contact: d.contact_id ?? undefined });
         setTask(d.task);
         setArrive(d.arrive_time ?? '');
         setNote(d.note ?? '');
@@ -57,7 +58,9 @@ export default function TurnoMinisterio() {
     if (!date && dates.length) setDate(dates[0]);
   }, [dates, date]);
 
-  const whoName = who?.profile ? people.find((p) => p.id === who.profile)?.display_name : who?.contact ? contacts.find((c) => c.id === who.contact)?.name : null;
+  const whoContact = who?.contact ? contacts.find((c) => c.id === who.contact) : who?.profile ? contacts.find((c) => c.profile_id === who.profile) : undefined;
+  const whoName = whoContact?.name ?? (who?.profile ? people.find((p) => p.id === who.profile)?.display_name : null);
+  const whoHasApp = !!(who?.profile || whoContact?.profile_id);
 
   const save = async () => {
     if (!who || !task.trim() || !date) {
@@ -66,7 +69,14 @@ export default function TurnoMinisterio() {
     }
     setBusy(true);
     try {
-      const base = { ministry_id: ministry, profile_id: who.profile ?? null, contact_id: who.contact ?? null, task: task.trim(), arrive_time: arrive.trim() || null, note: note.trim() || null };
+      // La ficha siempre; la cuenta si la persona usa la app (para que le llegue el aviso del lunes).
+      const card = whoContact;
+      const base = {
+        ministry_id: ministry,
+        contact_id: card?.id ?? who.contact ?? null,
+        profile_id: card?.profile_id ?? who.profile ?? null,
+        task: task.trim(), arrive_time: arrive.trim() || null, note: note.trim() || null,
+      };
       if (duty) {
         const { error } = await supabase.from('duties').update({ ...base, on_date: date }).eq('id', duty);
         if (error) throw error;
@@ -91,9 +101,14 @@ export default function TurnoMinisterio() {
     router.back();
   };
 
-  const memberIds = new Set(members.map((m) => m.profile_id));
-  const appItems = [...people].sort((a, b) => Number(memberIds.has(b.id)) - Number(memberIds.has(a.id)))
-    .map((p) => ({ id: p.id, title: p.display_name, subtitle: memberIds.has(p.id) ? 'Del ministerio' : undefined, photo: contacts.find((c) => c.profile_id === p.id)?.photo_path }));
+  // Primero los del ministerio, después el resto de los miembros y visitas.
+  const items = contacts
+    .filter((c) => c.status !== 'contact')
+    .sort((a, b) => Number(inMinistry.has(b.id)) - Number(inMinistry.has(a.id)) || Number(b.status === 'member') - Number(a.status === 'member') || a.name.localeCompare(b.name))
+    .map((c) => ({
+      id: c.id, title: c.name, photo: c.photo_path,
+      subtitle: [inMinistry.has(c.id) ? 'Del ministerio' : null, c.profile_id ? null : 'sin la app'].filter(Boolean).join(' · ') || undefined,
+    }));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -102,8 +117,12 @@ export default function TurnoMinisterio() {
         <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fecha</Text>
         <DateChips dates={dates} value={date} onChange={setDate} format={fmtDateShort} />
         <Card style={{ padding: 0 }}>
-          <RowLink icon="user" title={whoName ?? 'Elegir persona (usa la app)'} subtitle="Le llega el recordatorio el lunes" onPress={() => setPicker('app')} />
-          <RowLink icon="user-x" title="Alguien que no usa la app" subtitle="Queda en la lista; avisale vos" onPress={() => setPicker('noapp')} />
+          <RowLink
+            icon="user"
+            title={whoName ?? 'Elegir persona'}
+            subtitle={!who ? 'Del ministerio o de la iglesia' : whoHasApp ? 'Usa la app: le llega el aviso el lunes' : 'No usa la app: avisale vos'}
+            onPress={() => setPicker(true)}
+          />
         </Card>
         <Field label="Tarea" placeholder="Ej: recepción en la puerta, café, limpiar baños" value={task} onChangeText={setTask} />
         <Field label="Hora de llegada" hint="(opcional)" placeholder="Ej: 18:00" value={arrive} onChangeText={setArrive} />
@@ -117,9 +136,8 @@ export default function TurnoMinisterio() {
         <Button title="Guardar turno" onPress={save} loading={busy} />
         {duty ? <Button title="Borrar turno" variant="danger" onPress={remove} /> : null}
       </Screen>
-      <PickerModal visible={picker === 'app'} title="¿Quién?" items={appItems} onClose={() => setPicker(null)} onPick={(v) => { setPicker(null); if (v) setWho({ profile: v }); }} />
-      <PickerModal visible={picker === 'noapp'} title="¿Quién?" items={contacts.filter((c) => !c.profile_id && c.status !== 'contact').map((c) => ({ id: c.id, title: c.name, photo: c.photo_path }))}
-        onClose={() => setPicker(null)} onPick={(v) => { setPicker(null); if (v) setWho({ contact: v }); }} />
+      <PickerModal visible={picker} title="¿Quién?" items={items} onClose={() => setPicker(false)}
+        onPick={(v) => { setPicker(false); if (v) setWho({ contact: v }); }} />
     </View>
   );
 }

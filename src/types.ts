@@ -229,6 +229,9 @@ export type Ministry = {
   can_take_attendance: boolean; is_teaching: boolean; sort_order: number;
 };
 export type MinistryMember = { ministry_id: string; profile_id: string; is_leader: boolean; joined_at: string };
+/** Integrante de un ministerio por ficha (puede no tener la app). */
+export type MinistryPerson = { contact_id: string; name: string; photo_path: string | null; profile_id: string | null; is_leader: boolean; joined_at: string };
+export type MinistryPersonRow = { ministry_id: string; contact_id: string; is_leader: boolean; joined_at: string };
 export type MinistryMessage = {
   id: string; church_id: string; ministry_id: string; user_id: string; kind: 'message' | 'recommendation' | 'announcement'; body: string; created_at: string;
 };
