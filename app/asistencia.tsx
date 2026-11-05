@@ -11,7 +11,7 @@ import { Button, Empty, Loading } from '@/components/ui';
 import { addPerson, attendanceSheet, listServices, setAttendance } from '@/lib/api';
 import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { ChurchService, SheetRow } from '@/types';
 
@@ -179,7 +179,7 @@ export default function Asistencia() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   list: { padding: 12, paddingBottom: 140, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
   filters: { paddingHorizontal: 16, gap: 10, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
   counter: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, paddingHorizontal: 14, borderRadius: 12, backgroundColor: colors.greenSoft },
@@ -190,4 +190,4 @@ const styles = StyleSheet.create({
   check: { position: 'absolute', right: -2, bottom: -2, width: 24, height: 24, borderRadius: 12, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFF' },
   bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, paddingBottom: 28, backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border },
   quick: { flex: 1, height: 44, borderWidth: 1.5, borderColor: colors.input, borderRadius: 12, paddingHorizontal: 12, fontSize: 15, color: colors.text },
-});
+}));

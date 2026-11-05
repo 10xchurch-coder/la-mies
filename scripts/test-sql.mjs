@@ -30,6 +30,8 @@ const files = [
   'supabase/tests/rls_test_5.sql',
   'supabase/migrations/0008_errores_app.sql',
   'supabase/migrations/0009_devocional_estudio.sql',
+  'supabase/migrations/0010_familia_bautismo_turnos.sql',
+  'supabase/tests/rls_test_6.sql',
 ];
 for (const f of files) {
   console.log(`▶ ${f}`);

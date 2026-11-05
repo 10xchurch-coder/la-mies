@@ -9,7 +9,7 @@ import { listGroups, listProfiles } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { ROLE_LABEL, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { Group, Profile } from '@/types';
 
 export default function Miembros() {
@@ -48,10 +48,10 @@ export default function Miembros() {
             {groups.map((g) => (
               <Tag key={g.id} text={`${g.name} · ${people.filter((p) => p.group_id === g.id).length}`} tone="blue" />
             ))}
-            {!groups.length ? <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no hay {groupWord(church?.grouping, true).toLowerCase()}. Si la iglesia no se organiza así, no hace falta crear ninguno.</Text> : null}
+            {!groups.length ? <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no hay {groupWord(church?.grouping, true).toLowerCase()}. Si la iglesia no se organiza así, no hace falta crear ninguna.</Text> : null}
           </View>
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-            <Field label={`Nuevo ${gw.toLowerCase()}`} value={newGroup} onChangeText={setNewGroup} placeholder={church?.grouping === 'bus_routes' ? 'Colectivo 3' : 'Grupo norte'} style={{ flex: 1 }} />
+            <Field label={`Nuevo ${gw.toLowerCase()}`} value={newGroup} onChangeText={setNewGroup} placeholder={church?.grouping === 'bus_routes' ? 'El Porvenir' : 'Grupo norte'} style={{ flex: 1 }} />
             <Button title="Crear" small onPress={addGroup} disabled={!newGroup.trim()} />
           </View>
         </Card>
@@ -62,7 +62,7 @@ export default function Miembros() {
             <Pressable key={p.id} onPress={() => router.push({ pathname: '/admin/miembro', params: { id: p.id } })} accessibilityRole="button" style={[styles.row, i === people.length - 1 && { borderBottomWidth: 0 }]}>
               <Avatar name={p.display_name} size={36} color={p.role === 'admin' || p.role === 'secretary' ? colors.green : p.role === 'captain' ? colors.blueSoft : colors.bgSoft} textColor={p.role === 'admin' || p.role === 'secretary' ? '#FFFFFF' : p.role === 'captain' ? colors.blueText : colors.text} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontSize: 15, fontWeight: '700' }}>{p.display_name}{p.id === profile?.id ? ' (vos)' : ''}</Text>
+                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{p.display_name}{p.id === profile?.id ? ' (vos)' : ''}</Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>
                   {ROLE_LABEL[p.role]}{p.group_id ? ` · ${groups.find((g) => g.id === p.group_id)?.name ?? ''}` : ''}
                 </Text>
@@ -76,6 +76,6 @@ export default function Miembros() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-});
+}));

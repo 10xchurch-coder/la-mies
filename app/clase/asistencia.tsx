@@ -84,7 +84,7 @@ export default function AsistenciaClase() {
               <Pressable onPress={() => save(c, !on, notes[c.id] ?? '')} accessibilityRole="checkbox" accessibilityState={{ checked: on }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Face name={c.name} path={c.photo_path} size={48} ring={on ? colors.green : undefined} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '700' }}>{c.name}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{c.name}</Text>
                   {c.age != null ? <Text style={{ fontSize: 12, color: colors.muted }}>{c.age} años</Text> : null}
                 </View>
                 <View style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : '#FFF', alignItems: 'center', justifyContent: 'center' }}>

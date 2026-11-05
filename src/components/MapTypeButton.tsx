@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { MapStyleElement, MapType } from './map';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { colors } from '../theme';
+import { colors, themed } from '../theme';
 
 export type MapStyle = 'satellite' | 'standard' | 'simple';
 const OPTIONS: { value: MapStyle; label: string }[] = [
@@ -78,7 +78,7 @@ export function MapTypeButton({ style, onChange, top = 60 }: { style: MapStyle; 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: {
     position: 'absolute', right: 12, flexDirection: 'row', padding: 3, borderRadius: 12, backgroundColor: colors.bg,
     elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 2 },
@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
   optionOn: { backgroundColor: colors.green },
   text: { fontSize: 12, fontWeight: '700', color: colors.text },
   textOn: { color: '#FFFFFF' },
-});
+}));

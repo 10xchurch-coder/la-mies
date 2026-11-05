@@ -6,7 +6,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading } from '@/components/ui';
 import { sideHistory } from '@/lib/api';
 import { KIND_LABEL, fmtDayYear, fmtRelativeDay, fmtTime } from '@/lib/format';
-import { colors, coverageColor } from '@/theme';
+import { colors, coverageColor, themed } from '@/theme';
 
 export default function Vereda() {
   const { road, seg, side, name, sideName, kind } = useLocalSearchParams<{ road: string; seg: string; side: string; name: string; sideName: string; kind?: string }>();
@@ -29,7 +29,7 @@ export default function Vereda() {
               <Card key={`${r.session_id}-${i}`} style={styles.row}>
                 <View style={{ width: 6, borderRadius: 3, backgroundColor: coverageColor(r.covered_at, r.kind), alignSelf: 'stretch' }} />
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '700' }}>
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                     {fmtRelativeDay(r.covered_at) === 'hoy' ? 'Hoy' : fmtDayYear(r.covered_at)} · {fmtTime(r.covered_at)}
                   </Text>
                   <Text style={{ fontSize: 13, color: colors.muted }}>
@@ -47,6 +47,6 @@ export default function Vereda() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', gap: 12, padding: 12 },
-});
+}));

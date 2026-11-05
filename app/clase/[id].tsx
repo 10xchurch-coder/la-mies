@@ -8,7 +8,7 @@ import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Field, Loading, RowLink, SectionTitle, Tag } from '@/components/ui';
 import {
-  addPerson, classSchedule, classStudents, classTeachers, listClasses, listMaterials, listPeople, listProfiles, saveSchedule,
+  addPerson, classSchedule, classStudents, classTeachers, listClasses, listMaterials, listPeople, listProfiles, saveSchedule, scheduleName,
 } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, isoDate, upcomingDates } from '@/lib/format';
@@ -122,12 +122,13 @@ export default function Clase() {
       Alert.alert('Primero agregá maestros a la clase');
       return;
     }
-    const last = [...sched].filter((s) => s.teacher_id).sort((a, b) => a.on_date.localeCompare(b.on_date)).pop();
+    const last = [...sched].filter((s) => s.teacher_id || s.teacher_contact_id).sort((a, b) => a.on_date.localeCompare(b.on_date)).pop();
     let i = last ? Math.max(0, mainTeachers.findIndex((t) => t.profile_id === last.teacher_id) + 1) : 0;
     // Mismo maestro el sábado y el domingo del mismo fin de semana; alterna cada semana.
     let lastWeek = '';
     for (const d of dates) {
-      if (sched.find((s) => s.on_date === d)?.teacher_id) continue;
+      const existing = sched.find((s) => s.on_date === d);
+      if (existing?.teacher_id || existing?.teacher_contact_id) continue;
       const dt = new Date(`${d}T12:00:00`);
       const weekKey = isoDate(addDays(dt, -((dt.getDay() + 1) % 7)));
       if (lastWeek && weekKey !== lastWeek) i++;
@@ -158,7 +159,7 @@ export default function Clase() {
   };
 
   if (k === undefined) return <Loading />;
-  if (!k) return <View style={{ flex: 1 }}><Header title="Clase" back /><Text style={{ padding: 24 }}>No se encontró.</Text></View>;
+  if (!k) return <View style={{ flex: 1 }}><Header title="Clase" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -178,7 +179,7 @@ export default function Clase() {
               <RowLink
                 key={d}
                 icon={mine ? 'star' : 'calendar'}
-                title={`${fmtDateShort(d)} · ${nameOf(s?.teacher_id ?? null) ?? 'Sin maestro'}${s?.helper_id ? ` + ${nameOf(s.helper_id)}` : ''}`}
+                title={`${fmtDateShort(d)} · ${scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? 'Sin maestro'}${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}`}
                 subtitle={m ? `${m.series} · ${m.title}` : 'Sin material asignado'}
                 onPress={
                   canManage
@@ -223,7 +224,7 @@ export default function Clase() {
               ))}
             </View>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700' }}>Agregar un alumno nuevo</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Agregar un alumno nuevo</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Field label="Nombre" value={kidName} onChangeText={setKidName} style={{ flex: 1 }} autoCapitalize="words" />
                 <Field label="Edad" keyboardType="number-pad" value={kidAge} onChangeText={(t) => setKidAge(t.replace(/\D/g, ''))} style={{ width: 70 }} />

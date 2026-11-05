@@ -70,7 +70,7 @@ export default function NuevoMaterial() {
         </View>
         <Field label="Texto" hint="(opcional: pegá acá la lección)" value={body} onChangeText={setBody} multiline />
         <Card style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700' }}>Archivo</Text>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Archivo</Text>
           <Text style={{ fontSize: 13, color: colors.muted }}>
             {file ? `${file.name} ${fmtBytes(file.size)}` : existingFile ? `Actual: ${existingFile}` : 'PDF, Word, imagen o audio · hasta 50 MB'}
           </Text>

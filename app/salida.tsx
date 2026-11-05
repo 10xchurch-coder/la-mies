@@ -14,7 +14,7 @@ import { fmtDistance, fmtDuration, fmtTime } from '@/lib/format';
 import type { LatLng } from '@/lib/geo';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { CoverageRow } from '@/types';
 
 export default function Salida() {
@@ -201,7 +201,7 @@ function HeaderStat({ value, label }: { value: string | number; label: string })
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   header: { backgroundColor: colors.green, paddingHorizontal: 16, paddingBottom: 14, gap: 10 },
   liveDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: '#FFFFFF' },
   liveText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
@@ -212,4 +212,4 @@ const styles = StyleSheet.create({
   sidePill: { position: 'absolute', left: 12, bottom: 12, flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, paddingLeft: 10, paddingRight: 14, borderRadius: 999, backgroundColor: colors.bg, elevation: 4, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
   sideIcon: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
   actions: { padding: 12, paddingHorizontal: 16, gap: 10, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg },
-});
+}));

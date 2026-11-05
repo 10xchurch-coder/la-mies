@@ -7,9 +7,9 @@ import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Choice, Empty, Segmented, Tag } from '@/components/ui';
 import { listGroups, listPeople } from '@/lib/api';
-import { INTEREST_LABEL, PROMISE_LABEL, STATUS_LABEL, fmtRelativeDay, groupWord } from '@/lib/format';
+import { INTEREST_LABEL, PROMISE_LABEL, STATUS_LABEL, allGroupsLabel, fmtRelativeDay, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { Contact, Group } from '@/types';
 
@@ -103,7 +103,7 @@ export default function Personas() {
           <>
             {groups.length ? (
               <Choice
-                options={[{ value: 'all', label: `Todos los ${groupWord(church?.grouping, true).toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
+                options={[{ value: 'all', label: allGroupsLabel(church?.grouping) }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
                 value={route}
                 onChange={setRoute}
               />
@@ -154,10 +154,10 @@ export default function Personas() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   add: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: colors.green },
   filters: { paddingHorizontal: 16, gap: 10, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
   list: { padding: 16, gap: 10, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input },
   card: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg },
-});
+}));

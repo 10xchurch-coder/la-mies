@@ -9,13 +9,15 @@ import { biometricsAvailable } from '@/components/LockGate';
 import { requestAccountDeletion, updateProfile } from '@/lib/api';
 import { ROLE_LABEL, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed, useThemeMode } from '@/theme';
+import { saveThemeMode } from '@/lib/themeStore';
 import { APP_VERSION } from '@/components/ErrorScreen';
 
 export default function Ajustes() {
   const router = useRouter();
   const { profile, church, group, refreshProfile, signOut } = useAuth();
   const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: 'Face ID' });
+  const mode = useThemeMode();
 
   useEffect(() => {
     biometricsAvailable().then(setBio);
@@ -39,7 +41,7 @@ export default function Ajustes() {
         <View style={styles.profile}>
           <Avatar name={profile?.display_name ?? '?'} size={52} color={colors.green} textColor="#FFFFFF" />
           <View style={{ flex: 1, gap: 3 }}>
-            <Text style={{ fontSize: 17, fontWeight: '800' }}>{profile?.display_name}</Text>
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{profile?.display_name}</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>
               {roleLabel}{group ? ` · ${group.name}` : ''}{church ? ` · ${church.name}` : ''}
             </Text>
@@ -48,10 +50,10 @@ export default function Ajustes() {
 
         <SectionTitle>Compartir mis contactos</SectionTitle>
         <Card style={{ gap: 10 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600' }}>Cuando marco una casa nueva, compartirla con</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Cuando marco una casa nueva, compartirla con</Text>
           <Choice
             options={[
-              { value: 'group', label: group ? `Todo mi ${groupWord(church?.grouping).toLowerCase()}` : 'Toda la iglesia' },
+              { value: 'group', label: group ? `${church?.grouping === 'bus_routes' ? 'Toda' : 'Todo'} mi ${groupWord(church?.grouping).toLowerCase()}` : 'Toda la iglesia' },
               { value: 'me', label: 'Solo yo' },
               { value: 'ask', label: 'Preguntarme cada vez' },
             ]}
@@ -59,6 +61,16 @@ export default function Ajustes() {
             onChange={(v) => set({ share_default: v })}
           />
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Podés cambiarlo para un contacto puntual al momento de guardarlo. Los administradores de la iglesia ven todos los contactos.</Text>
+        </Card>
+
+        <SectionTitle>Apariencia</SectionTitle>
+        <Card>
+          <Toggle
+            label="Modo oscuro"
+            hint={mode === 'dark' ? 'Fondo oscuro, descansa la vista de noche.' : 'Fondo claro. Activalo para usar la app con fondo oscuro.'}
+            value={mode === 'dark'}
+            onChange={(v) => saveThemeMode(v ? 'dark' : 'light')}
+          />
         </Card>
 
         <SectionTitle>Seguridad y ubicación</SectionTitle>
@@ -71,13 +83,13 @@ export default function Ajustes() {
           />
           <View style={{ flexDirection: 'row', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Feather name="lock" size={22} color={colors.green} />
-            <Text style={{ flex: 1, fontSize: 14, lineHeight: 20 }}>
+            <Text style={{ flex: 1, fontSize: 14, lineHeight: 20, color: colors.text }}>
               Tu ubicación en vivo se comparte con el equipo <Text style={{ fontWeight: '700' }}>solo mientras una salida está activa</Text>. Al terminar, queda guardado el recorrido para el mapa de veredas, no dónde estás.
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Feather name="truck" size={22} color={colors.green} />
-            <Text style={{ flex: 1, fontSize: 14, lineHeight: 20 }}>
+            <Text style={{ flex: 1, fontSize: 14, lineHeight: 20, color: colors.text }}>
               Si la app detecta velocidad de vehículo durante una salida, la corta sola en el último punto en que caminabas, para que no queden líneas por toda la ciudad.
             </Text>
           </View>
@@ -127,6 +139,6 @@ export default function Ajustes() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   profile: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 14, backgroundColor: colors.bgSoft },
-});
+}));

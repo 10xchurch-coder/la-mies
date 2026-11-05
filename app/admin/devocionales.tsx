@@ -11,7 +11,7 @@ import { deleteDailyContent, listDailyContent, saveDailyContent } from '@/lib/ap
 import { pickAndUploadPhoto } from '@/lib/files';
 import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { DailyContent } from '@/types';
 
 const EMPTY = (d: string): Partial<DailyContent> => ({ on_date: d, reference: '', verse: '', message: '', devotional: '', study: '', prayer: '', background: 'campo' });
@@ -99,8 +99,8 @@ export default function Devocionales() {
             />
           </View>
           <Field label="Devocional (lectura del día)" hint="(1 o 2 párrafos; separalos con una línea en blanco)" value={editing.devotional ?? ''} onChangeText={(t) => setEditing({ ...editing, devotional: t })} multiline style={{ minHeight: 160 }} />
-          <Field label="Estudio completo" hint="(opcional, 5–10 min; pasajes en texto completo)" value={editing.study ?? ''} onChangeText={(t) => setEditing({ ...editing, study: t })} multiline style={{ minHeight: 160 }} />
-          <Field label="Oración breve" hint="(opcional)" value={editing.prayer ?? ''} onChangeText={(t) => setEditing({ ...editing, prayer: t })} multiline style={{ minHeight: 80 }} />
+          <Field label="Estudio completo" hint="(opcional, 5–10 min; pasajes en texto completo; un título va entre ** **, ej. **Para hoy**)" value={editing.study ?? ''} onChangeText={(t) => setEditing({ ...editing, study: t })} multiline style={{ minHeight: 160 }} />
+          <Field label="Oración breve" hint="(opcional; cierra el estudio a pantalla completa)" value={editing.prayer ?? ''} onChangeText={(t) => setEditing({ ...editing, prayer: t })} multiline style={{ minHeight: 80 }} />
           <Button title="Guardar" onPress={save} loading={busy} />
           <Button title="Cancelar" variant="ghost" onPress={() => setEditing(null)} />
         </Screen>
@@ -156,6 +156,6 @@ export default function Devocionales() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, minHeight: 56 },
-});
+}));

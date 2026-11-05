@@ -4,6 +4,7 @@ import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import RNMapView, { Marker, Polyline, type MapViewProps } from 'react-native-maps';
+import { themed } from '../../theme';
 
 export { Marker, Polyline };
 export type { MapViewProps, Region, MapType, MapStyleElement } from 'react-native-maps';
@@ -24,8 +25,8 @@ export const MapView = React.forwardRef<RNMapView, MapViewProps>(function MapVie
 });
 export default MapView;
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   missing: { backgroundColor: '#E3E7DF', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 8 },
   title: { fontSize: 16, fontWeight: '800', color: '#1F2A24', textAlign: 'center' },
   text: { fontSize: 13, color: '#5B635D', textAlign: 'center', lineHeight: 18 },
-});
+}));

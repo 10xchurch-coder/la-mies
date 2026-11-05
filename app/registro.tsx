@@ -8,7 +8,7 @@ import { checkPassword } from '@/lib/password';
 import { PasswordField } from '@/components/PasswordField';
 import { WEB_URL } from '@/lib/share';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export default function Registro() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function Registro() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   msg: { color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 },
   note: { fontSize: 12, color: colors.muted, lineHeight: 17, textAlign: 'center' },
-});
+}));

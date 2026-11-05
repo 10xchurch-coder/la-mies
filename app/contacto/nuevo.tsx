@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Choice, Field, Segmented } from '@/components/ui';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export type Step1 = {
   lat: number;
@@ -116,10 +116,10 @@ export default function NuevoContacto() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bar: { flex: 1, height: 5, borderRadius: 3 },
   where: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: colors.greenSoft },
   label: { fontSize: 13, fontWeight: '600', color: colors.label },
   kids: { gap: 8, padding: 12, borderRadius: 14, backgroundColor: colors.bgPage },
   addKid: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 44, borderRadius: 10, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#9AA19B' },
-});
+}));

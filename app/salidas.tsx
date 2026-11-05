@@ -7,7 +7,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading, Tag } from '@/components/ui';
 import { mySessions } from '@/lib/api';
 import { fmtDayYear, fmtDistance, fmtMinutes, fmtTime } from '@/lib/format';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { Session } from '@/types';
 
 export default function Salidas() {
@@ -35,7 +35,7 @@ export default function Salidas() {
                 <Pressable key={s.id} onPress={() => router.push({ pathname: '/recortar', params: { session: s.id } })} accessibilityRole="button">
                   <Card style={styles.row}>
                     <View style={{ flex: 1, gap: 4 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '700' }}>
+                      <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                         {fmtDayYear(s.started_at)} · {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : ''}
                       </Text>
                       <Text style={{ fontSize: 12, color: colors.muted }}>
@@ -62,6 +62,6 @@ export default function Salidas() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
-});
+}));

@@ -6,7 +6,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Card, Loading, SectionTitle, Stat } from '@/components/ui';
 import { myProgress } from '@/lib/api';
 import { LEVELS, badgesFor, levelFor, type Progress } from '@/lib/levels';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export default function Progreso() {
   const [p, setP] = useState<Progress | null>(null);
@@ -103,7 +103,7 @@ export default function Progreso() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   hero: { gap: 12, padding: 16, borderRadius: 16, backgroundColor: colors.green },
   heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
   badge: { width: '31%', flexGrow: 1, alignItems: 'center', gap: 6, padding: 12, paddingHorizontal: 6, borderRadius: 12, borderWidth: 1, borderColor: colors.border },
@@ -111,4 +111,4 @@ const styles = StyleSheet.create({
   badgeIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   level: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
   circle: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: colors.input },
-});
+}));

@@ -8,7 +8,7 @@ import { Avatar, Card, Empty, SectionTitle, Stat } from '@/components/ui';
 import { listProfiles, teamLive, teamTotals } from '@/lib/api';
 import { fmtDistance, fmtMinutes, fmtTime, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { Profile, TeamLiveRow, TeamTotals } from '@/types';
 
 export default function Equipo() {
@@ -60,7 +60,7 @@ export default function Equipo() {
             <Card key={r.user_id} style={styles.liveRow}>
               <Avatar name={r.display_name} color={colors.green} textColor="#FFFFFF" />
               <View style={{ flex: 1, gap: 3 }}>
-                <Text style={{ fontSize: 15, fontWeight: '700' }}>
+                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                   {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>
@@ -102,7 +102,7 @@ export default function Equipo() {
               <View key={m.id} style={[styles.memberRow, i === mine.length - 1 && { borderBottomWidth: 0 }]}>
                 <Avatar name={m.display_name} size={36} color={colors.bgSoft} textColor={colors.text} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '700' }}>
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                     {m.display_name} {m.role !== 'member' ? <Text style={{ fontSize: 11, color: colors.blueText }}>{m.role === 'admin' ? ' · Administrador' : ' · Capitán'}</Text> : null}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>{live.some((l) => l.user_id === m.id) ? 'En salida ahora' : m.phone ?? ''}</Text>
@@ -118,9 +118,9 @@ export default function Equipo() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   tablero: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 12, borderRadius: 999, backgroundColor: colors.greenSoft },
   liveRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.bgSoft, alignItems: 'center', justifyContent: 'center' },
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-});
+}));

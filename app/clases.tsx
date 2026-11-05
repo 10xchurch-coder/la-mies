@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Tag } from '@/components/ui';
-import { classSchedule, classTeachers, listClasses, listMaterials, listProfiles } from '@/lib/api';
+import { classSchedule, classTeachers, listClasses, listMaterials, listProfiles, scheduleName } from '@/lib/api';
 import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -59,7 +59,7 @@ export default function Clases() {
                   return (
                     <Text key={s.id} style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}>
                       <Text style={{ fontWeight: '700' }}>{fmtDateShort(s.on_date)}: </Text>
-                      {nameOf(s.teacher_id) ?? 'sin maestro'}{s.helper_id ? ` + ${nameOf(s.helper_id)}` : ''}{m ? ` · ${m.title}` : ''}
+                      {scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? 'sin maestro'}{scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}{m ? ` · ${m.title}` : ''}
                     </Text>
                   );
                 }) : <Text style={{ fontSize: 13, color: colors.muted }}>Esta semana todavía no tiene maestro asignado</Text>}

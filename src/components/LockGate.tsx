@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, StyleSheet, Text, View } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, themed } from '../theme';
 import { Button } from './ui';
 
 const RELOCK_AFTER_MS = 2 * 60 * 1000;
@@ -95,10 +95,10 @@ export function LockGate({ enabled, children }: { enabled: boolean; children: Re
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
   badge: { width: 76, height: 76, borderRadius: 38, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
   title: { fontSize: 28, fontWeight: '800', color: colors.text },
   text: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 20 },
   error: { fontSize: 13, color: colors.red, textAlign: 'center' },
-});
+}));

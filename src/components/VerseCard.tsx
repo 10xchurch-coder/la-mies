@@ -8,6 +8,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather } from '@expo/vector-icons';
 import { cachedSignedUrl } from '../lib/files';
 import type { DailyContent } from '../types';
+import { themed } from '../theme';
 
 /** Fondos incluidos (nombre → colores). Si el fondo no está acá, se toma como foto del bucket "photos". */
 export const BACKGROUNDS: Record<string, { label: string; colors: [string, string, string] }> = {
@@ -20,8 +21,8 @@ export const BACKGROUNDS: Record<string, { label: string; colors: [string, strin
 };
 export const BACKGROUND_NAMES = Object.keys(BACKGROUNDS);
 
-export const VerseCard = forwardRef<CardHandle, { item: DailyContent; church?: string | null; style?: StyleProp<ViewStyle>; compact?: boolean }>(
-  function VerseCard({ item, church, style, compact }, ref) {
+export const VerseCard = forwardRef<CardHandle, { item: DailyContent; church?: string | null; style?: StyleProp<ViewStyle>; compact?: boolean; lines?: number; hideMessage?: boolean }>(
+  function VerseCard({ item, church, style, compact, lines, hideMessage }, ref) {
     const bg = BACKGROUNDS[item.background];
     const photo = bg ? null : cachedSignedUrl('photos', item.background);
     const long = item.verse.length > 220;
@@ -41,11 +42,11 @@ export const VerseCard = forwardRef<CardHandle, { item: DailyContent; church?: s
           <Text style={[styles.brand, compact && { fontSize: 12 }]}>Versículo del día</Text>
         </View>
         <View style={{ flex: 1, justifyContent: 'center', gap: compact ? 8 : 14 }}>
-          <Text style={[styles.verse, compact && { fontSize: 15, lineHeight: 21 }, long && !compact && { fontSize: 19, lineHeight: 27 }]} numberOfLines={compact ? 5 : undefined}>
+          <Text style={[styles.verse, compact && { fontSize: 15, lineHeight: 21 }, long && !compact && { fontSize: 19, lineHeight: 27 }]} numberOfLines={lines ?? (compact ? 5 : undefined)}>
             {item.verse}
           </Text>
           <Text style={[styles.ref, compact && { fontSize: 13 }]}>{item.reference}</Text>
-          {item.message ? <Text style={[styles.msg, compact && { fontSize: 13 }]}>{item.message}</Text> : null}
+          {item.message && !hideMessage ? <Text style={[styles.msg, compact && { fontSize: 13 }]}>{item.message}</Text> : null}
         </View>
         <Text style={[styles.foot, compact && { fontSize: 10 }]}>{church ?? 'La Mies'} · RV1960</Text>
       </View>
@@ -53,7 +54,7 @@ export const VerseCard = forwardRef<CardHandle, { item: DailyContent; church?: s
   },
 );
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   card: { width: '100%', aspectRatio: 9 / 16, maxHeight: 640, borderRadius: 22, overflow: 'hidden', padding: 26, justifyContent: 'space-between', backgroundColor: '#1F6B45' },
   compact: { aspectRatio: 16 / 10, maxHeight: 260, padding: 18, borderRadius: 18 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -62,4 +63,4 @@ const styles = StyleSheet.create({
   ref: { color: '#FFFFFF', fontSize: 16, fontWeight: '800', opacity: 0.95 },
   msg: { color: 'rgba(255,255,255,0.92)', fontSize: 16, fontStyle: 'italic', lineHeight: 22 },
   foot: { color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600', textAlign: 'right' },
-});
+}));

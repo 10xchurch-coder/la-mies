@@ -1,0 +1,37 @@
+-- Turnos de maestros · octubre y noviembre 2026 · Iglesia Bautista Victoria.
+-- Niños 6-12 (PDF "Turnos de clases"), Niños 2-6 ("Escuela Bíblica") y Cuna (imagen): maestro y ayudante por fecha.
+-- Se puede correr más de una vez.
+insert into public.class_schedule (church_id, class_id, on_date, teacher_contact_id, helper_contact_id) values
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-10-24','9a12cab0-4ef4-4f27-8415-a7924a819878',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-10-25','0d31cd8d-ef85-4f4d-8057-072097a4821b',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-10-31','9a12cab0-4ef4-4f27-8415-a7924a819878',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-01','0d31cd8d-ef85-4f4d-8057-072097a4821b',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-07','b48db3cc-139c-4469-b1c0-9370aa0780b5',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-08','0d31cd8d-ef85-4f4d-8057-072097a4821b',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-14','b48db3cc-139c-4469-b1c0-9370aa0780b5',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-15','0d31cd8d-ef85-4f4d-8057-072097a4821b',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-21','9a12cab0-4ef4-4f27-8415-a7924a819878',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-22','b48db3cc-139c-4469-b1c0-9370aa0780b5',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-28','9a12cab0-4ef4-4f27-8415-a7924a819878',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','e4d08f64-41e4-410b-817e-cacdaf5de374','2026-11-29','b48db3cc-139c-4469-b1c0-9370aa0780b5',null),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-10-31','dad3be5b-1efd-4dc2-8b28-2adea64eed51','8bc23d9e-e3c8-4873-adfb-fe6be2c1b54b'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-10-31','eeed6faf-0fa8-40d3-b150-be00f022b999','bfdbbbd5-773a-493d-bf07-6e6fa57044a8'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-01','36328b09-dbbc-429f-942a-cffba70dfb3c','42a5ed24-d8cf-4a49-a209-065931d8b336'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-01','b9979062-2129-423a-96e0-ff6e81183938','dbb05dc3-2f4c-47af-81b0-0556a35b223c'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-07','bfdbbbd5-773a-493d-bf07-6e6fa57044a8','4cbd21bd-7389-4637-bf79-ca12d5d5c95d'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-07','92002ee2-e418-4dd9-8f22-c5baa6ec863d','a9ee81e4-1ada-4c3f-a491-b70cdddb66d6'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-08','b9979062-2129-423a-96e0-ff6e81183938','c5b5ca23-e98b-4a36-ad80-ccdef8322230'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-08','36328b09-dbbc-429f-942a-cffba70dfb3c','eeed6faf-0fa8-40d3-b150-be00f022b999'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-14','92002ee2-e418-4dd9-8f22-c5baa6ec863d','dbb05dc3-2f4c-47af-81b0-0556a35b223c'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-14','bfdbbbd5-773a-493d-bf07-6e6fa57044a8','42a5ed24-d8cf-4a49-a209-065931d8b336'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-15','36328b09-dbbc-429f-942a-cffba70dfb3c','a9ee81e4-1ada-4c3f-a491-b70cdddb66d6'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-15','dad3be5b-1efd-4dc2-8b28-2adea64eed51','eeed6faf-0fa8-40d3-b150-be00f022b999'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-21','bfdbbbd5-773a-493d-bf07-6e6fa57044a8','8bc23d9e-e3c8-4873-adfb-fe6be2c1b54b'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-21','b9979062-2129-423a-96e0-ff6e81183938','4cbd21bd-7389-4637-bf79-ca12d5d5c95d'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-22','dad3be5b-1efd-4dc2-8b28-2adea64eed51','42a5ed24-d8cf-4a49-a209-065931d8b336'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-22','92002ee2-e418-4dd9-8f22-c5baa6ec863d','a9ee81e4-1ada-4c3f-a491-b70cdddb66d6'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-28','b9979062-2129-423a-96e0-ff6e81183938','4cbd21bd-7389-4637-bf79-ca12d5d5c95d'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-28','36328b09-dbbc-429f-942a-cffba70dfb3c','dbb05dc3-2f4c-47af-81b0-0556a35b223c'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','9f84a3ca-be15-4eea-9bd4-c69f5634ffd8','2026-11-29','92002ee2-e418-4dd9-8f22-c5baa6ec863d','c5b5ca23-e98b-4a36-ad80-ccdef8322230'),
+('2c35b2a1-494d-475d-8a87-b7df18974838','dececc8e-fa95-4e37-b942-cdc9d1633e2f','2026-11-29','bfdbbbd5-773a-493d-bf07-6e6fa57044a8','eeed6faf-0fa8-40d3-b150-be00f022b999')
+on conflict (class_id, on_date) do update set teacher_contact_id = excluded.teacher_contact_id, helper_contact_id = excluded.helper_contact_id;

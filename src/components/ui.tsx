@@ -5,7 +5,7 @@ import {
   type StyleProp, type TextInputProps, type ViewStyle,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { colors, radius } from '../theme';
+import { colors, radius, themed } from '../theme';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -231,7 +231,7 @@ export function IconButton({ icon, onPress, label, style, ...rest }: PressablePr
   );
 }
 
-export const styles = StyleSheet.create({
+export const styles = themed(() => StyleSheet.create({
   button: {
     height: 56, borderRadius: radius.button, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', paddingHorizontal: 16,
   },
@@ -252,4 +252,4 @@ export const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase', color: colors.muted },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52, paddingHorizontal: 14, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
   iconButton: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgSoft },
-});
+}));

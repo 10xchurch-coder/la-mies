@@ -10,7 +10,7 @@ import { Button, Card, Field, SectionTitle, Tag } from '@/components/ui';
 import { checkPassword } from '@/lib/password';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 type Factor = { id: string; friendly_name?: string | null; status: string; created_at: string };
 type Enrolling = { id: string; secret: string; uri: string };
@@ -186,6 +186,6 @@ export default function Seguridad() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   p: { fontSize: 14, lineHeight: 20, color: colors.text },
-});
+}));

@@ -82,7 +82,7 @@ export default function Miembro() {
         <Card style={{ gap: 6 }}>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
             <Text style={{ fontWeight: '700' }}>Miembro:</Text> sale, marca casas, ve lo de su grupo.{'\n'}
-            <Text style={{ fontWeight: '700' }}>Capitán:</Text> además toma asistencia, marca discipulado y bautismos, ve el panel y recibe quiénes de su colectivo faltaron.{'\n'}
+            <Text style={{ fontWeight: '700' }}>Capitán:</Text> además toma asistencia, marca discipulado y bautismos, ve el panel y recibe quiénes de su ruta faltaron.{'\n'}
             <Text style={{ fontWeight: '700' }}>Secretaría:</Text> carga y marca miembros, vincula cuentas, arma clases, turnos, prédicas y datos para ofrendar.{'\n'}
             <Text style={{ fontWeight: '700' }}>Pastor / admin:</Text> todo lo anterior, nombra administradores y recibe el reporte de ausencias del domingo.
           </Text>

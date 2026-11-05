@@ -17,7 +17,8 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.green,
         tabBarInactiveTintColor: colors.muted,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
-        tabBarStyle: { borderTopColor: colors.border, height: 84, paddingTop: 6 },
+        tabBarStyle: { borderTopColor: colors.border, backgroundColor: colors.bg, height: 84, paddingTop: 6 },
+        sceneStyle: { backgroundColor: colors.bg },
       }}
     >
       <Tabs.Screen name="mapa" options={{ title: 'Mapa', tabBarIcon: icon('map') }} />

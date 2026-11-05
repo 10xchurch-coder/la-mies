@@ -173,13 +173,35 @@ export async function classStudents(classId: string): Promise<Contact[]> {
   if (!rows.length) return [];
   return ok(await supabase.from('contacts').select('*').in('id', rows.map((r) => r.contact_id)).order('name')) ?? [];
 }
+const SCHEDULE_COLS = '*, teacher_contact:contacts!class_schedule_teacher_contact_id_fkey(id,name), helper_contact:contacts!class_schedule_helper_contact_id_fkey(id,name)';
 export async function classSchedule(classId: string | null, from: string, to: string): Promise<ClassSchedule[]> {
-  let q = supabase.from('class_schedule').select('*').gte('on_date', from).lte('on_date', to).order('on_date');
+  let q = supabase.from('class_schedule').select(SCHEDULE_COLS).gte('on_date', from).lte('on_date', to).order('on_date');
   if (classId) q = q.eq('class_id', classId);
-  return ok(await q) ?? [];
+  return (ok(await q) ?? []) as ClassSchedule[];
 }
 export async function saveSchedule(row: Partial<ClassSchedule> & { class_id: string; on_date: string }): Promise<void> {
-  ok(await supabase.from('class_schedule').upsert({ ...row }, { onConflict: 'class_id,on_date' }));
+  const { teacher_contact: _t, helper_contact: _h, ...plain } = row;
+  ok(await supabase.from('class_schedule').upsert({ ...plain }, { onConflict: 'class_id,on_date' }));
+}
+/** Nombre del maestro o ayudante de un turno: primero la ficha, si no la cuenta. */
+export function scheduleName(s: ClassSchedule | undefined | null, who: 'teacher' | 'helper', nameOf: (pid: string | null) => string | undefined): string | undefined {
+  if (!s) return undefined;
+  const c = who === 'teacher' ? s.teacher_contact : s.helper_contact;
+  if (c?.name) return c.name;
+  const pid = who === 'teacher' ? s.teacher_id : s.helper_id;
+  return pid ? nameOf(pid) : undefined;
+}
+/** Los miembros de la iglesia (para elegir maestros, cónyuge, etc.). */
+export async function listMembers(): Promise<Contact[]> {
+  return ok(await supabase.from('contacts').select('*').eq('archived', false).eq('status', 'member').order('name').limit(1000)) ?? [];
+}
+/** Sugerencias de personas por nombre (sin importar acentos), para el cónyuge. */
+export async function searchPeople(q: string): Promise<{ id: string; name: string; status: string; photo_path: string | null }[]> {
+  return ok(await supabase.rpc('search_people', { p_q: q })) ?? [];
+}
+/** Hijos de la familia: los de la persona y los de su cónyuge. */
+export async function familyChildren(contactId: string): Promise<ContactChild[]> {
+  return ok(await supabase.rpc('family_children', { p_contact: contactId })) ?? [];
 }
 export async function classAttendance(classId: string, date: string): Promise<ClassAttendance[]> {
   return ok(await supabase.from('class_attendance').select('*').eq('class_id', classId).eq('on_date', date)) ?? [];

@@ -82,7 +82,7 @@ export default function NuevaPredica() {
         <DateChips dates={dates.includes(date) ? dates : [date, ...dates]} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
         <Field label="Link de YouTube" hint="(opcional)" autoCapitalize="none" keyboardType="url" placeholder="https://youtu.be/..." value={youtube} onChangeText={setYoutube} />
         <Card style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700' }}>Audio</Text>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Audio</Text>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
             {file ? `${file.name} ${fmtBytes(file.size)}` : existingAudio ? `Actual: ${existingAudio}` : 'MP3 o M4A, hasta 50 MB. Una prédica de una hora en MP3 a 64 kbps pesa unos 28 MB.'}
           </Text>

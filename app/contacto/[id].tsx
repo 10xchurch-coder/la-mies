@@ -10,17 +10,17 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  getContact, linkAccount, listAllServices, listGroups, listMinistries, listProfiles, ministryMembers, personJourney, setAttendance, updateContact,
+  familyChildren, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryMembers, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import {
-  FAITH_LABEL, INTEREST_LABEL, MARITAL_LABEL, PROMISE_LABEL, STATUS_LABEL, addDays, dayName, fmtDateOnly, fmtDateShort, fmtDay, fmtTime,
-  groupWord, isoDate, whatsappNumber,
+  FAITH_LABEL, INTEREST_LABEL, MARITAL_LABEL, PROMISE_LABEL, STATUS_LABEL, addDays, dayName, displayAge, fmtDateOnly, fmtDateShort, fmtDay, fmtTime,
+  groupArticle, groupWord, isoDate, whatsappNumber,
 } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type {
   Attendance, ChurchService, Contact, ContactChild, ContactVisit, FaithCategory, Group, JourneyStep, Ministry, PersonStatus, Profile,
 } from '@/types';
@@ -49,13 +49,13 @@ export default function PersonaDetalle() {
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
   const [children, setChildren] = useState<ContactChild[]>([]);
+  const [spouse, setSpouse] = useState<{ id: string; name: string } | null>(null);
   const [visits, setVisits] = useState<ContactVisit[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [journey, setJourney] = useState<JourneyStep[]>([]);
   const [services, setServices] = useState<ChurchService[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
-  const [linkedPeople, setLinkedPeople] = useState<Set<string>>(new Set());
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -63,13 +63,20 @@ export default function PersonaDetalle() {
   const [gospel, setGospel] = useState<'yes' | 'no'>('no');
   const [promise, setPromise] = useState<'none' | 'sat' | 'sun'>('none');
   const [busy, setBusy] = useState(false);
-  const [picker, setPicker] = useState<null | 'followup' | 'link' | 'group'>(null);
+  const [picker, setPicker] = useState<null | 'followup' | 'group'>(null);
 
   const load = useCallback(async () => {
     try {
       const r = await getContact(id);
       setC(r.contact);
       setChildren(r.children);
+      // La familia: los hijos del cónyuge también, si está vinculado.
+      if (r.contact?.spouse_id) {
+        familyChildren(id).then(setChildren).catch(() => undefined);
+        supabase.from('contacts').select('id,name').eq('id', r.contact.spouse_id).maybeSingle().then(({ data }) => setSpouse((data as { id: string; name: string } | null) ?? null));
+      } else {
+        setSpouse(null);
+      }
       setVisits(r.visits);
       setAttendances(r.attendances);
       personJourney(id).then(setJourney).catch(() => undefined);
@@ -186,9 +193,33 @@ export default function PersonaDetalle() {
     ? `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}&travelmode=walking`
     : c.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${c.address}, ${church?.city ?? 'Posadas'}`)}` : null;
   const followUp = people.find((p) => p.id === c.follow_up_user_id);
-  const linked = people.find((p) => p.id === c.profile_id);
   const group = groups.find((g) => g.id === c.group_id);
   const gw = groupWord(church?.grouping);
+  const isMember = c.status === 'member';
+  const isVisitor = c.status === 'visitor';
+  const isBaptized = !!c.baptized || !!c.baptized_on;
+  // Filas de la ficha corta según quién es. Miembro: teléfono, ruta si tiene, bautismo solo si falta.
+  // Contacto: además discipulado, bautismo, seguimiento. Visita: además cuántas veces vino y fidelidad.
+  const rows: { k: string; v: string; right?: React.ReactNode }[] = [];
+  rows.push({ k: 'Teléfono', v: c.phone ?? 'Sin teléfono' });
+  if (!isMember || group) {
+    rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || profile?.role === 'captain' ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined });
+  }
+  if (c.status === 'contact') {
+    rows.push({ k: 'Prometió venir', v: c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? ` · pasar a buscar${c.pickup_time ? ` ${c.pickup_time}` : ''}` : ''}` : 'Todavía no' });
+  }
+  if (!isMember) rows.push({ k: 'Discipulado', v: c.discipleship_since ? `Desde ${fmtDateOnly(c.discipleship_since)}` : 'Todavía no' });
+  if (!isMember || !isBaptized) {
+    rows.push({ k: 'Bautismo', v: isBaptized ? (c.baptized_on && c.baptized_here !== false ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)' });
+  }
+  if (c.dni && !isMember) rows.push({ k: 'DNI', v: c.dni });
+  if (isVisitor) {
+    rows.push({ k: 'Vino a la iglesia', v: attendances.length ? `${attendances.length} ${attendances.length === 1 ? 'vez' : 'veces'} · última ${fmtDateOnly(attendances[0].attended_on)}` : 'Todavía no' });
+    if (faith && isLeader) rows.push({ k: 'Fidelidad (12 semanas)', v: faith.possible ? `${faith.attended} de ${faith.possible} cultos · ${FAITH_LABEL[faith.cat].label}` : 'Recién agregada' });
+  }
+  if (!isMember) {
+    rows.push({ k: 'Seguimiento', v: followUp?.display_name ?? (c.follow_up_user_id ? 'Asignado' : 'Sin asignar'), right: canEdit ? <Small label="Cambiar" onPress={() => setPicker('followup')} /> : undefined });
+  }
   const nameOf = (uid: string) => (uid === profile?.id ? 'Vos' : people.find((p) => p.id === uid)?.display_name ?? 'Un hermano');
 
   return (
@@ -217,7 +248,7 @@ export default function PersonaDetalle() {
             <View style={{ flex: 1, gap: 5 }}>
               <Text style={{ fontSize: 24, fontWeight: '800', letterSpacing: -0.4, color: colors.text }}>{c.name}</Text>
               <Text style={{ fontSize: 14, color: colors.muted }}>
-                {[c.age ? `${c.age} años` : null, c.marital ? MARITAL_LABEL[c.marital] : null, c.address ?? c.address_hint].filter(Boolean).join(' · ')}
+                {[displayAge(c) != null ? `${displayAge(c)} años` : null, c.marital ? MARITAL_LABEL[c.marital] : null, c.address ?? c.address_hint].filter(Boolean).join(' · ')}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 <Tag text={STATUS_LABEL[c.status]} tone={c.status === 'member' ? 'green' : c.status === 'visitor' ? 'blue' : 'gray'} />
@@ -226,10 +257,18 @@ export default function PersonaDetalle() {
               </View>
             </View>
           </View>
+          {spouse || c.spouse_name ? (
+            <Pressable disabled={!spouse} onPress={() => spouse && router.push({ pathname: '/contacto/[id]', params: { id: spouse.id } })}>
+              <Text style={{ fontSize: 13, color: colors.text }}>
+                <Text style={{ fontWeight: '700' }}>{c.marital === 'partner' ? 'Pareja: ' : 'Cónyuge: '}</Text>
+                <Text style={spouse ? { color: colors.green, fontWeight: '700' } : undefined}>{spouse?.name ?? c.spouse_name}</Text>
+              </Text>
+            </Pressable>
+          ) : null}
           {children.length ? (
             <Text style={{ fontSize: 13, color: colors.text }}>
               <Text style={{ fontWeight: '700' }}>{children.length === 1 ? 'Hijo: ' : 'Hijos: '}</Text>
-              {children.map((k) => `${k.name}${k.age != null ? ` (${k.age})` : ''}`).join(', ')}
+              {children.map((k) => { const a = displayAge(k); return `${k.name}${a != null ? ` (${a})` : ''}`; }).join(', ')}
             </Text>
           ) : null}
 
@@ -250,41 +289,15 @@ export default function PersonaDetalle() {
             </View>
           ) : null}
 
+          {/* La ficha corta muestra solo lo importante según quién es. Lo demás se ve y se cambia en Editar. */}
           <Card style={{ padding: 0 }}>
-            <Row k="Teléfono" v={c.phone ?? 'Sin teléfono'} />
-            <Row
-              k={gw}
-              v={group?.name ?? `Sin ${gw.toLowerCase()}`}
-              right={isStaff || profile?.role === 'captain' ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined}
-            />
-            {c.status === 'contact' ? (
-              <Row k="Prometió venir" v={c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? ` · pasar a buscar${c.pickup_time ? ` ${c.pickup_time}` : ''}` : ''}` : 'Todavía no'} />
-            ) : null}
-            {c.member_since ? <Row k="Miembro desde" v={fmtDateOnly(c.member_since)} /> : null}
-            <Row k="Discipulado" v={c.discipleship_since ? `Desde ${fmtDateOnly(c.discipleship_since)}` : 'Todavía no'} />
-            <Row k="Bautismo" v={c.baptized || c.baptized_on ? (c.baptized_on ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)'} />
-            {c.dni ? <Row k="DNI" v={c.dni} /> : null}
-            <Row k="Vino a la iglesia" v={attendances.length ? `${attendances.length} ${attendances.length === 1 ? 'vez' : 'veces'} · última ${fmtDateOnly(attendances[0].attended_on)}` : 'Todavía no'} />
-            {faith && isLeader ? (
-              <Row k="Fidelidad (12 semanas)" v={faith.possible ? `${faith.attended} de ${faith.possible} cultos · ${FAITH_LABEL[faith.cat].label}` : 'Recién agregado'} />
-            ) : null}
-            <Row
-              k="Seguimiento"
-              v={followUp?.display_name ?? (c.follow_up_user_id ? 'Asignado' : 'Sin asignar')}
-              right={canEdit ? <Small label="Cambiar" onPress={() => setPicker('followup')} /> : undefined}
-            />
-            <Row
-              k="Cuenta en la app"
-              v={linked ? linked.display_name : 'No usa la app'}
-              right={isStaff ? <Small label={linked ? 'Cambiar' : 'Vincular'} onPress={() => {
-                supabase.from('contacts').select('profile_id').not('profile_id', 'is', null).then(({ data }) => {
-                  setLinkedPeople(new Set(((data ?? []) as { profile_id: string }[]).map((r) => r.profile_id)));
-                  setPicker('link');
-                });
-              }} /> : undefined}
-              last
-            />
+            {rows.map((r, i) => <Row key={r.k} k={r.k} v={r.v} right={r.right} last={i === rows.length - 1} />)}
           </Card>
+          {canEdit && isMember ? (
+            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -6 }}>
+              Miembro desde, discipulado, bautismo, seguimiento y cuenta en la app se ven y se cambian en <Text style={{ fontWeight: '700' }}>Editar</Text>.
+            </Text>
+          ) : null}
 
           {isStaff ? (
             <Card style={{ gap: 10 }}>
@@ -299,13 +312,13 @@ export default function PersonaDetalle() {
             </Card>
           ) : null}
 
-          {isLeader ? (
+          {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
             <Card style={{ gap: 10 }}>
               <SectionTitle>Seguimiento pastoral</SectionTitle>
-              <Button title="Marcar que vino a una reunión" icon="check-circle" variant="outline" small onPress={markAttendance} />
+              {!isMember ? <Button title="Marcar que vino a una reunión" icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 {!c.discipleship_since ? <Button title="Empezó discipulado" variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, 'Anotado: empezó discipulado')} style={{ flex: 1 }} /> : null}
-                {!c.baptized && !c.baptized_on ? <Button title="Se bautizó" variant="outline" small onPress={() => update({ baptized: true, baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó')} style={{ flex: 1 }} /> : null}
+                {!isBaptized ? <Button title="Se bautizó hoy" variant="outline" small onPress={() => update({ baptized: true, baptized_here: true, baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó en la iglesia')} style={{ flex: 1 }} /> : null}
               </View>
             </Card>
           ) : null}
@@ -359,7 +372,7 @@ export default function PersonaDetalle() {
             <Card style={{ gap: 12 }}>
               <Field label="Nota de la visita" value={note} onChangeText={setNote} multiline autoFocus />
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: 14, fontWeight: '700' }}>¿Le presentaste el evangelio?</Text>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>¿Le presentaste el evangelio?</Text>
                 <Segmented style={{ width: 130 }} options={[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }]} value={gospel} onChange={setGospel} />
               </View>
               <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>¿Se comprometió a venir?</Text>
@@ -388,7 +401,7 @@ export default function PersonaDetalle() {
       />
       <PickerModal
         visible={picker === 'group'}
-        title={`Elegí el ${gw.toLowerCase()}`}
+        title={`Elegí ${groupArticle(church?.grouping)} ${gw.toLowerCase()}`}
         items={groups.map((g) => ({ id: g.id, title: g.name, face: false }))}
         allowNone
         noneLabel={`Sin ${gw.toLowerCase()}`}
@@ -396,16 +409,6 @@ export default function PersonaDetalle() {
         onPick={(gid) => {
           setPicker(null);
           update({ group_id: gid });
-        }}
-      />
-      <PickerModal
-        visible={picker === 'link'}
-        title="¿Cuál es su cuenta en la app?"
-        items={people.filter((p) => !linkedPeople.has(p.id) || p.id === c.profile_id).map((p) => ({ id: p.id, title: p.display_name, subtitle: p.phone ?? undefined }))}
-        onClose={() => setPicker(null)}
-        onPick={(pid) => {
-          setPicker(null);
-          if (pid) linkAccount(c.id, pid).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
         }}
       />
     </View>
@@ -441,10 +444,10 @@ function Row({ k, v, right, last }: { k: string; v: string; right?: React.ReactN
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   action: { flex: 1, height: 58, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input, alignItems: 'center', justifyContent: 'center', gap: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: colors.border },
   smallBtn: { height: 32, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5, borderColor: colors.input, alignItems: 'center', justifyContent: 'center' },
   editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5, borderColor: colors.green },
   ministry: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 30, borderRadius: 999, backgroundColor: colors.greenSoft },
-});
+}));

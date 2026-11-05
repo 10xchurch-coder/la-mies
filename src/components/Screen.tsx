@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type Vie
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { colors, themed } from '../theme';
 import { CONTENT_MAX_WIDTH } from '../lib/layout';
 
 export function Header({ title, subtitle, back, right }: { title: string; subtitle?: string; back?: boolean; right?: React.ReactNode }) {
@@ -42,7 +42,7 @@ export function Screen({ children, style, scroll = true, padded = true }: { chil
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: 12, paddingBottom: 10, backgroundColor: colors.bg },
   headerInner: { flexDirection: 'row', alignItems: 'center', gap: 8, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' },
@@ -50,4 +50,4 @@ const styles = StyleSheet.create({
   back: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.3, color: colors.text },
   subtitle: { fontSize: 13, fontWeight: '500', color: colors.muted },
-});
+}));

@@ -10,7 +10,7 @@ import { sessionPoints, trimSession } from '@/lib/api';
 import { fmtTime } from '@/lib/format';
 import { walkedDistance, type TrackPoint } from '@/lib/track';
 import { useOuting } from '@/store/outing';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export default function Recortar() {
   const router = useRouter();
@@ -124,8 +124,8 @@ export default function Recortar() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   chip: { height: 44, paddingHorizontal: 16, borderRadius: 999, borderWidth: 1.5, borderColor: colors.input, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   chipOn: { borderColor: colors.green, backgroundColor: colors.greenSoft },
   chipText: { fontSize: 15, fontWeight: '600', color: colors.text },
-});
+}));

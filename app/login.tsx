@@ -6,7 +6,7 @@ import { Screen } from '@/components/Screen';
 import { Button, Field } from '@/components/ui';
 import { supabase, errorMessage, supabaseConfigured } from '@/lib/supabase';
 import { WEB_URL } from '@/lib/share';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 
 export default function Login() {
   const router = useRouter();
@@ -139,11 +139,11 @@ export default function Login() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   logo: { width: 76, height: 76, borderRadius: 38, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 34, fontWeight: '800', letterSpacing: -0.5, color: colors.text, marginTop: 8 },
   subtitle: { fontSize: 14, fontWeight: '500', color: colors.muted },
   error: { color: colors.red, fontSize: 13, textAlign: 'center' },
   warn: { color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, textAlign: 'center' },
   verse: { fontSize: 13, fontStyle: 'italic', color: colors.muted, textAlign: 'center', lineHeight: 19 },
-});
+}));

@@ -8,7 +8,7 @@ import { listProfiles } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { Profile } from '@/types';
 import type { Step1 } from './nuevo';
 
@@ -86,7 +86,9 @@ export default function Visita() {
     }
   };
 
-  const groupWord = church?.grouping === 'bus_routes' ? 'colectivo' : 'grupo';
+  const groupWord = church?.grouping === 'bus_routes' ? 'ruta' : 'grupo';
+  const art = church?.grouping === 'bus_routes' ? 'la' : 'el';
+  const todo = church?.grouping === 'bus_routes' ? 'Toda' : 'Todo';
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -117,7 +119,7 @@ export default function Visita() {
           {promise !== 'none' ? (
             <View style={styles.pickup}>
               <View style={{ flex: 1 }}>
-                <Toggle label={`Pasarlo a buscar con el ${groupWord}`} value={pickup} onChange={setPickup} />
+                <Toggle label={`Pasarlo a buscar con ${art} ${groupWord}`} value={pickup} onChange={setPickup} />
               </View>
               {pickup ? <Field label="Hora" value={pickupTime} onChangeText={setPickupTime} placeholder="14:30" style={{ width: 90 }} /> : null}
             </View>
@@ -130,7 +132,7 @@ export default function Visita() {
           <Text style={styles.label}>Compartir este contacto con</Text>
           <Choice
             options={[
-              { value: 'group', label: group ? `Todo mi ${groupWord} (${group.name})` : `Toda la iglesia` },
+              { value: 'group', label: group ? `${todo} mi ${groupWord} (${group.name})` : `Toda la iglesia` },
               { value: 'me', label: 'Solo yo, por ahora' },
               { value: 'custom', label: 'Elegir personas' },
             ]}
@@ -169,7 +171,7 @@ export default function Visita() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   bar: { flex: 1, height: 5, borderRadius: 3 },
   rowQ: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   q: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
@@ -177,4 +179,4 @@ const styles = StyleSheet.create({
   pickup: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 12, borderRadius: 12, backgroundColor: colors.bgPage },
   person: { height: 44, paddingHorizontal: 16, borderRadius: 999, borderWidth: 1.5, borderColor: colors.input, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   personOn: { borderColor: colors.green, backgroundColor: colors.greenSoft },
-});
+}));

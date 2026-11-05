@@ -44,7 +44,7 @@ export default function Reuniones() {
       <Screen>
         {rows.map((s) => (
           <Card key={s.id} style={{ gap: 4, opacity: s.active ? 1 : 0.5 }}>
-            <Text style={{ fontSize: 16, fontWeight: '800' }}>{s.name}</Text>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{s.name}</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>{dayName(s.dow)} {s.time}</Text>
             <Toggle label="Cuenta para la fidelidad" hint="Los cultos principales. Jóvenes u oración, mejor no." value={s.main} onChange={(v) => patch(s.id, { main: v })} />
             <Toggle label="Activa" value={s.active} onChange={(v) => patch(s.id, { active: v })} />

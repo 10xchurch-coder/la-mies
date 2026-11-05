@@ -5,7 +5,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Loading } from '@/components/ui';
 import { getTraining } from '@/lib/api';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { TrainingItem } from '@/types';
 
 /** Texto simple con títulos (#), subtítulos (##) y viñetas (-). */
@@ -61,9 +61,9 @@ export default function CapacitacionDetalle() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   summary: { fontSize: 15, fontWeight: '600', color: colors.greenText, backgroundColor: colors.greenSoft, padding: 12, borderRadius: 12, lineHeight: 21 },
   h1: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: 6 },
   h2: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: 4 },
   p: { fontSize: 15, lineHeight: 23, color: colors.text },
-});
+}));

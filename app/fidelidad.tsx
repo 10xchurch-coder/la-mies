@@ -117,7 +117,7 @@ export default function Fidelidad() {
               <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } })} style={{ flex: 1, maxWidth: cols > 1 ? '49.5%' : '100%', flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
                 <Face name={r.name} path={r.photo_path} size={44} />
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '700' }}>{r.name}</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
                     {r.possible ? `${r.attended} de ${r.possible} cultos` : 'Recién agregado'}{r.last_attended ? ` · última vez ${fmtDateOnly(r.last_attended)}` : ''}
                   </Text>
@@ -161,7 +161,7 @@ export default function Fidelidad() {
           renderItem={({ item: c }) => (
             <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: c.id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Face name={c.name} path={c.photo_path} size={40} />
-              <Text style={{ flex: 1, fontSize: 15, fontWeight: '600' }}>{c.name}</Text>
+              <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{c.name}</Text>
               {eng.get(c.id) ? <Tag text={FAITH_LABEL[eng.get(c.id)!.category].label} tone={FAITH_LABEL[eng.get(c.id)!.category].tone} /> : null}
             </Pressable>
           )}

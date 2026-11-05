@@ -7,7 +7,7 @@ import { scoreboard, teamTotals } from '@/lib/api';
 import { groupWord } from '@/lib/format';
 import { POINTS } from '@/lib/levels';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { ScoreRow, TeamTotals } from '@/types';
 
 type Period = 'day' | 'week' | 'month';
@@ -72,11 +72,11 @@ export default function Tablero() {
             <View style={{ gap: 8 }}>
               {groups.map(([name, pts], i) => (
                 <View key={name} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Text style={{ width: 96, fontSize: 14, fontWeight: '700' }} numberOfLines={1}>{name}</Text>
+                  <Text style={{ width: 96, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={1}>{name}</Text>
                   <View style={{ flex: 1, height: 26, borderRadius: 6, backgroundColor: colors.border, overflow: 'hidden' }}>
                     <View style={{ width: `${Math.max(4, (pts / maxGroup) * 100)}%`, height: '100%', borderRadius: 6, backgroundColor: palette[i % palette.length] }} />
                   </View>
-                  <Text style={{ width: 56, textAlign: 'right', fontSize: 14, fontWeight: '800' }}>{pts} pts</Text>
+                  <Text style={{ width: 56, textAlign: 'right', fontSize: 14, fontWeight: '800', color: colors.text }}>{pts} pts</Text>
                 </View>
               ))}
             </View>
@@ -91,14 +91,14 @@ export default function Tablero() {
                 <Text style={{ width: 24, fontSize: 15, fontWeight: '800', color: i === 0 ? colors.amber : colors.muted }}>{i + 1}</Text>
                 <Avatar name={r.display_name} size={36} color={i === 0 ? colors.amber : colors.green} textColor="#FFFFFF" />
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '700' }}>
+                  <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                     {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
                     {r.presentations} presentaciones · {r.promises} promesas{r.came ? ` · ${r.came} vinieron` : ''}
                   </Text>
                 </View>
-                <Text style={{ fontSize: 16, fontWeight: '800' }}>{r.points}</Text>
+                <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.points}</Text>
               </View>
             ))
           ) : (
@@ -113,6 +113,6 @@ export default function Tablero() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, paddingHorizontal: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-});
+}));

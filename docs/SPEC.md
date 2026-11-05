@@ -76,3 +76,17 @@ Weekly report email/PDF · network dashboard screen · photos/documents in chat 
 - **Web**: publicada en GitHub Pages (`https://10xchurch-coder.github.io/la-mies/`) por GitHub Actions en cada cambio.
 
 Pendiente de configurar en Supabase (Authentication → URL Configuration): Site URL = `https://10xchurch-coder.github.io/la-mies/` y Redirect URLs `https://10xchurch-coder.github.io/la-mies/**`, para que los links de correo abran la web y no den error.
+
+## v0.5 — Modo oscuro, familia y devocionales de noviembre
+
+- **Modo oscuro**: interruptor en Ajustes → Apariencia. Se guarda en el teléfono; la primera vez sigue al sistema. Toda la app (mapa incluido) cambia de colores sin reiniciar.
+- **Ficha corta por tipo de persona**: *Miembro* muestra solo teléfono, ruta (si tiene), cónyuge e hijos, y el bautismo solo si falta; *Contacto* agrega "prometió venir", discipulado, bautismo y seguimiento; *Visita* agrega cuántas veces vino y la fidelidad. Miembro desde, discipulado, bautismo, seguimiento y cuenta en la app se ven y se cambian en **Editar**.
+- **Un contacto pasa a visita solo** cuando se lo marca presente en una reunión (al tomar asistencia o desde su ficha).
+- **Bautismo**: al marcar Bautizado se elige "En esta iglesia" (con fecha) o "Antes de llegar" (la ficha dice "Sí", sin fecha).
+- **Fecha de nacimiento** para visitas y miembros (edad calculada sola); en contactos de la calle alcanza con la edad. El mismo campo acepta `7` (edad) o `12/03/2018` (fecha). Los hijos también.
+- **Estado civil**: se agregan Separado/a y Divorciado/a. Casado/a o En pareja muestra el campo **Cónyuge** con sugerencias de fichas ya cargadas; al elegir una, las dos fichas quedan vinculadas (familia) y los hijos de una se ven en la otra.
+- **Rutas**: en toda la app se dice "Ruta" (El Porvenir, etc.) en lugar de "Colectivo"; filtro "Todas las rutas".
+- **Maestros por ficha**: los turnos de las clases se asignan a miembros (no hace falta que tengan la app). Si tienen cuenta, el aviso del lunes les llega igual. Cargados los turnos de octubre y noviembre 2026 de Cuna, Niños 2–6 y Niños 6–12 (`supabase/seed/turnos_clases_oct_nov_2026.sql`).
+- **Devocional en diapositivas**: versículo → frase del día → lectura corta → "Devocional completo" a pantalla completa (estudio de 5–10 minutos con los pasajes en texto completo) que termina con una oración. En el editor, un título va entre `**` `**`.
+- **Devocionales de noviembre 2026** (5 al 30) cargados para la iglesia: Palabra (sem. 1), oración (sem. 2), la mies (sem. 3–4), gratitud, confianza y perseverancia (`supabase/seed/devocionales_noviembre_2026.sql`).
+- Base: migración `0010_familia_bautismo_turnos.sql` (aplicada).

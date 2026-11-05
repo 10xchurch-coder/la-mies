@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { MapView, Marker, Polyline, type MapViewProps, type Region } from './map';
 import { offsetSegment, segmentOf, type LatLng } from '../lib/geo';
-import { colors, coverageColor } from '../theme';
+import { colors, coverageColor, themed } from '../theme';
 import type { Contact, CoverageRow, RoadRow } from '../types';
 
 export type LiveMember = { user_id: string; display_name: string; lat: number; lng: number; me?: boolean };
@@ -120,7 +120,7 @@ export function bboxOfRegion(r: Region) {
   };
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   liveDot: {
     width: 30, height: 30, borderRadius: 15, backgroundColor: colors.green, borderWidth: 3, borderColor: '#FFFFFF',
     alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 4, shadowOffset: { width: 0, height: 2 }, elevation: 3,
@@ -129,4 +129,4 @@ const styles = StyleSheet.create({
   liveInitial: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
   liveLabel: { marginTop: 2, backgroundColor: '#FFFFFF', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, elevation: 2 },
   liveLabelText: { fontSize: 11, fontWeight: '700', color: colors.text },
-});
+}));

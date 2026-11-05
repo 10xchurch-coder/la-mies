@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, SectionTitle } from '@/components/ui';
 import { listTraining } from '@/lib/api';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { TrainingItem } from '@/types';
 
 export default function Capacitacion() {
@@ -52,7 +52,7 @@ export default function Capacitacion() {
                       <Feather name={it.kind === 'video' ? 'play' : 'file-text'} size={20} color={it.kind === 'video' ? colors.blueText : colors.greenText} />
                     </View>
                     <View style={{ flex: 1, gap: 3 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '700' }}>{it.title}</Text>
+                      <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{it.title}</Text>
                       {it.summary ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }} numberOfLines={2}>{it.summary}</Text> : null}
                       <Text style={{ fontSize: 11, color: colors.muted }}>{it.kind === 'video' ? 'Video' : 'Para leer'}{it.minutes ? ` · ${it.minutes} min` : ''}</Text>
                     </View>
@@ -70,8 +70,8 @@ export default function Capacitacion() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
   icon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
-});
+}));

@@ -40,7 +40,7 @@ export default function MaterialVer() {
   };
 
   if (m === undefined) return <Loading />;
-  if (!m) return <View style={{ flex: 1 }}><Header title="Material" back /><Text style={{ padding: 24 }}>No se encontró.</Text></View>;
+  if (!m) return <View style={{ flex: 1 }}><Header title="Material" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -48,7 +48,7 @@ export default function MaterialVer() {
       <Screen>
         {m.file_path ? (
           <Card style={{ gap: 10 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700' }}>{m.file_name ?? 'Archivo'}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{m.file_name ?? 'Archivo'}</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button title="Abrir" icon="eye" small onPress={() => open(false)} style={{ flex: 1 }} />
               <Button title="Descargar" icon="download" variant="outline" small onPress={() => open(true)} style={{ flex: 1 }} />

@@ -10,7 +10,7 @@ import { dailyFor, listMinistries, ministryMembers, myUpcoming, readingStreak } 
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { UpcomingItem } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
@@ -88,9 +88,9 @@ export default function Iglesia() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   tile: { width: '31%', flexGrow: 1, minHeight: 96, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 10 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
   dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
-});
+}));

@@ -88,13 +88,26 @@ export const MARITAL_LABEL: Record<string, string> = {
   married: 'Casado/a',
   partner: 'En pareja',
   widowed: 'Viudo/a',
+  separated: 'Separado/a',
+  divorced: 'Divorciado/a',
 };
 
 export const PROMISE_LABEL: Record<string, string> = { sat: 'sábado', sun: 'domingo' };
 
 export function groupWord(grouping: string | null | undefined, plural = false): string {
-  if (grouping === 'bus_routes') return plural ? 'Colectivos' : 'Colectivo';
+  if (grouping === 'bus_routes') return plural ? 'Rutas' : 'Ruta';
   return plural ? 'Grupos' : 'Grupo';
+}
+/** "Todas las rutas" / "Todos los grupos". */
+export function allGroupsLabel(grouping: string | null | undefined): string {
+  return grouping === 'bus_routes' ? 'Todas las rutas' : 'Todos los grupos';
+}
+/** Artículo que acompaña a la palabra: "la ruta" / "el grupo". */
+export function groupArticle(grouping: string | null | undefined, kind: 'el' | 'mi' | 'tu' | 'todo' = 'el'): string {
+  const fem = grouping === 'bus_routes';
+  if (kind === 'el') return fem ? 'la' : 'el';
+  if (kind === 'todo') return fem ? 'toda' : 'todo';
+  return kind; // "mi" y "tu" no cambian
 }
 
 // ---------- Parte 2 ----------
@@ -174,4 +187,60 @@ export function fmtBytes(n: number | null | undefined): string {
   if (!n) return '';
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
   return `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
+}
+
+// ---------- Fechas de nacimiento ----------
+/** Edad cumplida a partir de una fecha ISO (AAAA-MM-DD). */
+export function ageFrom(birthdate: string | null | undefined, today = new Date()): number | null {
+  if (!birthdate) return null;
+  const [y, m, d] = birthdate.split('-').map(Number);
+  if (!y || !m || !d) return null;
+  let age = today.getFullYear() - y;
+  if (today.getMonth() + 1 < m || (today.getMonth() + 1 === m && today.getDate() < d)) age--;
+  return age >= 0 && age <= 120 ? age : null;
+}
+
+/** Edad para mostrar: la fecha de nacimiento manda; si no hay, la edad anotada. */
+export function displayAge(p: { birthdate?: string | null; age?: number | null }): number | null {
+  return ageFrom(p.birthdate) ?? p.age ?? null;
+}
+
+/** "DD/MM/AAAA" → ISO, o null si no es una fecha válida. */
+export function parseDateAR(text: string): string | null {
+  const m = text.trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+  if (!m) return null;
+  const d = Number(m[1]); const mo = Number(m[2]); const y = Number(m[3]);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900 || y > new Date().getFullYear()) return null;
+  const dt = new Date(y, mo - 1, d);
+  if (dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+  return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+/** ISO → "DD/MM/AAAA" para mostrar en un campo. */
+export function fmtDateAR(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return y && m && d ? `${d}/${m}/${y}` : '';
+}
+
+/**
+ * Lo que escribe la persona en "edad o fecha de nacimiento": "7" es edad, "12/03/2018" es fecha.
+ * Devuelve las dos cosas listas para guardar.
+ */
+export function parseAgeOrBirthdate(text: string): { age: number | null; birthdate: string | null } {
+  const t = text.trim();
+  if (!t) return { age: null, birthdate: null };
+  const iso = parseDateAR(t);
+  if (iso) return { age: ageFrom(iso), birthdate: iso };
+  const n = Number(t.replace(/\D/g, ''));
+  return { age: Number.isFinite(n) && t.replace(/\D/g, '').length > 0 && n >= 0 && n <= 120 ? n : null, birthdate: null };
+}
+
+/** Escribe la fecha con barras mientras se tipea: "12032018" → "12/03/2018". Si son 1 a 3 dígitos, se deja como edad. */
+export function maskDateOrAge(text: string): string {
+  const digits = text.replace(/\D/g, '').slice(0, 8);
+  if (digits.length <= 3 && !text.includes('/')) return digits;
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }

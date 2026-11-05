@@ -4,7 +4,7 @@ import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, themed } from '../theme';
 import { Button } from './ui';
 import { supabase } from '../lib/supabase';
 
@@ -53,11 +53,11 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
   }
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   wrap: { flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14 },
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
   text: { fontSize: 14, color: colors.muted, textAlign: 'center', lineHeight: 20 },
   box: { maxHeight: 120, width: '100%', backgroundColor: colors.bgSoft, borderRadius: 10, padding: 10 },
   mono: { fontSize: 11, color: colors.muted, fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }) },
   ver: { fontSize: 11, color: colors.muted },
-});
+}));

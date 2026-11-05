@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { fmtDateShort } from '../lib/format';
-import { colors } from '../theme';
+import { colors, themed } from '../theme';
 import type { UpcomingItem } from '../types';
 
 export function UpcomingList({ items }: { items: UpcomingItem[] }) {
@@ -38,7 +38,7 @@ export function UpcomingList({ items }: { items: UpcomingItem[] }) {
 }
 
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   upcoming: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 14, backgroundColor: colors.greenSoft },
   dateBox: { width: 52, height: 52, borderRadius: 12, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center' },
-});
+}));

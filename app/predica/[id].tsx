@@ -70,7 +70,7 @@ export default function PredicaVer() {
   }, [id]);
 
   if (s === undefined) return <Loading />;
-  if (!s) return <View style={{ flex: 1 }}><Header title="Prédica" back /><Text style={{ padding: 24 }}>No se encontró.</Text></View>;
+  if (!s) return <View style={{ flex: 1 }}><Header title="Prédica" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
   const yt = youtubeId(s.youtube_url);
 
   const download = async () => {

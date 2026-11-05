@@ -118,7 +118,7 @@ export default function MinisterioDetalle() {
   };
 
   if (m === undefined) return <Loading />;
-  if (!m) return <View style={{ flex: 1 }}><Header title="Ministerio" back /><Text style={{ padding: 24 }}>No se encontró.</Text></View>;
+  if (!m) return <View style={{ flex: 1 }}><Header title="Ministerio" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
 
   const dutiesByDate = duties.reduce<Record<string, Duty[]>>((acc, d) => ({ ...acc, [d.on_date]: [...(acc[d.on_date] ?? []), d] }), {});
 
@@ -229,7 +229,7 @@ export default function MinisterioDetalle() {
             return (
               <Pressable key={mm.profile_id} onPress={() => memberMenu(mm)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <Face name={nameOf(mm.profile_id)} path={c?.photo_path} size={44} />
-                <Text style={{ flex: 1, fontSize: 15, fontWeight: '600' }}>{nameOf(mm.profile_id)}</Text>
+                <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{nameOf(mm.profile_id)}</Text>
                 {mm.is_leader || m.leader_id === mm.profile_id ? <Tag text="Líder" tone="green" /> : null}
               </Pressable>
             );

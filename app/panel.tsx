@@ -9,7 +9,7 @@ import { churchReport } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDay, fmtDistance, fmtMinutes, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
-import { colors } from '@/theme';
+import { colors, themed } from '@/theme';
 import type { ChurchReport } from '@/types';
 
 type Period = 'last' | 'week' | 'month';
@@ -167,7 +167,7 @@ export default function Panel() {
                 report.sessions.slice(0, 20).map((s, i) => (
                   <View key={s.id} style={[styles.tr, { paddingVertical: 10 }, i === Math.min(20, report.sessions.length) - 1 && { borderBottomWidth: 0 }]}>
                     <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: 14, fontWeight: '700' }}>{s.display_name} · {fmtDay(s.started_at)} {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : ' (en curso)'}</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{s.display_name} · {fmtDay(s.started_at)} {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : ' (en curso)'}</Text>
                       <Text style={{ fontSize: 12, color: colors.muted }}>
                         {fmtDistance(s.distance_m)} · {s.blocks} cuadras · {s.presentations} present. · {s.promises} promesas{s.auto_stopped ? ' · cortada sola' : ''}{s.trimmed_at ? ' · recortada' : ''}
                       </Text>
@@ -202,9 +202,9 @@ export default function Panel() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   pending: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: colors.amberSoft },
   tr: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: colors.border },
   th: { flex: 1, fontSize: 10, fontWeight: '700', color: colors.muted, textAlign: 'center' },
   td: { flex: 1, fontSize: 13, color: colors.text, textAlign: 'center' },
-});
+}));

@@ -15,7 +15,7 @@ import { segmentOf, sideName } from '@/lib/geo';
 import { KIND_LABEL, fmtDayYear, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
-import { COVERAGE_LEGEND, FLYERS_LEGEND, colors } from '@/theme';
+import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
 import type { Contact, CoverageRow, OutingKind, RoadRow } from '@/types';
 
 type Layer = 'all' | OutingKind;
@@ -290,7 +290,7 @@ export default function Mapa() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed(() => StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingBottom: 12 },
   title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.3, color: colors.text },
   subtitle: { fontSize: 13, fontWeight: '500', color: colors.muted },
@@ -309,4 +309,4 @@ const styles = StyleSheet.create({
   kindBtn: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16, borderRadius: 14, borderWidth: 2 },
   notice: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.amberSoft, padding: 12, borderTopWidth: 1, borderTopColor: colors.border },
   cta: { padding: 12, paddingHorizontal: 16, gap: 8, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg },
-});
+}));

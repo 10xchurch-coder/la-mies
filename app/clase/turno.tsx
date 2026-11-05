@@ -1,20 +1,22 @@
 // Quién da la clase una fecha puntual, quién ayuda y qué capítulo toca.
+// Los maestros se eligen entre los miembros de la iglesia (no hace falta que tengan cuenta en la app).
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Field, Loading, RowLink } from '@/components/ui';
-import { classSchedule, classTeachers, listMaterials, listProfiles, saveSchedule } from '@/lib/api';
+import { classSchedule, classTeachers, listMaterials, listMembers, listProfiles, saveSchedule } from '@/lib/api';
 import { errorMessage } from '@/lib/supabase';
 import { fmtDateShort } from '@/lib/format';
 import { colors } from '@/theme';
-import type { ClassTeacher, Material, Profile } from '@/types';
+import type { ClassTeacher, Contact, Material, Profile } from '@/types';
 
 export default function Turno() {
   const router = useRouter();
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>();
   const [loaded, setLoaded] = useState(false);
+  const [members, setMembers] = useState<Contact[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [teachers, setTeachers] = useState<ClassTeacher[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
@@ -26,15 +28,19 @@ export default function Turno() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    Promise.all([listProfiles(), classTeachers(id), listMaterials(), classSchedule(id, date, date)]).then(([p, t, m, s]) => {
+    Promise.all([listMembers(), listProfiles(), classTeachers(id), listMaterials(), classSchedule(id, date, date)]).then(([mem, p, t, m, s]) => {
+      setMembers(mem);
       setPeople(p);
       setTeachers(t);
       setMaterials(m);
-      if (s[0]) {
-        setTeacher(s[0].teacher_id);
-        setHelper(s[0].helper_id);
-        setMaterial(s[0].material_id);
-        setNote(s[0].note ?? '');
+      const row = s[0];
+      if (row) {
+        // Si el turno viejo tenía solo la cuenta, buscar la ficha de esa cuenta.
+        const byProfile = (pid: string | null) => (pid ? mem.find((c) => c.profile_id === pid)?.id ?? null : null);
+        setTeacher(row.teacher_contact_id ?? byProfile(row.teacher_id));
+        setHelper(row.helper_contact_id ?? byProfile(row.helper_id));
+        setMaterial(row.material_id);
+        setNote(row.note ?? '');
       }
       setLoaded(true);
     }).catch(() => setLoaded(true));
@@ -43,7 +49,15 @@ export default function Turno() {
   const save = async () => {
     setBusy(true);
     try {
-      await saveSchedule({ class_id: id, on_date: date, teacher_id: teacher, helper_id: helper, material_id: material, note: note.trim() || null });
+      const t = members.find((c) => c.id === teacher);
+      const h = members.find((c) => c.id === helper);
+      await saveSchedule({
+        class_id: id, on_date: date,
+        teacher_contact_id: teacher, helper_contact_id: helper,
+        // La cuenta (si la tiene) es la que recibe el aviso del lunes.
+        teacher_id: t?.profile_id ?? null, helper_id: h?.profile_id ?? null,
+        material_id: material, note: note.trim() || null,
+      });
       router.back();
     } catch (e) {
       Alert.alert('No se pudo guardar', errorMessage(e));
@@ -53,11 +67,15 @@ export default function Turno() {
   };
 
   if (!loaded) return <Loading />;
-  const nameOf = (pid: string | null) => people.find((p) => p.id === pid)?.display_name;
+  const nameOf = (cid: string | null) => members.find((c) => c.id === cid)?.name;
   const m = materials.find((x) => x.id === material);
-  // Primero los maestros de la clase, después el resto.
-  const ordered = [...people].sort((a, b) => Number(teachers.some((t) => t.profile_id === b.id)) - Number(teachers.some((t) => t.profile_id === a.id)));
-  const items = ordered.map((p) => ({ id: p.id, title: p.display_name, subtitle: teachers.find((t) => t.profile_id === p.id) ? (teachers.find((t) => t.profile_id === p.id)?.is_helper ? 'Ayudante de la clase' : 'Maestro de la clase') : undefined }));
+  const isClassTeacher = (c: Contact) => (c.profile_id ? teachers.find((t) => t.profile_id === c.profile_id) : undefined);
+  // Primero los maestros de la clase, después el resto de los miembros.
+  const ordered = [...members].sort((a, b) => Number(!!isClassTeacher(b)) - Number(!!isClassTeacher(a)) || a.name.localeCompare(b.name));
+  const items = ordered.map((c) => {
+    const t = isClassTeacher(c);
+    return { id: c.id, title: c.name, subtitle: t ? (t.is_helper ? 'Ayudante de la clase' : 'Maestro de la clase') : (c.profile_id ? people.find((p) => p.id === c.profile_id) ? 'Tiene la app' : undefined : undefined) };
+  });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -69,7 +87,7 @@ export default function Turno() {
           <RowLink icon="book" title={m ? m.title : 'Elegir material'} subtitle={m ? m.series : 'Capítulo o lección'} onPress={() => setPicker('material')} />
         </Card>
         <Field label="Nota para el maestro" hint="(opcional)" value={note} onChangeText={setNote} multiline />
-        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>El lunes de esa semana, el maestro y el ayudante reciben un aviso con la clase y el capítulo.</Text>
+        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Se eligen entre los miembros de la iglesia. Si el maestro o el ayudante tienen la app, el lunes de esa semana reciben un aviso con la clase y el capítulo.</Text>
         <Button title="Guardar" onPress={save} loading={busy} />
       </Screen>
       <PickerModal visible={picker === 'teacher'} title="Maestro" items={items} allowNone onClose={() => setPicker(null)} onPick={(v) => { setTeacher(v); setPicker(null); }} />

@@ -92,7 +92,7 @@ export type Contact = {
   name: string;
   age: number | null;
   sex: 'm' | 'f' | null;
-  marital: 'single' | 'married' | 'partner' | 'widowed' | null;
+  marital: 'single' | 'married' | 'partner' | 'widowed' | 'separated' | 'divorced' | null;
   phone: string | null;
   lat: number | null;
   lng: number | null;
@@ -108,7 +108,12 @@ export type Contact = {
   baptized_on: string | null;
   /** Bautismo después de creer en Cristo (no cuenta el de bebé). */
   baptized: boolean;
+  /** true: se bautizó en esta iglesia (con fecha). false: ya venía bautizado de antes. */
+  baptized_here: boolean;
   dni: string | null;
+  /** Cónyuge: otra ficha de la iglesia, o solo el nombre. */
+  spouse_id: string | null;
+  spouse_name: string | null;
   share_mode: 'group' | 'me' | 'custom';
   follow_up_user_id: string | null;
   archived: boolean;
@@ -125,7 +130,7 @@ export type Contact = {
 
 export type PersonStatus = 'contact' | 'visitor' | 'member';
 
-export type ContactChild = { id: string; contact_id: string; name: string; age: number | null };
+export type ContactChild = { id: string; contact_id: string; name: string; age: number | null; birthdate: string | null };
 
 export type ContactVisit = {
   id: string;
@@ -208,6 +213,9 @@ export type ClassRow = { id: string; church_id: string; name: string; age_min: n
 export type ClassTeacher = { class_id: string; profile_id: string; is_helper: boolean };
 export type ClassSchedule = {
   id: string; church_id: string; class_id: string; on_date: string; teacher_id: string | null; helper_id: string | null; material_id: string | null; note: string | null;
+  /** Maestro y ayudante por ficha de persona (no necesitan cuenta). */
+  teacher_contact_id: string | null; helper_contact_id: string | null;
+  teacher_contact?: { id: string; name: string } | null; helper_contact?: { id: string; name: string } | null;
 };
 export type ClassAttendance = { id: string; class_id: string; on_date: string; contact_id: string; present: boolean; note: string | null };
 
