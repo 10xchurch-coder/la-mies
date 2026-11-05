@@ -115,3 +115,6 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 
 ## v0.6.1
 - **Comentarios del día**: al abrirlos, la pantalla parpadeaba sin parar (la lista se volvía a cargar en bucle). Arreglado.
+
+## Próxima versión (ya en la web)
+- **Crear cuenta**: al tocar "Crear cuenta" se pasa a una pantalla limpia "Te mandamos un correo" (con el correo), y a los 6 segundos vuelve sola a Entrar con el correo ya escrito. El nombre, el celular y el código se guardan con la cuenta: al entrar después de validar el correo, la persona queda unida a su iglesia sola (si el código no sirve, ve el formulario ya lleno). Si el correo ya tenía cuenta, lo avisa y sugiere "¿Olvidaste tu contraseña?".

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Field } from '@/components/ui';
+import { Button, Field, Loading } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { checkPassword } from '@/lib/password';
 import { PasswordField } from '@/components/PasswordField';
@@ -21,12 +21,30 @@ export default function Registro() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
-  const join = async () => {
-    const { error } = await supabase.rpc('join_church', { p_code: code.trim(), p_display_name: name.trim(), p_phone: phone.trim() });
+  const join = async (c = code, n = name, ph = phone) => {
+    const { error } = await supabase.rpc('join_church', { p_code: c.trim(), p_display_name: n.trim(), p_phone: ph.trim() });
     if (error) throw error;
     await refreshProfile();
     router.replace('/');
   };
+
+  // Al crear la cuenta se guardan el nombre, el celular y el código. Cuando la persona confirma el correo
+  // y entra, se la une a su iglesia sola, sin volver a llenar nada. Si el código no sirve, ve el formulario ya lleno.
+  const meta = (session?.user?.user_metadata ?? {}) as { display_name?: string; phone?: string; join_code?: string };
+  const [autoJoining, setAutoJoining] = useState(!!(session && meta.join_code));
+  const tried = useRef(false);
+  useEffect(() => {
+    if (!session || tried.current) return;
+    tried.current = true;
+    if (meta.display_name) setName(meta.display_name);
+    if (meta.phone) setPhone(meta.phone);
+    if (meta.join_code) setCode(meta.join_code);
+    if (!meta.join_code || !meta.display_name) { setAutoJoining(false); return; }
+    join(meta.join_code, meta.display_name, meta.phone ?? '').catch((e) => {
+      setMsg(errorMessage(e));
+      setAutoJoining(false);
+    });
+  }, [session]);
 
   const submit = async () => {
     setBusy(true);
@@ -41,11 +59,20 @@ export default function Registro() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
-        options: { data: { display_name: name.trim() }, emailRedirectTo: `${WEB_URL}/login` },
+        options: {
+          data: { display_name: name.trim(), phone: phone.trim(), join_code: code.trim().toUpperCase() },
+          emailRedirectTo: `${WEB_URL}/login`,
+        },
       });
       if (error) throw error;
+      // Si el correo ya tenía cuenta, Supabase no avisa: devuelve un usuario sin identidades y no manda nada.
+      if (!data.session && data.user && (data.user.identities?.length ?? 0) === 0) {
+        setMsg('Ya hay una cuenta con ese correo. Volvé a Entrar; si no te acordás la contraseña, tocá "¿Olvidaste tu contraseña?".');
+        return;
+      }
       if (!data.session) {
-        setMsg('Te mandamos un correo para confirmar la cuenta. Cuando lo confirmes, entrá y poné el código de tu iglesia.');
+        // Pantalla aparte que avisa del correo y después vuelve sola a Entrar.
+        router.replace(`/registro-enviado?email=${encodeURIComponent(email.trim().toLowerCase())}` as Href);
         return;
       }
       await join();
@@ -55,6 +82,8 @@ export default function Registro() {
       setBusy(false);
     }
   };
+
+  if (autoJoining) return <Loading />;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>

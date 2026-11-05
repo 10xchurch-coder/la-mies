@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Button, Field } from '@/components/ui';
@@ -10,7 +10,9 @@ import { colors, themed } from '@/theme';
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  // Viene de "Crear cuenta": el correo ya queda escrito.
+  const { email: emailParam } = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(typeof emailParam === 'string' ? emailParam : '');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
