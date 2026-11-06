@@ -23,6 +23,9 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Para que el recorrido no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida está activa.",
         "NSFaceIDUsageDescription": "La Mies usa Face ID para desbloquear la app.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
