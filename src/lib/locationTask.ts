@@ -85,6 +85,12 @@ function toPayload(p: TrackPoint) {
   return { t: new Date(p.t).toISOString(), lat: p.lat, lng: p.lng, acc: p.acc ?? null, spd: p.spd ?? null, hdg: p.hdg ?? null };
 }
 
+export class SessionEndedError extends Error {
+  constructor() {
+    super('La salida ya terminó');
+  }
+}
+
 /** Sube los puntos pendientes. Si no hay señal, quedan para la próxima. */
 export async function flushPending(sessionId: string, force = false, upTo?: number): Promise<boolean> {
   const pending = await readJson<TrackPoint[]>(K.pending, []);
@@ -97,7 +103,11 @@ export async function flushPending(sessionId: string, force = false, upTo?: numb
     p_session: sessionId,
     p_points: batch.map(toPayload),
   });
-  if (error) return false;
+  if (error) {
+    // La salida ya se cerró en el servidor (por ejemplo, sola por estar quieto mucho rato): dejamos de marcar.
+    if (/ya termin/i.test(error.message ?? '')) throw new SessionEndedError();
+    return false;
+  }
   const sent = new Set(batch.map((p) => p.t));
   await AsyncStorage.setItem(K.pending, JSON.stringify(pending.filter((p) => !sent.has(p.t))));
   await AsyncStorage.setItem(K.lastFlush, String(Date.now()));
@@ -168,7 +178,11 @@ export type EndResult = { distance_m: number; blocks: number };
 /** Termina la salida: sube lo que falta, manda la cobertura y la cierra en el servidor. */
 export async function finishTracking(sessionId: string): Promise<EndResult> {
   await stopUpdates();
-  await flushPending(sessionId, true);
+  try {
+    await flushPending(sessionId, true);
+  } catch (e) {
+    if (!(e instanceof SessionEndedError)) throw e;
+  }
   const points = await getLocalPoints();
   const cov = (await syncCoverage(sessionId, true)) ?? { blocks: 0 };
   const distance_m = walkedDistance(points);
@@ -186,7 +200,11 @@ export async function finishTracking(sessionId: string): Promise<EndResult> {
 /** Recorta la salida en un momento dado (me olvidé de apagarla / vehículo). */
 export async function trimTracking(sessionId: string, cutoffMs: number, auto: boolean): Promise<void> {
   await stopUpdates();
-  await flushPending(sessionId, true, cutoffMs);
+  try {
+    await flushPending(sessionId, true, cutoffMs);
+  } catch (e) {
+    if (!(e instanceof SessionEndedError)) throw e;
+  }
   await syncCoverage(sessionId, true, cutoffMs);
   const { error } = await supabase.rpc('trim_session', {
     p_session: sessionId,
@@ -288,7 +306,17 @@ export async function handleLocations(locations: Location.LocationObject[]): Pro
     return;
   }
 
-  await flushPending(active.id);
+  try {
+    await flushPending(active.id);
+  } catch (e) {
+    if (e instanceof SessionEndedError) {
+      await stopUpdates();
+      await clearLocal();
+      await notify('Salida terminada', 'La salida se cerró sola porque estuviste un buen rato en el mismo lugar. Tus calles ya quedaron guardadas.');
+      return;
+    }
+    throw e;
+  }
   await syncCoverage(active.id);
 }
 

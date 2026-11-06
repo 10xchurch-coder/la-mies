@@ -11,7 +11,7 @@ import { colors } from '@/theme';
 import type { NotificationRow } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
-const ICON: Record<string, IconName> = { duty: 'calendar', class: 'book-open', ministry: 'volume-2', absences: 'user-x', link: 'link' };
+const ICON: Record<string, IconName> = { duty: 'calendar', class: 'book-open', ministry: 'volume-2', absences: 'user-x', link: 'link', outing: 'map' };
 
 export default function Avisos() {
   const router = useRouter();
