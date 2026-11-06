@@ -1,0 +1,43 @@
+# Compila la app de iPhone en la nube de Expo (EAS) y la manda a TestFlight.
+# Se usa desde GitHub: Actions → "App iPhone" → Run workflow.
+# Necesita:
+#   - el secreto EXPO_TOKEN (el mismo que usa Android);
+#   - la clave de App Store Connect (API key) cargada en expo.dev → la-mies → Credentials → iOS.
+#     Con esa clave EAS crea y renueva solo los certificados y perfiles de Apple, y sube la app a TestFlight.
+name: App iPhone
+
+on:
+  workflow_dispatch:
+    inputs:
+      subir:
+        description: "Subir a TestFlight al terminar"
+        type: boolean
+        default: true
+
+concurrency:
+  group: ios
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Compilar (y subir a TestFlight)
+        env:
+          SUBIR: ${{ inputs.subir && '--auto-submit' || '' }}
+        run: |
+          eas build --platform ios --profile production --non-interactive $SUBIR --json > build.json
+          cat build.json
+          node -e "const b=require('./build.json')[0]; console.log('\n=== LISTO ==='); console.log('Página de la compilación: https://expo.dev/accounts/hopeforargentinas-team/projects/la-mies/builds/' + b.id)" | tee -a "$GITHUB_STEP_SUMMARY"
