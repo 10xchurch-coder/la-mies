@@ -44,7 +44,7 @@ function faithOf(c: Contact, atts: Attendance[], services: ChurchService[]): { c
 
 export default function PersonaDetalle() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, vinculo } = useLocalSearchParams<{ id: string; vinculo?: string }>();
   const { profile, church, isStaff, isLeader } = useAuth();
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
@@ -58,6 +58,10 @@ export default function PersonaDetalle() {
   const [people, setPeople] = useState<Profile[]>([]);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [loaded, setLoaded] = useState(false);
+  // Viene del aviso "Cuenta vinculada por teléfono": se muestra un cartel para confirmar o deshacer.
+  const [review, setReview] = useState(vinculo === '1');
+  const [linkedName, setLinkedName] = useState<string | null>(null);
+  const [unlinking, setUnlinking] = useState(false);
   const [adding, setAdding] = useState(false);
   const [note, setNote] = useState('');
   const [gospel, setGospel] = useState<'yes' | 'no'>('no');
@@ -241,6 +245,37 @@ export default function PersonaDetalle() {
           </View>
         ) : null}
         <View style={{ padding: 16, gap: 14 }}>
+          {review && isStaff && c.profile_id ? (
+            <LinkReview
+              contactName={c.name}
+              profileId={c.profile_id}
+              linkedName={linkedName}
+              onName={setLinkedName}
+              busy={unlinking}
+              onConfirm={() => setReview(false)}
+              onUnlink={() => Alert.alert(
+                'No es esta persona',
+                `La cuenta de la app se separa de la ficha de ${c.name} y queda con una ficha propia.`,
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Separar', style: 'destructive', onPress: async () => {
+                    setUnlinking(true);
+                    try {
+                      const { error } = await supabase.rpc('unlink_account', { p_contact: c.id });
+                      if (error) throw error;
+                      setReview(false);
+                      setC({ ...c, profile_id: null });
+                      Alert.alert('Listo', 'Se separaron. Si después encontrás su ficha correcta, unila desde Editar → Cuenta en la app.');
+                    } catch (e) {
+                      Alert.alert('No se pudo', errorMessage(e));
+                    } finally {
+                      setUnlinking(false);
+                    }
+                  } },
+                ],
+              )}
+            />
+          ) : null}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <Face name={c.name} path={c.photo_path} size={84} editable={canEdit} onPress={canEdit ? changePhoto : undefined} />
             <View style={{ flex: 1, gap: 5 }}>
@@ -449,3 +484,30 @@ const styles = themed(() => StyleSheet.create({
   editBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1.5, borderColor: colors.green },
   ministry: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 30, borderRadius: 999, backgroundColor: colors.greenSoft },
 }));
+
+/** Cartel para revisar una cuenta que se unió sola a esta ficha porque el celular coincide. */
+function LinkReview({ contactName, profileId, linkedName, onName, busy, onConfirm, onUnlink }: {
+  contactName: string; profileId: string; linkedName: string | null; onName: (n: string) => void;
+  busy: boolean; onConfirm: () => void; onUnlink: () => void;
+}) {
+  React.useEffect(() => {
+    supabase.from('profiles').select('display_name').eq('id', profileId).maybeSingle()
+      .then(({ data }) => { if (data?.display_name) onName(data.display_name); });
+  }, [profileId]);
+  return (
+    <View style={{ backgroundColor: colors.greenSoft, borderRadius: 14, padding: 14, gap: 10, borderWidth: 1, borderColor: colors.border }}>
+      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <Feather name="link" size={18} color={colors.green} />
+        <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>¿Es la misma persona?</Text>
+      </View>
+      <Text style={{ fontSize: 14, lineHeight: 20, color: colors.text }}>
+        La cuenta de la app de <Text style={{ fontWeight: '800' }}>{linkedName ?? '…'}</Text> se unió sola a la ficha de{' '}
+        <Text style={{ fontWeight: '800' }}>{contactName}</Text> porque tienen el mismo celular. Si es la misma persona, no hay que hacer nada más.
+      </Text>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flex: 1 }}><Button title="Sí, es la misma" icon="check" onPress={onConfirm} /></View>
+        <View style={{ flex: 1 }}><Button title="No es" variant="outline" onPress={onUnlink} loading={busy} /></View>
+      </View>
+    </View>
+  );
+}

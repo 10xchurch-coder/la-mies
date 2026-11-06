@@ -2,7 +2,7 @@
   "expo": {
     "name": "La Mies",
     "slug": "la-mies",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "orientation": "default",
     "scheme": "lamies",
     "icon": "./assets/icon.png",
@@ -41,7 +41,8 @@
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_LOCATION",
         "USE_BIOMETRIC",
-        "USE_FINGERPRINT"
+        "USE_FINGERPRINT",
+        "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
       ],
       "config": {
         "googleMaps": {

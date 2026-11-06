@@ -15,6 +15,7 @@ import { segmentOf, sideName } from '@/lib/geo';
 import { KIND_LABEL, fmtDayYear, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
+import { ensureNoBatteryOptimization } from '@/lib/battery';
 import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
 import type { Contact, CoverageRow, OutingKind, RoadRow } from '@/types';
 
@@ -132,6 +133,7 @@ export default function Mapa() {
     setChoosing(false);
     setBusy(true);
     try {
+      await ensureNoBatteryOptimization();
       await outing.start(kind);
       router.push('/salida');
     } catch (e) {
