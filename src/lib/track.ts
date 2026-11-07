@@ -107,6 +107,9 @@ export const COVER = {
   minSpanMeters: 25,
   /** Si en el tramo una vereda tiene menos de esta parte de los puntos, es ruido del GPS y no cuenta. */
   minSideShare: 0.3,
+  /** A menos de esto del eje no se sabe de qué vereda es el punto (el GPS y el mapa tienen unos metros de error):
+   *  el punto cuenta para el tramo, pero no para elegir la vereda. */
+  sideBand: 2.5,
 } as const;
 
 function angleDiff(a: number, b: number): number {
@@ -116,7 +119,7 @@ function angleDiff(a: number, b: number): number {
   return d;
 }
 
-type Hit = { roadId: number; seg: number; side: Side; along: number; t: number };
+type Hit = { roadId: number; seg: number; side: Side; along: number; t: number; dist: number; forced?: boolean };
 
 /**
  * Convierte los puntos del recorrido en veredas cubiertas.
@@ -125,6 +128,7 @@ type Hit = { roadId: number; seg: number; side: Side; along: number; t: number }
  *  - caminando a lo largo de esa calle (no cruzándola),
  *  - cubren al menos la mitad del tramo (o 25 m),
  *  - y esa vereda tiene al menos el 30% de los puntos del tramo (si no, es el GPS saltando a la vereda de enfrente).
+ * Los puntos a menos de 2,5 m del eje cuentan para el tramo pero no deciden la vereda.
  */
 export function coverageFromTrack(points: TrackPoint[], roads: Road[], overrides: SideOverride[] = []): CoverageResult {
   const good = points.filter((p) => p.acc == null || p.acc <= COVER.maxAccuracy).sort((a, b) => a.t - b.t);
@@ -154,7 +158,7 @@ export function coverageFromTrack(points: TrackPoint[], roads: Road[], overrides
       }
     }
     if (!best) continue;
-    for (const o of overrides) if (o.roadId === best.roadId && p.t >= o.since) best.side = o.side;
+    for (const o of overrides) if (o.roadId === best.roadId && p.t >= o.since) { best.side = o.side; best.forced = true; }
     const k = `${best.roadId}:${best.seg}`;
     const list = byKey.get(k) ?? [];
     list.push(best);
@@ -168,22 +172,32 @@ export function coverageFromTrack(points: TrackPoint[], roads: Road[], overrides
 
   const events: CoverageEvent[] = [];
   const blocks = new Set<string>();
-  for (const [k, raw] of byKey) {
+  for (const [k, all] of byKey) {
+    const len = lenOf.get(k) ?? 0;
+    const needSpan = Math.min(COVER.minSpanMeters, len * COVER.minSpanShare);
+    // 1) ¿Se recorrió el tramo? (con todos los puntos, sepan o no de qué vereda son)
+    if (all.length < (len < 20 ? 2 : COVER.minPoints)) continue;
+    const spanAll = Math.max(...all.map((h) => h.along)) - Math.min(...all.map((h) => h.along));
+    if (spanAll < needSpan) continue;
+    // 2) ¿De qué vereda? Solo con los puntos que están claramente de un lado (o con la vereda elegida a mano).
+    const raw = all.filter((h) => h.forced || h.dist >= COVER.sideBand);
     // Un punto suelto del otro lado (distinto de los dos vecinos) es el GPS saltando: no cuenta.
-    const hits = raw.filter((h, i) => {
+    const known = raw.filter((h, i) => {
       const a = raw[i - 1], b = raw[i + 1];
       if (!a && !b) return true;
       return a?.side === h.side || b?.side === h.side;
     });
-    const len = lenOf.get(k) ?? 0;
-    const needSpan = Math.min(COVER.minSpanMeters, len * COVER.minSpanShare);
+    if (!known.length) continue;
     for (const side of [1, -1] as const) {
-      const hs = hits.filter((h) => h.side === side);
-      if (hs.length < (len < 20 ? 2 : COVER.minPoints)) continue;
-      if (hs.length / hits.length < COVER.minSideShare) continue;
-      const span = Math.max(...hs.map((h) => h.along)) - Math.min(...hs.map((h) => h.along));
-      if (span < needSpan) continue;
-      events.push({ road_id: hs[0].roadId, seg: hs[0].seg, side, at: new Date(Math.max(...hs.map((h) => h.t))).toISOString() });
+      const hs = known.filter((h) => h.side === side);
+      if (hs.length < 2 || hs.length / known.length < COVER.minSideShare) continue;
+      // si las dos veredas tienen puntos, cada una tiene que haberse recorrido de verdad
+      const other = known.length - hs.length;
+      if (other > 0) {
+        const span = Math.max(...hs.map((h) => h.along)) - Math.min(...hs.map((h) => h.along));
+        if (span < needSpan) continue;
+      }
+      events.push({ road_id: hs[0].roadId, seg: hs[0].seg, side, at: new Date(Math.max(...all.map((h) => h.t))).toISOString() });
       blocks.add(k);
     }
   }

@@ -150,3 +150,10 @@ test('coverageFromTrack respeta la corrección manual de vereda', () => {
   const r = coverageFromTrack(pts, [calle], [{ roadId: 1, since: 0, side: 1 }]);
   assert.deepEqual(r.events.map((e) => e.side), [1]);
 });
+
+test('coverageFromTrack: puntos sobre el eje cuentan el tramo pero no marcan las dos veredas', () => {
+  // la mayoría de los puntos justo sobre el eje (el teléfono "pega" la ubicación a la calle), algunos en la vereda sur
+  const pts = walk(21, 5, 5000).map((p, i) => (i % 3 === 0 ? p : { ...p, lat: -27.4000 + (i % 2 ? 0.5 : -0.5) / 111320 }));
+  const r = coverageFromTrack(pts, [calle]);
+  assert.deepEqual(r.events.map((e) => `${e.road_id}:${e.seg}:${e.side}`), ['1:0:-1']);
+});
