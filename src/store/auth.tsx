@@ -18,11 +18,24 @@ type AuthState = {
   isStaff: boolean;
   /** Capitán, secretaría o pastor: ven el panel, la fidelidad y las ausencias. */
   isLeader: boolean;
+  /** 0 sin acceso · 1 revisor · 2 carga · 3 tesorero · 4 pastor / administrador de finanzas */
+  financeLevel: number;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthState | null>(null);
+
+/** Igual que public.finance_level() en la base. */
+export function financeLevelOf(p: Profile | null | undefined): number {
+  if (!p) return 0;
+  if (p.role === 'admin' || p.finance_role === 'manager') return 4;
+  if (p.finance_role === 'treasurer') return 3;
+  if (p.finance_role === 'secretary') return 2;
+  if (p.finance_role === 'viewer') return 1;
+  if (p.finance_role === 'none') return 0;
+  return p.role === 'secretary' ? 2 : 0;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -98,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAdmin: profile?.role === 'admin',
       isStaff: profile?.role === 'admin' || profile?.role === 'secretary',
       isLeader: profile?.role === 'admin' || profile?.role === 'secretary' || profile?.role === 'captain',
+      financeLevel: financeLevelOf(profile),
       refreshProfile: () => loadProfile(session?.user.id),
       signOut: async () => {
         await supabase.auth.signOut();

@@ -4,7 +4,7 @@ import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Toggle } from '@/components/ui';
-import { listGroups, setProfileTitle } from '@/lib/api';
+import { listGroups, setFinanceRole, setProfileTitle } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -14,13 +14,14 @@ import type { Group, Profile, Role } from '@/types';
 export default function Miembro() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { church, isAdmin } = useAuth();
+  const { church, isAdmin, financeLevel } = useAuth();
   const [p, setP] = useState<Profile | null | undefined>(undefined);
   const [groups, setGroups] = useState<Group[]>([]);
   const [role, setRole] = useState<Role>('member');
   const [group, setGroup] = useState<string>('none');
   const [takes, setTakes] = useState(false);
   const [title, setTitle] = useState('');
+  const [fin, setFin] = useState<string>('default');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function Miembro() {
         setGroup(prof.group_id ?? 'none');
         setTakes(!!prof.takes_attendance);
         setTitle(prof.title ?? '');
+        setFin(prof.finance_role ?? 'default');
       }
     });
     listGroups().then(setGroups).catch(() => undefined);
@@ -46,6 +48,9 @@ export default function Miembro() {
     }
     if (!error && title.trim() !== (p?.title ?? '')) {
       try { await setProfileTitle(id, title.trim()); } catch (e) { Alert.alert('No se pudo guardar el cargo', errorMessage(e)); }
+    }
+    if (!error && financeLevel >= 4 && fin !== (p?.finance_role ?? 'default')) {
+      try { await setFinanceRole(id, fin === 'default' ? null : fin); } catch (e) { Alert.alert('No se pudo guardar el rol de finanzas', errorMessage(e)); }
     }
     // El capitán de un colectivo recibe el reporte de quiénes de su colectivo faltaron.
     if (!error && role === 'captain' && group !== 'none') {
@@ -108,6 +113,32 @@ export default function Miembro() {
             onChange={setTakes}
           />
         </Card>
+        {financeLevel >= 4 ? (
+          <>
+            <SectionTitle>Finanzas</SectionTitle>
+            <Choice
+              columns={2}
+              options={[
+                { value: 'default', label: role === 'secretary' ? 'Según su rol (carga)' : role === 'admin' ? 'Según su rol (todo)' : 'Sin acceso' },
+                { value: 'manager', label: 'Administrador de finanzas' },
+                { value: 'treasurer', label: 'Tesorero' },
+                { value: 'secretary', label: 'Secretario de finanzas' },
+                { value: 'viewer', label: 'Revisor de cuentas' },
+                ...(role === 'secretary' ? [{ value: 'none', label: 'Sin acceso a finanzas' }] : []),
+              ]}
+              value={fin}
+              onChange={setFin}
+            />
+            <Card style={{ gap: 6 }}>
+              <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
+                <Text style={{ fontWeight: '700' }}>Administrador de finanzas:</Text> todo, también da los roles de finanzas.{'\n'}
+                <Text style={{ fontWeight: '700' }}>Tesorero:</Text> carga, corrige y anula cualquier movimiento; maneja fondos y categorías.{'\n'}
+                <Text style={{ fontWeight: '700' }}>Secretario de finanzas:</Text> carga ingresos, gastos y comprobantes; corrige lo suyo por 7 días.{'\n'}
+                <Text style={{ fontWeight: '700' }}>Revisor de cuentas:</Text> solo mira saldos, movimientos y comprobantes.
+              </Text>
+            </Card>
+          </>
+        ) : null}
         <Button title="Guardar" onPress={save} loading={busy} />
       </Screen>
     </View>

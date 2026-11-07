@@ -8,7 +8,7 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
 
-export type Bucket = 'photos' | 'materials' | 'sermons';
+export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
 
 function randomId(): string {
@@ -119,4 +119,48 @@ export function cachedSignedUrl(bucket: Bucket, path: string | null | undefined)
 export async function downloadUrl(bucket: Bucket, path: string, name?: string | null): Promise<string | null> {
   const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 3600, name ? { download: name } : undefined);
   return data?.signedUrl ?? null;
+}
+
+// ---------- Finanzas: comprobantes en carpetas por mes ----------
+export type FinPhoto = { path: string; name: string };
+
+/** Saca o elige la foto del recibo / pantalla del banco (o un PDF) y la sube a finance/<iglesia>/<AAAA-MM>/. */
+export async function pickAndUploadReceipt(churchId: string, month: string, label: string): Promise<FinPhoto | null> {
+  const source = await new Promise<'camera' | 'library' | 'file' | null>((resolve) => {
+    Alert.alert(label, '¿De dónde?', [
+      { text: 'Sacar foto', onPress: () => resolve('camera') },
+      { text: 'Elegir de la galería', onPress: () => resolve('library') },
+      { text: 'Archivo (PDF)', onPress: () => resolve('file') },
+      { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+    ]);
+  });
+  if (!source) return null;
+  const folder = `finance/${churchId}/${month}`;
+  if (source === 'file') {
+    const f = await pickDocument('any');
+    if (!f) return null;
+    if (f.size && f.size > 15 * 1024 * 1024) { Alert.alert('Archivo muy grande', 'El máximo es 15 MB.'); return null; }
+    const path = `${folder}/${randomId()}-${safeName(f.name)}`;
+    const body = Platform.OS === 'web' ? await (await fetch(f.uri)).arrayBuffer() : await new File(f.uri).arrayBuffer();
+    const { error } = await supabase.storage.from('finance').upload(path, body, { contentType: f.mimeType, upsert: false });
+    if (error) throw new Error(errorMessage(error));
+    return { path, name: f.name };
+  }
+  const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) {
+    Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
+    return null;
+  }
+  const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: 0.9 };
+  const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  // Se achica a 1600 px de ancho: se leen bien los números y pesa poco.
+  const resize = a.width && a.width > 1600 ? [{ resize: { width: 1600 } }] : [];
+  const img = await manipulateAsync(a.uri, resize, { compress: 0.75, format: SaveFormat.JPEG });
+  const path = `${folder}/${randomId()}.jpg`;
+  const body = Platform.OS === 'web' ? await (await fetch(img.uri)).arrayBuffer() : await new File(img.uri).arrayBuffer();
+  const { error } = await supabase.storage.from('finance').upload(path, body, { contentType: 'image/jpeg', upsert: false });
+  if (error) throw new Error(errorMessage(error));
+  return { path, name: a.fileName ?? 'foto.jpg' };
 }

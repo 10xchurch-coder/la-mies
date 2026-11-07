@@ -244,3 +244,20 @@ export function maskDateOrAge(text: string): string {
   if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
+
+/** $ 12.345,50 (pesos) o US$ 100 */
+export function fmtMoney(n: number | string | null | undefined, currency = 'ARS'): string {
+  const v = Number(n) || 0;
+  const s = Math.abs(v).toLocaleString('es-AR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  return `${v < 0 ? '−' : ''}${currency === 'USD' ? 'US$' : '$'} ${s}`;
+}
+
+/** "12.345,50" o "12345.5" → 12345.5 */
+export function parseMoney(t: string): number | null {
+  let s = t.replace(/[^0-9.,]/g, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if ((s.match(/\./g) ?? []).length > 1 || /\.\d{3}$/.test(s)) s = s.replace(/\./g, '');
+  const v = Number(s);
+  return Number.isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : null;
+}

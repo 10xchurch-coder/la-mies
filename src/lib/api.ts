@@ -517,3 +517,93 @@ export async function churchProgress(months: number | null = null): Promise<impo
   const rows = (ok(await supabase.rpc('church_progress', { p_months: months })) ?? []) as import('@/types').ProgressRow[];
   return rows.map((r) => ({ ...r, avg_attendance: Number(r.avg_attendance), hours: Number(r.hours), km: Number(r.km) }));
 }
+
+// ---------- Finanzas ----------
+type T = typeof import('@/types');
+const num = <R extends Record<string, unknown>>(r: R, keys: string[]) => {
+  const o: Record<string, unknown> = { ...r };
+  for (const k of keys) o[k] = Number(o[k] ?? 0);
+  return o as R;
+};
+export async function finFunds(): Promise<import('@/types').FinFund[]> {
+  return ((ok(await supabase.from('fin_funds').select('*').order('sort_order')) ?? []) as import('@/types').FinFund[]).map((f) => num(f, ['opening_balance']));
+}
+export async function finAccounts(): Promise<import('@/types').FinAccount[]> {
+  return ok(await supabase.from('fin_accounts').select('*').eq('active', true).order('sort_order')) ?? [];
+}
+export async function finCategories(): Promise<import('@/types').FinCategory[]> {
+  return ok(await supabase.from('fin_categories').select('*').eq('active', true).order('sort_order')) ?? [];
+}
+export async function addFinCategory(name: string, direction: 'in' | 'out'): Promise<import('@/types').FinCategory> {
+  const { data: u } = await supabase.auth.getUser();
+  const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
+  return ok(await supabase.from('fin_categories').insert({ church_id: church, name, direction, sort_order: 80 }).select('*').single()) as import('@/types').FinCategory;
+}
+export async function saveFinFund(f: Partial<import('@/types').FinFund> & { name: string }): Promise<void> {
+  const row = { name: f.name, kind: f.kind ?? 'other', description: f.description ?? null, opening_balance: f.opening_balance ?? 0, opening_date: f.opening_date ?? null, active: f.active ?? true };
+  if (f.id) ok(await supabase.from('fin_funds').update(row).eq('id', f.id));
+  else ok(await supabase.from('fin_funds').insert({ ...row, sort_order: 90 }));
+}
+export async function finEntries(from: string, to: string, fundId?: string | null): Promise<import('@/types').FinEntry[]> {
+  let q = supabase.from('fin_entries').select('*').gte('on_date', from).lte('on_date', to).order('on_date', { ascending: false }).order('created_at', { ascending: false }).limit(1000);
+  if (fundId) q = q.or(`fund_id.eq.${fundId},to_fund_id.eq.${fundId}`);
+  return ((ok(await q) ?? []) as import('@/types').FinEntry[]).map((e) => num(e, ['amount']));
+}
+export async function finEntry(id: string): Promise<import('@/types').FinEntry | null> {
+  const r = ok(await supabase.from('fin_entries').select('*').eq('id', id).maybeSingle()) as import('@/types').FinEntry | null;
+  return r ? num(r, ['amount']) : null;
+}
+export async function saveFinEntry(e: Partial<import('@/types').FinEntry> & Pick<import('@/types').FinEntry, 'on_date' | 'kind' | 'fund_id' | 'amount'>): Promise<string> {
+  const { data: u } = await supabase.auth.getUser();
+  const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
+  const row = {
+    on_date: e.on_date, kind: e.kind, fund_id: e.fund_id, to_fund_id: e.kind === 'transfer' ? e.to_fund_id : null,
+    account_id: e.account_id ?? null, category_id: e.kind === 'transfer' ? null : e.category_id ?? null, amount: e.amount,
+    currency: e.currency ?? 'ARS', method: e.method ?? 'cash', description: e.description ?? null, counterpart: e.counterpart ?? null,
+  };
+  if (e.id) {
+    ok(await supabase.from('fin_entries').update(row).eq('id', e.id));
+    return e.id;
+  }
+  const r = ok(await supabase.from('fin_entries').insert({ ...row, church_id: church }).select('id').single()) as { id: string };
+  return r.id;
+}
+export async function voidFinEntry(id: string, reason: string): Promise<void> {
+  ok(await supabase.from('fin_entries').update({ voided_at: new Date().toISOString(), void_reason: reason }).eq('id', id));
+}
+export async function finAttachments(opts: { entryId?: string; month?: string }): Promise<import('@/types').FinAttachment[]> {
+  let q = supabase.from('fin_attachments').select('*').order('created_at', { ascending: false });
+  if (opts.entryId) q = q.eq('entry_id', opts.entryId);
+  if (opts.month) q = q.eq('month', opts.month);
+  return ok(await q) ?? [];
+}
+export async function finMonthsWithFiles(): Promise<{ month: string; n: number }[]> {
+  const rows = (ok(await supabase.from('fin_attachments').select('month').limit(5000)) ?? []) as { month: string }[];
+  const m = new Map<string, number>();
+  for (const r of rows) m.set(r.month, (m.get(r.month) ?? 0) + 1);
+  return [...m.entries()].map(([month, n]) => ({ month, n })).sort((a, b) => b.month.localeCompare(a.month));
+}
+export async function addFinAttachment(a: { entry_id: string | null; month: string; path: string; kind: 'receipt' | 'bank_screen' | 'other'; file_name?: string | null; note?: string | null }): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
+  ok(await supabase.from('fin_attachments').insert({ ...a, church_id: church }));
+}
+export async function linkFinAttachment(id: string, entryId: string | null): Promise<void> {
+  ok(await supabase.from('fin_attachments').update({ entry_id: entryId }).eq('id', id));
+}
+export async function finBalances(from: string | null = null, to: string | null = null): Promise<import('@/types').FinBalance[]> {
+  const rows = (ok(await supabase.rpc('fin_balances', { p_from: from, p_to: to })) ?? []) as import('@/types').FinBalance[];
+  return rows.map((r) => num(r, ['opening', 'income', 'expense', 'transfers_in', 'transfers_out', 'closing']));
+}
+export async function finMonthly(months = 12): Promise<import('@/types').FinMonthly[]> {
+  const rows = (ok(await supabase.rpc('fin_monthly', { p_months: months })) ?? []) as import('@/types').FinMonthly[];
+  return rows.map((r) => num(r, ['income', 'expense', 'net']));
+}
+export async function finByCategory(from: string, to: string): Promise<import('@/types').FinByCategory[]> {
+  const rows = (ok(await supabase.rpc('fin_by_category', { p_from: from, p_to: to })) ?? []) as import('@/types').FinByCategory[];
+  return rows.map((r) => num(r, ['total']));
+}
+export async function setFinanceRole(profileId: string, role: string | null): Promise<void> {
+  ok(await supabase.rpc('set_finance_role', { p_profile: profileId, p_role: role }));
+}
+export type _FinT = T;

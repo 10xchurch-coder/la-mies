@@ -10,7 +10,9 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { PipelineRow, WeeklyReport } from '@/types';
 
+/** Lunes que cierra el informe (el informe cubre los 7 días anteriores). El domingo ya muestra la semana que termina hoy. */
 function mondayOf(d: Date): string {
+  if (d.getDay() === 0) return isoDate(addDays(d, 1));
   const back = (d.getDay() + 6) % 7;
   return isoDate(addDays(d, -back));
 }

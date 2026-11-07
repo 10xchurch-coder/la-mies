@@ -32,7 +32,7 @@ export function greeting(d = new Date()): string {
 
 export default function Iglesia() {
   const router = useRouter();
-  const { profile, church, isStaff, isLeader } = useAuth();
+  const { profile, church, isStaff, isLeader, financeLevel } = useAuth();
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [takesAttendance, setTakesAttendance] = useState(false);
   const [daily, setDaily] = useState<DailyContent | null>(null);
@@ -84,6 +84,8 @@ export default function Iglesia() {
     { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
     { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
     { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
+    { icon: 'dollar-sign', label: 'Finanzas', to: '/finanzas' as Href, show: financeLevel >= 1 },
+    { icon: 'book', label: 'Informes y consejos', to: '/informes' as Href, show: isStaff },
     { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
     { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
     { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
