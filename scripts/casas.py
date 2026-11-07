@@ -26,7 +26,7 @@ def buildings():
     print('Bajando', url, flush=True)
     s, w, n, e = BBOX
     out = []
-    with urllib.request.urlopen(url) as r:
+    with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'LaMies/1.0'})) as r:
         f = io.TextIOWrapper(gzip.GzipFile(fileobj=r), encoding='utf-8')
         rd = csv.reader(f)
         head = next(rd)
@@ -50,12 +50,17 @@ def roads():
         lo = w
         while lo < e - 1e-9:
             q = f'[out:json][timeout:120];way["highway"~"^({TYPES})$"]({la},{lo},{min(la+0.05,n)},{min(lo+0.05,e)});out geom;'
-            for attempt in range(5):
+            data = None
+            for attempt in range(6):
                 try:
-                    data = urllib.request.urlopen('https://overpass-api.de/api/interpreter?' + urllib.parse.urlencode({'data': q}), timeout=180).read()
+                    req = urllib.request.Request('https://overpass-api.de/api/interpreter', data=urllib.parse.urlencode({'data': q}).encode(),
+                                                 headers={'User-Agent': 'LaMies/1.0 (app de una iglesia; github.com/10xchurch-coder/la-mies)', 'Accept': 'application/json'})
+                    data = urllib.request.urlopen(req, timeout=180).read()
                     break
                 except Exception as ex:  # noqa
                     print('  reintento Overpass', ex, flush=True); time.sleep(20 * (attempt + 1))
+            if data is None:
+                raise SystemExit('Overpass no respondió')
             for el in json.loads(data)['elements']:
                 if el.get('type') != 'way' or len(el.get('geometry', [])) < 2:
                     continue
