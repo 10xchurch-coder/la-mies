@@ -1,0 +1,58 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 Iglesia Bautista Victoria",
+    "categories": ["LIFESTYLE", "REFERENCE"],
+    "info": {
+      "es-MX": {
+        "title": "La Mies: iglesia y evangelismo",
+        "subtitle": "Salidas, asistencia y más",
+        "promoText": "La app de la iglesia: salí a evangelizar casa por casa, seguí a cada persona, tomá asistencia y enterate de todo lo que pasa en la iglesia.",
+        "description": "La Mies es la app de la Iglesia Bautista Victoria (Posadas, Misiones) para los hermanos de la iglesia. Para entrar hace falta el código que da el pastor.\n\n\"¿No decís vosotros: Aún faltan cuatro meses para que llegue la siega? He aquí os digo: Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega\" Juan 4:35\n\nEVANGELISMO CASA POR CASA\n• Iniciá una salida y la app marca en el mapa las cuadras y veredas que recorriste.\n• Mirá qué calles ya se visitaron y cuáles hace meses que nadie pasa.\n• Cargá cada contacto en segundos: nombre, si le presentaste el evangelio, si prometió venir y una nota.\n• Salidas en equipo: cada uno ve el recorrido de los demás.\n• Zonas asignadas y avance de cada barrio.\n\nSEGUIMIENTO DE CADA PERSONA\n• Avisos el día que alguien prometió venir, con un mensaje de WhatsApp listo para mandar.\n• Lista de los que faltaron 1, 2 o 3 semanas, con mensajes para animarlos y recordatorio de visitarlos.\n• Registro de visitas con notas.\n\nVIDA DE LA IGLESIA\n• Versículo y devocional de cada día.\n• Prédicas con video, resumen, audio y bosquejo para completar.\n• Calendario con los horarios de cada semana y las fechas especiales.\n• Pedidos de oración (para toda la iglesia, solo para el pastor o para personas elegidas).\n• Anuncios, ministerios, clases, turnos y directorio.\n• Sugerencias para la iglesia.\n\nPARA EL PASTOR Y LA SECRETARÍA\n• Asistencia por reunión y por clase.\n• Informe semanal y progreso de la iglesia mes a mes.\n• Finanzas de la iglesia con fondos, comprobantes por mes e informes (solo para quienes tienen permiso).\n\nPRIVACIDAD\nLa ubicación se usa solo durante una salida de evangelismo, para marcar las calles recorridas. Los datos de cada iglesia los ven solo sus miembros. Podés borrar tu cuenta desde la app.",
+        "keywords": ["iglesia", "evangelismo", "bautista", "asistencia", "devocional", "biblia", "prédicas", "oración", "misiones", "ganar almas"],
+        "releaseNotes": "Primera versión pública: evangelismo casa por casa con mapa, seguimiento, asistencia, devocional, prédicas, calendario, oración, anuncios e informes.",
+        "marketingUrl": "https://iglesiavictoria.com",
+        "supportUrl": "https://10xchurch-coder.github.io/la-mies/privacidad.html",
+        "privacyPolicyUrl": "https://10xchurch-coder.github.io/la-mies/privacidad.html"
+      },
+      "en-US": {
+        "title": "La Mies: iglesia y evangelismo",
+        "subtitle": "Church and soul winning",
+        "promoText": "The church app of Iglesia Bautista Victoria: door-to-door soul winning with a live street map, follow-up, attendance and church life. In Spanish.",
+        "description": "La Mies is the church app of Iglesia Bautista Victoria in Posadas, Argentina. The app is in Spanish. Members join with a code from the pastor.\n\nDOOR-TO-DOOR SOUL WINNING\n• Start an outing and the app marks on the map the blocks and sides of the street you walked.\n• See which streets were already visited and which have not been visited in months.\n• Save each contact in seconds: name, whether you shared the gospel, whether they promised to come, and a note.\n• Team outings, assigned zones and progress by neighborhood.\n\nFOLLOW-UP\n• Reminders on the day someone promised to come, with a ready-to-send WhatsApp message.\n• Lists of people who missed 1, 2 or 3 weeks, with encouragement messages and visit reminders.\n\nCHURCH LIFE\n• Daily verse and devotional, sermons with video, summary, audio and fill-in notes, calendar, prayer requests, announcements, ministries, classes and directory.\n\nFOR THE PASTOR AND SECRETARY\n• Attendance by service and class, weekly report, monthly church progress, and church finances with funds, monthly receipt folders and reports (only for authorized people).\n\nPRIVACY\nLocation is used only during a soul-winning outing, to mark the streets walked. Each church's data is visible only to its members. You can delete your account from the app.",
+        "keywords": ["church", "evangelism", "soul winning", "baptist", "attendance", "devotional", "bible", "sermons", "prayer", "missions"],
+        "releaseNotes": "First public version.",
+        "marketingUrl": "https://iglesiavictoria.com",
+        "supportUrl": "https://10xchurch-coder.github.io/la-mies/privacidad.html",
+        "privacyPolicyUrl": "https://10xchurch-coder.github.io/la-mies/privacidad.html"
+      }
+    },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "NONE",
+      "contests": "NONE",
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "NONE",
+      "medicalOrTreatmentInformation": "NONE",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "NONE",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "gambling": false,
+      "unrestrictedWebAccess": false,
+      "kidsAgeBand": null,
+      "seventeenPlus": false
+    },
+    "review": {
+      "firstName": "Benjamin",
+      "lastName": "George",
+      "email": "hopeforargentina@gmail.com",
+      "phone": "+54 9 376 485 7649",
+      "demoRequired": true,
+      "demoUsername": "hopeforargentina@gmail.com",
+      "notes": "La Mies is a private app for members of a local church (Iglesia Bautista Victoria, Posadas, Argentina). Members join with a church code given by the pastor, so content is visible only inside that church; the pastor and secretary can remove any post. Please sign in with the demo account (already a member of the church). To try the main feature, open the Mapa tab and tap 'Iniciar salida': the app records the walk and marks the streets on the map. Background location is used only while an outing is active and stops when the outing ends. Account deletion: Yo → Ajustes → Eliminar mi cuenta."
+    }
+  }
+}

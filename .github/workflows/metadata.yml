@@ -1,0 +1,25 @@
+# Sube el texto de la ficha del App Store (store.config.json) a App Store Connect.
+# Las capturas de pantalla, las preguntas de privacidad y la contraseña de la cuenta de prueba
+# se cargan a mano en App Store Connect.
+name: Ficha App Store
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Subir ficha
+        run: eas metadata:push --non-interactive
