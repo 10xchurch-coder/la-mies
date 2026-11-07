@@ -1,0 +1,35 @@
+# Calcula las casas de la zona (Google Open Buildings + calles de OpenStreetMap) y guarda data/casas_posadas.csv.
+# La base de datos lo carga después desde el repositorio.
+name: Casas de la zona
+
+on:
+  workflow_dispatch:
+    inputs:
+      bbox:
+        description: "Zona: sur,oeste,norte,este"
+        default: "-27.55,-56.05,-27.30,-55.65"
+
+permissions:
+  contents: write
+
+jobs:
+  casas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Calcular casas
+        env:
+          BBOX: ${{ inputs.bbox }}
+        run: python3 scripts/casas.py
+      - name: Guardar en el repositorio
+        run: |
+          git config user.name "la-mies-bot"
+          git config user.email "la-mies-bot@users.noreply.github.com"
+          git add data/casas_posadas.csv
+          git commit -m "Casas de la zona (Google Open Buildings + OpenStreetMap)" || echo "sin cambios"
+          git pull --rebase
+          git push
