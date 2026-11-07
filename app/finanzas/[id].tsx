@@ -97,7 +97,9 @@ export default function MovimientoVer() {
 
   const rows: [string, string][] = [
     ['Fecha', fmtDateOnly(e.on_date)],
-    e.kind === 'transfer' ? ['Fondos', `${fname(e.fund_id)} → ${fname(e.to_fund_id)}`] : ['Fondo', fname(e.fund_id)],
+    e.kind === 'transfer' ? (e.to_fund_id === e.fund_id
+      ? ['Cuentas', `${fname(e.fund_id)}: ${accounts.find((a) => a.id === e.account_id)?.name ?? ''} → ${accounts.find((a) => a.id === e.to_account_id)?.name ?? ''}`]
+      : ['Fondos', `${fname(e.fund_id)} → ${fname(e.to_fund_id)}`]) : ['Fondo', fname(e.fund_id)],
     ...(e.category_id ? [['Categoría', cats.find((c) => c.id === e.category_id)?.name ?? '']] as [string, string][] : []),
     ...(e.kind !== 'transfer' ? [['Cómo', `${METHOD[e.method]}${e.account_id ? ` · ${accounts.find((a) => a.id === e.account_id)?.name ?? ''}` : ''}`]] as [string, string][] : []),
     ...(e.counterpart ? [[e.kind === 'income' ? 'Quién lo dio' : 'A quién', e.counterpart]] as [string, string][] : []),

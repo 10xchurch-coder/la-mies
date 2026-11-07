@@ -21,6 +21,7 @@ export type Giving = { titular?: string; banco?: string; alias?: string; cbu?: s
 export type Group = { id: string; church_id: string; name: string; captain_id: string | null };
 
 export type Profile = {
+  rules_accepted_at?: string | null;
   finance_role?: 'manager' | 'treasurer' | 'secretary' | 'viewer' | 'none' | null;
   title?: string | null;
   directory_visible?: boolean;
@@ -363,7 +364,7 @@ export type FinCategory = { id: string; name: string; direction: 'in' | 'out'; a
 export type FinKind = 'income' | 'expense' | 'transfer';
 export type FinMethod = 'cash' | 'transfer' | 'card' | 'check' | 'other';
 export type FinEntry = {
-  id: string; on_date: string; kind: FinKind; fund_id: string; to_fund_id: string | null; account_id: string | null; category_id: string | null;
+  id: string; on_date: string; kind: FinKind; fund_id: string; to_fund_id: string | null; account_id: string | null; to_account_id?: string | null; category_id: string | null;
   amount: number; currency: string; method: FinMethod; description: string | null; counterpart: string | null; source: string | null;
   created_by: string | null; created_at: string; voided_at: string | null; void_reason: string | null;
 };
@@ -371,3 +372,4 @@ export type FinAttachment = { id: string; entry_id: string | null; month: string
 export type FinBalance = { fund_id: string; fund: string; kind: string; currency: string; opening: number; income: number; expense: number; transfers_in: number; transfers_out: number; closing: number };
 export type FinMonthly = { month: string; fund_id: string; fund: string; income: number; expense: number; net: number };
 export type FinByCategory = { direction: 'in' | 'out'; category: string; fund: string; total: number; entries: number };
+export type FinAccountBalance = { account_id: string; account: string; fund_id: string; fund: string; currency: string; balance: number };

@@ -18,6 +18,8 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Contact, Duty, Ministry, MinistryMember, MinistryMessage, MinistryPerson, Profile } from '@/types';
 
+import { moderate } from '@/lib/moderation';
+
 type Tab = 'chat' | 'duties' | 'people' | 'tips';
 
 export default function MinisterioDetalle() {
@@ -170,11 +172,13 @@ export default function MinisterioDetalle() {
                   );
                 }
                 return (
-                  <View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '85%', padding: 10, borderRadius: 14, backgroundColor: mine ? colors.greenSoft : colors.bgSoft, gap: 2 }}>
+                  <Pressable onLongPress={mine ? undefined : () => moderate({ kind: 'ministry_message', targetId: item.id, authorId: item.user_id, authorName: nameOf(item.user_id), excerpt: item.body, onChange: load })}
+                    style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '85%', padding: 10, borderRadius: 14, backgroundColor: mine ? colors.greenSoft : colors.bgSoft, gap: 2 }}>
                     {!mine ? <Text style={{ fontSize: 11, fontWeight: '800', color: colors.green }}>{nameOf(item.user_id)}</Text> : null}
                     <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{item.body}</Text>
                     <Text style={{ fontSize: 10, color: colors.muted, alignSelf: 'flex-end' }}>{fmtRelativeDay(item.created_at)} {fmtTime(item.created_at)}</Text>
-                  </View>
+                    {!mine ? <Text onPress={() => moderate({ kind: 'ministry_message', targetId: item.id, authorId: item.user_id, authorName: nameOf(item.user_id), excerpt: item.body, onChange: load })} style={{ fontSize: 10, color: colors.muted }}>Denunciar o bloquear</Text> : null}
+                  </Pressable>
                 );
               }}
             />

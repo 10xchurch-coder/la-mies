@@ -42,6 +42,8 @@ export default function Movimiento() {
   const [currency, setCurrency] = useState<'ARS' | 'USD'>('ARS');
   const [fund, setFund] = useState<string>('');
   const [toFund, setToFund] = useState<string>('');
+  const [between, setBetween] = useState<'funds' | 'accounts'>('funds');
+  const [toAccount, setToAccount] = useState<string>('');
   const [cat, setCat] = useState<string>('');
   const [account, setAccount] = useState<string>('');
   const [method, setMethod] = useState<FinMethod>('cash');
@@ -66,6 +68,7 @@ export default function Movimiento() {
         if (!e) return;
         setKind(e.kind); setDate(e.on_date); setAmount(String(e.amount).replace('.', ',')); setCurrency(e.currency === 'USD' ? 'USD' : 'ARS');
         setFund(e.fund_id); setToFund(e.to_fund_id ?? ''); setCat(e.category_id ?? ''); setAccount(e.account_id ?? '');
+        setToAccount(e.to_account_id ?? ''); if (e.kind === 'transfer' && e.to_fund_id === e.fund_id) setBetween('accounts');
         setMethod(e.method); setCounterpart(e.counterpart ?? ''); setDesc(e.description ?? '');
         setLoaded(true);
       });
@@ -104,7 +107,8 @@ export default function Movimiento() {
     const v = parseMoney(amount);
     if (!v) { Alert.alert('Falta el monto', 'Escribí el monto, por ejemplo 15.000 o 15000,50.'); return; }
     if (!fund) { Alert.alert('Elegí el fondo'); return; }
-    if (kind === 'transfer' && (!toFund || toFund === fund)) { Alert.alert('Elegí a qué fondo pasa'); return; }
+    if (kind === 'transfer' && between === 'funds' && (!toFund || toFund === fund)) { Alert.alert('Elegí a qué fondo pasa'); return; }
+    if (kind === 'transfer' && between === 'accounts' && (!account || !toAccount || account === toAccount)) { Alert.alert('Elegí de qué cuenta sale y a cuál entra'); return; }
     if (needsDetail && !desc.trim()) { Alert.alert('¿Para qué es?', 'En el fondo Designado, escribí para qué se dio o en qué se usó.'); return; }
     if (kind !== 'transfer' && method === 'transfer' && !photos.length && !params.id) {
       const go = await new Promise<boolean>((resolve) => Alert.alert('Sin foto', kind === 'income' ? '¿Guardar sin la foto de la pantalla del banco?' : '¿Guardar sin la foto del comprobante?', [
@@ -116,7 +120,8 @@ export default function Movimiento() {
     setBusy(true);
     try {
       const id = await saveFinEntry({
-        id: params.id, on_date: date, kind, fund_id: fund, to_fund_id: kind === 'transfer' ? toFund : null, amount: v, currency,
+        id: params.id, on_date: date, kind, fund_id: fund, to_fund_id: kind === 'transfer' ? (between === 'accounts' ? fund : toFund) : null, amount: v, currency,
+        to_account_id: kind === 'transfer' && between === 'accounts' ? toAccount : null,
         category_id: kind === 'transfer' ? null : cat || null, account_id: account || null, method,
         counterpart: counterpart.trim() || null, description: desc.trim() || null,
       });
@@ -156,17 +161,34 @@ export default function Movimiento() {
           <Button title="Usar" small variant="outline" onPress={() => { const d = parseDateAR(otherDate); if (d) setDate(d); else Alert.alert('Fecha inválida', 'Escribila así: 15/03/2026.'); }} />
         </View>
 
-        <SectionTitle>{kind === 'transfer' ? 'Sale del fondo' : 'Fondo'}</SectionTitle>
+        {kind === 'transfer' ? (
+          <Choice columns={2} options={[{ value: 'funds', label: 'Entre fondos' }, { value: 'accounts', label: 'Banco ↔ caja' }]} value={between} onChange={setBetween} />
+        ) : null}
+        <SectionTitle>{kind === 'transfer' && between === 'funds' ? 'Sale del fondo' : 'Fondo'}</SectionTitle>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {funds.map((f) => <Pressable key={f.id} onPress={() => setFund(f.id)} style={pill(fund === f.id)} accessibilityRole="button"><Text style={pillText(fund === f.id)}>{f.name}</Text></Pressable>)}
         </View>
         {kind === 'transfer' ? (
-          <>
-            <SectionTitle>Entra al fondo</SectionTitle>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {funds.filter((f) => f.id !== fund).map((f) => <Pressable key={f.id} onPress={() => setToFund(f.id)} style={pill(toFund === f.id)} accessibilityRole="button"><Text style={pillText(toFund === f.id)}>{f.name}</Text></Pressable>)}
-            </View>
-          </>
+          between === 'funds' ? (
+            <>
+              <SectionTitle>Entra al fondo</SectionTitle>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {funds.filter((f) => f.id !== fund).map((f) => <Pressable key={f.id} onPress={() => setToFund(f.id)} style={pill(toFund === f.id)} accessibilityRole="button"><Text style={pillText(toFund === f.id)}>{f.name}</Text></Pressable>)}
+              </View>
+            </>
+          ) : (
+            <>
+              <SectionTitle>Sale de</SectionTitle>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {accounts.map((a) => <Pressable key={a.id} onPress={() => setAccount(a.id)} style={pill(account === a.id)} accessibilityRole="button"><Text style={pillText(account === a.id)}>{a.name}</Text></Pressable>)}
+              </View>
+              <SectionTitle>Entra a</SectionTitle>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {accounts.filter((a) => a.id !== account).map((a) => <Pressable key={a.id} onPress={() => setToAccount(a.id)} style={pill(toAccount === a.id)} accessibilityRole="button"><Text style={pillText(toAccount === a.id)}>{a.name}</Text></Pressable>)}
+              </View>
+              <Text style={{ fontSize: 12, color: colors.muted }}>Por ejemplo, sacar plata del banco para la caja. El saldo del fondo no cambia.</Text>
+            </>
+          )
         ) : (
           <>
             <SectionTitle>Categoría</SectionTitle>
@@ -214,7 +236,7 @@ export default function Movimiento() {
         <Card style={{ padding: 12, backgroundColor: colors.bgSoft, borderColor: colors.bgSoft }}>
           <Text style={{ fontSize: 14, color: colors.text }}>
             {KIND_LABEL[kind]} de <Text style={{ fontWeight: '800' }}>{fmtMoney(parseMoney(amount) ?? 0, currency)}</Text>
-            {kind === 'transfer' ? ` de ${fundObj?.name ?? '…'} a ${funds.find((f) => f.id === toFund)?.name ?? '…'}` : ` en ${fundObj?.name ?? '…'}`} · {fmtDateShort(date)}
+            {kind === 'transfer' ? (between === 'accounts' ? ` en ${fundObj?.name ?? '…'}: ${accounts.find((a) => a.id === account)?.name ?? '…'} → ${accounts.find((a) => a.id === toAccount)?.name ?? '…'}` : ` de ${fundObj?.name ?? '…'} a ${funds.find((f) => f.id === toFund)?.name ?? '…'}`) : ` en ${fundObj?.name ?? '…'}`} · {fmtDateShort(date)}
           </Text>
         </Card>
         <Button title="Guardar" onPress={save} loading={busy} />

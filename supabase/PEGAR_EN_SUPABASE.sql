@@ -5178,3 +5178,286 @@ begin
   return v_id;
 end $$;
 revoke all on function public.post_pastor_report(uuid, text, text, text, text, boolean) from public, anon, authenticated;
+
+
+-- ===== 0022_finanzas_cuentas.sql =====
+-- 0022: pases entre cuentas (del banco a la caja y al revés) dentro del mismo fondo, saldo por cuenta,
+-- y fondos/categorías que usa la planilla de la iglesia (Terreno y construcción, General en dólares).
+
+alter table public.fin_entries add column if not exists to_account_id uuid references public.fin_accounts(id);
+
+-- Un pase puede ser entre fondos o, dentro del mismo fondo, entre cuentas distintas.
+do $$ declare c record; begin
+  for c in select conname from pg_constraint
+           where conrelid = 'public.fin_entries'::regclass and contype = 'c' and pg_get_constraintdef(oid) like '%to_fund_id <> fund_id%' loop
+    execute format('alter table public.fin_entries drop constraint %I', c.conname);
+  end loop;
+end $$;
+alter table public.fin_entries drop constraint if exists fin_entries_transfer_target;
+alter table public.fin_entries add constraint fin_entries_transfer_target check (
+  kind <> 'transfer' or to_fund_id <> fund_id
+  or (account_id is not null and to_account_id is not null and account_id <> to_account_id));
+
+create or replace function public.fin_entries_accounts_guard() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.kind <> 'transfer' then new.to_account_id := null; end if;
+  if new.to_account_id is not null and not exists (select 1 from public.fin_accounts a where a.id = new.to_account_id and a.church_id = new.church_id) then
+    raise exception 'Cuenta de destino inválida';
+  end if;
+  return new;
+end $$;
+drop trigger if exists fin_entries_accounts_guard on public.fin_entries;
+create trigger fin_entries_accounts_guard before insert or update on public.fin_entries for each row execute function public.fin_entries_accounts_guard();
+
+-- Saldo de cada cuenta (caja, banco) por fondo.
+create or replace function public.fin_account_balances(p_to date default null) returns table (account_id uuid, account text, fund_id uuid, fund text, currency text, balance numeric)
+language plpgsql stable security definer set search_path = public as $$
+declare v_church uuid := public.current_church_id(); v_to date := coalesce(p_to, '2999-12-31');
+begin
+  if public.finance_level() < 1 then raise exception 'Sin acceso a finanzas'; end if;
+  return query
+  with m as (
+    select e.account_id a, e.fund_id f, case when e.kind = 'income' then e.amount else -e.amount end v
+    from public.fin_entries e where e.church_id = v_church and e.voided_at is null and e.on_date <= v_to and e.account_id is not null
+    union all
+    select coalesce(e.to_account_id, e.account_id), e.to_fund_id, e.amount
+    from public.fin_entries e where e.church_id = v_church and e.voided_at is null and e.on_date <= v_to and e.kind = 'transfer'
+      and coalesce(e.to_account_id, e.account_id) is not null
+  )
+  select ac.id, ac.name, f.id, f.name, f.currency, sum(m.v)
+  from m join public.fin_accounts ac on ac.id = m.a join public.fin_funds f on f.id = m.f
+  group by ac.id, f.id
+  having abs(sum(m.v)) > 0.004
+  order by ac.sort_order, f.sort_order;
+end $$;
+grant execute on function public.fin_account_balances(date) to authenticated;
+
+create or replace function public.fin_ensure_defaults_v2(p_church uuid) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.fin_funds (church_id, name, kind, description, currency, sort_order) values
+    (p_church, 'Terreno y construcción', 'other', 'Para terreno, construcción e infraestructura.', 'ARS', 50),
+    (p_church, 'General (dólares)', 'other', 'Ofrendas en dólares del fondo General.', 'USD', 15)
+  on conflict (church_id, name) do nothing;
+  insert into public.fin_categories (church_id, name, direction, sort_order) values
+    (p_church, 'Diezmos y ofrendas', 'in', 5),
+    (p_church, 'Cuota del vehículo', 'out', 53),
+    (p_church, 'Ofrendas a pastores y predicadores', 'out', 62),
+    (p_church, 'Muebles y artículos', 'out', 33)
+  on conflict (church_id, direction, name) do nothing;
+end $$;
+revoke all on function public.fin_ensure_defaults_v2(uuid) from public, anon, authenticated;
+select public.fin_ensure_defaults_v2(id) from public.churches;
+
+
+-- Saldos: un pase dentro del mismo fondo (banco ↔ caja) resta y suma en el mismo fondo (queda en cero).
+create or replace function public.fin_balances(p_from date default null, p_to date default null) returns table (
+  fund_id uuid, fund text, kind text, currency text, opening numeric, income numeric, expense numeric, transfers_in numeric, transfers_out numeric, closing numeric
+)
+language plpgsql stable security definer set search_path = public as $$
+declare v_church uuid := public.current_church_id(); v_from date := coalesce(p_from, '1900-01-01'); v_to date := coalesce(p_to, '2999-12-31');
+begin
+  if public.finance_level() < 1 then raise exception 'Sin acceso a finanzas'; end if;
+  return query
+  select q.id, q.name, q.kind, q.currency, q.op, q.inc, q.exp, q.tin, q.tout, q.op + q.inc - q.exp + q.tin - q.tout
+  from (
+    select f.id, f.name, f.kind, f.currency, f.sort_order,
+      f.opening_balance + coalesce((select sum(((case when e.fund_id = f.id then (case when e.kind = 'income' then e.amount else -e.amount end) else 0 end) + (case when e.kind = 'transfer' and e.to_fund_id = f.id then e.amount else 0 end)))
+                           from public.fin_entries e where e.church_id = v_church and e.voided_at is null and e.on_date < v_from
+                             and (e.fund_id = f.id or e.to_fund_id = f.id)), 0) op,
+      coalesce(sum(e.amount) filter (where e.kind = 'income' and e.fund_id = f.id), 0) inc,
+      coalesce(sum(e.amount) filter (where e.kind = 'expense' and e.fund_id = f.id), 0) exp,
+      coalesce(sum(e.amount) filter (where e.kind = 'transfer' and e.to_fund_id = f.id), 0) tin,
+      coalesce(sum(e.amount) filter (where e.kind = 'transfer' and e.fund_id = f.id), 0) tout
+    from public.fin_funds f
+    left join public.fin_entries e on e.church_id = v_church and e.voided_at is null and (e.fund_id = f.id or e.to_fund_id = f.id)
+         and e.on_date between v_from and v_to
+    where f.church_id = v_church
+    group by f.id
+  ) q
+  order by q.sort_order, q.name;
+end $$;
+
+create or replace function public.fin_monthly(p_months integer default 12) returns table (
+  month date, fund_id uuid, fund text, income numeric, expense numeric, net numeric
+)
+language plpgsql stable security definer set search_path = public as $$
+declare v_church uuid := public.current_church_id(); v_start date;
+begin
+  if public.finance_level() < 1 then raise exception 'Sin acceso a finanzas'; end if;
+  v_start := (date_trunc('month', current_date) - make_interval(months => greatest(p_months, 1) - 1))::date;
+  return query
+  select m::date, f.id, f.name,
+    coalesce(sum(e.amount) filter (where e.kind = 'income' and e.fund_id = f.id), 0),
+    coalesce(sum(e.amount) filter (where e.kind = 'expense' and e.fund_id = f.id), 0),
+    coalesce(sum(((case when e.fund_id = f.id then (case when e.kind = 'income' then e.amount else -e.amount end) else 0 end) + (case when e.kind = 'transfer' and e.to_fund_id = f.id then e.amount else 0 end))), 0)
+  from generate_series(v_start, date_trunc('month', current_date)::date, interval '1 month') m
+  cross join public.fin_funds f
+  left join public.fin_entries e on e.church_id = v_church and e.voided_at is null and (e.fund_id = f.id or e.to_fund_id = f.id)
+       and e.on_date >= m::date and e.on_date < (m + interval '1 month')::date
+  where f.church_id = v_church
+  group by m, f.id
+  order by m, f.sort_order;
+end $$;
+
+create or replace function public.fin_period(p_church uuid, p_from date, p_to date) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object(
+    'income', coalesce(sum(amount) filter (where kind = 'income'), 0),
+    'expense', coalesce(sum(amount) filter (where kind = 'expense'), 0),
+    'entries', count(*),
+    'missing_receipts', count(*) filter (where kind <> 'transfer' and method <> 'cash'
+                                           and not exists (select 1 from public.fin_attachments a where a.entry_id = e.id)),
+    'funds', coalesce((
+      select jsonb_agg(jsonb_build_object('name', f.name, 'balance',
+        f.opening_balance + coalesce((select sum(((case when x.fund_id = f.id then (case when x.kind = 'income' then x.amount else -x.amount end) else 0 end) + (case when x.kind = 'transfer' and x.to_fund_id = f.id then x.amount else 0 end)))
+                                     from public.fin_entries x where x.church_id = p_church and x.voided_at is null and x.on_date <= p_to
+                                       and (x.fund_id = f.id or x.to_fund_id = f.id)), 0)) order by f.sort_order)
+      from public.fin_funds f where f.church_id = p_church and f.active), '[]'::jsonb)
+  )
+  from public.fin_entries e
+  where e.church_id = p_church and e.voided_at is null and e.on_date between p_from and p_to
+$$;
+revoke all on function public.fin_period(uuid, date, date) from public, anon, authenticated;
+
+
+-- ===== 0023_denunciar_bloquear.sql =====
+-- 0023: denunciar contenido y bloquear personas (lo pide Apple para apps donde los usuarios publican).
+-- - Cualquiera denuncia un comentario, pedido de oración o mensaje de ministerio: les llega aviso al pastor
+--   y a la secretaría, que lo borran o lo dejan.
+-- - Cualquiera bloquea a otra persona: deja de ver lo que publica (comentarios, oración, mensajes).
+-- - Normas de la comunidad: se aceptan al crear la cuenta.
+
+create table if not exists public.content_reports (
+  id          uuid primary key default gen_random_uuid(),
+  church_id   uuid not null default public.current_church_id() references public.churches(id) on delete cascade,
+  kind        text not null check (kind in ('comment', 'prayer', 'ministry_message', 'announcement', 'profile')),
+  target_id   uuid not null,
+  author_id   uuid references public.profiles(id) on delete set null,
+  excerpt     text,
+  reason      text,
+  reporter_id uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  status      text not null default 'open' check (status in ('open', 'removed', 'kept')),
+  resolved_by uuid references public.profiles(id) on delete set null,
+  resolved_at timestamptz,
+  created_at  timestamptz not null default now()
+);
+create index if not exists content_reports_open_idx on public.content_reports (church_id, status, created_at desc);
+
+create table if not exists public.user_blocks (
+  blocker_id uuid not null default auth.uid() references public.profiles(id) on delete cascade,
+  blocked_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  check (blocker_id <> blocked_id)
+);
+
+alter table public.content_reports enable row level security;
+alter table public.user_blocks enable row level security;
+grant select, insert, update on public.content_reports to authenticated;
+grant select, insert, delete on public.user_blocks to authenticated;
+
+drop policy if exists content_reports_insert on public.content_reports;
+create policy content_reports_insert on public.content_reports for insert to authenticated
+  with check (church_id = public.current_church_id() and reporter_id = auth.uid() and status = 'open');
+drop policy if exists content_reports_read on public.content_reports;
+create policy content_reports_read on public.content_reports for select to authenticated
+  using (church_id = public.current_church_id() and (public.is_staff() or reporter_id = auth.uid()));
+drop policy if exists content_reports_update on public.content_reports;
+create policy content_reports_update on public.content_reports for update to authenticated
+  using (church_id = public.current_church_id() and public.is_staff()) with check (church_id = public.current_church_id());
+
+drop policy if exists user_blocks_own on public.user_blocks;
+create policy user_blocks_own on public.user_blocks for all to authenticated
+  using (blocker_id = auth.uid()) with check (blocker_id = auth.uid());
+
+create or replace function public.is_blocked_by_me(p_user uuid) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.user_blocks b where b.blocker_id = auth.uid() and b.blocked_id = p_user)
+$$;
+grant execute on function public.is_blocked_by_me(uuid) to authenticated;
+
+-- Aviso al pastor y la secretaría.
+create or replace function public.content_report_notify() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare v_to uuid;
+begin
+  for v_to in select public.staff_ids(new.church_id) loop
+    if v_to <> new.reporter_id then
+      perform public.notify(v_to, 'report', 'Contenido denunciado',
+        coalesce(left(new.excerpt, 120), 'Alguien denunció una publicación') || coalesce(' · Motivo: ' || new.reason, ''), '/admin/denuncias');
+    end if;
+  end loop;
+  return null;
+end $$;
+drop trigger if exists content_report_notify on public.content_reports;
+create trigger content_report_notify after insert on public.content_reports for each row execute function public.content_report_notify();
+
+-- Resolver: borrar el contenido o dejarlo.
+create or replace function public.resolve_report(p_report uuid, p_remove boolean) returns void
+language plpgsql security definer set search_path = public as $$
+declare r record;
+begin
+  if not public.is_staff() then raise exception 'Solo el pastor o la secretaría'; end if;
+  select * into r from public.content_reports where id = p_report and church_id = public.current_church_id();
+  if r.id is null then raise exception 'No existe la denuncia'; end if;
+  if p_remove then
+    if r.kind = 'comment' then delete from public.daily_comments where id = r.target_id and church_id = r.church_id;
+    elsif r.kind = 'prayer' then delete from public.prayer_requests where id = r.target_id and church_id = r.church_id;
+    elsif r.kind = 'ministry_message' then delete from public.ministry_messages where id = r.target_id and church_id = r.church_id;
+    elsif r.kind = 'announcement' then delete from public.announcements where id = r.target_id and church_id = r.church_id;
+    end if;
+  end if;
+  update public.content_reports set status = case when p_remove then 'removed' else 'kept' end, resolved_by = auth.uid(), resolved_at = now()
+  where church_id = r.church_id and kind = r.kind and target_id = r.target_id and status = 'open';
+end $$;
+grant execute on function public.resolve_report(uuid, boolean) to authenticated;
+
+-- No mostrar lo que publica alguien que bloqueé.
+create or replace function public.daily_comments_list(p_date date)
+returns table (id uuid, user_id uuid, name text, photo_path text, body text, created_at timestamptz, mine boolean)
+language sql stable security definer set search_path = public as $$
+  select c.id, c.user_id, coalesce(p.display_name, 'Alguien'),
+         (select k.photo_path from public.contacts k where k.profile_id = c.user_id limit 1),
+         c.body, c.created_at, c.user_id = auth.uid()
+  from public.daily_comments c
+  left join public.profiles p on p.id = c.user_id
+  where c.church_id = public.current_church_id() and c.on_date = p_date and not public.is_blocked_by_me(c.user_id)
+  order by c.created_at
+  limit 500
+$$;
+grant execute on function public.daily_comments_list(date) to authenticated;
+
+drop policy if exists ministry_messages_select on public.ministry_messages;
+create policy ministry_messages_select on public.ministry_messages for select to authenticated
+  using (church_id = public.current_church_id() and (public.is_ministry_member(ministry_id) or public.is_ministry_leader(ministry_id))
+         and not public.is_blocked_by_me(user_id));
+
+-- Oración: además, el pedido anónimo ya no deja ver quién lo pidió (antes se mandaba el id).
+create or replace function public.prayer_list()
+returns table (id uuid, user_id uuid, author text, body text, visibility text, people uuid[], anonymous boolean,
+               answered_at timestamptz, answer_note text, created_at timestamptz, prayed integer, i_prayed boolean, mine boolean)
+language sql stable security definer set search_path = public as $$
+  select p.id,
+         case when p.anonymous and p.user_id <> auth.uid() then null else p.user_id end,
+         case when p.anonymous and p.user_id <> auth.uid() then null else pr.display_name end,
+         p.body, p.visibility, case when p.user_id = auth.uid() then p.people else '{}'::uuid[] end, p.anonymous,
+         p.answered_at, p.answer_note, p.created_at,
+         (select count(*)::int from public.prayer_prayed x where x.request_id = p.id),
+         exists (select 1 from public.prayer_prayed x where x.request_id = p.id and x.user_id = auth.uid()),
+         p.user_id = auth.uid()
+  from public.prayer_requests p join public.profiles pr on pr.id = p.user_id
+  where public.can_see_prayer(p.id) and (p.answered_at is null or p.answered_at > now() - interval '30 days')
+    and not public.is_blocked_by_me(p.user_id)
+  order by p.created_at desc limit 200
+$$;
+grant execute on function public.prayer_list() to authenticated;
+
+-- Aceptación de las normas de la comunidad.
+alter table public.profiles add column if not exists rules_accepted_at timestamptz;
+create or replace function public.accept_community_rules() returns void
+language sql security definer set search_path = public as $$
+  update public.profiles set rules_accepted_at = coalesce(rules_accepted_at, now()) where id = auth.uid()
+$$;
+grant execute on function public.accept_community_rules() to authenticated;

@@ -558,7 +558,7 @@ export async function saveFinEntry(e: Partial<import('@/types').FinEntry> & Pick
   const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
   const row = {
     on_date: e.on_date, kind: e.kind, fund_id: e.fund_id, to_fund_id: e.kind === 'transfer' ? e.to_fund_id : null,
-    account_id: e.account_id ?? null, category_id: e.kind === 'transfer' ? null : e.category_id ?? null, amount: e.amount,
+    account_id: e.account_id ?? null, to_account_id: e.kind === 'transfer' ? e.to_account_id ?? null : null, category_id: e.kind === 'transfer' ? null : e.category_id ?? null, amount: e.amount,
     currency: e.currency ?? 'ARS', method: e.method ?? 'cash', description: e.description ?? null, counterpart: e.counterpart ?? null,
   };
   if (e.id) {
@@ -607,3 +607,7 @@ export async function setFinanceRole(profileId: string, role: string | null): Pr
   ok(await supabase.rpc('set_finance_role', { p_profile: profileId, p_role: role }));
 }
 export type _FinT = T;
+export async function finAccountBalances(to: string | null = null): Promise<import('@/types').FinAccountBalance[]> {
+  const rows = (ok(await supabase.rpc('fin_account_balances', { p_to: to })) ?? []) as import('@/types').FinAccountBalance[];
+  return rows.map((r) => ({ ...r, balance: Number(r.balance) }));
+}

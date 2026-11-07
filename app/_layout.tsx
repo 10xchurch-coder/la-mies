@@ -2,6 +2,7 @@ import '@/lib/webAlert'; // en la web, los avisos y confirmaciones se muestran c
 import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
 import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
+import { RulesGate } from '@/components/RulesGate';
 import { Stack, useRouter, useSegments, type Href } from 'expo-router';
 import { Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -104,6 +105,7 @@ export default function RootLayout() {
             {/* La clave hace que toda la app se vuelva a dibujar con los colores nuevos al cambiar de modo. */}
             <Gate key={mode} />
             <ActionSheetHost key={`sheet-${mode}`} />
+            <RulesGate key={`rules-${mode}`} />
           </ErrorBoundary>
         </OutingProvider>
       </AuthProvider>

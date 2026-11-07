@@ -1,5 +1,5 @@
 // Ajustes: perfil, cómo comparto, Face ID, ubicación, cuenta.
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -12,6 +12,8 @@ import { useAuth } from '@/store/auth';
 import { colors, themed, useThemeMode } from '@/theme';
 import { saveThemeMode } from '@/lib/themeStore';
 import { APP_VERSION } from '@/components/ErrorScreen';
+import { blockedPeople, unblockUser } from '@/lib/moderation';
+import { RULES } from '@/components/RulesGate';
 
 export default function Ajustes() {
   const router = useRouter();
@@ -19,9 +21,12 @@ export default function Ajustes() {
   const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: 'Face ID' });
   const mode = useThemeMode();
 
+  const [blocked, setBlocked] = useState<{ id: string; name: string }[]>([]);
+  const loadBlocked = useCallback(() => { blockedPeople().then(setBlocked).catch(() => undefined); }, []);
   useEffect(() => {
     biometricsAvailable().then(setBio);
-  }, []);
+    loadBlocked();
+  }, [loadBlocked]);
 
   const set = async (patch: Parameters<typeof updateProfile>[0]) => {
     try {
@@ -97,6 +102,15 @@ export default function Ajustes() {
 
         <SectionTitle>Cuenta</SectionTitle>
         <Card style={{ padding: 0 }}>
+          <RowLink title="Normas de la comunidad" subtitle="Respeto, privacidad y denuncias" icon="book" onPress={() => Alert.alert('Normas de la comunidad', RULES.map((r, i) => `${i + 1}. ${r}`).join('\n\n'))} />
+          <RowLink
+            title="Personas bloqueadas"
+            subtitle={blocked.length ? blocked.map((b) => b.name).join(', ') : 'No bloqueaste a nadie'}
+            icon="slash"
+            onPress={() => blocked.length
+              ? Alert.alert('Desbloquear', 'Elegí a quién volver a ver.', [...blocked.slice(0, 3).map((b) => ({ text: b.name, onPress: () => { unblockUser(b.id).then(loadBlocked); } })), { text: 'Cancelar', style: 'cancel' as const }])
+              : undefined}
+          />
           <RowLink title="Seguridad de mi cuenta" subtitle="Contraseña y verificación en dos pasos" icon="shield" onPress={() => router.push('/seguridad')} />
           <RowLink
             title="Cerrar sesión"

@@ -43,7 +43,7 @@ export default function Movimientos() {
   useFocusEffect(load);
 
   const shown = useMemo(() => (rows ?? []).filter((r) => showVoid || !r.voided_at), [rows, showVoid]);
-  const sign = (e: FinEntry) => (e.kind === 'income' ? 1 : e.kind === 'expense' ? -1 : fund ? (e.to_fund_id === fund ? 1 : -1) : 0);
+  const sign = (e: FinEntry) => (e.kind === 'income' ? 1 : e.kind === 'expense' ? -1 : e.to_fund_id === e.fund_id ? 0 : fund ? (e.to_fund_id === fund ? 1 : -1) : 0);
   const inSum = shown.filter((e) => !e.voided_at && sign(e) > 0).reduce((a, e) => a + e.amount, 0);
   const outSum = shown.filter((e) => !e.voided_at && sign(e) < 0).reduce((a, e) => a + e.amount, 0);
   const fname = (id: string | null) => funds.find((f) => f.id === id)?.name ?? '';
@@ -76,7 +76,7 @@ export default function Movimientos() {
         {shown.map((e) => {
           const s = sign(e);
           const cat = cats.find((c) => c.id === e.category_id)?.name;
-          const title = e.kind === 'transfer' ? `Pase ${fname(e.fund_id)} → ${fname(e.to_fund_id)}` : cat ?? (e.kind === 'income' ? 'Ingreso' : 'Gasto');
+          const title = e.kind === 'transfer' ? (e.to_fund_id === e.fund_id ? `Banco ↔ caja · ${fname(e.fund_id)}` : `Pase ${fname(e.fund_id)} → ${fname(e.to_fund_id)}`) : cat ?? (e.kind === 'income' ? 'Ingreso' : 'Gasto');
           return (
             <Pressable key={e.id} onPress={() => router.push(`/finanzas/${e.id}` as Href)} accessibilityRole="button">
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, opacity: e.voided_at ? 0.5 : 1 }}>

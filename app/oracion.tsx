@@ -12,6 +12,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { PrayerRow, Profile } from '@/types';
+import { moderate } from '@/lib/moderation';
 
 const VIS_LABEL = { church: 'Toda la iglesia', pastor: 'Solo el pastor', people: 'Personas elegidas' } as const;
 
@@ -111,6 +112,11 @@ export default function Oracion() {
               {r.mine && !r.answered_at ? (
                 <Pressable onPress={() => markPrayerAnswered(r.id, null).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} style={{ padding: 6 }} accessibilityRole="button">
                   <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Dios respondió</Text>
+                </Pressable>
+              ) : null}
+              {!r.mine ? (
+                <Pressable onPress={() => moderate({ kind: 'prayer', targetId: r.id, authorId: r.user_id ?? null, authorName: r.author, excerpt: r.body, onChange: load })} style={{ padding: 6 }} accessibilityLabel="Denunciar o bloquear">
+                  <Feather name="more-horizontal" size={18} color={colors.muted} />
                 </Pressable>
               ) : null}
               {r.mine ? (

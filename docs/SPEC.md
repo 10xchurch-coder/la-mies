@@ -150,3 +150,7 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - Ministerios Música y Medios.
 - `.github/workflows/update.yml`: EAS Update a los canales preview (Android) y production (iPhone).
 - Calendario en dos partes: "Cada semana" (reuniones y actividades por día con hora) y "Fechas especiales" (un año por delante, mínimo hasta fin del año siguiente; eventos anuales con `yearly`).
+
+## v0.7 (finanzas y moderación)
+- Finanzas: pases banco ↔ caja dentro de un fondo (`to_account_id`), saldo por cuenta (`fin_account_balances`), fondos Terreno y construcción y General (dólares). La planilla anterior (2024–oct 2026) se cargó con `source = 'planilla'` (no está en el repositorio).
+- Denunciar y bloquear (pauta 1.2 de Apple): `content_reports`, `user_blocks`, `resolve_report`, Iglesia → Denuncias, Ajustes → Personas bloqueadas, Normas de la comunidad que cada uno acepta una vez. Los pedidos anónimos ya no mandan el id de quien los pidió.

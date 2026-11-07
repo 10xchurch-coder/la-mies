@@ -23,6 +23,7 @@ import { addDays, fmtDateShort, fmtTime, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { DailyComment, DailyContent, DailySocial, ReadingStreak } from '@/types';
+import { moderate } from '@/lib/moderation';
 
 type Slide = 'verse' | 'phrase' | 'reading' | 'full';
 
@@ -469,7 +470,10 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
                     {c.name}<Text style={{ fontWeight: '500', color: colors.muted }}>  {fmtTime(c.created_at)}</Text>
                   </Text>
                   <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{c.body}</Text>
-                  {c.mine || isStaff ? <Text onPress={() => remove(c)} style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>Borrar</Text> : null}
+                  <View style={{ flexDirection: 'row', gap: 14, marginTop: 2 }}>
+                    {c.mine || isStaff ? <Text onPress={() => remove(c)} style={{ fontSize: 11, color: colors.muted }}>Borrar</Text> : null}
+                    {!c.mine ? <Text onPress={() => moderate({ kind: 'comment', targetId: c.id, authorId: c.user_id, authorName: c.name, excerpt: c.body, onChange: load })} style={{ fontSize: 11, color: colors.muted }}>Denunciar o bloquear</Text> : null}
+                  </View>
                 </View>
               </Pressable>
             )}

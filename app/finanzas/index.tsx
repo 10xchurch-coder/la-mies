@@ -6,12 +6,12 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, Loading, SectionTitle } from '@/components/ui';
-import { finBalances, saveFinFund } from '@/lib/api';
+import { finAccountBalances, finBalances, saveFinFund } from '@/lib/api';
 import { fmtMoney, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
-import type { FinBalance } from '@/types';
+import type { FinAccountBalance, FinBalance } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 export const FUND_ICON: Record<string, IconName> = { general: 'home', missions: 'globe', designated: 'tag', vehicle: 'truck', other: 'folder' };
@@ -28,11 +28,13 @@ export default function Finanzas() {
   const [all, setAll] = useState<FinBalance[] | null>(null);
   const [month, setMonth] = useState<FinBalance[]>([]);
   const [newFund, setNewFund] = useState<string | null>(null);
+  const [accts, setAccts] = useState<FinAccountBalance[]>([]);
 
   const load = useCallback(() => {
     const [a, b] = monthRange();
     finBalances().then(setAll).catch((e) => { Alert.alert('No se pudo', errorMessage(e)); setAll([]); });
     finBalances(a, b).then(setMonth).catch(() => undefined);
+    finAccountBalances().then(setAccts).catch(() => undefined);
   }, []);
   useFocusEffect(load);
 
@@ -45,9 +47,12 @@ export default function Finanzas() {
     );
   }
 
-  const total = (all ?? []).reduce((a, f) => a + f.closing, 0);
-  const mIn = month.reduce((a, f) => a + f.income, 0);
-  const mOut = month.reduce((a, f) => a + f.expense, 0);
+  const ars = (x: { currency: string }) => x.currency !== 'USD';
+  const total = (all ?? []).filter(ars).reduce((a, f) => a + f.closing, 0);
+  const usd = (all ?? []).filter((f) => f.currency === 'USD').reduce((a, f) => a + f.closing, 0);
+  const mIn = month.filter(ars).reduce((a, f) => a + f.income, 0);
+  const mOut = month.filter(ars).reduce((a, f) => a + f.expense, 0);
+  const byAccount = [...accts.filter(ars).reduce((m, x) => m.set(x.account, (m.get(x.account) ?? 0) + x.balance), new Map<string, number>()).entries()];
   const monthName = new Date().toLocaleDateString('es-AR', { month: 'long' });
 
   const go = (to: string) => router.push(to as Href);
@@ -60,7 +65,8 @@ export default function Finanzas() {
           <>
             <Card style={{ gap: 4, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>Total en todos los fondos</Text>
-              <Text style={{ fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: -0.5 }}>{fmtMoney(total)}</Text>
+              <Text style={{ fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: -0.5 }}>{fmtMoney(total)}{usd ? <Text style={{ fontSize: 16 }}>  + {fmtMoney(usd, 'USD')}</Text> : null}</Text>
+              {byAccount.length ? <Text style={{ fontSize: 13, color: colors.text }}>{byAccount.map(([n, v]) => `${n}: ${fmtMoney(v)}`).join(' · ')}</Text> : null}
               <Text style={{ fontSize: 13, color: colors.text }}>
                 En {monthName}: <Text style={{ color: colors.greenText, fontWeight: '800' }}>+{fmtMoney(mIn)}</Text> entró · <Text style={{ color: colors.red, fontWeight: '800' }}>−{fmtMoney(mOut)}</Text> salió
               </Text>
