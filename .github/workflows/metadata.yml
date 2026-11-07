@@ -22,4 +22,7 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Subir ficha
+        env:
+          EXPO_APPLE_TEAM_ID: 8VK7D3J6QX
+          EXPO_APPLE_TEAM_TYPE: INDIVIDUAL
         run: eas metadata:push --non-interactive
