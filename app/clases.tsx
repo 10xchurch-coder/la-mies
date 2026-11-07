@@ -13,7 +13,7 @@ import type { ClassRow, ClassSchedule, ClassTeacher, Material, Profile } from '@
 
 export default function Clases() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, isLeader } = useAuth();
   const [classes, setClasses] = useState<ClassRow[] | null>(null);
   const [teachers, setTeachers] = useState<ClassTeacher[]>([]);
   const [sched, setSched] = useState<ClassSchedule[]>([]);
@@ -39,7 +39,7 @@ export default function Clases() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Clases" subtitle="Escuela dominical · sábado y domingo" back />
+      <Header title={isLeader ? 'Clases' : 'Mis clases'} subtitle="Escuela dominical · sábado y domingo" back />
       <Screen>
         {classes && !classes.length ? <Empty icon="book" title="No hay clases cargadas" text="El pastor o la secretaría las crea desde la base de datos (ya vienen Cuna, 2 a 6 y 6 a 12)." /> : null}
         {(classes ?? []).map((k) => {

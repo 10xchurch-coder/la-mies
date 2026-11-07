@@ -198,6 +198,22 @@ export default function Clase() {
         ) : null}
         {canManage ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>“Alternar maestros” llena las fechas vacías turnándolos por semana. “Material en orden” asigna los capítulos de una serie, uno por semana, desde el que elijas. El lunes a la mañana cada maestro recibe el aviso con su capítulo.</Text> : null}
 
+        <SectionTitle right={canStudents ? <Text onPress={() => router.push({ pathname: '/material/nuevo', params: { classId: id } })} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>+ Agregar</Text> : undefined}>Material de la clase</SectionTitle>
+        {(() => {
+          const mine = materials.filter((m) => m.class_id === id || !m.class_id);
+          if (!mine.length) return <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no hay material. {canStudents ? 'Tocá “+ Agregar” para subir un capítulo, un PDF o un texto.' : ''}</Text>;
+          const bySeries = new Map<string, Material[]>();
+          for (const m of mine) bySeries.set(m.series, [...(bySeries.get(m.series) ?? []), m]);
+          return [...bySeries.entries()].map(([series, list]) => (
+            <Card key={series} style={{ padding: 0 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, paddingHorizontal: 14, paddingTop: 10 }}>{series}</Text>
+              {list.sort((a, b) => a.chapter_order - b.chapter_order).map((m) => (
+                <RowLink key={m.id} icon={m.file_path ? 'file-text' : 'book-open'} title={m.title} subtitle={m.file_name ?? (m.body ? 'Texto para leer' : undefined)} onPress={() => router.push({ pathname: '/material/[id]', params: { id: m.id } })} />
+              ))}
+            </Card>
+          ));
+        })()}
+
         <SectionTitle>Maestros</SectionTitle>
         <Card style={{ padding: 0 }}>
           {teachers.map((t) => (

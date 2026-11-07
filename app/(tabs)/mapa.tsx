@@ -429,10 +429,14 @@ export default function Mapa() {
           </Text>
         ) : (
           <>
-            <Button title={outing.active ? 'Continuar la salida' : 'Iniciar salida'} icon={outing.active ? 'arrow-right' : 'play'} onPress={start} loading={busy} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Button title={outing.active ? 'Continuar la salida' : 'Iniciar salida'} icon={outing.active ? 'arrow-right' : 'play'} onPress={start} loading={busy} style={{ flex: 1 }} />
+              <Button title="Capacitación" icon="compass" variant="outline" onPress={() => router.push('/capacitacion')} />
+            </View>
             <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Tu ubicación se comparte con el equipo solo mientras la salida está activa</Text>
           </>
         )}
+        {Platform.OS === 'web' ? <Button title="Capacitación para evangelizar" icon="compass" variant="outline" small onPress={() => router.push('/capacitacion')} /> : null}
       </View>
 
       <Modal visible={choosing} transparent animationType="fade" onRequestClose={() => setChoosing(false)}>

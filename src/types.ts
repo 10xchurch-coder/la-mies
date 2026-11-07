@@ -234,6 +234,7 @@ export type ClassAttendance = { id: string; class_id: string; on_date: string; c
 export type Material = {
   id: string; church_id: string; series: string; title: string; chapter_order: number; body: string | null;
   file_path: string | null; file_name: string | null; created_by: string | null; created_at: string;
+  class_id?: string | null;
 };
 
 export type Ministry = {

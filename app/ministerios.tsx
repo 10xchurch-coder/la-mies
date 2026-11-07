@@ -14,7 +14,7 @@ type IconName = React.ComponentProps<typeof Feather>['name'];
 
 export default function Ministerios() {
   const router = useRouter();
-  const { profile } = useAuth();
+  const { profile, isLeader } = useAuth();
   const [rows, setRows] = useState<Ministry[] | null>(null);
   const [members, setMembers] = useState<MinistryMember[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
@@ -36,9 +36,9 @@ export default function Ministerios() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Ministerios" subtitle="Cada uno con su chat, sus turnos y sus recomendaciones" back />
+      <Header title={isLeader ? 'Ministerios' : 'Mis ministerios'} subtitle="Cada uno con su chat, sus turnos y sus recomendaciones" back />
       <Screen>
-        {rows && !rows.length ? <Empty icon="heart" title="Todavía no hay ministerios" /> : null}
+        {rows && !rows.length ? <Empty icon="heart" title={isLeader ? 'Todavía no hay ministerios' : 'Todavía no estás en ningún ministerio'} text={isLeader ? undefined : 'Cuando el pastor o un líder te sume a un ministerio, aparece acá.'} /> : null}
         {sorted.map((m) => {
           const mine = isMine(m);
           const count = crewRows.filter((x) => x.ministry_id === m.id).length;

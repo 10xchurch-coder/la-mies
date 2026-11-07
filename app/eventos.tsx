@@ -1,14 +1,15 @@
-// Calendario de la iglesia en dos partes:
-// - "Cada semana": horarios de las reuniones y las actividades semanales, por día.
-// - "Fechas especiales": lo que pasa una vez (Cena del Señor, juntas, campamentos), siempre con un año
-//   por delante como mínimo (y hasta fin del año que viene). Los que se repiten cada año aparecen solos.
+// Calendario de la iglesia, todo en una página:
+//  1. Cada semana: los horarios de las reuniones y actividades semanales.
+//  2. Esta semana: las fechas especiales de esta semana, bien resaltadas.
+//  3. Este mes: lo que queda del mes.
+//  4. "Ver el calendario": la vista de calendario mes por mes, con las fechas hasta fin del año que viene.
 // "Voy" para anotarse (recordatorio la víspera). La secretaría y el pastor agregan y borran.
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Choice, Empty, Field, Loading, Segmented, SectionTitle, Toggle } from '@/components/ui';
+import { Button, Card, Choice, Field, Loading, Segmented, SectionTitle, Toggle } from '@/components/ui';
 import { deleteEvent, listEvents, listServices, rsvpRows, saveEvent, setRsvp } from '@/lib/api';
 import { addDays, dayName, fmtDateShort, isoDate, parseDateAR } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -63,13 +64,56 @@ function weeklyItems(services: ChurchService[], events: ChurchEvent[]): WeeklyIt
   return items.sort((a, b) => WEEK_ORDER.indexOf(a.dow) - WEEK_ORDER.indexOf(b.dow) || a.time.localeCompare(b.time));
 }
 
+const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
+
+/** Lunes de la semana de una fecha. */
+function mondayOf(d: Date): Date {
+  return addDays(d, -((d.getDay() + 6) % 7));
+}
+
+function MonthGrid({ ym, occ, sel, onSel }: { ym: { y: number; m: number }; occ: Occ[]; sel: string | null; onSel: (d: string) => void }) {
+  const first = new Date(ym.y, ym.m, 1);
+  const start = mondayOf(first);
+  const today = isoDate(new Date());
+  const days = Array.from({ length: 42 }, (_, i) => addDays(start, i));
+  const byDay = new Map<string, number>();
+  for (const o of occ) byDay.set(o.date, (byDay.get(o.date) ?? 0) + 1);
+  return (
+    <View>
+      <View style={{ flexDirection: 'row' }}>
+        {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => <Text key={i} style={{ flex: 1, textAlign: 'center', fontSize: 11, fontWeight: '800', color: colors.muted, paddingVertical: 4 }}>{d}</Text>)}
+      </View>
+      {Array.from({ length: 6 }, (_, w) => (
+        <View key={w} style={{ flexDirection: 'row' }}>
+          {days.slice(w * 7, w * 7 + 7).map((d) => {
+            const iso = isoDate(d);
+            const inMonth = d.getMonth() === ym.m;
+            const n = byDay.get(iso) ?? 0;
+            const on = sel === iso;
+            return (
+              <Pressable key={iso} onPress={() => onSel(iso)} accessibilityRole="button" accessibilityLabel={`${d.getDate()} ${n ? `, ${n} actividades` : ''}`}
+                style={{ flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: on ? colors.green : iso === today ? colors.greenSoft : 'transparent' }}>
+                <Text style={{ fontSize: 15, fontWeight: n ? '800' : '500', color: on ? '#FFF' : inMonth ? colors.text : colors.border }}>{d.getDate()}</Text>
+                {n ? <View style={{ width: 6, height: 6, borderRadius: 3, marginTop: 2, backgroundColor: on ? '#FFF' : colors.amber }} /> : <View style={{ height: 8 }} />}
+              </Pressable>
+            );
+          })}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export default function Eventos() {
   const { isStaff, session } = useAuth();
-  const [tab, setTab] = useState<'week' | 'special'>('week');
   const [events, setEvents] = useState<ChurchEvent[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
   const [rsvps, setRsvps] = useState<{ event_id: string; occurs_on: string; user_id: string }[]>([]);
-  const [adding, setAdding] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
+  const [ym, setYm] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }));
+  const [sel, setSel] = useState<string | null>(null);
+  const [adding, setAdding] = useState<null | 'week' | 'special'>(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [dow, setDow] = useState<number>(5);
@@ -88,14 +132,13 @@ export default function Eventos() {
 
   const week = useMemo(() => weeklyItems(services, events ?? []), [services, events]);
   const occ = useMemo(() => special(events ?? []), [events]);
-  const months = useMemo(() => {
-    const m = new Map<string, Occ[]>();
-    for (const o of occ) {
-      const k = new Date(`${o.date}T12:00:00`).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
-      m.set(k, [...(m.get(k) ?? []), o]);
-    }
-    return [...m.entries()];
-  }, [occ]);
+  const now = new Date();
+  const weekEnd = isoDate(addDays(mondayOf(now), 6));
+  const monthEnd = isoDate(new Date(now.getFullYear(), now.getMonth() + 1, 0));
+  const thisWeek = occ.filter((o) => o.date <= weekEnd);
+  const thisMonth = occ.filter((o) => o.date > weekEnd && o.date <= monthEnd);
+  const nextUp = occ.filter((o) => o.date > monthEnd).slice(0, 3);
+  const todayDow = now.getDay();
 
   const toggle = async (o: Occ, going: boolean) => {
     try {
@@ -110,11 +153,10 @@ export default function Eventos() {
     Alert.alert('Borrar', ev.title, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => deleteEvent(ev.id).then(load) }]);
 
   const add = async () => {
-    const weekly = tab === 'week';
+    const weekly = adding === 'week';
     const t = /^\d{1,2}:\d{2}$/.test(time.trim()) ? time.trim().padStart(5, '0') : null;
     let d: string | null;
     if (weekly) {
-      // Próximo día de la semana elegido desde hoy.
       const today = new Date();
       d = isoDate(addDays(today, (dow - today.getDay() + 7) % 7));
       if (!t) { Alert.alert('Falta la hora', 'Poné la hora, por ejemplo 17:00.'); return; }
@@ -128,7 +170,7 @@ export default function Eventos() {
     setBusy(true);
     try {
       await saveEvent({ title: title.trim(), starts_at: `${d}T${t ?? '00:00'}:00${TZ_OFFSET}`, all_day: !t, place: place.trim() || null, description: desc.trim() || null, weekly, yearly: !weekly && yearly });
-      setAdding(false);
+      setAdding(null);
       setTitle(''); setDate(''); setTime(''); setPlace(''); setDesc(''); setYearly(false);
       load();
     } catch (e) {
@@ -138,104 +180,135 @@ export default function Eventos() {
     }
   };
 
+  const EventCard = ({ o, big }: { o: Occ; big?: boolean }) => {
+    const going = rsvps.some((r) => r.event_id === o.ev.id && r.occurs_on === o.date && r.user_id === session?.user.id);
+    const count = rsvps.filter((r) => r.event_id === o.ev.id && r.occurs_on === o.date).length;
+    const d = new Date(`${o.date}T12:00:00`);
+    const endIso = o.ev.ends_at ? isoDate(addDays(o.start, Math.round((new Date(o.ev.ends_at).getTime() - new Date(o.ev.starts_at).getTime()) / 86400000))) : null;
+    return (
+      <Card style={[{ flexDirection: 'row', gap: 12, padding: 12, alignItems: 'center' }, big && { backgroundColor: colors.amberSoft, borderColor: colors.amber, borderWidth: 1.5 }]}>
+        <View style={{ width: 54, alignItems: 'center', paddingVertical: 6, borderRadius: 12, backgroundColor: big ? colors.amber : colors.greenSoft }}>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{dayName(d.getDay()).slice(0, 3).toUpperCase()}</Text>
+          <Text style={{ fontSize: 22, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{d.getDate()}</Text>
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={{ fontSize: big ? 17 : 15, fontWeight: '800', color: colors.text }}>{o.ev.title}</Text>
+          <Text style={{ fontSize: 12, color: colors.muted }}>
+            {o.ev.all_day ? (endIso && endIso > o.date ? `Hasta el ${fmtDateShort(endIso)}` : 'Todo el día') : hhmm(o.start)}
+            {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? ' · todos los años' : ''}{count ? ` · ${count} van` : ''}
+          </Text>
+          {o.ev.description ? <Text style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
+        </View>
+        <Pressable onPress={() => toggle(o, !going)} accessibilityRole="button" style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: going ? colors.green : colors.bg, borderWidth: 1, borderColor: going ? colors.green : colors.border }}>
+          <Text style={{ fontSize: 13, fontWeight: '800', color: going ? '#FFF' : colors.text }}>{going ? 'Voy ✓' : 'Voy'}</Text>
+        </Pressable>
+        {isStaff ? (
+          <Pressable onPress={() => remove(o.ev)} accessibilityLabel="Borrar" style={{ padding: 4 }}>
+            <Feather name="trash-2" size={16} color={colors.muted} />
+          </Pressable>
+        ) : null}
+      </Card>
+    );
+  };
+
+  const selList = sel ? occ.filter((o) => o.date === sel) : [];
+  const selWeekly = sel ? week.filter((w) => w.dow === new Date(`${sel}T12:00:00`).getDay()) : [];
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Calendario" subtitle="Horarios y fechas de la iglesia" back />
       <Screen>
-        <Segmented options={[{ value: 'week', label: 'Cada semana' }, { value: 'special', label: 'Fechas especiales' }]} value={tab} onChange={(v) => { setTab(v); setAdding(false); }} />
-
-        {isStaff ? (
-          adding ? (
-            <Card style={{ gap: 10 }}>
-              <Field label="Nombre" value={title} onChangeText={setTitle} placeholder={tab === 'week' ? 'Ganar almas' : 'Cena del Señor'} />
-              {tab === 'week' ? (
-                <>
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Día</Text>
-                  <Choice columns={4} options={WEEK_ORDER.map((d) => ({ value: String(d), label: dayName(d).slice(0, 3) }))} value={String(dow)} onChange={(v) => setDow(Number(v))} />
-                  <Field label="Hora" value={time} onChangeText={setTime} placeholder="17:00" keyboardType="numbers-and-punctuation" />
-                </>
-              ) : (
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Field label="Fecha" value={date} onChangeText={setDate} placeholder="20/12/2026" style={{ flex: 1 }} keyboardType="numbers-and-punctuation" />
-                  <Field label="Hora" hint="(opcional)" value={time} onChangeText={setTime} placeholder="19:30" style={{ width: 110 }} keyboardType="numbers-and-punctuation" />
-                </View>
-              )}
-              <Field label="Lugar" hint="(opcional)" value={place} onChangeText={setPlace} />
-              <Field label="Detalle" hint="(opcional)" value={desc} onChangeText={setDesc} multiline />
-              {tab === 'special' ? <Toggle label="Se repite todos los años" hint="Aniversario, Día del Niño…" value={yearly} onChange={setYearly} /> : null}
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" onPress={() => setAdding(false)} style={{ flex: 1 }} />
-                <Button title="Guardar" onPress={add} loading={busy} style={{ flex: 2 }} />
-              </View>
-            </Card>
-          ) : (
-            <Button title={tab === 'week' ? 'Agregar actividad semanal' : 'Agregar fecha especial'} icon="plus" variant="outline" onPress={() => setAdding(true)} />
-          )
-        ) : null}
-
-        {events === null ? <Loading /> : tab === 'week' ? (
-          !week.length ? <Empty icon="clock" title="No hay horarios cargados" /> : (
-            WEEK_ORDER.filter((d) => week.some((w) => w.dow === d)).map((d) => (
-              <View key={d} style={{ gap: 8 }}>
-                <SectionTitle>{dayName(d).charAt(0).toUpperCase() + dayName(d).slice(1)}</SectionTitle>
-                <Card style={{ padding: 0 }}>
-                  {week.filter((w) => w.dow === d).map((w, i, arr) => (
-                    <View key={w.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderBottomWidth: i < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border }}>
-                      <Text style={{ width: 52, fontSize: 16, fontWeight: '800', color: colors.green }}>{w.time || '—'}</Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 15, fontWeight: w.main ? '800' : '700', color: colors.text }}>{w.title}</Text>
-                        {w.place || w.note ? <Text style={{ fontSize: 12, color: colors.muted }}>{[w.place, w.note].filter(Boolean).join(' · ')}</Text> : null}
-                      </View>
-                      {isStaff && w.ev ? (
-                        <Pressable onPress={() => remove(w.ev as ChurchEvent)} accessibilityLabel="Borrar" style={{ padding: 6 }}>
-                          <Feather name="trash-2" size={16} color={colors.muted} />
-                        </Pressable>
-                      ) : null}
-                    </View>
-                  ))}
-                </Card>
-              </View>
-            ))
-          )
-        ) : (
+        {events === null ? <Loading /> : (
           <>
-            {!occ.length ? <Empty icon="calendar" title="No hay fechas especiales cargadas" /> : null}
-            {months.map(([month, list]) => (
-              <View key={month} style={{ gap: 8 }}>
-                <SectionTitle>{month.charAt(0).toUpperCase() + month.slice(1)}</SectionTitle>
-                {list.map((o) => {
-                  const going = rsvps.some((r) => r.event_id === o.ev.id && r.occurs_on === o.date && r.user_id === session?.user.id);
-                  const count = rsvps.filter((r) => r.event_id === o.ev.id && r.occurs_on === o.date).length;
-                  const d = new Date(`${o.date}T12:00:00`);
-                  const endIso = o.ev.ends_at ? isoDate(addDays(o.start, Math.round((new Date(o.ev.ends_at).getTime() - new Date(o.ev.starts_at).getTime()) / 86400000))) : null;
-                  return (
-                    <Card key={`${o.ev.id}-${o.date}`} style={{ flexDirection: 'row', gap: 12, padding: 12, alignItems: 'center' }}>
-                      <View style={{ width: 52, alignItems: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: colors.greenSoft }}>
-                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.greenText }}>{dayName(d.getDay()).slice(0, 3).toUpperCase()}</Text>
-                        <Text style={{ fontSize: 20, fontWeight: '800', color: colors.greenText }}>{d.getDate()}</Text>
+            <SectionTitle>Cada semana</SectionTitle>
+            <Card style={{ padding: 0 }}>
+              {WEEK_ORDER.filter((d) => week.some((w) => w.dow === d)).map((d, di, arr) => (
+                <View key={d} style={{ flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 10, gap: 10, borderBottomWidth: di < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border, backgroundColor: d === todayDow ? colors.greenSoft : 'transparent' }}>
+                  <Text style={{ width: 74, fontSize: 13, fontWeight: '800', color: d === todayDow ? colors.greenText : colors.muted }}>{cap(dayName(d))}{d === todayDow ? '\nhoy' : ''}</Text>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    {week.filter((w) => w.dow === d).map((w) => (
+                      <View key={w.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Text style={{ width: 44, fontSize: 14, fontWeight: '800', color: colors.green }}>{w.time || '—'}</Text>
+                        <Text style={{ flex: 1, fontSize: 14, fontWeight: w.main ? '800' : '600', color: colors.text }}>{w.title}{w.place ? <Text style={{ fontWeight: '400', color: colors.muted }}> · {w.place}</Text> : null}</Text>
+                        {isStaff && w.ev ? (
+                          <Pressable onPress={() => remove(w.ev as ChurchEvent)} accessibilityLabel="Borrar" style={{ padding: 2 }}>
+                            <Feather name="trash-2" size={14} color={colors.muted} />
+                          </Pressable>
+                        ) : null}
                       </View>
-                      <View style={{ flex: 1, gap: 2 }}>
-                        <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{o.ev.title}</Text>
-                        <Text style={{ fontSize: 12, color: colors.muted }}>
-                          {o.ev.all_day ? (endIso && endIso > o.date ? `Hasta el ${fmtDateShort(endIso)}` : 'Todo el día') : hhmm(o.start)}
-                          {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? ' · todos los años' : ''}{count ? ` · ${count} van` : ''}
-                        </Text>
-                        {o.ev.description ? <Text style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
-                      </View>
-                      <Pressable onPress={() => toggle(o, !going)} accessibilityRole="button" style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: going ? colors.green : colors.bgSoft }}>
-                        <Text style={{ fontSize: 13, fontWeight: '800', color: going ? '#FFF' : colors.text }}>{going ? 'Voy ✓' : 'Voy'}</Text>
-                      </Pressable>
-                      {isStaff ? (
-                        <Pressable onPress={() => remove(o.ev)} accessibilityLabel="Borrar" style={{ padding: 6 }}>
-                          <Feather name="trash-2" size={16} color={colors.muted} />
-                        </Pressable>
-                      ) : null}
-                    </Card>
-                  );
-                })}
-              </View>
-            ))}
-            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Se muestra hasta {fmtDateShort(horizon())}.</Text>
+                    ))}
+                  </View>
+                </View>
+              ))}
+              {!week.length ? <Text style={{ padding: 14, color: colors.muted }}>No hay horarios cargados.</Text> : null}
+            </Card>
+
+            <SectionTitle>Esta semana</SectionTitle>
+            {thisWeek.length ? thisWeek.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} big />) : <Text style={{ fontSize: 13, color: colors.muted }}>Esta semana no hay actividades especiales, solo las de siempre.</Text>}
+
+            <SectionTitle>{`Lo que queda de ${MONTHS[now.getMonth()]}`}</SectionTitle>
+            {thisMonth.length ? thisMonth.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />) : <Text style={{ fontSize: 13, color: colors.muted }}>No hay más fechas especiales este mes.</Text>}
+
+            {nextUp.length ? (
+              <>
+                <SectionTitle>Lo que viene</SectionTitle>
+                {nextUp.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />)}
+              </>
+            ) : null}
+
+            <Button title={showGrid ? 'Ocultar el calendario' : 'Ver el calendario del año'} icon="calendar" variant={showGrid ? 'ghost' : 'outline'} onPress={() => { setShowGrid((v) => !v); setSel(null); }} />
+            {showGrid ? (
+              <Card style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Pressable onPress={() => setYm((x) => (x.m === 0 ? { y: x.y - 1, m: 11 } : { y: x.y, m: x.m - 1 }))} hitSlop={10} accessibilityLabel="Mes anterior" style={{ padding: 6 }}>
+                    <Feather name="chevron-left" size={22} color={colors.text} />
+                  </Pressable>
+                  <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800', color: colors.text }}>{cap(MONTHS[ym.m])} {ym.y}</Text>
+                  <Pressable onPress={() => setYm((x) => (x.m === 11 ? { y: x.y + 1, m: 0 } : { y: x.y, m: x.m + 1 }))} hitSlop={10} accessibilityLabel="Mes siguiente" style={{ padding: 6 }}>
+                    <Feather name="chevron-right" size={22} color={colors.text} />
+                  </Pressable>
+                </View>
+                <MonthGrid ym={ym} occ={occ} sel={sel} onSel={(d) => setSel(d === sel ? null : d)} />
+                {sel ? (
+                  <View style={{ gap: 8 }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{cap(new Date(`${sel}T12:00:00`).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</Text>
+                    {selList.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />)}
+                    {selWeekly.map((w) => <Text key={w.key} style={{ fontSize: 13, color: colors.muted }}>{w.time} · {w.title} (cada semana)</Text>)}
+                    {!selList.length && !selWeekly.length ? <Text style={{ fontSize: 13, color: colors.muted }}>No hay nada ese día.</Text> : null}
+                  </View>
+                ) : <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Los días con punto naranja tienen una fecha especial. Tocá un día para verlo.</Text>}
+              </Card>
+            ) : null}
+
+            {isStaff ? (
+              adding ? (
+                <Card style={{ gap: 10 }}>
+                  <Segmented options={[{ value: 'special', label: 'Fecha especial' }, { value: 'week', label: 'Cada semana' }]} value={adding} onChange={setAdding} />
+                  <Field label="Nombre" value={title} onChangeText={setTitle} placeholder={adding === 'week' ? 'Ganar almas' : 'Cena del Señor'} />
+                  {adding === 'week' ? (
+                    <>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Día</Text>
+                      <Choice columns={4} options={WEEK_ORDER.map((d) => ({ value: String(d), label: dayName(d).slice(0, 3) }))} value={String(dow)} onChange={(v) => setDow(Number(v))} />
+                      <Field label="Hora" value={time} onChangeText={setTime} placeholder="17:00" keyboardType="numbers-and-punctuation" />
+                    </>
+                  ) : (
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <Field label="Fecha" value={date} onChangeText={setDate} placeholder="20/12/2026" style={{ flex: 1 }} keyboardType="numbers-and-punctuation" />
+                      <Field label="Hora" hint="(opcional)" value={time} onChangeText={setTime} placeholder="19:30" style={{ width: 110 }} keyboardType="numbers-and-punctuation" />
+                    </View>
+                  )}
+                  <Field label="Lugar" hint="(opcional)" value={place} onChangeText={setPlace} />
+                  <Field label="Detalle" hint="(opcional)" value={desc} onChangeText={setDesc} multiline />
+                  {adding === 'special' ? <Toggle label="Se repite todos los años" hint="Aniversario, Día del Niño…" value={yearly} onChange={setYearly} /> : null}
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <Button title="Cancelar" variant="ghost" onPress={() => setAdding(null)} style={{ flex: 1 }} />
+                    <Button title="Guardar" onPress={add} loading={busy} style={{ flex: 2 }} />
+                  </View>
+                </Card>
+              ) : (
+                <Button title="Agregar al calendario" icon="plus" variant="outline" onPress={() => setAdding('special')} />
+              )
+            ) : null}
           </>
         )}
       </Screen>

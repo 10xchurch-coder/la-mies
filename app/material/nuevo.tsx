@@ -13,7 +13,7 @@ import { colors } from '@/theme';
 
 export default function NuevoMaterial() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ id?: string; series?: string; order?: string }>();
+  const params = useLocalSearchParams<{ id?: string; series?: string; order?: string; classId?: string }>();
   const { church } = useAuth();
   const [series, setSeries] = useState(params.series ?? '');
   const [order, setOrder] = useState(params.order ?? '1');
@@ -43,6 +43,7 @@ export default function NuevoMaterial() {
     setBusy(true);
     try {
       const row: Record<string, unknown> = { series: series.trim(), chapter_order: Number(order) || 1, title: title.trim(), body: body.trim() || null };
+      if (params.classId) row.class_id = params.classId;
       if (file) {
         row.file_path = await uploadPicked('materials', church.id, file);
         row.file_name = file.name;

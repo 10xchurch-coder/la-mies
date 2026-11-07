@@ -105,11 +105,12 @@ export default function Personas() {
               <Choice
                 options={[{ value: 'all', label: allGroupsLabel(church?.grouping) }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
                 value={route}
-                onChange={setRoute}
+                // tocar otra vez la ruta elegida la saca (vuelve a todas)
+                onChange={(v) => setRoute(v === route ? 'all' : v)}
               />
             ) : null}
             {scope === 'member' || scope === 'visitor' ? (
-              <Choice options={[{ value: 'all', label: 'Todos' }, { value: 'unbaptized', label: 'Sin bautizar' }]} value={mfilter} onChange={setMfilter} />
+              <Choice options={[{ value: 'all', label: 'Todos' }, { value: 'unbaptized', label: 'Sin bautizar' }]} value={mfilter} onChange={(v) => setMfilter(v === mfilter ? 'all' : v)} />
             ) : null}
           </>
         )}
