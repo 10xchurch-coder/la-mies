@@ -73,11 +73,13 @@ export default function Finanzas() {
             </Card>
 
             {financeLevel >= 2 ? (
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Ingreso" icon="plus-circle" onPress={() => go('/finanzas/movimiento?kind=income')} style={{ flex: 1 }} />
-                <Button title="Gasto" icon="minus-circle" variant="outline" onPress={() => go('/finanzas/movimiento?kind=expense')} style={{ flex: 1 }} />
-                <Button title="Pase" icon="repeat" variant="outline" onPress={() => go('/finanzas/movimiento?kind=transfer')} style={{ flex: 1 }} />
-              </View>
+              <>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button title="Ingreso" icon="plus-circle" onPress={() => go('/finanzas/movimiento?kind=income')} style={{ flex: 1 }} />
+                  <Button title="Gasto" icon="minus-circle" variant="outline" onPress={() => go('/finanzas/movimiento?kind=expense')} style={{ flex: 1 }} />
+                </View>
+                <Button title="Pasar plata de un fondo a otro" icon="repeat" variant="outline" onPress={() => go('/finanzas/movimiento?kind=transfer')} />
+              </>
             ) : null}
 
             <SectionTitle>Fondos</SectionTitle>
@@ -120,6 +122,7 @@ export default function Finanzas() {
                 ['list', 'Movimientos', 'Todo lo que entró y salió, mes por mes', '/finanzas/movimientos'],
                 ['folder', 'Comprobantes', 'Fotos de recibos y del banco, en carpetas por mes', '/finanzas/comprobantes'],
                 ['bar-chart-2', 'Informe', 'Por mes, por fondo y por categoría', '/finanzas/informe'],
+                ['repeat', 'Pases automáticos', 'Cada mes, de un fondo a otro (ej. General → Vehículo)', '/finanzas/automaticos'],
                 ...(financeLevel >= 3 ? [['sliders', 'Saldos iniciales', 'Con cuánto empezó cada fondo', '/finanzas/fondos']] : []),
               ] as [IconName, string, string, string][]).map(([icon, t, sub, to], i, arr) => (
                 <Pressable key={t} onPress={() => go(to)} accessibilityRole="button"

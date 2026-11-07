@@ -160,3 +160,4 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - Mapa: el toque busca la vereda o el recorrido más cercano (antes en iPhone el toque en la línea también borraba la selección). Tarjeta con quién y cuándo, Historial, Ver la salida, "No se hizo" (de esa salida o de todas; no vuelve al recalcular: `coverage_exclusions`) y "Marcar como hecha" (`coverage_events.manual`).
 - Casas: confianza ≥ 0,80, 30–2500 m², ≤ 35 m de la calle, sin repetidos a < 4 m. Pastor, secretaría y capitanes sacan o agregan puntos ("Corregir casas"); lo corregido se respeta al volver a cargar.
 - "Ver sin visitar" solo pinta veredas con casas (`house_sides_in_bbox`): no plazas, parques ni el medio de avenidas de doble mano.
+- Pases automáticos entre fondos (`fin_recurring`, `run_fin_recurring` en el trabajo de cada hora). Roles y permisos: se eligen las personas de cada rol (iglesia y finanzas) en la misma pantalla.

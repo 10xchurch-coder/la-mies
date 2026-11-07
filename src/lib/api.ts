@@ -624,3 +624,14 @@ export async function houseSidesInBbox(b: Bbox): Promise<Set<string>> {
   const rows = (ok(await supabase.rpc('house_sides_in_bbox', { p_min_lat: b.minLat, p_min_lng: b.minLng, p_max_lat: b.maxLat, p_max_lng: b.maxLng })) ?? []) as { road_id: number; seg: number; side: number }[];
   return new Set(rows.map((r) => `${r.road_id}:${r.seg}:${r.side}`));
 }
+export type FinRecurring = { id: string; from_fund_id: string; to_fund_id: string; amount: number; day: number; description: string | null; active: boolean };
+export async function finRecurring(): Promise<FinRecurring[]> {
+  return ((ok(await supabase.from('fin_recurring').select('*').order('created_at')) ?? []) as FinRecurring[]).map((r) => ({ ...r, amount: Number(r.amount) }));
+}
+export async function saveFinRecurring(r: Partial<FinRecurring> & { from_fund_id: string; to_fund_id: string; amount: number; day: number }): Promise<void> {
+  const row = { from_fund_id: r.from_fund_id, to_fund_id: r.to_fund_id, amount: r.amount, day: r.day, description: r.description ?? null, active: r.active ?? true };
+  if (r.id) { ok(await supabase.from('fin_recurring').update(row).eq('id', r.id)); return; }
+  const { data: u } = await supabase.auth.getUser();
+  const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
+  ok(await supabase.from('fin_recurring').insert({ ...row, church_id: church }));
+}

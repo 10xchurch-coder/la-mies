@@ -91,7 +91,7 @@ export default function Iglesia() {
     { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
     { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
     { icon: 'users', label: 'Hermanos', to: '/admin/miembros', show: isStaff },
-    { icon: 'key', label: 'Roles y avisos', to: '/admin/roles', show: isStaff },
+    { icon: 'key', label: 'Roles y permisos', to: '/admin/roles', show: isStaff },
     { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
   ];
 
