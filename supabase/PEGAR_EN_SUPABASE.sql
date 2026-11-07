@@ -4698,3 +4698,8 @@ begin
   order by m.m0;
 end $$;
 grant execute on function public.church_progress(integer) to authenticated;
+
+
+-- ===== 0019_eventos_anuales.sql =====
+-- 0019: eventos que se repiten todos los años (aniversario, etc.).
+alter table public.events add column if not exists yearly boolean not null default false;

@@ -331,7 +331,7 @@ export type FollowupRow = {
 export type PipelineRow = { month: string; contacts: number; gospel: number; visited: number; came: number; saved: number; baptized: number; members: number };
 export type ChurchEvent = {
   id: string; church_id: string; title: string; starts_at: string; ends_at: string | null; all_day: boolean; place: string | null;
-  description: string | null; weekly: boolean; source_id: string | null;
+  description: string | null; weekly: boolean; source_id: string | null; yearly?: boolean;
 };
 export type PrayerRow = {
   id: string; user_id: string; author: string | null; body: string; visibility: 'church' | 'pastor' | 'people'; people: string[];

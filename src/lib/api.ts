@@ -421,7 +421,7 @@ export async function listEvents(): Promise<ChurchEvent[]> {
   return ok(await supabase.from('events').select('*').order('starts_at').limit(400)) ?? [];
 }
 export async function saveEvent(e: Partial<ChurchEvent> & { title: string; starts_at: string }): Promise<void> {
-  const row = { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at ?? null, all_day: !!e.all_day, place: e.place ?? null, description: e.description ?? null, weekly: !!e.weekly };
+  const row = { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at ?? null, all_day: !!e.all_day, place: e.place ?? null, description: e.description ?? null, weekly: !!e.weekly, yearly: !e.weekly && !!e.yearly };
   if (e.id) ok(await supabase.from('events').update(row).eq('id', e.id));
   else ok(await supabase.from('events').insert(row));
 }

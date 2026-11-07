@@ -77,7 +77,7 @@ export default function Iglesia() {
     { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
     { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
     { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
-    { icon: 'calendar', label: 'Eventos', to: '/eventos', show: true },
+    { icon: 'calendar', label: 'Calendario', to: '/eventos', show: true },
     { icon: 'heart', label: 'Oración', to: '/oracion', show: true },
     { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: true },
     { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },

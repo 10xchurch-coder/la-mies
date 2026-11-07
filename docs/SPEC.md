@@ -149,3 +149,4 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - Ficha: la secretaría y el pastor corrigen fechas de salvación, bautismo y membresía.
 - Ministerios Música y Medios.
 - `.github/workflows/update.yml`: EAS Update a los canales preview (Android) y production (iPhone).
+- Calendario en dos partes: "Cada semana" (reuniones y actividades por día con hora) y "Fechas especiales" (un año por delante, mínimo hasta fin del año siguiente; eventos anuales con `yearly`).
