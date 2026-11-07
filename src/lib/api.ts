@@ -512,3 +512,8 @@ export async function weeklyReport(monday: string | null = null): Promise<Weekly
 export async function recomputeCoverage(sessionId: string): Promise<number> {
   return (ok(await supabase.rpc('recompute_session_coverage', { p_session: sessionId })) as number) ?? 0;
 }
+/** Progreso de la iglesia mes a mes (null = toda la historia). */
+export async function churchProgress(months: number | null = null): Promise<import('@/types').ProgressRow[]> {
+  const rows = (ok(await supabase.rpc('church_progress', { p_months: months })) ?? []) as import('@/types').ProgressRow[];
+  return rows.map((r) => ({ ...r, avg_attendance: Number(r.avg_attendance), hours: Number(r.hours), km: Number(r.km) }));
+}

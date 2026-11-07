@@ -33,6 +33,8 @@ export default function Reporte() {
     ? `Informe semanal · ${church?.name ?? ''}\nDel ${fmtDateShort(r.from)} al ${fmtDateShort(r.to)}\n\n`
       + `EVANGELISMO\n${r.outings} salidas · ${r.people_out} hermanos · ${fmtMinutes(r.minutes)} · ${r.km} km\n${r.houses} casas · ${r.contacts} contactos · ${r.gospel} con el evangelio · ${r.promises} promesas\n\n`
       + `IGLESIA\n${r.attendance} asistencias · ${r.first_time} vinieron por primera vez · ${r.visits} visitas a casas\n${r.saved} recibieron a Cristo · ${r.baptisms} bautismos · ${r.new_members} miembros nuevos\n${r.absent} miembros faltaron el último fin de semana`
+      + (r.services?.length ? `\n\nPOR REUNIÓN\n${r.services.map((x) => `${x.name}: ${x.count}`).join('\n')}` : '')
+      + (r.classes?.length ? `\n\nPOR CLASE\n${r.classes.map((x) => `${x.name}: ${x.days ? x.present : '–'}`).join('\n')}\nTotal en clases: ${r.classes.reduce((a, x) => a + x.present, 0)}` : '')
     : '';
 
   return (
@@ -69,6 +71,41 @@ export default function Reporte() {
               <Stat value={r.new_members} label="Miembros nuevos" />
             </View>
             <Text style={{ fontSize: 13, color: colors.muted }}>{r.absent} miembros faltaron el último fin de semana.</Text>
+            {r.services?.length ? (
+              <>
+                <SectionTitle>Por reunión</SectionTitle>
+                <Card style={{ padding: 0 }}>
+                  {r.services.map((x, i) => (
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: i < (r.services?.length ?? 0) - 1 ? 1 : 0, borderBottomColor: colors.border }}>
+                      <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text }}>{x.name}</Text>
+                      <Text style={{ fontSize: 13, color: colors.muted, marginRight: 12 }}>{x.visitors ? `${x.visitors} visitas` : ''}</Text>
+                      <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{x.count}</Text>
+                    </View>
+                  ))}
+                </Card>
+              </>
+            ) : null}
+            {r.classes?.length ? (
+              <>
+                <SectionTitle>Por clase</SectionTitle>
+                <Card style={{ padding: 0 }}>
+                  {r.classes.map((x, i) => (
+                    <View key={i} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: i < (r.classes?.length ?? 0) - 1 ? 1 : 0, borderBottomColor: colors.border }}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{x.name}</Text>
+                        <Text style={{ fontSize: 12, color: colors.muted }}>
+                          {x.days ? `${x.days} ${x.days === 1 ? 'día' : 'días'} · ${x.absent} faltaron` : 'Sin asistencia tomada'}{x.enrolled ? ` · ${x.enrolled} anotados` : ''}
+                        </Text>
+                      </View>
+                      <Text style={{ fontSize: 18, fontWeight: '800', color: x.days ? colors.text : colors.muted }}>{x.days ? x.present : '–'}</Text>
+                    </View>
+                  ))}
+                </Card>
+                <Text style={{ fontSize: 12, color: colors.muted }}>
+                  Total en clases: {r.classes.reduce((a, x) => a + x.present, 0)} presentes.
+                </Text>
+              </>
+            ) : null}
             <Button title="Compartir / mandar por email" icon="share-2" onPress={() => shareText(text, 'Informe semanal')} />
           </>
         )}

@@ -346,4 +346,11 @@ export type DirectoryRow = { id: string; display_name: string; phone: string | n
 export type WeeklyReport = {
   from: string; to: string; outings: number; people_out: number; minutes: number; km: number; houses: number; contacts: number; gospel: number;
   promises: number; visits: number; attendance: number; first_time: number; saved: number; baptisms: number; new_members: number; absent: number;
+  services?: { name: string; dow: number; count: number; visitors: number }[];
+  classes?: { name: string; present: number; absent: number; enrolled: number; days: number }[];
+};
+
+export type ProgressRow = {
+  month: string; avg_attendance: number; people: number; first_time: number; members: number; new_members: number; saved: number; baptisms: number;
+  class_present: number; contacts: number; gospel: number; promises: number; outings: number; people_out: number; hours: number; km: number; houses: number;
 };

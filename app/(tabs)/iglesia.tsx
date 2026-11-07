@@ -84,6 +84,7 @@ export default function Iglesia() {
     { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
     { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
     { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
+    { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
     { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
     { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
     { icon: 'users', label: 'Hermanos', to: '/admin/miembros', show: isStaff },
