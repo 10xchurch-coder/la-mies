@@ -80,6 +80,7 @@
       "demoRequired": true,
       "demoUsername": "hopeforargentina@gmail.com",
       "notes": "La Mies is a private app for members of a local church (Iglesia Bautista Victoria, Posadas, Argentina). Members join with a church code given by the pastor, so content is visible only inside that church; the pastor and secretary can remove any post. Please sign in with the demo account (already a member of the church). To try the main feature, open the Mapa tab and tap 'Iniciar salida': the app records the walk and marks the streets on the map. Background location is used only while an outing is active and stops when the outing ends. Account deletion: Yo → Ajustes → Eliminar mi cuenta."
-    }
+    },
+    "version": "0.7.0"
   }
 }
