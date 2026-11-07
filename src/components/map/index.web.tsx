@@ -215,3 +215,44 @@ export function Polyline({ coordinates, strokeColor = '#1F6B45', strokeWidth = 4
   }, [map, points, strokeColor, strokeWidth, onPress]);
   return null;
 }
+
+export type PolygonProps = {
+  coordinates: LatLng[];
+  strokeColor?: string;
+  fillColor?: string;
+  strokeWidth?: number;
+  tappable?: boolean;
+  onPress?: () => void;
+};
+
+export function Polygon({ coordinates, strokeColor = '#1F6B45', fillColor = 'rgba(47,143,91,0.15)', strokeWidth = 2, onPress }: PolygonProps) {
+  const map = useContext(MapCtx);
+  const points = useMemo(() => coordinates.map((c) => [c.latitude, c.longitude] as [number, number]), [coordinates]);
+  useEffect(() => {
+    if (!map || points.length < 3) return;
+    const m = /rgba?\(([^)]+)\)/.exec(fillColor);
+    const parts = m ? m[1].split(',').map((x) => x.trim()) : null;
+    const fill = parts ? `rgb(${parts.slice(0, 3).join(',')})` : fillColor;
+    const opacity = parts && parts[3] != null ? Number(parts[3]) : 0.2;
+    const poly = L.polygon(points, { color: strokeColor, weight: strokeWidth, fillColor: fill, fillOpacity: opacity, interactive: !!onPress }).addTo(map);
+    if (onPress) poly.on('click', (e) => { L.DomEvent.stopPropagation(e); onPress(); });
+    return () => {
+      poly.remove();
+    };
+  }, [map, points, strokeColor, fillColor, strokeWidth, onPress]);
+  return null;
+}
+
+export type CircleProps = { center: LatLng; radius: number; strokeColor?: string; fillColor?: string; strokeWidth?: number };
+
+export function Circle({ center, radius, strokeColor = '#FFFFFF', fillColor = '#6B7280', strokeWidth = 1 }: CircleProps) {
+  const map = useContext(MapCtx);
+  useEffect(() => {
+    if (!map) return;
+    const c = L.circle([center.latitude, center.longitude], { radius, color: strokeColor, weight: strokeWidth, fillColor, fillOpacity: 0.9, interactive: false }).addTo(map);
+    return () => {
+      c.remove();
+    };
+  }, [map, center.latitude, center.longitude, radius, strokeColor, fillColor, strokeWidth]);
+  return null;
+}

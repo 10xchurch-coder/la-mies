@@ -103,7 +103,10 @@ export default function Yo() {
           <RowLink title="Avisos" subtitle={unread ? `${unread} sin leer` : 'Recordatorios y anuncios'} icon="bell" onPress={() => router.push('/avisos')} />
           <RowLink title="Devocional y mi racha" subtitle="Versículo del día, lectura y premios" icon="book-open" onPress={() => router.push('/devocional')} />
           <RowLink title="Mi progreso y niveles" icon="award" onPress={() => router.push('/progreso')} />
-          <RowLink title="Mis salidas" subtitle="Ver o recortar una salida que me olvidé de apagar" icon="clock" onPress={() => router.push('/salidas')} />
+          <RowLink title="Mis salidas" subtitle="Ver, arreglar o terminar una salida" icon="clock" onPress={() => router.push('/salidas')} />
+          <RowLink title="Mis contactos para seguir" subtitle="Promesas, visitas y mensajes" icon="user-check" onPress={() => router.push('/seguimiento')} />
+          <RowLink title="Zonas" subtitle="Barrios asignados y cuánto falta" icon="hexagon" onPress={() => router.push('/zonas')} />
+          <RowLink title="Directorio" subtitle="Elegí si aparecés" icon="users" onPress={() => router.push('/directorio')} />
           {me ? <RowLink title="Mis datos" subtitle="Teléfono, dirección, hijos" icon="user" onPress={() => router.push({ pathname: '/persona/nueva', params: { id: me.id } })} /> : null}
           {isLeader ? <RowLink title="Panel del pastor" subtitle="Reportes, hermanos y código de la iglesia" icon="bar-chart-2" onPress={() => router.push('/panel')} /> : null}
           <RowLink title="Seguridad de mi cuenta" subtitle="Contraseña y verificación en dos pasos" icon="shield" onPress={() => router.push('/seguridad')} />

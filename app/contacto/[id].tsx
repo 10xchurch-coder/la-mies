@@ -1,10 +1,11 @@
 // Ficha de una persona: foto, datos, su camino en la iglesia, fidelidad, visitas y asistencias.
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { MapView, Marker } from '@/components/map';
 import { Feather } from '@expo/vector-icons';
-import { chooseWhatsApp } from '@/lib/messages';
+import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
+import { showActions } from '@/components/ActionSheet';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
@@ -45,7 +46,7 @@ function faithOf(c: Contact, atts: Attendance[], services: ChurchService[]): { c
 
 export default function PersonaDetalle() {
   const router = useRouter();
-  const { id, vinculo } = useLocalSearchParams<{ id: string; vinculo?: string }>();
+  const { id, vinculo, wa: waKind, visita } = useLocalSearchParams<{ id: string; vinculo?: string; wa?: string; visita?: string }>();
   const { profile, church, isStaff, isLeader } = useAuth();
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
@@ -63,7 +64,8 @@ export default function PersonaDetalle() {
   const [review, setReview] = useState(vinculo === '1');
   const [linkedName, setLinkedName] = useState<string | null>(null);
   const [unlinking, setUnlinking] = useState(false);
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(visita === '1');
+  const waShown = useRef(false);
   const [note, setNote] = useState('');
   const [gospel, setGospel] = useState<'yes' | 'no'>('no');
   const [promise, setPromise] = useState<'none' | 'sat' | 'sun'>('none');
@@ -180,6 +182,18 @@ export default function PersonaDetalle() {
     update(patch);
   };
 
+  // Desde el aviso "Hoy prometió venir…" / "prometió y no vino": ofrecer el WhatsApp ya escrito o ver la ficha.
+  useEffect(() => {
+    if (!c || !waKind || waShown.current) return;
+    waShown.current = true;
+    const kind = (['promise', 'visit', 'followup', 'missed1', 'missed2', 'missed3'].includes(waKind) ? waKind : 'followup') as MessageKind;
+    const ctx = { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services };
+    showActions(c.name, kind === 'promise' ? 'Hoy prometió venir a la iglesia.' : kind === 'visit' ? 'Prometió venir y no vino.' : undefined, [
+      { text: 'Mandarle un WhatsApp', icon: 'message-circle', hint: messageText(kind, ctx).slice(0, 90) + '…', onPress: () => openWhatsApp(c.phone, messageText(kind, ctx)) },
+      { text: 'Ver su ficha', icon: 'user' },
+    ]);
+  }, [c, waKind]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!loaded) return <Loading />;
   if (!c) {
     return (
@@ -211,6 +225,7 @@ export default function PersonaDetalle() {
   if (c.status === 'contact') {
     rows.push({ k: 'Prometió venir', v: c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? ` · pasar a buscar${c.pickup_time ? ` ${c.pickup_time}` : ''}` : ''}` : 'Todavía no' });
   }
+  if (!isMember) rows.push({ k: 'Recibió a Cristo', v: c.saved_on ? fmtDateOnly(c.saved_on) : 'Todavía no' });
   if (!isMember) rows.push({ k: 'Discipulado', v: c.discipleship_since ? `Desde ${fmtDateOnly(c.discipleship_since)}` : 'Todavía no' });
   if (!isMember || !isBaptized) {
     rows.push({ k: 'Bautismo', v: isBaptized ? (c.baptized_on && c.baptized_here !== false ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)' });
@@ -363,11 +378,12 @@ export default function PersonaDetalle() {
             </Card>
           ) : null}
 
-          {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
+          {isLeader && (!isMember || !c.discipleship_since || !isBaptized || !c.saved_on) ? (
             <Card style={{ gap: 10 }}>
               <SectionTitle>Seguimiento pastoral</SectionTitle>
               {!isMember ? <Button title="Marcar que vino a una reunión" icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
               <View style={{ flexDirection: 'row', gap: 8 }}>
+                {!c.saved_on ? <Button title="Recibió a Cristo" variant="outline" small onPress={() => update({ saved_on: isoDate(new Date()) }, '¡Gloria a Dios! Anotado: recibió a Cristo')} style={{ flex: 1 }} /> : null}
                 {!c.discipleship_since ? <Button title="Empezó discipulado" variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, 'Anotado: empezó discipulado')} style={{ flex: 1 }} /> : null}
                 {!isBaptized ? <Button title="Se bautizó hoy" variant="outline" small onPress={() => update({ baptized: true, baptized_here: true, baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó en la iglesia')} style={{ flex: 1 }} /> : null}
               </View>

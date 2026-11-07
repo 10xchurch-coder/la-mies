@@ -25,7 +25,7 @@ export default function Salida() {
   const [now, setNow] = useState(Date.now());
   const [coverage, setCoverage] = useState<CoverageRow[]>([]);
   const [live, setLive] = useState<LiveMember[]>([]);
-  const [trails, setTrails] = useState<{ id: string; points: LatLng[] }[]>([]);
+  const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color?: string }[]>([]);
   const [region, setRegion] = useState<Region | null>(null);
   const [follow, setFollow] = useState(true);
   const [ending, setEnding] = useState(false);
@@ -69,7 +69,7 @@ export default function Salida() {
           if (!bySession.has(p.session_id)) bySession.set(p.session_id, []);
           bySession.get(p.session_id)!.push({ lat: p.lat, lng: p.lng });
         }
-        setTrails([...bySession.entries()].map(([id, points]) => ({ id, points })));
+        setTrails([...bySession.entries()].map(([id, points], i) => ({ id, points, color: ['#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488', '#DC2626'][i % 6] })));
       } else {
         setTrails([]);
       }
@@ -114,9 +114,10 @@ export default function Salida() {
         onPress: async () => {
           setEnding(true);
           try {
-            const res = await outing.stop();
-            Alert.alert('Salida guardada', `${fmtDistance(res.distance_m)} caminados · ${res.blocks} cuadras · ${outing.presentations} presentaciones · ${outing.promises} promesas`);
-            router.replace('/(tabs)/mapa');
+            const id = outing.active?.id;
+            await outing.stop();
+            if (id) router.replace({ pathname: '/resumen', params: { session: id } });
+            else router.replace('/(tabs)/mapa');
           } catch (e) {
             setEnding(false);
             Alert.alert('No se pudo cerrar', `${e instanceof Error ? e.message : 'Error'}. Probá de nuevo cuando tengas señal; nada se pierde.`);
@@ -140,9 +141,9 @@ export default function Salida() {
         </View>
         <Text style={styles.timer}>{fmtDuration(elapsed)}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          <HeaderStat value={outing.presentations} label="Presentaciones" />
+          <HeaderStat value={outing.contacts} label="Contactos" />
+          <HeaderStat value={outing.presentations} label="Evangelio" />
           <HeaderStat value={outing.promises} label={outing.promises === 1 ? 'Promesa' : 'Promesas'} />
-          <HeaderStat value={outing.blocks} label="Cuadras" />
           <HeaderStat value={fmtDistance(outing.distanceM)} label="Caminados" />
         </View>
         {!outing.backgroundGranted ? (
@@ -184,7 +185,7 @@ export default function Salida() {
       <View style={[styles.actions, { paddingBottom: insets.bottom + 8 }]}>
         <Button title="Marcar esta casa" icon="map-pin" onPress={markHouse} />
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button title="Me olvidé de apagarla" variant="ghost" small onPress={() => router.push({ pathname: '/recortar', params: { session: outing.active?.id ?? '' } })} style={{ flex: 1 }} />
+          <Button title="Arreglar el recorrido" variant="ghost" small onPress={() => router.push({ pathname: '/recortar', params: { session: outing.active?.id ?? '' } })} style={{ flex: 1 }} />
           <Button title="Finalizar salida" variant="danger" icon="square" small onPress={finish} loading={ending} style={{ flex: 1 }} />
         </View>
       </View>

@@ -2,6 +2,7 @@
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
+  OutingRow, SessionSummary, HouseRow, Zone, ZoneProgress, FollowupRow, PipelineRow, ChurchEvent, PrayerRow, Announcement, SuggestionRow, DirectoryRow, WeeklyReport,
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
   ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage, MinistryPerson, MinistryPersonRow,
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
@@ -362,4 +363,152 @@ export async function setAccountDisabled(userId: string, disabled: boolean): Pro
 
 export async function requestAccountDeletion(): Promise<void> {
   ok(await supabase.rpc('request_account_deletion'));
+}
+
+// ---------------------------------------------------------------------------
+// v0.7 · Salidas (arreglar las propias o, si sos secretaría/pastor, las de cualquiera)
+// ---------------------------------------------------------------------------
+export async function listOutings(days = 14, userId: string | null = null): Promise<OutingRow[]> {
+  return ok(await supabase.rpc('list_outings', { p_days: days, p_user: userId })) ?? [];
+}
+export async function outingPoints(sessionId: string): Promise<{ recorded_at: string; lat: number; lng: number; accuracy_m: number | null; speed_mps: number | null }[]> {
+  return ok(await supabase.rpc('outing_points', { p_session: sessionId })) ?? [];
+}
+export async function finishOuting(sessionId: string, cutoff: Date | null): Promise<void> {
+  ok(await supabase.rpc('finish_outing', { p_session: sessionId, p_cutoff: cutoff ? cutoff.toISOString() : null }));
+}
+export async function cutOutingRange(sessionId: string, from: Date, to: Date): Promise<void> {
+  ok(await supabase.rpc('cut_outing_range', { p_session: sessionId, p_from: from.toISOString(), p_to: to.toISOString() }));
+}
+export async function deleteOuting(sessionId: string): Promise<void> {
+  ok(await supabase.rpc('delete_outing', { p_session: sessionId }));
+}
+export async function sessionSummary(sessionId: string): Promise<SessionSummary> {
+  return ok(await supabase.rpc('session_summary', { p_session: sessionId })) as SessionSummary;
+}
+export async function housesInBbox(b: Bbox): Promise<HouseRow[]> {
+  return ok(await supabase.rpc('houses_in_bbox', { p_min_lat: b.minLat, p_min_lng: b.minLng, p_max_lat: b.maxLat, p_max_lng: b.maxLng })) ?? [];
+}
+
+// Zonas
+export async function listZones(includeArchived = false): Promise<Zone[]> {
+  let q = supabase.from('zones').select('*').order('created_at', { ascending: false });
+  if (!includeArchived) q = q.eq('archived', false);
+  return ok(await q) ?? [];
+}
+export async function saveZone(z: Partial<Zone> & { name: string; polygon: [number, number][] }): Promise<Zone> {
+  const row = { name: z.name, color: z.color ?? '#2F8F5B', polygon: z.polygon, assigned: z.assigned ?? [], on_date: z.on_date ?? null, note: z.note ?? null, archived: z.archived ?? false };
+  if (z.id) return ok(await supabase.from('zones').update(row).eq('id', z.id).select('*').single());
+  return ok(await supabase.from('zones').insert(row).select('*').single());
+}
+export async function deleteZone(id: string): Promise<void> {
+  ok(await supabase.from('zones').delete().eq('id', id));
+}
+export async function zoneProgress(id: string): Promise<ZoneProgress | null> {
+  return ok(await supabase.rpc('zone_progress', { p_zone: id })) as ZoneProgress | null;
+}
+
+// Seguimiento
+export async function myFollowups(): Promise<FollowupRow[]> {
+  return ok(await supabase.rpc('my_followups')) ?? [];
+}
+export async function pipelineReport(months = 6): Promise<PipelineRow[]> {
+  return ok(await supabase.rpc('pipeline_report', { p_months: months })) ?? [];
+}
+
+// Eventos
+export async function listEvents(): Promise<ChurchEvent[]> {
+  return ok(await supabase.from('events').select('*').order('starts_at').limit(400)) ?? [];
+}
+export async function saveEvent(e: Partial<ChurchEvent> & { title: string; starts_at: string }): Promise<void> {
+  const row = { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at ?? null, all_day: !!e.all_day, place: e.place ?? null, description: e.description ?? null, weekly: !!e.weekly };
+  if (e.id) ok(await supabase.from('events').update(row).eq('id', e.id));
+  else ok(await supabase.from('events').insert(row));
+}
+export async function deleteEvent(id: string): Promise<void> {
+  ok(await supabase.from('events').delete().eq('id', id));
+}
+export async function rsvpRows(): Promise<{ event_id: string; occurs_on: string; user_id: string }[]> {
+  return ok(await supabase.from('event_rsvps').select('event_id, occurs_on, user_id').limit(5000)) ?? [];
+}
+export async function setRsvp(eventId: string, on: string, going: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  if (going) ok(await supabase.from('event_rsvps').upsert({ event_id: eventId, occurs_on: on, user_id: u.user?.id }, { onConflict: 'event_id,user_id,occurs_on' }));
+  else ok(await supabase.from('event_rsvps').delete().eq('event_id', eventId).eq('occurs_on', on).eq('user_id', u.user?.id ?? ''));
+}
+
+// Oración
+export async function prayerList(): Promise<PrayerRow[]> {
+  return ok(await supabase.rpc('prayer_list')) ?? [];
+}
+export async function addPrayer(body: string, visibility: PrayerRow['visibility'], people: string[], anonymous: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('prayer_requests').insert({ body, visibility, people, anonymous, user_id: u.user?.id }));
+}
+export async function setPrayed(id: string, prayed: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  if (prayed) ok(await supabase.from('prayer_prayed').upsert({ request_id: id, user_id: u.user?.id }, { onConflict: 'request_id,user_id' }));
+  else ok(await supabase.from('prayer_prayed').delete().eq('request_id', id).eq('user_id', u.user?.id ?? ''));
+}
+export async function markPrayerAnswered(id: string, note: string | null): Promise<void> {
+  ok(await supabase.from('prayer_requests').update({ answered_at: new Date().toISOString(), answer_note: note }).eq('id', id));
+}
+export async function deletePrayer(id: string): Promise<void> {
+  ok(await supabase.from('prayer_requests').delete().eq('id', id));
+}
+
+// Anuncios
+export async function listAnnouncements(): Promise<Announcement[]> {
+  return ok(await supabase.from('announcements').select('*').order('created_at', { ascending: false }).limit(100)) ?? [];
+}
+export async function sendAnnouncement(a: Pick<Announcement, 'title' | 'body' | 'audience'> & { ministry_id?: string | null; group_id?: string | null }): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('announcements').insert({ ...a, author_id: u.user?.id }));
+}
+export async function deleteAnnouncement(id: string): Promise<void> {
+  ok(await supabase.from('announcements').delete().eq('id', id));
+}
+
+// Apuntes de la prédica
+export async function mySermonNotes(sermonId: string): Promise<{ answers: string[]; notes: string | null } | null> {
+  const { data: u } = await supabase.auth.getUser();
+  return ok(await supabase.from('sermon_notes').select('answers, notes').eq('sermon_id', sermonId).eq('user_id', u.user?.id ?? '').maybeSingle()) as { answers: string[]; notes: string | null } | null;
+}
+export async function saveSermonNotes(sermonId: string, answers: string[], notes: string | null): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('sermon_notes').upsert({ sermon_id: sermonId, user_id: u.user?.id, answers, notes, updated_at: new Date().toISOString() }, { onConflict: 'sermon_id,user_id' }));
+}
+
+// Sugerencias
+export async function suggestionsList(): Promise<SuggestionRow[]> {
+  return ok(await supabase.rpc('suggestions_list')) ?? [];
+}
+export async function addSuggestion(body: string, anonymous: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('suggestions').insert({ body, anonymous, user_id: u.user?.id }));
+}
+export async function answerSuggestion(id: string, status: SuggestionRow['status'], reply: string | null): Promise<void> {
+  ok(await supabase.from('suggestions').update({ status, reply }).eq('id', id));
+}
+
+// Directorio, roles, informe
+export async function directoryList(): Promise<DirectoryRow[]> {
+  return ok(await supabase.rpc('directory_list')) ?? [];
+}
+export async function setDirectoryVisible(visible: boolean): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('profiles').update({ directory_visible: visible }).eq('id', u.user?.id ?? ''));
+}
+export async function setProfileTitle(profileId: string, title: string): Promise<void> {
+  ok(await supabase.rpc('set_profile_title', { p_profile: profileId, p_title: title }));
+}
+export async function setChurchRecipients(absence: string[] | null, report: string[] | null): Promise<void> {
+  ok(await supabase.rpc('set_church_recipients', { p_absence: absence, p_report: report }));
+}
+export async function weeklyReport(monday: string | null = null): Promise<WeeklyReport> {
+  return ok(await supabase.rpc('weekly_report', { p_church: null, p_monday: monday })) as WeeklyReport;
+}
+/** Vuelve a calcular en el servidor las cuadras de una salida a partir de su recorrido. */
+export async function recomputeCoverage(sessionId: string): Promise<number> {
+  return (ok(await supabase.rpc('recompute_session_coverage', { p_session: sessionId })) as number) ?? 0;
 }

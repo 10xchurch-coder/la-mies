@@ -20,6 +20,8 @@ export default function NuevaPredica() {
   const [preacher, setPreacher] = useState(profile?.display_name ?? '');
   const [passage, setPassage] = useState('');
   const [description, setDescription] = useState('');
+  const [summary, setSummary] = useState('');
+  const [outline, setOutline] = useState('');
   const [youtube, setYoutube] = useState('');
   const [date, setDate] = useState(isoDate(new Date()));
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -34,13 +36,16 @@ export default function NuevaPredica() {
       setPreacher(s.preacher ?? '');
       setPassage(s.passage ?? '');
       setDescription(s.description ?? '');
+      setSummary(s.summary ?? '');
+      setOutline(s.notes_outline ?? '');
       setYoutube(s.youtube_url ?? '');
       setDate(s.preached_on);
       setExistingAudio(s.audio_name ?? (s.audio_path ? 'Audio cargado' : null));
     }).catch(() => undefined);
   }, [id]);
 
-  const dates = Array.from({ length: 14 }, (_, i) => isoDate(addDays(new Date(), -i)));
+  // También fechas próximas: si se carga el título del domingo antes, el sábado aparece "Mañana: …" en Iglesia.
+  const dates = Array.from({ length: 21 }, (_, i) => isoDate(addDays(new Date(), 7 - i)));
 
   const save = async () => {
     if (!title.trim() || !church) {
@@ -55,6 +60,7 @@ export default function NuevaPredica() {
     try {
       const row: Record<string, unknown> = {
         title: title.trim(), preacher: preacher.trim() || null, passage: passage.trim() || null, description: description.trim() || null,
+        summary: summary.trim() || null, notes_outline: outline.trim() || null,
         youtube_url: youtube.trim() || null, preached_on: date,
       };
       if (file) {
@@ -89,6 +95,9 @@ export default function NuevaPredica() {
           <Button title={file || existingAudio ? 'Cambiar audio' : 'Elegir audio'} icon="music" variant="outline" small onPress={() => pickDocument('audio').then((f) => f && setFile(f))} />
         </Card>
         <Field label="Descripción" hint="(opcional)" value={description} onChangeText={setDescription} multiline />
+        <Field label="Resumen" hint="(opcional, se ve debajo del video)" value={summary} onChangeText={setSummary} multiline placeholder="Los puntos principales del mensaje…" />
+        <Field label="Bosquejo para completar" hint="(opcional)" value={outline} onChangeText={setOutline} multiline
+          placeholder={'Un renglón por punto. Poné ___ donde va la palabra que completan.\nEj: 1. Jesús vino a buscar y a ___ lo que se había perdido (Lucas 19:10)'} />
         <Button title="Guardar" onPress={save} loading={busy} />
         {busy && file ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Subiendo el audio… puede tardar un par de minutos.</Text> : null}
       </Screen>

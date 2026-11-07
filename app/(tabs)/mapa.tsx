@@ -10,14 +10,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CoverageMap, bboxOfRegion, regionAround, type LiveMember } from '@/components/CoverageMap';
 import { Button } from '@/components/ui';
 import { MapTypeButton, mapStyleProps, useMapStyle } from '@/components/MapTypeButton';
-import { coverageInBbox, listContacts, roadsInBbox, teamLive } from '@/lib/api';
+import { coverageInBbox, housesInBbox, listContacts, listZones, roadsInBbox, teamLive } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
+import type { LatLng } from '@/lib/geo';
 import { segmentOf, sideName } from '@/lib/geo';
 import { KIND_LABEL, fmtDayYear, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { ensureAlwaysLocationIOS, ensureNoBatteryOptimization } from '@/lib/battery';
 import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
-import type { Contact, CoverageRow, OutingKind, RoadRow } from '@/types';
+import type { Contact, CoverageRow, HouseRow, OutingKind, RoadRow, Zone } from '@/types';
+
+/** Un color por compañero para su recorrido. */
+export const TRAIL_COLORS = ['#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488', '#DC2626', '#4D7C0F', '#0369A1'];
+const STALE_STEPS = [0, 3, 6, 12] as const;
 
 type Layer = 'all' | OutingKind;
 const LAYER_KEY = 'lamies.mapLayer';
@@ -40,6 +46,11 @@ export default function Mapa() {
   const [mapStyle, setMapStyle] = useMapStyle();
   const [layer, setLayerState] = useState<Layer>('all');
   const [choosing, setChoosing] = useState(false);
+  const [houses, setHouses] = useState<HouseRow[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color: string }[]>([]);
+  const [staleMonths, setStaleMonths] = useState<(typeof STALE_STEPS)[number]>(0);
+  const staleSince = useMemo(() => (staleMonths ? new Date(Date.now() - staleMonths * 30.4 * 86400000) : null), [staleMonths]);
 
   useEffect(() => {
     AsyncStorage.getItem(LAYER_KEY).then((v) => {
@@ -58,9 +69,11 @@ export default function Mapa() {
     if (r.latitudeDelta > 0.08) return; // muy lejos: no cargamos miles de líneas
     const b = bboxOfRegion(r);
     try {
-      const [rs, cov] = await Promise.all([roadsInBbox(b), coverageInBbox(b)]);
+      const near = r.latitudeDelta < 0.014;
+      const [rs, cov, hs] = await Promise.all([roadsInBbox(b), coverageInBbox(b), near ? housesInBbox(b) : Promise.resolve([] as HouseRow[])]);
       setRoads(rs);
       setCoverage(cov);
+      setHouses(hs);
     } catch {
       // sin señal
     }
@@ -69,6 +82,19 @@ export default function Mapa() {
   const loadLive = useCallback(async () => {
     try {
       const rows = await teamLive();
+      // El recorrido de hoy de cada compañero en salida, cada uno con su color.
+      const others = rows.filter((x) => x.user_id !== session?.user.id);
+      if (others.length) {
+        const { data } = await supabase.from('track_points').select('session_id, lat, lng, recorded_at').in('session_id', others.map((o) => o.session_id)).order('recorded_at').limit(6000);
+        const by = new Map<string, LatLng[]>();
+        for (const p of (data ?? []) as { session_id: string; lat: number; lng: number }[]) {
+          if (!by.has(p.session_id)) by.set(p.session_id, []);
+          by.get(p.session_id)!.push({ lat: p.lat, lng: p.lng });
+        }
+        setTrails(others.map((o, i) => ({ id: o.session_id, points: by.get(o.session_id) ?? [], color: TRAIL_COLORS[i % TRAIL_COLORS.length] })).filter((t) => t.points.length > 1));
+      } else {
+        setTrails([]);
+      }
       setLive(
         rows
           .filter((r) => r.lat != null && r.lng != null)
@@ -101,6 +127,7 @@ export default function Mapa() {
   useFocusEffect(
     useCallback(() => {
       listContacts().then(setContacts).catch(() => undefined);
+      listZones().then(setZones).catch(() => undefined);
       loadLive();
       const id = setInterval(loadLive, 15000);
       return () => clearInterval(id);
@@ -165,6 +192,11 @@ export default function Mapa() {
           coverage={shownCoverage}
           contacts={contacts}
           live={live}
+          trails={trails}
+          houses={houses}
+          zones={zones}
+          staleSince={staleSince}
+          onPressZone={(z) => router.push({ pathname: '/zona', params: { id: z.id } })}
           selected={selected}
           region={region}
           {...mapStyleProps(mapStyle)}
@@ -216,6 +248,23 @@ export default function Mapa() {
               </Pressable>
             ))}
           </View>
+          <Pressable
+            onPress={() => setStaleMonths(STALE_STEPS[(STALE_STEPS.indexOf(staleMonths) + 1) % STALE_STEPS.length])}
+            accessibilityRole="button"
+            style={[styles.layerBtn, staleMonths ? { backgroundColor: '#D64545' } : null, { alignSelf: 'flex-start' }]}
+          >
+            <Text style={{ fontSize: 11, fontWeight: '800', color: staleMonths ? '#FFF' : colors.text }}>
+              {staleMonths ? `Sin visitar hace ${staleMonths} meses` : 'Ver sin visitar'}
+            </Text>
+          </Pressable>
+          {houses.length ? (
+            <View style={styles.legendRow}>
+              <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.green }} />
+              <Text style={styles.legendText}>Casa visitada</Text>
+              <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: '#8A9490', marginLeft: 6 }} />
+              <Text style={styles.legendText}>Sin visitar</Text>
+            </View>
+          ) : null}
           {layer !== 'flyers' ? (
             <>
               {layer === 'all' ? <Text style={styles.legendHead}>Evangelismo</Text> : null}

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
-import { Avatar, Button, Card, Choice, Loading, SectionTitle, Toggle } from '@/components/ui';
-import { listGroups } from '@/lib/api';
+import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Toggle } from '@/components/ui';
+import { listGroups, setProfileTitle } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -20,6 +20,7 @@ export default function Miembro() {
   const [role, setRole] = useState<Role>('member');
   const [group, setGroup] = useState<string>('none');
   const [takes, setTakes] = useState(false);
+  const [title, setTitle] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function Miembro() {
         setRole(prof.role);
         setGroup(prof.group_id ?? 'none');
         setTakes(!!prof.takes_attendance);
+        setTitle(prof.title ?? '');
       }
     });
     listGroups().then(setGroups).catch(() => undefined);
@@ -41,6 +43,9 @@ export default function Miembro() {
     if (!error && takes !== !!p?.takes_attendance) {
       const r = await supabase.rpc('set_takes_attendance', { p_user: id, p_value: takes });
       if (r.error) Alert.alert('No se pudo guardar el permiso de asistencia', errorMessage(r.error));
+    }
+    if (!error && title.trim() !== (p?.title ?? '')) {
+      try { await setProfileTitle(id, title.trim()); } catch (e) { Alert.alert('No se pudo guardar el cargo', errorMessage(e)); }
     }
     // El capitán de un colectivo recibe el reporte de quiénes de su colectivo faltaron.
     if (!error && role === 'captain' && group !== 'none') {
@@ -87,6 +92,7 @@ export default function Miembro() {
             <Text style={{ fontWeight: '700' }}>Pastor / admin:</Text> todo lo anterior, nombra administradores y recibe el reporte de ausencias del domingo.
           </Text>
         </Card>
+        <Field label="Cargo (opcional)" value={title} onChangeText={setTitle} placeholder="Diácono, maestra de niños, tesorero…" hint="Se muestra en el directorio y en su perfil" />
         <SectionTitle>{groupWord(church?.grouping)}</SectionTitle>
         <Choice
           options={[{ value: 'none', label: `Sin ${groupWord(church?.grouping).toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}

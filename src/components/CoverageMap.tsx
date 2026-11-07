@@ -2,10 +2,10 @@
 // las casas marcadas y los hermanos en vivo.
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { MapView, Marker, Polyline, type MapViewProps, type Region } from './map';
+import { Circle, MapView, Marker, Polygon, Polyline, type MapViewProps, type Region } from './map';
 import { offsetSegment, segmentOf, type LatLng } from '../lib/geo';
 import { colors, coverageColor, themed } from '../theme';
-import type { Contact, CoverageRow, RoadRow } from '../types';
+import type { Contact, CoverageRow, HouseRow, RoadRow, Zone } from '../types';
 
 export type LiveMember = { user_id: string; display_name: string; lat: number; lng: number; me?: boolean };
 
@@ -14,7 +14,14 @@ export type CoverageMapProps = MapViewProps & {
   coverage: CoverageRow[];
   contacts?: Contact[];
   live?: LiveMember[];
-  trails?: { id: string; points: LatLng[] }[];
+  trails?: { id: string; points: LatLng[]; color?: string }[];
+  /** Casas (edificios del mapa satelital). Las que ya tienen la vereda cubierta se ven verdes. */
+  houses?: HouseRow[];
+  /** Zonas asignadas. */
+  zones?: Zone[];
+  onPressZone?: (z: Zone) => void;
+  /** "Sin visitar en X meses": pinta en rojo las veredas de las calles cargadas que no se cubrieron desde esa fecha. */
+  staleSince?: Date | null;
   selected?: { road_id: number; seg: number; side: 1 | -1; kind?: string } | null;
   onPressSegment?: (row: CoverageRow) => void;
   onPressContact?: (c: Contact) => void;
@@ -24,9 +31,31 @@ const SIDE_OFFSET_M = 3.2;
 const FLYERS_OFFSET_M = 6;  // los volantes se dibujan un poco más afuera, así se ven las dos líneas
 
 export function CoverageMap({
-  roads, coverage, contacts = [], live = [], trails = [], selected, onPressSegment, onPressContact, children, ...mapProps
+  roads, coverage, contacts = [], live = [], trails = [], houses = [], zones = [], staleSince = null, onPressZone,
+  selected, onPressSegment, onPressContact, children, ...mapProps
 }: CoverageMapProps) {
   const roadById = useMemo(() => new Map(roads.map((r) => [r.id, r])), [roads]);
+  const coveredKeys = useMemo(() => new Set(coverage.filter((c) => c.kind !== 'flyers').map((c) => `${c.road_id}:${c.seg}:${c.side}`)), [coverage]);
+
+  // Veredas sin visitar desde staleSince (solo calles residenciales y similares, para no llenar el mapa).
+  const stale = useMemo(() => {
+    if (!staleSince) return [];
+    const recent = new Set(coverage.filter((c) => c.kind !== 'flyers' && new Date(c.last_covered_at) >= staleSince).map((c) => `${c.road_id}:${c.seg}:${c.side}`));
+    const out: { key: string; coords: { latitude: number; longitude: number }[] }[] = [];
+    for (const r of roads) {
+      if (r.highway && ['primary', 'trunk', 'primary_link', 'trunk_link'].includes(r.highway)) continue;
+      for (let i = 0; i < r.coords.length - 1 && out.length < 4000; i++) {
+        for (const side of [1, -1] as const) {
+          if (recent.has(`${r.id}:${i}:${side}`)) continue;
+          const seg = segmentOf(r, i);
+          if (!seg) continue;
+          const [a, b] = offsetSegment(seg[0], seg[1], side, SIDE_OFFSET_M);
+          out.push({ key: `st-${r.id}:${i}:${side}`, coords: [{ latitude: a.lat, longitude: a.lng }, { latitude: b.lat, longitude: b.lng }] });
+        }
+      }
+    }
+    return out;
+  }, [staleSince, roads, coverage]);
 
   const lines = useMemo(() => {
     const out: { key: string; coords: { latitude: number; longitude: number }[]; color: string; row: CoverageRow; isSelected: boolean }[] = [];
@@ -64,11 +93,35 @@ export function CoverageMap({
           onPress={() => onPressSegment?.(l.row)}
         />
       ))}
+      {zones.map((z) => (
+        <Polygon
+          key={`zone-${z.id}`}
+          coordinates={z.polygon.map(([lat, lng]) => ({ latitude: lat, longitude: lng }))}
+          strokeColor={z.color}
+          fillColor={`${z.color}22`}
+          strokeWidth={3}
+          tappable={!!onPressZone}
+          onPress={() => onPressZone?.(z)}
+        />
+      ))}
+      {stale.map((l) => (
+        <Polyline key={l.key} coordinates={l.coords} strokeColor="#D64545" strokeWidth={3} lineCap="round" />
+      ))}
+      {houses.map((h) => (
+        <Circle
+          key={`h-${h.id}`}
+          center={{ latitude: h.lat, longitude: h.lng }}
+          radius={3}
+          strokeColor="#FFFFFF"
+          strokeWidth={1}
+          fillColor={coveredKeys.has(`${h.road_id}:${h.seg}:${h.side}`) ? colors.green : '#8A9490'}
+        />
+      ))}
       {trails.map((t) => (
         <Polyline
           key={`trail-${t.id}`}
           coordinates={t.points.map((p) => ({ latitude: p.lat, longitude: p.lng }))}
-          strokeColor={colors.green}
+          strokeColor={t.color ?? colors.green}
           strokeWidth={6}
           lineCap="round"
           lineJoin="round"

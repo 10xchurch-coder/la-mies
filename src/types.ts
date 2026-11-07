@@ -3,6 +3,9 @@ export type Role = 'member' | 'captain' | 'secretary' | 'admin';
 export type OutingKind = 'soulwinning' | 'flyers';
 
 export type Church = {
+  logo_path?: string | null;
+  absence_recipients?: string[] | null;
+  report_recipients?: string[] | null;
   id: string;
   name: string;
   city: string | null;
@@ -18,6 +21,8 @@ export type Giving = { titular?: string; banco?: string; alias?: string; cbu?: s
 export type Group = { id: string; church_id: string; name: string; captain_id: string | null };
 
 export type Profile = {
+  title?: string | null;
+  directory_visible?: boolean;
   id: string;
   church_id: string | null;
   group_id: string | null;
@@ -83,6 +88,7 @@ export type CoverageRow = {
 };
 
 export type Contact = {
+  saved_on?: string | null;
   id: string;
   church_id: string;
   created_by: string;
@@ -172,6 +178,8 @@ export type ScoreRow = {
 };
 
 export type TeamTotals = {
+  /** Casas frente a las veredas recorridas (según el mapa de edificios). */
+  houses?: number | null;
   sessions: number;
   members: number;
   minutes: number;
@@ -243,6 +251,8 @@ export type Duty = {
 export type NotificationRow = { id: string; kind: string; title: string; body: string; link: string | null; created_at: string; read_at: string | null };
 
 export type Sermon = {
+  summary?: string | null;
+  notes_outline?: string | null;
   id: string; church_id: string; title: string; preacher: string | null; preached_on: string; passage: string | null; description: string | null;
   youtube_url: string | null; audio_path: string | null; audio_name: string | null; created_at: string;
 };
@@ -265,6 +275,8 @@ export type SheetRow = { contact_id: string; name: string; photo_path: string | 
 export type AbsenceRow = {
   contact_id: string; name: string; photo_path: string | null; phone: string | null; status: PersonStatus;
   group_id: string | null; group_name: string | null; last_attended: string | null;
+  /** Fines de semana seguidos sin venir (1, 2 o 3 = tres o más). */
+  weeks_missed?: number; last_visit?: string | null;
 };
 
 // ---------- Parte 3: versículo del día, devocional, racha ----------
@@ -295,3 +307,43 @@ export type AccountRow = { id: string; display_name: string; email: string; role
 export type DailyComment = { id: string; user_id: string; name: string; photo_path: string | null; body: string; created_at: string; mine: boolean };
 /** Cuántos comentarios y corazones tiene un día; "open" = todavía se puede comentar (es hoy). */
 export type DailySocial = { comments: number; likes: number; liked: boolean; open: boolean };
+
+// ---- v0.7 ----
+export type OutingRow = {
+  id: string; user_id: string; display_name: string; kind: OutingKind; started_at: string; ended_at: string | null;
+  distance_m: number; contacts: number; presentations: number; promises: number; auto_stopped: boolean;
+  trimmed_at: string | null; last_point: string | null;
+};
+export type SessionSummary = {
+  id: string; user_id: string; name: string; kind: OutingKind; started_at: string; ended_at: string | null; minutes: number;
+  distance_m: number; sidewalks: number; blocks: number; houses: number; contacts: number; presentations: number; promises: number;
+};
+export type HouseRow = { id: number; lat: number; lng: number; road_id: number | null; seg: number | null; side: number | null };
+export type Zone = {
+  id: string; church_id: string; name: string; color: string; polygon: [number, number][]; assigned: string[];
+  on_date: string | null; note: string | null; archived: boolean; created_by: string | null; created_at: string;
+};
+export type ZoneProgress = { sidewalks: number; done: number; houses: number; houses_done: number };
+export type FollowupRow = {
+  id: string; name: string; phone: string | null; photo_path: string | null; status: string; interest: string | null; promise_day: string | null;
+  created_at: string; last_visit: string | null; last_attended: string | null; address_hint: string | null; saved_on: string | null;
+};
+export type PipelineRow = { month: string; contacts: number; gospel: number; visited: number; came: number; saved: number; baptized: number; members: number };
+export type ChurchEvent = {
+  id: string; church_id: string; title: string; starts_at: string; ends_at: string | null; all_day: boolean; place: string | null;
+  description: string | null; weekly: boolean; source_id: string | null;
+};
+export type PrayerRow = {
+  id: string; user_id: string; author: string | null; body: string; visibility: 'church' | 'pastor' | 'people'; people: string[];
+  anonymous: boolean; answered_at: string | null; answer_note: string | null; created_at: string; prayed: number; i_prayed: boolean; mine: boolean;
+};
+export type Announcement = {
+  id: string; church_id: string; author_id: string | null; title: string; body: string;
+  audience: 'all' | 'staff' | 'leaders' | 'teachers' | 'ministry' | 'group'; ministry_id: string | null; group_id: string | null; sent_to: number; created_at: string;
+};
+export type SuggestionRow = { id: string; author: string | null; mine: boolean; body: string; anonymous: boolean; status: 'new' | 'seen' | 'done'; reply: string | null; created_at: string };
+export type DirectoryRow = { id: string; display_name: string; phone: string | null; title: string | null; photo_path: string | null; contact_id: string | null };
+export type WeeklyReport = {
+  from: string; to: string; outings: number; people_out: number; minutes: number; km: number; houses: number; contacts: number; gospel: number;
+  promises: number; visits: number; attendance: number; first_time: number; saved: number; baptisms: number; new_members: number; absent: number;
+};

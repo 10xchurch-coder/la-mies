@@ -127,3 +127,17 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - **Calles de Posadas cargadas**: la tabla de calles (OpenStreetMap) estaba vacía —el script `import-roads.mjs` nunca se había corrido— y sin calles la app no puede pintar veredas en verde (ni las propias ni las de los compañeros). Ahora se cargan desde la base con `step_road_tiles()` (Posadas, Garupá y Candelaria, en cuadros de ~5 km).
 - **iPhone con la pantalla apagada**: si la ubicación está en "Mientras se usa", el iPhone deja de marcar. Al empezar una salida, la app lo explica y abre Ajustes para elegir "Siempre".
 - **Salidas olvidadas** (migración `0015`, pendiente de aplicar): sin movimiento por más de una hora, la salida se cierra sola en el momento en que la persona llegó a ese lugar, deja de aparecer "en vivo" y se le avisa. El teléfono deja de marcar solo.
+
+## v0.7
+- Estadísticas del equipo: salieron, horas entre todos, caminados, casas, contactos, evangelio presentado, promesas ("vinieron" solo en las personales).
+- Casas: Google Open Buildings v3 (detección por IA sobre imágenes satelitales, CC BY 4.0), asignadas a la cuadra y vereda más cercana (≤45 m). `scripts/casas.py` + `.github/workflows/casas.yml` → `data/casas_posadas.csv` → `load_houses()`. Puntos en el mapa con zoom cercano.
+- Nuevo contacto en una pantalla: nombre, "Le presenté el evangelio", "Prometió venir", nota rápida; el resto abajo.
+- Arreglar salidas (dueño, secretaría y pastor): terminar ahora, cortar el final, quitar un tramo (tocando el mapa o por minuto y calle), borrar, volver a pintar las cuadras (`recompute_session_coverage`). El dueño recibe un aviso.
+- Recorridos del equipo en el mapa, zonas con progreso, "sin visitar hace 3/6/12 meses", aviso si el teléfono deja de mandar la ubicación (6 min).
+- Resumen para compartir al terminar una salida.
+- Seguimiento: lista personal, aviso el día prometido con "Mandarle un WhatsApp" (mensaje firmado por quien lo manda) o "Ver su ficha"; "prometió y no vino" el lunes.
+- Faltas por semanas (1, 2, 3+) con mensajes de WhatsApp; destinatarios elegibles. "Visité" con notas en cualquier persona.
+- Eventos con "voy / no voy" (importados del calendario "Church"), oración con visibilidad (iglesia, solo pastor, personas elegidas), anuncios por grupo, sugerencias, directorio opcional, roles y cargos, informe semanal (lunes 8) y camino de los contactos por mes.
+- Prédica: YouTube arriba, resumen, audio para escuchar o descargar, bosquejo para completar con apuntes propios. El sábado, Iglesia muestra "Mañana en la iglesia" si ya está cargado el título del domingo.
+- Encabezado de Iglesia con el logo (del sitio de Wix) y el nombre más chico.
+- No se hizo: registro de ofrendas (#16) y pedido de transporte, por decisión del pastor.

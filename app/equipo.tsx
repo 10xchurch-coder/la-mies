@@ -64,7 +64,7 @@ export default function Equipo() {
                   {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>
-                  Salió {fmtTime(r.started_at)} · {fmtMinutes((Date.now() - new Date(r.started_at).getTime()) / 60000)} · {r.presentations} present. · {r.promises} promesas
+                  Salió {fmtTime(r.started_at)} · {fmtMinutes((Date.now() - new Date(r.started_at).getTime()) / 60000)} · {r.contacts} contactos · {r.presentations} evangelio · {r.promises} promesas
                 </Text>
               </View>
               <Pressable onPress={() => router.push('/(tabs)/mapa')} accessibilityRole="button" accessibilityLabel={`Ver a ${r.display_name} en el mapa`} style={styles.iconBtn}>
@@ -80,16 +80,18 @@ export default function Equipo() {
         {totals ? (
           <View style={{ gap: 8 }}>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.presentations} label="Presentaciones" tone="green" />
-              <Stat value={totals.promises} label="Promesas" tone="amber" />
-              <Stat value={totals.came} label="Vinieron" tone="blue" />
+              <Stat value={totals.members} label="Salieron" />
+              <Stat value={fmtMinutes(totals.minutes)} label="Horas (entre todos)" />
+              <Stat value={fmtDistance(Number(totals.km) * 1000)} label="Caminados" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.members} label="Hermanos" />
-              <Stat value={fmtMinutes(totals.minutes)} label="Horas" />
-              <Stat value={totals.blocks} label="Cuadras" />
+              <Stat value={totals.houses ?? '—'} label="Casas" tone="blue" />
+              <Stat value={totals.contacts} label="Contactos" />
             </View>
-            <Text style={{ fontSize: 12, color: colors.muted }}>{fmtDistance(Number(totals.km) * 1000)} caminados · {totals.contacts} casas marcadas</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Stat value={totals.presentations} label="Evangelio presentado" tone="green" />
+              <Stat value={totals.promises} label="Promesas" tone="amber" />
+            </View>
           </View>
         ) : null}
 

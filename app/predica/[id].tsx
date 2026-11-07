@@ -1,13 +1,14 @@
-// Una prédica: abrir el video en YouTube, escuchar el audio acá mismo o descargarlo.
-import React, { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, Text, View } from 'react-native';
+// Una prédica: arriba el video de YouTube, después el resumen, el audio (escuchar o descargar)
+// y el bosquejo para completar con los espacios en blanco (cada uno guarda sus respuestas).
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Linking, Pressable, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Loading } from '@/components/ui';
-import { getSermon } from '@/lib/api';
+import { Button, Card, Field, Loading, SectionTitle } from '@/components/ui';
+import { getSermon, mySermonNotes, saveSermonNotes } from '@/lib/api';
 import { downloadUrl, signedUrl } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateOnly, youtubeId } from '@/lib/format';
@@ -52,6 +53,66 @@ function AudioPlayer({ url }: { url: string }) {
         </Pressable>
       </View>
     </Card>
+  );
+}
+
+// El bosquejo: cada "___" es un espacio para completar. Se guarda solo, un segundo después de escribir.
+function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string | null }) {
+  const lines = (outline ?? '').split('\n').map((l) => l.trimEnd()).filter((l) => l.trim());
+  const blanks = lines.reduce((n, l) => n + (l.split('___').length - 1), 0);
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [notes, setNotes] = useState('');
+  const [saved, setSaved] = useState<'idle' | 'saving' | 'ok'>('idle');
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loaded = useRef(false);
+
+  useEffect(() => {
+    mySermonNotes(sermonId).then((n) => {
+      if (n) { setAnswers(n.answers ?? []); setNotes(n.notes ?? ''); }
+      loaded.current = true;
+    }).catch(() => { loaded.current = true; });
+  }, [sermonId]);
+
+  const queue = (a: string[], n: string) => {
+    if (!loaded.current) return;
+    if (timer.current) clearTimeout(timer.current);
+    setSaved('saving');
+    timer.current = setTimeout(() => {
+      saveSermonNotes(sermonId, a, n.trim() || null).then(() => setSaved('ok')).catch(() => setSaved('idle'));
+    }, 900);
+  };
+
+  let k = -1;
+  return (
+    <>
+      <SectionTitle>{blanks ? 'Bosquejo para completar' : 'Mis apuntes'}</SectionTitle>
+      {lines.length ? (
+        <Card style={{ gap: 10 }}>
+          {lines.map((line, li) => {
+            const parts = line.split('___');
+            return (
+              <View key={li} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', rowGap: 4 }}>
+                {parts.map((part, pi) => {
+                  const idx = pi < parts.length - 1 ? ++k : -1;
+                  return (
+                    <React.Fragment key={pi}>
+                      {part ? <Text style={{ fontSize: 15, lineHeight: 24, color: colors.text }}>{part}</Text> : null}
+                      {idx >= 0 ? (
+                        <TextInput value={answers[idx] ?? ''} accessibilityLabel={`Espacio ${idx + 1}`}
+                          onChangeText={(t) => { const a = [...answers]; while (a.length <= idx) a.push(''); a[idx] = t; setAnswers(a); queue(a, notes); }}
+                          style={{ minWidth: 90, borderBottomWidth: 2, borderBottomColor: colors.green, fontSize: 15, fontWeight: '700', color: colors.greenText, paddingVertical: 2, paddingHorizontal: 4, marginHorizontal: 2 }} />
+                      ) : null}
+                    </React.Fragment>
+                  );
+                })}
+              </View>
+            );
+          })}
+        </Card>
+      ) : null}
+      <Field label="Mis notas" value={notes} onChangeText={(t) => { setNotes(t); queue(answers, t); }} multiline placeholder="Lo que Dios me habló hoy…" />
+      <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'right' }}>{saved === 'saving' ? 'Guardando…' : saved === 'ok' ? 'Guardado' : 'Solo vos ves tus apuntes'}</Text>
+    </>
   );
 }
 
@@ -107,8 +168,16 @@ export default function PredicaVer() {
         ) : s.youtube_url ? <Button title="Ver el video" icon="youtube" onPress={() => Linking.openURL(s.youtube_url as string)} /> : null}
         {s.passage ? <Text style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{s.passage}</Text> : null}
         {s.description ? <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }}>{s.description}</Text> : null}
+        {s.summary ? (
+          <>
+            <SectionTitle>Resumen</SectionTitle>
+            <Text style={{ fontSize: 15, lineHeight: 23, color: colors.text }}>{s.summary}</Text>
+          </>
+        ) : null}
+        {s.audio_path ? <SectionTitle>Escuchar</SectionTitle> : null}
         {audio ? <AudioPlayer url={audio} /> : s.audio_path ? <Loading /> : null}
         {s.audio_path ? <Button title="Descargar el audio" icon="download" variant="outline" onPress={download} /> : null}
+        <SermonNotes sermonId={s.id} outline={s.notes_outline ?? null} />
         {isStaff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Button title="Editar" variant="outline" small onPress={() => router.push({ pathname: '/predica/nueva', params: { id } })} style={{ flex: 1 }} />

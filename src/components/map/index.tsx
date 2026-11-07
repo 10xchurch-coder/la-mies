@@ -3,10 +3,10 @@
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
-import RNMapView, { Marker, Polyline, type MapViewProps } from 'react-native-maps';
+import RNMapView, { Circle, Marker, Polygon, Polyline, type MapViewProps } from 'react-native-maps';
 import { themed } from '../../theme';
 
-export { Marker, Polyline };
+export { Circle, Marker, Polygon, Polyline };
 export type { MapViewProps, Region, MapType, MapStyleElement } from 'react-native-maps';
 
 // La clave de Google Maps no se puede leer acá (Expo la quita de Constants.expoConfig), así que

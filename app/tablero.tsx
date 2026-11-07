@@ -5,6 +5,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Avatar, Card, Empty, SectionTitle, Segmented, Stat } from '@/components/ui';
 import { scoreboard, teamTotals } from '@/lib/api';
 import { groupWord } from '@/lib/format';
+import { fmtDistance } from '@/lib/format';
 import { POINTS } from '@/lib/levels';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
@@ -54,14 +55,14 @@ export default function Tablero() {
         {totals ? (
           <View style={{ gap: 8 }}>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.presentations} label="Presentaciones" tone="green" />
+              <Stat value={totals.contacts} label="Contactos" />
+              <Stat value={totals.presentations} label="Evangelio" tone="green" />
               <Stat value={totals.promises} label="Promesas" tone="amber" />
-              <Stat value={totals.came} label="Vinieron" tone="blue" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.discipleship} label="Discipulado" />
-              <Stat value={totals.baptisms} label="Bautismos" />
-              <Stat value={totals.members} label="Hermanos" />
+              <Stat value={totals.members} label="Salieron" />
+              <Stat value={fmtDistance(Number(totals.km) * 1000)} label="Caminados" />
+              <Stat value={totals.houses ?? '—'} label="Casas" tone="blue" />
             </View>
           </View>
         ) : null}
@@ -95,7 +96,7 @@ export default function Tablero() {
                     {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    {r.presentations} presentaciones · {r.promises} promesas{r.came ? ` · ${r.came} vinieron` : ''}
+                    {r.presentations} con el evangelio · {r.promises} promesas
                   </Text>
                 </View>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.points}</Text>
