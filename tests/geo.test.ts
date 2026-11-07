@@ -157,3 +157,9 @@ test('coverageFromTrack: puntos sobre el eje cuentan el tramo pero no marcan las
   const r = coverageFromTrack(pts, [calle]);
   assert.deepEqual(r.events.map((e) => `${e.road_id}:${e.seg}:${e.side}`), ['1:0:-1']);
 });
+
+test('coverageFromTrack: un recorrido con pocos puntos (uno cada 40 s) igual marca la cuadra', () => {
+  const pts = walk(21, 5, 5000).filter((_, i) => i % 8 === 0); // 3 puntos: 0, 40, 80 m
+  const r = coverageFromTrack(pts, [calle]);
+  assert.deepEqual(r.events.map((e) => `${e.road_id}:${e.seg}:${e.side}`), ['1:0:-1']);
+});

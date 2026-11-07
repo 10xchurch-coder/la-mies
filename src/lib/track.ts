@@ -112,6 +112,27 @@ export const COVER = {
   sideBand: 2.5,
 } as const;
 
+/** Si el teléfono guardó pocos puntos (el iPhone a veces guarda uno por minuto), se completa el camino
+ *  entre dos puntos cercanos (≤ 90 s y ≤ 120 m) con puntos cada 5 m. Así una cuadra caminada no se pierde. */
+export function densify(pts: TrackPoint[]): TrackPoint[] {
+  const out: TrackPoint[] = [];
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    out.push(a);
+    const b = pts[i + 1];
+    if (!b) break;
+    const d = haversine(a, b);
+    const dt = (b.t - a.t) / 1000;
+    if (d <= 10 || d > 120 || dt > 90 || dt <= 0 || d / dt > 3) continue;
+    const n = Math.floor(d / 5);
+    for (let k = 1; k < n; k++) {
+      const f = k / n;
+      out.push({ t: a.t + (b.t - a.t) * f, lat: a.lat + (b.lat - a.lat) * f, lng: a.lng + (b.lng - a.lng) * f, acc: Math.max(a.acc ?? 0, b.acc ?? 0) });
+    }
+  }
+  return out;
+}
+
 function angleDiff(a: number, b: number): number {
   // diferencia entre rumbos sin importar el sentido (0..90)
   let d = Math.abs(a - b) % 180;
@@ -131,7 +152,7 @@ type Hit = { roadId: number; seg: number; side: Side; along: number; t: number; 
  * Los puntos a menos de 2,5 m del eje cuentan para el tramo pero no deciden la vereda.
  */
 export function coverageFromTrack(points: TrackPoint[], roads: Road[], overrides: SideOverride[] = []): CoverageResult {
-  const good = points.filter((p) => p.acc == null || p.acc <= COVER.maxAccuracy).sort((a, b) => a.t - b.t);
+  const good = densify(points.filter((p) => p.acc == null || p.acc <= COVER.maxAccuracy).sort((a, b) => a.t - b.t));
   const byKey = new Map<string, Hit[]>();
   for (let i = 0; i < good.length; i++) {
     const p = good[i];

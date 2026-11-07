@@ -59,6 +59,8 @@ const files = [
   'supabase/tests/rls_test_18.sql',
   'supabase/migrations/0025_vereda_ambigua.sql',
   'supabase/tests/rls_test_19.sql',
+  'supabase/migrations/0026_completar_recorrido.sql',
+  'supabase/tests/rls_test_20.sql',
 ];
 for (const f of files) {
   console.log(`▶ ${f}`);
