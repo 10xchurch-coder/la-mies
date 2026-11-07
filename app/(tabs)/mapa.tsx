@@ -10,10 +10,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CoverageMap, bboxOfRegion, regionAround, type LiveMember } from '@/components/CoverageMap';
 import { Button } from '@/components/ui';
 import { MapTypeButton, mapStyleProps, useMapStyle } from '@/components/MapTypeButton';
-import { coverageInBbox, housesInBbox, listContacts, listZones, roadsInBbox, teamLive } from '@/lib/api';
+import { coverageInBbox, editHouse, housesInBbox, listContacts, listZones, roadsInBbox, setSideCoverage, teamLive } from '@/lib/api';
+import { showActions } from '@/components/ActionSheet';
+import { errorMessage } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
 import type { LatLng } from '@/lib/geo';
-import { segmentOf, sideName } from '@/lib/geo';
+import { haversine, projectOnSegment, segmentOf, sideName, sideOfSegment, type Side } from '@/lib/geo';
 import { KIND_LABEL, fmtDayYear, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
@@ -34,7 +36,7 @@ const DEFAULT_CENTER = { lat: -27.3671, lng: -55.896 };
 export default function Mapa() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { session } = useAuth();
+  const { session, isLeader } = useAuth();
   const outing = useOuting();
   const [region, setRegion] = useState<Region>(regionAround(DEFAULT_CENTER, 900));
   const [roads, setRoads] = useState<RoadRow[]>([]);
@@ -42,13 +44,17 @@ export default function Mapa() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [live, setLive] = useState<LiveMember[]>([]);
   const [selected, setSelected] = useState<CoverageRow | null>(null);
+  // Lo que se tocó en el mapa: una vereda (marcada o no) o el recorrido de un compañero.
+  const [picked, setPicked] = useState<{ road: RoadRow; seg: number; side: Side } | null>(null);
+  const [pickedTrail, setPickedTrail] = useState<{ name: string; id: string } | null>(null);
+  const [houseEdit, setHouseEdit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [mapStyle, setMapStyle] = useMapStyle();
   const [layer, setLayerState] = useState<Layer>('all');
   const [choosing, setChoosing] = useState(false);
   const [houses, setHouses] = useState<HouseRow[]>([]);
   const [zones, setZones] = useState<Zone[]>([]);
-  const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color: string }[]>([]);
+  const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color: string; name: string }[]>([]);
   const [staleMonths, setStaleMonths] = useState<(typeof STALE_STEPS)[number]>(0);
   const staleSince = useMemo(() => (staleMonths ? new Date(Date.now() - staleMonths * 30.4 * 86400000) : null), [staleMonths]);
 
@@ -60,6 +66,7 @@ export default function Mapa() {
   const setLayer = (l: Layer) => {
     setLayerState(l);
     setSelected(null);
+    setPicked(null);
     AsyncStorage.setItem(LAYER_KEY, l).catch(() => undefined);
   };
   const shownCoverage = useMemo(() => (layer === 'all' ? coverage : coverage.filter((c) => c.kind === layer)), [coverage, layer]);
@@ -91,7 +98,7 @@ export default function Mapa() {
           if (!by.has(p.session_id)) by.set(p.session_id, []);
           by.get(p.session_id)!.push({ lat: p.lat, lng: p.lng });
         }
-        setTrails(others.map((o, i) => ({ id: o.session_id, points: by.get(o.session_id) ?? [], color: TRAIL_COLORS[i % TRAIL_COLORS.length] })).filter((t) => t.points.length > 1));
+        setTrails(others.map((o, i) => ({ id: o.session_id, name: o.display_name, points: by.get(o.session_id) ?? [], color: TRAIL_COLORS[i % TRAIL_COLORS.length] })).filter((t) => t.points.length > 1));
       } else {
         setTrails([]);
       }
@@ -141,12 +148,90 @@ export default function Mapa() {
   };
 
   const selectedInfo = useMemo(() => {
-    if (!selected) return null;
-    const road = roads.find((x) => x.id === selected.road_id);
-    const seg = road ? segmentOf(road, selected.seg) : null;
-    const name = seg ? sideName(seg[0], seg[1], selected.side) : null;
-    return { road, name };
-  }, [selected, roads]);
+    if (!picked) return null;
+    const seg = segmentOf(picked.road, picked.seg);
+    const name = seg ? sideName(seg[0], seg[1], picked.side) : null;
+    return { road: picked.road, name };
+  }, [picked]);
+
+  const clearPick = () => { setPicked(null); setSelected(null); setPickedTrail(null); };
+
+  // Un toque en el mapa: buscamos la vereda más cercana al dedo (o el recorrido de un compañero).
+  // Se hace acá y no en cada línea porque en el iPhone tocar una línea también "toca el mapa" y se borraba la selección.
+  const onMapPress = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
+    const p = { lat: e.nativeEvent.coordinate.latitude, lng: e.nativeEvent.coordinate.longitude };
+    const tol = Math.max(10, Math.min(45, region.latitudeDelta * 111320 * 0.03));
+    if (houseEdit) {
+      let hb: { h: HouseRow; d: number } | null = null;
+      for (const h of houses) { const d = haversine(p, h); if (d <= Math.max(6, tol / 2) && (!hb || d < hb.d)) hb = { h, d }; }
+      if (hb) {
+        const h = hb.h;
+        Alert.alert('¿No es una casa?', 'Se saca este punto del mapa y del conteo de casas.', [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Sacar el punto', style: 'destructive', onPress: () => editHouse('hide', h.id).then(() => loadArea(region)).catch((err) => Alert.alert('No se pudo', errorMessage(err))) },
+        ]);
+      } else {
+        Alert.alert('Agregar una casa acá', 'Se suma al conteo de casas de la cuadra más cercana.', [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Agregar', onPress: () => editHouse('add', null, p.lat, p.lng).then(() => loadArea(region)).catch((err) => Alert.alert('No se pudo', errorMessage(err))) },
+        ]);
+      }
+      return;
+    }
+    let best: { road: RoadRow; seg: number; side: Side; d: number } | null = null;
+    for (const r of roads) {
+      for (let i = 0; i < r.coords.length - 1; i++) {
+        const a = { lat: r.coords[i][0], lng: r.coords[i][1] };
+        const b = { lat: r.coords[i + 1][0], lng: r.coords[i + 1][1] };
+        const pr = projectOnSegment(p, a, b);
+        if (pr.dist <= tol && (!best || pr.dist < best.d)) best = { road: r, seg: i, side: sideOfSegment(p, a, b), d: pr.dist };
+      }
+    }
+    let trail: { name: string; id: string; d: number } | null = null;
+    for (const t of trails) {
+      for (let i = 0; i < t.points.length - 1; i++) {
+        const d = projectOnSegment(p, t.points[i], t.points[i + 1]).dist;
+        if (d <= tol && (!trail || d < trail.d)) trail = { name: t.name, id: t.id, d };
+      }
+    }
+    if (trail && (!best || trail.d + 4 < best.d)) {
+      setPicked(null); setSelected(null);
+      setPickedTrail({ name: trail.name, id: trail.id });
+      return;
+    }
+    if (!best) { clearPick(); return; }
+    const k = best;
+    const rows = shownCoverage.filter((c) => c.road_id === k.road.id && c.seg === k.seg && c.side === k.side);
+    const row = rows.find((c) => c.kind === 'soulwinning') ?? rows[0] ?? null;
+    setPickedTrail(null);
+    setPicked({ road: k.road, seg: k.seg, side: k.side });
+    setSelected(row);
+  };
+
+  const pickKind: OutingKind = selected?.kind ?? (layer === 'flyers' ? 'flyers' : 'soulwinning');
+  const canRemove = !!selected && (isLeader || selected.last_user_id === session?.user.id);
+
+  const markDone = () => {
+    if (!picked) return;
+    setSideCoverage(picked.road.id, picked.seg, picked.side, pickKind, true)
+      .then(() => loadArea(region)).then(clearPick)
+      .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+  };
+
+  const removeMark = () => {
+    if (!picked || !selected) return;
+    const go = (session: string | null) =>
+      setSideCoverage(picked.road.id, picked.seg, picked.side, selected.kind, false, session)
+        .then(() => loadArea(region)).then(clearPick)
+        .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+    const who = selected.last_user_name ?? 'alguien';
+    showActions('No se hizo esta vereda', 'Se saca del mapa. Si se recalcula la salida, no vuelve a aparecer.', [
+      ...(selected.last_session_id ? [{ text: `Quitar la de ${who} (${fmtRelativeDay(selected.last_covered_at)})`, icon: 'x' as const, onPress: () => go(selected.last_session_id ?? null) }] : []),
+      ...(isLeader && selected.times > 1 ? [{ text: `Quitar las ${selected.times} veces (nadie la hizo)`, icon: 'trash-2' as const, destructive: true, onPress: () => go(null) }] : []),
+      ...(isLeader && !selected.last_session_id ? [{ text: 'Quitar la marca', icon: 'x' as const, onPress: () => go(null) }] : []),
+      { text: 'Cancelar', icon: 'corner-up-left' as const },
+    ]);
+  };
 
   const start = () => {
     if (outing.active) {
@@ -201,27 +286,53 @@ export default function Mapa() {
           region={region}
           {...mapStyleProps(mapStyle)}
           onRegionChangeComplete={onRegionChangeComplete}
-          onPressSegment={(row) => setSelected(row)}
           onPressContact={(c) => router.push({ pathname: '/contacto/[id]', params: { id: c.id } })}
-          onPress={() => setSelected(null)}
+          onPress={onMapPress}
         />
 
-        {selected && selectedInfo ? (
+        {picked && selectedInfo ? (
           <View style={styles.popup}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>
-              {selectedInfo.road?.name ?? 'Calle sin nombre'} · vereda {selectedInfo.name ?? '?'} · {KIND_LABEL[selected.kind]}
-            </Text>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.grayText }}>
-              {selected.last_user_name ?? 'Alguien'} · {fmtRelativeDay(selected.last_covered_at)} {fmtTime(selected.last_covered_at)} · {selected.times} {selected.times === 1 ? 'vez' : 'veces'}
-            </Text>
-            <Text style={{ fontSize: 11, color: colors.muted }}>{fmtDayYear(selected.last_covered_at)}</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push({ pathname: '/vereda', params: { road: String(selected.road_id), seg: String(selected.seg), side: String(selected.side), kind: selected.kind, name: selectedInfo.road?.name ?? '', sideName: selectedInfo.name ?? '' } })}
-              style={{ minHeight: 32, justifyContent: 'center' }}
-            >
-              <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green, textDecorationLine: 'underline' }}>Ver todo el historial de esta vereda</Text>
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>
+                {selectedInfo.road?.name ?? 'Calle sin nombre'} · vereda {selectedInfo.name ?? '?'}{selected ? ` · ${KIND_LABEL[selected.kind]}` : ''}
+              </Text>
+              <Pressable onPress={clearPick} accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+            </View>
+            {selected ? (
+              <>
+                <Text style={{ fontSize: 12, fontWeight: '600', color: colors.grayText }}>
+                  {selected.last_user_name ?? 'Alguien'} · {fmtRelativeDay(selected.last_covered_at)} {fmtTime(selected.last_covered_at)} · {selected.times} {selected.times === 1 ? 'vez' : 'veces'}{!selected.last_session_id ? ' · marcada a mano' : ''}
+                </Text>
+                <Text style={{ fontSize: 11, color: colors.muted }}>{fmtDayYear(selected.last_covered_at)}</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 4 }}>
+                  <Text onPress={() => router.push({ pathname: '/vereda', params: { road: String(selected.road_id), seg: String(selected.seg), side: String(selected.side), kind: selected.kind, name: selectedInfo.road?.name ?? '', sideName: selectedInfo.name ?? '' } })}
+                    style={styles.popLink}>Historial</Text>
+                  {selected.last_session_id && (isLeader || selected.last_user_id === session?.user.id) ? (
+                    <Text onPress={() => router.push(`/recortar?session=${selected.last_session_id}` as never)} style={styles.popLink}>Ver la salida</Text>
+                  ) : null}
+                  {canRemove ? <Text onPress={removeMark} style={[styles.popLink, { color: colors.red }]}>No se hizo</Text> : null}
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={{ fontSize: 12, color: colors.muted }}>Sin marcar{layer === 'all' ? '' : ` en ${KIND_LABEL[pickKind].toLowerCase()}`}.</Text>
+                <Text onPress={markDone} style={[styles.popLink, { marginTop: 4 }]}>Marcar como hecha ({KIND_LABEL[pickKind].toLowerCase()})</Text>
+              </>
+            )}
+          </View>
+        ) : pickedTrail ? (
+          <View style={styles.popup}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>Recorrido de {pickedTrail.name} (ahora)</Text>
+              <Pressable onPress={clearPick} accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+            </View>
+            {isLeader ? <Text onPress={() => router.push(`/recortar?session=${pickedTrail.id}` as never)} style={styles.popLink}>Ver o arreglar la salida</Text> : null}
+          </View>
+        ) : houseEdit ? (
+          <View style={[styles.popup, { backgroundColor: colors.amberSoft }]}>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>Corrigiendo casas</Text>
+            <Text style={{ fontSize: 12, color: colors.text }}>{houses.length ? 'Tocá un punto que no es casa para sacarlo, o un lugar sin punto para agregar una casa.' : 'Acercate más al mapa para ver los puntos de las casas.'}</Text>
+            <Text onPress={() => setHouseEdit(false)} style={styles.popLink}>Listo</Text>
           </View>
         ) : (
           <View style={styles.hint}>
@@ -230,7 +341,7 @@ export default function Mapa() {
           </View>
         )}
 
-        <MapTypeButton style={mapStyle} onChange={setMapStyle} top={selected ? 120 : 60} />
+        <MapTypeButton style={mapStyle} onChange={setMapStyle} top={picked || pickedTrail || houseEdit ? 130 : 60} />
 
         <View style={styles.legend}>
           <View style={{ flexDirection: 'row', gap: 4, marginBottom: 2 }}>
@@ -257,6 +368,12 @@ export default function Mapa() {
               {staleMonths ? `Sin visitar hace ${staleMonths} meses` : 'Ver sin visitar'}
             </Text>
           </Pressable>
+          {isLeader ? (
+            <Pressable onPress={() => { clearPick(); setHouseEdit((v) => !v); }} accessibilityRole="button"
+              style={[styles.layerBtn, houseEdit ? { backgroundColor: colors.amber } : null, { alignSelf: 'flex-start' }]}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: houseEdit ? '#FFF' : colors.text }}>{houseEdit ? 'Corrigiendo casas' : 'Corregir casas'}</Text>
+            </Pressable>
+          ) : null}
           {houses.length ? (
             <View style={styles.legendRow}>
               <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.green }} />
@@ -349,6 +466,7 @@ const styles = themed(() => StyleSheet.create({
   teamBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 12, borderRadius: 20, backgroundColor: colors.greenSoft },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
   popup: { position: 'absolute', left: 12, top: 12, right: 12, backgroundColor: colors.bg, borderRadius: 12, padding: 12, gap: 4, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
+  popLink: { fontSize: 13, fontWeight: '800', color: colors.green, paddingVertical: 4 },
   hint: { position: 'absolute', left: 12, top: 12, flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 12, borderRadius: 10, backgroundColor: colors.bg, elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
   legend: { position: 'absolute', left: 12, bottom: 12, backgroundColor: colors.bg, borderRadius: 12, padding: 10, gap: 6, elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
   legendHead: { fontSize: 11, fontWeight: '800', color: colors.muted, marginTop: 2 },

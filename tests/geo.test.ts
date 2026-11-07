@@ -112,16 +112,41 @@ test('detectVehicle: un solo salto rápido no cuenta', () => {
   assert.equal(detectVehicle(pts).vehicle, false);
 });
 
-test('coverageFromTrack marca la vereda sur del tramo caminado y cuenta cuadras', () => {
-  const pts = walk(25, 5, 5000); // 120 m sobre el 1er tramo (100 m) y entra al 2º
+test('coverageFromTrack marca la vereda sur del tramo caminado, no la calle que cruza ni los 20 m del tramo siguiente', () => {
+  const pts = walk(25, 5, 5000); // 120 m sobre el 1er tramo (100 m) y entra 20 m al 2º
   const r = coverageFromTrack(pts, [calle, transversal]);
   const keys = r.events.map((e) => `${e.road_id}:${e.seg}:${e.side}`).sort();
-  assert.deepEqual(keys, ['1:0:-1', '1:1:-1']);
-  assert.equal(r.blocks, 2);
+  assert.deepEqual(keys, ['1:0:-1']);
+  assert.equal(r.blocks, 1);
+});
+
+test('coverageFromTrack: el GPS que salta a la vereda de enfrente no la marca', () => {
+  // camina por la vereda sur (4 m) y cada 5 puntos el GPS lo tira 6 m al norte del eje
+  const pts = walk(21, 5, 5000).map((p, i) => (i % 5 === 2 ? { ...p, lat: -27.4000 + 6 / 111320 } : p));
+  const r = coverageFromTrack(pts, [calle]);
+  assert.deepEqual(r.events.map((e) => `${e.road_id}:${e.seg}:${e.side}`), ['1:0:-1']);
+});
+
+test('coverageFromTrack: cruzar una calle no la marca', () => {
+  // cruza la transversal (norte-sur) caminando de oeste a este, a 4 m de la calle 137
+  const pts = walk(41, 5, 5000);
+  const r = coverageFromTrack(pts, [transversal]);
+  assert.equal(r.events.length, 0);
+});
+
+test('coverageFromTrack: pasar solo por una punta del tramo no lo marca', () => {
+  const pts = walk(4, 5, 5000); // 15 m de una cuadra de 100 m
+  const r = coverageFromTrack(pts, [calle]);
+  assert.equal(r.events.length, 0);
+});
+
+test('coverageFromTrack: con GPS impreciso (40 m) no marca nada', () => {
+  const pts = walk(21, 5, 5000).map((p) => ({ ...p, acc: 40 }));
+  assert.equal(coverageFromTrack(pts, [calle]).events.length, 0);
 });
 
 test('coverageFromTrack respeta la corrección manual de vereda', () => {
-  const pts = walk(12, 5, 5000);
+  const pts = walk(16, 5, 5000);
   const r = coverageFromTrack(pts, [calle], [{ roadId: 1, since: 0, side: 1 }]);
   assert.deepEqual(r.events.map((e) => e.side), [1]);
 });

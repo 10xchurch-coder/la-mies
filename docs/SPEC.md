@@ -154,3 +154,8 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 ## v0.7 (finanzas y moderación)
 - Finanzas: pases banco ↔ caja dentro de un fondo (`to_account_id`), saldo por cuenta (`fin_account_balances`), fondos Terreno y construcción y General (dólares). La planilla anterior (2024–oct 2026) se cargó con `source = 'planilla'` (no está en el repositorio).
 - Denunciar y bloquear (pauta 1.2 de Apple): `content_reports`, `user_blocks`, `resolve_report`, Iglesia → Denuncias, Ajustes → Personas bloqueadas, Normas de la comunidad que cada uno acepta una vez. Los pedidos anónimos ya no mandan el id de quien los pidió.
+
+## v0.7 (mapa más preciso y corregible)
+- Marcado de veredas: GPS ≤ 25 m, ≤ 20 m del eje, dentro del tramo (no en esquinas), rumbo a lo largo de la calle (± 35°), se descartan saltos sueltos a la vereda de enfrente, ≥ 3 puntos, ≥ 30% de los puntos del tramo y la mitad del tramo recorrida (o 25 m). Igual en `coverageFromTrack` y `recompute_session_coverage`.
+- Mapa: el toque busca la vereda o el recorrido más cercano (antes en iPhone el toque en la línea también borraba la selección). Tarjeta con quién y cuándo, Historial, Ver la salida, "No se hizo" (de esa salida o de todas; no vuelve al recalcular: `coverage_exclusions`) y "Marcar como hecha" (`coverage_events.manual`).
+- Casas: confianza ≥ 0,80, 30–2500 m², ≤ 35 m de la calle, sin repetidos a < 4 m. Pastor, secretaría y capitanes sacan o agregan puntos ("Corregir casas"); lo corregido se respeta al volver a cargar.

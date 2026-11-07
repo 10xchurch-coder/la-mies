@@ -14,7 +14,7 @@ export type CoverageMapProps = MapViewProps & {
   coverage: CoverageRow[];
   contacts?: Contact[];
   live?: LiveMember[];
-  trails?: { id: string; points: LatLng[]; color?: string }[];
+  trails?: { id: string; points: LatLng[]; color?: string; name?: string }[];
   /** Casas (edificios del mapa satelital). Las que ya tienen la vereda cubierta se ven verdes. */
   houses?: HouseRow[];
   /** Zonas asignadas. */
@@ -89,8 +89,7 @@ export function CoverageMap({
           strokeColor={l.color}
           strokeWidth={l.isSelected ? 9 : 5}
           lineCap="round"
-          tappable={!!onPressSegment}
-          onPress={() => onPressSegment?.(l.row)}
+          tappable={false}
         />
       ))}
       {zones.map((z) => (

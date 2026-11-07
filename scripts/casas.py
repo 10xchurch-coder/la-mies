@@ -12,8 +12,8 @@ import csv, gzip, io, json, math, os, sys, time, urllib.parse, urllib.request
 BBOX = tuple(float(x) for x in os.environ.get('BBOX', '-27.55,-56.05,-27.30,-55.65').split(','))  # sur,oeste,norte,este
 CELL = os.environ.get('CELL', '945')
 OUT = os.environ.get('OUT', 'data/casas_posadas.csv')
-MIN_CONF = float(os.environ.get('MIN_CONF', '0.72'))
-MAX_DIST = float(os.environ.get('MAX_DIST', '45'))  # metros desde la calle
+MIN_CONF = float(os.environ.get('MIN_CONF', '0.80'))  # más alto = menos galpones y árboles tomados por casas
+MAX_DIST = float(os.environ.get('MAX_DIST', '35'))  # metros desde la calle
 TYPES = 'residential|primary|secondary|tertiary|unclassified|living_street|pedestrian|trunk|primary_link|secondary_link|tertiary_link|service'
 R = 6371000.0
 DEG = math.pi / 180
@@ -35,12 +35,21 @@ def buildings():
             lat, lng = float(row[il]), float(row[io_])
             if s <= lat <= n and w <= lng <= e:
                 conf, area = float(row[ic]), float(row[ia])
-                if conf >= MIN_CONF and 18 <= area <= 3000:
+                if conf >= MIN_CONF and 30 <= area <= 2500:
                     out.append((lat, lng, area))
             if i % 2000000 == 0:
                 print(f'  {i:,} leídos, {len(out):,} en la zona', flush=True)
-    print(f'{len(out):,} edificios en la zona', flush=True)
-    return out
+    # Dos detecciones casi en el mismo lugar (a menos de 4 m) son la misma casa: queda la más grande.
+    out.sort(key=lambda x: -x[2])
+    seen, uniq = set(), []
+    for lat, lng, area in out:
+        k = (round(lat / 0.000036), round(lng / 0.00004))
+        if any((k[0] + dy, k[1] + dx) in seen for dy in (-1, 0, 1) for dx in (-1, 0, 1)):
+            continue
+        seen.add(k)
+        uniq.append((lat, lng, area))
+    print(f'{len(out):,} edificios en la zona, {len(uniq):,} sin repetidos', flush=True)
+    return uniq
 
 def roads():
     s, w, n, e = BBOX

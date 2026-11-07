@@ -24,7 +24,7 @@ export async function roadsInBbox(b: Bbox): Promise<RoadRow[]> {
 
 export async function sideHistory(road: number, seg: number, side: 1 | -1, kind: OutingKind | null = null) {
   return (ok(await supabase.rpc('side_history', { p_road: road, p_seg: seg, p_side: side, p_kind: kind })) ?? []) as {
-    covered_at: string; user_name: string | null; session_id: string; kind: OutingKind; presentations: number; promises: number;
+    covered_at: string; user_name: string | null; session_id: string | null; kind: OutingKind; presentations: number; promises: number; manual?: boolean; user_id?: string | null;
   }[];
 }
 
@@ -610,4 +610,12 @@ export type _FinT = T;
 export async function finAccountBalances(to: string | null = null): Promise<import('@/types').FinAccountBalance[]> {
   const rows = (ok(await supabase.rpc('fin_account_balances', { p_to: to })) ?? []) as import('@/types').FinAccountBalance[];
   return rows.map((r) => ({ ...r, balance: Number(r.balance) }));
+}
+/** Marcar una vereda como hecha (done) o quitarla: de una salida (session) o de todas (session null). */
+export async function setSideCoverage(road: number, seg: number, side: 1 | -1, kind: OutingKind, done: boolean, session: string | null = null): Promise<void> {
+  ok(await supabase.rpc('set_side_coverage', { p_road: road, p_seg: seg, p_side: side, p_kind: kind, p_done: done, p_session: session }));
+}
+/** Sacar un punto de casa que no es casa, o agregar una casa que falta. */
+export async function editHouse(action: 'hide' | 'add', house: number | null, lat: number | null = null, lng: number | null = null): Promise<void> {
+  ok(await supabase.rpc('edit_house', { p_action: action, p_house: house, p_lat: lat, p_lng: lng }));
 }

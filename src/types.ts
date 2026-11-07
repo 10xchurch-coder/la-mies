@@ -87,6 +87,8 @@ export type CoverageRow = {
   last_covered_at: string;
   last_user_name: string | null;
   times: number;
+  last_session_id?: string | null;
+  last_user_id?: string | null;
 };
 
 export type Contact = {
