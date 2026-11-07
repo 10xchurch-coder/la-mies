@@ -10,7 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CoverageMap, bboxOfRegion, regionAround, type LiveMember } from '@/components/CoverageMap';
 import { Button } from '@/components/ui';
 import { MapTypeButton, mapStyleProps, useMapStyle } from '@/components/MapTypeButton';
-import { coverageInBbox, editHouse, housesInBbox, listContacts, listZones, roadsInBbox, setSideCoverage, teamLive } from '@/lib/api';
+import { coverageInBbox, editHouse, houseSidesInBbox, housesInBbox, listContacts, listZones, roadsInBbox, setSideCoverage, teamLive } from '@/lib/api';
 import { showActions } from '@/components/ActionSheet';
 import { errorMessage } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
@@ -53,6 +53,7 @@ export default function Mapa() {
   const [layer, setLayerState] = useState<Layer>('all');
   const [choosing, setChoosing] = useState(false);
   const [houses, setHouses] = useState<HouseRow[]>([]);
+  const [houseSides, setHouseSides] = useState<Set<string> | null>(null);
   const [zones, setZones] = useState<Zone[]>([]);
   const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color: string; name: string }[]>([]);
   const [staleMonths, setStaleMonths] = useState<(typeof STALE_STEPS)[number]>(0);
@@ -81,6 +82,7 @@ export default function Mapa() {
       setRoads(rs);
       setCoverage(cov);
       setHouses(hs);
+      houseSidesInBbox(b).then(setHouseSides).catch(() => undefined);
     } catch {
       // sin señal
     }
@@ -281,6 +283,7 @@ export default function Mapa() {
           houses={houses}
           zones={zones}
           staleSince={staleSince}
+          houseSides={houseSides}
           onPressZone={(z) => router.push({ pathname: '/zona', params: { id: z.id } })}
           selected={selected}
           region={region}

@@ -619,3 +619,8 @@ export async function setSideCoverage(road: number, seg: number, side: 1 | -1, k
 export async function editHouse(action: 'hide' | 'add', house: number | null, lat: number | null = null, lng: number | null = null): Promise<void> {
   ok(await supabase.rpc('edit_house', { p_action: action, p_house: house, p_lat: lat, p_lng: lng }));
 }
+/** Veredas que tienen casas (para "Ver sin visitar": no se pintan plazas ni el medio de las avenidas). */
+export async function houseSidesInBbox(b: Bbox): Promise<Set<string>> {
+  const rows = (ok(await supabase.rpc('house_sides_in_bbox', { p_min_lat: b.minLat, p_min_lng: b.minLng, p_max_lat: b.maxLat, p_max_lng: b.maxLng })) ?? []) as { road_id: number; seg: number; side: number }[];
+  return new Set(rows.map((r) => `${r.road_id}:${r.seg}:${r.side}`));
+}

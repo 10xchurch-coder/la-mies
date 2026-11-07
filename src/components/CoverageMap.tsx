@@ -22,6 +22,8 @@ export type CoverageMapProps = MapViewProps & {
   onPressZone?: (z: Zone) => void;
   /** "Sin visitar en X meses": pinta en rojo las veredas de las calles cargadas que no se cubrieron desde esa fecha. */
   staleSince?: Date | null;
+  /** Veredas con casas: "sin visitar" solo pinta estas. */
+  houseSides?: Set<string> | null;
   selected?: { road_id: number; seg: number; side: 1 | -1; kind?: string } | null;
   onPressSegment?: (row: CoverageRow) => void;
   onPressContact?: (c: Contact) => void;
@@ -31,7 +33,7 @@ const SIDE_OFFSET_M = 3.2;
 const FLYERS_OFFSET_M = 6;  // los volantes se dibujan un poco más afuera, así se ven las dos líneas
 
 export function CoverageMap({
-  roads, coverage, contacts = [], live = [], trails = [], houses = [], zones = [], staleSince = null, onPressZone,
+  roads, coverage, contacts = [], live = [], trails = [], houses = [], zones = [], staleSince = null, houseSides = null, onPressZone,
   selected, onPressSegment, onPressContact, children, ...mapProps
 }: CoverageMapProps) {
   const roadById = useMemo(() => new Map(roads.map((r) => [r.id, r])), [roads]);
@@ -47,6 +49,7 @@ export function CoverageMap({
       for (let i = 0; i < r.coords.length - 1 && out.length < 4000; i++) {
         for (const side of [1, -1] as const) {
           if (recent.has(`${r.id}:${i}:${side}`)) continue;
+          if (houseSides && !houseSides.has(`${r.id}:${i}:${side}`)) continue; // sin casas: plaza, parque, medio de avenida
           const seg = segmentOf(r, i);
           if (!seg) continue;
           const [a, b] = offsetSegment(seg[0], seg[1], side, SIDE_OFFSET_M);
@@ -55,7 +58,7 @@ export function CoverageMap({
       }
     }
     return out;
-  }, [staleSince, roads, coverage]);
+  }, [staleSince, roads, coverage, houseSides]);
 
   const lines = useMemo(() => {
     const out: { key: string; coords: { latitude: number; longitude: number }[]; color: string; row: CoverageRow; isSelected: boolean }[] = [];
