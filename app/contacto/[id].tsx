@@ -44,6 +44,63 @@ function faithOf(c: Contact, atts: Attendance[], services: ChurchService[]): { c
   return { cat, attended, possible };
 }
 
+/** dd/mm/aaaa ⇄ aaaa-mm-dd */
+function toDmy(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return `${d}/${m}/${y}`;
+}
+function fromDmy(t: string): string | null | undefined {
+  const s = t.trim();
+  if (!s) return null;
+  const m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})$/);
+  if (!m) return undefined;
+  const y = m[3].length === 2 ? `20${m[3]}` : m[3];
+  const iso = `${y}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  const d = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(d.getTime()) || d > new Date(Date.now() + 86400000)) return undefined;
+  return iso;
+}
+
+/** La secretaría o el pastor corrigen las fechas reales (al cargar a alguien queda la fecha del día). */
+function DatesEditor({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contact>) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [saved, setSaved] = useState(toDmy(c.saved_on));
+  const [bap, setBap] = useState(toDmy(c.baptized_on));
+  const [mem, setMem] = useState(toDmy(c.member_since));
+  const [busy, setBusy] = useState(false);
+  if (!open) return <Button title="Corregir fechas (salvación, bautismo, miembro)" icon="calendar" variant="ghost" small onPress={() => setOpen(true)} />;
+  const save = async () => {
+    const a = fromDmy(saved), b = fromDmy(bap), m = fromDmy(mem);
+    if (a === undefined || b === undefined || m === undefined) {
+      Alert.alert('Revisá las fechas', 'Escribilas así: 15/03/2024. Dejá vacío si no corresponde.');
+      return;
+    }
+    setBusy(true);
+    try {
+      const patch: Partial<Contact> = { saved_on: a, baptized_on: b, member_since: c.status === 'member' ? m : c.member_since };
+      if (b) { patch.baptized = true; if (c.baptized_here == null) patch.baptized_here = true; }
+      await onSave(patch);
+      setOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card style={{ gap: 10 }}>
+      <SectionTitle>Fechas</SectionTitle>
+      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Así el progreso de la iglesia muestra cada cosa en el mes que pasó. Formato: 15/03/2024.</Text>
+      <Field label="Recibió a Cristo" value={saved} onChangeText={setSaved} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" />
+      <Field label="Se bautizó" value={bap} onChangeText={setBap} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" />
+      {c.status === 'member' ? <Field label="Miembro desde" value={mem} onChangeText={setMem} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" /> : null}
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button title="Cancelar" variant="ghost" small onPress={() => setOpen(false)} style={{ flex: 1 }} />
+        <Button title="Guardar fechas" small onPress={save} loading={busy} style={{ flex: 2 }} />
+      </View>
+    </Card>
+  );
+}
+
 export default function PersonaDetalle() {
   const router = useRouter();
   const { id, vinculo, wa: waKind, visita } = useLocalSearchParams<{ id: string; vinculo?: string; wa?: string; visita?: string }>();
@@ -230,6 +287,7 @@ export default function PersonaDetalle() {
   if (!isMember || !isBaptized) {
     rows.push({ k: 'Bautismo', v: isBaptized ? (c.baptized_on && c.baptized_here !== false ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)' });
   }
+  if (isMember && c.member_since) rows.push({ k: 'Miembro desde', v: fmtDateOnly(c.member_since) });
   if (c.dni && !isMember) rows.push({ k: 'DNI', v: c.dni });
   if (isVisitor) {
     rows.push({ k: 'Vino a la iglesia', v: attendances.length ? `${attendances.length} ${attendances.length === 1 ? 'vez' : 'veces'} · última ${fmtDateOnly(attendances[0].attended_on)}` : 'Todavía no' });
@@ -377,6 +435,8 @@ export default function PersonaDetalle() {
               <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Solo la secretaría y el pastor marcan miembros. Los miembros aparecen para todos en Personas y en el reporte de ausencias.</Text>
             </Card>
           ) : null}
+
+          {isStaff ? <DatesEditor key={`${c.saved_on}-${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 
           {isLeader && (!isMember || !c.discipleship_since || !isBaptized || !c.saved_on) ? (
             <Card style={{ gap: 10 }}>

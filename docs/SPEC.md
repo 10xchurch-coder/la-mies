@@ -141,3 +141,11 @@ Pendiente de configurar en Supabase (Authentication → URL Configuration): Site
 - Prédica: YouTube arriba, resumen, audio para escuchar o descargar, bosquejo para completar con apuntes propios. El sábado, Iglesia muestra "Mañana en la iglesia" si ya está cargado el título del domingo.
 - Encabezado de Iglesia con el logo (del sitio de Wix) y el nombre más chico.
 - No se hizo: registro de ofrendas (#16) y pedido de transporte, por decisión del pastor.
+
+## v0.7 (actualizaciones sin reinstalar)
+- Avisos: desaparecen al atenderlos (tocarlos o ✕); los atendidos quedan en "Anteriores".
+- Informe semanal: totales por reunión y por clase (presentes, faltaron, anotados, días).
+- Progreso de la iglesia (`church_progress`): salud del último mes vs. promedio de 3 meses, gráfico por indicador, totales del año o de toda la historia.
+- Ficha: la secretaría y el pastor corrigen fechas de salvación, bautismo y membresía.
+- Ministerios Música y Medios.
+- `.github/workflows/update.yml`: EAS Update a los canales preview (Android) y production (iPhone).
