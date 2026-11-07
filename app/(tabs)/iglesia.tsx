@@ -77,10 +77,10 @@ export default function Iglesia() {
 
   type Tile = { icon: IconName; label: string; to: Href; show: boolean; tone?: 'green' };
   const ministryTile: Tile = isLeader
-    ? { icon: 'heart', label: 'Ministerios', to: '/ministerios', show: true }
+    ? { icon: 'layers', label: 'Ministerios', to: '/ministerios', show: true }
     : myMinistries.length === 1
-      ? { icon: 'heart', label: 'Mi ministerio', to: { pathname: '/ministerio/[id]', params: { id: myMinistries[0].id } } as unknown as Href, show: true }
-      : { icon: 'heart', label: 'Mis ministerios', to: '/ministerios', show: myMinistries.length > 1 };
+      ? { icon: 'layers', label: 'Mi ministerio', to: { pathname: '/ministerio/[id]', params: { id: myMinistries[0].id } } as unknown as Href, show: true }
+      : { icon: 'layers', label: 'Mis ministerios', to: '/ministerios', show: myMinistries.length > 1 };
   const groups: { title: string; tiles: Tile[] }[] = [
     {
       title: 'Para vos',

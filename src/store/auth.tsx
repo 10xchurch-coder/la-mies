@@ -1,6 +1,7 @@
 // Quién está logueado, su perfil, su iglesia y su grupo.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session as AuthSession } from '@supabase/supabase-js';
+import { PROFILE_COLS } from '@/lib/api';
 import { supabase } from '../lib/supabase';
 import { registerForPush } from '../lib/push';
 import type { Church, Contact, Group, Profile } from '../types';
@@ -53,7 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setMe(null);
       return;
     }
-    const { data: p } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+    // Lo propio se lee con my_profile() (el teléfono y domicilio de los demás no se leen directo).
+    let { data: p } = await supabase.rpc('my_profile');
+    if (!p || !(p as Profile).id) ({ data: p } = await supabase.from('profiles').select(PROFILE_COLS).eq('id', userId).maybeSingle());
     const prof = (p as Profile | null) ?? null;
     setProfile(prof);
     if (prof?.church_id) {

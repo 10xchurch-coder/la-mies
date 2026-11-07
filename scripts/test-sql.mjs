@@ -66,6 +66,9 @@ const files = [
   'supabase/tests/rls_test_21.sql',
   'supabase/migrations/0029_privacidad_ministerios.sql',
   'supabase/tests/rls_test_22.sql',
+  'supabase/migrations/0030_seguridad.sql',
+  'supabase/migrations/0031_perfil_privado.sql',
+  'supabase/tests/rls_test_23.sql',
 ];
 for (const f of files) {
   console.log(`▶ ${f}`);

@@ -18,9 +18,12 @@ export function Article({ body }: { body: string }) {
         if (t.startsWith('## ')) return <Text key={i} style={{ fontSize: 19, fontWeight: '800', color: colors.green, marginTop: 12 }}>{t.slice(3)}</Text>;
         if (t.startsWith('# ')) return <Text key={i} style={{ fontSize: 23, fontWeight: '800', color: colors.text }}>{t.slice(2)}</Text>;
         if (t.startsWith('> ')) {
+          // «texto» Referencia → el texto y, abajo, la cita.
+          const m = t.slice(2).match(/^«([\s\S]+)»\s+(.+)$/);
           return (
-            <View key={i} style={{ borderLeftWidth: 4, borderLeftColor: colors.green, backgroundColor: colors.greenSoft, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12 }}>
-              <Inline text={t.slice(2)} style={{ ...base, fontStyle: 'italic' }} />
+            <View key={i} style={{ borderLeftWidth: 4, borderLeftColor: colors.green, backgroundColor: colors.greenSoft, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 14, gap: 6 }}>
+              <Inline text={m ? m[1] : t.slice(2)} style={{ ...base, fontFamily: 'Georgia, serif', fontSize: 16.5, lineHeight: 26 }} />
+              {m ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText, letterSpacing: 0.3 }}>{m[2]} · RV1960</Text> : null}
             </View>
           );
         }

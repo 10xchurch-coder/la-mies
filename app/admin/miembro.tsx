@@ -4,7 +4,7 @@ import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Toggle } from '@/components/ui';
-import { listGroups, setFinanceRole, setProfileTitle } from '@/lib/api';
+import { getProfile, listGroups, setFinanceRole, setProfileTitle } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -25,8 +25,7 @@ export default function Miembro() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.from('profiles').select('*').eq('id', id).maybeSingle().then(({ data }) => {
-      const prof = (data as Profile | null) ?? null;
+    getProfile(id).then((prof) => {
       setP(prof);
       if (prof) {
         setRole(prof.role);

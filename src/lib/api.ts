@@ -67,8 +67,25 @@ export async function getContact(id: string) {
   };
 }
 
+// Columnas del perfil que cualquiera de la iglesia puede leer. Teléfono y domicilio van aparte.
+export const PROFILE_COLS = 'id, church_id, group_id, role, is_network_admin, display_name, share_default, biometric_lock, created_at, updated_at, takes_attendance, disabled_at, deletion_requested_at, title, directory_visible, finance_role, rules_accepted_at';
+
+type PrivateRow = { id: string; phone: string | null; home_address: string | null; home_lat: number | null; home_lng: number | null };
+/** Agrega teléfono y domicilio a los perfiles que el usuario puede ver (los suyos; los líderes, los de todos). */
+export async function withPrivate<T extends { id: string }>(rows: T[]): Promise<T[]> {
+  const { data } = await supabase.rpc('profiles_private');
+  const m = new Map(((data ?? []) as PrivateRow[]).map((r) => [r.id, r]));
+  return rows.map((r) => { const x = m.get(r.id); return x ? { ...r, phone: x.phone, home_address: x.home_address, home_lat: x.home_lat, home_lng: x.home_lng } : r; });
+}
+
 export async function listProfiles(): Promise<Profile[]> {
-  return ok(await supabase.from('profiles').select('*').order('display_name')) ?? [];
+  const rows = (ok(await supabase.from('profiles').select(PROFILE_COLS).order('display_name')) ?? []) as unknown as Profile[];
+  return withPrivate(rows);
+}
+
+export async function getProfile(id: string): Promise<Profile | null> {
+  const { data } = await supabase.from('profiles').select(PROFILE_COLS).eq('id', id).maybeSingle();
+  return data ? (await withPrivate([data as unknown as Profile]))[0] : null;
 }
 
 export async function listGroups(): Promise<Group[]> {
