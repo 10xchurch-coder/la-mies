@@ -4,6 +4,7 @@ import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { MapView, Marker } from '@/components/map';
 import { Feather } from '@expo/vector-icons';
+import { chooseWhatsApp } from '@/lib/messages';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
@@ -307,9 +308,26 @@ export default function PersonaDetalle() {
 
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Action icon="phone" label="Llamar" disabled={!c.phone} onPress={() => Linking.openURL(`tel:${c.phone}`)} />
-            <Action icon="message-circle" label="WhatsApp" disabled={!wa} onPress={() => wa && Linking.openURL(wa)} />
+            <Action icon="message-circle" label="WhatsApp" disabled={!wa} onPress={() => chooseWhatsApp(c.phone, { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services })} />
+            <Action icon="check-square" label="Visité" onPress={() => setAdding(true)} />
             <Action icon="navigation" label="Cómo llegar" disabled={!directions} onPress={() => directions && Linking.openURL(directions)} />
           </View>
+          {adding ? (
+            <Card style={{ gap: 12 }}>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Visita de hoy</Text>
+              <Field label="¿Cómo te fue? (nota)" value={note} onChangeText={setNote} multiline autoFocus />
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>¿Le presentaste el evangelio?</Text>
+                <Segmented style={{ width: 130 }} options={[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }]} value={gospel} onChange={setGospel} />
+              </View>
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>¿Se comprometió a venir?</Text>
+              <Choice columns={3} options={[{ value: 'none', label: 'No' }, { value: 'sat', label: 'Sábado' }, { value: 'sun', label: 'Domingo' }]} value={promise} onChange={setPromise} />
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Button title="Cancelar" variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
+                <Button title="Guardar visita" small onPress={addVisit} loading={busy} style={{ flex: 2 }} />
+              </View>
+            </Card>
+          ) : null}
 
           {ministries.length ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -401,23 +419,9 @@ export default function PersonaDetalle() {
           ))}
           {!visits.length && !attendances.length ? <Text style={{ color: colors.muted, fontSize: 13 }}>Todavía no hay nada anotado.</Text> : null}
 
-          {adding ? (
-            <Card style={{ gap: 12 }}>
-              <Field label="Nota de la visita" value={note} onChangeText={setNote} multiline autoFocus />
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>¿Le presentaste el evangelio?</Text>
-                <Segmented style={{ width: 130 }} options={[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }]} value={gospel} onChange={setGospel} />
-              </View>
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>¿Se comprometió a venir?</Text>
-              <Choice columns={3} options={[{ value: 'none', label: 'No' }, { value: 'sat', label: 'Sábado' }, { value: 'sun', label: 'Domingo' }]} value={promise} onChange={setPromise} />
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
-                <Button title="Guardar visita" small onPress={addVisit} loading={busy} style={{ flex: 2 }} />
-              </View>
-            </Card>
-          ) : (
-            <Button title="Agregar nota de visita" icon="plus" onPress={() => setAdding(true)} />
-          )}
+          {!adding ? (
+            <Button title="Registrar visita" icon="plus" onPress={() => setAdding(true)} />
+          ) : null}
         </View>
       </Screen>
 
