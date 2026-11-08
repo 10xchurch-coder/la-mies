@@ -43,8 +43,8 @@ export default function Seguimiento() {
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Vinieron por primera vez</Text>
             <Text style={{ fontSize: 12, color: colors.amberText }}>Llamalos en 48 horas y visitalos en la semana. Al registrar la visita se tilda solo.</Text>
             {tasks.map((t) => (
-              <View key={t.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
-                <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: t.contact_id } })} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View key={t.id} style={{ gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: t.contact_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <Face name={t.name} path={t.photo_path} size={36} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{t.name}</Text>
@@ -53,8 +53,10 @@ export default function Seguimiento() {
                     </Text>
                   </View>
                 </Pressable>
+                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
                 {t.phone ? <Small icon={t.kind === 'call' ? 'phone' : 'message-circle'} label={t.kind === 'call' ? 'Llamar' : 'Escribir'} onPress={() => (t.kind === 'call' ? Linking.openURL(`tel:${t.phone}`) : chooseWhatsApp(t.phone, { to: t.name, from: profile?.display_name, church: church?.name, services }, ['followup', 'visit']))} /> : null}
                 <Small icon="check" label="Hecho" onPress={() => completeFollowUp(t.id).then(() => setTasks(tasks.filter((x) => x.id !== t.id))).catch(() => undefined)} />
+                </View>
               </View>
             ))}
           </Card>
