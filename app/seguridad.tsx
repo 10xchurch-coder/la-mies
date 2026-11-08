@@ -7,7 +7,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Header, Screen } from '@/components/Screen';
 import { PasswordField } from '@/components/PasswordField';
 import { Button, Card, Field, SectionTitle, Tag } from '@/components/ui';
-import { checkPassword } from '@/lib/password';
+import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
@@ -95,6 +95,10 @@ export default function Seguridad() {
     const c = checkPassword(pw, [profile?.display_name ?? '', session?.user.email?.split('@')[0] ?? '']);
     if (!c.ok) {
       Alert.alert('Contraseña débil', c.problems.join('\n'));
+      return;
+    }
+    if (await leakedCount(pw)) {
+      Alert.alert('Contraseña filtrada', LEAKED_MSG);
       return;
     }
     if (pw !== pw2) {

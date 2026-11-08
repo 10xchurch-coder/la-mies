@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { PasswordField } from '@/components/PasswordField';
 import { Button } from '@/components/ui';
-import { checkPassword } from '@/lib/password';
+import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -23,6 +23,10 @@ export default function Recuperar() {
     const c = checkPassword(pw, [session?.user.email?.split('@')[0] ?? '']);
     if (!c.ok) {
       setMsg(c.problems[0]);
+      return;
+    }
+    if (await leakedCount(pw)) {
+      setMsg(LEAKED_MSG);
       return;
     }
     if (pw !== pw2) {

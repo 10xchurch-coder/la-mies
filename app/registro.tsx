@@ -4,7 +4,7 @@ import { useRouter, type Href } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
-import { checkPassword } from '@/lib/password';
+import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
 import { PasswordField } from '@/components/PasswordField';
 import { WEB_URL } from '@/lib/share';
 import { useAuth } from '@/store/auth';
@@ -56,6 +56,7 @@ export default function Registro() {
       }
       const check = checkPassword(password, [name, email.split('@')[0] ?? '']);
       if (!check.ok) throw new Error(check.problems[0]);
+      if (await leakedCount(password)) throw new Error(LEAKED_MSG);
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,

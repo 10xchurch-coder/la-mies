@@ -27,3 +27,26 @@ export function checkPassword(pw: string, personal: string[] = []): PasswordChec
   const strength: PasswordCheck['strength'] = problems.length ? 'débil' : score >= 3 ? 'fuerte' : 'buena';
   return { ok: problems.length === 0, problems, strength };
 }
+
+/**
+ * ¿Esta contraseña apareció en filtraciones conocidas? Usa la lista pública de Have I Been Pwned
+ * sin mandar la contraseña: solo los primeros 5 caracteres de su huella SHA-1 (k-anonimato).
+ * Si no hay internet o el servicio no responde, no frena a nadie (devuelve 0).
+ */
+export async function leakedCount(pw: string): Promise<number> {
+  try {
+    const Crypto = await import('expo-crypto');
+    const hash = (await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA1, pw)).toUpperCase();
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 5000);
+    const res = await fetch(`https://api.pwnedpasswords.com/range/${hash.slice(0, 5)}`, { headers: { 'Add-Padding': 'true' }, signal: ctrl.signal });
+    clearTimeout(t);
+    if (!res.ok) return 0;
+    const line = (await res.text()).split('\n').find((l) => l.startsWith(hash.slice(5)));
+    return line ? Number(line.split(':')[1]) || 0 : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export const LEAKED_MSG = 'Esa contraseña apareció en filtraciones de internet. Elegí otra que no uses en ningún otro lado.';
