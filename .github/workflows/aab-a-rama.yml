@@ -1,0 +1,21 @@
+# Copia un archivo .aab de Expo a la rama "tienda" para subirlo a Google Play desde el navegador.
+name: AAB a la rama tienda
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Enlace del .aab en expo.dev
+        required: true
+permissions:
+  contents: write
+jobs:
+  copiar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          git init tienda && cd tienda
+          curl -sL -o la-mies.aab "${{ inputs.url }}"
+          ls -la la-mies.aab
+          git config user.name "la-mies-bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -b tienda && git add la-mies.aab && git commit -qm "AAB para Google Play"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tienda
