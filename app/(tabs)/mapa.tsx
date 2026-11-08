@@ -22,6 +22,7 @@ import { KIND_LABEL, addDays, fmtDateAR, fmtDayYear, fmtRelativeDay, fmtTime, is
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { ensureAlwaysLocationIOS, ensureNoBatteryOptimization } from '@/lib/battery';
+import { useKeyboardHeight } from '@/lib/keyboard';
 import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
 import type { Contact, CoverageRow, HouseRow, MeetingPoint, OutingKind, Profile, RoadRow, Zone } from '@/types';
 
@@ -38,6 +39,7 @@ const DEFAULT_CENTER = { lat: -27.3671, lng: -55.896 };
 export default function Mapa() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const kb = useKeyboardHeight();
   const { session, isLeader, can, church, profile } = useAuth();
   const outing = useOuting();
   const [region, setRegion] = useState<Region>(regionAround(DEFAULT_CENTER, 900));
@@ -636,7 +638,7 @@ export default function Mapa() {
       {/* Marcar a mano: para quién y qué día */}
       <Modal visible={!!manualSetup} transparent animationType="slide" onRequestClose={() => setManualSetup(null)}>
         <Pressable style={styles.backdrop} onPress={() => setManualSetup(null)}>
-          <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 16, maxHeight: '85%' }]} onPress={() => undefined}>
+          <Pressable style={[styles.sheet, { paddingBottom: kb ? 16 : insets.bottom + 16, marginBottom: kb, maxHeight: kb ? '60%' : '85%' }]} onPress={() => undefined}>
             <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Marcar calles a mano</Text>
             {manualSetup ? (
               <>
@@ -703,7 +705,7 @@ export default function Mapa() {
       {/* Nuevo punto de encuentro */}
       <Modal visible={!!meetDraft} transparent animationType="slide" onRequestClose={() => setMeetDraft(null)}>
         <Pressable style={styles.backdrop} onPress={() => setMeetDraft(null)}>
-          <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]} onPress={() => undefined}>
+          <Pressable style={[styles.sheet, { paddingBottom: kb ? 16 : insets.bottom + 16, marginBottom: kb }]} onPress={() => undefined}>
             <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Punto de encuentro</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>Les avisamos a todos los que están en salida. ¿En cuánto se juntan?</Text>
             {meetDraft ? (

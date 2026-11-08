@@ -4,7 +4,7 @@
 // corazón y días anteriores (hasta 31 días). Abrir el de hoy cuenta para la racha.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
   useWindowDimensions,
 } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -21,6 +21,7 @@ import { shareImage, shareText, WEB_URL } from '@/lib/share';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, fmtTime, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
+import { useKeyboardHeight } from '@/lib/keyboard';
 import { colors, themed } from '@/theme';
 import type { DailyComment, DailyContent, DailySocial, ReadingStreak } from '@/types';
 import { moderate } from '@/lib/moderation';
@@ -399,6 +400,7 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
   visible: boolean; date: string; today: string; isStaff: boolean; onClose: () => void; onCount: (n: number) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const kb = useKeyboardHeight();
   const [rows, setRows] = useState<DailyComment[] | null>(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -451,7 +453,7 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.sheet, { paddingBottom: insets.bottom + 10, height: '78%' }]}>
+      <View style={[styles.sheet, { paddingBottom: kb ? 10 : insets.bottom + 10, marginBottom: kb, height: kb ? '62%' : '78%' }]}>
         <View style={styles.sheetHead}>
           <View style={{ flex: 1 }}>
             <Text style={styles.sheetTitle}>Comentarios del día{rows?.length ? ` · ${rows.length}` : ''}</Text>
@@ -498,7 +500,7 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
             </Pressable>
           </View>
         ) : null}
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }

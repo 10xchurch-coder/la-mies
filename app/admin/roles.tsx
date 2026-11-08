@@ -12,6 +12,7 @@ import { FIN_ROLES, ROLES, isTopRole, roleLabel, type RoleKey } from '@/lib/perm
 import { useRouter } from 'expo-router';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
+import { useKeyboardHeight } from '@/lib/keyboard';
 import { colors } from '@/theme';
 import type { Profile } from '@/types';
 
@@ -21,13 +22,14 @@ const CHURCH_ROLES = ROLES.filter((r) => r.key !== 'member');
 
 function Picker({ visible, title, people, onPick, onClose }: { visible: boolean; title: string; people: Profile[]; onPick: (p: Profile) => void; onClose: () => void }) {
   const insets = useSafeAreaInsets();
+  const kb = useKeyboardHeight();
   const [q, setQ] = useState('');
   const n = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const shown = people.filter((p) => n(p.display_name).includes(n(q.trim())));
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable onPress={onClose} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} />
-      <View style={{ backgroundColor: colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, paddingBottom: insets.bottom + 12, maxHeight: '75%' }}>
+      <View style={{ backgroundColor: colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 16, paddingBottom: kb ? 12 : insets.bottom + 12, marginBottom: kb, height: kb ? '55%' : '75%' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
           <Text style={{ flex: 1, fontSize: 17, fontWeight: '800', color: colors.text }}>{title}</Text>
           <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Cerrar"><Feather name="x" size={20} color={colors.text} /></Pressable>
