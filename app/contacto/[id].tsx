@@ -13,7 +13,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  familyChildren, familyParents, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -127,7 +127,8 @@ export default function PersonaDetalle() {
   const [gospel, setGospel] = useState<'yes' | 'no'>('no');
   const [promise, setPromise] = useState<'none' | 'sat' | 'sun'>('none');
   const [busy, setBusy] = useState(false);
-  const [picker, setPicker] = useState<null | 'followup' | 'group'>(null);
+  const [picker, setPicker] = useState<null | 'followup' | 'group' | 'merge'>(null);
+  const [mergeList, setMergeList] = useState<Contact[]>([]);
 
   const load = useCallback(async () => {
     try {
@@ -455,6 +456,16 @@ export default function PersonaDetalle() {
             </Card>
           ) : null}
 
+          {isStaff ? (
+            <Button
+              title="Unir con otra ficha de la misma persona"
+              icon="git-merge"
+              variant="ghost"
+              small
+              onPress={() => { listPeople().then((l) => setMergeList(l.filter((x) => x.id !== c.id))).catch(() => undefined); setPicker('merge'); }}
+            />
+          ) : null}
+
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 
           {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
@@ -528,6 +539,33 @@ export default function PersonaDetalle() {
         onPick={(pid) => {
           setPicker(null);
           update({ follow_up_user_id: pid });
+        }}
+      />
+      <PickerModal
+        visible={picker === 'merge'}
+        title="¿Con qué ficha la unimos?"
+        items={mergeList.map((p) => ({ id: p.id, title: p.name, subtitle: [p.profile_id ? 'Tiene cuenta en la app' : null, p.phone].filter(Boolean).join(' · ') || undefined, photo: p.photo_path }))}
+        onClose={() => setPicker(null)}
+        onPick={(otherId) => {
+          setPicker(null);
+          const other = mergeList.find((x) => x.id === otherId);
+          if (!other) return;
+          if (c.profile_id && other.profile_id) {
+            Alert.alert('No se pueden unir', 'Las dos fichas tienen su propia cuenta en la app, así que son dos personas distintas.');
+            return;
+          }
+          // Queda la ficha que tiene cuenta en la app (si alguna la tiene); si no, la que estás mirando.
+          const keep = other.profile_id && !c.profile_id ? other : c;
+          const drop = keep.id === c.id ? other : c;
+          const run = (name: string | null) => mergeContacts(keep.id, drop.id, name)
+            .then((id) => { Alert.alert('Listo', 'Quedó una sola ficha con todo junto.'); router.replace({ pathname: '/contacto/[id]', params: { id } }); })
+            .catch((e) => Alert.alert('No se pudo unir', e instanceof Error ? e.message : 'Probá de nuevo'));
+          const names = keep.name.trim() === drop.name.trim() ? [keep.name] : [keep.name, drop.name];
+          Alert.alert(
+            'Unir fichas',
+            `«${c.name}» y «${other.name}» van a quedar como una sola persona: asistencias, clases, visitas, ministerios e hijos se juntan. ¿Qué nombre dejamos?`,
+            [...names.map((n) => ({ text: n, onPress: () => { run(n); } })), { text: 'Cancelar', style: 'cancel' as const }],
+          );
         }}
       />
       <PickerModal

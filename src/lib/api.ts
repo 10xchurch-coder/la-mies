@@ -132,6 +132,11 @@ export async function listPeople(): Promise<Contact[]> {
   return ok(await supabase.from('contacts').select('*').eq('archived', false).order('name').limit(2000)) ?? [];
 }
 
+/** Une dos fichas de la misma persona. Devuelve el id de la que queda. */
+export async function mergeContacts(keep: string, drop: string, name?: string | null): Promise<string> {
+  return ok(await supabase.rpc('merge_contacts', { p_keep: keep, p_drop: drop, p_name: name ?? null })) as string;
+}
+
 export async function updateContact(id: string, patch: Partial<Contact>): Promise<void> {
   ok(await supabase.from('contacts').update(patch).eq('id', id));
 }
