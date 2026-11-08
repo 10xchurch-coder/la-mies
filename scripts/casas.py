@@ -27,7 +27,7 @@ OUT = os.environ.get('OUT', 'data/casas_posadas.csv')
 MIN_CONF = float(os.environ.get('MIN_CONF', '0.70'))   # solo para Google: más bajo = menos casas perdidas
 MIN_AREA = float(os.environ.get('MIN_AREA', '18'))     # m² (una pieza chica igual es una casa)
 MAX_AREA = float(os.environ.get('MAX_AREA', '3000'))
-LOT_W = float(os.environ.get('LOT_W', '9'))            # ancho típico de un lote en Posadas
+LOT_W = float(os.environ.get('LOT_W', '10'))           # ancho típico de un lote en Posadas
 MAX_ASSIGN = float(os.environ.get('MAX_ASSIGN', '40')) # metros de la pared más cercana a la calle
 MAX_FRONT = float(os.environ.get('MAX_FRONT', '28'))   # más lejos que esto, es el medio de la manzana
 BACK_GAP = float(os.environ.get('BACK_GAP', '6'))      # 6 m más atrás que otro en el mismo lote = fondo
@@ -191,7 +191,7 @@ def main():
         near, rid, i, side, t0, t1, back, L, a, ux, uy = best
         t0, t1 = max(t0, -2.0), min(t1, L + 2.0)
         frontage = t1 - t0
-        n = max(1, round(frontage / LOT_W)) if frontage >= 1.6 * LOT_W else 1
+        n = max(1, round(frontage / LOT_W)) if frontage >= 2.2 * LOT_W else 1  # solo techos claramente de varias casas (filas de departamentos o locales)
         if n > 1:
             stats['partidos'] += 1
         wseg = frontage / n
