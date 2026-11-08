@@ -14,6 +14,7 @@ import { LockGate } from '@/components/LockGate';
 import { Loading } from '@/components/ui';
 import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
+import { useOtaUpdates } from '@/lib/otaUpdates';
 import { colors, useThemeMode } from '@/theme';
 
 // Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
@@ -86,6 +87,7 @@ function Gate() {
 export default function RootLayout() {
   const [themeReady, setThemeReady] = useState(false);
   const mode = useThemeMode();
+  useOtaUpdates();
   useEffect(() => {
     loadThemeMode().finally(() => setThemeReady(true));
   }, []);

@@ -12,6 +12,7 @@ import { useAuth } from '@/store/auth';
 import { colors, themed, useThemeMode } from '@/theme';
 import { saveThemeMode } from '@/lib/themeStore';
 import { APP_VERSION } from '@/components/ErrorScreen';
+import { updateLabel } from '@/lib/otaUpdates';
 import { blockedPeople, unblockUser } from '@/lib/moderation';
 import { RULES } from '@/components/RulesGate';
 
@@ -147,7 +148,7 @@ export default function Ajustes() {
             }
           />
         </Card>
-        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión {APP_VERSION} · {church?.name ?? ''}</Text>
+        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión {APP_VERSION} · {updateLabel()} · {church?.name ?? ''}</Text>
       </Screen>
     </View>
   );
