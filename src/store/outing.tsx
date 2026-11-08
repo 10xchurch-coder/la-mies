@@ -1,6 +1,6 @@
 // La salida activa: empezar, ver cómo va, corregir la vereda, terminar.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as Notifications from 'expo-notifications';
 import { supabase } from '../lib/supabase';
@@ -13,6 +13,21 @@ import { matchPoint, sideName, type Match, type SideName } from '../lib/geo';
 import { coverageFromTrack, walkedDistance, type TrackPoint } from '../lib/track';
 import type { OutingKind, RoadRow, TeamLiveRow } from '../types';
 import { useAuth } from './auth';
+
+/** Aviso antes del permiso del sistema: qué datos, para qué y cuándo (requisito de Google Play). */
+function backgroundDisclosure(): Promise<boolean> {
+  return new Promise((resolve) => {
+    Alert.alert(
+      'Ubicación durante la salida',
+      'La Mies recopila datos de tu ubicación para marcar en el mapa las calles que recorrés durante una salida de evangelismo, incluso cuando la app está cerrada o no está en uso. Solo se usa mientras la salida está activa y se detiene al finalizarla. En el siguiente aviso elegí "Permitir todo el tiempo".',
+      [
+        { text: 'Ahora no', style: 'cancel', onPress: () => resolve(false) },
+        { text: 'Continuar', onPress: () => resolve(true) },
+      ],
+      { cancelable: false },
+    );
+  });
+}
 
 export type SideInfo = { match: Match | null; name: SideName | null; overridden: boolean };
 
@@ -147,7 +162,12 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
     if (Platform.OS === 'web') throw new Error('Las salidas se hacen desde el teléfono: la computadora no puede seguir el recorrido.');
     const fg = await Location.requestForegroundPermissionsAsync();
     if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para marcar las calles.');
-    const bg = await Location.requestBackgroundPermissionsAsync();
+    // Aviso destacado que Google exige antes de pedir la ubicación en segundo plano.
+    const already = await Location.getBackgroundPermissionsAsync();
+    if (already.status !== 'granted' && !(await backgroundDisclosure())) {
+      throw new Error('Sin el permiso de ubicación en segundo plano no podemos marcar las calles con el teléfono bloqueado.');
+    }
+    const bg = already.status === 'granted' ? already : await Location.requestBackgroundPermissionsAsync();
     setBackgroundGranted(bg.status === 'granted');
     try {
       await Notifications.requestPermissionsAsync();
