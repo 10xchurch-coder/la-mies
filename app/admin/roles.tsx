@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, SectionTitle } from '@/components/ui';
 import { listProfiles, setChurchRecipients, setFinanceRole } from '@/lib/api';
-import { FIN_ROLES, ROLES, isTopRole, roleLabel, type RoleKey } from '@/lib/perms';
+import { FIN_ROLES, ROLES, hasRole, isTopRole, roleLabel, rolesLabel, type RoleKey } from '@/lib/perms';
 import { useRouter } from 'expo-router';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -114,10 +114,10 @@ export default function Roles() {
   }, []);
   useFocusEffect(load);
 
-  const leaders = useMemo(() => people.filter((p) => p.role !== 'member'), [people]);
+  const leaders = useMemo(() => people.filter((p) => p.role !== 'member' || (p.extra_roles ?? []).length > 0), [people]);
 
-  const setRole = async (p: Profile, role: ChurchRole | 'member') => {
-    const { error } = await supabase.rpc('set_member_role', { p_user: p.id, p_role: role, p_group: p.group_id ?? null });
+  const changeRole = async (p: Profile, role: ChurchRole, add: boolean) => {
+    const { error } = await supabase.rpc(add ? 'add_member_role' : 'remove_member_role', { p_user: p.id, p_role: role });
     if (error) Alert.alert('No se pudo', errorMessage(error));
     load();
     if (p.id === profile?.id) refreshProfile();
@@ -141,7 +141,7 @@ export default function Roles() {
         Alert.alert(`${p.display_name} es ${roleLabel(p.role).toLowerCase()}`, 'Solo otro pastor o administrador de la app lo puede cambiar.');
         return;
       }
-      setRole(p, pk.role);
+      changeRole(p, pk.role, true);
     } else {
       setFin(p, pk.role);
     }
@@ -170,17 +170,17 @@ export default function Roles() {
         {!isAdmin ? <Text style={{ fontSize: 13, color: colors.muted }}>Solo el pastor y el administrador de la app dan roles y permisos. Acá podés ver quién tiene cada uno.</Text> : null}
         {CHURCH_ROLES.map((r) => (
           <RoleCard key={r.key} label={r.label} hint={r.hint}
-            people={people.filter((p) => p.role === r.key)}
+            people={people.filter((p) => hasRole(p, r.key))}
             canEdit={canChurch(r.key as ChurchRole)}
             onAdd={() => setPicking({ kind: 'church', role: r.key as ChurchRole, label: r.label })}
             onRemove={(p) => {
               if (p.id === profile?.id && isTopRole(r.key)) { Alert.alert('No te podés quitar a vos mismo'); return; }
-              Alert.alert(`Quitar a ${p.display_name}`, `Deja de ser ${r.label.toLowerCase()} y queda como miembro.`, [
-                { text: 'Cancelar', style: 'cancel' }, { text: 'Quitar', style: 'destructive', onPress: () => setRole(p, 'member') },
+              Alert.alert(`Quitar a ${p.display_name}`, `Deja de ser ${r.label.toLowerCase()}. Si tiene otros roles, los conserva.`, [
+                { text: 'Cancelar', style: 'cancel' }, { text: 'Quitar', style: 'destructive', onPress: () => changeRole(p, r.key as ChurchRole, false) },
               ]);
             }} />
         ))}
-        <Text style={{ fontSize: 12, color: colors.muted }}>{people.filter((p) => p.role === 'member').length} miembros sin rol.</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>{people.filter((p) => p.role === 'member' && !(p.extra_roles ?? []).length).length} miembros sin rol. Una persona puede tener varios roles: agregala en cada uno.</Text>
 
         <SectionTitle>Finanzas</SectionTitle>
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -8 }}>
@@ -203,7 +203,7 @@ export default function Roles() {
               style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{p.display_name}</Text>
-                <Text style={{ fontSize: 12, color: colors.muted }}>{roleLabel(p.role)}{p.finance_role && p.finance_role !== 'none' ? ` · ${FIN_ROLES.find((f) => f.key === (p.finance_role === 'manager' ? 'treasurer' : p.finance_role))?.label ?? ''}` : ''}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{rolesLabel(p)}{p.finance_role && p.finance_role !== 'none' ? ` · ${FIN_ROLES.find((f) => f.key === (p.finance_role === 'manager' ? 'treasurer' : p.finance_role))?.label ?? ''}` : ''}</Text>
               </View>
               <Feather name="sliders" size={18} color={colors.green} />
             </Pressable>
@@ -216,7 +216,7 @@ export default function Roles() {
         {isAdmin ? <Button title="Guardar avisos" onPress={saveRecipients} loading={busy} /> : null}
       </Screen>
       <Picker visible={!!picking} title={picking ? `Agregar a ${picking.label}` : ''}
-        people={people.filter((p) => (picking?.kind === 'church' ? p.role !== picking.role : p.finance_role !== picking?.role))}
+        people={people.filter((p) => (picking?.kind === 'church' ? !hasRole(p, picking.role) : p.finance_role !== picking?.role))}
         onPick={pick} onClose={() => setPicking(null)} />
     </View>
   );

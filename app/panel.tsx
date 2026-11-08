@@ -1,4 +1,5 @@
 // Panel del pastor: totales por salida / semana / mes, hermanos, código de la iglesia.
+import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -91,7 +92,7 @@ export default function Panel() {
     Share.share({ message: `Para usar la app La Mies de ${church.name}: descargala, tocá "Crear cuenta" y poné el código ${church.join_code}` });
   };
 
-  if (!profile || (profile.role !== 'admin' && profile.role !== 'captain')) {
+  if (!profile || (!hasRole(profile, 'admin') && !hasRole(profile, 'captain'))) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <Header title="Panel" back />

@@ -7,7 +7,8 @@ import { Header, Screen } from '@/components/Screen';
 import { Avatar, Card, Choice, RowLink, SectionTitle, Toggle } from '@/components/ui';
 import { biometricsAvailable } from '@/components/LockGate';
 import { requestAccountDeletion, updateProfile } from '@/lib/api';
-import { ROLE_LABEL, groupWord } from '@/lib/format';
+import { groupWord } from '@/lib/format';
+import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 import { colors, themed, useThemeMode } from '@/theme';
 import { saveThemeMode } from '@/lib/themeStore';
@@ -39,7 +40,7 @@ export default function Ajustes() {
     }
   };
 
-  const roleLabel = ROLE_LABEL[profile?.role ?? 'member'];
+  const roleLabel = rolesLabel(profile);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>

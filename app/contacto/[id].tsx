@@ -1,4 +1,5 @@
 // Ficha de una persona: foto, datos, su camino en la iglesia, fidelidad, visitas y asistencias.
+import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -166,7 +167,7 @@ export default function PersonaDetalle() {
   );
 
   const canEdit = !!c && (isStaff || c.created_by === profile?.id || c.follow_up_user_id === profile?.id || c.profile_id === profile?.id
-    || (profile?.role === 'captain' && !!c.group_id && c.group_id === profile.group_id));
+    || (hasRole(profile, 'captain') && !!c.group_id && c.group_id === profile?.group_id));
   const faith = useMemo(() => (c ? faithOf(c, attendances, services) : null), [c, attendances, services]);
 
   const update = async (patch: Partial<Contact>, done?: string) => {
@@ -277,7 +278,7 @@ export default function PersonaDetalle() {
   const rows: { k: string; v: string; right?: React.ReactNode }[] = [];
   rows.push({ k: 'Teléfono', v: c.phone ?? 'Sin teléfono' });
   if (!isMember || group) {
-    rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || profile?.role === 'captain' ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined });
+    rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || hasRole(profile, 'captain') ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined });
   }
   if (c.status === 'contact') {
     rows.push({ k: 'Prometió venir', v: c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? ` · pasar a buscar${c.pickup_time ? ` ${c.pickup_time}` : ''}` : ''}` : 'Todavía no' });

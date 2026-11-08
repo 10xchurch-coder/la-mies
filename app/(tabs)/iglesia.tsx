@@ -1,5 +1,6 @@
 // La iglesia: la pantalla con la que abre la app. Saludo según la hora, el versículo del día,
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
+import { hasRole } from '@/lib/perms';
 import React, { useCallback, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
@@ -96,7 +97,7 @@ export default function Iglesia() {
         { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
         { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
         { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: isLeader || takesAttendance || !!profile?.takes_attendance || can('personas.asistencia') },
-        { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: profile?.role === 'captain' || can('personas.asistencia') },
+        { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
         { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
         { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },

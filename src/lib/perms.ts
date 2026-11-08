@@ -95,3 +95,18 @@ export function financeLevelFromPerms(perms: string[]): number {
   if (perms.includes('fin.ver')) return 1;
   return 0;
 }
+
+/** Todos los roles de una persona: el principal y los extra. */
+export function rolesOf(p: { role?: string | null; extra_roles?: string[] | null } | null | undefined): string[] {
+  if (!p) return [];
+  return [p.role ?? 'member', ...(p.extra_roles ?? [])].filter((r, i, a) => a.indexOf(r) === i);
+}
+/** ¿Tiene este rol (como principal o extra)? */
+export function hasRole(p: { role?: string | null; extra_roles?: string[] | null } | null | undefined, role: string): boolean {
+  return rolesOf(p).includes(role);
+}
+/** "Pastor asistente · Jefe de ruta" */
+export function rolesLabel(p: { role?: string | null; extra_roles?: string[] | null } | null | undefined): string {
+  const r = rolesOf(p).filter((x) => x !== 'member');
+  return r.length ? r.map((x) => roleLabel(x)).join(' · ') : roleLabel('member');
+}

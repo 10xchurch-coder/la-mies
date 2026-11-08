@@ -23,6 +23,8 @@ export type Giving = { titular?: string; banco?: string; alias?: string; cbu?: s
 export type Group = { id: string; church_id: string; name: string; captain_id: string | null };
 
 export type Profile = {
+  /** Otros roles además del principal (por ejemplo, pastor asistente y también jefe de ruta). */
+  extra_roles?: string[] | null;
   rules_accepted_at?: string | null;
   finance_role?: 'manager' | 'treasurer' | 'secretary' | 'viewer' | 'none' | null;
   title?: string | null;

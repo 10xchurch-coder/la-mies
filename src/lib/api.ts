@@ -68,7 +68,7 @@ export async function getContact(id: string) {
 }
 
 // Columnas del perfil que cualquiera de la iglesia puede leer. Teléfono y domicilio van aparte.
-export const PROFILE_COLS = 'id, church_id, group_id, role, is_network_admin, display_name, share_default, biometric_lock, created_at, updated_at, takes_attendance, disabled_at, deletion_requested_at, title, directory_visible, finance_role, rules_accepted_at';
+export const PROFILE_COLS = 'id, church_id, group_id, role, is_network_admin, display_name, share_default, biometric_lock, created_at, updated_at, takes_attendance, disabled_at, deletion_requested_at, title, directory_visible, finance_role, rules_accepted_at, extra_roles';
 
 type PrivateRow = { id: string; phone: string | null; home_address: string | null; home_lat: number | null; home_lng: number | null };
 /** Agrega teléfono y domicilio a los perfiles que el usuario puede ver (los suyos; los líderes, los de todos). */

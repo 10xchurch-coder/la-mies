@@ -5,7 +5,7 @@ import { PROFILE_COLS } from '@/lib/api';
 import { supabase } from '../lib/supabase';
 import { registerForPush } from '../lib/push';
 import type { Church, Contact, Group, Profile } from '../types';
-import { financeLevelFromPerms, rolePerms, type Perm } from '../lib/perms';
+import { financeLevelFromPerms, hasRole, rolePerms, type Perm } from '../lib/perms';
 
 type AuthState = {
   loading: boolean;
@@ -35,7 +35,7 @@ const Ctx = createContext<AuthState | null>(null);
 /** Permisos aproximados de una persona según su rol (los exactos los da la base con perms_of). */
 export function permsOf(p: Profile | null | undefined): string[] {
   if (!p) return [];
-  let v: string[] = rolePerms(p.role);
+  let v: string[] = [...rolePerms(p.role), ...(p.extra_roles ?? []).flatMap((r) => rolePerms(r))];
   if (p.role !== 'admin' && p.role !== 'app_admin' && p.finance_role) {
     v = v.filter((x) => !x.startsWith('fin.'));
     const f: Record<string, string[]> = { manager: ['fin.ver', 'fin.cargar', 'fin.tesoreria', 'fin.roles'], treasurer: ['fin.ver', 'fin.cargar', 'fin.tesoreria'], secretary: ['fin.ver', 'fin.cargar'], viewer: ['fin.ver'] };
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       me,
       isAdmin: perms.includes('admin.permisos'),
       isStaff: perms.includes('personas.editar'),
-      isLeader: perms.includes('personas.ver_todas') || perms.includes('inf.panel') || profile?.role === 'captain',
+      isLeader: perms.includes('personas.ver_todas') || perms.includes('inf.panel') || hasRole(profile, 'captain'),
       financeLevel: financeLevelFromPerms(perms),
       perms,
       can: (k: Perm) => perms.includes(k),
