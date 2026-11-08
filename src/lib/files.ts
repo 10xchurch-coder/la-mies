@@ -28,7 +28,7 @@ async function upload(bucket: Bucket, churchId: string, uri: string, name: strin
 }
 
 /** Pregunta cámara o galería, deja recortar en cuadrado, achica a 480 px y sube. Devuelve la ruta o null. */
-export async function pickAndUploadPhoto(churchId: string): Promise<string | null> {
+export async function pickAndUploadPhoto(churchId: string, o: { free?: boolean; width?: number } = {}): Promise<string | null> {
   const source = await new Promise<'camera' | 'library' | null>((resolve) => {
     Alert.alert('Foto', '¿De dónde sacamos la foto?', [
       { text: 'Sacar foto', onPress: () => resolve('camera') },
@@ -42,10 +42,10 @@ export async function pickAndUploadPhoto(churchId: string): Promise<string | nul
     Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
     return null;
   }
-  const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8 };
+  const opts: ImagePicker.ImagePickerOptions = o.free ? { mediaTypes: ['images'], allowsEditing: false, quality: 0.85 } : { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8 };
   const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
   if (res.canceled || !res.assets?.[0]) return null;
-  const small = await manipulateAsync(res.assets[0].uri, [{ resize: { width: 480 } }], { compress: 0.7, format: SaveFormat.JPEG });
+  const small = await manipulateAsync(res.assets[0].uri, [{ resize: { width: o.width ?? 480 } }], { compress: 0.7, format: SaveFormat.JPEG });
   return upload('photos', churchId, small.uri, 'foto.jpg', 'image/jpeg');
 }
 

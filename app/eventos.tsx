@@ -6,7 +6,8 @@
 // "Voy" para anotarse (recordatorio la víspera). La secretaría y el pastor agregan y borran.
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { EventImage } from '@/components/EventImage';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Field, Loading, Segmented, SectionTitle, Toggle } from '@/components/ui';
@@ -106,7 +107,10 @@ function MonthGrid({ ym, occ, sel, onSel }: { ym: { y: number; m: number }; occ:
 }
 
 export default function Eventos() {
-  const { isStaff, session } = useAuth();
+  const { can, session } = useAuth();
+  const isStaff = can('cal.editar');
+  const router = useRouter();
+  const open = (ev: ChurchEvent, date?: string) => router.push({ pathname: '/evento/[id]', params: date ? { id: ev.id, fecha: date } : { id: ev.id } });
   const [events, setEvents] = useState<ChurchEvent[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
   const [rsvps, setRsvps] = useState<{ event_id: string; occurs_on: string; user_id: string }[]>([]);
@@ -186,28 +190,28 @@ export default function Eventos() {
     const d = new Date(`${o.date}T12:00:00`);
     const endIso = o.ev.ends_at ? isoDate(addDays(o.start, Math.round((new Date(o.ev.ends_at).getTime() - new Date(o.ev.starts_at).getTime()) / 86400000))) : null;
     return (
-      <Card style={[{ flexDirection: 'row', gap: 12, padding: 12, alignItems: 'center' }, big && { backgroundColor: colors.amberSoft, borderColor: colors.amber, borderWidth: 1.5 }]}>
-        <View style={{ width: 54, alignItems: 'center', paddingVertical: 6, borderRadius: 12, backgroundColor: big ? colors.amber : colors.greenSoft }}>
-          <Text style={{ fontSize: 11, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{dayName(d.getDay()).slice(0, 3).toUpperCase()}</Text>
-          <Text style={{ fontSize: 22, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{d.getDate()}</Text>
-        </View>
+      <Pressable onPress={() => open(o.ev, o.date)} accessibilityRole="button" accessibilityLabel={`${o.ev.title}, ver detalles`}>
+      <Card style={[{ flexDirection: 'row', gap: 12, padding: 10, alignItems: 'center' }, big && { backgroundColor: colors.amberSoft, borderColor: colors.amber, borderWidth: 1.5 }]}>
+        <EventImage ev={o.ev} width={big ? 84 : 68} height={big ? 84 : 68} radius={12}>
+          <View style={{ position: 'absolute', left: 4, top: 4, backgroundColor: big ? colors.amber : 'rgba(255,255,255,0.95)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, alignItems: 'center' }}>
+            <Text style={{ fontSize: 9, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{dayName(d.getDay()).slice(0, 3).toUpperCase()}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '900', color: big ? '#FFF' : colors.green, lineHeight: 17 }}>{d.getDate()}</Text>
+          </View>
+        </EventImage>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontSize: big ? 17 : 15, fontWeight: '800', color: colors.text }}>{o.ev.title}</Text>
           <Text style={{ fontSize: 12, color: colors.muted }}>
             {o.ev.all_day ? (endIso && endIso > o.date ? `Hasta el ${fmtDateShort(endIso)}` : 'Todo el día') : hhmm(o.start)}
             {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? ' · todos los años' : ''}{count ? ` · ${count} van` : ''}
           </Text>
-          {o.ev.description ? <Text style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
+          {o.ev.description ? <Text numberOfLines={2} style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
+          {o.ev.registration ? <Text style={{ fontSize: 11, fontWeight: '800', color: colors.green }}>Con inscripción · tocá para anotarte</Text> : null}
         </View>
         <Pressable onPress={() => toggle(o, !going)} accessibilityRole="button" style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: going ? colors.green : colors.bg, borderWidth: 1, borderColor: going ? colors.green : colors.border }}>
           <Text style={{ fontSize: 13, fontWeight: '800', color: going ? '#FFF' : colors.text }}>{going ? 'Voy ✓' : 'Voy'}</Text>
         </Pressable>
-        {isStaff ? (
-          <Pressable onPress={() => remove(o.ev)} accessibilityLabel="Borrar" style={{ padding: 4 }}>
-            <Feather name="trash-2" size={16} color={colors.muted} />
-          </Pressable>
-        ) : null}
       </Card>
+      </Pressable>
     );
   };
 
@@ -227,15 +231,11 @@ export default function Eventos() {
                   <Text style={{ width: 74, fontSize: 13, fontWeight: '800', color: d === todayDow ? colors.greenText : colors.muted }}>{cap(dayName(d))}{d === todayDow ? '\nhoy' : ''}</Text>
                   <View style={{ flex: 1, gap: 4 }}>
                     {week.filter((w) => w.dow === d).map((w) => (
-                      <View key={w.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Pressable key={w.key} disabled={!w.ev} onPress={() => w.ev && open(w.ev)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <Text style={{ width: 44, fontSize: 14, fontWeight: '800', color: colors.green }}>{w.time || '—'}</Text>
                         <Text style={{ flex: 1, fontSize: 14, fontWeight: w.main ? '800' : '600', color: colors.text }}>{w.title}{w.place ? <Text style={{ fontWeight: '400', color: colors.muted }}> · {w.place}</Text> : null}</Text>
-                        {isStaff && w.ev ? (
-                          <Pressable onPress={() => remove(w.ev as ChurchEvent)} accessibilityLabel="Borrar" style={{ padding: 2 }}>
-                            <Feather name="trash-2" size={14} color={colors.muted} />
-                          </Pressable>
-                        ) : null}
-                      </View>
+                        {w.ev ? <Feather name="chevron-right" size={14} color={colors.muted} /> : null}
+                      </Pressable>
                     ))}
                   </View>
                 </View>
@@ -281,34 +281,12 @@ export default function Eventos() {
             ) : null}
 
             {isStaff ? (
-              adding ? (
-                <Card style={{ gap: 10 }}>
-                  <Segmented options={[{ value: 'special', label: 'Fecha especial' }, { value: 'week', label: 'Cada semana' }]} value={adding} onChange={setAdding} />
-                  <Field label="Nombre" value={title} onChangeText={setTitle} placeholder={adding === 'week' ? 'Ganar almas' : 'Cena del Señor'} />
-                  {adding === 'week' ? (
-                    <>
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Día</Text>
-                      <Choice columns={4} options={WEEK_ORDER.map((d) => ({ value: String(d), label: dayName(d).slice(0, 3) }))} value={String(dow)} onChange={(v) => setDow(Number(v))} />
-                      <Field label="Hora" value={time} onChangeText={setTime} placeholder="17:00" keyboardType="numbers-and-punctuation" />
-                    </>
-                  ) : (
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <Field label="Fecha" value={date} onChangeText={setDate} placeholder="20/12/2026" style={{ flex: 1 }} keyboardType="numbers-and-punctuation" />
-                      <Field label="Hora" hint="(opcional)" value={time} onChangeText={setTime} placeholder="19:30" style={{ width: 110 }} keyboardType="numbers-and-punctuation" />
-                    </View>
-                  )}
-                  <Field label="Lugar" hint="(opcional)" value={place} onChangeText={setPlace} />
-                  <Field label="Detalle" hint="(opcional)" value={desc} onChangeText={setDesc} multiline />
-                  {adding === 'special' ? <Toggle label="Se repite todos los años" hint="Aniversario, Día del Niño…" value={yearly} onChange={setYearly} /> : null}
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Button title="Cancelar" variant="ghost" onPress={() => setAdding(null)} style={{ flex: 1 }} />
-                    <Button title="Guardar" onPress={add} loading={busy} style={{ flex: 2 }} />
-                  </View>
-                </Card>
-              ) : (
-                <Button title="Agregar al calendario" icon="plus" variant="outline" onPress={() => setAdding('special')} />
-              )
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Button title="Fecha especial" icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'special' } })} style={{ flex: 1 }} />
+                <Button title="Cada semana" icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'week' } })} style={{ flex: 1 }} />
+              </View>
             ) : null}
+            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Tocá cualquier fecha para ver los detalles, anotarte o compartirla.</Text>
           </>
         )}
       </Screen>

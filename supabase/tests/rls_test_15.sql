@@ -1,7 +1,7 @@
 \set ON_ERROR_STOP on
 -- 0021: informe del domingo y informes escritos.
 reset role;
-do $$ declare n int; d date := current_date - extract(dow from current_date)::int; begin
+do $$ declare n int; d date := current_date - extract(dow from current_date)::int - 14; begin
   -- domingo 15 h sin asistencia: todavía no sale
   n := public.run_weekly_report('10000000-0000-0000-0000-000000000001', (d + time '15:00')::timestamp);
   if n <> 0 then raise exception 'FALLO: salió sin asistencia antes de las 20'; end if;

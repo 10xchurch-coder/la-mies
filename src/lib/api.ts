@@ -221,6 +221,14 @@ export async function searchPeople(q: string): Promise<{ id: string; name: strin
 export async function familyChildren(contactId: string): Promise<ContactChild[]> {
   return ok(await supabase.rpc('family_children', { p_contact: contactId })) ?? [];
 }
+/** Guarda los hijos de la familia; a los que no tienen ficha se les crea una. */
+export async function setFamilyChildren(contactId: string, kids: { child_contact_id?: string | null; name: string; age: number | null; birthdate: string | null }[]): Promise<void> {
+  ok(await supabase.rpc('set_family_children', { p_contact: contactId, p_kids: kids }));
+}
+export async function familyParents(childId: string): Promise<{ id: string; name: string; photo_path: string | null }[]> {
+  const { data, error } = await supabase.rpc('family_parents', { p_child: childId });
+  return error ? [] : ((data ?? []) as { id: string; name: string; photo_path: string | null }[]);
+}
 export async function classAttendance(classId: string, date: string): Promise<ClassAttendance[]> {
   return ok(await supabase.from('class_attendance').select('*').eq('class_id', classId).eq('on_date', date)) ?? [];
 }
@@ -437,10 +445,31 @@ export async function pipelineReport(months = 6): Promise<PipelineRow[]> {
 export async function listEvents(): Promise<ChurchEvent[]> {
   return ok(await supabase.from('events').select('*').order('starts_at').limit(400)) ?? [];
 }
-export async function saveEvent(e: Partial<ChurchEvent> & { title: string; starts_at: string }): Promise<void> {
-  const row = { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at ?? null, all_day: !!e.all_day, place: e.place ?? null, description: e.description ?? null, weekly: !!e.weekly, yearly: !e.weekly && !!e.yearly };
-  if (e.id) ok(await supabase.from('events').update(row).eq('id', e.id));
-  else ok(await supabase.from('events').insert(row));
+const EXTRA_EVENT_KEYS = ['photo_path', 'image_key', 'cost', 'transport', 'bring', 'program', 'contact_name', 'contact_phone', 'registration', 'reg_price', 'reg_capacity', 'reg_deadline', 'reg_ask_ride', 'reg_ask_lodging'] as const;
+export async function saveEvent(e: Partial<ChurchEvent> & { title: string; starts_at: string }): Promise<string> {
+  const row: Record<string, unknown> = { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at ?? null, all_day: !!e.all_day, place: e.place ?? null, description: e.description ?? null, weekly: !!e.weekly, yearly: !e.weekly && !!e.yearly };
+  for (const k of EXTRA_EVENT_KEYS) if (k in e) row[k] = (e as Record<string, unknown>)[k] ?? null;
+  if (e.id) { ok(await supabase.from('events').update(row).eq('id', e.id)); return e.id; }
+  const r = ok(await supabase.from('events').insert(row).select('id').single()) as { id: string };
+  return r.id;
+}
+export async function getEvent(id: string): Promise<ChurchEvent | null> {
+  return (ok(await supabase.from('events').select('*').eq('id', id).maybeSingle()) as ChurchEvent | null) ?? null;
+}
+export async function eventRegistrations(eventId: string, on: string): Promise<import('@/types').EventRegistration[]> {
+  return ok(await supabase.from('event_registrations').select('*').eq('event_id', eventId).eq('occurs_on', on).order('created_at')) ?? [];
+}
+export async function eventRegistrationCount(eventId: string, on: string): Promise<number> {
+  const { data } = await supabase.rpc('event_registration_count', { p_event: eventId, p_on: on });
+  return (data as number | null) ?? 0;
+}
+export async function saveRegistration(r: Partial<import('@/types').EventRegistration> & { event_id: string; occurs_on: string; name: string }): Promise<void> {
+  const { id, ...row } = r;
+  if (id) ok(await supabase.from('event_registrations').update(row).eq('id', id));
+  else ok(await supabase.from('event_registrations').insert(row));
+}
+export async function deleteRegistration(id: string): Promise<void> {
+  ok(await supabase.from('event_registrations').delete().eq('id', id));
 }
 export async function deleteEvent(id: string): Promise<void> {
   ok(await supabase.from('events').delete().eq('id', id));
@@ -631,6 +660,22 @@ export async function finAccountBalances(to: string | null = null): Promise<impo
 /** Marcar una vereda como hecha (done) o quitarla: de una salida (session) o de todas (session null). */
 export async function setSideCoverage(road: number, seg: number, side: 1 | -1, kind: OutingKind, done: boolean, session: string | null = null): Promise<void> {
   ok(await supabase.rpc('set_side_coverage', { p_road: road, p_seg: seg, p_side: side, p_kind: kind, p_done: done, p_session: session }));
+}
+/** Marcar veredas a mano a nombre de alguien (o propio), en una fecha. */
+export async function markSidesFor(user: string, date: string, kind: OutingKind, sides: { road_id: number; seg: number; side: 1 | -1 }[]): Promise<string> {
+  return ok(await supabase.rpc('mark_sides_for', { p_user: user, p_date: date, p_kind: kind, p_sides: sides })) as string;
+}
+/** El punto de encuentro más reciente de hoy (si todavía no pasaron 2 horas). */
+export async function currentMeetingPoint(): Promise<import('@/types').MeetingPoint | null> {
+  const since = new Date(Date.now() - 2 * 3600 * 1000).toISOString();
+  const { data } = await supabase.from('meeting_points').select('*').gte('meet_at', since).order('created_at', { ascending: false }).limit(1);
+  return ((data ?? [])[0] as import('@/types').MeetingPoint | undefined) ?? null;
+}
+export async function setMeetingPoint(lat: number, lng: number, meetAt: Date, note: string | null): Promise<void> {
+  ok(await supabase.from('meeting_points').insert({ lat, lng, meet_at: meetAt.toISOString(), note }));
+}
+export async function clearMeetingPoint(id: string): Promise<void> {
+  ok(await supabase.from('meeting_points').delete().eq('id', id));
 }
 /** Sacar un punto de casa que no es casa, o agregar una casa que falta. */
 export async function editHouse(action: 'hide' | 'add', house: number | null, lat: number | null = null, lng: number | null = null): Promise<void> {

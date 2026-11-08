@@ -1,9 +1,11 @@
 // Filas de la base como las devuelve Supabase.
-export type Role = 'member' | 'captain' | 'secretary' | 'admin';
+export type Role = 'member' | 'captain' | 'evangelism' | 'deacon' | 'secretary' | 'assistant_pastor' | 'app_admin' | 'admin';
 export type OutingKind = 'soulwinning' | 'flyers';
 
 export type Church = {
   logo_path?: string | null;
+  website?: string | null;
+  youtube_channel?: string | null;
   absence_recipients?: string[] | null;
   report_recipients?: string[] | null;
   id: string;
@@ -89,6 +91,7 @@ export type CoverageRow = {
   times: number;
   last_session_id?: string | null;
   last_user_id?: string | null;
+  team_names?: string | null;
 };
 
 export type Contact = {
@@ -140,7 +143,7 @@ export type Contact = {
 
 export type PersonStatus = 'contact' | 'visitor' | 'member';
 
-export type ContactChild = { id: string; contact_id: string; name: string; age: number | null; birthdate: string | null };
+export type ContactChild = { id: string; contact_id: string; name: string; age: number | null; birthdate: string | null; child_contact_id?: string | null; photo_path?: string | null };
 
 export type ContactVisit = {
   id: string;
@@ -337,6 +340,14 @@ export type PipelineRow = { month: string; contacts: number; gospel: number; vis
 export type ChurchEvent = {
   id: string; church_id: string; title: string; starts_at: string; ends_at: string | null; all_day: boolean; place: string | null;
   description: string | null; weekly: boolean; source_id: string | null; yearly?: boolean;
+  photo_path?: string | null; image_key?: string | null; cost?: string | null; transport?: string | null; bring?: string | null;
+  program?: string | null; contact_name?: string | null; contact_phone?: string | null;
+  registration?: boolean; reg_price?: number | null; reg_capacity?: number | null; reg_deadline?: string | null;
+  reg_ask_ride?: boolean; reg_ask_lodging?: boolean;
+};
+export type EventRegistration = {
+  id: string; event_id: string; occurs_on: string; user_id: string | null; name: string; phone: string | null; people: number;
+  needs_ride: boolean; needs_lodging: boolean; notes: string | null; paid_amount: number; paid_note: string | null; created_at: string;
 };
 export type PrayerRow = {
   id: string; user_id: string; author: string | null; body: string; visibility: 'church' | 'pastor' | 'people'; people: string[];
@@ -376,3 +387,5 @@ export type FinBalance = { fund_id: string; fund: string; kind: string; currency
 export type FinMonthly = { month: string; fund_id: string; fund: string; income: number; expense: number; net: number };
 export type FinByCategory = { direction: 'in' | 'out'; category: string; fund: string; total: number; entries: number };
 export type FinAccountBalance = { account_id: string; account: string; fund_id: string; fund: string; currency: string; balance: number };
+
+export type MeetingPoint = { id: string; church_id: string; created_by: string | null; lat: number; lng: number; meet_at: string; note: string | null; created_at: string };

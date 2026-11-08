@@ -100,7 +100,7 @@ export default function Iglesia() {
     {
       title: 'Liderazgo',
       tiles: [
-        { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader },
+        { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader || !!(profile && church?.absence_recipients?.includes(profile.id)) },
         { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
         { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
         { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },

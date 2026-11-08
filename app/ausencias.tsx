@@ -49,7 +49,7 @@ export default function Ausencias() {
       <Screen>
         <DateChips dates={saturdays.includes(sat) ? saturdays : [sat, ...saturdays]} value={sat} onChange={setSat} format={(d) => `Finde ${fmtDateShort(d)}`} />
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-          {isStaff ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre.
+          {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre.
         </Text>
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="check-circle" title="No faltó nadie" text="¡Gloria a Dios!" /> : null}
         {SECTIONS.map((sec) => {

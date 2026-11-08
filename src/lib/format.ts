@@ -156,9 +156,13 @@ export function lastSaturday(from = new Date()): string {
 
 export const ROLE_LABEL: Record<string, string> = {
   member: 'Miembro',
-  captain: 'Capitán',
+  captain: 'Jefe de ruta',
+  evangelism: 'Coordinador de evangelismo',
+  deacon: 'Diácono',
   secretary: 'Secretaría',
-  admin: 'Pastor / administrador',
+  assistant_pastor: 'Pastor asistente',
+  app_admin: 'Administrador de la app',
+  admin: 'Pastor',
 };
 
 export const STATUS_LABEL: Record<string, string> = { contact: 'Contacto', visitor: 'Visita', member: 'Miembro' };

@@ -10,7 +10,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Choice, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
-import { addPerson, linkAccount, listGroups, listProfiles, searchPeople, updateContact } from '@/lib/api';
+import { addPerson, familyChildren, linkAccount, listGroups, listProfiles, searchPeople, setFamilyChildren, updateContact } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { ageFrom, fmtDateAR, groupWord, isoDate, maskDateOrAge, parseAgeOrBirthdate, parseDateAR } from '@/lib/format';
@@ -18,7 +18,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Contact, Group, PersonStatus, Profile } from '@/types';
 
-type Kid = { id?: string; name: string; when: string };
+type Kid = { id?: string; name: string; when: string; childId?: string | null; photo?: string | null };
 type Suggestion = { id: string; name: string; status: string; photo_path: string | null };
 
 /** Lo que se muestra en el campo: la fecha si la hay, si no la edad. */
@@ -56,6 +56,8 @@ export default function NuevaPersona() {
     initialStatus === 'member' && isStaff ? 'member' : initialStatus === 'contact' ? 'contact' : 'visitor',
   );
   const [kids, setKids] = useState<Kid[]>([]);
+  const [kidSugg, setKidSugg] = useState<{ i: number; list: Suggestion[] } | null>(null);
+  const kidTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [picker, setPicker] = useState<null | 'followup' | 'link'>(null);
   const [busy, setBusy] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -65,9 +67,9 @@ export default function NuevaPersona() {
     if (isLeader) listProfiles().then(setPeople).catch(() => undefined);
     if (!id) return;
     (async () => {
-      const [{ data: c }, { data: ch }] = await Promise.all([
+      const [{ data: c }, ch] = await Promise.all([
         supabase.from('contacts').select('*').eq('id', id).maybeSingle(),
-        supabase.from('contact_children').select('*').eq('contact_id', id).order('age', { ascending: false }),
+        familyChildren(id).catch(() => []),
       ]);
       const x = c as Contact | null;
       if (x) {
@@ -98,7 +100,7 @@ export default function NuevaPersona() {
           setSpouseName(x.spouse_name ?? '');
         }
       }
-      setKids(((ch ?? []) as { id: string; name: string; age: number | null; birthdate: string | null }[]).map((k) => ({ id: k.id, name: k.name, when: whenText(k.birthdate, k.age) })));
+      setKids([...ch].sort((a, b) => (b.age ?? 0) - (a.age ?? 0)).map((k) => ({ id: k.id, name: k.name, when: whenText(k.birthdate, k.age), childId: k.child_contact_id ?? null, photo: k.photo_path ?? null })));
       setLoaded(true);
     })();
   }, [id, isLeader]);
@@ -125,6 +127,22 @@ export default function NuevaPersona() {
     searchTimer.current = setTimeout(() => {
       searchPeople(t.trim()).then((r) => setSuggestions(r.filter((p) => p.id !== id).slice(0, 6))).catch(() => setSuggestions([]));
     }, 250);
+  };
+
+  /** Al escribir el nombre de un hijo, preguntar si es alguien que ya está cargado. */
+  const onKidText = (i: number, t: string) => {
+    setKids((ks) => ks.map((x, j) => (j === i ? { ...x, name: t, childId: null, photo: null } : x)));
+    if (kidTimer.current) clearTimeout(kidTimer.current);
+    if (t.trim().length < 2) { setKidSugg(null); return; }
+    kidTimer.current = setTimeout(() => {
+      searchPeople(t.trim())
+        .then((r) => setKidSugg({ i, list: r.filter((p) => p.id !== id && p.id !== spouseId && !kids.some((k) => k.childId === p.id)).slice(0, 5) }))
+        .catch(() => setKidSugg(null));
+    }, 250);
+  };
+  const pickKid = (i: number, p: Suggestion) => {
+    setKids((ks) => ks.map((x, j) => (j === i ? { ...x, name: p.name, childId: p.id, photo: p.photo_path } : x)));
+    setKidSugg(null);
   };
 
   const pickSpouse = (p: Suggestion) => {
@@ -194,16 +212,14 @@ export default function NuevaPersona() {
       if (contactId && isStaff && linkedProfile && linkedProfile !== orig?.profile_id) {
         await linkAccount(contactId, linkedProfile);
       }
-      // Hijos: se reemplaza la lista completa.
+      // Hijos: la lista de la familia completa. Los que no tienen ficha reciben una (para la asistencia).
       if (contactId) {
-        const keep = kids.filter((k) => k.name.trim());
-        if (orig) await supabase.from('contact_children').delete().eq('contact_id', contactId);
-        if (keep.length) {
-          const { error } = await supabase.from('contact_children').insert(keep.map((k) => {
+        const keep = kids.filter((k) => k.name.trim() || k.childId);
+        if (orig || keep.length) {
+          await setFamilyChildren(contactId, keep.map((k) => {
             const w = parseAgeOrBirthdate(k.when);
-            return { contact_id: contactId, name: k.name.trim(), age: w.age, birthdate: w.birthdate };
+            return { child_contact_id: k.childId ?? null, name: k.name.trim(), age: w.age, birthdate: w.birthdate };
           }));
-          if (error) throw error;
         }
       }
       if (orig) router.back();
@@ -314,16 +330,36 @@ export default function NuevaPersona() {
         <SectionTitle>Hijos</SectionTitle>
         <Card style={{ gap: 10 }}>
           {kids.map((k, i) => (
-            <View key={i} style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-              <Field label="Nombre" value={k.name} onChangeText={(t) => setKids(kids.map((x, j) => (j === i ? { ...x, name: t } : x)))} style={{ flex: 1 }} />
-              <Field label="Nacimiento o edad" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={k.when} onChangeText={(t) => setKids(kids.map((x, j) => (j === i ? { ...x, when: maskDateOrAge(t) } : x)))} style={{ width: 128 }} />
-              <Pressable onPress={() => setKids(kids.filter((_, j) => j !== i))} accessibilityLabel="Quitar" style={{ height: 50, width: 40, alignItems: 'center', justifyContent: 'center' }}>
-                <Feather name="trash-2" size={20} color={colors.red} />
-              </Pressable>
+            <View key={k.id ?? `n${i}`} style={{ gap: 6 }}>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                {k.childId ? <View style={{ paddingBottom: 9 }}><Face name={k.name || '?'} path={k.photo ?? null} size={32} /></View> : null}
+                <Field label="Nombre" value={k.name} onChangeText={(t) => onKidText(i, t)} autoCapitalize="words" style={{ flex: 1 }} />
+                <Field label="Nacimiento o edad" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={k.when} onChangeText={(t) => setKids(kids.map((x, j) => (j === i ? { ...x, when: maskDateOrAge(t) } : x)))} style={{ width: 128 }} />
+                <Pressable onPress={() => { setKids(kids.filter((_, j) => j !== i)); setKidSugg(null); }} accessibilityLabel="Quitar" style={{ height: 50, width: 40, alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="trash-2" size={20} color={colors.red} />
+                </Pressable>
+              </View>
+              {k.childId ? <View style={{ flexDirection: 'row' }}><Tag text="Ficha vinculada" tone="green" /></View>
+                : k.name.trim().length >= 2 && !(kidSugg?.i === i && kidSugg.list.length) ? <Text style={{ fontSize: 12, color: colors.muted }}>Al guardar se le crea su ficha para tomarle asistencia.</Text> : null}
+              {kidSugg?.i === i && kidSugg.list.length ? (
+                <Card style={{ padding: 0 }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, paddingHorizontal: 12, paddingTop: 10 }}>¿Es alguien que ya está cargado?</Text>
+                  {kidSugg.list.map((p, n) => (
+                    <Pressable key={p.id} onPress={() => pickKid(i, p)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: n ? 1 : 0, borderTopColor: colors.border }}>
+                      <Face name={p.name} path={p.photo_path} size={32} />
+                      <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{p.name}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Sí, es</Text>
+                    </Pressable>
+                  ))}
+                  <Pressable onPress={() => setKidSugg(null)} style={{ padding: 12, borderTopWidth: 1, borderTopColor: colors.border }}>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>No, es otra persona (crear su ficha)</Text>
+                  </Pressable>
+                </Card>
+              ) : null}
             </View>
           ))}
           <Button title="Agregar hijo" icon="plus" variant="outline" small onPress={() => setKids([...kids, { name: '', when: '' }])} />
-          {spouseId ? <Text style={{ fontSize: 12, color: colors.muted }}>Los hijos cargados en la ficha del cónyuge también aparecen acá sin volver a escribirlos.</Text> : null}
+          {spouseId ? <Text style={{ fontSize: 12, color: colors.muted }}>Los hijos son de la familia: se ven y se editan igual desde la ficha del cónyuge.</Text> : null}
         </Card>
 
         <SectionTitle>Su camino en la iglesia</SectionTitle>

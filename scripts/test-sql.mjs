@@ -69,8 +69,18 @@ const files = [
   'supabase/migrations/0030_seguridad.sql',
   'supabase/migrations/0031_perfil_privado.sql',
   'supabase/tests/rls_test_23.sql',
+  'supabase/migrations/0032_permisos.sql',
+  'supabase/tests/rls_test_24.sql',
+  'supabase/migrations/0033_hijos_con_ficha.sql',
+  'supabase/tests/rls_test_25.sql',
+  'supabase/migrations/0034_eventos_detalle.sql',
+  'supabase/tests/rls_test_26.sql',
+  'supabase/migrations/0035_mapa_equipo.sql',
+  'supabase/tests/rls_test_27.sql',
 ];
-for (const f of files) {
+// MIGRATIONS_FIRST=1: todas las migraciones primero y después todas las pruebas (para ver que lo nuevo no rompe lo viejo).
+const order = process.env.MIGRATIONS_FIRST ? [...files.filter((f) => !f.includes('/tests/')), ...files.filter((f) => f.includes('/tests/'))] : files;
+for (const f of order) {
   console.log(`▶ ${f}`);
   execFileSync('psql', ['-v', 'ON_ERROR_STOP=1', '-q', '-f', path.join(root, f)], { stdio: 'inherit', env: tenv });
 }

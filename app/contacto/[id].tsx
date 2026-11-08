@@ -12,7 +12,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  familyChildren, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  familyChildren, familyParents, getContact, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -108,6 +108,7 @@ export default function PersonaDetalle() {
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
   const [children, setChildren] = useState<ContactChild[]>([]);
+  const [parents, setParents] = useState<{ id: string; name: string }[]>([]);
   const [spouse, setSpouse] = useState<{ id: string; name: string } | null>(null);
   const [visits, setVisits] = useState<ContactVisit[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
@@ -134,9 +135,10 @@ export default function PersonaDetalle() {
       const r = await getContact(id);
       setC(r.contact);
       setChildren(r.children);
-      // La familia: los hijos del cónyuge también, si está vinculado.
+      // La familia: los hijos de los dos (con su ficha) y, si es hijo de alguien, sus padres.
+      familyChildren(id).then(setChildren).catch(() => undefined);
+      familyParents(id).then(setParents).catch(() => undefined);
       if (r.contact?.spouse_id) {
-        familyChildren(id).then(setChildren).catch(() => undefined);
         supabase.from('contacts').select('id,name').eq('id', r.contact.spouse_id).maybeSingle().then(({ data }) => setSpouse((data as { id: string; name: string } | null) ?? null));
       } else {
         setSpouse(null);
@@ -375,7 +377,26 @@ export default function PersonaDetalle() {
           {children.length ? (
             <Text style={{ fontSize: 13, color: colors.text }}>
               <Text style={{ fontWeight: '700' }}>{children.length === 1 ? 'Hijo: ' : 'Hijos: '}</Text>
-              {children.map((k) => { const a = displayAge(k); return `${k.name}${a != null ? ` (${a})` : ''}`; }).join(', ')}
+              {children.map((k, i) => {
+                const a = displayAge(k);
+                const label = `${k.name}${a != null ? ` (${a})` : ''}`;
+                return (
+                  <Text key={k.id}>
+                    {i ? ', ' : ''}
+                    {k.child_contact_id
+                      ? <Text onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: k.child_contact_id as string } })} style={{ color: colors.green, fontWeight: '700' }}>{label}</Text>
+                      : label}
+                  </Text>
+                );
+              })}
+            </Text>
+          ) : null}
+          {parents.length ? (
+            <Text style={{ fontSize: 13, color: colors.text }}>
+              <Text style={{ fontWeight: '700' }}>{parents.length === 1 ? 'Papá/mamá: ' : 'Padres: '}</Text>
+              {parents.map((x, i) => (
+                <Text key={x.id}>{i ? ', ' : ''}<Text onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: x.id } })} style={{ color: colors.green, fontWeight: '700' }}>{x.name}</Text></Text>
+              ))}
             </Text>
           ) : null}
 

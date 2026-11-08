@@ -8,6 +8,11 @@ on:
       bbox:
         description: "Zona: sur,oeste,norte,este"
         default: "-27.55,-56.05,-27.30,-55.65"
+      fuente:
+        description: "overture (OSM + Microsoft + Google) o google (solo Google Open Buildings)"
+        type: choice
+        options: [overture, google]
+        default: overture
 
 permissions:
   contents: write
@@ -21,15 +26,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: pip install duckdb==1.4.1
       - name: Calcular casas
         env:
           BBOX: ${{ inputs.bbox }}
+          SOURCE: ${{ inputs.fuente }}
         run: python3 scripts/casas.py
       - name: Guardar en el repositorio
         run: |
           git config user.name "la-mies-bot"
           git config user.email "la-mies-bot@users.noreply.github.com"
           git add data/casas_posadas.csv
-          git commit -m "Casas de la zona (Google Open Buildings + OpenStreetMap)" || echo "sin cambios"
+          git commit -m "Casas de la zona (${{ inputs.fuente }} + OpenStreetMap)" || echo "sin cambios"
           git pull --rebase
           git push

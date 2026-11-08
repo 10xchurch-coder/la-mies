@@ -1,5 +1,5 @@
-// Roles y permisos: acá se eligen las personas de cada rol (de la iglesia y de finanzas),
-// se ve qué puede hacer cada uno, y a quién le llegan los avisos de ausencias y el informe semanal.
+// Roles y permisos: las personas de cada rol (de la iglesia y de finanzas), los permisos sueltos
+// de cada persona y a quién le llegan los avisos de ausencias y el informe semanal.
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
@@ -8,25 +8,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, SectionTitle } from '@/components/ui';
 import { listProfiles, setChurchRecipients, setFinanceRole } from '@/lib/api';
+import { FIN_ROLES, ROLES, isTopRole, roleLabel, type RoleKey } from '@/lib/perms';
+import { useRouter } from 'expo-router';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Profile } from '@/types';
 
-type ChurchRole = 'admin' | 'secretary' | 'captain';
-type FinRole = 'manager' | 'treasurer' | 'secretary' | 'viewer';
-
-const CHURCH_ROLES: { role: ChurchRole; label: string; hint: string }[] = [
-  { role: 'admin', label: 'Pastor / administrador', hint: 'Todo: nombra roles, ve todo, finanzas completas.' },
-  { role: 'secretary', label: 'Secretaría', hint: 'Carga miembros, prédicas, eventos y zonas; arregla salidas; carga finanzas.' },
-  { role: 'captain', label: 'Capitanes', hint: 'Toman asistencia, mandan anuncios, ven el panel, corrigen el mapa.' },
-];
-const FIN_ROLES: { role: FinRole; label: string; hint: string }[] = [
-  { role: 'manager', label: 'Administrador de finanzas', hint: 'Todo en finanzas, también da los roles de finanzas.' },
-  { role: 'treasurer', label: 'Tesorero', hint: 'Carga, corrige y anula; maneja fondos, categorías y pases automáticos.' },
-  { role: 'secretary', label: 'Secretario de finanzas', hint: 'Carga ingresos, gastos y comprobantes; corrige lo suyo por 7 días.' },
-  { role: 'viewer', label: 'Revisor de cuentas', hint: 'Solo mira saldos, movimientos y comprobantes.' },
-];
+type ChurchRole = Exclude<RoleKey, 'member'>;
+type FinRole = 'treasurer' | 'secretary' | 'viewer';
+const CHURCH_ROLES = ROLES.filter((r) => r.key !== 'member');
 
 function Picker({ visible, title, people, onPick, onClose }: { visible: boolean; title: string; people: Profile[]; onPick: (p: Profile) => void; onClose: () => void }) {
   const insets = useSafeAreaInsets();
@@ -107,7 +98,9 @@ function Recipients({ title, hint, people, value, onChange }: { title: string; h
 }
 
 export default function Roles() {
-  const { church, profile, isAdmin, isStaff, financeLevel, refreshProfile } = useAuth();
+  const { church, profile, isAdmin, financeLevel, refreshProfile } = useAuth();
+  const router = useRouter();
+  const iAmTop = isTopRole(profile?.role);
   const [people, setPeople] = useState<Profile[]>([]);
   const [absence, setAbsence] = useState<string[]>(church?.absence_recipients ?? []);
   const [report, setReport] = useState<string[]>(church?.report_recipients ?? []);
@@ -142,8 +135,8 @@ export default function Roles() {
     setPicking(null);
     if (!pk) return;
     if (pk.kind === 'church') {
-      if (p.role === 'admin' && pk.role !== 'admin') {
-        Alert.alert('Es pastor / administrador', `Para cambiar a ${p.display_name}, primero quitalo de administradores.`);
+      if (isTopRole(p.role) && !iAmTop) {
+        Alert.alert(`${p.display_name} es ${roleLabel(p.role).toLowerCase()}`, 'Solo otro pastor o administrador de la app lo puede cambiar.');
         return;
       }
       setRole(p, pk.role);
@@ -165,20 +158,21 @@ export default function Roles() {
     }
   };
 
-  const canChurch = (role: ChurchRole) => (role === 'admin' ? isAdmin : isStaff);
+  const canChurch = (role: ChurchRole) => isAdmin && (!isTopRole(role) || iAmTop);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Roles y permisos" subtitle="Tocá Agregar para elegir a alguien" back />
       <Screen>
         <SectionTitle>Roles de la iglesia</SectionTitle>
+        {!isAdmin ? <Text style={{ fontSize: 13, color: colors.muted }}>Solo el pastor y el administrador de la app dan roles y permisos. Acá podés ver quién tiene cada uno.</Text> : null}
         {CHURCH_ROLES.map((r) => (
-          <RoleCard key={r.role} label={r.label} hint={r.hint}
-            people={people.filter((p) => p.role === r.role)}
-            canEdit={canChurch(r.role)}
-            onAdd={() => setPicking({ kind: 'church', role: r.role, label: r.label })}
+          <RoleCard key={r.key} label={r.label} hint={r.hint}
+            people={people.filter((p) => p.role === r.key)}
+            canEdit={canChurch(r.key as ChurchRole)}
+            onAdd={() => setPicking({ kind: 'church', role: r.key as ChurchRole, label: r.label })}
             onRemove={(p) => {
-              if (p.id === profile?.id && r.role === 'admin') { Alert.alert('No te podés quitar a vos mismo'); return; }
+              if (p.id === profile?.id && isTopRole(r.key)) { Alert.alert('No te podés quitar a vos mismo'); return; }
               Alert.alert(`Quitar a ${p.display_name}`, `Deja de ser ${r.label.toLowerCase()} y queda como miembro.`, [
                 { text: 'Cancelar', style: 'cancel' }, { text: 'Quitar', style: 'destructive', onPress: () => setRole(p, 'member') },
               ]);
@@ -188,36 +182,36 @@ export default function Roles() {
 
         <SectionTitle>Finanzas</SectionTitle>
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -8 }}>
-          El pastor ve y hace todo en finanzas. La secretaría puede cargar movimientos, salvo que la quites abajo. Los demás no ven nada de finanzas si no tienen uno de estos roles.
+          El pastor y el administrador de la app ven y hacen todo en finanzas. La secretaría puede ver y cargar movimientos (se lo podés sacar en sus permisos). Los demás no ven nada de finanzas si no tienen uno de estos roles.
         </Text>
         {FIN_ROLES.map((r) => (
-          <RoleCard key={r.role} label={r.label} hint={r.hint}
-            people={people.filter((p) => p.finance_role === r.role)}
-            canEdit={financeLevel >= 4}
-            onAdd={() => setPicking({ kind: 'fin', role: r.role, label: r.label })}
+          <RoleCard key={r.key} label={r.label} hint={r.hint}
+            people={people.filter((p) => p.finance_role === r.key || (r.key === 'treasurer' && p.finance_role === 'manager'))}
+            canEdit={isAdmin || financeLevel >= 4}
+            onAdd={() => setPicking({ kind: 'fin', role: r.key, label: r.label })}
             onRemove={(p) => setFin(p, null)} />
         ))}
-        {people.some((p) => p.role === 'secretary') && financeLevel >= 4 ? (
-          <Card style={{ gap: 8, padding: 12 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Secretaría sin acceso a finanzas</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {people.filter((p) => p.role === 'secretary').map((p) => {
-                const off = p.finance_role === 'none';
-                return (
-                  <Pressable key={p.id} onPress={() => setFin(p, off ? null : ('none' as FinRole))} accessibilityRole="checkbox" accessibilityState={{ checked: off }}
-                    style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, borderWidth: 1.5, borderColor: off ? colors.red : colors.input, justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: off ? colors.red : colors.text }}>{off ? `${p.display_name} · sin acceso` : `${p.display_name} · puede cargar`}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </Card>
-        ) : null}
+        <SectionTitle>Permisos por persona</SectionTitle>
+        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -8 }}>
+          Cada rol trae sus permisos, pero a cualquiera le podés dar o sacar uno suelto. Por ejemplo: que alguien sin rol pueda editar el calendario, o que una secretaría no vea finanzas.
+        </Text>
+        <Card style={{ padding: 0 }}>
+          {people.map((p, i) => (
+            <Pressable key={p.id} onPress={() => router.push({ pathname: '/admin/permisos', params: { id: p.id } })} accessibilityRole="button"
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{p.display_name}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{roleLabel(p.role)}{p.finance_role && p.finance_role !== 'none' ? ` · ${FIN_ROLES.find((f) => f.key === (p.finance_role === 'manager' ? 'treasurer' : p.finance_role))?.label ?? ''}` : ''}</Text>
+              </View>
+              <Feather name="sliders" size={18} color={colors.green} />
+            </Pressable>
+          ))}
+        </Card>
 
         <SectionTitle>¿A quién le llegan los avisos?</SectionTitle>
-        <Recipients title="Ausencias del fin de semana" hint="Quiénes faltaron 1, 2 o 3+ semanas, con el mensaje de WhatsApp listo. Si no elegís a nadie, le llega al pastor y a la secretaría." people={leaders} value={absence} onChange={setAbsence} />
+        <Recipients title="Ausencias del fin de semana" hint="Quiénes faltaron 1, 2 o 3+ semanas, con el mensaje de WhatsApp listo. Pueden ser jefes de ruta o cualquiera con un rol: a todos les llega el mismo informe. Si no elegís a nadie, le llega al pastor y a la secretaría." people={leaders} value={absence} onChange={setAbsence} />
         <Recipients title="Informe semanal y mensual" hint="El domingo a la tarde (después de la asistencia) y el 1.º de cada mes. La parte de finanzas solo la ven los que tienen acceso a finanzas." people={leaders} value={report} onChange={setReport} />
-        <Button title="Guardar avisos" onPress={saveRecipients} loading={busy} />
+        {isAdmin ? <Button title="Guardar avisos" onPress={saveRecipients} loading={busy} /> : null}
       </Screen>
       <Picker visible={!!picking} title={picking ? `Agregar a ${picking.label}` : ''}
         people={people.filter((p) => (picking?.kind === 'church' ? p.role !== picking.role : p.finance_role !== picking?.role))}

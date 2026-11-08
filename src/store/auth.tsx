@@ -5,6 +5,7 @@ import { PROFILE_COLS } from '@/lib/api';
 import { supabase } from '../lib/supabase';
 import { registerForPush } from '../lib/push';
 import type { Church, Contact, Group, Profile } from '../types';
+import { financeLevelFromPerms, rolePerms, type Perm } from '../lib/perms';
 
 type AuthState = {
   loading: boolean;
@@ -14,28 +15,38 @@ type AuthState = {
   group: Group | null;
   /** La ficha de la persona (foto, colectivo, estado de miembro). */
   me: Contact | null;
+  /** Dan roles y permisos (pastor y administrador de la app). */
   isAdmin: boolean;
-  /** Pastor o secretaría: cargan miembros, editan clases, ministerios, prédicas. */
+  /** Pueden cargar y editar personas (pastor, secretaría…). */
   isStaff: boolean;
   /** Capitán, secretaría o pastor: ven el panel, la fidelidad y las ausencias. */
   isLeader: boolean;
   /** 0 sin acceso · 1 revisor · 2 carga · 3 tesorero · 4 pastor / administrador de finanzas */
   financeLevel: number;
+  /** Permisos efectivos (rol + permisos sueltos). */
+  perms: string[];
+  can: (p: Perm) => boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthState | null>(null);
 
-/** Igual que public.finance_level() en la base. */
+/** Permisos aproximados de una persona según su rol (los exactos los da la base con perms_of). */
+export function permsOf(p: Profile | null | undefined): string[] {
+  if (!p) return [];
+  let v: string[] = rolePerms(p.role);
+  if (p.role !== 'admin' && p.role !== 'app_admin' && p.finance_role) {
+    v = v.filter((x) => !x.startsWith('fin.'));
+    const f: Record<string, string[]> = { manager: ['fin.ver', 'fin.cargar', 'fin.tesoreria', 'fin.roles'], treasurer: ['fin.ver', 'fin.cargar', 'fin.tesoreria'], secretary: ['fin.ver', 'fin.cargar'], viewer: ['fin.ver'] };
+    v = [...v, ...(f[p.finance_role] ?? [])];
+  }
+  return v;
+}
+
+/** Nivel de finanzas de una persona según su rol (igual que public.finance_level_of sin permisos sueltos). */
 export function financeLevelOf(p: Profile | null | undefined): number {
-  if (!p) return 0;
-  if (p.role === 'admin' || p.finance_role === 'manager') return 4;
-  if (p.finance_role === 'treasurer') return 3;
-  if (p.finance_role === 'secretary') return 2;
-  if (p.finance_role === 'viewer') return 1;
-  if (p.finance_role === 'none') return 0;
-  return p.role === 'secretary' ? 2 : 0;
+  return financeLevelFromPerms(permsOf(p));
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -45,10 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [church, setChurch] = useState<Church | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [me, setMe] = useState<Contact | null>(null);
+  const [perms, setPerms] = useState<string[]>([]);
 
   const loadProfile = useCallback(async (userId: string | undefined) => {
     if (!userId) {
       setProfile(null);
+      setPerms([]);
       setChurch(null);
       setGroup(null);
       setMe(null);
@@ -59,6 +72,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!p || !(p as Profile).id) ({ data: p } = await supabase.from('profiles').select(PROFILE_COLS).eq('id', userId).maybeSingle());
     const prof = (p as Profile | null) ?? null;
     setProfile(prof);
+    const { data: pp, error: pe } = await supabase.rpc('my_permissions');
+    setPerms(!pe && Array.isArray(pp) ? (pp as string[]) : permsOf(prof));
     if (prof?.church_id) {
       const { data: c } = await supabase.from('churches').select('*').eq('id', prof.church_id).maybeSingle();
       setChurch((c as Church | null) ?? null);
@@ -111,16 +126,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       church,
       group,
       me,
-      isAdmin: profile?.role === 'admin',
-      isStaff: profile?.role === 'admin' || profile?.role === 'secretary',
-      isLeader: profile?.role === 'admin' || profile?.role === 'secretary' || profile?.role === 'captain',
-      financeLevel: financeLevelOf(profile),
+      isAdmin: perms.includes('admin.permisos'),
+      isStaff: perms.includes('personas.editar'),
+      isLeader: perms.includes('personas.ver_todas') || perms.includes('inf.panel') || profile?.role === 'captain',
+      financeLevel: financeLevelFromPerms(perms),
+      perms,
+      can: (k: Perm) => perms.includes(k),
       refreshProfile: () => loadProfile(session?.user.id),
       signOut: async () => {
         await supabase.auth.signOut();
       },
     }),
-    [loading, session, profile, church, group, me, loadProfile],
+    [loading, session, profile, church, group, me, perms, loadProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
