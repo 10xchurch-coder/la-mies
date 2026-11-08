@@ -1,0 +1,16 @@
+# Calles de una zona chica para armar capturas de pantalla de la tienda.
+name: Calles para capturas
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  calles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/demo_calles.py
+      - run: |
+          git config user.name "la-mies-bot"; git config user.email "bot@users.noreply.github.com"
+          git add data/demo_calles.json; git commit -m "Calles para capturas" || echo "sin cambios"
+          git pull --rebase && git push
