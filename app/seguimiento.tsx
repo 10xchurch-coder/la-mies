@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Card, Empty, Loading, Tag } from '@/components/ui';
-import { listServices, myFollowups } from '@/lib/api';
+import { completeFollowUp, listServices, myFirstVisitTasks, myFollowups, type FirstVisitTask } from '@/lib/api';
 import { INTEREST_LABEL, PROMISE_LABEL, fmtRelativeDay } from '@/lib/format';
 import { chooseWhatsApp } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
@@ -19,6 +19,7 @@ export default function Seguimiento() {
   const { profile, church } = useAuth();
   const [rows, setRows] = useState<FollowupRow[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
+  const [tasks, setTasks] = useState<FirstVisitTask[]>([]);
 
   useEffect(() => {
     listServices().then(setServices).catch(() => undefined);
@@ -26,6 +27,7 @@ export default function Seguimiento() {
   useFocusEffect(
     useCallback(() => {
       myFollowups().then(setRows).catch(() => setRows([]));
+      myFirstVisitTasks().then(setTasks).catch(() => undefined);
     }, []),
   );
 
@@ -36,6 +38,27 @@ export default function Seguimiento() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Mis contactos para seguir" subtitle={rows ? `${rows.length} personas · ${pending.length} sin contacto esta semana` : undefined} back />
       <Screen>
+        {tasks.length ? (
+          <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Vinieron por primera vez</Text>
+            <Text style={{ fontSize: 12, color: colors.amberText }}>Llamalos en 48 horas y visitalos en la semana. Al registrar la visita se tilda solo.</Text>
+            {tasks.map((t) => (
+              <View key={t.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: t.contact_id } })} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Face name={t.name} path={t.photo_path} size={36} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{t.name}</Text>
+                    <Text style={{ fontSize: 12, color: t.overdue ? colors.red : colors.muted }}>
+                      {t.kind === 'call' ? 'Llamar' : 'Visitar'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
+                    </Text>
+                  </View>
+                </Pressable>
+                {t.phone ? <Small icon={t.kind === 'call' ? 'phone' : 'message-circle'} label={t.kind === 'call' ? 'Llamar' : 'Escribir'} onPress={() => (t.kind === 'call' ? Linking.openURL(`tel:${t.phone}`) : chooseWhatsApp(t.phone, { to: t.name, from: profile?.display_name, church: church?.name, services }, ['followup', 'visit']))} /> : null}
+                <Small icon="check" label="Hecho" onPress={() => completeFollowUp(t.id).then(() => setTasks(tasks.filter((x) => x.id !== t.id))).catch(() => undefined)} />
+              </View>
+            ))}
+          </Card>
+        ) : null}
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title="No tenés contactos para seguir" text="Los contactos que anotás en las salidas (o que te asignan) aparecen acá." /> : null}
         {(rows ?? []).map((r) => {
           const stale = !r.last_visit || new Date(r.last_visit).getTime() < week;

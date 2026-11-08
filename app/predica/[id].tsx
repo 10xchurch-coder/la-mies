@@ -8,7 +8,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, Loading, SectionTitle } from '@/components/ui';
-import { getSermon, mySermonNotes, saveSermonNotes } from '@/lib/api';
+import { getSermon, liveNotes, mySermonNotes, saveSermonNotes } from '@/lib/api';
 import { downloadUrl, signedUrl } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateOnly, youtubeId } from '@/lib/format';
@@ -57,6 +57,19 @@ function AudioPlayer({ url }: { url: string }) {
 }
 
 // El bosquejo: cada "___" es un espacio para completar. Se guarda solo, un segundo después de escribir.
+/** Lo que la persona escribió mientras miraba el culto en vivo. */
+function LiveNotes({ video }: { video: string }) {
+  const [t, setT] = useState('');
+  useEffect(() => { liveNotes(video).then(setT).catch(() => undefined); }, [video]);
+  if (!t.trim()) return null;
+  return (
+    <Card style={{ gap: 6, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
+      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Tus notas del culto en vivo</Text>
+      <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }}>{t}</Text>
+    </Card>
+  );
+}
+
 function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string | null }) {
   const lines = (outline ?? '').split('\n').map((l) => l.trimEnd()).filter((l) => l.trim());
   const blanks = lines.reduce((n, l) => n + (l.split('___').length - 1), 0);
@@ -166,6 +179,7 @@ export default function PredicaVer() {
             </View>
           </Pressable>
         ) : s.youtube_url ? <Button title="Ver el video" icon="youtube" onPress={() => Linking.openURL(s.youtube_url as string)} /> : null}
+        {yt ? <LiveNotes video={yt} /> : null}
         {s.passage ? <Text style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{s.passage}</Text> : null}
         {s.description ? <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }}>{s.description}</Text> : null}
         {s.summary ? (

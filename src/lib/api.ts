@@ -697,3 +697,70 @@ export async function saveFinRecurring(r: Partial<FinRecurring> & { from_fund_id
   const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
   ok(await supabase.from('fin_recurring').insert({ ...row, church_id: church }));
 }
+
+// ---------------------------------------------------------------------------
+// En vivo, seguimiento de visitas nuevas, cumpleaños, niños y colectivo
+// ---------------------------------------------------------------------------
+export type LiveState = { live_video_id: string | null; live_title: string | null; live_since: string | null; youtube_channel_id: string | null; website: string | null };
+export async function liveState(): Promise<LiveState | null> {
+  const { data } = await supabase.from('churches').select('live_video_id, live_title, live_since, youtube_channel_id, website').maybeSingle();
+  return (data as LiveState | null) ?? null;
+}
+export async function setLive(video: string | null, title: string | null = null): Promise<void> {
+  ok(await supabase.rpc('set_live', { p_video: video ?? '', p_title: title }));
+}
+export type LiveComment = { id: string; user_id: string; author: string | null; body: string; created_at: string; mine: boolean };
+export async function liveComments(video: string): Promise<LiveComment[]> {
+  return (ok(await supabase.rpc('live_comments_list', { p_video: video, p_after: null })) as LiveComment[] | null) ?? [];
+}
+export async function addLiveComment(video: string, body: string): Promise<void> {
+  ok(await supabase.from('live_comments').insert({ video_id: video, body }));
+}
+export async function deleteLiveComment(id: string): Promise<void> {
+  ok(await supabase.from('live_comments').delete().eq('id', id));
+}
+export async function liveNotes(video: string): Promise<string> {
+  const { data } = await supabase.from('live_notes').select('body').eq('video_id', video).maybeSingle();
+  return (data as { body: string } | null)?.body ?? '';
+}
+export async function saveLiveNotes(video: string, body: string): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  ok(await supabase.from('live_notes').upsert({ user_id: u.user?.id, video_id: video, body, updated_at: new Date().toISOString() }, { onConflict: 'user_id,video_id' }));
+}
+
+export type FirstVisitTask = { id: string; contact_id: string; name: string; phone: string | null; photo_path: string | null; kind: 'call' | 'visit'; due_at: string; overdue: boolean };
+export async function myFirstVisitTasks(): Promise<FirstVisitTask[]> {
+  const { data, error } = await supabase.rpc('my_follow_ups');
+  return error ? [] : ((data ?? []) as FirstVisitTask[]);
+}
+export async function completeFollowUp(id: string): Promise<void> {
+  ok(await supabase.rpc('complete_follow_up', { p_task: id }));
+}
+
+export type BirthdayRow = { contact_id: string; name: string; phone: string | null; photo_path: string | null; birthdate: string; next_on: string; turns: number };
+export async function upcomingBirthdays(days = 30): Promise<BirthdayRow[]> {
+  return (ok(await supabase.rpc('upcoming_birthdays', { p_days: days })) as BirthdayRow[] | null) ?? [];
+}
+
+export type CheckinRow = { id: string; child_id: string; name: string; photo_path: string | null; room: string; code: string; in_at: string; out_at: string | null; brought_by: string | null; age: number | null };
+export async function checkinsToday(): Promise<CheckinRow[]> {
+  return (ok(await supabase.rpc('checkins_today')) as CheckinRow[] | null) ?? [];
+}
+export async function checkInChild(child: string, room: string, broughtBy: string | null): Promise<string> {
+  return ok(await supabase.rpc('check_in_child', { p_child: child, p_room: room, p_brought_by: broughtBy })) as string;
+}
+export async function checkOutChild(code: string): Promise<{ child_id: string; name: string }[]> {
+  return (ok(await supabase.rpc('check_out_child', { p_code: code })) as { child_id: string; name: string }[] | null) ?? [];
+}
+
+export type RiderRow = { contact_id: string; name: string; phone: string | null; photo_path: string | null; address: string | null; pickup_time: string | null; picked: boolean; status: string };
+export async function routeRiders(group: string): Promise<RiderRow[]> {
+  return (ok(await supabase.rpc('route_riders', { p_group: group })) as RiderRow[] | null) ?? [];
+}
+export async function setPicked(contact: string, group: string, on: boolean): Promise<void> {
+  if (on) ok(await supabase.from('bus_pickups').upsert({ contact_id: contact, group_id: group }, { onConflict: 'contact_id,on_date' }));
+  else ok(await supabase.from('bus_pickups').delete().eq('contact_id', contact).eq('on_date', new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' })));
+}
+export async function setBusRider(contact: string, on: boolean): Promise<void> {
+  ok(await supabase.rpc('set_bus_rider', { p_contact: contact, p_on: on }));
+}

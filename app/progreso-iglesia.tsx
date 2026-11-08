@@ -18,7 +18,6 @@ const METRICS: { key: Key; label: string; group: 'iglesia' | 'evangelismo'; sum:
   { key: 'people', label: 'Personas distintas', group: 'iglesia', sum: false, good: 'up' },
   { key: 'members', label: 'Miembros', group: 'iglesia', sum: false, good: 'up' },
   { key: 'first_time', label: 'Primera vez', group: 'iglesia', sum: true, good: 'up' },
-  { key: 'saved', label: 'Recibieron a Cristo', group: 'iglesia', sum: true, good: 'up' },
   { key: 'baptisms', label: 'Bautismos', group: 'iglesia', sum: true, good: 'up' },
   { key: 'new_members', label: 'Miembros nuevos', group: 'iglesia', sum: true, good: 'up' },
   { key: 'class_present', label: 'Asistencia a clases', group: 'iglesia', sum: true, good: 'up' },

@@ -18,7 +18,8 @@ import { RULES } from '@/components/RulesGate';
 
 export default function Ajustes() {
   const router = useRouter();
-  const { profile, church, group, refreshProfile, signOut } = useAuth();
+  const { profile, church, group, refreshProfile, signOut, can } = useAuth();
+  const isStaff = can('com.moderar');
   const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: 'Face ID' });
   const mode = useThemeMode();
 
@@ -103,6 +104,7 @@ export default function Ajustes() {
 
         <SectionTitle>Cuenta</SectionTitle>
         <Card style={{ padding: 0 }}>
+          {isStaff ? <RowLink title="Denuncias" subtitle="Comentarios o pedidos que alguien denunció" icon="flag" onPress={() => router.push('/admin/denuncias' as never)} /> : null}
           <RowLink title="Normas de la comunidad" subtitle="Respeto, privacidad y denuncias" icon="book" onPress={() => Alert.alert('Normas de la comunidad', RULES.map((r, i) => `${i + 1}. ${r}`).join('\n\n'))} />
           <RowLink
             title="Personas bloqueadas"

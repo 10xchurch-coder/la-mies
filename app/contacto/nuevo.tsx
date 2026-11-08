@@ -8,6 +8,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Button, Choice, Field, Segmented, Toggle } from '@/components/ui';
 import { listProfiles } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
+import { isNetworkError, newId, queueContact, uploadContact, type OfflineContact } from '@/lib/offline';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
@@ -61,9 +62,9 @@ export default function NuevoContacto() {
     setBusy(true);
     try {
       const day = promised ? promiseDay : null;
-      const { data: c, error } = await supabase
-        .from('contacts')
-        .insert({
+      const item: OfflineContact = {
+        contact: {
+          id: newId(),
           name: name.trim(),
           age: age ? Number(age) : null,
           sex,
@@ -81,32 +82,23 @@ export default function NuevoContacto() {
           gospel_presented: gospel,
           share_mode: share,
           session_id: outing.active?.id ?? null,
-        })
-        .select('id')
-        .single();
-      if (error) throw error;
-      const contactId = (c as { id: string }).id;
-      const kids = hasChildren === 'yes' ? children.filter((k) => k.name.trim()).map((k) => ({ contact_id: contactId, name: k.name.trim(), age: k.age ? Number(k.age) : null })) : [];
-      if (kids.length) {
-        const { error: e2 } = await supabase.from('contact_children').insert(kids);
-        if (e2) throw e2;
-      }
-      const { error: e3 } = await supabase.from('contact_visits').insert({
-        contact_id: contactId,
-        session_id: outing.active?.id ?? null,
-        note: notes.trim() || null,
-        gospel_presented: gospel,
-        promise_day: day,
-      });
-      if (e3) throw e3;
-      if (share === 'custom' && chosen.length) {
-        const { error: e4 } = await supabase.from('contact_shares').insert(chosen.map((uid) => ({ contact_id: contactId, user_id: uid })));
-        if (e4) throw e4;
+        },
+        kids: hasChildren === 'yes' ? children.filter((k) => k.name.trim()).map((k) => ({ name: k.name.trim(), age: k.age ? Number(k.age) : null })) : [],
+        visit: { session_id: outing.active?.id ?? null, note: notes.trim() || null, gospel_presented: gospel, promise_day: day },
+        shares: share === 'custom' ? chosen : [],
+        savedAt: Date.now(),
+      };
+      try {
+        await uploadContact(item);
+      } catch (e) {
+        if (!isNetworkError(e)) throw e;
+        await queueContact(item);
+        Alert.alert('Guardado en el teléfono', 'No hay señal. El contacto quedó guardado y se sube solo cuando vuelva la señal.');
       }
       router.dismissAll();
       router.replace(outing.active ? '/salida' : '/(tabs)/personas');
     } catch (e) {
-      Alert.alert('No se pudo guardar', `${errorMessage(e)}\n\nSi no tenés señal, anotá los datos y cargalos cuando vuelva.`);
+      Alert.alert('No se pudo guardar', errorMessage(e));
     } finally {
       setBusy(false);
     }

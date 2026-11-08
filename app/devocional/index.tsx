@@ -267,6 +267,16 @@ export default function Devocional() {
           ))}
         </ScrollView>
 
+        {/* Tocar a los costados también pasa de página (como los estados de WhatsApp). */}
+        {slides.length > 1 ? (
+          <>
+            <Pressable onPress={() => page > 0 && goTo(page - 1)} accessibilityRole="button" accessibilityLabel="Página anterior"
+              style={{ position: 'absolute', left: 0, top: padTop, bottom: padBottom, width: W * (slides[page] === 'reading' ? 0.16 : 0.26) }} />
+            <Pressable onPress={() => page < slides.length - 1 && goTo(page + 1)} accessibilityRole="button" accessibilityLabel="Página siguiente"
+              style={{ position: 'absolute', right: 0, top: padTop, bottom: padBottom, width: W * (slides[page] === 'reading' ? 0.16 : 0.26) }} />
+          </>
+        ) : null}
+
         {/* Arriba: barras de avance, cerrar, día y racha. */}
         <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
           <View style={{ flexDirection: 'row', gap: 4 }}>

@@ -15,6 +15,7 @@ import { Loading } from '@/components/ui';
 import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
 import { useOtaUpdates } from '@/lib/otaUpdates';
+import { startOfflineSync } from '@/lib/offline';
 import { colors, useThemeMode } from '@/theme';
 
 // Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
@@ -88,6 +89,7 @@ export default function RootLayout() {
   const [themeReady, setThemeReady] = useState(false);
   const mode = useThemeMode();
   useOtaUpdates();
+  useEffect(() => startOfflineSync(), []);
   useEffect(() => {
     loadThemeMode().finally(() => setThemeReady(true));
   }, []);

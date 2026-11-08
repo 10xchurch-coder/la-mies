@@ -33,8 +33,8 @@ export default function Reporte() {
 
   const text = r
     ? `Informe semanal · ${church?.name ?? ''}\nDel ${fmtDateShort(r.from)} al ${fmtDateShort(r.to)}\n\n`
-      + `EVANGELISMO\n${r.outings} salidas · ${r.people_out} hermanos · ${fmtMinutes(r.minutes)} · ${r.km} km\n${r.houses} casas · ${r.contacts} contactos · ${r.gospel} con el evangelio · ${r.promises} promesas\n\n`
-      + `IGLESIA\n${r.attendance} asistencias · ${r.first_time} vinieron por primera vez · ${r.visits} visitas a casas\n${r.saved} recibieron a Cristo · ${r.baptisms} bautismos · ${r.new_members} miembros nuevos\n${r.absent} miembros faltaron el último fin de semana`
+      + `EVANGELISMO\n${r.outings} salidas · ${r.people_out} hermanos · ${fmtMinutes(r.minutes)} · ${r.km} km\n${r.houses} casas · ${r.contacts} contactos · ${r.gospel} con el evangelio presentado · ${r.promises} promesas\n\n`
+      + `IGLESIA\n${r.attendance} asistencias · ${r.first_time} vinieron por primera vez · ${r.visits} visitas a casas\n${r.baptisms} bautismos · ${r.new_members} miembros nuevos\n${r.absent} miembros faltaron el último fin de semana`
       + (r.services?.length ? `\n\nPOR REUNIÓN\n${r.services.map((x) => `${x.name}: ${x.count}`).join('\n')}` : '')
       + (r.classes?.length ? `\n\nPOR CLASE\n${r.classes.map((x) => `${x.name}: ${x.days ? x.present : '–'}`).join('\n')}\nTotal en clases: ${r.classes.reduce((a, x) => a + x.present, 0)}` : '')
     : '';
@@ -58,7 +58,7 @@ export default function Reporte() {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Stat value={r.houses} label="Casas" tone="blue" />
               <Stat value={r.contacts} label="Contactos" />
-              <Stat value={r.gospel} label="Evangelio" tone="green" />
+              <Stat value={r.gospel} label="Evangelio presentado" tone="green" />
               <Stat value={r.promises} label="Promesas" tone="amber" />
             </View>
             <SectionTitle>Iglesia</SectionTitle>
@@ -68,7 +68,6 @@ export default function Reporte() {
               <Stat value={r.visits} label="Visitas a casas" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={r.saved} label="Recibieron a Cristo" tone="green" />
               <Stat value={r.baptisms} label="Bautismos" />
               <Stat value={r.new_members} label="Miembros nuevos" />
             </View>
@@ -116,14 +115,14 @@ export default function Reporte() {
             <SectionTitle>El camino de los contactos (por mes)</SectionTitle>
             <Card style={{ padding: 0 }}>
               <View style={{ flexDirection: 'row', padding: 8, borderBottomWidth: 1, borderBottomColor: colors.border }}>
-                {['Mes', 'Contac.', 'Evang.', 'Visit.', 'Vino', 'Salvo', 'Baut.', 'Miemb.'].map((h, i) => (
+                {['Mes', 'Contac.', 'Ev. pres.', 'Visit.', 'Vino', 'Baut.', 'Miemb.'].map((h, i) => (
                   <Text key={h} style={{ flex: i === 0 ? 1.4 : 1, fontSize: 10, fontWeight: '800', color: colors.muted, textAlign: i === 0 ? 'left' : 'center' }}>{h}</Text>
                 ))}
               </View>
               {pipe.map((p) => (
                 <View key={p.month} style={{ flexDirection: 'row', padding: 8, borderBottomWidth: 1, borderBottomColor: colors.border }}>
                   <Text style={{ flex: 1.4, fontSize: 12, fontWeight: '700', color: colors.text }}>{new Date(`${p.month}T12:00:00`).toLocaleDateString('es-AR', { month: 'short', year: '2-digit' })}</Text>
-                  {[p.contacts, p.gospel, p.visited, p.came, p.saved, p.baptized, p.members].map((v, i) => (
+                  {[p.contacts, p.gospel, p.visited, p.came, p.baptized, p.members].map((v, i) => (
                     <Text key={i} style={{ flex: 1, fontSize: 13, fontWeight: '700', color: v ? colors.text : colors.muted, textAlign: 'center' }}>{v}</Text>
                   ))}
                 </View>

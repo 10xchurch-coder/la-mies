@@ -13,7 +13,7 @@ import { signedUrl } from '@/lib/files';
 import { Card, SectionTitle } from '@/components/ui';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
-import { dailyFor, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
+import { dailyFor, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
@@ -33,7 +33,8 @@ export function greeting(d = new Date()): string {
 
 export default function Iglesia() {
   const router = useRouter();
-  const { profile, church, isStaff, isLeader, financeLevel } = useAuth();
+  const { profile, church, isStaff, isLeader, financeLevel, can } = useAuth();
+  const [live, setLive] = useState<{ id: string; title: string | null } | null>(null);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [takesAttendance, setTakesAttendance] = useState(false);
   const [daily, setDaily] = useState<DailyContent | null>(null);
@@ -59,6 +60,7 @@ export default function Iglesia() {
       setMyMinistries(ms.filter((m) => m.leader_id === profile?.id || mm.some((x) => x.ministry_id === m.id && x.profile_id === profile?.id)));
     }).catch(() => undefined);
     listClasses().then((k) => setHasClasses(k.length > 0)).catch(() => undefined);
+    liveState().then((st) => setLive(st?.live_video_id ? { id: st.live_video_id, title: st.live_title } : null)).catch(() => undefined);
     // Anuncios de las últimas dos semanas, arriba de todo.
     listAnnouncements().then((a) => setNews(a.filter((x) => Date.now() - new Date(x.created_at).getTime() < 14 * 86400000).slice(0, 3))).catch(() => undefined);
   }, [profile?.id]);
@@ -87,11 +89,14 @@ export default function Iglesia() {
       tiles: [
         { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: isLeader || takesAttendance || !!profile?.takes_attendance, tone: 'green' },
         { icon: 'calendar', label: 'Calendario', to: '/eventos', show: true },
+        { icon: 'radio', label: 'En vivo', to: '/vivo' as Href, show: true },
         { icon: 'sunrise', label: 'Crecimiento', to: '/crecimiento' as Href, show: true },
         { icon: 'heart', label: 'Oración', to: '/oracion', show: true },
         ministryTile,
         { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
         { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
+        { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: isLeader || takesAttendance || !!profile?.takes_attendance || can('personas.asistencia') },
+        { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: profile?.role === 'captain' || can('personas.asistencia') },
         { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
         { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
@@ -106,6 +111,7 @@ export default function Iglesia() {
         { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
         { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
         { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
+        { icon: 'gift', label: 'Cumpleaños', to: '/cumples' as Href, show: isLeader },
       ],
     },
     {
@@ -117,7 +123,6 @@ export default function Iglesia() {
         { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
         { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
         { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
-        { icon: 'flag', label: 'Denuncias', to: '/admin/denuncias' as Href, show: isStaff },
         { icon: 'book', label: 'Informes y consejos', to: '/informes' as Href, show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
       ],
@@ -147,6 +152,19 @@ export default function Iglesia() {
                 {tomorrow.passage || tomorrow.preacher ? <Text style={{ fontSize: 13, color: colors.muted }}>{[tomorrow.passage, tomorrow.preacher].filter(Boolean).join(' · ')}</Text> : null}
               </View>
             </Card>
+          </Pressable>
+        ) : null}
+        {live ? (
+          <Pressable onPress={() => router.push('/vivo' as Href)} accessibilityRole="button" accessibilityLabel="Ver el culto en vivo"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: '#E11D48' }}>
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="radio" size={20} color="#FFF" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFF', letterSpacing: 1 }}>● EN VIVO AHORA</Text>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: '#FFF' }} numberOfLines={1}>{live.title ?? 'El culto está en vivo'}</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
         ) : null}
         {daily ? (

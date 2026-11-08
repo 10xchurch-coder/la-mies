@@ -48,11 +48,12 @@ export default function Finanzas() {
   }
 
   const ars = (x: { currency: string }) => x.currency !== 'USD';
-  const total = (all ?? []).filter(ars).reduce((a, f) => a + f.closing, 0);
-  const usd = (all ?? []).filter((f) => f.currency === 'USD').reduce((a, f) => a + f.closing, 0);
   const mIn = month.filter(ars).reduce((a, f) => a + f.income, 0);
   const mOut = month.filter(ars).reduce((a, f) => a + f.expense, 0);
-  const byAccount = [...accts.filter(ars).reduce((m, x) => m.set(x.account, (m.get(x.account) ?? 0) + x.balance), new Map<string, number>()).entries()];
+  // Fondo General: efectivo y banco por separado, y el total.
+  const general = (all ?? []).find((f) => f.kind === 'general' && f.currency !== 'USD');
+  const genAccounts = [...accts.filter((x) => general && x.fund_id === general.fund_id).reduce((m, x) => m.set(x.account, (m.get(x.account) ?? 0) + x.balance), new Map<string, number>()).entries()];
+  const genTotal = general?.closing ?? genAccounts.reduce((a, [, v]) => a + v, 0);
   const monthName = new Date().toLocaleDateString('es-AR', { month: 'long' });
 
   const go = (to: string) => router.push(to as Href);
@@ -63,12 +64,19 @@ export default function Finanzas() {
       <Screen>
         {all === null ? <Loading /> : (
           <>
-            <Card style={{ gap: 4, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>Total en todos los fondos</Text>
-              <Text style={{ fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: -0.5 }}>{fmtMoney(total)}{usd ? <Text style={{ fontSize: 16 }}>  + {fmtMoney(usd, 'USD')}</Text> : null}</Text>
-              {byAccount.length ? <Text style={{ fontSize: 13, color: colors.text }}>{byAccount.map(([n, v]) => `${n}: ${fmtMoney(v)}`).join(' · ')}</Text> : null}
+            {/* Arriba solo el fondo General (lo que de verdad se puede usar); cada fondo tiene su saldo abajo. */}
+            <Card style={{ gap: 8, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Fondo General</Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {[...genAccounts, ['Total', genTotal] as [string, number]].map(([n, v], i, arr) => (
+                  <View key={n} style={{ flex: 1, gap: 2, paddingLeft: i ? 8 : 0, borderLeftWidth: i ? 1 : 0, borderLeftColor: colors.border }}>
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: colors.greenText }}>{n}</Text>
+                    <Text style={{ fontSize: i === arr.length - 1 ? 20 : 17, fontWeight: '800', color: v < 0 ? colors.red : colors.text }} numberOfLines={1} adjustsFontSizeToFit>{fmtMoney(v)}</Text>
+                  </View>
+                ))}
+              </View>
               <Text style={{ fontSize: 13, color: colors.text }}>
-                En {monthName}: <Text style={{ color: colors.greenText, fontWeight: '800' }}>+{fmtMoney(mIn)}</Text> entró · <Text style={{ color: colors.red, fontWeight: '800' }}>−{fmtMoney(mOut)}</Text> salió
+                En {monthName} (todos los fondos): <Text style={{ color: colors.greenText, fontWeight: '800' }}>+{fmtMoney(mIn)}</Text> entró · <Text style={{ color: colors.red, fontWeight: '800' }}>−{fmtMoney(mOut)}</Text> salió
               </Text>
             </Card>
 

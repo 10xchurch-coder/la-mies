@@ -6,6 +6,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Button, Loading } from '@/components/ui';
 import { getTraining } from '@/lib/api';
 import { colors, themed } from '@/theme';
+import { Bridge } from '@/components/Bridge';
 import type { TrainingItem } from '@/types';
 
 /** Texto simple con títulos (#), subtítulos (##), viñetas (-), números (1.) y versículos (> Cita | texto). */
@@ -15,8 +16,20 @@ function Body({ text }: { text: string }) {
       {text.split('\n').map((line, i) => {
         const t = line.trim();
         if (!t) return <View key={i} style={{ height: 4 }} />;
+        const br = t.match(/^\[\[puente (\d)\]\]$/);
+        if (br) return <Bridge key={i} step={Number(br[1])} />;
         if (t.startsWith('> ')) {
           const [ref, ...rest] = t.slice(2).split(' | ');
+          // También "> «texto» Cita", como en Crecimiento.
+          const g = t.slice(2).match(/^«([\s\S]+)»\s+(.+)$/);
+          if (g) {
+            return (
+              <View key={i} style={styles.verse}>
+                <Text style={styles.verseText}>{g[1]}</Text>
+                <Text style={styles.verseRef}>{g[2]} · RV1960</Text>
+              </View>
+            );
+          }
           const verse = rest.join(' | ');
           return (
             <View key={i} style={styles.verse}>
@@ -40,6 +53,10 @@ function Body({ text }: { text: string }) {
         }
         if (t.startsWith('## ')) return <Text key={i} style={styles.h2}>{t.slice(3)}</Text>;
         if (t.startsWith('# ')) return <Text key={i} style={styles.h1}>{t.slice(2)}</Text>;
+        if (t.includes('**')) {
+          const parts = t.split(/(\*\*[^*]+\*\*)/g);
+          return <Text key={i} style={styles.p}>{parts.map((x, j) => (x.startsWith('**') && x.endsWith('**') ? <Text key={j} style={{ fontWeight: '800' }}>{x.slice(2, -2)}</Text> : x))}</Text>;
+        }
         if (t.startsWith('- ') || t.startsWith('• ')) {
           return (
             <View key={i} style={{ flexDirection: 'row', gap: 8, paddingLeft: 4 }}>
