@@ -61,7 +61,10 @@ export default function Clase() {
 
   const isTeacher = teachers.some((t) => t.profile_id === profile?.id);
   const canManage = isStaff;
+  // El que tiene un turno (maestro o ayudante) también toma asistencia, aunque no esté en la lista de maestros.
+  const hasTurn = sched.some((s) => s.teacher_id === profile?.id || s.helper_id === profile?.id);
   const canStudents = isStaff || isTeacher;
+  const canAttend = canStudents || hasTurn;
   const nameOf = (pid: string | null) => people.find((p) => p.id === pid)?.display_name ?? null;
   const mainTeachers = teachers.filter((t) => !t.is_helper);
 
@@ -165,7 +168,7 @@ export default function Clase() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={k.name} subtitle={`${students.length} ${students.length === 1 ? 'alumno' : 'alumnos'} · ${mainTeachers.length} ${mainTeachers.length === 1 ? 'maestro' : 'maestros'}`} back />
       <Screen>
-        {canStudents ? (
+        {canAttend ? (
           <Button title={`Tomar asistencia · ${fmtDateShort(lastClassDate)}`} icon="check-square" onPress={() => router.push({ pathname: '/clase/asistencia', params: { id, date: lastClassDate } })} />
         ) : null}
 
