@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
-import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
+import { takeSignupDraft } from '@/lib/signupDraft';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -14,9 +15,10 @@ export default function Registro() {
   const router = useRouter();
   const { session, refreshProfile } = useAuth();
   const [name, setName] = useState('');
-  const params = useLocalSearchParams<{ email?: string }>();
-  const [email, setEmail] = useState(typeof params.email === 'string' ? params.email : '');
-  const [password, setPassword] = useState('');
+  // Si ya escribió correo y contraseña en el inicio, vienen cargados.
+  const [draft] = useState(() => takeSignupDraft());
+  const [email, setEmail] = useState(draft?.email ?? '');
+  const [password, setPassword] = useState(draft?.password ?? '');
   const [code, setCode] = useState('');
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
@@ -91,6 +93,9 @@ export default function Registro() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Header title={session ? 'Unirme a mi iglesia' : 'Crear cuenta'} back={!session} subtitle="Pedile el código al administrador de tu iglesia" />
       <Screen style={{ gap: 16 }}>
+        {draft?.email && draft.password && !session ? (
+          <Text style={styles.msg}>Ya cargamos tu correo y tu contraseña. Completá tu nombre, tu celular y el código de la iglesia, y tocá "Crear cuenta".</Text>
+        ) : null}
         <Field label="Tu nombre" hint="(como te conocen en la iglesia)" value={name} onChangeText={setName} autoCapitalize="words" />
         {!session ? (
           <>

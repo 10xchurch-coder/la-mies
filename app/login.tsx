@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Screen } from '@/components/Screen';
 import { Button, Field } from '@/components/ui';
+import { setSignupDraft } from '@/lib/signupDraft';
 import { supabase, errorMessage, supabaseConfigured } from '@/lib/supabase';
 import { WEB_URL } from '@/lib/share';
 import { colors, themed } from '@/theme';
@@ -131,7 +132,7 @@ export default function Login() {
         </Pressable>
         <View style={{ gap: 6, marginTop: 4 }}>
           <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' }}>¿Es tu primera vez?</Text>
-          <Button title="Crear mi cuenta" icon="user-plus" variant="outline" onPress={() => router.push(email ? { pathname: '/registro', params: { email } } : '/registro')} />
+          <Button title="Crear mi cuenta" icon="user-plus" variant="outline" onPress={() => { setSignupDraft(email.trim(), password); router.push('/registro'); }} />
           <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>Necesitás el código de tu iglesia.</Text>
         </View>
         <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
