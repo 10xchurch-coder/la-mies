@@ -24,3 +24,16 @@ end $$;
 reset role;
 delete from public.classes where id = '30000000-0000-0000-0000-0000000000b1';
 delete from public.contacts where id = '20000000-0000-0000-0000-0000000000b1';
+-- teacher_prefs: el admin guarda, un miembro no
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+insert into public.teacher_prefs (profile_id, church_id, per_month) values ('00000000-0000-0000-0000-0000000000c5', '10000000-0000-0000-0000-000000000001', 2);
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c5', false);
+do $$ begin
+  begin
+    update public.teacher_prefs set per_month = 5 where profile_id = '00000000-0000-0000-0000-0000000000c5';
+    if found then raise exception 'FALLO: un miembro cambió su límite'; end if;
+  exception when others then if sqlerrm like 'FALLO%' then raise; end if; end;
+end $$;
+reset role;
+delete from public.teacher_prefs where profile_id = '00000000-0000-0000-0000-0000000000c5';

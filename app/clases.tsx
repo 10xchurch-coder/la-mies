@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Card, Empty, Tag } from '@/components/ui';
+import { Button, Card, Empty, Tag } from '@/components/ui';
 import { classSchedule, classTeachers, listClasses, listMaterials, listProfiles, scheduleName } from '@/lib/api';
 import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -13,7 +13,7 @@ import type { ClassRow, ClassSchedule, ClassTeacher, Material, Profile } from '@
 
 export default function Clases() {
   const router = useRouter();
-  const { profile, isLeader } = useAuth();
+  const { profile, isLeader, can } = useAuth();
   const [classes, setClasses] = useState<ClassRow[] | null>(null);
   const [teachers, setTeachers] = useState<ClassTeacher[]>([]);
   const [sched, setSched] = useState<ClassSchedule[]>([]);
@@ -41,6 +41,7 @@ export default function Clases() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={isLeader ? 'Clases' : 'Mis clases'} subtitle="Escuela dominical · sábado y domingo" back />
       <Screen>
+        {can('ens.editar') ? <Button title="Planificar el mes (sugerencia automática)" icon="shuffle" variant="outline" onPress={() => router.push('/clase/planificar')} /> : null}
         {classes && !classes.length ? <Empty icon="book" title="No hay clases cargadas" text="El pastor o la secretaría las crea desde la base de datos (ya vienen Cuna, 2 a 6 y 6 a 12)." /> : null}
         {(classes ?? []).map((k) => {
           const mine = teachers.some((t) => t.class_id === k.id && t.profile_id === profile?.id);

@@ -24,3 +24,20 @@ drop policy if exists class_students_select on public.class_students;
 create policy class_students_select on public.class_students for select to authenticated
   using (exists (select 1 from public.classes k where k.id = class_students.class_id and k.church_id = public.current_church_id())
          and (public.has_perm('ens.ver') or public.can_teach_class(class_id)));
+
+-- Cuántas veces por mes puede enseñar cada maestro (para armar la sugerencia del mes).
+create table if not exists public.teacher_prefs (
+  profile_id uuid primary key references public.profiles(id) on delete cascade,
+  church_id  uuid not null references public.churches(id) on delete cascade,
+  per_month  integer check (per_month between 1 and 10),
+  updated_at timestamptz not null default now()
+);
+alter table public.teacher_prefs enable row level security;
+drop policy if exists teacher_prefs_select on public.teacher_prefs;
+create policy teacher_prefs_select on public.teacher_prefs for select to authenticated
+  using (church_id = public.current_church_id() and (public.has_perm('ens.ver') or public.has_perm('ens.editar') or profile_id = auth.uid()));
+drop policy if exists teacher_prefs_write on public.teacher_prefs;
+create policy teacher_prefs_write on public.teacher_prefs for all to authenticated
+  using (church_id = public.current_church_id() and public.has_perm('ens.editar'))
+  with check (church_id = public.current_church_id() and public.has_perm('ens.editar'));
+grant select, insert, update, delete on public.teacher_prefs to authenticated;

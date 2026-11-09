@@ -21,7 +21,7 @@ const DOW: Record<string, number> = { sun: 0, sat: 6, mon: 1, tue: 2, wed: 3, th
 export default function Clase() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { profile, isStaff } = useAuth();
+  const { profile, isStaff, can } = useAuth();
   const [k, setK] = useState<ClassRow | null | undefined>(undefined);
   const [teachers, setTeachers] = useState<ClassTeacher[]>([]);
   const [students, setStudents] = useState<Contact[]>([]);
@@ -60,7 +60,7 @@ export default function Clase() {
   );
 
   const isTeacher = teachers.some((t) => t.profile_id === profile?.id);
-  const canManage = isStaff;
+  const canManage = isStaff || can('ens.editar');
   // El que tiene un turno (maestro o ayudante) también toma asistencia, aunque no esté en la lista de maestros.
   const hasTurn = sched.some((s) => s.teacher_id === profile?.id || s.helper_id === profile?.id);
   const canStudents = isStaff || isTeacher;
@@ -220,7 +220,7 @@ export default function Clase() {
         <SectionTitle>Maestros</SectionTitle>
         <Card style={{ padding: 0 }}>
           {teachers.map((t) => (
-            <RowLink key={t.profile_id} icon="user" title={nameOf(t.profile_id) ?? 'Maestro'} subtitle={t.is_helper ? 'Ayudante' : 'Maestro'} onPress={canManage ? () => removeTeacher(t) : undefined} />
+            <RowLink key={t.profile_id} icon="user" title={nameOf(t.profile_id) ?? 'Maestro'} subtitle={`${t.is_helper ? 'Ayudante' : 'Maestro'}${canManage ? ' · tocá para quitarlo de la clase' : ''}`} onPress={canManage ? () => removeTeacher(t) : undefined} />
           ))}
           {!teachers.length ? <Text style={{ padding: 14, color: colors.muted }}>Todavía no hay maestros.</Text> : null}
         </Card>
