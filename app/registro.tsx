@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -14,7 +14,8 @@ export default function Registro() {
   const router = useRouter();
   const { session, refreshProfile } = useAuth();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const params = useLocalSearchParams<{ email?: string }>();
+  const [email, setEmail] = useState(typeof params.email === 'string' ? params.email : '');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [phone, setPhone] = useState('');

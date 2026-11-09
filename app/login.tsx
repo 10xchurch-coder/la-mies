@@ -39,7 +39,9 @@ export default function Login() {
     const { error: e } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
     if (e) {
       setBusy(false);
-      setError(errorMessage(e));
+      // El error más común: alguien nuevo escribe su correo acá sin haber creado la cuenta.
+      const bad = /invalid login credentials|invalid_credentials/i.test(e.message ?? '');
+      setError(bad ? 'Correo o contraseña incorrectos. Si es tu primera vez, todavía no tenés cuenta: tocá "Crear mi cuenta" acá abajo.' : errorMessage(e));
       return;
     }
     await finish();
@@ -127,11 +129,11 @@ export default function Login() {
             {resetState === 'sending' ? 'Enviando…' : resetState === 'sent' ? 'Correo enviado ✓' : '¿Olvidaste tu contraseña?'}
           </Text>
         </Pressable>
-        <Pressable onPress={() => router.push('/registro')} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.muted, fontSize: 13 }}>
-            ¿Primera vez? <Text style={{ color: colors.green, fontWeight: '700' }}>Creá tu cuenta con el código de tu iglesia</Text>
-          </Text>
-        </Pressable>
+        <View style={{ gap: 6, marginTop: 4 }}>
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' }}>¿Es tu primera vez?</Text>
+          <Button title="Crear mi cuenta" icon="user-plus" variant="outline" onPress={() => router.push(email ? { pathname: '/registro', params: { email } } : '/registro')} />
+          <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>Necesitás el código de tu iglesia.</Text>
+        </View>
         <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
           <Text style={styles.verse}>Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos</Text>
           <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green }}>Mateo 9:37</Text>
