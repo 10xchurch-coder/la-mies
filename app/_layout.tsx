@@ -11,6 +11,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
+import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
+import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
 import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
@@ -73,11 +75,16 @@ function useAuthGuard() {
 }
 
 function Gate() {
-  const { loading, session, profile } = useAuth();
+  const { loading, session, perms } = useAuth();
+  const optIn = useLockOptIn();
+  const cachedRequired = useLockRequiredCache();
+  const required = perms.length ? needsAppLock(perms) : !!cachedRequired;
+  useEffect(() => { if (perms.length) rememberLockRequired(needsAppLock(perms)); }, [perms]);
   useNotificationLinks();
   useAuthGuard();
-  if (loading) return <Loading />;
-  const lock = Platform.OS !== 'web' && !!session && (profile?.biometric_lock ?? true);
+  if (loading || optIn === null || cachedRequired === null) return <Loading />;
+  // Solo se pide Face ID / huella a quien maneja finanzas o administración, o al que lo activó.
+  const lock = Platform.OS !== 'web' && !!session && (required || optIn);
   return (
     <LockGate enabled={lock}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />

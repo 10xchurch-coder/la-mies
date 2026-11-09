@@ -6,6 +6,8 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Avatar, Card, Choice, RowLink, SectionTitle, Toggle } from '@/components/ui';
 import { biometricsAvailable } from '@/components/LockGate';
+import { setLockOptIn, useLockOptIn } from '@/lib/lockPref';
+import { needsAppLock } from '@/lib/perms';
 import { requestAccountDeletion, updateProfile } from '@/lib/api';
 import { groupWord } from '@/lib/format';
 import { rolesLabel } from '@/lib/perms';
@@ -19,7 +21,9 @@ import { RULES } from '@/components/RulesGate';
 
 export default function Ajustes() {
   const router = useRouter();
-  const { profile, church, group, refreshProfile, signOut, can } = useAuth();
+  const { profile, church, group, refreshProfile, signOut, can, perms } = useAuth();
+  const mustLock = needsAppLock(perms);
+  const optIn = useLockOptIn();
   const isStaff = can('com.moderar');
   const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: 'Face ID' });
   const mode = useThemeMode();
@@ -85,9 +89,12 @@ export default function Ajustes() {
         <Card>
           <Toggle
             label={`Pedir ${bio.label} para abrir la app`}
-            hint={bio.available ? 'También se pide si la app estuvo cerrada más de 2 minutos.' : 'Tu teléfono no tiene Face ID, huella ni código configurado.'}
-            value={profile?.biometric_lock ?? true}
-            onChange={(v) => set({ biometric_lock: v })}
+            hint={!bio.available ? 'Tu teléfono no tiene Face ID, huella ni código configurado.'
+              : mustLock ? 'Obligatorio porque podés ver finanzas o datos de administración. También se pide si la app estuvo cerrada más de 2 minutos.'
+              : 'Opcional. Si lo activás, también se pide si la app estuvo cerrada más de 2 minutos.'}
+            value={mustLock || !!optIn}
+            disabled={mustLock}
+            onChange={(v) => { setLockOptIn(v); }}
           />
           <View style={{ flexDirection: 'row', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Feather name="lock" size={22} color={colors.green} />

@@ -122,14 +122,14 @@ export function Choice<T extends string>({
   );
 }
 
-export function Toggle({ label, hint, value, onChange }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({ label, hint, value, onChange, disabled }: { label: string; hint?: string; value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 }}>
       <View style={{ flex: 1, gap: 3 }}>
         <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>{label}</Text>
         {hint ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{hint}</Text> : null}
       </View>
-      <Switch value={value} onValueChange={onChange} trackColor={{ true: colors.green, false: colors.input }} thumbColor="#FFFFFF" />
+      <Switch value={value} onValueChange={onChange} disabled={disabled} trackColor={{ true: colors.green, false: colors.input }} thumbColor="#FFFFFF" />
     </View>
   );
 }

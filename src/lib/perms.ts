@@ -88,6 +88,12 @@ export function rolePerms(role: string | null | undefined): Perm[] {
 
 export const isTopRole = (r: string | null | undefined) => r === 'admin' || r === 'app_admin';
 
+/** Quien ve finanzas, administra o ve los datos de todos tiene que desbloquear la app con Face ID / huella / código.
+ *  El miembro común abre la app directo (puede activarlo él si quiere). */
+export function needsAppLock(perms: string[]): boolean {
+  return perms.some((p) => p.startsWith('fin.') || p.startsWith('admin.') || p === 'inf.panel' || p === 'personas.editar' || p === 'personas.ver_todas');
+}
+
 export function financeLevelFromPerms(perms: string[]): number {
   if (perms.includes('fin.roles')) return 4;
   if (perms.includes('fin.tesoreria')) return 3;
