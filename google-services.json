@@ -1,0 +1,19 @@
+{
+  "project_info": {
+    "project_number": "646690820444",
+    "project_id": "la-mies-ba483",
+    "storage_bucket": "la-mies-ba483.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:646690820444:android:d28cd229dd389f01be7199",
+        "android_client_info": { "package_name": "com.hopeforargentina.lamies" }
+      },
+      "oauth_client": [],
+      "api_key": [ { "current_key": "AIzaSyD1TS98-ckP5F1rz2h51_qqaASM39FR5WY" } ],
+      "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+    }
+  ],
+  "configuration_version": "1"
+}
