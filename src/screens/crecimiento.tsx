@@ -8,12 +8,16 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading, SectionTitle } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
+import { listTraining } from '@/lib/api';
+import type { TrainingItem } from '@/types';
 import { colors } from '@/theme';
 
 type Row = { id: string; slug: string; section: string; title: string; summary: string | null; sort_order: number; body?: string };
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
+const EVANG = 'Evangelismo personal';
 const FOLDERS: { section: string; icon: IconName; hint: string; bg: string; fg: string }[] = [
+  { section: EVANG, icon: 'compass', hint: 'Todo para aprender a compartir a Cristo: cómo presentar el evangelio, tu testimonio y qué responder', bg: 'amberSoft', fg: 'amberText' },
   { section: 'Lo que creemos', icon: 'book-open', hint: 'Las doctrinas de la iglesia, explicadas con la Biblia', bg: 'greenSoft', fg: 'greenText' },
   { section: 'Preguntas y respuestas', icon: 'help-circle', hint: 'Las preguntas más comunes sobre la fe', bg: 'blueSoft', fg: 'blueText' },
   { section: 'Finanzas bíblicas', icon: 'dollar-sign', hint: 'El dinero, el trabajo, las deudas y los negocios según Dios', bg: 'amberSoft', fg: 'amberText' },
@@ -41,8 +45,10 @@ export default function Crecimiento() {
   const router = useRouter();
   const { seccion } = useLocalSearchParams<{ seccion?: string }>();
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [train, setTrain] = useState<TrainingItem[]>([]);
   const [q, setQ] = useState('');
   const load = useCallback(() => {
+    listTraining().then(setTrain).catch(() => undefined);
     supabase.from('growth_articles').select('id, slug, section, title, summary, sort_order, body').order('sort_order').then(({ data }) => setRows((data as Row[]) ?? []));
   }, []);
   useFocusEffect(load);
@@ -51,13 +57,34 @@ export default function Crecimiento() {
   const s = n(q.trim());
   const found = useMemo(() => (s ? (rows ?? []).filter((r) => (!seccion || r.section === seccion) && n(`${r.title} ${r.summary ?? ''} ${r.body ?? ''}`).includes(s)) : []), [rows, s, seccion]);
   const open = (r: Row) => router.push(`/crecimiento/${r.slug}` as Href);
+  const trainRow = (t: TrainingItem): Row => ({ id: t.id, slug: t.id, section: t.category, title: t.title, summary: t.summary, sort_order: t.sort_order });
+  const openTrain = (r: Row) => router.push(`/capacitacion/${r.id}` as Href);
+  const art = (slug: string) => (rows ?? []).find((r) => r.slug === slug);
+  const cat = (name: string) => train.filter((t) => t.category === name).map(trainRow);
+  // La carpeta de evangelismo: un solo lugar, en el orden en que se aprende. Lo de capacitación se muestra desde acá sin copiarlo.
+  const evangBlocks: { title: string; items: { r: Row; train?: boolean }[] }[] = (() => {
+    const A = (slug: string) => { const r = art(slug); return r ? [{ r }] : []; };
+    const T = (name: string) => cat(name).map((r) => ({ r, train: true }));
+    const known = ['Tips para recordar', 'Presentaciones del evangelio', 'Respuestas bíblicas', 'Objeciones comunes'];
+    const more = [...new Set(train.map((t) => t.category))].filter((c) => !known.includes(c)).flatMap((c) => T(c));
+    return [
+      { title: '1. Para empezar', items: [...A('por-que-compartir'), ...A('empezar-conversacion'), ...T('Tips para recordar')] },
+      { title: '2. Cómo presentar el evangelio', items: [...A('salvacion'), ...T('Presentaciones del evangelio')] },
+      { title: '3. Tu testimonio', items: A('tu-testimonio') },
+      { title: '4. Qué responder cuando preguntan o dudan', items: [...T('Respuestas bíblicas'), ...T('Objeciones comunes'), ...more] },
+      { title: '5. Cuando alguien cree', items: A('cuando-alguien-cree') },
+    ].filter((b) => b.items.length);
+  })();
+  const evangCount = (rows ?? []).filter((r) => r.section === EVANG).length + train.length;
   const folder = FOLDERS.find((f) => f.section === seccion);
+  const isEvang = seccion === EVANG;
+  const foundTrain = isEvang && s ? train.filter((t) => n(`${t.title} ${t.summary ?? ''} ${t.category} ${t.body ?? ''}`).includes(s)).map(trainRow) : [];
   const inFolder = (rows ?? []).filter((r) => r.section === seccion);
   const first = (rows ?? []).filter((r) => r.section === 'Lo primero');
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={seccion ?? 'Crecimiento'} subtitle={folder ? `${inFolder.length} temas` : 'Para leer, aprender y crecer en la fe'} back />
+      <Header title={seccion ?? 'Crecimiento'} subtitle={folder ? `${isEvang ? evangCount : inFolder.length} temas` : 'Para leer, aprender y crecer en la fe'} back />
       <View style={{ paddingHorizontal: 16, paddingBottom: 12, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input }}>
           <Feather name="search" size={20} color={colors.muted} />
@@ -66,7 +93,28 @@ export default function Crecimiento() {
       </View>
       <Screen>
         {rows === null ? <Loading /> : s ? (
-          found.length ? found.map((r) => <ArticleRow key={r.id} r={r} icon="search" onPress={() => open(r)} />) : <Empty icon="book-open" title="No encontramos ese tema" />
+          found.length || foundTrain.length ? (
+            <>
+              {found.map((r) => <ArticleRow key={r.id} r={r} icon="search" onPress={() => open(r)} />)}
+              {foundTrain.map((r) => <ArticleRow key={r.id} r={r} icon="search" onPress={() => openTrain(r)} />)}
+            </>
+          ) : <Empty icon="book-open" title="No encontramos ese tema" />
+        ) : isEvang ? (
+          <>
+            {evangBlocks.map((b) => (
+              <View key={b.title} style={{ gap: 8 }}>
+                <SectionTitle>{b.title}</SectionTitle>
+                {b.items.map((it) => <ArticleRow key={it.r.id} r={it.r} icon={it.train ? 'compass' : 'book-open'} onPress={() => (it.train ? openTrain(it.r) : open(it.r))} />)}
+              </View>
+            ))}
+            <Pressable onPress={() => router.push('/(tabs)/mapa' as Href)} accessibilityRole="button">
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
+                <Feather name="map" size={22} color={colors.greenText} />
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText, lineHeight: 19 }}>Ya aprendiste lo básico: salí a evangelizar desde el Mapa</Text>
+                <Feather name="chevron-right" size={18} color={colors.greenText} />
+              </Card>
+            </Pressable>
+          </>
         ) : seccion ? (
           inFolder.length ? inFolder.map((r) => <ArticleRow key={r.id} r={r} icon={folder?.icon ?? 'book-open'} onPress={() => open(r)} />) : <Empty icon="book-open" title="Todavía no hay material" />
         ) : (
@@ -82,7 +130,7 @@ export default function Crecimiento() {
             ))}
             <SectionTitle>Carpetas</SectionTitle>
             {FOLDERS.map((f) => {
-              const count = (rows ?? []).filter((r) => r.section === f.section).length;
+              const count = f.section === EVANG ? evangCount : (rows ?? []).filter((r) => r.section === f.section).length;
               if (!count) return null;
               return (
                 <Pressable key={f.section} onPress={() => router.push({ pathname: '/crecimiento', params: { seccion: f.section } } as unknown as Href)} accessibilityRole="button">
