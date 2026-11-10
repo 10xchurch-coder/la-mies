@@ -8,7 +8,7 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
 
-export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance';
+export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
 
 function randomId(): string {
@@ -163,4 +163,47 @@ export async function pickAndUploadReceipt(churchId: string, month: string, labe
   const { error } = await supabase.storage.from('finance').upload(path, body, { contentType: 'image/jpeg', upsert: false });
   if (error) throw new Error(errorMessage(error));
   return { path, name: a.fileName ?? 'foto.jpg' };
+}
+
+// ---------- Chat: fotos, GIF y documentos ----------
+export type ChatAttachment = { path: string; name: string; size: number; kind: 'image' | 'file' };
+const CHAT_MAX_BYTES = 15 * 1024 * 1024;
+
+/** Saca una foto o elige una de la galería (los GIF se mandan tal cual, para que se muevan). */
+export async function pickChatImage(churchId: string, source: 'camera' | 'library'): Promise<ChatAttachment | null> {
+  const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) {
+    Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
+    return null;
+  }
+  const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: 0.9 };
+  const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  const isGif = a.mimeType === 'image/gif' || /\.gif$/i.test(a.fileName ?? a.uri);
+  if (isGif) {
+    if (a.fileSize && a.fileSize > CHAT_MAX_BYTES) { Alert.alert('GIF muy grande', 'El máximo es 15 MB.'); return null; }
+    const path = await upload('chat', churchId, a.uri, a.fileName ?? 'animacion.gif', 'image/gif');
+    return { path, name: a.fileName ?? 'animacion.gif', size: a.fileSize ?? 0, kind: 'image' };
+  }
+  const resize = a.width && a.width > 1280 ? [{ resize: { width: 1280 } }] : [];
+  const img = await manipulateAsync(a.uri, resize, { compress: 0.75, format: SaveFormat.JPEG });
+  const path = await upload('chat', churchId, img.uri, 'foto.jpg', 'image/jpeg');
+  return { path, name: 'foto.jpg', size: 0, kind: 'image' };
+}
+
+/** Elige un documento (PDF, Word, Excel, PowerPoint o texto) de hasta 15 MB. */
+export async function pickChatDocument(churchId: string): Promise<ChatAttachment | null> {
+  const res = await DocumentPicker.getDocumentAsync({
+    type: ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+    copyToCacheDirectory: true,
+    multiple: false,
+  });
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  if (a.size && a.size > CHAT_MAX_BYTES) { Alert.alert('Archivo muy grande', 'El máximo es 15 MB.'); return null; }
+  const path = await upload('chat', churchId, a.uri, a.name, a.mimeType ?? 'application/octet-stream');
+  return { path, name: a.name, size: a.size ?? 0, kind: 'file' };
 }
