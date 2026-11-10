@@ -77,8 +77,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "La Mies usa tus fotos para poner la foto de cada persona.",
-          "cameraPermission": "La Mies usa la cámara para sacar la foto de cada persona.",
+          "photosPermission": "La Mies usa tus fotos para poner la foto de cada persona y para mandar fotos en el chat.",
+          "cameraPermission": "La Mies usa la cámara para sacar la foto de cada persona y para mandar fotos en el chat.",
           "microphonePermission": false
         }
       ],
