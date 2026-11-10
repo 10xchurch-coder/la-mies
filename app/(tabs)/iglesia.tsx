@@ -14,7 +14,7 @@ import { signedUrl } from '@/lib/files';
 import { Button, Card, Field, SectionTitle } from '@/components/ui';
 import { Face } from '@/components/Face';
 import { errorMessage } from '@/lib/supabase';
-import { parseDateAR } from '@/lib/format';
+import { maskDateAR, parseDateAR } from '@/lib/format';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
@@ -226,12 +226,12 @@ export default function Iglesia() {
           <Card style={{ gap: 8 }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>🎂 ¿Cuándo es tu cumpleaños?</Text>
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Así la iglesia te saluda ese día. Solo se muestra el día, no tu edad.</Text>
-            <Field label="Fecha de nacimiento" placeholder="DD/MM/AAAA" value={bdayText} onChangeText={setBdayText} keyboardType="numbers-and-punctuation" maxLength={10} />
+            <Field label="Fecha de nacimiento" placeholder="DD/MM/AAAA" value={bdayText} onChangeText={(t) => setBdayText((prev) => maskDateAR(t, prev))} keyboardType="number-pad" maxLength={10} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button title="Ahora no" variant="ghost" small style={{ flex: 1 }} onPress={() => { setAskBday(false); AsyncStorage.setItem('lamies.bday.skip', '1').catch(() => undefined); }} />
               <Button title="Guardar" small style={{ flex: 1 }} onPress={async () => {
                 const iso = parseDateAR(bdayText);
-                if (!iso) return Alert.alert('Revisá la fecha', 'Escribila así: día/mes/año. Por ejemplo 23/05/1990.');
+                if (!iso) return Alert.alert('Revisá la fecha', 'Escribí el día, el mes y el año. Por ejemplo 23/05/1990.');
                 const { error } = await supabase.rpc('set_my_birthdate', { p_date: iso });
                 if (error) return Alert.alert('No se pudo guardar', errorMessage(error));
                 setAskBday(false);

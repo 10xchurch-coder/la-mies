@@ -265,3 +265,16 @@ export function parseMoney(t: string): number | null {
   const v = Number(s);
   return Number.isFinite(v) && v > 0 ? Math.round(v * 100) / 100 : null;
 }
+
+/** Mientras se escribe una fecha: deja solo números y pone las barras solas (23051990 → 23/05/1990).
+ *  Si se borra justo una barra, se borra también el número de antes, para que el borrar no se trabe. */
+export function maskDateAR(next: string, prev = ''): string {
+  let digits = next.replace(/\D/g, '').slice(0, 8);
+  if (next.length < prev.length && prev.endsWith('/') && !next.endsWith('/')) digits = digits.slice(0, -1);
+  if (digits.length <= 2) return digits.length === 2 && next.length > prev.length ? `${digits}/` : digits;
+  if (digits.length <= 4) {
+    const s = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return digits.length === 4 && next.length > prev.length ? `${s}/` : s;
+  }
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}

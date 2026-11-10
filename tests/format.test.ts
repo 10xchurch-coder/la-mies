@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFrom, allGroupsLabel, displayAge, fmtDateAR, groupArticle, groupWord, maskDateOrAge, parseAgeOrBirthdate, parseDateAR } from '../src/lib/format';
+import { ageFrom, allGroupsLabel, displayAge, fmtDateAR, groupArticle, groupWord, maskDateAR, maskDateOrAge, parseAgeOrBirthdate, parseDateAR } from '../src/lib/format';
 
 test('parseDateAR: día/mes/año válido e inválido', () => {
   assert.equal(parseDateAR('15/03/2024'), '2024-03-15');
@@ -50,4 +50,16 @@ test('rutas: palabra, artículo y "Todas las rutas"', () => {
   assert.equal(allGroupsLabel(null), 'Todos los grupos');
   assert.equal(groupArticle('bus_routes'), 'la');
   assert.equal(groupArticle(null), 'el');
+});
+
+test('maskDateAR: pone las barras solas y no traba el borrar', () => {
+  assert.equal(maskDateAR('2', ''), '2');
+  assert.equal(maskDateAR('23', '2'), '23/');
+  assert.equal(maskDateAR('23/0', '23/'), '23/0');
+  assert.equal(maskDateAR('23/05', '23/0'), '23/05/');
+  assert.equal(maskDateAR('23/05/1990', '23/05/199'), '23/05/1990');
+  assert.equal(maskDateAR('23051990', ''), '23/05/1990'); // pegado de una vez
+  assert.equal(maskDateAR('23/05/19901', '23/05/1990'), '23/05/1990');
+  assert.equal(maskDateAR('23', '23/'), '2'); // borró la barra: se va también el 3
+  assert.equal(maskDateAR('23/05', '23/05/'), '23/0');
 });
