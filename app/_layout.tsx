@@ -1,5 +1,6 @@
 import '@/lib/webAlert'; // en la web, los avisos y confirmaciones se muestran como ventanas
 import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
+import '@/lib/busTask'; // y la del colectivo en vivo
 import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
@@ -11,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
+import { OutingBanner } from '@/components/OutingBanner';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
@@ -88,6 +90,7 @@ function Gate() {
   return (
     <LockGate enabled={lock}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+      {session ? <OutingBanner /> : null}
     </LockGate>
   );
 }

@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { showActions } from '@/components/ActionSheet';
 import { supabase, errorMessage } from './supabase';
 
-export type ReportKind = 'comment' | 'prayer' | 'ministry_message' | 'announcement';
+export type ReportKind = 'comment' | 'prayer' | 'ministry_message' | 'announcement' | 'church_chat' | 'outing_chat';
 
 const REASONS = ['Ofensivo o irrespetuoso', 'Contenido inapropiado', 'Información privada de otra persona', 'Spam o engaño', 'Otro motivo'];
 
@@ -37,7 +37,7 @@ export function moderate(opts: { kind: ReportKind; targetId: string; authorId: s
         .catch((e) => Alert.alert('No se pudo', errorMessage(e))),
     })));
   const doBlock = () =>
-    Alert.alert(`Bloquear a ${opts.authorName ?? 'esta persona'}`, 'Ya no vas a ver sus comentarios, pedidos de oración ni mensajes. Lo podés deshacer en Ajustes.', [
+    Alert.alert(`Bloquear a ${opts.authorName ?? 'esta persona'}`, 'Ya no vas a ver sus comentarios, mensajes del chat, pedidos de oración ni mensajes de ministerio. Lo podés deshacer en Ajustes.', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Bloquear', style: 'destructive', onPress: () => blockUser(opts.authorId as string).then(() => opts.onChange?.()).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
     ]);

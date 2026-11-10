@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase';
 import { fmtDistance, fmtDuration, fmtTime } from '@/lib/format';
 import type { LatLng } from '@/lib/geo';
 import { useAuth } from '@/store/auth';
+import { liveMemberActions } from '@/lib/directions';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
 import type { CoverageRow } from '@/types';
@@ -137,8 +138,12 @@ export default function Salida() {
             <View style={styles.liveDot} />
             <Text style={styles.liveText}>{outing.active?.kind === 'flyers' ? 'Volantes en curso' : 'Evangelismo en curso'}</Text>
           </View>
-          <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600', opacity: 0.9 }}>Empezó {outing.active ? fmtTime(outing.active.startedAt) : ''}</Text>
+          <Pressable onPress={() => router.navigate('/(tabs)/iglesia')} accessibilityRole="button" accessibilityLabel="Usar el resto de la app sin cortar la salida" style={styles.appBtn}>
+            <Feather name="grid" size={14} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800' }}>Usar la app</Text>
+          </Pressable>
         </View>
+        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600', opacity: 0.9, marginTop: -6 }}>Empezó {outing.active ? fmtTime(outing.active.startedAt) : ''} · la salida sigue aunque uses otras partes de la app</Text>
         <Text style={styles.timer}>{fmtDuration(elapsed)}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
           <HeaderStat value={outing.contacts} label="Contactos" />
@@ -160,8 +165,18 @@ export default function Salida() {
           region={region ?? undefined}
           {...mapStyleProps(mapStyle)}
           onPanDrag={() => setFollow(false)}
+          onPressLive={(m) => liveMemberActions(m, { onChat: () => router.push('/salida-chat' as never) })}
         />
         <MapTypeButton style={mapStyle} onChange={setMapStyle} top={12} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Abrir el chat de la salida" onPress={() => router.push('/salida-chat' as never)} style={styles.chatBtn}>
+          <Feather name="message-circle" size={20} color="#FFFFFF" />
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Chat{live.length ? ` · ${live.length + 1}` : ''}</Text>
+        </Pressable>
+        {live.length ? (
+          <View style={styles.tapHint} pointerEvents="none">
+            <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>Tocá a un compañero para ir caminando hasta él</Text>
+          </View>
+        ) : null}
         {!follow ? (
           <Pressable accessibilityRole="button" accessibilityLabel="Centrar en mi ubicación" onPress={() => setFollow(true)} style={styles.locate}>
             <Feather name="crosshair" size={22} color={colors.text} />
@@ -212,5 +227,8 @@ const styles = themed(() => StyleSheet.create({
   locate: { position: 'absolute', right: 12, bottom: 12, width: 48, height: 48, borderRadius: 24, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
   sidePill: { position: 'absolute', left: 12, bottom: 12, flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, paddingLeft: 10, paddingRight: 14, borderRadius: 999, backgroundColor: colors.bg, elevation: 4, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
   sideIcon: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
+  appBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, height: 32, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.22)' },
+  chatBtn: { position: 'absolute', left: 12, top: 12, flexDirection: 'row', alignItems: 'center', gap: 6, height: 42, paddingHorizontal: 14, borderRadius: 999, backgroundColor: colors.blue, elevation: 4, shadowColor: '#000', shadowOpacity: 0.18, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
+  tapHint: { position: 'absolute', left: 12, top: 62, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: colors.bg, opacity: 0.92 },
   actions: { padding: 12, paddingHorizontal: 16, gap: 10, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg },
 }));

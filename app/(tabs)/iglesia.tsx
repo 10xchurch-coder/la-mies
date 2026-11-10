@@ -2,7 +2,7 @@
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -11,7 +11,11 @@ import { Screen } from '@/components/Screen';
 import { supabase } from '@/lib/supabase';
 import { addDays, isoDate } from '@/lib/format';
 import { signedUrl } from '@/lib/files';
-import { Card, SectionTitle } from '@/components/ui';
+import { Button, Card, Field, SectionTitle } from '@/components/ui';
+import { Face } from '@/components/Face';
+import { errorMessage } from '@/lib/supabase';
+import { parseDateAR } from '@/lib/format';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { dailyFor, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
@@ -45,6 +49,10 @@ export default function Iglesia() {
   const [myMinistries, setMyMinistries] = useState<Ministry[]>([]);
   const [hasClasses, setHasClasses] = useState(false);
   const [news, setNews] = useState<Announcement[]>([]);
+  const [bdays, setBdays] = useState<{ contact_id: string; name: string; photo_path: string | null; turns: number | null; is_me: boolean }[]>([]);
+  const [askBday, setAskBday] = useState(false);
+  const [bdayText, setBdayText] = useState('');
+  const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
   const insets = useSafeAreaInsets();
 
   const refresh = useCallback(() => {
@@ -63,6 +71,17 @@ export default function Iglesia() {
     listClasses().then((k) => setHasClasses(k.length > 0)).catch(() => undefined);
     liveState().then((st) => setLive(st?.live_video_id ? { id: st.live_video_id, title: st.live_title } : null)).catch(() => undefined);
     // Anuncios de las últimas dos semanas, arriba de todo.
+    supabase.rpc('today_birthdays').then(({ data }) => setBdays((data ?? []) as typeof bdays));
+    supabase.rpc('my_birthdate').then(async ({ data, error }) => {
+      if (error || data) return setAskBday(false);
+      let skipped = null;
+      try { skipped = await AsyncStorage.getItem('lamies.bday.skip'); } catch { /* sin almacenamiento */ }
+      setAskBday(!skipped);
+    });
+    supabase.rpc('bus_live_routes').then(({ data }) => {
+      const rows = (data ?? []) as { name: string; run_id: string | null }[];
+      setBus({ routes: rows.length, live: rows.find((r) => r.run_id)?.name ?? null });
+    });
     listAnnouncements().then((a) => setNews(a.filter((x) => Date.now() - new Date(x.created_at).getTime() < 14 * 86400000).slice(0, 3))).catch(() => undefined);
   }, [profile?.id]);
   useFocusEffect(refresh);
@@ -98,6 +117,8 @@ export default function Iglesia() {
         { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
         { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: isLeader || takesAttendance || !!profile?.takes_attendance || can('personas.asistencia') },
         { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
+        { icon: 'message-circle', label: 'Chat de la iglesia', to: '/chat' as Href, show: true },
+        { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
         { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
         { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
@@ -167,6 +188,54 @@ export default function Iglesia() {
             </View>
             <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
+        ) : null}
+        {bus.live ? (
+          <Pressable onPress={() => router.push('/colectivo-vivo' as Href)} accessibilityRole="button"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.amber }}>
+            <Feather name="truck" size={22} color="#FFF" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFF', letterSpacing: 1 }}>EL COLECTIVO ESTÁ EN CAMINO</Text>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: '#FFF' }} numberOfLines={1}>{bus.live} · tocá para verlo en el mapa</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color="#FFF" />
+          </Pressable>
+        ) : null}
+        {bdays.length ? (
+          <Card style={{ gap: 10, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
+            <Text style={{ fontSize: 13, fontWeight: '900', color: colors.blueText, letterSpacing: 0.5 }}>
+              🎂 {bdays.some((b) => b.is_me) ? '¡FELIZ CUMPLEAÑOS!' : bdays.length === 1 ? 'HOY CUMPLE AÑOS' : 'HOY CUMPLEN AÑOS'}
+            </Text>
+            {bdays.some((b) => b.is_me) ? (
+              <Text style={{ fontSize: 15, color: colors.text, lineHeight: 21 }}>Toda la iglesia te saluda hoy. Que el Señor te bendiga mucho.</Text>
+            ) : null}
+            {bdays.filter((b) => !b.is_me).map((b) => (
+              <View key={b.contact_id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Face name={b.name} path={b.photo_path} size={38} />
+                <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>{b.name}{b.turns ? <Text style={{ fontWeight: '500', color: colors.muted }}>  · {b.turns} años</Text> : null}</Text>
+              </View>
+            ))}
+            {bdays.some((b) => !b.is_me) ? (
+              <Text onPress={() => router.push('/chat' as Href)} style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>Mandale un saludo en el chat de la iglesia →</Text>
+            ) : null}
+          </Card>
+        ) : null}
+        {askBday ? (
+          <Card style={{ gap: 8 }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>🎂 ¿Cuándo es tu cumpleaños?</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Así la iglesia te saluda ese día. Solo se muestra el día, no tu edad.</Text>
+            <Field label="Fecha de nacimiento" placeholder="DD/MM/AAAA" value={bdayText} onChangeText={setBdayText} keyboardType="numbers-and-punctuation" maxLength={10} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Button title="Ahora no" variant="ghost" small style={{ flex: 1 }} onPress={() => { setAskBday(false); AsyncStorage.setItem('lamies.bday.skip', '1').catch(() => undefined); }} />
+              <Button title="Guardar" small style={{ flex: 1 }} onPress={async () => {
+                const iso = parseDateAR(bdayText);
+                if (!iso) return Alert.alert('Revisá la fecha', 'Escribila así: día/mes/año. Por ejemplo 23/05/1990.');
+                const { error } = await supabase.rpc('set_my_birthdate', { p_date: iso });
+                if (error) return Alert.alert('No se pudo guardar', errorMessage(error));
+                setAskBday(false);
+                Alert.alert('¡Listo!', 'Ya quedó tu cumpleaños.');
+              }} />
+            </View>
+          </Card>
         ) : null}
         {daily ? (
           <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">

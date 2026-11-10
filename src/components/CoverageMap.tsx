@@ -27,6 +27,7 @@ export type CoverageMapProps = MapViewProps & {
   selected?: { road_id: number; seg: number; side: 1 | -1; kind?: string } | null;
   onPressSegment?: (row: CoverageRow) => void;
   onPressContact?: (c: Contact) => void;
+  onPressLive?: (m: LiveMember) => void;
 };
 
 const SIDE_OFFSET_M = 3.2;
@@ -34,7 +35,7 @@ const FLYERS_OFFSET_M = 6;  // los volantes se dibujan un poco más afuera, así
 
 export function CoverageMap({
   roads, coverage, contacts = [], live = [], trails = [], houses = [], zones = [], staleSince = null, houseSides = null, onPressZone,
-  selected, onPressSegment, onPressContact, children, ...mapProps
+  selected, onPressSegment, onPressContact, onPressLive, children, ...mapProps
 }: CoverageMapProps) {
   const roadById = useMemo(() => new Map(roads.map((r) => [r.id, r])), [roads]);
   const coveredKeys = useMemo(() => new Set(coverage.filter((c) => c.kind !== 'flyers').map((c) => `${c.road_id}:${c.seg}:${c.side}`)), [coverage]);
@@ -140,7 +141,8 @@ export function CoverageMap({
         />
       ))}
       {live.map((m) => (
-        <Marker key={`live-${m.user_id}`} coordinate={{ latitude: m.lat, longitude: m.lng }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+        <Marker key={`live-${m.user_id}`} coordinate={{ latitude: m.lat, longitude: m.lng }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}
+          onPress={onPressLive && !m.me ? () => onPressLive(m) : undefined}>
           <View style={{ alignItems: 'center' }}>
             <View style={[styles.liveDot, m.me && styles.liveMe]}>
               <Text style={styles.liveInitial}>{m.display_name.charAt(0).toUpperCase()}</Text>

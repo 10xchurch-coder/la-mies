@@ -1,4 +1,5 @@
 // Pantalla principal: el mapa de veredas cubiertas, los hermanos en vivo y el botón de salir.
+import { liveMemberActions } from '@/lib/directions';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -376,6 +377,7 @@ export default function Mapa() {
           staleSince={staleSince}
           houseSides={houseSides}
           onPressZone={(z) => router.push({ pathname: '/zona', params: { id: z.id } })}
+          onPressLive={(m) => liveMemberActions(m, outing.active ? { onChat: () => router.push('/salida-chat' as never) } : {})}
           selected={selected}
           region={region}
           {...mapStyleProps(mapStyle)}
