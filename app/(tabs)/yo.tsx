@@ -110,6 +110,7 @@ export default function Yo() {
           <RowLink title="Avisos" subtitle={unread ? `${unread} sin leer` : 'Recordatorios y anuncios'} icon="bell" onPress={() => router.push('/avisos')} />
           <RowLink title="Devocional y mi racha" subtitle="Versículo del día, lectura y premios" icon="book-open" onPress={() => router.push('/devocional')} />
           <RowLink title="Mi progreso y niveles" icon="award" onPress={() => router.push('/progreso')} />
+          <RowLink title="Mis notas" subtitle="Tus apuntes de los estudios" icon="edit-3" onPress={() => router.push('/notas' as never)} />
           {certId ? <RowLink title="Mi certificado de bautismo" subtitle="Verlo, guardarlo o imprimirlo" icon="droplet" onPress={() => router.push(`/certificado/${certId}` as never)} /> : null}
           <RowLink title="Mis salidas" subtitle="Ver, arreglar o terminar una salida" icon="clock" onPress={() => router.push('/salidas')} />
           <RowLink title="Mis contactos para seguir" subtitle="Promesas, visitas y mensajes" icon="user-check" onPress={() => router.push('/seguimiento')} />

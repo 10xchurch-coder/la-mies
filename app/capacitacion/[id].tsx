@@ -7,6 +7,8 @@ import { Button, Loading } from '@/components/ui';
 import { getTraining } from '@/lib/api';
 import { colors, themed } from '@/theme';
 import { Bridge } from '@/components/Bridge';
+import { StudyNotes } from '@/components/StudyNotes';
+import { shareText } from '@/lib/share';
 import type { TrainingItem } from '@/types';
 
 /** Texto simple con títulos (#), subtítulos (##), viñetas (-), números (1.) y versículos (> Cita | texto). */
@@ -94,6 +96,8 @@ export default function CapacitacionDetalle() {
             ) : null}
             {item.summary ? <Text style={styles.summary}>{item.summary}</Text> : null}
             {item.body ? <Body text={item.body} /> : null}
+            <StudyNotes kind="training" refId={String(id)} title={item.title} />
+            <Button title="Compartir" icon="share-2" variant="outline" onPress={() => shareText(`${item.title}\n\n${(item.body ?? '').replace(/\[\[puente \d\]\]/g, '').replace(/\*\*/g, '').replace(/^#+ /gm, '').replace(/^> /gm, '')}`, item.title)} />
           </>
         )}
       </Screen>

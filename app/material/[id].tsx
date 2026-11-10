@@ -4,6 +4,7 @@ import { Alert, Linking, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading } from '@/components/ui';
+import { StudyNotes } from '@/components/StudyNotes';
 import { getMaterial } from '@/lib/api';
 import { downloadUrl, signedUrl } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -56,6 +57,7 @@ export default function MaterialVer() {
           </Card>
         ) : null}
         {m.body ? <Text selectable style={{ fontSize: 17, lineHeight: 27, color: colors.text }}>{m.body}</Text> : null}
+        <StudyNotes kind="material" refId={String(id)} title={m.title} />
         {isStaff || m.created_by === profile?.id ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Button title="Editar" variant="outline" small onPress={() => router.push({ pathname: '/material/nuevo', params: { id: m.id } })} style={{ flex: 1 }} />
