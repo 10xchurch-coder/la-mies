@@ -92,6 +92,12 @@ export default function Ajustes() {
           <TabsEditor />
         </Card>
 
+        <SectionTitle>Menú de Iglesia</SectionTitle>
+        <Card style={{ padding: 0 }}>
+          <RowLink title="Ordenar mi menú" subtitle="Fijar favoritos arriba, mover botones y grupos" icon="move"
+            onPress={() => router.push({ pathname: '/(tabs)/iglesia', params: { editar: String(Date.now()) } } as never)} />
+        </Card>
+
         <SectionTitle>Seguridad y ubicación</SectionTitle>
         <Card>
           <Toggle

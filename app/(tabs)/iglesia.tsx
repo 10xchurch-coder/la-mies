@@ -1,9 +1,9 @@
 // La iglesia: la pantalla con la que abre la app. Saludo según la hora, el versículo del día,
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useFocusEffect, useRouter, type Href } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,7 @@ import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
 import { useAuth } from '@/store/auth';
 import { useTabs } from '@/lib/tabsPref';
+import { FAV, layout, moved, resetMenu, setMenu, useMenu } from '@/lib/menuPref';
 import { colors, themed } from '@/theme';
 import type { Announcement, Ministry, Sermon, UpcomingItem } from '@/types';
 
@@ -56,6 +57,10 @@ export default function Iglesia() {
   const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
   const insets = useSafeAreaInsets();
   const tabs = useTabs();
+  const menu = useMenu();
+  const { editar } = useLocalSearchParams<{ editar?: string }>();
+  const [edit, setEdit] = useState(false);
+  useEffect(() => { if (editar) setEdit(true); }, [editar]);
 
   const refresh = useCallback(() => {
     myUpcoming(21).then(setUpcoming).catch(() => undefined);
@@ -154,6 +159,77 @@ export default function Iglesia() {
     },
   ];
 
+  // El menú: cada uno lo ordena (favoritos arriba, orden de botones y de grupos, arriba o abajo de todo).
+  const tileKey = (t: Tile) => (typeof t.to === 'string' ? t.to : JSON.stringify(t.to));
+  const laid = layout(groups, tileKey, menu).filter((g) => g.tiles.some((t) => t.show));
+  const groupTitles = laid.filter((g) => g.title !== FAV).map((g) => g.title);
+  const toggleFav = (k: string) => setMenu({ ...menu, fav: menu.fav.includes(k) ? menu.fav.filter((x) => x !== k) : [...menu.fav, k] });
+  const moveTile = (title: string, k: string, dir: -1 | 1) => {
+    const keys = (laid.find((g) => g.title === title)?.tiles ?? []).filter((t) => t.show).map(tileKey);
+    const next = moved(keys, k, dir);
+    setMenu(title === FAV ? { ...menu, fav: next } : { ...menu, order: { ...menu.order, [title]: next } });
+  };
+  const moveGroup = (title: string, dir: -1 | 1) => setMenu({ ...menu, groups: moved(groupTitles, title, dir) });
+  const menuBlock = (
+    <View style={{ gap: 14 }}>
+      {edit ? (
+        <Card style={{ gap: 10, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
+          <Text style={{ fontSize: 15, fontWeight: '800', color: colors.greenText }}>Ordenar mi menú</Text>
+          <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>
+            ★ deja el botón fijado arriba, en Favoritos. Las flechas ◀ ▶ lo mueven y ▲ ▼ mueven el grupo entero. Esto es solo en tu teléfono.
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Button title={menu.top ? 'Menú: arriba de todo' : 'Menú: abajo de todo'} icon={menu.top ? 'arrow-up' : 'arrow-down'} variant="outline" small style={{ flex: 1 }} onPress={() => setMenu({ ...menu, top: !menu.top })} />
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Button title="Como estaba" variant="ghost" small style={{ flex: 1 }} onPress={() => resetMenu()} />
+            <Button title="Listo" small style={{ flex: 1 }} onPress={() => setEdit(false)} />
+          </View>
+        </Card>
+      ) : null}
+      {laid.map((g) => {
+        const shown = g.tiles.filter((t) => t.show);
+        const gi = groupTitles.indexOf(g.title);
+        return (
+          <View key={g.title} style={{ gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flex: 1 }}><SectionTitle>{g.title === FAV ? '★ Favoritos' : g.title}</SectionTitle></View>
+              {edit && g.title !== FAV ? (
+                <View style={{ flexDirection: 'row', gap: 6 }}>
+                  <Pressable disabled={gi <= 0} onPress={() => moveGroup(g.title, -1)} accessibilityLabel={`Subir ${g.title}`} style={[styles.mini, gi <= 0 && { opacity: 0.3 }]}><Feather name="chevron-up" size={18} color={colors.text} /></Pressable>
+                  <Pressable disabled={gi >= groupTitles.length - 1} onPress={() => moveGroup(g.title, 1)} accessibilityLabel={`Bajar ${g.title}`} style={[styles.mini, gi >= groupTitles.length - 1 && { opacity: 0.3 }]}><Feather name="chevron-down" size={18} color={colors.text} /></Pressable>
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.grid}>
+              {shown.map((t, ti) => {
+                const k = tileKey(t);
+                const isFav = menu.fav.includes(k);
+                return (
+                  <Pressable key={k} onPress={() => (edit ? toggleFav(k) : router.push(t.to))} accessibilityRole="button"
+                    style={({ pressed }) => [styles.tile, t.tone === 'green' && styles.tileGreen, edit && { borderStyle: 'dashed', borderColor: colors.green }, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
+                    <View style={[styles.tileIcon, t.tone === 'green' && { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
+                      <Feather name={t.icon} size={22} color={t.tone === 'green' ? '#FFF' : colors.green} />
+                    </View>
+                    <Text style={{ fontSize: 13, fontWeight: '800', color: t.tone === 'green' ? '#FFF' : colors.text, textAlign: 'center' }} numberOfLines={2}>{t.label}</Text>
+                    {edit ? (
+                      <View style={{ flexDirection: 'row', gap: 3, marginTop: 2 }}>
+                        <Pressable disabled={ti === 0} onPress={() => moveTile(g.title, k, -1)} accessibilityLabel={`Mover ${t.label} atrás`} style={[styles.mini, styles.tiny, ti === 0 && { opacity: 0.3 }]}><Feather name="chevron-left" size={14} color={colors.text} /></Pressable>
+                        <Pressable onPress={() => toggleFav(k)} accessibilityLabel={isFav ? `Sacar ${t.label} de favoritos` : `Fijar ${t.label} arriba`} style={[styles.mini, styles.tiny, isFav && { backgroundColor: colors.amber, borderColor: colors.amber }]}><Feather name="star" size={14} color={isFav ? '#FFF' : colors.text} /></Pressable>
+                        <Pressable disabled={ti === shown.length - 1} onPress={() => moveTile(g.title, k, 1)} accessibilityLabel={`Mover ${t.label} adelante`} style={[styles.mini, styles.tiny, ti === shown.length - 1 && { opacity: 0.3 }]}><Feather name="chevron-right" size={14} color={colors.text} /></Pressable>
+                      </View>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
+      {!edit ? <Text onPress={() => setEdit(true)} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center' }}>✎ Ordenar mi menú</Text> : null}
+    </View>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={[styles.top, { paddingTop: insets.top + 10 }]}>
@@ -167,6 +243,7 @@ export default function Iglesia() {
       </View>
       <Screen>
         <Text style={styles.hello}>{greeting()}{firstName ? `, ${firstName}` : ''}</Text>
+        {menu.top ? menuBlock : null}
         {tomorrow ? (
           <Pressable onPress={() => router.push(`/predica/${tomorrow.id}` as Href)} accessibilityRole="button">
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
@@ -271,25 +348,7 @@ export default function Iglesia() {
         <SectionTitle>Esta semana te toca</SectionTitle>
         <UpcomingList items={upcoming.slice(0, 4)} />
 
-        {groups.map((g) => {
-          const shown = g.tiles.filter((t) => t.show);
-          if (!shown.length) return null;
-          return (
-            <View key={g.title} style={{ gap: 10 }}>
-              <SectionTitle>{g.title}</SectionTitle>
-              <View style={styles.grid}>
-                {shown.map((t) => (
-                  <Pressable key={t.label} onPress={() => router.push(t.to)} accessibilityRole="button" style={({ pressed }) => [styles.tile, t.tone === 'green' && styles.tileGreen, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
-                    <View style={[styles.tileIcon, t.tone === 'green' && { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-                      <Feather name={t.icon} size={22} color={t.tone === 'green' ? '#FFF' : colors.green} />
-                    </View>
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: t.tone === 'green' ? '#FFF' : colors.text, textAlign: 'center' }} numberOfLines={2}>{t.label}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          );
-        })}
+        {!menu.top ? menuBlock : null}
 
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Feather name="map" size={22} color={colors.green} />
@@ -314,6 +373,8 @@ const styles = themed(() => StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 1 },
   tileIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
   news: { gap: 10, backgroundColor: colors.amberSoft, borderColor: colors.amberSoft },
+  mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
   dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
 }));

@@ -19,6 +19,7 @@ import { Loading } from '@/components/ui';
 import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
 import { loadTabs } from '@/lib/tabsPref';
+import { loadMenu } from '@/lib/menuPref';
 import { useOtaUpdates } from '@/lib/otaUpdates';
 import { startOfflineSync } from '@/lib/offline';
 import { colors, useThemeMode } from '@/theme';
@@ -102,7 +103,7 @@ export default function RootLayout() {
   useOtaUpdates();
   useEffect(() => startOfflineSync(), []);
   useEffect(() => {
-    Promise.all([loadThemeMode(), loadTabs()]).finally(() => setThemeReady(true));
+    Promise.all([loadThemeMode(), loadTabs(), loadMenu()]).finally(() => setThemeReady(true));
   }, []);
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
