@@ -66,14 +66,19 @@ export default function Yo() {
         }
       />
       <Screen>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 16, backgroundColor: colors.bgSoft }}>
+        <Pressable
+          disabled={!me}
+          onPress={() => me && router.push({ pathname: '/persona/nueva', params: { id: me.id } })}
+          accessibilityRole="button" accessibilityLabel="Ver y editar mis datos"
+          style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 16, backgroundColor: colors.bgSoft }, pressed && me ? { opacity: 0.85 } : null]}>
           <Face name={profile?.display_name ?? '?'} path={me?.photo_path} size={72} editable onPress={changePhoto} />
           <View style={{ flex: 1, gap: 3 }}>
             <Text style={{ fontSize: 20, fontWeight: '800', color: colors.text }}>{profile?.display_name}</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>{ROLE_LABEL[profile?.role ?? 'member']}{group ? ` · ${group.name}` : ''}</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>{church?.name}{me ? ` · ${STATUS_LABEL[me.status]}` : ''}</Text>
           </View>
-        </View>
+          {me ? <Feather name="chevron-right" size={22} color={colors.muted} /> : null}
+        </Pressable>
 
         {mine.length ? (
           <>
