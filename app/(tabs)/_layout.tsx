@@ -1,7 +1,10 @@
+// La barra de abajo. Cada uno elige en Ajustes qué 5 pestañas ve y en qué orden.
+// Las demás pantallas siguen existiendo (se abren desde Iglesia), pero no ocupan lugar en la barra.
 import React from 'react';
-import { Tabs } from 'expo-router';
 import { View } from 'react-native';
+import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { ALL_TABS, tabInfo, useTabs, type TabKey } from '@/lib/tabsPref';
 import { colors } from '@/theme';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
@@ -20,9 +23,17 @@ function churchIcon({ focused }: { focused: boolean }) {
   );
 }
 
+// Si la barra se cambia y se vuelve a armar, se queda en Iglesia.
+export const unstable_settings = { initialRouteName: 'iglesia' };
+
 export default function TabsLayout() {
+  const shown = useTabs();
+  // El orden de las pestañas es el orden en que se declaran: primero las elegidas, después las ocultas.
+  const order: TabKey[] = [...shown, ...ALL_TABS.filter((k) => !shown.includes(k))];
   return (
     <Tabs
+      key={shown.join()} // al cambiar el orden en Ajustes, la barra se vuelve a armar
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.green,
@@ -32,11 +43,16 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.bg },
       }}
     >
-      <Tabs.Screen name="mapa" options={{ title: 'Mapa', tabBarIcon: icon('map') }} />
-      <Tabs.Screen name="personas" options={{ title: 'Personas', tabBarIcon: icon('users') }} />
-      <Tabs.Screen name="iglesia" options={{ title: 'Iglesia', tabBarIcon: churchIcon, tabBarLabelStyle: { fontSize: 11, fontWeight: '900', color: colors.green }, tabBarIconStyle: { width: 52 } }} />
-      <Tabs.Screen name="predicas" options={{ title: 'Prédicas', tabBarIcon: icon('play-circle') }} />
-      <Tabs.Screen name="yo" options={{ title: 'Yo', tabBarIcon: icon('user') }} />
+      {order.map((k) => {
+        const t = tabInfo(k);
+        const visible = shown.includes(k);
+        return k === 'iglesia' ? (
+          <Tabs.Screen key={k} name={k} options={{ title: t.title, tabBarIcon: churchIcon, href: visible ? undefined : null,
+            tabBarLabelStyle: { fontSize: 11, fontWeight: '900', color: colors.green }, tabBarIconStyle: { width: 52 } }} />
+        ) : (
+          <Tabs.Screen key={k} name={k} options={{ title: t.title, tabBarIcon: icon(t.icon), href: visible ? undefined : null }} />
+        );
+      })}
     </Tabs>
   );
 }

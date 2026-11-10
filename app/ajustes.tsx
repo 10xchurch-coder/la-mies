@@ -19,6 +19,7 @@ import { APP_VERSION } from '@/components/ErrorScreen';
 import { updateLabel } from '@/lib/otaUpdates';
 import { blockedPeople, unblockUser } from '@/lib/moderation';
 import { RULES } from '@/components/RulesGate';
+import { TabsEditor } from '@/components/TabsEditor';
 
 export default function Ajustes() {
   const router = useRouter();
@@ -84,6 +85,11 @@ export default function Ajustes() {
             value={mode === 'dark'}
             onChange={(v) => saveThemeMode(v ? 'dark' : 'light')}
           />
+        </Card>
+
+        <SectionTitle>Barra de abajo</SectionTitle>
+        <Card>
+          <TabsEditor />
         </Card>
 
         <SectionTitle>Seguridad y ubicación</SectionTitle>

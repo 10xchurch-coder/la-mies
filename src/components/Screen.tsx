@@ -1,7 +1,8 @@
 // Encabezado y contenedor de pantalla.
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
+import { useTabs, type TabKey } from '../lib/tabsPref';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, themed } from '../theme';
@@ -10,11 +11,15 @@ import { CONTENT_MAX_WIDTH } from '../lib/layout';
 export function Header({ title, subtitle, back, right }: { title: string; subtitle?: string; back?: boolean; right?: React.ReactNode }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const segments = useSegments() as string[];
+  const tabs = useTabs();
+  // Si esta pantalla está en la barra de abajo, no lleva flecha para volver.
+  if (segments[0] === '(tabs)' && tabs.includes(segments[1] as TabKey)) back = false;
   return (
     <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
       <View style={styles.headerInner}>
       {back ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => router.back()} style={styles.back}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/iglesia'))} style={styles.back}>
           <Feather name="arrow-left" size={24} color={colors.text} />
         </Pressable>
       ) : null}

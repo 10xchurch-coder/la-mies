@@ -23,6 +23,7 @@ import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
 import { useAuth } from '@/store/auth';
+import { useTabs } from '@/lib/tabsPref';
 import { colors, themed } from '@/theme';
 import type { Announcement, Ministry, Sermon, UpcomingItem } from '@/types';
 
@@ -54,6 +55,7 @@ export default function Iglesia() {
   const [bdayText, setBdayText] = useState('');
   const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
   const insets = useSafeAreaInsets();
+  const tabs = useTabs();
 
   const refresh = useCallback(() => {
     myUpcoming(21).then(setUpcoming).catch(() => undefined);
@@ -108,18 +110,19 @@ export default function Iglesia() {
       title: 'Para vos',
       tiles: [
         { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: isLeader || takesAttendance || !!profile?.takes_attendance, tone: 'green' },
-        { icon: 'calendar', label: 'Calendario', to: '/eventos', show: true },
+        { icon: 'calendar', label: 'Calendario', to: '/eventos', show: !tabs.includes('eventos') },
         { icon: 'radio', label: 'En vivo', to: '/vivo' as Href, show: true },
-        { icon: 'sunrise', label: 'Crecimiento', to: '/crecimiento' as Href, show: true },
-        { icon: 'heart', label: 'Oración', to: '/oracion', show: true },
+        { icon: 'sunrise', label: 'Crecimiento', to: '/crecimiento' as Href, show: !tabs.includes('crecimiento') },
+        { icon: 'heart', label: 'Oración', to: '/oracion', show: !tabs.includes('oracion') },
         ministryTile,
         { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
         { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
         { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: isLeader || takesAttendance || !!profile?.takes_attendance || can('personas.asistencia') },
         { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
-        { icon: 'message-circle', label: 'Chat de la iglesia', to: '/chat' as Href, show: true },
+        { icon: 'message-circle', label: 'Chat de la iglesia', to: '/chat' as Href, show: !tabs.includes('chat') },
+        { icon: 'play-circle', label: 'Prédicas', to: '/predicas' as Href, show: !tabs.includes('predicas') },
         { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
-        { icon: 'users', label: 'Directorio', to: '/directorio', show: true },
+        { icon: 'users', label: 'Directorio', to: '/directorio', show: !tabs.includes('directorio') },
         { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
       ],
