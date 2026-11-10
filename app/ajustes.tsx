@@ -8,7 +8,8 @@ import { Avatar, Card, Choice, RowLink, SectionTitle, Toggle } from '@/component
 import { biometricsAvailable } from '@/components/LockGate';
 import { setLockOptIn, useLockOptIn } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
-import { requestAccountDeletion, updateProfile } from '@/lib/api';
+import { deleteMyAccount, updateProfile } from '@/lib/api';
+import { errorMessage } from '@/lib/supabase';
 import { groupWord } from '@/lib/format';
 import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
@@ -131,25 +132,25 @@ export default function Ajustes() {
           />
           <RowLink
             title="Eliminar mi cuenta"
-            subtitle="Borra tu cuenta y tus datos personales"
+            subtitle="Borra tu cuenta y tus datos personales en el momento"
             icon="trash-2"
             danger
             onPress={() =>
               Alert.alert(
                 'Eliminar mi cuenta',
-                'Vamos a borrar tu cuenta y tus datos personales (foto, teléfono, dirección, DNI) dentro de los 10 días hábiles. Las fichas de las personas que visitaste quedan en la iglesia para su seguimiento. ¿Seguro?',
+                'Se borran ahora mismo tu cuenta y tus datos personales (foto, teléfono, dirección, DNI, tus salidas y comentarios). Las fichas de las personas que visitaste quedan en la iglesia para su seguimiento. No se puede deshacer. ¿Seguro?',
                 [
                   { text: 'Cancelar', style: 'cancel' },
                   {
                     text: 'Eliminar', style: 'destructive',
                     onPress: async () => {
                       try {
-                        await requestAccountDeletion();
-                        await signOut();
+                        await deleteMyAccount();
+                        await signOut().catch(() => undefined);
                         router.replace('/login');
-                        Alert.alert('Pedido recibido', 'La iglesia va a borrar tu cuenta dentro de los 10 días hábiles. Si cambiás de idea, escribí a info@iglesiavictoria.com.');
+                        Alert.alert('Cuenta eliminada', 'Tu cuenta y tus datos personales se borraron. Gracias por haber usado La Mies.');
                       } catch (e) {
-                        Alert.alert('No se pudo', e instanceof Error ? e.message : 'Probá de nuevo');
+                        Alert.alert('No se pudo', errorMessage(e));
                       }
                     },
                   },

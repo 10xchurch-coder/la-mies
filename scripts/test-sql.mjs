@@ -91,6 +91,8 @@ const files = [
   'supabase/tests/rls_test_33.sql',
   'supabase/migrations/0042_asistencia_maestros_turno.sql',
   'supabase/tests/rls_test_34.sql',
+  'supabase/migrations/0043_borrar_cuenta_ya.sql',
+  'supabase/tests/rls_test_35.sql',
 ];
 // MIGRATIONS_FIRST=1: todas las migraciones primero y después todas las pruebas (para ver que lo nuevo no rompe lo viejo).
 const order = process.env.MIGRATIONS_FIRST ? [...files.filter((f) => !f.includes('/tests/')), ...files.filter((f) => f.includes('/tests/'))] : files;

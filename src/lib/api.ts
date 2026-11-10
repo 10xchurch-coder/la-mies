@@ -391,8 +391,10 @@ export async function setAccountDisabled(userId: string, disabled: boolean): Pro
   ok(await supabase.rpc('set_account_disabled', { p_user: userId, p_disabled: disabled }));
 }
 
-export async function requestAccountDeletion(): Promise<void> {
-  ok(await supabase.rpc('request_account_deletion'));
+/** Borra la cuenta y los datos personales en el momento (lo de la iglesia pasa a un administrador). */
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
 }
 
 // ---------------------------------------------------------------------------
