@@ -2,7 +2,7 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useRouter, useSegments } from 'expo-router';
-import { useTabs, type TabKey } from '../lib/tabsPref';
+import { tabKeyOfRoute, useTabs } from '../lib/tabsPref';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, themed } from '../theme';
@@ -14,7 +14,8 @@ export function Header({ title, subtitle, back, right }: { title: string; subtit
   const segments = useSegments() as string[];
   const tabs = useTabs();
   // Si esta pantalla está en la barra de abajo, no lleva flecha para volver.
-  if (segments[0] === '(tabs)' && tabs.includes(segments[1] as TabKey)) back = false;
+  const here = segments[0] === '(tabs)' ? tabKeyOfRoute(segments[1] ?? '') : null;
+  if (here && tabs.includes(here)) back = false;
   return (
     <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
       <View style={styles.headerInner}>

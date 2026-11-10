@@ -4,7 +4,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { ALL_TABS, tabInfo, useTabs, type TabKey } from '@/lib/tabsPref';
+import { ALL_TABS, tabInfo, tabRoute, useTabs, type TabKey } from '@/lib/tabsPref';
 import { colors } from '@/theme';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
@@ -47,10 +47,10 @@ export default function TabsLayout() {
         const t = tabInfo(k);
         const visible = shown.includes(k);
         return k === 'iglesia' ? (
-          <Tabs.Screen key={k} name={k} options={{ title: t.title, tabBarIcon: churchIcon, href: visible ? undefined : null,
+          <Tabs.Screen key={k} name={tabRoute(k)} options={{ title: t.title, tabBarIcon: churchIcon, href: visible ? undefined : null,
             tabBarLabelStyle: { fontSize: 11, fontWeight: '900', color: colors.green }, tabBarIconStyle: { width: 52 } }} />
         ) : (
-          <Tabs.Screen key={k} name={k} options={{ title: t.title, tabBarIcon: icon(t.icon), href: visible ? undefined : null }} />
+          <Tabs.Screen key={k} name={tabRoute(k)} options={{ title: t.title, tabBarIcon: icon(t.icon), href: visible ? undefined : null }} />
         );
       })}
     </Tabs>

@@ -21,6 +21,9 @@ export const TAB_OPTIONS: { key: TabKey; title: string; icon: IconName; fixed?: 
 ];
 export const ALL_TABS = TAB_OPTIONS.map((t) => t.key);
 export const DEFAULT_TABS: TabKey[] = ['mapa', 'personas', 'iglesia', 'chat', 'yo'];
+/** Nombre del archivo de cada pestaña: las que también son pantallas sueltas usan una copia "t-…" para no mezclarse. */
+export const tabRoute = (k: TabKey): string => (['chat', 'eventos', 'oracion', 'directorio', 'crecimiento'].includes(k) ? `t-${k}` : k);
+export const tabKeyOfRoute = (r: string): TabKey | null => ALL_TABS.find((k) => tabRoute(k) === r) ?? null;
 export const tabInfo = (k: TabKey) => TAB_OPTIONS.find((t) => t.key === k)!;
 
 const KEY = 'lamies.tabs';
