@@ -98,6 +98,15 @@ export default function Ajustes() {
             onPress={() => router.push({ pathname: '/(tabs)/iglesia', params: { editar: String(Date.now()) } } as never)} />
         </Card>
 
+        {can('personas.editar') ? (
+          <>
+            <SectionTitle>Personas de la iglesia</SectionTitle>
+            <Card style={{ padding: 0 }}>
+              <RowLink title="Importar desde una planilla" subtitle="Subí tu Excel o CSV y agregá a todos de una vez" icon="upload" onPress={() => router.push('/importar' as never)} />
+            </Card>
+          </>
+        ) : null}
+
         <SectionTitle>Seguridad y ubicación</SectionTitle>
         <Card>
           <Toggle
