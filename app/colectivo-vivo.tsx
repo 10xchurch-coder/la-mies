@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { MapView, Marker } from '@/components/map';
+import { MapView, Marker, Polyline } from '@/components/map';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card } from '@/components/ui';
 import { PickerModal } from '@/components/Picker';
@@ -27,6 +27,17 @@ function ago(iso: string | null, now: number): string {
   return m === 1 ? 'hace 1 minuto' : `hace ${m} minutos`;
 }
 
+// El mapa se acomoda para que se vea todo el recorrido (con un poco de margen), y nunca más cerca que ~2 km.
+function regionFor(trail: { latitude: number; longitude: number }[], lat: number, lng: number) {
+  const pts = [...trail, { latitude: lat, longitude: lng }];
+  const lats = pts.map((p) => p.latitude), lngs = pts.map((p) => p.longitude);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  return {
+    latitude: (minLat + maxLat) / 2, longitude: (minLng + maxLng) / 2,
+    latitudeDelta: Math.max(0.02, (maxLat - minLat) * 1.4), longitudeDelta: Math.max(0.02, (maxLng - minLng) * 1.4),
+  };
+}
+
 export default function ColectivoVivo() {
   const { isStaff } = useAuth();
   const [routes, setRoutes] = useState<Route[] | null>(null);
@@ -34,10 +45,23 @@ export default function ColectivoVivo() {
   const [now, setNow] = useState(Date.now());
   const [drivers, setDrivers] = useState<Record<string, { id: string; name: string }[]>>({});
   const [picking, setPicking] = useState<Route | null>(null);
+  const [trails, setTrails] = useState<Record<string, { latitude: number; longitude: number }[]>>({});
   const [people, setPeople] = useState<{ id: string; title: string }[]>([]);
 
   const load = useCallback(() => {
-    supabase.rpc('bus_live_routes').then(({ data }) => setRoutes((data ?? []) as Route[]));
+    supabase.rpc('bus_live_routes').then(({ data }) => {
+      const list = (data ?? []) as Route[];
+      setRoutes(list);
+      // La línea de todo el recorrido que ya hizo cada colectivo en camino.
+      for (const r of list) {
+        if (!r.run_id) continue;
+        const runId = r.run_id;
+        supabase.rpc('bus_run_trail', { p_run: runId }).then(({ data: pts }) => {
+          const coords = ((pts ?? []) as { lat: number; lng: number }[]).map((p) => ({ latitude: p.lat, longitude: p.lng }));
+          setTrails((t) => ({ ...t, [runId]: coords }));
+        });
+      }
+    });
     supabase.from('bus_route_drivers').select('group_id, profile_id, profiles:profile_id(display_name)').then(({ data }) => {
       const map: Record<string, { id: string; name: string }[]> = {};
       for (const r of (data ?? []) as unknown as { group_id: string; profile_id: string; profiles: { display_name: string } | null }[]) {
@@ -116,6 +140,7 @@ export default function ColectivoVivo() {
           </Card>
         ) : routes.map((r) => {
           const live = !!r.run_id;
+          const trail = (r.run_id && trails[r.run_id]) || [];
           const ownerCanEdit = isStaff;
           const list = drivers[r.group_id] ?? [];
           return (
@@ -134,15 +159,16 @@ export default function ColectivoVivo() {
               {live && r.lat != null && r.lng != null ? (
                 <>
                   <View style={styles.mapBox}>
-                    <MapView style={{ flex: 1 }}
-                      region={{ latitude: r.lat, longitude: r.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
-                      showsUserLocation>
+                    <MapView style={{ flex: 1 }} region={regionFor(trail, r.lat, r.lng)} showsUserLocation>
+                      {trail.length > 1 ? (
+                        <Polyline coordinates={[...trail, { latitude: r.lat, longitude: r.lng }]} strokeColor={colors.green} strokeWidth={5} lineCap="round" lineJoin="round" />
+                      ) : null}
                       <Marker coordinate={{ latitude: r.lat, longitude: r.lng }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
                         <View style={styles.busPin}><Feather name="truck" size={18} color="#FFF" /></View>
                       </Marker>
                     </MapView>
                   </View>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>Ubicación {ago(r.updated_at, now)} · se actualiza sola</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>Ubicación {ago(r.updated_at, now)} · la línea verde es por donde ya pasó · se actualiza sola</Text>
                   <Button title="Ver en Google Maps" icon="external-link" variant="ghost" small onPress={() => openMaps(r)} />
                 </>
               ) : live ? (
