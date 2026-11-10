@@ -468,6 +468,10 @@ export default function PersonaDetalle() {
 
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 
+          {isStaff && c.baptized_on && c.baptized_here !== false ? (
+            <Button title="Certificado de bautismo" icon="award" variant="outline" small onPress={() => router.push(`/certificado/${c.id}` as never)} />
+          ) : null}
+
           {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
             <Card style={{ gap: 10 }}>
               <SectionTitle>Seguimiento pastoral</SectionTitle>

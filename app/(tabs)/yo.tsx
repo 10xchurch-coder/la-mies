@@ -8,7 +8,7 @@ import { Face } from '@/components/Face';
 import { Card, RowLink, SectionTitle } from '@/components/ui';
 import { listMinistries, ministryMembers, myUpcoming, unreadCount, updateContact } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
-import { errorMessage } from '@/lib/supabase';
+import { errorMessage, supabase } from '@/lib/supabase';
 import { ROLE_LABEL, STATUS_LABEL } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -23,10 +23,12 @@ export default function Yo() {
   const [mine, setMine] = useState<Ministry[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [unread, setUnread] = useState(0);
+  const [certId, setCertId] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       unreadCount().then(setUnread).catch(() => undefined);
+      supabase.rpc('my_baptism_certificate_id').then(({ data }) => setCertId((data as string | null) ?? null));
       myUpcoming(21).then(setUpcoming).catch(() => undefined);
       Promise.all([listMinistries(), ministryMembers()]).then(([ms, mm]) => {
         const ids = new Set(mm.filter((x) => x.profile_id === profile?.id).map((x) => x.ministry_id));
@@ -103,6 +105,7 @@ export default function Yo() {
           <RowLink title="Avisos" subtitle={unread ? `${unread} sin leer` : 'Recordatorios y anuncios'} icon="bell" onPress={() => router.push('/avisos')} />
           <RowLink title="Devocional y mi racha" subtitle="Versículo del día, lectura y premios" icon="book-open" onPress={() => router.push('/devocional')} />
           <RowLink title="Mi progreso y niveles" icon="award" onPress={() => router.push('/progreso')} />
+          {certId ? <RowLink title="Mi certificado de bautismo" subtitle="Verlo, guardarlo o imprimirlo" icon="droplet" onPress={() => router.push(`/certificado/${certId}` as never)} /> : null}
           <RowLink title="Mis salidas" subtitle="Ver, arreglar o terminar una salida" icon="clock" onPress={() => router.push('/salidas')} />
           <RowLink title="Mis contactos para seguir" subtitle="Promesas, visitas y mensajes" icon="user-check" onPress={() => router.push('/seguimiento')} />
           <RowLink title="Zonas" subtitle="Barrios asignados y cuánto falta" icon="hexagon" onPress={() => router.push('/zonas')} />
