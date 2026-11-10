@@ -17,7 +17,7 @@ type IconName = React.ComponentProps<typeof Feather>['name'];
 
 const EVANG = 'Evangelismo personal';
 const FOLDERS: { section: string; icon: IconName; hint: string; bg: string; fg: string }[] = [
-  { section: EVANG, icon: 'compass', hint: 'Todo para aprender a compartir a Cristo: cómo presentar el evangelio, tu testimonio y qué responder', bg: 'amberSoft', fg: 'amberText' },
+  { section: EVANG, icon: 'compass', hint: 'Todo para aprender a compartir a Cristo: cómo presentar el evangelio a cada persona y creencia, tu testimonio y qué responder', bg: 'amberSoft', fg: 'amberText' },
   { section: 'Lo que creemos', icon: 'book-open', hint: 'Las doctrinas de la iglesia, explicadas con la Biblia', bg: 'greenSoft', fg: 'greenText' },
   { section: 'Preguntas y respuestas', icon: 'help-circle', hint: 'Las preguntas más comunes sobre la fe', bg: 'blueSoft', fg: 'blueText' },
   { section: 'Finanzas bíblicas', icon: 'dollar-sign', hint: 'El dinero, el trabajo, las deudas y los negocios según Dios', bg: 'amberSoft', fg: 'amberText' },
@@ -67,13 +67,20 @@ export default function Crecimiento() {
     const T = (name: string) => cat(name).map((r) => ({ r, train: true }));
     const known = ['Tips para recordar', 'Presentaciones del evangelio', 'Respuestas bíblicas', 'Objeciones comunes'];
     const more = [...new Set(train.map((t) => t.category))].filter((c) => !known.includes(c)).flatMap((c) => T(c));
-    return [
-      { title: '1. Para empezar', items: [...A('por-que-compartir'), ...A('empezar-conversacion'), ...T('Tips para recordar')] },
-      { title: '2. Cómo presentar el evangelio', items: [...A('salvacion'), ...T('Presentaciones del evangelio')] },
-      { title: '3. Tu testimonio', items: A('tu-testimonio') },
-      { title: '4. Qué responder cuando preguntan o dudan', items: [...T('Respuestas bíblicas'), ...T('Objeciones comunes'), ...more] },
-      { title: '5. Cuando alguien cree', items: A('cuando-alguien-cree') },
-    ].filter((b) => b.items.length);
+    const used = new Set<string>();
+    const AA = (...slugs: string[]) => slugs.flatMap((x) => { used.add(x); return A(x); });
+    const blocks = [
+      { title: '1. Para empezar', items: [...AA('guia-principiantes', 'por-que-compartir', 'empezar-conversacion', 'principios-conversacion'), ...T('Tips para recordar')] },
+      { title: '2. Cómo presentar el evangelio', items: [...AA('salvacion'), ...T('Presentaciones del evangelio'), ...AA('guiar-a-confiar-en-cristo')] },
+      { title: '3. A quién se lo presentás', items: AA('evangelio-a-un-nino', 'evangelio-a-jovenes', 'evangelio-por-whatsapp', 'evangelio-a-quien-sufre') },
+      { title: '4. Según lo que cree la persona', items: AA('creencia-ateismo', 'creencia-agnosticismo', 'creencia-indiferente', 'creencia-cristiano-de-nombre', 'creencia-catolico', 'creencia-religiosidad-popular', 'creencia-testigos-de-jehova', 'creencia-mormones', 'creencia-adventistas', 'creencia-islam', 'creencia-budismo', 'creencia-hinduismo', 'creencia-judaismo', 'creencia-nueva-era') },
+      { title: '5. Tu testimonio', items: AA('tu-testimonio') },
+      { title: '6. Qué responder cuando preguntan o dudan', items: [...T('Respuestas bíblicas'), ...T('Objeciones comunes'), ...more] },
+      { title: '7. Cuando alguien cree', items: AA('cuando-alguien-cree') },
+    ];
+    const rest = (rows ?? []).filter((r) => r.section === EVANG && !used.has(r.slug)).map((r) => ({ r }));
+    if (rest.length) blocks.push({ title: 'Más', items: rest });
+    return blocks.filter((b) => b.items.length);
   })();
   const evangCount = (rows ?? []).filter((r) => r.section === EVANG).length + train.length;
   const folder = FOLDERS.find((f) => f.section === seccion);
