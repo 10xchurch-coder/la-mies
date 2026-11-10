@@ -103,10 +103,10 @@ export default function Registro() {
             <PasswordField label="Contraseña" value={password} onChangeText={setPassword} personal={[name, email.split('@')[0] ?? '']} />
           </>
         ) : null}
-        <Field label="Tu celular" hint="(así te encontramos si la iglesia ya te tiene cargado)" keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} placeholder="Ej: 376 455-1234" />
+        <Field label="Tu celular" hint="(obligatorio: así te encontramos si la iglesia ya te tiene cargado)" keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} placeholder="Ej: 376 455-1234" />
         <Field label="Código de la iglesia" autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} placeholder="Ej: VICTORIA-2026" />
         {msg ? <Text style={styles.msg}>{msg}</Text> : null}
-        <Button title={session ? 'Unirme' : 'Crear cuenta'} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || (!session && (!email || !password))} />
+        <Button title={session ? 'Unirme' : 'Crear cuenta'} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || phone.replace(/\D/g, '').length < 8 || (!session && (!email || !password))} />
         <Text style={styles.note}>
           Tus datos y los contactos que marques los ve solo tu iglesia. Los administradores de la iglesia ven todo; vos elegís con quién más compartir cada contacto.
         </Text>

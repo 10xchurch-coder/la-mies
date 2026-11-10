@@ -127,7 +127,7 @@ set role authenticated;
 -- Sin ficha previa → se crea una automática; la secretaria la une a la real después
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c5', false);
 do $$ begin
-  perform public.join_church('CODIGO-A', 'Pedrito', null);
+  perform public.join_church('CODIGO-A', 'Pedrito', '3765000000');
   if not exists (select 1 from public.contacts where profile_id = auth.uid() and auto_created) then raise exception 'FALLO: no se creó la ficha automática'; end if;
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000c1', false);
