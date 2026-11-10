@@ -19,8 +19,8 @@
         "UIBackgroundModes": [
           "location"
         ],
-        "NSLocationWhenInUseUsageDescription": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Para que el recorrido no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida está activa.",
+        "NSLocationWhenInUseUsageDescription": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo y, si sos el chofer, para que los hermanos de tu ruta vean dónde está el colectivo.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Para que no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida de evangelismo o un viaje del colectivo que vos iniciaste está activo.",
         "NSFaceIDUsageDescription": "La Mies usa Face ID para desbloquear la app.",
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -61,8 +61,8 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Para que el recorrido no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida está activa.",
-          "locationWhenInUsePermission": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo.",
+          "locationAlwaysAndWhenInUsePermission": "Para que no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida de evangelismo o un viaje del colectivo que vos iniciaste está activo.",
+          "locationWhenInUsePermission": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo y, si sos el chofer, para que los hermanos de tu ruta vean dónde está el colectivo.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true

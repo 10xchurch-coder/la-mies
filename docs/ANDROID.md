@@ -63,7 +63,10 @@ link it prints (or from expo.dev → your project → Builds).
      street is marked. Text you can use: *"La Mies records the streets the church covers
      while evangelizing door to door. The user starts and stops each outing; location is only
      recorded during an active outing, also with the screen off, so the whole route is
-     marked."*
+     marked. It is also used for the church bus: the route captain (or a worker the church
+     chooses) taps "Salimos" when the bus leaves, and the members of that route see where
+     the bus is until the driver taps "Llegamos". Location is only shared during that trip,
+     also with the screen off, and only with the members of that route."*
    - **Foreground service** (location): same explanation and the same video.
 3. **Store listing**: short description, full description, app icon 512×512, feature graphic
    1024×500, at least 2 phone screenshots (take them from your phone).
