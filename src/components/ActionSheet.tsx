@@ -1,7 +1,7 @@
 // Lista de opciones desde abajo (Android muestra como mucho 3 botones en Alert.alert; esto no tiene límite).
 // Uso: showActions('Título', 'texto', [{ text: 'Opción', onPress }]). El <ActionSheetHost/> va una sola vez en la raíz.
 import React, { useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActionSheetIOS, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
@@ -12,6 +12,17 @@ type Req = { title: string; message?: string; actions: SheetAction[] };
 let push: ((r: Req | null) => void) | null = null;
 
 export function showActions(title: string, message: string | undefined, actions: SheetAction[]): void {
+  if (Platform.OS === 'ios') {
+    // En iPhone, un Modal no se puede abrir encima de otro Modal (por ejemplo, los comentarios del devocional):
+    // quedaba invisible y bloqueaba la pantalla. La hoja nativa de iOS siempre aparece arriba de todo.
+    const list = actions.filter((a) => a.text !== 'Cancelar');
+    const destructive = list.map((a, i) => (a.destructive ? i : -1)).filter((i) => i >= 0);
+    ActionSheetIOS.showActionSheetWithOptions(
+      { title, message, options: [...list.map((a) => a.text), 'Cancelar'], cancelButtonIndex: list.length, destructiveButtonIndex: destructive },
+      (i) => { if (i < list.length) setTimeout(() => list[i].onPress?.(), 300); },
+    );
+    return;
+  }
   push?.({ title, message, actions });
 }
 
