@@ -4,7 +4,8 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Empty, Field } from '@/components/ui';
+import { Button, Card, Empty, Field, RowLink } from '@/components/ui';
+import { useRouter, type Href } from 'expo-router';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -19,6 +20,7 @@ const FIELDS: { key: keyof Giving; label: string; hint?: string }[] = [
 ];
 
 export default function Dar() {
+  const router = useRouter();
   const { church, isStaff, refreshProfile } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Giving>(church?.giving ?? {});
@@ -50,6 +52,7 @@ export default function Dar() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Ofrendar" subtitle={church?.name} back />
       <Screen>
+        {!editing ? <RowLink icon="bar-chart-2" title="Finanzas de la iglesia" subtitle="Informe por trimestre y por año, para los miembros" onPress={() => router.push('/informe-iglesia' as Href)} /> : null}
         {editing ? (
           <>
             {FIELDS.map((f) => (

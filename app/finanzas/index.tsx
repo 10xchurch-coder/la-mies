@@ -130,6 +130,7 @@ export default function Finanzas() {
                 ['list', 'Movimientos', 'Todo lo que entró y salió, mes por mes', '/finanzas/movimientos'],
                 ['folder', 'Comprobantes', 'Fotos de recibos y del banco, en carpetas por mes', '/finanzas/comprobantes'],
                 ['bar-chart-2', 'Informe', 'Por mes, por fondo y por categoría', '/finanzas/informe'],
+                ['users', 'Informe para los miembros', 'Totales por trimestre y por año, para mayores de 18', '/informe-iglesia'],
                 ['repeat', 'Pases automáticos', 'Cada mes, de un fondo a otro (ej. General → Vehículo)', '/finanzas/automaticos'],
                 ...(financeLevel >= 3 ? [['sliders', 'Saldos iniciales', 'Con cuánto empezó cada fondo', '/finanzas/fondos']] : []),
               ] as [IconName, string, string, string][]).map(([icon, t, sub, to], i, arr) => (
