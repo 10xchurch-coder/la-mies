@@ -1,7 +1,7 @@
 // El colectivo: los pasajeros de cada ruta, quién subió hoy y un aviso por WhatsApp ("pasamos en 10 minutos").
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
@@ -15,6 +15,7 @@ import type { Group } from '@/types';
 
 export default function Colectivo() {
   const { profile, church } = useAuth();
+  const router = useRouter();
   const [groups, setGroups] = useState<Group[]>([]);
   const [group, setGroup] = useState<string | null>(profile?.group_id ?? null);
   const [rows, setRows] = useState<RiderRow[] | null>(null);
@@ -53,6 +54,18 @@ export default function Colectivo() {
       <Header title="Colectivo" subtitle={rows ? `${picked} de ${rows.length} subieron hoy` : undefined} back />
       <Screen>
         {groups.length > 1 ? <Choice columns={2} options={groups.map((g) => ({ value: g.id, label: g.name }))} value={group ?? ''} onChange={setGroup} /> : null}
+        {group ? (
+          <Pressable onPress={() => router.push({ pathname: '/recorrido', params: { group, name: groups.find((g) => g.id === group)?.name ?? '' } } as unknown as Href)} accessibilityRole="button">
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Feather name="navigation" size={20} color={colors.green} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Recorrido</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>Las paradas en orden, para abrir en Google Maps o Apple Maps</Text>
+              </View>
+              <Feather name="chevron-right" size={20} color={colors.muted} />
+            </Card>
+          </Pressable>
+        ) : null}
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="truck" title="No hay pasajeros en esta ruta" text="Agregá abajo a los que viajan en el colectivo. También aparecen los que prometieron venir y pidieron que los busquen." /> : (
           <Card style={{ padding: 0 }}>
             {rows.map((r, i) => (

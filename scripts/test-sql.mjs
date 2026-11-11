@@ -109,12 +109,14 @@ const files = [
   'supabase/migrations/0052_salidas_que_cuentan.sql',
   'supabase/migrations/0053_chat_como_whatsapp.sql',
   'supabase/migrations/0054_alabanza.sql',
+  'supabase/migrations/0055_recorrido_colectivo.sql',
   'supabase/tests/rls_test_41.sql',
   'supabase/tests/rls_test_42.sql',
   'supabase/tests/rls_test_43.sql',
   'supabase/tests/rls_test_44.sql',
   'supabase/tests/rls_test_45.sql',
   'supabase/tests/rls_test_46.sql',
+  'supabase/tests/rls_test_47.sql',
 ];
 // MIGRATIONS_FIRST=1: todas las migraciones primero y después todas las pruebas (para ver que lo nuevo no rompe lo viejo).
 const order = process.env.MIGRATIONS_FIRST ? [...files.filter((f) => !f.includes('/tests/')), ...files.filter((f) => f.includes('/tests/'))] : files;
