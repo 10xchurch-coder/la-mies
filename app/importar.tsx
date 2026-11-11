@@ -10,7 +10,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, SectionTitle } from '@/components/ui';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
-import { buildRows, detectFields, FIELD_LABELS, parseCsv, type ImportField, type ImportRow } from '@/lib/importPeople';
+import { buildRows, detectFields, detectSource, FIELD_LABELS, parseCsv, type ImportField, type ImportRow } from '@/lib/importPeople';
 import { colors } from '@/theme';
 
 type Status = 'member' | 'visitor' | 'contact';
@@ -80,6 +80,8 @@ export default function Importar() {
       setTable(t);
       setHasHeader(true);
       setFields(detectFields(t[0]));
+      const src = detectSource(t[0]);
+      if (src !== 'generic') setMsg(`Parece una planilla exportada de ${src === 'planning_center' ? 'Planning Center' : 'Breeze'}. Ya elegimos las columnas: el celular, el correo personal y la dirección de casa. Revisalas abajo antes de importar.`);
     } catch (e) {
       setMsg(`No pude leer el archivo. Probá guardarlo como CSV o Excel (.xlsx). ${errorMessage(e)}`);
     }
@@ -140,7 +142,7 @@ export default function Importar() {
         {!table ? (
           <Card style={{ gap: 10 }}>
             <Text style={{ fontSize: 14, color: colors.text, lineHeight: 21 }}>
-              Elegí tu planilla (Excel .xlsx o CSV). La primera fila debería tener los títulos, por ejemplo: Nombre, Apellido, Celular, Correo, Dirección, Fecha de nacimiento.
+              Elegí tu planilla (Excel .xlsx o CSV). La primera fila debería tener los títulos, por ejemplo: Nombre, Apellido, Celular, Correo, Dirección, Fecha de nacimiento. También sirve la planilla que exportás de Planning Center (CSV) o de Breeze (Excel).
               {'\n'}Solo hace falta el nombre; el celular es lo más importante, porque con él la app reconoce a cada persona cuando crea su cuenta.
             </Text>
             <Button title="Elegir archivo" icon="upload" onPress={pick} />
