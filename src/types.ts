@@ -244,7 +244,7 @@ export type Material = {
 
 export type Ministry = {
   id: string; church_id: string; name: string; description: string | null; icon: string; leader_id: string | null;
-  can_take_attendance: boolean; is_teaching: boolean; sort_order: number;
+  can_take_attendance: boolean; is_teaching: boolean; sort_order: number; is_music?: boolean;
 };
 export type MinistryMember = { ministry_id: string; profile_id: string; is_leader: boolean; joined_at: string };
 /** Integrante de un ministerio por ficha (puede no tener la app). */

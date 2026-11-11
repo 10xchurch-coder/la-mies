@@ -2,12 +2,12 @@
 // Los integrantes se eligen por ficha: no hace falta que usen la app (los que la usan, además, tienen el chat y los avisos).
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
-import { Button, Card, Empty, Loading, RowLink, Segmented, Tag } from '@/components/ui';
+import { Button, Card, Empty, Loading, RowLink, Segmented, Tag, Toggle } from '@/components/ui';
 import {
   addMinistryPerson, listDuties, listMinistries, listPeople, listProfiles, ministryMembers, ministryMessages, ministryPeople, removeMinistryPerson,
   sendMinistryMessage, setMinistryPersonLeader,
@@ -145,6 +145,7 @@ export default function MinisterioDetalle() {
       <Header title={m.name} subtitle={`${crew.length} ${crew.length === 1 ? 'integrante' : 'integrantes'} · líder: ${m.leader_id ? nameOf(m.leader_id) : 'sin asignar'}`} back />
       <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <Segmented options={[{ value: 'chat', label: 'Chat' }, { value: 'duties', label: 'Turnos' }, { value: 'tips', label: 'Consejos' }, { value: 'people', label: 'Gente' }]} value={tab} onChange={setTab} />
+        {m.is_music ? <Button small style={{ marginTop: 8 }} title="Alabanza: canciones y orden del culto" icon="music" variant="outline" onPress={() => router.push('/alabanza' as Href)} /> : null}
       </View>
 
       {tab === 'chat' ? (
@@ -265,6 +266,10 @@ export default function MinisterioDetalle() {
             </Text>
           ) : null}
           {isStaff ? <Button title="Cambiar líder" icon="award" variant="ghost" onPress={() => setPicker('leader')} /> : null}
+          {isStaff ? (
+            <Toggle label="Es el ministerio de música" hint="Les abre Alabanza: las canciones, el orden de cada culto y el equipo de cada día." value={!!m.is_music}
+              onChange={(v) => { supabase.from('ministries').update({ is_music: v }).eq('id', m.id).then(({ error }) => { if (error) Alert.alert('No se pudo', error.message); else load(); }); }} />
+          ) : null}
         </Screen>
       ) : null}
 
