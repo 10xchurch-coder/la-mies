@@ -85,6 +85,11 @@ export default function Resumen() {
           <Text style={styles.small}>{fmtMinutes(s.minutes)} · {fmtDistance(s.distance_m)} caminados · {s.sidewalks} veredas</Text>
           <Text style={styles.verse}>"Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega" Juan 4:35</Text>
         </View>
+        {s.ended_at && s.minutes < 10 && s.distance_m < 300 && s.contacts + s.presentations + s.promises === 0 ? (
+          <Text style={{ color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 }}>
+            Esta salida duró menos de 10 minutos, casi no tuvo recorrido y no registraste a nadie, así que no suma a tus números. Si fue una prueba, podés borrarla en Yo → Mis salidas.
+          </Text>
+        ) : null}
         <Button title="Compartir en WhatsApp" icon="share-2" onPress={share} />
         <Button title="Listo" variant="ghost" onPress={() => router.replace('/(tabs)/mapa')} />
       </Screen>

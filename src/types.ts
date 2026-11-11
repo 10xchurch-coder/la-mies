@@ -322,7 +322,7 @@ export type DailySocial = { comments: number; likes: number; liked: boolean; ope
 export type OutingRow = {
   id: string; user_id: string; display_name: string; kind: OutingKind; started_at: string; ended_at: string | null;
   distance_m: number; contacts: number; presentations: number; promises: number; auto_stopped: boolean;
-  trimmed_at: string | null; last_point: string | null;
+  trimmed_at: string | null; last_point: string | null; counts?: boolean;
 };
 export type SessionSummary = {
   id: string; user_id: string; name: string; kind: OutingKind; started_at: string; ended_at: string | null; minutes: number;

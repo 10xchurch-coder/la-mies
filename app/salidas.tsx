@@ -42,9 +42,10 @@ export default function Salidas() {
             <Text style={{ fontSize: 12, color: colors.muted }}>
               {KIND_LABEL[r.kind]} · {fmtMinutes(mins)} · {fmtDistance(r.distance_m ?? 0)} · {r.contacts} contactos · {r.presentations} evangelio · {r.promises} promesas
             </Text>
+            {r.ended_at && r.counts === false ? <Text style={{ fontSize: 12, color: colors.muted }}>Muy corta: no suma a los números. Si fue una prueba, tocala y borrala.</Text> : null}
             {!r.ended_at && r.last_point ? <Text style={{ fontSize: 12, color: colors.red }}>Último punto: {fmtTime(r.last_point)}</Text> : null}
           </View>
-          {r.trimmed_at ? <Tag text="Corregida" tone="gray" /> : r.auto_stopped ? <Tag text="Cortada sola" tone="amber" /> : null}
+          {r.ended_at && r.counts === false ? <Tag text="No cuenta" tone="gray" /> : r.trimmed_at ? <Tag text="Corregida" tone="gray" /> : r.auto_stopped ? <Tag text="Cortada sola" tone="amber" /> : null}
           <Feather name="chevron-right" size={18} color={colors.muted} />
         </Card>
       </Pressable>

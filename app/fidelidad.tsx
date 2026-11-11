@@ -46,7 +46,7 @@ export default function Fidelidad() {
       peopleEngagement(Number(weeks)).then(setRows).catch(() => setRows([]));
       listPeople().then(setPeople).catch(() => undefined);
       ministryPeopleRows().then((mp) => setServing(new Set(mp.map((m) => m.contact_id)))).catch(() => undefined);
-      supabase.from('sessions').select('user_id').eq('kind', 'soulwinning').limit(5000)
+      supabase.from('sessions').select('user_id').eq('kind', 'soulwinning').or('counts.eq.true,ended_at.is.null').limit(5000)
         .then(({ data }) => setSoulwinners(new Set(((data ?? []) as { user_id: string }[]).map((r) => r.user_id))));
     }, [weeks]),
   );

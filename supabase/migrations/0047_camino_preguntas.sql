@@ -41,8 +41,8 @@ language sql stable security definer set search_path = public as $$
   select 'ministerio', exists (select 1 from public.ministry_members m where m.profile_id = auth.uid()),
          (select min(m.joined_at)::date from public.ministry_members m where m.profile_id = auth.uid())
   union all
-  select 'evangelismo', exists (select 1 from public.sessions s where s.user_id = auth.uid() and s.ended_at is not null),
-         (select min(s.started_at)::date from public.sessions s where s.user_id = auth.uid() and s.ended_at is not null)
+  select 'evangelismo', exists (select 1 from public.sessions s where s.user_id = auth.uid() and s.ended_at is not null and (s.manual or s.ended_at - s.started_at >= interval '10 minutes' or s.distance_m >= 300 or s.contacts + s.presentations + s.promises > 0)),
+         (select min(s.started_at)::date from public.sessions s where s.user_id = auth.uid() and s.ended_at is not null and (s.manual or s.ended_at - s.started_at >= interval '10 minutes' or s.distance_m >= 300 or s.contacts + s.presentations + s.promises > 0))
 $$;
 grant execute on function public.my_path() to authenticated;
 
