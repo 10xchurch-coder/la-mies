@@ -1,6 +1,7 @@
 import '@/lib/webAlert'; // en la web, los avisos y confirmaciones se muestran como ventanas
 import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
 import '@/lib/busTask'; // y la del colectivo en vivo
+import '@/lib/chatLive'; // y la de la ubicación en tiempo real de los chats
 import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';

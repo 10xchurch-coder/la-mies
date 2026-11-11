@@ -12,7 +12,7 @@ export type { MapViewProps, Region, MapType, MapStyleElement } from 'react-nativ
 // La clave de Google Maps no se puede leer acá (Expo la quita de Constants.expoConfig), así que
 // app.config.js deja una marca en "extra" cuando la compilación la tiene.
 const androidMapsReady = (Constants.expoConfig?.extra as { googleMapsAndroid?: boolean } | undefined)?.googleMapsAndroid === true;
-const mapAvailable = Platform.OS !== 'android' || androidMapsReady;
+export const mapAvailable = Platform.OS !== 'android' || androidMapsReady;
 
 export const MapView = React.forwardRef<RNMapView, MapViewProps>(function MapView(props, ref) {
   if (!mapAvailable) {

@@ -1,6 +1,6 @@
 // Tomar asistencia de una reunión: elegís la reunión y tocás la cara de cada persona que vino.
 // La pueden tomar capitanes, recepción (ministerio que toma asistencia), secretaría y pastor.
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -66,7 +66,10 @@ export default function Asistencia() {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [load]),
+      // Si otra persona está tomando asistencia al mismo tiempo, sus marcas aparecen solas acá.
+      const id = setInterval(() => { if (!busyToggles.current) attendanceSheet(date, service?.id ?? '').then((r) => { if (service && !busyToggles.current) setRows(r); }).catch(() => undefined); }, 6000);
+      return () => clearInterval(id);
+    }, [load, date, service]),
   );
 
   // Fechas de esa reunión: las últimas 6 y la próxima.
@@ -83,15 +86,19 @@ export default function Asistencia() {
     if (dates.length && !dates.includes(date)) setDate(dates[0]);
   }, [dates, date]);
 
+  const busyToggles = useRef(0);
   const toggle = async (r: SheetRow) => {
     if (!service) return;
     const next = !r.present;
+    busyToggles.current += 1;
     setRows((rs) => rs?.map((x) => (x.contact_id === r.contact_id ? { ...x, present: next } : x)) ?? null);
     try {
       await setAttendance(r.contact_id, date, service.id, next);
     } catch (e) {
       setRows((rs) => rs?.map((x) => (x.contact_id === r.contact_id ? { ...x, present: !next } : x)) ?? null);
       Alert.alert('No se guardó', errorMessage(e));
+    } finally {
+      busyToggles.current -= 1;
     }
   };
 
