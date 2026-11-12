@@ -9,19 +9,13 @@ import { Feather } from '@expo/vector-icons';
 import { cachedSignedUrl } from '../lib/files';
 import { chosenPhotoId, dailyPhotoId, photoUrl } from '../lib/backgrounds';
 import type { DailyContent } from '../types';
+import { BrandFooter } from './BrandFooter';
 import { themed } from '../theme';
 
 export type CardHandle = React.ComponentRef<typeof View>;
 
-/** Fondos de color (opcionales; lo normal es "auto" = la foto del día). */
-export const BACKGROUNDS: Record<string, { label: string; colors: [string, string, string] }> = {
-  campo:    { label: 'Campo',    colors: ['#1F6B45', '#2F8F5B', '#9CCB8E'] },
-  cielo:    { label: 'Cielo',    colors: ['#1E3A8A', '#2563EB', '#93C5FD'] },
-  amanecer: { label: 'Amanecer', colors: ['#7C2D12', '#EA580C', '#FDE68A'] },
-  noche:    { label: 'Noche',    colors: ['#0F172A', '#1E293B', '#475569'] },
-  rio:      { label: 'Río',      colors: ['#134E4A', '#0D9488', '#99F6E4'] },
-  montana:  { label: 'Montaña',  colors: ['#44403C', '#78716C', '#D6D3D1'] },
-};
+import { BACKGROUNDS } from '../lib/backgroundColors';
+export { BACKGROUNDS };
 export const BACKGROUND_NAMES = Object.keys(BACKGROUNDS);
 
 /** El fondo del día: foto automática, un color elegido o una foto subida por la iglesia. Ocupa todo el lugar. */
@@ -65,7 +59,7 @@ export const VerseCard = forwardRef<CardHandle, {
           <Feather name="sun" size={compact ? 11 : 13} color="rgba(255,255,255,0.85)" />
           <Text style={[styles.label, compact && { fontSize: 10 }]}>Versículo del día</Text>
         </View>
-        <Text style={[styles.ref, compact && { fontSize: 17 }]}>{item.reference}</Text>
+        <Text style={[styles.ref, compact && { fontSize: 17 }]}>{compact ? item.reference : `${item.reference} · RV1960`}</Text>
       </View>
       <View style={{ flex: 1, justifyContent: 'center', paddingVertical: compact ? 8 : 18, gap: compact ? 8 : 18 }}>
         <Text
@@ -76,7 +70,7 @@ export const VerseCard = forwardRef<CardHandle, {
         </Text>
         {item.message && !hideMessage ? <Text style={[styles.msg, compact && { fontSize: 13, lineHeight: 18 }]} numberOfLines={compact ? 2 : undefined}>{item.message}</Text> : null}
       </View>
-      <Text style={[styles.foot, compact && { fontSize: 10 }]}>{church ?? 'La Mies'} · RV1960</Text>
+      {compact ? <Text style={[styles.foot, { fontSize: 10 }]}>{church ?? 'La Mies'} · RV1960</Text> : <BrandFooter />}
     </View>
   );
 });

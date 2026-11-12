@@ -12,12 +12,17 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { DayBackground, VerseCard } from '@/components/VerseCard';
+import { BrandFooter, useChurchLogo } from '@/components/BrandFooter';
 import { Face } from '@/components/Face';
 import { Button } from '@/components/ui';
 import {
   dailyComments, dailyFor, dailyRange, dailySocial, deleteDailyComment, markReading, readingStreak, sendDailyComment, setDailyLike,
 } from '@/lib/api';
 import { shareImage, shareText, WEB_URL } from '@/lib/share';
+import { renderCardPng, shareCardBlob, type CardKind } from '@/lib/shareCardWeb';
+import { cachedSignedUrl } from '@/lib/files';
+import { BACKGROUNDS } from '@/lib/backgroundColors';
+import { chosenPhotoId } from '@/lib/backgrounds';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, fmtTime, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -112,6 +117,20 @@ export default function Devocional() {
     ? ['verse', ...(item.message ? ['phrase' as const] : []), ...(item.devotional ? ['reading' as const] : []), ...(item.study || item.prayer || item.devotional ? ['full' as const] : [])]
     : []), [item]);
 
+  // En la web la imagen se dibuja de antemano: el iPhone solo deja compartir en el mismo instante en que se toca el botón.
+  const logoUrl = useChurchLogo();
+  const cards = useRef<Record<string, Promise<Blob> | undefined>>({});
+  const cardKind = (slides[page] === 'phrase' ? 'phrase' : slides[page] === 'verse' ? 'verse' : null) as CardKind | null;
+  const cardKey = item && cardKind ? `${item.on_date}|${cardKind}|${item.background ?? ''}|${logoUrl ?? ''}` : null;
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !item || !cardKind || !cardKey || cards.current[cardKey]) return;
+    const bg = item.background;
+    const uploaded = bg && !BACKGROUNDS[bg] && !chosenPhotoId(bg) && bg !== 'auto' ? cachedSignedUrl('photos', bg) : null;
+    const p = renderCardPng({ kind: cardKind, reference: item.reference, verse: item.verse, message: item.message ?? null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
+    p.catch(() => { delete cards.current[cardKey]; });
+    cards.current[cardKey] = p;
+  }, [cardKey]);
+
   const goTo = (i: number) => {
     pager.current?.scrollTo({ x: i * W, animated: true });
     setPage(i);
@@ -145,6 +164,15 @@ export default function Devocional() {
       : kind === 'reading'
         ? `${verseText}\n\n${plain(item.devotional ?? '')}\n\n${churchName} · ${WEB_URL}`
         : `${verseText}${item.message ? `\n\n${item.message}` : ''}\n\n${churchName} · ${WEB_URL}`;
+    if (Platform.OS === 'web' && cardKey && cards.current[cardKey]) {
+      try {
+        const site = church?.website ? (/^https?:/.test(church.website) ? church.website : `https://${church.website}`) : WEB_URL;
+        const blob = await cards.current[cardKey];
+        const r = await shareCardBlob(blob, `${churchName} · ${site}`, `versiculo-${item.on_date}.png`);
+        if (r === 'downloaded') Alert.alert('Imagen guardada', 'Quedó guardada en tu teléfono (en Descargas o en Archivos). Ahora podés mandarla por WhatsApp o subirla a tus estados.');
+        return;
+      } catch { /* si falla, se comparte el texto */ }
+    }
     try {
       const ref = slideRefs.current[kind];
       const ok = ref
@@ -239,7 +267,7 @@ export default function Devocional() {
                     <Text style={styles.phrase}>{item.message}</Text>
                     <Text style={styles.slideRef}>{item.reference}</Text>
                   </View>
-                  <Text style={styles.foot}>{churchName} · RV1960</Text>
+                  <BrandFooter />
                 </View>
               ) : s === 'reading' ? (
                 <View ref={(r) => { slideRefs.current.reading = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
@@ -248,7 +276,7 @@ export default function Devocional() {
                   <ScrollView style={{ flex: 1, marginVertical: 14 }} contentContainerStyle={{ gap: 14, flexGrow: 1, justifyContent: 'center' }} nestedScrollEnabled>
                     <Paragraphs text={item.devotional as string} size={18} color="#FFFFFF" headingColor="#FFFFFF" />
                   </ScrollView>
-                  <Text style={styles.foot}>{churchName}</Text>
+                  <BrandFooter />
                 </View>
               ) : (
                 <View style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
