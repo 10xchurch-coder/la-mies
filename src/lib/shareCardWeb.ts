@@ -134,8 +134,8 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   const rowY = h - 56;
   if (logo) {
     ctx.save();
-    ctx.beginPath(); ctx.arc(x0 + 17, rowY, 17, 0, Math.PI * 2); ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.fill(); ctx.clip();
-    const s = Math.max(34 / logo.width, 34 / logo.height);
+    ctx.beginPath(); ctx.arc(x0 + 17, rowY, 17, 0, Math.PI * 2); ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill(); ctx.clip();
+    const s = Math.min(24 / logo.width, 24 / logo.height);
     ctx.drawImage(logo, x0 + 17 - (logo.width * s) / 2, rowY - (logo.height * s) / 2, logo.width * s, logo.height * s);
     ctx.restore();
   }
