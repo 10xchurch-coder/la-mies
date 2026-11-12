@@ -150,7 +150,7 @@ export default function EditarEvento() {
       <Header title={id ? 'Editar evento' : 'Agregar al calendario'} back />
       <Screen>
         <Segmented options={[{ value: 'special', label: 'Fecha especial' }, { value: 'week', label: 'Cada semana' }]} value={kind} onChange={setKind} />
-        <Field label="Nombre" value={title} onChangeText={setTitle} placeholder={kind === 'week' ? 'Ganar almas' : 'Reunión de hombres en Candelaria'} />
+        <Field label="Nombre" value={title} onChangeText={setTitle} placeholder={kind === 'week' ? 'Evangelismo personal' : 'Reunión de hombres en Candelaria'} />
         {kind === 'week' ? (
           <>
             <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Día</Text>
