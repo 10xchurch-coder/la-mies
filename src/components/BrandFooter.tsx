@@ -28,7 +28,7 @@ export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' })
       {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" cachePolicy="memory-disk" /> : null}
       <View style={{ flexShrink: 1 }}>
         <Text style={styles.name} numberOfLines={2}>{name}</Text>
-        <Text style={styles.app}>App La Mies</Text>
+        <Text style={styles.app}>App La Mies · RV1960</Text>
       </View>
     </View>
   );
@@ -36,7 +36,7 @@ export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' })
 
 const styles = themed(() => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 12, maxWidth: '100%' },
-  logo: { width: 42, height: 42, borderRadius: 21, padding: 6, backgroundColor: '#FFFFFF' },
+  logo: { width: 40, height: 44 },
   name: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
   app: { color: 'rgba(255,255,255,0.9)', fontSize: 12.5, fontWeight: '600', marginTop: 1, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
 }));
