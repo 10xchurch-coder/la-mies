@@ -34,6 +34,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
   ] },
   { title: 'Evangelismo', items: [
+    { key: 'vivo', label: 'En vivo ahora', icon: 'radio', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
     { key: 'panel', label: 'Panel de salidas', icon: 'bar-chart-2', to: '/panel', perms: ['inf.panel'] },
     { key: 'salidas', label: 'Salidas', icon: 'map', to: '/salidas', perms: ['evang.ver_salidas'] },
     { key: 'zonas', label: 'Zonas', icon: 'grid', to: '/zonas', perms: ['evang.zonas'] },
