@@ -107,6 +107,9 @@ export default function Panel() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Panel del pastor" subtitle={church?.name ?? ''} back />
       <Screen>
+        <Card style={{ padding: 0 }}>
+          <RowLink title="Evangelismo en vivo" subtitle="Quién está saliendo ahora, por dónde va y cómo viene el día" icon="radio" onPress={() => router.push('/equipo')} />
+        </Card>
         <Segmented options={[{ value: 'last', label: 'Última salida' }, { value: 'week', label: 'Semana' }, { value: 'month', label: 'Mes' }]} value={period} onChange={setPeriod} />
         <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{label}</Text>
         {report === undefined ? (

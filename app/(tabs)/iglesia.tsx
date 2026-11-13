@@ -18,7 +18,7 @@ import { maskDateAR, parseDateAR } from '@/lib/format';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
-import { dailyFor, dailySocial, setDailyLike, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
+import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent, DailySocial } from '@/types';
@@ -58,12 +58,16 @@ export default function Iglesia() {
   const [askBday, setAskBday] = useState(false);
   const [bdayText, setBdayText] = useState('');
   const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
+  const [outNow, setOutNow] = useState(0);
   const insets = useSafeAreaInsets();
   const tabs = useTabs();
   const menu = useMenu();
   const { editar } = useLocalSearchParams<{ editar?: string }>();
   const [edit, setEdit] = useState(false);
   useEffect(() => { if (editar) setEdit(true); }, [editar]);
+
+  // Los líderes ven en el inicio cuando hay hermanos evangelizando, para seguirlos en vivo sin iniciar una salida.
+  const seesLiveOutings = isLeader || can('evang.ver_salidas');
 
   const toggleDailyLike = async () => {
     if (!daily) return;
@@ -104,12 +108,13 @@ export default function Iglesia() {
       try { skipped = await AsyncStorage.getItem('lamies.bday.skip'); } catch { /* sin almacenamiento */ }
       setAskBday(!skipped);
     });
+    if (seesLiveOutings) teamLive().then((rows) => setOutNow(rows.length)).catch(() => undefined);
     supabase.rpc('bus_live_routes').then(({ data }) => {
       const rows = (data ?? []) as { name: string; run_id: string | null }[];
       setBus({ routes: rows.length, live: rows.find((r) => r.run_id)?.name ?? null });
     });
     listAnnouncements().then((a) => setNews(a.filter((x) => Date.now() - new Date(x.created_at).getTime() < 14 * 86400000).slice(0, 3))).catch(() => undefined);
-  }, [profile?.id]);
+  }, [profile?.id, seesLiveOutings]);
   useFocusEffect(refresh);
   // Si la app quedó abierta de un día para el otro (o en otra pestaña del navegador), se actualiza sola.
   useRefreshOnResume(refresh);
@@ -157,6 +162,7 @@ export default function Iglesia() {
         { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader || !!(profile && church?.absence_recipients?.includes(profile.id)) },
         { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
         { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
+        { icon: 'radio', label: 'Evangelismo en vivo', to: '/equipo', show: isLeader || can('evang.ver_salidas') },
         { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
         { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
         { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
@@ -291,6 +297,19 @@ export default function Iglesia() {
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFF', letterSpacing: 1 }}>● EN VIVO AHORA</Text>
               <Text style={{ fontSize: 15, fontWeight: '800', color: '#FFF' }} numberOfLines={1}>{live.title ?? 'El culto está en vivo'}</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color="#FFF" />
+          </Pressable>
+        ) : null}
+        {seesLiveOutings && outNow > 0 ? (
+          <Pressable onPress={() => router.push('/equipo')} accessibilityRole="button"
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.green }}>
+            <Feather name="radio" size={22} color="#FFF" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFF', letterSpacing: 1 }}>● EVANGELISMO EN VIVO</Text>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: '#FFF' }} numberOfLines={1}>
+                {outNow === 1 ? '1 hermano saliendo ahora' : `${outNow} hermanos saliendo ahora`}
+              </Text>
             </View>
             <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
