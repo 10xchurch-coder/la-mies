@@ -24,20 +24,19 @@ export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' })
   const name = church?.name ?? 'La Mies';
   const logo = useChurchLogo();
   return (
-    <View style={[styles.wrap, align === 'left' && { alignItems: 'flex-start' }]}>
-      <View style={styles.row}>
-        {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" cachePolicy="memory-disk" /> : null}
+    <View style={[styles.row, align === 'left' && { alignSelf: 'flex-start' }]}>
+      {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" cachePolicy="memory-disk" /> : null}
+      <View style={{ flexShrink: 1 }}>
         <Text style={styles.name} numberOfLines={2}>{name}</Text>
+        <Text style={styles.app}>App La Mies</Text>
       </View>
-      <Text style={styles.app}>App La Mies</Text>
     </View>
   );
 }
 
 const styles = themed(() => StyleSheet.create({
-  wrap: { alignItems: 'center', gap: 3 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, maxWidth: '100%' },
-  logo: { width: 34, height: 34, borderRadius: 17, padding: 5, backgroundColor: 'rgba(255,255,255,0.95)' },
-  name: { color: '#FFFFFF', fontSize: 15, fontWeight: '800', flexShrink: 1, textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 6, textShadowOffset: { width: 0, height: 1 } },
-  app: { color: 'rgba(255,255,255,0.72)', fontSize: 10, fontWeight: '600', letterSpacing: 0.4 },
+  row: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 12, maxWidth: '100%' },
+  logo: { width: 42, height: 42, borderRadius: 21, padding: 6, backgroundColor: '#FFFFFF' },
+  name: { color: '#FFFFFF', fontSize: 18, fontWeight: '800', textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
+  app: { color: 'rgba(255,255,255,0.9)', fontSize: 12.5, fontWeight: '600', marginTop: 1, textShadowColor: 'rgba(0,0,0,0.6)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 } },
 }));

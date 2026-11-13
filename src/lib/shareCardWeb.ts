@@ -18,7 +18,9 @@ export type CardInput = {
   uploadedUrl?: string | null;
 };
 
-const W = 1080, H = 1920, K = 3; // se diseña en 360 × 640 y se dibuja a 3×
+// Se diseña en 360 × 640 y se dibuja a 4× (1440 × 2560): WhatsApp achica y comprime lo que se sube a los estados,
+// así que conviene darle una imagen más grande que la pantalla para que el texto llegue nítido.
+const W = 1440, H = 2560, K = 4;
 const FONT = '-apple-system, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
 function loadImage(src: string): Promise<HTMLImageElement | null> {
@@ -57,6 +59,8 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
   ctx.scale(K, K);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const w = W / K, h = H / K;
 
   // Fondo: color elegido, foto subida o la foto del día.
@@ -69,7 +73,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
     ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
   } else {
     const chosen = chosenPhotoId(input.background);
-    const src = input.uploadedUrl ?? photoUrl(chosen ?? dailyPhotoId(input.onDate), 1080, 1920);
+    const src = input.uploadedUrl ?? photoUrl(chosen ?? dailyPhotoId(input.onDate), W, H, 90);
     const img = await loadImage(src);
     if (img) {
       const s = Math.max(w / img.width, h / img.height);
@@ -101,7 +105,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   const refY = y;
 
   // Al medio: el versículo (o la frase), centrado en el espacio que queda.
-  const footTop = h - 70;
+  const footTop = h - 92;
   const body = input.kind === 'phrase' ? (input.message ?? '') : input.verse;
   const sz = input.kind === 'phrase' ? { size: 30, line: 40 } : verseSize(input.verse.length);
   ctx.font = `${input.kind === 'phrase' ? 800 : 700} ${sz.size}px ${FONT}`;
@@ -112,46 +116,50 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   let ty = midTop + Math.max(0, (areaH - textH - (input.kind === 'phrase' ? 40 : 0)) / 2);
   if (input.kind === 'phrase') {
     // La frase va arriba de la cita, como en la app.
-    ctx.fillStyle = '#FFFFFF'; shadow(8, 0.4);
+    ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
     for (const l of lines) { ty += sz.line; ctx.fillText(l, PAD, ty - 10); }
     noShadow();
     ctx.font = `700 15px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.fillText(refText, PAD, ty + 26);
   } else {
-    ctx.font = `800 22px ${FONT}`; ctx.fillStyle = '#FFFFFF'; shadow(6, 0.4);
+    ctx.font = `800 22px ${FONT}`; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
     ctx.fillText(refText, PAD, refY);
-    ctx.font = `700 ${sz.size}px ${FONT}`; shadow(8, 0.45);
+    ctx.font = `700 ${sz.size}px ${FONT}`; shadow(3, 0.6);
     for (const l of lines) { ty += sz.line; ctx.fillText(l, PAD, ty - 10); }
     noShadow();
   }
 
-  // Abajo: el logo con el nombre de la iglesia al lado y, más chiquito, "App La Mies".
+  // Abajo: el logo de la iglesia con su nombre al lado y, debajo y más chico, "App La Mies".
   const logo = input.logoUrl ? await loadImage(input.logoUrl) : null;
-  ctx.font = `800 15px ${FONT}`;
-  const nameW = ctx.measureText(input.churchName).width;
-  const rowW = (logo ? 34 + 10 : 0) + Math.min(nameW, maxW - 44);
+  const R = 21, GAP = 12; // radio del círculo del logo y espacio hasta el nombre
+  ctx.font = `800 18px ${FONT}`;
+  const nameMax = maxW - (logo ? R * 2 + GAP : 0);
+  const nameW = Math.min(ctx.measureText(input.churchName).width, nameMax);
+  const rowW = (logo ? R * 2 + GAP : 0) + nameW;
   const x0 = (w - rowW) / 2;
-  const rowY = h - 56;
+  const rowY = h - 70;
   if (logo) {
     ctx.save();
-    ctx.beginPath(); ctx.arc(x0 + 17, rowY, 17, 0, Math.PI * 2); ctx.closePath(); ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.fill(); ctx.clip();
-    const s = Math.min(24 / logo.width, 24 / logo.height);
-    ctx.drawImage(logo, x0 + 17 - (logo.width * s) / 2, rowY - (logo.height * s) / 2, logo.width * s, logo.height * s);
+    ctx.beginPath(); ctx.arc(x0 + R, rowY, R, 0, Math.PI * 2); ctx.closePath(); ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.clip();
+    const s = Math.min(29 / logo.width, 29 / logo.height);
+    ctx.drawImage(logo, x0 + R - (logo.width * s) / 2, rowY - (logo.height * s) / 2, logo.width * s, logo.height * s);
     ctx.restore();
   }
-  ctx.fillStyle = '#FFFFFF'; shadow(6, 0.45);
-  ctx.fillText(input.churchName, x0 + (logo ? 44 : 0), rowY + 5, maxW - (logo ? 44 : 0));
+  const nameX = x0 + (logo ? R * 2 + GAP : 0);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.6);
+  ctx.fillText(input.churchName, nameX, rowY - 1, nameMax);
+  ctx.font = `600 12.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fillText('App La Mies', nameX, rowY + 16);
   noShadow();
-  ctx.font = `600 10px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.72)'; ctx.textAlign = 'center';
-  ctx.fillText('App La Mies', w / 2, rowY + 30);
 
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/png'));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.95));
 }
 
 /** Comparte la imagen con el menú del navegador (WhatsApp, Instagram…) o, si no se puede, la baja. */
 export async function shareCardBlob(blob: Blob, caption: string, fileName: string): Promise<'shared' | 'downloaded' | 'cancelled'> {
   const nav = globalThis.navigator as Navigator & { canShare?: (d: unknown) => boolean };
-  const file = new File([blob], fileName, { type: 'image/png' });
+  const name = blob.type === 'image/jpeg' ? fileName.replace(/\.png$/i, '.jpg') : fileName;
+  const file = new File([blob], name, { type: blob.type || 'image/png' });
   if (nav?.canShare?.({ files: [file] }) && nav.share) {
     try {
       await nav.share({ files: [file], text: caption });
@@ -162,7 +170,7 @@ export async function shareCardBlob(blob: Blob, caption: string, fileName: strin
   }
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = fileName;
+  a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   return 'downloaded';

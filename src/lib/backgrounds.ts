@@ -58,10 +58,10 @@ export function chosenPhotoId(background: string | null | undefined): string | n
 }
 
 /** Dirección de la foto, recortada al tamaño que se va a mostrar. */
-export function photoUrl(id: string, width: number, height: number): string {
+export function photoUrl(id: string, width: number, height: number, quality = 75): string {
   const w = Math.min(1440, Math.max(200, Math.round(width)));
   const h = Math.min(2560, Math.max(200, Math.round(height)));
-  return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&crop=entropy&q=75&auto=format`;
+  return `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&crop=entropy&q=${quality}&auto=format`;
 }
 
 export const DAILY_PHOTO_COUNT = DAILY_PHOTOS.length;
