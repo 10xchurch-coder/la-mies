@@ -2,7 +2,7 @@
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -23,6 +23,8 @@ import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent } from '@/types';
 import { useAuth } from '@/store/auth';
+import { setDeskPref } from '@/components/desk/DeskShell';
+import { canUseDesk } from '@/lib/desk';
 import { useTabs } from '@/lib/tabsPref';
 import { FAV, layout, moved, resetMenu, setMenu, useMenu } from '@/lib/menuPref';
 import { colors, themed } from '@/theme';
@@ -40,7 +42,7 @@ export function greeting(d = new Date()): string {
 
 export default function Iglesia() {
   const router = useRouter();
-  const { profile, church, isStaff, isLeader, financeLevel, can } = useAuth();
+  const { profile, church, isStaff, isLeader, financeLevel, can, perms } = useAuth();
   const [live, setLive] = useState<{ id: string; title: string | null } | null>(null);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [takesAttendance, setTakesAttendance] = useState(false);
@@ -239,6 +241,13 @@ export default function Iglesia() {
             <Text style={styles.churchName} numberOfLines={1}>{church?.name ?? 'Iglesia'}</Text>
             <Text style={styles.motto}>Más como Cristo cada día</Text>
           </View>
+          {Platform.OS === 'web' && canUseDesk(perms) ? (
+            <Pressable accessibilityRole="link" accessibilityLabel="Abrir el escritorio" onPress={() => { setDeskPref(true); router.push('/escritorio' as Href); }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 9, borderWidth: 1, borderColor: colors.input }}>
+              <Feather name="monitor" size={15} color={colors.text} />
+              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>Escritorio</Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
       <Screen>
