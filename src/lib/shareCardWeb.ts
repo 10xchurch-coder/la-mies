@@ -101,7 +101,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   y += 26;
   ctx.font = `800 ${input.kind === 'phrase' ? 15 : 22}px ${FONT}`;
   ctx.fillStyle = input.kind === 'phrase' ? 'rgba(255,255,255,0.95)' : '#FFFFFF';
-  const refText = input.kind === 'phrase' ? input.reference : `${input.reference} · RV1960`;
+  const refText = input.reference; // "RV1960" va abajo, al lado de "App La Mies"
   const refY = y;
 
   // Al medio: el versículo (o la frase), centrado en el espacio que queda.
@@ -131,25 +131,27 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
 
   // Abajo: el logo de la iglesia con su nombre al lado y, debajo y más chico, "App La Mies".
   const logo = input.logoUrl ? await loadImage(input.logoUrl) : null;
-  const R = 21, GAP = 12; // radio del círculo del logo y espacio hasta el nombre
+  const LH = 44, GAP = 12; // alto del logo y espacio hasta el nombre
+  const LW = logo ? Math.min(LH, (logo.width / logo.height) * LH) : 0;
   ctx.font = `800 18px ${FONT}`;
-  const nameMax = maxW - (logo ? R * 2 + GAP : 0);
+  const nameMax = maxW - (logo ? LW + GAP : 0);
   const nameW = Math.min(ctx.measureText(input.churchName).width, nameMax);
-  const rowW = (logo ? R * 2 + GAP : 0) + nameW;
+  const rowW = (logo ? LW + GAP : 0) + nameW;
   const x0 = (w - rowW) / 2;
   const rowY = h - 70;
   if (logo) {
+    // El logo va solo, sin círculo. Un resplandor claro muy suave lo despega de los fondos oscuros.
     ctx.save();
-    ctx.beginPath(); ctx.arc(x0 + R, rowY, R, 0, Math.PI * 2); ctx.closePath(); ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.clip();
-    const s = Math.min(29 / logo.width, 29 / logo.height);
-    ctx.drawImage(logo, x0 + R - (logo.width * s) / 2, rowY - (logo.height * s) / 2, logo.width * s, logo.height * s);
+    ctx.shadowColor = 'rgba(255,255,255,0.55)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 0;
+    const lh = (logo.height / logo.width) * LW;
+    ctx.drawImage(logo, x0, rowY - lh / 2, LW, lh);
     ctx.restore();
   }
-  const nameX = x0 + (logo ? R * 2 + GAP : 0);
+  const nameX = x0 + (logo ? LW + GAP : 0);
   ctx.textAlign = 'left'; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.6);
   ctx.fillText(input.churchName, nameX, rowY - 1, nameMax);
   ctx.font = `600 12.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.fillText('App La Mies', nameX, rowY + 16);
+  ctx.fillText('App La Mies · RV1960', nameX, rowY + 16);
   noShadow();
 
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.95));

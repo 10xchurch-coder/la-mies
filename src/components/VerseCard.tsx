@@ -59,7 +59,7 @@ export const VerseCard = forwardRef<CardHandle, {
           <Feather name="sun" size={compact ? 11 : 13} color="rgba(255,255,255,0.85)" />
           <Text style={[styles.label, compact && { fontSize: 10 }]}>Versículo del día</Text>
         </View>
-        <Text style={[styles.ref, compact && { fontSize: 17 }]}>{compact ? item.reference : `${item.reference} · RV1960`}</Text>
+        <Text style={[styles.ref, compact && { fontSize: 17 }]}>{item.reference}</Text>
       </View>
       <View style={{ flex: 1, justifyContent: 'center', paddingVertical: compact ? 8 : 18, gap: compact ? 8 : 18 }}>
         <Text
