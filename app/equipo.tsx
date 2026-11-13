@@ -1,12 +1,19 @@
-// Equipo: quién está saliendo ahora, cómo va el día, mi grupo.
-import React, { useCallback, useState } from 'react';
+// Evangelismo en vivo: quién está saliendo ahora y por dónde va (en el mapa), cómo va el día y mi grupo.
+// Se ve en cualquier momento, sin iniciar una salida.
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { CoverageMap, regionAround, type LiveMember } from '@/components/CoverageMap';
+import { MapTypeButton, mapStyleProps, useMapStyle } from '@/components/MapTypeButton';
 import { Header, Screen } from '@/components/Screen';
 import { Avatar, Card, Empty, SectionTitle, Stat } from '@/components/ui';
 import { listProfiles, teamLive, teamTotals } from '@/lib/api';
+import { liveMemberActions } from '@/lib/directions';
 import { fmtDistance, fmtMinutes, fmtTime, groupWord } from '@/lib/format';
+import { haversine, type LatLng } from '@/lib/geo';
+import { useLayout } from '@/lib/layout';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { Profile, TeamLiveRow, TeamTotals } from '@/types';
@@ -17,12 +24,28 @@ export default function Equipo() {
   const [live, setLive] = useState<TeamLiveRow[]>([]);
   const [totals, setTotals] = useState<TeamTotals | null>(null);
   const [members, setMembers] = useState<Profile[]>([]);
+  const [trails, setTrails] = useState<{ id: string; points: LatLng[]; color: string; name: string }[]>([]);
+  const [focus, setFocus] = useState<LatLng | null>(null);
+  const [mapStyle, setMapStyle] = useMapStyle();
+  const { width } = useLayout();
 
   const load = useCallback(async () => {
     try {
       const [l, t] = await Promise.all([teamLive(), teamTotals('day')]);
       setLive(l);
       setTotals(t);
+      // El recorrido de hoy de cada uno, con su color.
+      if (l.length) {
+        const { data } = await supabase.from('track_points').select('session_id, lat, lng, recorded_at').in('session_id', l.map((o) => o.session_id)).order('recorded_at').limit(6000);
+        const by = new Map<string, LatLng[]>();
+        for (const p of (data ?? []) as { session_id: string; lat: number; lng: number }[]) {
+          if (!by.has(p.session_id)) by.set(p.session_id, []);
+          by.get(p.session_id)!.push({ lat: p.lat, lng: p.lng });
+        }
+        setTrails(l.map((o, i) => ({ id: o.session_id, name: o.display_name, points: by.get(o.session_id) ?? [], color: TRAIL_COLORS[i % TRAIL_COLORS.length] })).filter((x) => x.points.length > 1));
+      } else {
+        setTrails([]);
+      }
     } catch {
       // sin señal
     }
@@ -37,6 +60,20 @@ export default function Equipo() {
     }, [load]),
   );
 
+  const onMap: LiveMember[] = useMemo(
+    () => live.filter((r) => r.lat != null && r.lng != null).map((r) => ({ user_id: r.user_id, display_name: r.display_name, lat: r.lat as number, lng: r.lng as number, me: r.user_id === session?.user.id })),
+    [live, session?.user.id],
+  );
+  // El mapa se acomoda para que entren todos; solo se vuelve a acomodar cuando cambia quién está saliendo (no en cada actualización).
+  const who = onMap.map((m) => m.user_id).sort().join(',');
+  const region = useMemo(() => {
+    if (focus) return regionAround(focus, 250);
+    if (!onMap.length) return undefined;
+    const center = { lat: onMap.reduce((a, m) => a + m.lat, 0) / onMap.length, lng: onMap.reduce((a, m) => a + m.lng, 0) / onMap.length };
+    const far = Math.max(0, ...onMap.map((m) => haversine(center, m)));
+    return regionAround(center, Math.max(350, far * 1.5));
+  }, [who, focus]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const mine = members.filter((m) => (group ? m.group_id === group.id : true) && m.id !== profile?.id);
   const gw = groupWord(church?.grouping);
 
@@ -44,7 +81,7 @@ export default function Equipo() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
         back
-        title="Equipo"
+        title="Evangelismo en vivo"
         subtitle={live.length ? `${live.length} ${live.length === 1 ? 'hermano' : 'hermanos'} en salida ahora` : 'Nadie está saliendo ahora'}
         right={
           <Pressable onPress={() => router.push('/tablero')} accessibilityRole="button" style={styles.tablero}>
@@ -54,11 +91,23 @@ export default function Equipo() {
         }
       />
       <Screen>
-        <SectionTitle>En salida ahora</SectionTitle>
+        {onMap.length && region ? (
+          <View style={[styles.map, { height: width >= 900 ? 460 : 300 }]}>
+            <CoverageMap roads={[]} coverage={[]} live={onMap} trails={trails} region={region} {...mapStyleProps(mapStyle)} onPressLive={(m) => liveMemberActions(m)} />
+            <MapTypeButton style={mapStyle} onChange={setMapStyle} top={10} />
+            {focus ? (
+              <Pressable onPress={() => setFocus(null)} accessibilityRole="button" accessibilityLabel="Ver a todos en el mapa" style={styles.allBtn}>
+                <Feather name="maximize" size={14} color={colors.greenText} />
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Ver a todos</Text>
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+        <SectionTitle right={live.length ? <Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>● Se actualiza solo</Text> : undefined}>En salida ahora</SectionTitle>
         {live.length ? (
-          live.map((r) => (
+          live.map((r, i) => (
             <Card key={r.user_id} style={styles.liveRow}>
-              <Avatar name={r.display_name} color={colors.green} textColor="#FFFFFF" />
+              <Avatar name={r.display_name} color={trails.find((t) => t.id === r.session_id)?.color ?? TRAIL_COLORS[i % TRAIL_COLORS.length]} textColor="#FFFFFF" />
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
                   {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
@@ -67,13 +116,15 @@ export default function Equipo() {
                   Salió {fmtTime(r.started_at)} · {fmtMinutes((Date.now() - new Date(r.started_at).getTime()) / 60000)} · {r.contacts} contactos · {r.presentations} evangelio · {r.promises} promesas
                 </Text>
               </View>
-              <Pressable onPress={() => router.push('/(tabs)/mapa')} accessibilityRole="button" accessibilityLabel={`Ver a ${r.display_name} en el mapa`} style={styles.iconBtn}>
-                <Feather name="map" size={20} color={colors.green} />
-              </Pressable>
+              {r.lat != null && r.lng != null ? (
+                <Pressable onPress={() => setFocus({ lat: r.lat as number, lng: r.lng as number })} accessibilityRole="button" accessibilityLabel={`Ver a ${r.display_name} en el mapa`} style={styles.iconBtn}>
+                  <Feather name="crosshair" size={20} color={colors.green} />
+                </Pressable>
+              ) : null}
             </Card>
           ))
         ) : (
-          <Empty icon="users" title="Nadie está en salida" text="Cuando alguien toque Iniciar salida, lo ves acá y en el mapa." />
+          <Empty icon="users" title="Nadie está en salida" text="Cuando alguien toque Iniciar salida, lo ves acá en el mapa, con lo que va haciendo. No hace falta que vos inicies una salida." />
         )}
 
         <SectionTitle right={<Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>● En vivo</Text>}>Salida de hoy · todo el equipo</SectionTitle>
@@ -120,7 +171,11 @@ export default function Equipo() {
   );
 }
 
+const TRAIL_COLORS = ['#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488', '#DC2626'];
+
 const styles = themed(() => StyleSheet.create({
+  map: { borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
+  allBtn: { position: 'absolute', left: 10, bottom: 10, flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 18, backgroundColor: colors.bg, borderWidth: 1, borderColor: colors.border },
   tablero: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 12, borderRadius: 999, backgroundColor: colors.greenSoft },
   liveRow: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
   iconBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.bgSoft, alignItems: 'center', justifyContent: 'center' },
