@@ -69,7 +69,7 @@ function dayLabel(date: string, today: string): string {
 
 export default function Devocional() {
   const router = useRouter();
-  const { fecha } = useLocalSearchParams<{ fecha?: string }>();
+  const { fecha, abrir } = useLocalSearchParams<{ fecha?: string; abrir?: string }>();
   const { church, isStaff } = useAuth();
   const insets = useSafeAreaInsets();
   const { width: winW, height: winH } = useWindowDimensions();
@@ -82,7 +82,7 @@ export default function Devocional() {
   const [social, setSocial] = useState<DailySocial>({ comments: 0, likes: 0, liked: false, open: false });
   const [streak, setStreak] = useState<ReadingStreak | null>(null);
   const [page, setPage] = useState(0);
-  const [sheet, setSheet] = useState<null | 'comments' | 'days' | 'streak' | 'reader'>(null);
+  const [sheet, setSheet] = useState<null | 'comments' | 'days' | 'streak' | 'reader' | 'share'>(abrir === 'comentarios' ? 'comments' : abrir === 'compartir' ? 'share' : null);
   const pager = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const slideRefs = useRef<Record<string, React.ComponentRef<typeof View> | null>>({});
 
@@ -120,16 +120,19 @@ export default function Devocional() {
   // En la web la imagen se dibuja de antemano: el iPhone solo deja compartir en el mismo instante en que se toca el botón.
   const logoUrl = useChurchLogo();
   const cards = useRef<Record<string, Promise<Blob> | undefined>>({});
-  const cardKind = (slides[page] === 'phrase' ? 'phrase' : slides[page] === 'verse' ? 'verse' : null) as CardKind | null;
-  const cardKey = item && cardKind ? `${item.on_date}|${cardKind}|${item.background ?? ''}|${logoUrl ?? ''}` : null;
+  const cardKeyOf = (kind: CardKind) => (item ? `${item.on_date}|${kind}|${item.background ?? ''}|${logoUrl ?? ''}` : null);
   useEffect(() => {
-    if (Platform.OS !== 'web' || !item || !cardKind || !cardKey || cards.current[cardKey]) return;
+    if (Platform.OS !== 'web' || !item) return;
     const bg = item.background;
     const uploaded = bg && !BACKGROUNDS[bg] && !chosenPhotoId(bg) && bg !== 'auto' ? cachedSignedUrl('photos', bg) : null;
-    const p = renderCardPng({ kind: cardKind, reference: item.reference, verse: item.verse, message: item.message ?? null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
-    p.catch(() => { delete cards.current[cardKey]; });
-    cards.current[cardKey] = p;
-  }, [cardKey]);
+    for (const kind of ['verse', ...(item.message ? ['phrase'] : [])] as CardKind[]) {
+      const key = cardKeyOf(kind);
+      if (!key || cards.current[key]) continue;
+      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
+      p.catch(() => { delete cards.current[key]; });
+      cards.current[key] = p;
+    }
+  }, [item?.on_date, item?.background, item?.message, logoUrl]);
 
   const goTo = (i: number) => {
     pager.current?.scrollTo({ x: i * W, animated: true });
@@ -155,20 +158,22 @@ export default function Devocional() {
     ].filter(Boolean).join('\n\n')
     : '';
 
-  const share = async () => {
+  // Versículo + frase + devocional corto, todo junto y en texto (una imagen no alcanza para los tres).
+  const threeText = item
+    ? [`${item.reference} (RV1960)`, `"${item.verse}"`, item.message ?? '', item.devotional ? plain(item.devotional) : '', `${churchName} · ${WEB_URL}`].filter(Boolean).join('\n\n')
+    : '';
+
+  /** Comparte la tarjeta como imagen: solo el versículo o solo la frase. */
+  const shareCard = async (kind: CardKind) => {
     if (!item) return;
-    const kind = slides[page] ?? 'verse';
-    if (kind === 'full') return shareFull();
-    const fallback = kind === 'phrase'
-      ? `${item.message}\n${item.reference}\n\n${churchName} · ${WEB_URL}`
-      : kind === 'reading'
-        ? `${verseText}\n\n${plain(item.devotional ?? '')}\n\n${churchName} · ${WEB_URL}`
-        : `${verseText}${item.message ? `\n\n${item.message}` : ''}\n\n${churchName} · ${WEB_URL}`;
-    if (Platform.OS === 'web' && cardKey && cards.current[cardKey]) {
+    setSheet(null);
+    const fallback = kind === 'phrase' ? `${item.message}\n${item.reference}\n\n${churchName} · ${WEB_URL}` : `${verseText}\n\n${churchName} · ${WEB_URL}`;
+    const key = cardKeyOf(kind);
+    if (Platform.OS === 'web' && key && cards.current[key]) {
       try {
         const site = church?.website ? (/^https?:/.test(church.website) ? church.website : `https://${church.website}`) : WEB_URL;
-        const blob = await cards.current[cardKey];
-        const r = await shareCardBlob(blob, `${churchName} · ${site}`, `versiculo-${item.on_date}.png`);
+        const blob = await cards.current[key];
+        const r = await shareCardBlob(blob, `${churchName} · ${site}`, `${kind === 'phrase' ? 'frase' : 'versiculo'}-${item.on_date}.png`);
         if (r === 'downloaded') Alert.alert('Imagen guardada', 'Quedó guardada en tu teléfono (en Descargas o en Archivos). Ahora podés mandarla por WhatsApp o subirla a tus estados.');
         return;
       } catch { /* si falla, se comparte el texto */ }
@@ -188,6 +193,13 @@ export default function Devocional() {
     } catch (e) {
       Alert.alert('No se pudo compartir', errorMessage(e));
     }
+  };
+
+  const shareThree = async () => {
+    if (!item) return;
+    setSheet(null);
+    const r = await shareText(threeText, `Devocional · ${item.reference}`);
+    if (r === 'copied') Alert.alert('Copiado', 'Quedó copiado para pegarlo donde quieras.');
   };
 
   const shareFull = async () => {
@@ -337,7 +349,7 @@ export default function Devocional() {
 
         {/* Abajo: compartir, comentarios, corazón y días anteriores. */}
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 14 }]}>
-          <Action icon={<Feather name="share-2" size={24} color="#FFF" />} label="Compartir" onPress={share} />
+          <Action icon={<Feather name="share-2" size={24} color="#FFF" />} label="Compartir" onPress={() => setSheet('share')} />
           <Action icon={<Feather name="message-circle" size={24} color="#FFF" />} label={social.comments ? String(social.comments) : 'Comentar'} onPress={() => setSheet('comments')} />
           <Action
             icon={<Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={26} color={social.liked ? '#FF5A6E' : '#FFF'} />}
@@ -352,6 +364,8 @@ export default function Devocional() {
         onCount={(n) => setSocial((s) => ({ ...s, comments: n }))} />
       <DaysSheet visible={sheet === 'days'} current={item.on_date} today={today} onPick={openDay} onClose={() => setSheet(null)} />
       <StreakSheet visible={sheet === 'streak'} streak={streak} onClose={() => setSheet(null)} onBoard={() => { setSheet(null); router.push('/devocional/lectores'); }} />
+      <ShareSheet visible={sheet === 'share'} item={item} onVerse={() => shareCard('verse')} onPhrase={() => shareCard('phrase')} onThree={shareThree}
+        onFull={() => { setSheet(null); shareFull(); }} onClose={() => setSheet(null)} />
       <ReaderSheet visible={sheet === 'reader'} item={item} label={dayLabel(item.on_date, today)} social={social}
         onShare={shareFull} onComments={() => setSheet('comments')} onClose={() => setSheet(null)} />
     </View>
@@ -364,6 +378,40 @@ function Action({ icon, label, onPress }: { icon: React.ReactNode; label: string
       {icon}
       <Text style={styles.actionLabel} numberOfLines={1}>{label}</Text>
     </Pressable>
+  );
+}
+
+// ---------- Qué compartir ----------
+function ShareSheet({ visible, item, onVerse, onPhrase, onThree, onFull, onClose }: {
+  visible: boolean; item: DailyContent; onVerse: () => void; onPhrase: () => void; onThree: () => void; onFull: () => void; onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const options: { key: string; icon: React.ComponentProps<typeof Feather>['name']; title: string; hint: string; onPress: () => void; show: boolean }[] = [
+    { key: 'verse', icon: 'image', title: 'Solo el versículo', hint: 'Una imagen con el versículo, lista para WhatsApp o tus estados', onPress: onVerse, show: true },
+    { key: 'three', icon: 'align-left', title: 'Versículo, frase y devocional corto', hint: 'Los tres juntos, en texto', onPress: onThree, show: !!(item.message || item.devotional) },
+    { key: 'phrase', icon: 'message-square', title: 'Solo la frase del día', hint: 'Una imagen con la frase', onPress: onPhrase, show: !!item.message },
+    { key: 'full', icon: 'book-open', title: 'El devocional completo', hint: 'Con el estudio y la oración, en texto', onPress: onFull, show: !!(item.study || item.prayer) },
+  ];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, padding: 18, gap: 6 }]}>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, marginBottom: 6 }}>¿Qué querés compartir?</Text>
+        {options.filter((o) => o.show).map((o) => (
+          <Pressable key={o.key} onPress={o.onPress} accessibilityRole="button" accessibilityLabel={o.title}
+            style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 10, borderRadius: 12 }, pressed && { backgroundColor: colors.bgSoft }]}>
+            <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name={o.icon} size={20} color={colors.greenText} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{o.title}</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>{o.hint}</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color={colors.gray} />
+          </Pressable>
+        ))}
+      </View>
+    </Modal>
   );
 }
 
