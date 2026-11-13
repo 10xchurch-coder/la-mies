@@ -4,7 +4,7 @@ import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Screen } from '@/components/Screen';
@@ -18,10 +18,10 @@ import { maskDateAR, parseDateAR } from '@/lib/format';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
-import { dailyFor, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
+import { dailyFor, dailySocial, setDailyLike, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
-import type { DailyContent } from '@/types';
+import type { DailyContent, DailySocial } from '@/types';
 import { useAuth } from '@/store/auth';
 import { useTabs } from '@/lib/tabsPref';
 import { FAV, layout, moved, resetMenu, setMenu, useMenu } from '@/lib/menuPref';
@@ -46,6 +46,7 @@ export default function Iglesia() {
   const [takesAttendance, setTakesAttendance] = useState(false);
   const [daily, setDaily] = useState<DailyContent | null>(null);
   const [streak, setStreak] = useState(0);
+  const [social, setSocial] = useState<DailySocial>({ comments: 0, likes: 0, liked: false, open: false });
   const [tomorrow, setTomorrow] = useState<Pick<Sermon, 'id' | 'title' | 'passage' | 'preacher'> | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
   const [myMinistries, setMyMinistries] = useState<Ministry[]>([]);
@@ -62,9 +63,25 @@ export default function Iglesia() {
   const [edit, setEdit] = useState(false);
   useEffect(() => { if (editar) setEdit(true); }, [editar]);
 
+  const toggleDailyLike = async () => {
+    if (!daily) return;
+    const before = social;
+    const next = !before.liked;
+    setSocial({ ...before, liked: next, likes: Math.max(0, before.likes + (next ? 1 : -1)) });
+    try {
+      await setDailyLike(daily.on_date, next);
+    } catch (e) {
+      setSocial(before);
+      Alert.alert('No se pudo', errorMessage(e));
+    }
+  };
+
   const refresh = useCallback(() => {
     myUpcoming(21).then(setUpcoming).catch(() => undefined);
-    dailyFor(null).then(setDaily).catch(() => undefined);
+    dailyFor(null).then((d) => {
+      setDaily(d);
+      if (d) dailySocial(d.on_date).then(setSocial).catch(() => undefined);
+    }).catch(() => undefined);
     readingStreak().then((r) => setStreak(r.current)).catch(() => undefined);
     // El sábado (o cualquier día antes de una prédica ya cargada) se ve el título del mensaje de mañana.
     supabase.from('sermons').select('id, title, passage, preacher').eq('preached_on', isoDate(addDays(new Date(), 1))).limit(1).maybeSingle()
@@ -318,14 +335,31 @@ export default function Iglesia() {
           </Card>
         ) : null}
         {daily ? (
-          <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
-            <VerseCard item={daily} church={church?.name} compact />
+          <View>
+            <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
+              <VerseCard item={daily} church={church?.name} compact />
+            </Pressable>
+            {/* Como en las apps de la Biblia: corazones, comentarios y compartir, ahí mismo. */}
             <View style={styles.dailyBar}>
-              <Feather name="book-open" size={16} color={colors.greenText} />
-              <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: colors.greenText }}>Devocional de hoy · tocá para leer y compartir</Text>
+              <Pressable onPress={toggleDailyLike} hitSlop={8} style={styles.dailyAct} accessibilityRole="button"
+                accessibilityLabel={social.liked ? 'Quitar me gusta' : 'Me gusta'} accessibilityState={{ selected: social.liked }}>
+                <Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={22} color={social.liked ? '#E5484D' : colors.greenText} />
+                <Text style={styles.dailyActText}>{social.likes || 'Me gusta'}</Text>
+              </Pressable>
+              <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'comentarios' } })} hitSlop={8} style={styles.dailyAct}
+                accessibilityRole="button" accessibilityLabel={`Comentarios: ${social.comments}`}>
+                <Feather name="message-circle" size={20} color={colors.greenText} />
+                <Text style={styles.dailyActText}>{social.comments || 'Comentar'}</Text>
+              </Pressable>
+              <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'compartir' } })} hitSlop={8} style={styles.dailyAct}
+                accessibilityRole="button" accessibilityLabel="Compartir">
+                <Feather name="share-2" size={20} color={colors.greenText} />
+                <Text style={styles.dailyActText}>Compartir</Text>
+              </Pressable>
+              <View style={{ flex: 1 }} />
               {streak ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>⚡ {streak}</Text> : null}
             </View>
-          </Pressable>
+          </View>
         ) : null}
         {news.length ? (
           <Card style={styles.news}>
@@ -376,5 +410,7 @@ const styles = themed(() => StyleSheet.create({
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
-  dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
+  dailyAct: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 32 },
+  dailyActText: { fontSize: 14, fontWeight: '700', color: colors.greenText },
+  dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
 }));
