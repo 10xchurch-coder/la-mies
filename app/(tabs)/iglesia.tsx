@@ -365,28 +365,28 @@ export default function Iglesia() {
         {daily ? (
           <View>
             <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
-              <VerseCard item={daily} church={church?.name} compact style={styles.dailyCard} />
+              <VerseCard item={daily} church={church?.name} compact big hideMessage style={styles.dailyCard} />
             </Pressable>
             {/* Como en las apps de la Biblia: corazones, comentarios y compartir, sobre la misma foto. */}
             <View style={styles.dailyBar} pointerEvents="box-none">
               <Pressable onPress={toggleDailyLike} hitSlop={8} style={styles.dailyAct} accessibilityRole="button"
                 accessibilityLabel={social.liked ? 'Quitar me gusta' : 'Me gusta'} accessibilityState={{ selected: social.liked }}>
-                <Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={25} color={social.liked ? '#FF6B6F' : '#FFFFFF'} />
+                <Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={19} color={social.liked ? '#FF6B6F' : '#FFFFFF'} />
                 <Text style={styles.dailyActText}>{social.likes || 'Me gusta'}</Text>
               </Pressable>
               <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'comentarios' } })} hitSlop={8} style={styles.dailyAct}
                 accessibilityRole="button" accessibilityLabel={`Comentarios: ${social.comments}`}>
-                <Ionicons name="chatbubble-outline" size={23} color="#FFFFFF" />
+                <Ionicons name="chatbubble-outline" size={18} color="#FFFFFF" />
                 <Text style={styles.dailyActText}>{social.comments || 'Comentar'}</Text>
               </Pressable>
               <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'compartir' } })} hitSlop={8} style={styles.dailyAct}
                 accessibilityRole="button" accessibilityLabel="Compartir">
-                <Ionicons name="share-outline" size={24} color="#FFFFFF" />
+                <Ionicons name="share-outline" size={19} color="#FFFFFF" />
                 <Text style={styles.dailyActText}>Compartir</Text>
               </Pressable>
               {streak ? (
                 <Pressable onPress={() => router.push('/devocional')} hitSlop={8} style={styles.dailyAct} accessibilityRole="button" accessibilityLabel={`Racha de lectura: ${streak} días`}>
-                  <Ionicons name="flash-outline" size={24} color="#FFFFFF" />
+                  <Ionicons name="flash-outline" size={19} color="#FFFFFF" />
                   <Text style={styles.dailyActText}>{streak}</Text>
                 </Pressable>
               ) : null}
@@ -442,9 +442,9 @@ const styles = themed(() => StyleSheet.create({
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
-  dailyAct: { alignItems: 'center', gap: 4, minWidth: 64 },
-  dailyActText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  dailyAct: { alignItems: 'center', gap: 3, minWidth: 64 },
+  dailyActText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
   // La foto baja hasta abajo y los botones van encima, sin la franja verde.
-  dailyCard: { aspectRatio: undefined, maxHeight: undefined, minHeight: 320, paddingBottom: 84 },
-  dailyBar: { position: 'absolute', left: 0, right: 0, bottom: 14, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'flex-start' },
+  dailyCard: { aspectRatio: undefined, maxHeight: undefined, minHeight: 300, paddingBottom: 68 },
+  dailyBar: { position: 'absolute', left: 0, right: 0, bottom: 12, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'flex-start' },
 }));

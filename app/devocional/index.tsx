@@ -198,16 +198,22 @@ export default function Devocional() {
     }
   };
 
+  // En la web (iPhone) el menú del teléfono no siempre abre con texto, así que ahí mostramos siempre
+  // nuestras propias opciones: WhatsApp, copiar u otra app. En la app de Android va directo al menú.
+  const shareLongText = async (text: string) => {
+    if (Platform.OS === 'web') { setTextShare(text); return; }
+    if ((await tryShareText(text, 'Devocional')) === 'failed') setTextShare(text);
+  };
+
   const shareThree = async () => {
     if (!item) return;
     setSheet(null);
-    // Si el teléfono no abre su menú de compartir, se ofrece WhatsApp o copiar (antes no pasaba nada).
-    if ((await tryShareText(threeText, `Devocional · ${item.reference}`)) === 'failed') setTextShare(threeText);
+    await shareLongText(threeText);
   };
 
   const shareFull = async () => {
     if (!item) return;
-    if ((await tryShareText(fullText, `Devocional · ${item.reference}`)) === 'failed') setTextShare(fullText);
+    await shareLongText(fullText);
   };
 
   const toggleLike = async () => {
@@ -403,7 +409,7 @@ function TextShareSheet({ text, onClose }: { text: string | null; onClose: () =>
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, padding: 18, gap: 6 }]}>
         <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Compartir</Text>
         <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 6 }} numberOfLines={4}>{text ?? ''}</Text>
-        {row(<Ionicons name="logo-whatsapp" size={22} color={colors.greenText} />, 'Enviar por WhatsApp', 'Elegís a quién o lo subís a tu estado', () => {
+        {row(<Ionicons name="logo-whatsapp" size={22} color={colors.greenText} />, 'Enviar por WhatsApp', 'Elegís a quién mandárselo', () => {
           Linking.openURL(`https://wa.me/?text=${encodeURIComponent(text ?? '')}`).catch(() => undefined);
           onClose();
         })}
@@ -411,6 +417,15 @@ function TextShareSheet({ text, onClose }: { text: string | null; onClose: () =>
           Clipboard.setStringAsync(text ?? '').then(() => Alert.alert('Copiado', 'Quedó copiado para pegarlo donde quieras.')).catch(() => Alert.alert('No se pudo copiar', 'Probá con el botón de WhatsApp.'));
           onClose();
         })}
+        {Platform.OS === 'web' && typeof (globalThis.navigator as { share?: unknown } | undefined)?.share === 'function'
+          ? row(<Feather name="share" size={20} color={colors.greenText} />, 'Otra app', 'Abre el menú de compartir del teléfono', () => {
+            const t = text ?? '';
+            onClose();
+            (globalThis.navigator as Navigator).share({ text: t }).catch((e: { name?: string; message?: string }) => {
+              if (e?.name !== 'AbortError') Alert.alert('El teléfono no abrió su menú', `Usá WhatsApp o Copiar el texto. (${e?.name ?? 'error'})`);
+            });
+          })
+          : null}
       </View>
     </Modal>
   );

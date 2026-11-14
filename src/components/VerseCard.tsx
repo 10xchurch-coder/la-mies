@@ -47,8 +47,8 @@ export function DayBackground({ background, date, width = 1080, height = 1920, d
 export const VerseCard = forwardRef<CardHandle, {
   item: DailyContent; church?: string | null; style?: StyleProp<ViewStyle>;
   /** Compacta: la tarjeta de la pestaña Iglesia. Si no, ocupa todo el lugar (pantalla completa). */
-  compact?: boolean; lines?: number; hideMessage?: boolean; width?: number; height?: number;
-}>(function VerseCard({ item, church, style, compact, lines, hideMessage, width, height }, ref) {
+  compact?: boolean; /** Letra más grande para la tarjeta del inicio. */ big?: boolean; lines?: number; hideMessage?: boolean; width?: number; height?: number;
+}>(function VerseCard({ item, church, style, compact, big, lines, hideMessage, width, height }, ref) {
   const long = item.verse.length > 220;
   const veryLong = item.verse.length > 380;
   return (
@@ -63,8 +63,8 @@ export const VerseCard = forwardRef<CardHandle, {
       </View>
       <View style={{ flex: 1, justifyContent: 'center', paddingVertical: compact ? 8 : 18, gap: compact ? 8 : 18 }}>
         <Text
-          style={[styles.verse, compact && { fontSize: 16, lineHeight: 23 }, !compact && long && { fontSize: 21, lineHeight: 30 }, !compact && veryLong && { fontSize: 18, lineHeight: 26 }]}
-          numberOfLines={lines ?? (compact ? 5 : undefined)}
+          style={[styles.verse, compact && { fontSize: big ? 20 : 16, lineHeight: big ? 28 : 23 }, !compact && long && { fontSize: 21, lineHeight: 30 }, !compact && veryLong && { fontSize: 18, lineHeight: 26 }]}
+          numberOfLines={lines ?? (compact ? (big ? 8 : 5) : undefined)}
         >
           {item.verse}
         </Text>
