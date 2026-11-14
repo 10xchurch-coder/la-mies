@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Loading, RowLink, SectionTitle, Segmented, Stat } from '@/components/ui';
 import { churchReport } from '@/lib/api';
+import { countContacts, countOutings } from '@/lib/outings';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDay, fmtDistance, fmtMinutes, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -120,18 +121,18 @@ export default function Panel() {
           <>
             <View style={{ gap: 8 }}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Stat value={countContacts(report.sessions)} label="Contactos" />
                 <Stat value={t.presentations} label="Presentaciones" tone="green" />
                 <Stat value={t.promises} label="Promesas" tone="amber" />
                 <Stat value={t.came} label="Vinieron" tone="blue" />
-                <Stat value={t.discipleship} label="Discipulado" />
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Stat value={t.discipleship} label="Discipulado" />
                 <Stat value={t.baptisms} label="Bautismos" />
-                <Stat value={t.sessions} label="Salidas" />
+                <Stat value={countOutings(report.sessions)} label="Salidas" />
                 <Stat value={t.members} label="Hermanos" />
-                <Stat value={fmtMinutes(t.minutes)} label="En la calle" />
               </View>
-              <Text style={{ fontSize: 12, color: colors.muted }}>{fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras · {t.contacts} casas marcadas</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>{fmtMinutes(t.minutes)} en la calle · {fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras</Text>
             </View>
 
             {t.pending_pickups > 0 ? (

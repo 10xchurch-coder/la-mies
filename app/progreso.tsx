@@ -54,9 +54,11 @@ export default function Progreso() {
         <SectionTitle>Mis números desde que empecé</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Stat value={p.sessions} label="Salidas" />
-          <Stat value={p.presentations} label="Presentac." />
-          <Stat value={p.promises} label="Promesas" />
-          <Stat value={p.came} label="Vinieron" tone="green" />
+          <Stat value={p.presentations} label="Presentaciones del evangelio" />
+        </View>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Stat value={p.promises} label="Prometieron venir a la iglesia" />
+          <Stat value={p.came} label="Vinieron a la iglesia" tone="green" />
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Stat value={p.discipleship} label="Discipulado" />
