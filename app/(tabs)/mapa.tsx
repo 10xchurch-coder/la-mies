@@ -10,6 +10,8 @@ import { Feather } from '@expo/vector-icons';
 import type { Region } from '@/components/map';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CoverageMap, bboxOfRegion, regionAround, type LiveMember } from '@/components/CoverageMap';
+import { MyLocationMarker } from '@/components/MyLocationMarker';
+import { useMyLocation } from '@/lib/useMyLocation';
 import { Button } from '@/components/ui';
 import { MapTypeButton, mapStyleProps, useMapStyle } from '@/components/MapTypeButton';
 import { clearMeetingPoint, coverageInBbox, currentMeetingPoint, editHouse, houseSidesInBbox, housesInBbox, listContacts, listProfiles, listZones, markSidesFor, roadsInBbox, setMeetingPoint, setSideCoverage, teamLive } from '@/lib/api';
@@ -44,6 +46,10 @@ export default function Mapa() {
   const { session, isLeader, can, church, profile } = useAuth();
   const outing = useOuting();
   const [region, setRegion] = useState<Region>(regionAround(DEFAULT_CENTER, 900));
+  // El punto azul de "estás acá" con el abanico de hacia dónde mirás. Solo se dibuja en la pantalla; no se comparte.
+  const [onScreen, setOnScreen] = useState(true);
+  useFocusEffect(useCallback(() => { setOnScreen(true); return () => setOnScreen(false); }, []));
+  const my = useMyLocation(onScreen);
   const [roads, setRoads] = useState<RoadRow[]>([]);
   const [coverage, setCoverage] = useState<CoverageRow[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -158,6 +164,18 @@ export default function Mapa() {
       return () => clearInterval(id);
     }, [loadLive]),
   );
+
+  // Botón de la flechita: lleva el mapa a donde estoy y, en iPhone, pide permiso para la brújula (tiene que ser al tocar).
+  const centerOnMe = async () => {
+    my.askCompass().catch(() => undefined);
+    if (my.pos) {
+      const r = regionAround({ lat: my.pos.lat, lng: my.pos.lng }, 250);
+      setRegion(r);
+      loadArea(r);
+    } else {
+      Alert.alert('Todavía no sé dónde estás', 'Revisá que la ubicación esté prendida y que le hayas dado permiso a La Mies.');
+    }
+  };
 
   const onRegionChangeComplete = (r: Region) => {
     setRegion(r);
@@ -370,7 +388,7 @@ export default function Mapa() {
           roads={roads}
           coverage={shownCoverage}
           contacts={contacts}
-          live={live}
+          live={my.pos ? live.filter((m) => !m.me) : live}
           trails={trails}
           houses={houses}
           zones={zones}
@@ -386,6 +404,7 @@ export default function Mapa() {
           onPress={onMapPress}
           onLongPress={onLongPress}
         >
+          <MyLocationMarker pos={my.pos} heading={my.heading} />
           {manual ? [...manual.picks.values()].map((k) => {
             const r = roads.find((x) => x.id === k.road_id);
             const seg = r ? segmentOf(r, k.seg) : null;
@@ -461,6 +480,11 @@ export default function Mapa() {
         ) : null}
 
         <MapTypeButton style={mapStyle} onChange={setMapStyle} top={picked || pickedTrail || houseEdit || manual ? 130 : 12} />
+
+        <Pressable onPress={centerOnMe} accessibilityRole="button" accessibilityLabel="Ir a donde estoy"
+          style={[styles.locateBtn, { top: (picked || pickedTrail || houseEdit || manual ? 130 : 12) + 54 }]}>
+          <Feather name="navigation" size={20} color={my.pos ? '#1A73E8' : colors.muted} />
+        </Pressable>
 
         {/* Barra chica abajo: capas y opciones en un menú, para que el mapa quede libre. */}
         <View style={styles.toolbar}>
@@ -760,6 +784,7 @@ const styles = themed(() => StyleSheet.create({
   popup: { position: 'absolute', left: 12, top: 12, right: 12, backgroundColor: colors.bg, borderRadius: 12, padding: 12, gap: 4, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 5 },
   popLink: { fontSize: 13, fontWeight: '800', color: colors.green, paddingVertical: 4 },
   hint: { position: 'absolute', left: 12, top: 12, flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 12, borderRadius: 10, backgroundColor: colors.bg, elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  locateBtn: { position: 'absolute', right: 12, width: 44, height: 44, borderRadius: 22, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 3 },
   toolbar: { position: 'absolute', left: 12, right: 12, bottom: 12, flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   toolBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 34, paddingHorizontal: 12, borderRadius: 17, backgroundColor: colors.bg, elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
   toolText: { fontSize: 12, fontWeight: '800', color: colors.text },

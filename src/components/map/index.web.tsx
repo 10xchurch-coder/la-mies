@@ -149,25 +149,29 @@ export type MarkerProps = {
   description?: string;
   anchor?: { x: number; y: number };
   tracksViewChanges?: boolean;
+  zIndex?: number;
   onPress?: () => void;
   onCalloutPress?: () => void;
   children?: React.ReactNode;
 };
 
-export function Marker({ coordinate, pinColor = '#B3261E', title, description, onPress, onCalloutPress, children }: MarkerProps) {
+export function Marker({ coordinate, pinColor = '#B3261E', title, description, zIndex, onPress, onCalloutPress, children }: MarkerProps) {
   const map = useContext(MapCtx);
   const [el, setEl] = useState<HTMLElement | null>(null);
   const layer = useRef<L.Layer | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const hasChildren = !!children;
 
   useEffect(() => {
     if (!map) return;
     if (hasChildren) {
       const icon = L.divIcon({ className: 'lamies-marker', html: '<div></div>', iconSize: undefined });
-      const mk = L.marker([coordinate.latitude, coordinate.longitude], { icon, interactive: true }).addTo(map);
+      // Los que no se tocan (como el punto de "estás acá") dejan pasar los toques al mapa.
+      const mk = L.marker([coordinate.latitude, coordinate.longitude], { icon, interactive: !!onPress, zIndexOffset: zIndex ?? 0 }).addTo(map);
       layer.current = mk;
+      markerRef.current = mk;
       const root = mk.getElement()?.firstElementChild as HTMLElement | null;
-      if (root) root.style.cssText = 'transform:translate(-50%,-50%);display:inline-block';
+      if (root) root.style.cssText = `transform:translate(-50%,-50%);display:inline-block${onPress ? '' : ';pointer-events:none'}`;
       setEl(root);
       mk.on('click', () => onPress?.());
     } else {
@@ -186,9 +190,15 @@ export function Marker({ coordinate, pinColor = '#B3261E', title, description, o
     return () => {
       layer.current?.remove();
       layer.current = null;
+      markerRef.current = null;
     };
+    // Los marcadores con dibujo propio se mueven sin volver a crearse (más abajo); los demás se rehacen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, coordinate.latitude, coordinate.longitude, pinColor, title, description, hasChildren]);
+  }, [map, hasChildren ? 0 : coordinate.latitude, hasChildren ? 0 : coordinate.longitude, pinColor, title, description, hasChildren]);
+
+  useEffect(() => {
+    markerRef.current?.setLatLng([coordinate.latitude, coordinate.longitude]);
+  }, [coordinate.latitude, coordinate.longitude]);
 
   return el && children ? createPortal(<>{children}</>, el) : null;
 }
