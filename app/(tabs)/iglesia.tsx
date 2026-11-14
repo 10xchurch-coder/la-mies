@@ -2,7 +2,8 @@
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { socialLinks } from '@/lib/social';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -422,6 +423,20 @@ export default function Iglesia() {
             Para salir a evangelizar o a repartir volantes, andá a la pestaña Mapa y tocá Iniciar salida.
           </Text>
         </Card>
+
+        {socialLinks(church?.social, church?.website).length ? (
+          <>
+            <SectionTitle>Seguinos</SectionTitle>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {socialLinks(church?.social, church?.website).map((l) => (
+                <Pressable key={l.key} onPress={() => Linking.openURL(l.url).catch(() => undefined)} accessibilityRole="link" accessibilityLabel={`${l.label} de la iglesia`} style={styles.social}>
+                  <Ionicons name={l.icon as React.ComponentProps<typeof Ionicons>['name']} size={24} color={colors.greenText} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text }} numberOfLines={1}>{l.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        ) : null}
       </Screen>
     </View>
   );
@@ -442,6 +457,7 @@ const styles = themed(() => StyleSheet.create({
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
+  social: { width: 78, alignItems: 'center', gap: 6, paddingVertical: 12, borderRadius: 14, backgroundColor: colors.greenSoft },
   dailyAct: { alignItems: 'center', gap: 3, minWidth: 64 },
   dailyActText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
   // La foto baja hasta abajo y los botones van encima, sin la franja verde.

@@ -6,6 +6,8 @@ export type Church = {
   logo_path?: string | null;
   website?: string | null;
   youtube_channel?: string | null;
+  /** Redes y podcast de la iglesia: { instagram, facebook, youtube, podcast, whatsapp, threads, x, tiktok }. */
+  social?: import('./lib/social').ChurchSocial | null;
   absence_recipients?: string[] | null;
   report_recipients?: string[] | null;
   id: string;
