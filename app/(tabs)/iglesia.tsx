@@ -365,27 +365,31 @@ export default function Iglesia() {
         {daily ? (
           <View>
             <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
-              <VerseCard item={daily} church={church?.name} compact />
+              <VerseCard item={daily} church={church?.name} compact style={styles.dailyCard} />
             </Pressable>
-            {/* Como en las apps de la Biblia: corazones, comentarios y compartir, ahí mismo. */}
-            <View style={styles.dailyBar}>
+            {/* Como en las apps de la Biblia: corazones, comentarios y compartir, sobre la misma foto. */}
+            <View style={styles.dailyBar} pointerEvents="box-none">
               <Pressable onPress={toggleDailyLike} hitSlop={8} style={styles.dailyAct} accessibilityRole="button"
                 accessibilityLabel={social.liked ? 'Quitar me gusta' : 'Me gusta'} accessibilityState={{ selected: social.liked }}>
-                <Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={22} color={social.liked ? '#E5484D' : colors.greenText} />
+                <Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={25} color={social.liked ? '#FF6B6F' : '#FFFFFF'} />
                 <Text style={styles.dailyActText}>{social.likes || 'Me gusta'}</Text>
               </Pressable>
               <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'comentarios' } })} hitSlop={8} style={styles.dailyAct}
                 accessibilityRole="button" accessibilityLabel={`Comentarios: ${social.comments}`}>
-                <Feather name="message-circle" size={20} color={colors.greenText} />
+                <Ionicons name="chatbubble-outline" size={23} color="#FFFFFF" />
                 <Text style={styles.dailyActText}>{social.comments || 'Comentar'}</Text>
               </Pressable>
               <Pressable onPress={() => router.push({ pathname: '/devocional', params: { abrir: 'compartir' } })} hitSlop={8} style={styles.dailyAct}
                 accessibilityRole="button" accessibilityLabel="Compartir">
-                <Feather name="share-2" size={20} color={colors.greenText} />
+                <Ionicons name="share-outline" size={24} color="#FFFFFF" />
                 <Text style={styles.dailyActText}>Compartir</Text>
               </Pressable>
-              <View style={{ flex: 1 }} />
-              {streak ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>⚡ {streak}</Text> : null}
+              {streak ? (
+                <Pressable onPress={() => router.push('/devocional')} hitSlop={8} style={styles.dailyAct} accessibilityRole="button" accessibilityLabel={`Racha de lectura: ${streak} días`}>
+                  <Ionicons name="flash-outline" size={24} color="#FFFFFF" />
+                  <Text style={styles.dailyActText}>{streak}</Text>
+                </Pressable>
+              ) : null}
             </View>
           </View>
         ) : null}
@@ -438,7 +442,9 @@ const styles = themed(() => StyleSheet.create({
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
-  dailyAct: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 32 },
-  dailyActText: { fontSize: 14, fontWeight: '700', color: colors.greenText },
-  dailyBar: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: -8, paddingTop: 16, paddingBottom: 10, paddingHorizontal: 14, borderBottomLeftRadius: 16, borderBottomRightRadius: 16, backgroundColor: colors.greenSoft },
+  dailyAct: { alignItems: 'center', gap: 4, minWidth: 64 },
+  dailyActText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
+  // La foto baja hasta abajo y los botones van encima, sin la franja verde.
+  dailyCard: { aspectRatio: undefined, maxHeight: undefined, minHeight: 320, paddingBottom: 84 },
+  dailyBar: { position: 'absolute', left: 0, right: 0, bottom: 14, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'flex-start' },
 }));

@@ -23,6 +23,25 @@ export async function shareText(text: string, title = 'La Mies'): Promise<'share
   return 'shared';
 }
 
+/**
+ * Abre el menú de compartir del teléfono con un texto. No copia nada por su cuenta:
+ * si el navegador no deja compartir, devuelve 'failed' para que la pantalla ofrezca WhatsApp o copiar.
+ */
+export async function tryShareText(text: string, title = 'La Mies'): Promise<'shared' | 'cancelled' | 'failed'> {
+  if (Platform.OS !== 'web') {
+    await Share.share({ message: text, title });
+    return 'shared';
+  }
+  const nav = globalThis.navigator as Navigator & { share?: (d: { text: string; title?: string }) => Promise<void> };
+  if (!nav?.share) return 'failed';
+  try {
+    await nav.share({ text, title });
+    return 'shared';
+  } catch (e) {
+    return (e as { name?: string } | null)?.name === 'AbortError' ? 'cancelled' : 'failed';
+  }
+}
+
 /** Comparte una imagen capturada de un componente (solo teléfono). Devuelve false si no se pudo. */
 export async function shareImage(captureRef: () => Promise<string>): Promise<boolean> {
   if (Platform.OS === 'web') return false;

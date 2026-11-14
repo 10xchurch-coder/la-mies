@@ -4,6 +4,7 @@
 // corazón y días anteriores (hasta 31 días). Abrir el de hoy cuenta para la racha.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Linking,
   ActivityIndicator, Alert, FlatList, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
   useWindowDimensions,
 } from 'react-native';
@@ -18,7 +19,8 @@ import { Button } from '@/components/ui';
 import {
   dailyComments, dailyFor, dailyRange, dailySocial, deleteDailyComment, markReading, readingStreak, sendDailyComment, setDailyLike,
 } from '@/lib/api';
-import { shareImage, shareText, WEB_URL } from '@/lib/share';
+import * as Clipboard from 'expo-clipboard';
+import { shareImage, shareText, tryShareText, WEB_URL } from '@/lib/share';
 import { renderCardPng, shareCardBlob, type CardKind } from '@/lib/shareCardWeb';
 import { cachedSignedUrl } from '@/lib/files';
 import { BACKGROUNDS } from '@/lib/backgroundColors';
@@ -82,6 +84,7 @@ export default function Devocional() {
   const [social, setSocial] = useState<DailySocial>({ comments: 0, likes: 0, liked: false, open: false });
   const [streak, setStreak] = useState<ReadingStreak | null>(null);
   const [page, setPage] = useState(0);
+  const [textShare, setTextShare] = useState<string | null>(null);
   const [sheet, setSheet] = useState<null | 'comments' | 'days' | 'streak' | 'reader' | 'share'>(abrir === 'comentarios' ? 'comments' : abrir === 'compartir' ? 'share' : null);
   const pager = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const slideRefs = useRef<Record<string, React.ComponentRef<typeof View> | null>>({});
@@ -198,14 +201,13 @@ export default function Devocional() {
   const shareThree = async () => {
     if (!item) return;
     setSheet(null);
-    const r = await shareText(threeText, `Devocional · ${item.reference}`);
-    if (r === 'copied') Alert.alert('Copiado', 'Quedó copiado para pegarlo donde quieras.');
+    // Si el teléfono no abre su menú de compartir, se ofrece WhatsApp o copiar (antes no pasaba nada).
+    if ((await tryShareText(threeText, `Devocional · ${item.reference}`)) === 'failed') setTextShare(threeText);
   };
 
   const shareFull = async () => {
     if (!item) return;
-    const r = await shareText(fullText, `Devocional · ${item.reference}`);
-    if (r === 'copied') Alert.alert('Copiado', 'El devocional completo quedó copiado para pegarlo donde quieras.');
+    if ((await tryShareText(fullText, `Devocional · ${item.reference}`)) === 'failed') setTextShare(fullText);
   };
 
   const toggleLike = async () => {
@@ -366,6 +368,7 @@ export default function Devocional() {
       <StreakSheet visible={sheet === 'streak'} streak={streak} onClose={() => setSheet(null)} onBoard={() => { setSheet(null); router.push('/devocional/lectores'); }} />
       <ShareSheet visible={sheet === 'share'} item={item} onVerse={() => shareCard('verse')} onPhrase={() => shareCard('phrase')} onThree={shareThree}
         onFull={() => { setSheet(null); shareFull(); }} onClose={() => setSheet(null)} />
+      <TextShareSheet text={textShare} onClose={() => setTextShare(null)} />
       <ReaderSheet visible={sheet === 'reader'} item={item} label={dayLabel(item.on_date, today)} social={social}
         onShare={shareFull} onComments={() => setSheet('comments')} onClose={() => setSheet(null)} />
     </View>
@@ -378,6 +381,38 @@ function Action({ icon, label, onPress }: { icon: React.ReactNode; label: string
       {icon}
       <Text style={styles.actionLabel} numberOfLines={1}>{label}</Text>
     </Pressable>
+  );
+}
+
+// ---------- Compartir un texto cuando el teléfono no abre su menú ----------
+function TextShareSheet({ text, onClose }: { text: string | null; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+  const row = (icon: React.ReactNode, title: string, hint: string, onPress: () => void) => (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={title}
+      style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 10, borderRadius: 12 }, pressed && { backgroundColor: colors.bgSoft }]}>
+      <View style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>{icon}</View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{title}</Text>
+        <Text style={{ fontSize: 13, color: colors.muted }}>{hint}</Text>
+      </View>
+    </Pressable>
+  );
+  return (
+    <Modal visible={!!text} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
+      <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, padding: 18, gap: 6 }]}>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Compartir</Text>
+        <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 6 }} numberOfLines={4}>{text ?? ''}</Text>
+        {row(<Ionicons name="logo-whatsapp" size={22} color={colors.greenText} />, 'Enviar por WhatsApp', 'Elegís a quién o lo subís a tu estado', () => {
+          Linking.openURL(`https://wa.me/?text=${encodeURIComponent(text ?? '')}`).catch(() => undefined);
+          onClose();
+        })}
+        {row(<Feather name="copy" size={20} color={colors.greenText} />, 'Copiar el texto', 'Para pegarlo donde quieras', () => {
+          Clipboard.setStringAsync(text ?? '').then(() => Alert.alert('Copiado', 'Quedó copiado para pegarlo donde quieras.')).catch(() => Alert.alert('No se pudo copiar', 'Probá con el botón de WhatsApp.'));
+          onClose();
+        })}
+      </View>
+    </Modal>
   );
 }
 
