@@ -1,0 +1,52 @@
+# Arma La Mies para la computadora (Mac y Windows) y deja los instaladores en una "release" para bajar.
+name: Escritorio (Mac y Windows)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [siguiente]
+    paths: ['desktop/**', '.github/workflows/desktop.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: dist:mac
+            files: desktop/dist/*.dmg
+          - os: windows-latest
+            script: dist:win
+            files: desktop/dist/*.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar
+        working-directory: desktop
+        run: npm install --no-audit --no-fund
+      - name: Armar el instalador
+        working-directory: desktop
+        env:
+          # Todavía sin firma de Apple ni de Microsoft: se firma cuando estén las cuentas de desarrollador.
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: la-mies-${{ matrix.os }}
+          path: ${{ matrix.files }}
+          if-no-files-found: error
+      - name: Subir a la release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=escritorio-v$(node -p "require('./desktop/package.json').version")
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --prerelease --target "$GITHUB_SHA" --title "La Mies para la computadora (prueba)" --notes "Instaladores de prueba de La Mies para Mac y Windows. Todavía sin firma: la primera vez hay que abrirlos con clic derecho → Abrir."
+          gh release upload "$TAG" ${{ matrix.files }} --clobber

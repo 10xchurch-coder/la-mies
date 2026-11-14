@@ -1,0 +1,35 @@
+{
+  "name": "la-mies-escritorio",
+  "productName": "La Mies",
+  "version": "0.1.0",
+  "description": "La Mies para la computadora: la app de la iglesia en su propia ventana.",
+  "author": "Hope for Argentina",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac dmg --universal --publish never",
+    "dist:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.hopeforargentina.lamies.desktop",
+    "productName": "La Mies",
+    "files": ["main.js", "sin-conexion.html"],
+    "directories": { "buildResources": "build", "output": "dist" },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "artifactName": "La-Mies-${version}-mac.${ext}"
+    },
+    "dmg": { "title": "La Mies" },
+    "win": {
+      "icon": "build/icon.png",
+      "artifactName": "La-Mies-${version}-windows.${ext}"
+    },
+    "nsis": { "oneClick": true, "perMachine": false, "shortcutName": "La Mies" }
+  }
+}
