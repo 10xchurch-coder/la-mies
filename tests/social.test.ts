@@ -8,6 +8,10 @@ test('muestra solo las redes cargadas, en orden, y el sitio al final', () => {
   assert.equal(l[0].url, 'https://instagram.com/y');
   assert.equal(l[2].url, 'https://iglesia.com');
 });
+test('el podcast usa su nombre propio', () => {
+  assert.equal(socialLinks({ podcast: 'x.podbean.com', podcast_name: 'Mensajes de Victoria' })[0].label, 'Mensajes de Victoria');
+  assert.equal(socialLinks({ podcast: 'x.podbean.com' })[0].label, 'Podcast');
+});
 test('sin nada cargado no muestra nada', () => {
   assert.deepEqual(socialLinks(null), []);
   assert.deepEqual(socialLinks({}, ''), []);

@@ -4,12 +4,14 @@
 import { BACKGROUNDS } from './backgroundColors';
 import { chosenPhotoId, dailyPhotoId, photoUrl } from './backgrounds';
 
-export type CardKind = 'verse' | 'phrase';
+export type CardKind = 'verse' | 'phrase' | 'devotional';
 export type CardInput = {
   kind: CardKind;
   reference: string;
   verse: string;
   message: string | null;
+  /** El devocional corto, para la tercera imagen. */
+  devotional?: string | null;
   background: string | null;
   onDate: string;
   churchName: string;
@@ -97,7 +99,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   ctx.font = `800 11px ${FONT}`;
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
   let x = PAD;
-  for (const ch of (input.kind === 'phrase' ? 'PARA PENSAR HOY' : 'VERSÍCULO DEL DÍA')) { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + 1.2; }
+  for (const ch of (input.kind === 'phrase' ? 'PARA PENSAR HOY' : input.kind === 'devotional' ? 'DEVOCIONAL DE HOY' : 'VERSÍCULO DEL DÍA')) { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + 1.2; }
   y += 26;
   ctx.font = `800 ${input.kind === 'phrase' ? 15 : 22}px ${FONT}`;
   ctx.fillStyle = input.kind === 'phrase' ? 'rgba(255,255,255,0.95)' : '#FFFFFF';
@@ -106,13 +108,20 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
 
   // Al medio: el versículo (o la frase), centrado en el espacio que queda.
   const footTop = h - 92;
-  const body = input.kind === 'phrase' ? (input.message ?? '') : input.verse;
-  const sz = input.kind === 'phrase' ? { size: 30, line: 40 } : verseSize(input.verse.length);
-  ctx.font = `${input.kind === 'phrase' ? 800 : 700} ${sz.size}px ${FONT}`;
-  const lines = wrapLines((t) => ctx.measureText(t).width, body, maxW);
-  const textH = lines.length * sz.line;
+  const body = input.kind === 'phrase' ? (input.message ?? '') : input.kind === 'devotional' ? (input.devotional ?? '') : input.verse;
   const midTop = refY + (input.kind === 'phrase' ? 0 : 22);
   const areaH = footTop - 24 - midTop;
+  const weight = input.kind === 'phrase' ? 800 : input.kind === 'devotional' ? 600 : 700;
+  let sz = input.kind === 'phrase' ? { size: 30, line: 40 } : verseSize(input.verse.length);
+  let lines: string[] = [];
+  // El devocional es más largo: se achica la letra hasta que entre entero en la imagen.
+  for (const size of input.kind === 'devotional' ? [19, 17, 16, 15, 14, 13, 12, 11, 10] : [sz.size]) {
+    if (input.kind === 'devotional') sz = { size, line: Math.round(size * 1.42) };
+    ctx.font = `${weight} ${sz.size}px ${FONT}`;
+    lines = wrapLines((t) => ctx.measureText(t).width, body, maxW);
+    if (lines.length * sz.line <= areaH) break;
+  }
+  const textH = lines.length * sz.line;
   let ty = midTop + Math.max(0, (areaH - textH - (input.kind === 'phrase' ? 40 : 0)) / 2);
   if (input.kind === 'phrase') {
     // La frase va arriba de la cita, como en la app.
@@ -124,7 +133,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   } else {
     ctx.font = `800 22px ${FONT}`; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
     ctx.fillText(refText, PAD, refY);
-    ctx.font = `700 ${sz.size}px ${FONT}`; shadow(3, 0.6);
+    ctx.font = `${weight} ${sz.size}px ${FONT}`; shadow(3, 0.6);
     for (const l of lines) { ty += sz.line; ctx.fillText(l, PAD, ty - 10); }
     noShadow();
   }
@@ -155,6 +164,29 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   noShadow();
 
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.95));
+}
+
+/** Comparte varias imágenes juntas (versículo, frase y devocional). Si el teléfono no deja, las baja una por una. */
+export async function shareCardBlobs(blobs: Blob[], names: string[]): Promise<'shared' | 'downloaded' | 'cancelled'> {
+  const nav = globalThis.navigator as Navigator & { canShare?: (d: unknown) => boolean };
+  const files = blobs.map((b, i) => new File([b], b.type === 'image/jpeg' ? names[i].replace(/\.png$/i, '.jpg') : names[i], { type: b.type || 'image/png' }));
+  if (nav?.canShare?.({ files }) && nav.share) {
+    try {
+      // Sin texto: con varias fotos, algunas apps (WhatsApp) mandan solo el texto y descartan las fotos.
+      await nav.share({ files });
+      return 'shared';
+    } catch (e) {
+      if ((e as { name?: string })?.name === 'AbortError') return 'cancelled';
+    }
+  }
+  for (const f of files) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(f);
+    a.download = f.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+  return 'downloaded';
 }
 
 /** Comparte la imagen con el menú del navegador (WhatsApp, Instagram…) o, si no se puede, la baja. */

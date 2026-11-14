@@ -431,7 +431,7 @@ export default function Iglesia() {
               {socialLinks(church?.social, church?.website).map((l) => (
                 <Pressable key={l.key} onPress={() => Linking.openURL(l.url).catch(() => undefined)} accessibilityRole="link" accessibilityLabel={`${l.label} de la iglesia`} style={styles.social}>
                   <Ionicons name={l.icon as React.ComponentProps<typeof Ionicons>['name']} size={24} color={colors.greenText} />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text }} numberOfLines={1}>{l.label}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text, textAlign: 'center' }} numberOfLines={2}>{l.label}</Text>
                 </Pressable>
               ))}
             </View>
@@ -457,7 +457,7 @@ const styles = themed(() => StyleSheet.create({
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
   tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
-  social: { width: 78, alignItems: 'center', gap: 6, paddingVertical: 12, borderRadius: 14, backgroundColor: colors.greenSoft },
+  social: { width: 96, alignItems: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 14, backgroundColor: colors.greenSoft },
   dailyAct: { alignItems: 'center', gap: 3, minWidth: 64 },
   dailyActText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
   // La foto baja hasta abajo y los botones van encima, sin la franja verde.

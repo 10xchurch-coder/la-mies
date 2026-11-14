@@ -21,7 +21,7 @@ import {
 } from '@/lib/api';
 import * as Clipboard from 'expo-clipboard';
 import { shareImage, shareText, tryShareText, WEB_URL } from '@/lib/share';
-import { renderCardPng, shareCardBlob, type CardKind } from '@/lib/shareCardWeb';
+import { renderCardPng, shareCardBlob, shareCardBlobs, type CardKind } from '@/lib/shareCardWeb';
 import { cachedSignedUrl } from '@/lib/files';
 import { BACKGROUNDS } from '@/lib/backgroundColors';
 import { chosenPhotoId } from '@/lib/backgrounds';
@@ -128,14 +128,14 @@ export default function Devocional() {
     if (Platform.OS !== 'web' || !item) return;
     const bg = item.background;
     const uploaded = bg && !BACKGROUNDS[bg] && !chosenPhotoId(bg) && bg !== 'auto' ? cachedSignedUrl('photos', bg) : null;
-    for (const kind of ['verse', ...(item.message ? ['phrase'] : [])] as CardKind[]) {
+    for (const kind of ['verse', ...(item.message ? ['phrase'] : []), ...(item.devotional ? ['devotional'] : [])] as CardKind[]) {
       const key = cardKeyOf(kind);
       if (!key || cards.current[key]) continue;
-      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
+      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, devotional: item.devotional ? plain(item.devotional) : null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
       p.catch(() => { delete cards.current[key]; });
       cards.current[key] = p;
     }
-  }, [item?.on_date, item?.background, item?.message, logoUrl]);
+  }, [item?.on_date, item?.background, item?.message, item?.devotional, logoUrl]);
 
   const goTo = (i: number) => {
     pager.current?.scrollTo({ x: i * W, animated: true });
@@ -208,6 +208,17 @@ export default function Devocional() {
   const shareThree = async () => {
     if (!item) return;
     setSheet(null);
+    // En la web (iPhone): tres imágenes juntas — versículo, frase y devocional corto.
+    if (Platform.OS === 'web') {
+      const kinds = (['verse', 'phrase', 'devotional'] as CardKind[]).filter((k) => { const key = cardKeyOf(k); return !!key && !!cards.current[key]; });
+      try {
+        const blobs = await Promise.all(kinds.map((k) => cards.current[cardKeyOf(k) as string] as Promise<Blob>));
+        const label: Record<CardKind, string> = { verse: '1-versiculo', phrase: '2-frase', devotional: '3-devocional' };
+        const r = await shareCardBlobs(blobs, kinds.map((k) => `${label[k]}-${item.on_date}.png`));
+        if (r === 'downloaded') Alert.alert('Imágenes guardadas', 'Quedaron guardadas en tu teléfono (en Descargas o en Archivos). Ahora podés mandarlas por WhatsApp o subirlas a tus estados.');
+        return;
+      } catch { /* si no se pudieron armar las imágenes, se comparte el texto */ }
+    }
     await shareLongText(threeText);
   };
 
@@ -438,7 +449,7 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onThree, onFull, onClose
   const insets = useSafeAreaInsets();
   const options: { key: string; icon: React.ComponentProps<typeof Feather>['name']; title: string; hint: string; onPress: () => void; show: boolean }[] = [
     { key: 'verse', icon: 'image', title: 'Solo el versículo', hint: 'Una imagen con el versículo, lista para WhatsApp o tus estados', onPress: onVerse, show: true },
-    { key: 'three', icon: 'align-left', title: 'Versículo, frase y devocional corto', hint: 'Los tres juntos, en texto', onPress: onThree, show: !!(item.message || item.devotional) },
+    { key: 'three', icon: 'align-left', title: 'Versículo, frase y devocional corto', hint: Platform.OS === 'web' ? 'Tres imágenes juntas, listas para WhatsApp' : 'Los tres juntos, en texto', onPress: onThree, show: !!(item.message || item.devotional) },
     { key: 'phrase', icon: 'message-square', title: 'Solo la frase del día', hint: 'Una imagen con la frase', onPress: onPhrase, show: !!item.message },
     { key: 'full', icon: 'book-open', title: 'El devocional completo', hint: 'Con el estudio y la oración, en texto', onPress: onFull, show: !!(item.study || item.prayer) },
   ];
