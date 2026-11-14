@@ -170,7 +170,9 @@ export default function Devocional() {
   const shareCard = async (kind: CardKind) => {
     if (!item) return;
     setSheet(null);
-    const fallback = kind === 'phrase' ? `${item.message}\n${item.reference}\n\n${churchName} · ${WEB_URL}` : `${verseText}\n\n${churchName} · ${WEB_URL}`;
+    const fallback = kind === 'phrase' ? `${item.message}\n${item.reference}\n\n${churchName} · ${WEB_URL}`
+      : kind === 'devotional' ? `${item.reference}\n\n${plain(item.devotional ?? '')}\n\n${churchName} · ${WEB_URL}`
+      : `${verseText}\n\n${churchName} · ${WEB_URL}`;
     const key = cardKeyOf(kind);
     if (Platform.OS === 'web' && key && cards.current[key]) {
       try {
@@ -182,7 +184,7 @@ export default function Devocional() {
       } catch { /* si falla, se comparte el texto */ }
     }
     try {
-      const ref = slideRefs.current[kind];
+      const ref = slideRefs.current[kind === 'devotional' ? 'reading' : kind];
       const ok = ref
         ? await shareImage(async () => {
           const { captureRef } = await import('react-native-view-shot');
@@ -203,6 +205,8 @@ export default function Devocional() {
   const shareLongText = async (text: string) => {
     // Un instante después: abrir una hoja en el mismo momento en que se cierra la otra falla en algunos iPhone.
     if (Platform.OS === 'web') { setTimeout(() => setTextShare(text), 350); return; }
+    // En el iPhone el menú de compartir no abre si la hoja de abajo todavía se está cerrando: hay que esperar a que termine.
+    await new Promise((r) => setTimeout(r, 700));
     if ((await tryShareText(text, 'Devocional')) === 'failed') setTextShare(text);
   };
 
@@ -383,7 +387,7 @@ export default function Devocional() {
         onCount={(n) => setSocial((s) => ({ ...s, comments: n }))} />
       <DaysSheet visible={sheet === 'days'} current={item.on_date} today={today} onPick={openDay} onClose={() => setSheet(null)} />
       <StreakSheet visible={sheet === 'streak'} streak={streak} onClose={() => setSheet(null)} onBoard={() => { setSheet(null); router.push('/devocional/lectores'); }} />
-      <ShareSheet visible={sheet === 'share'} item={item} onVerse={() => shareCard('verse')} onPhrase={() => shareCard('phrase')} onThree={shareThree} threeFiles={Platform.OS === 'web' ? threeFiles : undefined}
+      <ShareSheet visible={sheet === 'share'} item={item} onVerse={() => shareCard('verse')} onPhrase={() => shareCard('phrase')} onThree={shareThree} onDevo={() => shareCard('devotional')} threeFiles={Platform.OS === 'web' ? threeFiles : undefined}
         onFull={() => { setSheet(null); shareFull(); }} onClose={() => setSheet(null)} />
       <TextShareSheet text={textShare} onClose={() => setTextShare(null)} />
       <ReaderSheet visible={sheet === 'reader'} item={item} label={dayLabel(item.on_date, today)} social={social}
@@ -443,8 +447,8 @@ function TextShareSheet({ text, onClose }: { text: string | null; onClose: () =>
 }
 
 // ---------- Qué compartir ----------
-function ShareSheet({ visible, item, onVerse, onPhrase, onThree, threeFiles, onFull, onClose }: {
-  visible: boolean; item: DailyContent; onVerse: () => void; onPhrase: () => void; onThree: () => void; onFull: () => void; onClose: () => void;
+function ShareSheet({ visible, item, onVerse, onPhrase, onDevo, onThree, threeFiles, onFull, onClose }: {
+  visible: boolean; item: DailyContent; onVerse: () => void; onPhrase: () => void; onDevo: () => void; onThree: () => void; onFull: () => void; onClose: () => void;
   /** Solo en la web: arma las tres imágenes para compartirlas desde acá mismo. */
   threeFiles?: () => Promise<File[]>;
 }) {
@@ -454,7 +458,8 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onThree, threeFiles, onF
   const [three, setThree] = useState<null | { files: File[] | null; note: string }>(null);
   useEffect(() => { if (!visible) setThree(null); }, [visible]);
   const openThree = () => {
-    if (!threeFiles) { onThree(); return; }
+    // En la app del teléfono: se elige cuál mandar (el teléfono comparte una imagen por vez).
+    if (!threeFiles) { setThree({ files: [], note: '' }); return; }
     setThree({ files: null, note: '' });
     threeFiles().then((files) => setThree({ files, note: '' })).catch((e) => setThree({ files: [], note: `No se pudieron armar las imágenes (${errorMessage(e)}).` }));
   };
@@ -482,7 +487,7 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onThree, threeFiles, onF
   const names = ['El versículo', 'La frase', 'El devocional'];
   const options: { key: string; icon: React.ComponentProps<typeof Feather>['name']; title: string; hint: string; onPress: () => void; show: boolean }[] = [
     { key: 'verse', icon: 'image', title: 'Solo el versículo', hint: 'Una imagen con el versículo, lista para WhatsApp o tus estados', onPress: onVerse, show: true },
-    { key: 'three', icon: 'layers', title: 'Versículo, frase y devocional corto', hint: threeFiles ? 'Tres imágenes, listas para WhatsApp' : 'Los tres juntos, en texto', onPress: openThree, show: !!(item.message || item.devotional) },
+    { key: 'three', icon: 'layers', title: 'Versículo, frase y devocional corto', hint: threeFiles ? 'Tres imágenes, listas para WhatsApp' : 'Como imágenes o los tres en texto', onPress: openThree, show: !!(item.message || item.devotional) },
     { key: 'phrase', icon: 'message-square', title: 'Solo la frase del día', hint: 'Una imagen con la frase', onPress: onPhrase, show: !!item.message },
     { key: 'full', icon: 'book-open', title: 'El devocional completo', hint: 'Con el estudio y la oración, en texto', onPress: onFull, show: !!(item.study || item.prayer) },
   ];
@@ -498,6 +503,16 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onThree, threeFiles, onF
             </View>
             {three.files === null ? (
               <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 14 }}>Armando las imágenes…</Text>
+            ) : !threeFiles ? (
+              <>
+                <Text style={{ fontSize: 13, color: colors.muted }}>Tocá cada una para mandarla como imagen:</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button title="El versículo" variant="outline" small onPress={onVerse} style={{ flex: 1 }} />
+                  {item.message ? <Button title="La frase" variant="outline" small onPress={onPhrase} style={{ flex: 1 }} /> : null}
+                  {item.devotional ? <Button title="El devocional" variant="outline" small onPress={onDevo} style={{ flex: 1 }} /> : null}
+                </View>
+                <Button title="Mandar los tres juntos en texto" variant="ghost" small icon="align-left" onPress={onThree} />
+              </>
             ) : three.files.length === 0 ? null : (
               <>
                 <Button title={`Compartir las ${three.files.length} juntas`} icon="share" onPress={() => share(three.files as File[], true)} />
