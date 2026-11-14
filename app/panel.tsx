@@ -1,13 +1,13 @@
 // Panel del pastor: totales por salida / semana / mes, hermanos, código de la iglesia.
 import { hasRole } from '@/lib/perms';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Loading, RowLink, SectionTitle, Segmented, Stat } from '@/components/ui';
-import { churchReport } from '@/lib/api';
-import { countContacts, countOutings } from '@/lib/outings';
+import { churchReport, panelDetail } from '@/lib/api';
+import { METRIC_LABEL, countContacts, countOutings, panelItems, rankMembers, type PanelDetail, type PanelItem, type PanelMetric } from '@/lib/outings';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDay, fmtDistance, fmtMinutes, fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -53,6 +53,9 @@ export default function Panel() {
   const [report, setReport] = useState<ChurchReport | null | undefined>(undefined);
   const [label, setLabel] = useState('');
   const [lastSession, setLastSession] = useState<string | undefined>();
+  const [detail, setDetail] = useState<PanelDetail | null>(null);
+  // Qué lista está abierta: la de un número de arriba (sin user) o la de un hermano.
+  const [open, setOpen] = useState<{ metric: PanelMetric; user?: string } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -64,7 +67,10 @@ export default function Panel() {
       }
       const r = range(period, ls);
       setLabel(r.label);
+      setOpen(null);
+      setDetail(null);
       setReport(await churchReport(r.from, r.to));
+      panelDetail(r.from, r.to).then(setDetail).catch(() => setDetail(null));
     } catch {
       setReport(null);
     }
@@ -93,6 +99,27 @@ export default function Panel() {
     Share.share({ message: `Para usar la app La Mies de ${church.name}: descargala, tocá "Crear cuenta" y poné el código ${church.join_code}` });
   };
 
+  const t = report?.totals;
+  const names = useMemo(() => new Map((report?.members ?? []).map((m) => [m.user_id, m.display_name])), [report]);
+  const contactsBy = useMemo(() => {
+    const by = new Map<string, number>();
+    if (detail) for (const i of panelItems('contacts', detail)) if (i.user_id) by.set(i.user_id, (by.get(i.user_id) ?? 0) + 1);
+    return by;
+  }, [detail]);
+  const ranked = useMemo(() => rankMembers(report?.members ?? [], contactsBy), [report, contactsBy]);
+  const toggle = (metric: PanelMetric, user?: string) => setOpen((o) => (o && o.metric === metric && o.user === user ? null : { metric, user }));
+  const isOpen = (metric: PanelMetric) => !!open && !open.user && open.metric === metric;
+  const list = (metric: PanelMetric, user?: string) => (
+    <DetailList
+      title={`${METRIC_LABEL[metric]}${user ? ` de ${names.get(user) ?? ''}` : ''}`}
+      items={detail ? panelItems(metric, detail, user) : null}
+      names={names}
+      showWho={!user}
+      onClose={() => setOpen(null)}
+      onOpen={(id) => router.push({ pathname: '/contacto/[id]', params: { id } })}
+    />
+  );
+
   if (!profile || (!hasRole(profile, 'admin') && !hasRole(profile, 'captain'))) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -101,8 +128,6 @@ export default function Panel() {
       </View>
     );
   }
-
-  const t = report?.totals;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -121,19 +146,22 @@ export default function Panel() {
           <>
             <View style={{ gap: 8 }}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Stat value={countContacts(report.sessions)} label="Contactos" />
-                <Stat value={t.presentations} label="Presentaciones" tone="green" />
-                <Stat value={t.promises} label="Promesas" tone="amber" />
-                <Stat value={t.came} label="Vinieron" tone="blue" />
+                <Stat value={detail ? panelItems('contacts', detail).length : countContacts(report.sessions)} label="Contactos" onPress={() => toggle('contacts')} active={isOpen('contacts')} />
+                <Stat value={t.presentations} label="Presentaciones" tone="green" onPress={() => toggle('presentations')} active={isOpen('presentations')} />
+                <Stat value={t.promises} label="Promesas" tone="amber" onPress={() => toggle('promises')} active={isOpen('promises')} />
+                <Stat value={detail ? detail.came.length : t.came} label="Vinieron" tone="blue" onPress={() => toggle('came')} active={isOpen('came')} />
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Stat value={t.discipleship} label="Discipulado" />
-                <Stat value={t.baptisms} label="Bautismos" />
+                <Stat value={t.discipleship} label="Discipulado" onPress={() => toggle('discipleship')} active={isOpen('discipleship')} />
+                <Stat value={t.baptisms} label="Bautismos" onPress={() => toggle('baptisms')} active={isOpen('baptisms')} />
                 <Stat value={countOutings(report.sessions)} label="Salidas" />
                 <Stat value={t.members} label="Hermanos" />
               </View>
               <Text style={{ fontSize: 12, color: colors.muted }}>{fmtMinutes(t.minutes)} en la calle · {fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver quiénes son y quién los cargó.</Text>
             </View>
+
+            {open && !open.user ? list(open.metric) : null}
 
             {t.pending_pickups > 0 ? (
               <Pressable onPress={() => router.push('/(tabs)/personas')} accessibilityRole="button" style={styles.pending}>
@@ -151,19 +179,36 @@ export default function Panel() {
               <View style={[styles.tr, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.th, { flex: 1.6 }]}>Nombre</Text>
                 <Text style={styles.th}>Salidas</Text>
+                <Text style={styles.th}>Contac.</Text>
                 <Text style={styles.th}>Present.</Text>
                 <Text style={styles.th}>Promesas</Text>
                 <Text style={[styles.th, { textAlign: 'right' }]}>Última</Text>
               </View>
-              {report.members.map((m, i) => (
-                <Pressable key={m.user_id} onPress={() => profile.role === 'admin' && router.push({ pathname: '/admin/miembro', params: { id: m.user_id } })} accessibilityRole="button" style={[styles.tr, i === report.members.length - 1 && { borderBottomWidth: 0 }]}>
-                  <Text style={[styles.td, { flex: 1.6, fontWeight: '700' }]} numberOfLines={1}>{m.display_name}</Text>
-                  <Text style={styles.td}>{m.sessions}</Text>
-                  <Text style={styles.td}>{m.presentations}</Text>
-                  <Text style={styles.td}>{m.promises}</Text>
-                  <Text style={[styles.td, { textAlign: 'right', color: m.last_session && fmtRelativeDay(m.last_session) === 'hoy' ? colors.greenText : colors.muted }]}>{m.last_session ? fmtRelativeDay(m.last_session) : '—'}</Text>
-                </Pressable>
-              ))}
+              {ranked.map((m, i) => {
+                const num = (metric: PanelMetric, n: number) => {
+                  const on = !!open && open.user === m.user_id && open.metric === metric;
+                  return (
+                    <Pressable accessibilityRole="button" accessibilityLabel={`${METRIC_LABEL[metric]} de ${m.display_name}: ${n}. Ver la lista`} disabled={!n} onPress={() => toggle(metric, m.user_id)} hitSlop={6} style={{ flex: 1, alignItems: 'center' }}>
+                      <Text style={[styles.num, n > 0 && { color: colors.green, fontWeight: '800', textDecorationLine: 'underline' }, on && { backgroundColor: colors.greenSoft }]}>{n}</Text>
+                    </Pressable>
+                  );
+                };
+                return (
+                  <View key={m.user_id} style={[{ borderBottomWidth: 1, borderBottomColor: colors.border }, i === ranked.length - 1 && { borderBottomWidth: 0 }]}>
+                    <View style={[styles.tr, { borderBottomWidth: 0 }]}>
+                      <Pressable style={{ flex: 1.6 }} accessibilityRole="button" onPress={() => profile.role === 'admin' && router.push({ pathname: '/admin/miembro', params: { id: m.user_id } })}>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }} numberOfLines={1}>{m.display_name}</Text>
+                      </Pressable>
+                      <Text style={styles.td}>{m.sessions}</Text>
+                      {num('contacts', m.contacts)}
+                      {num('presentations', m.presentations)}
+                      {num('promises', m.promises)}
+                      <Text style={[styles.td, { textAlign: 'right', color: m.last_session && fmtRelativeDay(m.last_session) === 'hoy' ? colors.greenText : colors.muted }]}>{m.last_session ? fmtRelativeDay(m.last_session) : '—'}</Text>
+                    </View>
+                    {open && open.user === m.user_id ? <View style={{ paddingHorizontal: 8, paddingBottom: 10 }}>{list(open.metric, m.user_id)}</View> : null}
+                  </View>
+                );
+              })}
             </Card>
 
             <SectionTitle>Salidas</SectionTitle>
@@ -207,9 +252,41 @@ export default function Panel() {
   );
 }
 
+/** La lista detrás de un número: cada persona, quién la cargó y cuándo. Se toca para abrir su ficha. */
+function DetailList({ title, items, names, showWho, onClose, onOpen }: { title: string; items: PanelItem[] | null; names: Map<string, string>; showWho: boolean; onClose: () => void; onOpen: (id: string) => void }) {
+  return (
+    <View style={styles.detail}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6 }}>
+        <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.text }}>{title}{items ? ` · ${items.length}` : ''}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar la lista" onPress={onClose} hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+      </View>
+      {items === null ? (
+        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>Cargando…</Text>
+      ) : items.length === 0 ? (
+        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>No hay nadie para mostrar en este período.</Text>
+      ) : (
+        items.map((it) => (
+          <Pressable key={it.key} accessibilityRole="link" onPress={() => onOpen(it.contact_id)} style={styles.detailRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={1}>{it.name}</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>
+                {showWho ? `${it.user_id && names.get(it.user_id) ? `Lo cargó ${names.get(it.user_id)}` : 'No se sabe quién lo cargó'} · ` : ''}{fmtDay(it.when.length === 10 ? `${it.when}T12:00:00` : it.when)}
+              </Text>
+            </View>
+            <Feather name="chevron-right" size={16} color={colors.gray} />
+          </Pressable>
+        ))
+      )}
+    </View>
+  );
+}
+
 const styles = themed(() => StyleSheet.create({
   pending: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: colors.amberSoft },
   tr: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: colors.border },
   th: { flex: 1, fontSize: 10, fontWeight: '700', color: colors.muted, textAlign: 'center' },
   td: { flex: 1, fontSize: 13, color: colors.text, textAlign: 'center' },
+  detail: { borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, overflow: 'hidden' },
+  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 9, borderTopWidth: 1, borderTopColor: colors.border },
+  num: { fontSize: 13, color: colors.text, textAlign: 'center', minWidth: 28, paddingVertical: 2, paddingHorizontal: 6, borderRadius: 6 },
 }));

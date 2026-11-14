@@ -138,16 +138,19 @@ export function Card({ children, style }: { children: React.ReactNode; style?: S
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
-export function Stat({ value, label, tone = 'plain' }: { value: string | number; label: string; tone?: 'plain' | 'green' | 'amber' | 'blue' }) {
+export function Stat({ value, label, tone = 'plain', onPress, active }: { value: string | number; label: string; tone?: 'plain' | 'green' | 'amber' | 'blue'; onPress?: () => void; active?: boolean }) {
   const bg = tone === 'green' ? colors.greenSoft : tone === 'amber' ? colors.amberSoft : tone === 'blue' ? colors.blueSoft : colors.bgSoft;
   const fg = tone === 'green' ? colors.greenText : tone === 'amber' ? colors.amberText : tone === 'blue' ? colors.blueText : colors.text;
   const lb = tone === 'plain' ? colors.muted : fg;
-  return (
-    <View style={{ flex: 1, minWidth: 70, gap: 2, padding: 12, borderRadius: 12, backgroundColor: bg }}>
+  const box = { flex: 1, minWidth: 70, gap: 2, padding: 12, borderRadius: 12, backgroundColor: bg, borderWidth: 2, borderColor: active ? fg : 'transparent' } as const;
+  const inner = (
+    <>
       <Text style={{ fontSize: 22, fontWeight: '800', letterSpacing: -0.5, color: fg }}>{value}</Text>
       <Text style={{ fontSize: 11, fontWeight: '600', color: lb }}>{label}</Text>
-    </View>
+    </>
   );
+  if (!onPress) return <View style={box}>{inner}</View>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}. Ver la lista`} onPress={onPress} style={box}>{inner}</Pressable>;
 }
 
 export function Avatar({ name, size = 40, color = colors.greenSoft, textColor = colors.greenText }: { name: string; size?: number; color?: string; textColor?: string }) {

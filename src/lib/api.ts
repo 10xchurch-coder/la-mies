@@ -1,4 +1,5 @@
 // Llamadas a la base, con tipos. Si algo falla, lanza un Error con mensaje legible.
+import type { PanelDetail } from './outings';
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
@@ -46,6 +47,30 @@ export async function myProgress() {
 
 export async function churchReport(from: Date, to: Date): Promise<ChurchReport | null> {
   return ok(await supabase.rpc('church_report', { p_from: from.toISOString(), p_to: to.toISOString() }));
+}
+
+/** Lo que hay detrás de los números del panel: cada visita con el nombre del contacto y quién la cargó. */
+export async function panelDetail(from: Date, to: Date): Promise<PanelDetail> {
+  const d1 = from.toISOString().slice(0, 10);
+  const d2 = to.toISOString().slice(0, 10);
+  type N = { name: string; status?: string } | null;
+  const [vis, att, dis, bap] = await Promise.all([
+    supabase.from('contact_visits').select('contact_id, user_id, visited_at, gospel_presented, promise_day, contacts(name)').gte('visited_at', from.toISOString()).lt('visited_at', to.toISOString()).order('visited_at').limit(1000),
+    supabase.from('attendances').select('contact_id, attended_on, contacts(name, status)').gte('attended_on', d1).lt('attended_on', d2).order('attended_on').limit(2000),
+    supabase.from('contacts').select('id, name, discipleship_since, created_by').gte('discipleship_since', d1).lt('discipleship_since', d2),
+    supabase.from('contacts').select('id, name, baptized_on, created_by').gte('baptized_on', d1).lt('baptized_on', d2),
+  ]);
+  const visits = ((ok(vis) ?? []) as unknown as { contact_id: string; user_id: string | null; visited_at: string; gospel_presented: boolean; promise_day: string | null; contacts: N }[])
+    .map((r) => ({ contact_id: r.contact_id, user_id: r.user_id, visited_at: r.visited_at, gospel_presented: !!r.gospel_presented, promise_day: r.promise_day, name: r.contacts?.name ?? 'Sin nombre' }));
+  // "Vinieron" son las visitas y contactos que vinieron, no los miembros de siempre.
+  const first = new Map<string, string | null>();
+  for (const x of visits) if (!first.has(x.contact_id)) first.set(x.contact_id, x.user_id);
+  const came = ((ok(att) ?? []) as unknown as { contact_id: string; attended_on: string; contacts: N }[])
+    .filter((r) => r.contacts && r.contacts.status !== 'member')
+    .map((r) => ({ contact_id: r.contact_id, name: r.contacts?.name ?? 'Sin nombre', when: r.attended_on, user_id: first.get(r.contact_id) ?? null }));
+  const discipleship = ((ok(dis) ?? []) as { id: string; name: string; discipleship_since: string; created_by: string | null }[]).map((c) => ({ contact_id: c.id, name: c.name, when: c.discipleship_since, user_id: c.created_by }));
+  const baptisms = ((ok(bap) ?? []) as { id: string; name: string; baptized_on: string; created_by: string | null }[]).map((c) => ({ contact_id: c.id, name: c.name, when: c.baptized_on, user_id: c.created_by }));
+  return { visits, came, discipleship, baptisms };
 }
 
 export async function listContacts(): Promise<Contact[]> {
