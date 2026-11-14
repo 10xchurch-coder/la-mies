@@ -1,4 +1,5 @@
 // Inicio del escritorio: de un vistazo, cómo viene la iglesia y qué hay para atender.
+import { telDigits } from '@/lib/phone';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
@@ -170,7 +171,7 @@ export default function DeskHome() {
                   </View>
                   <Pill tone={(a.weeks_missed ?? 1) >= 3 ? 'red' : (a.weeks_missed ?? 1) === 2 ? 'amber' : 'gray'} text={(a.weeks_missed ?? 1) >= 3 ? '3 o más' : (a.weeks_missed ?? 1) === 2 ? '2 seguidas' : '1 vez'} />
                   <IconLink icon="message-circle" label={`WhatsApp a ${a.name}`} disabled={!a.phone} onPress={() => openWhatsApp(a.phone, '')} />
-                  <IconLink icon="phone" label={`Llamar a ${a.name}`} disabled={!a.phone} onPress={() => Linking.openURL(`tel:${a.phone}`)} />
+                  <IconLink icon="phone" label={`Llamar a ${a.name}`} disabled={!a.phone} onPress={() => Linking.openURL(`tel:${telDigits(a.phone)}`)} />
                 </Row>
               ))}
             </Panel>

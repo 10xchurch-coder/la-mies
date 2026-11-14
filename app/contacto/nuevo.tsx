@@ -1,5 +1,6 @@
 // Marcar una casa: todo en una pantalla.
 // Arriba lo rápido (nombre, ¿evangelio?, ¿prometió venir?, nota). Abajo, si hay tiempo, el resto de los datos.
+import { formatPhone } from '@/lib/phone';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -69,7 +70,7 @@ export default function NuevoContacto() {
           age: age ? Number(age) : null,
           sex,
           marital,
-          phone: phone.trim() || null,
+          phone: formatPhone(phone) || null,
           lat: Number(p.lat),
           lng: Number(p.lng),
           address_hint: p.roadName ? `${p.roadName}${p.sideName ? ` · vereda ${p.sideName}` : ''}` : null,

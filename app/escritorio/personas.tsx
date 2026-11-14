@@ -1,11 +1,12 @@
 // Tabla de personas del escritorio: buscar, filtrar, ordenar, corregir un dato sin salir de la tabla y bajar la lista a Excel.
+import { formatPhone, telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
-import { deleteContact, listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
+import { deleteContact, syncFamilyRoute, listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
 import { ageOf, daysSince, filterPeople, sortPeople, toCsv, type PersonFilter, type PersonSort } from '@/lib/desk';
 import { FAITH_LABEL, STATUS_LABEL, fmtDateAR, fmtDateShort, groupWord, maskDateAR, parseDateAR } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
@@ -93,7 +94,7 @@ export default function DeskPeople() {
   const exportCsv = () => {
     const csv = toCsv(
       ['Nombre', 'Estado', gw, 'Teléfono', 'Correo', 'Domicilio', 'Nacimiento', 'Edad', 'Bautizado', 'Miembro desde', 'Última vez que vino', 'Asistencia % (12 semanas)'],
-      shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', c.phone, c.email, c.address ?? c.address_hint,
+      shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,
         fmtDateAR(c.birthdate), ageOf(c), c.baptized || c.baptized_on ? 'Sí' : 'No', fmtDateAR(c.member_since), fmtDateAR(last.get(c.id) ?? null), pct.has(c.id) ? Math.round(pct.get(c.id)!) : '']),
     );
     if (Platform.OS !== 'web') return;
@@ -203,7 +204,7 @@ export default function DeskPeople() {
                   );
                   case 'status': return <StatusPill status={c.status} />;
                   case 'group': return <Text style={styles.td} numberOfLines={1}>{groupName.get(c.group_id ?? '') ?? '—'}</Text>;
-                  case 'phone': return <Text style={styles.td} numberOfLines={1}>{c.phone ?? '—'}</Text>;
+                  case 'phone': return <Text style={styles.td} numberOfLines={1}>{c.phone ? formatPhone(c.phone) : '—'}</Text>;
                   case 'age': return <Text style={styles.td}>{ageOf(c) ?? '—'}</Text>;
                   case 'baptized': return c.baptized || c.baptized_on ? <Feather name="check" size={16} color={colors.green} /> : <Text style={[styles.td, { color: colors.muted }]}>No</Text>;
                   case 'last': return (
@@ -266,7 +267,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
   onClose: () => void; onDeleted: () => void; onSaved: (patch: Partial<Contact>) => void; onOpenFull: () => void;
 }) {
   const start = useMemo(() => ({
-    name: person.name, phone: person.phone ?? '', email: person.email ?? '', address: person.address ?? '',
+    name: person.name, phone: person.phone ? formatPhone(person.phone) : '', email: person.email ?? '', address: person.address ?? '',
     birth: fmtDateAR(person.birthdate), status: person.status as string, group: person.group_id ?? '',
   }), [person]);
   const [f, setF] = useState(start);
@@ -282,7 +283,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
     // Se manda solo lo que cambió, para no pisar lo que otro haya corregido mientras tanto.
     const patch: Partial<Contact> = {};
     if (f.name !== start.name) patch.name = f.name.trim();
-    if (f.phone !== start.phone) patch.phone = f.phone.trim() || null;
+    if (f.phone !== start.phone) patch.phone = formatPhone(f.phone) || null;
     if (f.email !== start.email) patch.email = f.email.trim() || null;
     if (f.address !== start.address) patch.address = f.address.trim() || null;
     if (f.birth !== start.birth) patch.birthdate = birthdate;
@@ -291,6 +292,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
     setBusy(true);
     try {
       await updateContact(person.id, patch);
+      if (patch.group_id && showGroup && groupWordLabel.toLowerCase().includes('ruta')) await syncFamilyRoute(person.id, person.group_id);
       onSaved(patch);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
@@ -327,7 +329,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <DeskButton label="WhatsApp" icon="message-circle" disabled={!person.phone} onPress={() => openWhatsApp(person.phone, '')} />
-          <DeskButton label="Llamar" icon="phone" disabled={!person.phone} onPress={() => Linking.openURL(`tel:${person.phone}`)} />
+          <DeskButton label="Llamar" icon="phone" disabled={!person.phone} onPress={() => Linking.openURL(`tel:${telDigits(person.phone)}`)} />
         </View>
         {engagement && engagement.possible > 0 ? (
           <View style={{ padding: 12, borderRadius: 10, backgroundColor: colors.bgSoft, gap: 2 }}>

@@ -2,6 +2,7 @@
 // Cualquiera puede agregar; solo la secretaría o el pastor marcan "miembro".
 // Acá viven también los datos que no van en la ficha corta: miembro desde, discipulado,
 // bautismo, quién hace el seguimiento y la cuenta en la app.
+import { formatPhone } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,7 +11,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Choice, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
-import { addPerson, familyChildren, linkAccount, listGroups, listProfiles, searchPeople, setFamilyChildren, updateContact } from '@/lib/api';
+import { addPerson, familyChildren, linkAccount, syncFamilyRoute, listGroups, listProfiles, searchPeople, setFamilyChildren, updateContact } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { ageFrom, fmtDateAR, groupWord, isoDate, maskDateOrAge, parseAgeOrBirthdate, parseDateAR } from '@/lib/format';
@@ -175,7 +176,7 @@ export default function NuevaPersona() {
     try {
       const patch: Partial<Contact> = {
         name: name.trim(),
-        phone: phone.trim() || null,
+        phone: formatPhone(phone) || null,
         age: parsedWhen.age,
         birthdate: parsedWhen.birthdate,
         sex,
@@ -222,6 +223,7 @@ export default function NuevaPersona() {
           }));
         }
       }
+      if (contactId && church?.grouping === 'bus_routes') await syncFamilyRoute(contactId, orig?.group_id ?? null);
       if (orig) router.back();
       else router.replace({ pathname: '/contacto/[id]', params: { id: contactId as string } });
     } catch (e) {
@@ -260,7 +262,7 @@ export default function NuevaPersona() {
         </View>
 
         <Field label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" />
-        <Field label="Celular" keyboardType="phone-pad" value={phone} onChangeText={setPhone} placeholder="Ej: 376 455-1234" />
+        <Field label="Celular" keyboardType="phone-pad" value={phone} onChangeText={setPhone} hint="(solo escribí el número; se agrega +54 9 3764. Si es de otra zona, escribí el código)" placeholder="Ej: 27-2200" />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Field
             label={isContact ? 'Edad' : 'Fecha de nacimiento'}

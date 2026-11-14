@@ -1,4 +1,5 @@
 // Ficha de una persona: foto, datos, su camino en la iglesia, fidelidad, visitas y asistencias.
+import { formatPhone, telDigits } from '@/lib/phone';
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -13,7 +14,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  deleteContact, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  deleteContact, syncFamilyRoute, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -277,7 +278,7 @@ export default function PersonaDetalle() {
   // Filas de la ficha corta según quién es. Miembro: teléfono, ruta si tiene, bautismo solo si falta.
   // Contacto: además discipulado, bautismo, seguimiento. Visita: además cuántas veces vino y fidelidad.
   const rows: { k: string; v: string; right?: React.ReactNode }[] = [];
-  rows.push({ k: 'Teléfono', v: c.phone ?? 'Sin teléfono' });
+  rows.push({ k: 'Teléfono', v: c.phone ? formatPhone(c.phone) : 'Sin teléfono' });
   if (!isMember || group) {
     rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || hasRole(profile, 'captain') ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined });
   }
@@ -400,7 +401,7 @@ export default function PersonaDetalle() {
           ) : null}
 
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Action icon="phone" label="Llamar" disabled={!c.phone} onPress={() => Linking.openURL(`tel:${c.phone}`)} />
+            <Action icon="phone" label="Llamar" disabled={!c.phone} onPress={() => Linking.openURL(`tel:${telDigits(c.phone)}`)} />
             <Action icon="message-circle" label="WhatsApp" disabled={!wa} onPress={() => chooseWhatsApp(c.phone, { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services })} />
             <Action icon="check-square" label="Visité" onPress={() => setAdding(true)} />
             <Action icon="navigation" label="Cómo llegar" disabled={!directions} onPress={() => directions && Linking.openURL(directions)} />
@@ -604,7 +605,11 @@ export default function PersonaDetalle() {
         onClose={() => setPicker(null)}
         onPick={(gid) => {
           setPicker(null);
-          update({ group_id: gid });
+          const before = c.group_id;
+          updateContact(id, { group_id: gid })
+            .then(() => (gid && church?.grouping === 'bus_routes' ? syncFamilyRoute(id, before) : undefined))
+            .then(() => load())
+            .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
         }}
       />
     </View>

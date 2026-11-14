@@ -1,5 +1,6 @@
 // Mis contactos para seguir: los que anoté (o me asignaron), primero los que prometieron venir y los más interesados.
 // Con un toque: WhatsApp con el mensaje escrito, llamar, cómo llegar o registrar la visita.
+import { telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Linking, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -54,7 +55,7 @@ export default function Seguimiento() {
                   </View>
                 </Pressable>
                 <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
-                {t.phone ? <Small icon={t.kind === 'call' ? 'phone' : 'message-circle'} label={t.kind === 'call' ? 'Llamar' : 'Escribir'} onPress={() => (t.kind === 'call' ? Linking.openURL(`tel:${t.phone}`) : chooseWhatsApp(t.phone, { to: t.name, from: profile?.display_name, church: church?.name, services }, ['followup', 'visit']))} /> : null}
+                {t.phone ? <Small icon={t.kind === 'call' ? 'phone' : 'message-circle'} label={t.kind === 'call' ? 'Llamar' : 'Escribir'} onPress={() => (t.kind === 'call' ? Linking.openURL(`tel:${telDigits(t.phone)}`) : chooseWhatsApp(t.phone, { to: t.name, from: profile?.display_name, church: church?.name, services }, ['followup', 'visit']))} /> : null}
                 <Small icon="check" label="Hecho" onPress={() => completeFollowUp(t.id).then(() => setTasks(tasks.filter((x) => x.id !== t.id))).catch(() => undefined)} />
                 </View>
               </View>
@@ -78,7 +79,7 @@ export default function Seguimiento() {
               </Pressable>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Small icon="message-circle" label="WhatsApp" disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
-                <Small icon="phone" label="Llamar" disabled={!r.phone} onPress={() => Linking.openURL(`tel:${r.phone}`)} />
+                <Small icon="phone" label="Llamar" disabled={!r.phone} onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} />
                 <Small icon="check-square" label={stale ? 'Visité' : 'Visitado'} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />
               </View>
             </Card>

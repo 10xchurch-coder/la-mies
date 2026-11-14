@@ -1,4 +1,5 @@
 // Directorio de la iglesia: solo aparecen los que eligieron aparecer (con su foto y teléfono).
+import { telDigits } from '@/lib/phone';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, Text, TextInput, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
@@ -60,7 +61,7 @@ export default function Directorio() {
             </View>
             {r.phone ? (
               <>
-                <Pressable onPress={() => Linking.openURL(`tel:${r.phone}`)} style={{ padding: 8 }} accessibilityLabel={`Llamar a ${r.display_name}`}>
+                <Pressable onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} style={{ padding: 8 }} accessibilityLabel={`Llamar a ${r.display_name}`}>
                   <Feather name="phone" size={20} color={colors.green} />
                 </Pressable>
                 <Pressable onPress={() => Linking.openURL(`https://wa.me/${whatsappNumber(r.phone as string)}`)} style={{ padding: 8 }} accessibilityLabel={`WhatsApp a ${r.display_name}`}>

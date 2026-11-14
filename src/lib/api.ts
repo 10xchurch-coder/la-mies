@@ -148,6 +148,22 @@ export async function deleteContact(id: string): Promise<void> {
   if (!data || data.length === 0) throw new Error('No tenés permiso para borrar a esta persona.');
 }
 
+/**
+ * Cuando una persona queda en una ruta, su esposo/a y sus hijos pasan a la misma ruta, solos.
+ * Solo se mueven los que no tenían ruta o estaban en la que tenía antes esta persona;
+ * a quien se le haya puesto otra ruta a propósito no se lo toca.
+ */
+export async function syncFamilyRoute(id: string, previousGroup: string | null): Promise<void> {
+  const me = ok(await supabase.from('contacts').select('id, group_id, spouse_id').eq('id', id).single()) as { id: string; group_id: string | null; spouse_id: string | null };
+  if (!me.group_id) return;
+  const kids = await familyChildren(id);
+  const ids = [me.spouse_id, ...kids.map((k) => k.child_contact_id)].filter((x): x is string => !!x && x !== id);
+  if (!ids.length) return;
+  const rows = (ok(await supabase.from('contacts').select('id, group_id').in('id', ids)) ?? []) as { id: string; group_id: string | null }[];
+  const move = rows.filter((r) => !r.group_id || r.group_id === previousGroup).map((r) => r.id);
+  if (move.length) ok(await supabase.from('contacts').update({ group_id: me.group_id }).in('id', move));
+}
+
 export async function addPerson(p: Partial<Contact> & { name: string }): Promise<Contact> {
   const me = await uid();
   return ok(await supabase.from('contacts').insert({ created_by: me, share_mode: 'group', ...p }).select('*').single());

@@ -1,3 +1,4 @@
+import { formatPhone } from './phone';
 // Importar personas desde una planilla (CSV o Excel). Todo el armado de filas vive acá, sin pantalla, para poder probarlo.
 export type ImportField = 'name' | 'lastname' | 'phone' | 'email' | 'address' | 'birthdate' | 'sex' | 'marital' | 'baptized_on' | 'skip';
 export const FIELD_LABELS: Record<ImportField, string> = {
@@ -103,7 +104,7 @@ export function buildRows(data: string[][], fields: ImportField[]): { rows: Impo
     if (!name) { dropped++; continue; }
     rows.push({
       name,
-      phone: o.phone, email: o.email, address: o.address,
+      phone: o.phone ? formatPhone(o.phone) : o.phone, email: o.email, address: o.address,
       birthdate: parseDate(o.birthdate), baptized_on: parseDate(o.baptized_on),
       sex: o.sex ? sexOf(o.sex) : undefined, marital: o.marital ? maritalOf(o.marital) : undefined,
     });
