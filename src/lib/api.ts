@@ -141,6 +141,13 @@ export async function updateContact(id: string, patch: Partial<Contact>): Promis
   ok(await supabase.from('contacts').update(patch).eq('id', id));
 }
 
+/** Borra la ficha de una persona (y sus asistencias, visitas, etc.). Solo quien puede editar personas. */
+export async function deleteContact(id: string): Promise<void> {
+  const { data, error } = await supabase.from('contacts').delete().eq('id', id).select('id');
+  if (error) throw error;
+  if (!data || data.length === 0) throw new Error('No tenés permiso para borrar a esta persona.');
+}
+
 export async function addPerson(p: Partial<Contact> & { name: string }): Promise<Contact> {
   const me = await uid();
   return ok(await supabase.from('contacts').insert({ created_by: me, share_mode: 'group', ...p }).select('*').single());

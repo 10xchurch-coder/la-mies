@@ -13,7 +13,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  deleteContact, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -103,7 +103,7 @@ function DatesEditor({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contac
 export default function PersonaDetalle() {
   const router = useRouter();
   const { id, vinculo, wa: waKind, visita } = useLocalSearchParams<{ id: string; vinculo?: string; wa?: string; visita?: string }>();
-  const { profile, church, isStaff, isLeader } = useAuth();
+  const { profile, church, isStaff, isLeader, can } = useAuth();
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
   const [children, setChildren] = useState<ContactChild[]>([]);
@@ -463,6 +463,29 @@ export default function PersonaDetalle() {
               variant="ghost"
               small
               onPress={() => { listPeople().then((l) => setMergeList(l.filter((x) => x.id !== c.id))).catch(() => undefined); setPicker('merge'); }}
+            />
+          ) : null}
+
+          {isStaff && can('personas.editar') ? (
+            <Button
+              title="Borrar esta persona"
+              icon="trash-2"
+              variant="ghost"
+              small
+              onPress={() => {
+                if (c.profile_id) {
+                  Alert.alert('Tiene cuenta en la app', 'Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.');
+                  return;
+                }
+                Alert.alert(
+                  `¿Borrar a ${c.name}?`,
+                  'Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.',
+                  [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Borrar', style: 'destructive', onPress: () => { deleteContact(c.id).then(() => router.back()).catch((e) => Alert.alert('No se pudo borrar', errorMessage(e))); } },
+                  ],
+                );
+              }}
             />
           ) : null}
 

@@ -74,7 +74,6 @@ export default function DeskHome() {
   const kpis: { label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean }[] = report ? [
     { label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true },
     { label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true },
-    { label: 'Salvos', value: report.saved, prev: before?.saved, icon: 'heart', goodUp: true },
     { label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true },
     { label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true },
     { label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false },

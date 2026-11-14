@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
-import { listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
+import { deleteContact, listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
 import { ageOf, daysSince, filterPeople, sortPeople, toCsv, type PersonFilter, type PersonSort } from '@/lib/desk';
 import { FAITH_LABEL, STATUS_LABEL, fmtDateAR, fmtDateShort, groupWord, maskDateAR, parseDateAR } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
@@ -237,9 +237,10 @@ export default function DeskPeople() {
 
         {open ? (
           <PersonDrawer
-            key={open.id} person={open} groups={groups} groupWordLabel={gw} showGroup={church?.grouping !== 'none'} canEdit={isStaff}
+            key={open.id} person={open} groups={groups} groupWordLabel={gw} showGroup={church?.grouping !== 'none'} canEdit={isStaff} canDelete={can('personas.editar')}
             engagement={engOf.get(open.id) ?? null} floating={floating}
             onClose={() => setOpenId(null)}
+            onDeleted={() => { setRows((rs) => (rs ?? []).filter((r) => r.id !== open.id)); setOpenId(null); }}
             onSaved={(patch) => setRows((rs) => (rs ?? []).map((r) => (r.id === open.id ? { ...r, ...patch } : r)))}
             onOpenFull={() => router.push({ pathname: '/contacto/[id]', params: { id: open.id } })}
           />
@@ -260,9 +261,9 @@ function StatusPill({ status }: { status: PersonStatus }) {
 }
 
 /** Panel del costado: los datos de una persona, para corregirlos sin salir de la tabla. */
-function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, engagement, floating, onClose, onSaved, onOpenFull }: {
-  person: Contact; groups: Group[]; groupWordLabel: string; showGroup: boolean; canEdit: boolean; engagement: Engagement | null; floating: boolean;
-  onClose: () => void; onSaved: (patch: Partial<Contact>) => void; onOpenFull: () => void;
+function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canDelete, engagement, floating, onClose, onSaved, onDeleted, onOpenFull }: {
+  person: Contact; groups: Group[]; groupWordLabel: string; showGroup: boolean; canEdit: boolean; canDelete: boolean; engagement: Engagement | null; floating: boolean;
+  onClose: () => void; onDeleted: () => void; onSaved: (patch: Partial<Contact>) => void; onOpenFull: () => void;
 }) {
   const start = useMemo(() => ({
     name: person.name, phone: person.phone ?? '', email: person.email ?? '', address: person.address ?? '',
@@ -298,6 +299,14 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, enga
     } finally {
       setBusy(false);
     }
+  };
+
+  const remove = () => {
+    if (person.profile_id) return Alert.alert('Tiene cuenta en la app', 'Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.');
+    Alert.alert(`¿Borrar a ${person.name}?`, 'Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Borrar', style: 'destructive', onPress: () => { deleteContact(person.id).then(onDeleted).catch((e) => Alert.alert('No se pudo borrar', errorMessage(e))); } },
+    ]);
   };
 
   const faith = engagement ? FAITH_LABEL[engagement.category] : null;
@@ -363,6 +372,12 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, enga
           <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Abrir la ficha completa</Text>
           <Feather name="chevron-right" size={15} color={colors.green} />
         </Pressable>
+        {canDelete ? (
+          <Pressable accessibilityRole="button" onPress={remove} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
+            <Feather name="trash-2" size={14} color={colors.red} />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.red }}>Borrar esta persona</Text>
+          </Pressable>
+        ) : null}
       </View>
     </View>
   );
