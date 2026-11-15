@@ -1,4 +1,5 @@
 // Quién está logueado, su perfil, su iglesia y su grupo.
+import { setFollowupConfig } from '@/lib/messages';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session as AuthSession } from '@supabase/supabase-js';
 import { PROFILE_COLS } from '@/lib/api';
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (prof?.church_id) {
       const { data: c } = await supabase.from('churches').select('*').eq('id', prof.church_id).maybeSingle();
       setChurch((c as Church | null) ?? null);
+      setFollowupConfig((c as Church | null)?.followup ?? null);
     } else {
       setChurch(null);
     }

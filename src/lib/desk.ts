@@ -48,6 +48,7 @@ export const DESK_NAV: DeskGroup[] = [
   { title: 'Administración', items: [
     { key: 'cuentas', label: 'Cuentas', icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
     { key: 'roles', label: 'Roles y permisos', icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
+    { key: 'reglas', label: 'Seguimiento y mensajes', icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
     { key: 'importar', label: 'Importar personas', icon: 'upload', to: '/importar', perms: ['personas.editar'] },
     { key: 'ajustes', label: 'Ajustes', icon: 'settings', to: '/ajustes', perms: [] },
   ] },

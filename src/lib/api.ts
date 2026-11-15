@@ -1,4 +1,5 @@
 // Llamadas a la base, con tipos. Si algo falla, lanza un Error con mensaje legible.
+import type { PlanId } from './biblePlan';
 import type { PanelDetail } from './outings';
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
@@ -783,7 +784,32 @@ export async function saveLiveNotes(video: string, body: string): Promise<void> 
   ok(await supabase.from('live_notes').upsert({ user_id: u.user?.id, video_id: video, body, updated_at: new Date().toISOString() }, { onConflict: 'user_id,video_id' }));
 }
 
-export type FirstVisitTask = { id: string; contact_id: string; name: string; phone: string | null; photo_path: string | null; kind: 'call' | 'visit'; due_at: string; overdue: boolean };
+// ---------- Plan de lectura de la Biblia (uno por persona) ----------
+export type BiblePlanRow = { plan: PlanId; started_on: string; done: number[] };
+export async function myBiblePlan(): Promise<BiblePlanRow | null> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return null;
+  const { data, error } = await supabase.from('bible_plans').select('plan, started_on, done').eq('profile_id', u.user.id).maybeSingle();
+  if (error) throw error;
+  return (data as BiblePlanRow | null) ?? null;
+}
+export async function startBiblePlan(plan: PlanId, startedOn: string): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) throw new Error('Tenés que entrar con tu cuenta.');
+  ok(await supabase.from('bible_plans').upsert({ profile_id: u.user.id, plan, started_on: startedOn, done: [], updated_at: new Date().toISOString() }, { onConflict: 'profile_id' }));
+}
+export async function saveBiblePlanDone(done: number[]): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return;
+  ok(await supabase.from('bible_plans').update({ done: [...new Set(done)].sort((a, b) => a - b), updated_at: new Date().toISOString() }).eq('profile_id', u.user.id));
+}
+export async function stopBiblePlan(): Promise<void> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return;
+  ok(await supabase.from('bible_plans').delete().eq('profile_id', u.user.id));
+}
+
+export type FirstVisitTask = { id: string; contact_id: string; name: string; phone: string | null; photo_path: string | null; kind: 'call' | 'write2' | 'visit' | 'absent_visit'; due_at: string; overdue: boolean };
 export async function myFirstVisitTasks(): Promise<FirstVisitTask[]> {
   const { data, error } = await supabase.rpc('my_follow_ups');
   return error ? [] : ((data ?? []) as FirstVisitTask[]);

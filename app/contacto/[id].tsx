@@ -1,4 +1,6 @@
 // Ficha de una persona: foto, datos, su camino en la iglesia, fidelidad, visitas y asistencias.
+import { PART_TITLE, hasStarted, partProgress, toggleClass, type DiscPart } from '@/lib/discipleship';
+import { followupConfig } from '@/lib/messages';
 import { formatPhone, telDigits } from '@/lib/phone';
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -65,6 +67,49 @@ function fromDmy(t: string): string | null | undefined {
 }
 
 /** La secretaría o el pastor corrigen las fechas reales (al cargar a alguien queda la fecha del día). */
+/** Programa de discipulado: se tilda cada clase que la persona completó. Completar cada parte es un logro. */
+function DiscipleshipCard({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contact>) => Promise<void> }) {
+  const cfg = followupConfig();
+  const parts = ([['one', cfg.disc_one_classes], ['course', cfg.disc_course_classes]] as [DiscPart, number][]).filter(([, n]) => n > 0);
+  if (!parts.length) return null;
+  const tap = (part: DiscPart, n: number) => {
+    const next = toggleClass(c.discipleship, part, n, isoDate(new Date()));
+    const patch: Partial<Contact> = { discipleship: next };
+    if (!c.discipleship_since && hasStarted(next)) patch.discipleship_since = isoDate(new Date());
+    onSave(patch).catch(() => undefined);
+  };
+  return (
+    <Card style={{ gap: 12 }}>
+      <SectionTitle>Discipulado</SectionTitle>
+      {parts.map(([part, total]) => {
+        const p = partProgress(c.discipleship, part, total);
+        return (
+          <View key={part} style={{ gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.text }}>{PART_TITLE[part]}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: p.complete ? colors.greenText : colors.muted }}>
+                {p.complete ? `Completo${p.completedOn ? ` · ${fmtDateOnly(p.completedOn)}` : ''}` : `${p.done} de ${p.total}`}
+              </Text>
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {Array.from({ length: total }, (_, i) => i + 1).map((n) => {
+                const on = !!c.discipleship?.[part]?.[String(n)];
+                return (
+                  <Pressable key={n} onPress={() => tap(part, n)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${PART_TITLE[part]}, clase ${n}: ${on ? 'completada' : 'sin hacer'}`} hitSlop={4}
+                    style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : 'transparent' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: on ? '#FFFFFF' : colors.muted }}>{n}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        );
+      })}
+      <Text style={{ fontSize: 12, color: colors.muted }}>Tocá el número de cada clase cuando la complete.</Text>
+    </Card>
+  );
+}
+
 function DatesEditor({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contact>) => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [bap, setBap] = useState(toDmy(c.baptized_on));
@@ -489,6 +534,8 @@ export default function PersonaDetalle() {
               }}
             />
           ) : null}
+
+          {isLeader ? <DiscipleshipCard c={c} onSave={(patch) => update(patch)} /> : null}
 
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 

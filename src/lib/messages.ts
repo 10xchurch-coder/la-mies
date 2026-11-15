@@ -1,11 +1,12 @@
 // Mensajes de WhatsApp ya escritos, desde la persona que los manda (no "la iglesia").
 // Se abren en el WhatsApp del teléfono con el texto puesto; se pueden cambiar antes de enviar.
+import { fillMessage, mergeFollowup, type FollowupConfig } from './followupConfig';
 import { Alert, Linking } from 'react-native';
 import { whatsappNumber } from './format';
 import { showActions } from '../components/ActionSheet';
 import type { ChurchService } from '../types';
 
-export type MessageKind = 'firstvisit' | 'promise' | 'followup' | 'missed1' | 'missed2' | 'missed3' | 'visit' | 'plain';
+export type MessageKind = 'firstvisit' | 'secondvisit' | 'promise' | 'followup' | 'missed1' | 'missed2' | 'missed3' | 'visit' | 'plain';
 
 export type MessageContext = {
   /** Nombre de la persona a la que se le escribe. */
@@ -37,33 +38,28 @@ export function serviceWhen(services: ChurchService[] | undefined, promiseDay?: 
   return `el ${DAY[s.dow]} a las ${hhmm(s.time)}`;
 }
 
+/** Los mensajes que escribió esta iglesia (Ajustes > Seguimiento y mensajes). Los carga la sesión al entrar. */
+let config: FollowupConfig = mergeFollowup(null);
+export function setFollowupConfig(raw: unknown): void {
+  config = mergeFollowup(raw);
+}
+export function followupConfig(): FollowupConfig {
+  return config;
+}
+
 export function messageText(kind: MessageKind, c: MessageContext): string {
-  const to = firstName(c.to);
-  const me = firstName(c.from) || 'yo';
-  const ch = c.church ?? 'la iglesia';
-  const when = serviceWhen(c.services, c.promiseDay);
-  switch (kind) {
-    case 'firstvisit':
-      return `Hola ${to}, soy ${me} de ${ch}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez ${when}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.`;
-    case 'promise':
-      return `Hola ${to}, soy ${me} de ${ch}. Te escribo para recordarte que ${when} tenemos el culto. ¡Me encantaría verte ahí! Si necesitás que te pasemos a buscar, avisame.`;
-    case 'followup':
-      return `Hola ${to}, soy ${me} de ${ch}. Fue una alegría conocerte. Te quería invitar: ${when} tenemos el culto y me encantaría que vengas. ¿Te puedo ayudar en algo?`;
-    case 'missed1':
-      return `Hola ${to}, soy ${me}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?`;
-    case 'missed2':
-      return `Hola ${to}, soy ${me}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?`;
-    case 'missed3':
-      return `Hola ${to}, soy ${me}. Recién oré por vos. Espero que estés bien. Dios te ama; buscalo de todo corazón y Él te va a sostener. Te esperamos ${when}.`;
-    case 'visit':
-      return `Hola ${to}, soy ${me} de ${ch}. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?`;
-    default:
-      return '';
-  }
+  if (kind === 'plain') return '';
+  return fillMessage(config.messages[kind], {
+    nombre: firstName(c.to),
+    yo: firstName(c.from) || 'yo',
+    iglesia: c.church ?? 'la iglesia',
+    cuando: serviceWhen(c.services, c.promiseDay),
+  });
 }
 
 export const MESSAGE_LABEL: Record<Exclude<MessageKind, 'plain'>, string> = {
   firstvisit: 'Gracias por visitarnos',
+  secondvisit: 'Vino por segunda vez',
   promise: 'Recordarle el culto',
   followup: 'Invitarlo después de conocerlo',
   missed1: 'Lo extrañamos (faltó 1 semana)',

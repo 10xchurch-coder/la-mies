@@ -98,6 +98,14 @@ export default function Ajustes() {
             onPress={() => router.push({ pathname: '/(tabs)/iglesia', params: { editar: String(Date.now()) } } as never)} />
         </Card>
 
+        {can('admin.iglesia') ? (
+          <>
+            <SectionTitle>Cómo trabaja la iglesia</SectionTitle>
+            <Card style={{ padding: 0 }}>
+              <RowLink title="Seguimiento y mensajes" subtitle="Cuándo avisar para escribir o visitar, y qué dice cada WhatsApp" icon="message-circle" onPress={() => router.push('/admin/seguimiento' as never)} />
+            </Card>
+          </>
+        ) : null}
         {can('personas.editar') ? (
           <>
             <SectionTitle>Personas de la iglesia</SectionTitle>

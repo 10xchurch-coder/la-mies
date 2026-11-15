@@ -6,6 +6,8 @@ export type Church = {
   logo_path?: string | null;
   website?: string | null;
   youtube_channel?: string | null;
+  /** Reglas de seguimiento y mensajes propios de la iglesia (ver lib/followupConfig). */
+  followup?: Record<string, unknown> | null;
   /** Redes y podcast de la iglesia: { instagram, facebook, youtube, podcast, whatsapp, threads, x, tiktok }. */
   social?: import('./lib/social').ChurchSocial | null;
   absence_recipients?: string[] | null;
@@ -122,6 +124,8 @@ export type Contact = {
   pickup_time: string | null;
   gospel_presented: boolean;
   discipleship_since: string | null;
+  /** Clases del programa de discipulado que completó (ver lib/discipleship). */
+  discipleship?: import('./lib/discipleship').Discipleship | null;
   baptized_on: string | null;
   /** Bautismo después de creer en Cristo (no cuenta el de bebé). */
   baptized: boolean;

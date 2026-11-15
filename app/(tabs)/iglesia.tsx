@@ -19,7 +19,9 @@ import { maskDateAR, parseDateAR } from '@/lib/format';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
-import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myUpcoming, readingStreak } from '@/lib/api';
+import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myBiblePlan, myUpcoming, readingStreak, type BiblePlanRow } from '@/lib/api';
+import { planStatus } from '@/lib/biblePlan';
+import { isoDate as isoDay } from '@/lib/format';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent, DailySocial } from '@/types';
@@ -49,6 +51,7 @@ export default function Iglesia() {
   const [takesAttendance, setTakesAttendance] = useState(false);
   const [daily, setDaily] = useState<DailyContent | null>(null);
   const [streak, setStreak] = useState(0);
+  const [biblePlan, setBiblePlan] = useState<BiblePlanRow | null>(null);
   const [social, setSocial] = useState<DailySocial>({ comments: 0, likes: 0, liked: false, open: false });
   const [tomorrow, setTomorrow] = useState<Pick<Sermon, 'id' | 'title' | 'passage' | 'preacher'> | null>(null);
   const [logo, setLogo] = useState<string | null>(null);
@@ -88,6 +91,7 @@ export default function Iglesia() {
     dailyFor(null).then((d) => {
       setDaily(d);
       if (d) dailySocial(d.on_date).then(setSocial).catch(() => undefined);
+      myBiblePlan().then(setBiblePlan).catch(() => undefined);
     }).catch(() => undefined);
     readingStreak().then((r) => setStreak(r.current)).catch(() => undefined);
     // El sábado (o cualquier día antes de una prédica ya cargada) se ve el título del mensaje de mañana.
@@ -394,6 +398,28 @@ export default function Iglesia() {
             </View>
           </View>
         ) : null}
+        {(() => {
+          const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
+          const title = !st ? 'Leé la Biblia en un año' : st.today ? `Lectura de hoy: ${st.today}` : 'Hoy no hay lectura nueva';
+          const hint = !st ? 'Elegí un plan y la app te dice qué leer cada día'
+            : st.todayDone && !st.behind.length ? '¡Listo por hoy! Vas al día.'
+              : st.behind.length ? `Te ${st.behind.length === 1 ? 'queda 1 lectura atrasada' : `quedan ${st.behind.length} lecturas atrasadas`}` : 'Tocá para tildarla cuando la leas';
+          return (
+            <Pressable onPress={() => router.push('/plan-lectura' as Href)} accessibilityRole="button" accessibilityLabel={`${title}. ${hint}`}>
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name={st?.todayDone ? 'check' : 'book-open'} size={19} color={colors.greenText} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{title}</Text>
+                  <Text style={{ fontSize: 13, color: colors.muted }}>{hint}</Text>
+                </View>
+                <Feather name="chevron-right" size={18} color={colors.gray} />
+              </Card>
+            </Pressable>
+          );
+        })()}
+
         {news.length ? (
           <Card style={styles.news}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
