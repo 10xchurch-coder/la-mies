@@ -5,7 +5,7 @@ import { whatsappNumber } from './format';
 import { showActions } from '../components/ActionSheet';
 import type { ChurchService } from '../types';
 
-export type MessageKind = 'promise' | 'followup' | 'missed1' | 'missed2' | 'missed3' | 'visit' | 'plain';
+export type MessageKind = 'firstvisit' | 'promise' | 'followup' | 'missed1' | 'missed2' | 'missed3' | 'visit' | 'plain';
 
 export type MessageContext = {
   /** Nombre de la persona a la que se le escribe. */
@@ -43,6 +43,8 @@ export function messageText(kind: MessageKind, c: MessageContext): string {
   const ch = c.church ?? 'la iglesia';
   const when = serviceWhen(c.services, c.promiseDay);
   switch (kind) {
+    case 'firstvisit':
+      return `Hola ${to}, soy ${me} de ${ch}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez ${when}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.`;
     case 'promise':
       return `Hola ${to}, soy ${me} de ${ch}. Te escribo para recordarte que ${when} tenemos el culto. ¡Me encantaría verte ahí! Si necesitás que te pasemos a buscar, avisame.`;
     case 'followup':
@@ -61,6 +63,7 @@ export function messageText(kind: MessageKind, c: MessageContext): string {
 }
 
 export const MESSAGE_LABEL: Record<Exclude<MessageKind, 'plain'>, string> = {
+  firstvisit: 'Gracias por visitarnos',
   promise: 'Recordarle el culto',
   followup: 'Invitarlo después de conocerlo',
   missed1: 'Lo extrañamos (faltó 1 semana)',

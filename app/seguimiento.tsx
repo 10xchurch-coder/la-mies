@@ -1,8 +1,7 @@
 // Mis contactos para seguir: los que anoté (o me asignaron), primero los que prometieron venir y los más interesados.
 // Con un toque: WhatsApp con el mensaje escrito, llamar, cómo llegar o registrar la visita.
-import { telDigits } from '@/lib/phone';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
@@ -10,7 +9,7 @@ import { Face } from '@/components/Face';
 import { Card, Empty, Loading, Tag } from '@/components/ui';
 import { completeFollowUp, listServices, myFirstVisitTasks, myFollowups, type FirstVisitTask } from '@/lib/api';
 import { INTEREST_LABEL, PROMISE_LABEL, fmtRelativeDay } from '@/lib/format';
-import { chooseWhatsApp } from '@/lib/messages';
+import { chooseWhatsApp, messageText, openWhatsApp } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchService, FollowupRow } from '@/types';
@@ -32,6 +31,18 @@ export default function Seguimiento() {
     }, []),
   );
 
+  // Una fila por persona (cada visita nueva trae dos pasos: escribirle y visitarla).
+  const visitors = useMemo(() => {
+    const by = new Map<string, { contact_id: string; name: string; phone: string | null; photo_path: string | null; tasks: FirstVisitTask[] }>();
+    for (const t of tasks) {
+      const v = by.get(t.contact_id) ?? { contact_id: t.contact_id, name: t.name, phone: t.phone, photo_path: t.photo_path, tasks: [] };
+      v.tasks.push(t);
+      by.set(t.contact_id, v);
+    }
+    for (const v of by.values()) v.tasks.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'call' ? -1 : 1));
+    return [...by.values()];
+  }, [tasks]);
+
   const week = Date.now() - 7 * 86400000;
   const pending = (rows ?? []).filter((r) => !r.last_visit || new Date(r.last_visit).getTime() < week);
 
@@ -42,21 +53,27 @@ export default function Seguimiento() {
         {tasks.length ? (
           <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Vinieron por primera vez</Text>
-            <Text style={{ fontSize: 12, color: colors.amberText }}>Llamalos en 48 horas y visitalos en la semana. Al registrar la visita se tilda solo.</Text>
-            {tasks.map((t) => (
-              <View key={t.id} style={{ gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
-                <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: t.contact_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <Face name={t.name} path={t.photo_path} size={36} />
+            <Text style={{ fontSize: 12, color: colors.amberText }}>Cada uno tiene dos pasos: escribirle en 48 horas y visitarlo en la semana. El botón de WhatsApp abre el mensaje ya escrito. Cuando hagas cada paso, tocá “Ya le escribí” o “Ya lo visité” y sale de la lista.</Text>
+            {visitors.map((v) => (
+              <View key={v.contact_id} style={{ gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: v.contact_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Face name={v.name} path={v.photo_path} size={36} />
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{t.name}</Text>
-                    <Text style={{ fontSize: 12, color: t.overdue ? colors.red : colors.muted }}>
-                      {t.kind === 'call' ? 'Llamar' : 'Visitar'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
-                    </Text>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{v.name}</Text>
+                    {v.tasks.map((t) => (
+                      <Text key={t.id} style={{ fontSize: 12, color: t.overdue ? colors.red : colors.muted }}>
+                        {t.kind === 'call' ? 'Escribirle' : 'Visitarlo'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
+                      </Text>
+                    ))}
                   </View>
                 </Pressable>
-                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
-                {t.phone ? <Small icon={t.kind === 'call' ? 'phone' : 'message-circle'} label={t.kind === 'call' ? 'Llamar' : 'Escribir'} onPress={() => (t.kind === 'call' ? Linking.openURL(`tel:${telDigits(t.phone)}`) : chooseWhatsApp(t.phone, { to: t.name, from: profile?.display_name, church: church?.name, services }, ['followup', 'visit']))} /> : null}
-                <Small icon="check" label="Hecho" onPress={() => completeFollowUp(t.id).then(() => setTasks(tasks.filter((x) => x.id !== t.id))).catch(() => undefined)} />
+                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                  <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                    onPress={() => openWhatsApp(v.phone, messageText('firstvisit', { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
+                  {v.tasks.map((t) => (
+                    <Small key={t.id} icon="check" label={t.kind === 'call' ? 'Ya le escribí' : 'Ya lo visité'}
+                      onPress={() => completeFollowUp(t.id).then(() => setTasks((cur) => cur.filter((x) => x.id !== t.id))).catch(() => undefined)} />
+                  ))}
                 </View>
               </View>
             ))}
@@ -79,7 +96,6 @@ export default function Seguimiento() {
               </Pressable>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Small icon="message-circle" label="WhatsApp" disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
-                <Small icon="phone" label="Llamar" disabled={!r.phone} onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} />
                 <Small icon="check-square" label={stale ? 'Visité' : 'Visitado'} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />
               </View>
             </Card>

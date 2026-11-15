@@ -1,7 +1,7 @@
 // Escritorio · Asistencia del día: se ve en vivo quién quedó marcado en cada reunión y en cada clase,
 // para revisar que no falte nadie. Se actualiza sola cada pocos segundos mientras otro toma la asistencia.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
@@ -92,6 +92,12 @@ export default function DeskAttendance() {
       subtitle={`${isToday ? 'Hoy, ' : ''}${longDate(day)}${updated ? ` · actualizado ${fmtTime(updated)}` : ''} · se actualiza sola`}
       actions={(
         <>
+          {Platform.OS === 'web' ? React.createElement('input', {
+            type: 'date', value: date, max: isoDate(new Date()), 'aria-label': 'Elegir una fecha',
+            onChange: (e: { target: { value: string } }) => { if (e.target.value) setDay(new Date(`${e.target.value}T12:00:00`)); },
+            style: { height: 36, padding: '0 10px', borderRadius: 9, border: `1px solid ${colors.input}`, background: colors.bg, color: colors.text, fontSize: 13, fontFamily: 'inherit' },
+          }) : null}
+          <DeskButton label="Domingo pasado" onPress={() => { const t = new Date(); setDay(addDays(t, -(t.getDay() === 0 ? 7 : t.getDay()))); }} />
           <DeskButton label="Día anterior" icon="chevron-left" onPress={() => setDay((d) => addDays(d, -1))} />
           <DeskButton label="Hoy" onPress={() => setDay(new Date())} disabled={isToday} />
           <DeskButton label="Día siguiente" icon="chevron-right" onPress={() => setDay((d) => addDays(d, 1))} disabled={isToday} />
