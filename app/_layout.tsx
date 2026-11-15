@@ -23,6 +23,9 @@ import { loadTabs } from '@/lib/tabsPref';
 import { loadMenu } from '@/lib/menuPref';
 import { useOtaUpdates } from '@/lib/otaUpdates';
 import { startOfflineSync } from '@/lib/offline';
+import { startNetSync } from '@/lib/netFetch';
+import { registerWebShell } from '@/lib/webShell';
+import { OfflineBadge } from '@/components/OfflineBadge';
 import { colors, useThemeMode } from '@/theme';
 
 // Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
@@ -103,6 +106,8 @@ export default function RootLayout() {
   const mode = useThemeMode();
   useOtaUpdates();
   useEffect(() => startOfflineSync(), []);
+  useEffect(() => startNetSync(), []);
+  useEffect(() => { if (Platform.OS === 'web') registerWebShell(); }, []);
   useEffect(() => {
     Promise.all([loadThemeMode(), loadTabs(), loadMenu()]).finally(() => setThemeReady(true));
   }, []);
@@ -123,6 +128,7 @@ export default function RootLayout() {
             <Gate key={mode} />
             <ActionSheetHost key={`sheet-${mode}`} />
             <RulesGate key={`rules-${mode}`} />
+            <OfflineBadge />
           </ErrorBoundary>
         </OutingProvider>
       </AuthProvider>

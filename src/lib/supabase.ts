@@ -3,6 +3,7 @@ import { AppState, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { createClient } from '@supabase/supabase-js';
 import { LargeSecureStore } from './secureStore';
+import { makeOfflineFetch, setOfflineUser, setTokenGetter } from './netFetch';
 
 // Los dos valores públicos de Supabase se pegan en app.json → expo.extra
 // (supabaseUrl y supabaseAnonKey). Así viajan con la app cuando se compila en la nube.
@@ -22,6 +23,14 @@ export const supabase = createClient(url ?? 'https://falta-configurar.invalid', 
     // En la web, el link del correo (confirmar cuenta, cambiar contraseña) trae la sesión en la dirección.
     detectSessionInUrl: Platform.OS === 'web',
   },
+  // Sin señal, las pantallas se abren con lo último guardado y la asistencia se anota para subir después.
+  global: url && anonKey ? { fetch: makeOfflineFetch(url, anonKey) } : undefined,
+});
+setTokenGetter(async () => (await supabase.auth.getSession()).data.session?.access_token ?? null);
+// Lo guardado en el teléfono es de una sola cuenta: se borra al cerrar sesión o al entrar con otra.
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') setOfflineUser(null).catch(() => undefined);
+  else if (session?.user.id && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) setOfflineUser(session.user.id).catch(() => undefined);
 });
 
 // Renueva el token solo mientras la app está en primer plano (en la web lo hace el navegador solo).
@@ -43,7 +52,7 @@ export function errorMessage(e: unknown): string {
   const m = any.message ?? any.error_description ?? 'Error';
   if (/invalid login credentials/i.test(m)) return 'Correo o contraseña incorrectos';
   if (/email not confirmed/i.test(m)) return 'Primero confirmá tu correo (mirá tu bandeja de entrada)';
-  if (/network request failed/i.test(m)) return 'Sin conexión. Probá de nuevo cuando tengas señal.';
+  if (/network request failed|failed to fetch|load failed|networkerror/i.test(m)) return 'Sin conexión. Esto necesita internet: probá de nuevo cuando tengas señal.';
   if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Iniciá sesión.';
   if (/password should be at least/i.test(m)) return 'La contraseña tiene que tener al menos 10 caracteres';
   if (/weak password|password is too weak|known to be weak/i.test(m)) return 'Esa contraseña es muy fácil de adivinar. Usá letras, números y más de 10 caracteres.';

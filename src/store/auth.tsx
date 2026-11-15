@@ -3,10 +3,28 @@ import { setFollowupConfig } from '@/lib/messages';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session as AuthSession } from '@supabase/supabase-js';
 import { PROFILE_COLS } from '@/lib/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
+import { netState } from '../lib/netFetch';
 import { registerForPush } from '../lib/push';
 import type { Church, Contact, Group, Profile } from '../types';
 import { financeLevelFromPerms, hasRole, rolePerms, type Perm } from '../lib/perms';
+
+// Quién fue el último en entrar en este teléfono. Si la app se abre sin señal y la sesión no se puede renovar,
+// se sigue como esa persona con lo último guardado; cuando vuelve la señal, la sesión se renueva sola.
+const LAST_USER = 'lamies.lastUser';
+async function offlineSession(): Promise<AuthSession | null> {
+  if (netState().online) return null;
+  try {
+    const u = JSON.parse((await AsyncStorage.getItem(LAST_USER)) ?? 'null') as { id: string; email?: string } | null;
+    return u?.id ? ({ access_token: '', refresh_token: '', token_type: 'bearer', expires_in: 0, user: { id: u.id, email: u.email, app_metadata: {}, user_metadata: {}, aud: 'authenticated', created_at: '' } } as unknown as AuthSession) : null;
+  } catch {
+    return null;
+  }
+}
+function rememberUser(s: AuthSession | null) {
+  if (s?.user.id && s.access_token) AsyncStorage.setItem(LAST_USER, JSON.stringify({ id: s.user.id, email: s.user.email })).catch(() => undefined);
+}
 
 type AuthState = {
   loading: boolean;
@@ -105,11 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
     supabase.auth.getSession().then(async ({ data }) => {
       if (!mounted) return;
-      setSession(data.session);
-      await loadProfile(data.session?.user.id);
+      const s = data.session ?? (await offlineSession());
+      rememberUser(s);
+      setSession(s);
+      await loadProfile(s?.user.id);
       setLoading(false);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, real) => {
+      if (event === 'SIGNED_OUT') AsyncStorage.removeItem(LAST_USER).catch(() => undefined);
+      const s = real ?? (event === 'SIGNED_OUT' ? null : await offlineSession());
+      rememberUser(s);
       setSession(s);
       await loadProfile(s?.user.id);
       setLoading(false);
