@@ -148,16 +148,26 @@ export default function Panel() {
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Stat value={detail ? panelItems('contacts', detail).length : countContacts(report.sessions)} label="Contactos" onPress={() => toggle('contacts')} active={isOpen('contacts')} />
                 <Stat value={t.presentations} label="Presentaciones" tone="green" onPress={() => toggle('presentations')} active={isOpen('presentations')} />
-                <Stat value={t.promises} label="Promesas" tone="amber" onPress={() => toggle('promises')} active={isOpen('promises')} />
-                <Stat value={detail ? detail.came.length : t.came} label="Vinieron" tone="blue" onPress={() => toggle('came')} active={isOpen('came')} />
+              </View>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Stat value={t.promises} label="Prometieron venir a la iglesia" tone="amber" onPress={() => toggle('promises')} active={isOpen('promises')} />
+                <Stat value={detail ? detail.came.length : t.came} label="Visitaron la iglesia" tone="blue" onPress={() => toggle('came')} active={isOpen('came')} />
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Stat value={t.discipleship} label="Discipulado" onPress={() => toggle('discipleship')} active={isOpen('discipleship')} />
                 <Stat value={t.baptisms} label="Bautismos" onPress={() => toggle('baptisms')} active={isOpen('baptisms')} />
-                <Stat value={countOutings(report.sessions)} label="Salidas" />
+                <Stat value={fmtMinutes(t.minutes)} label="En la calle" />
                 <Stat value={t.members} label="Hermanos" />
               </View>
-              <Text style={{ fontSize: 12, color: colors.muted }}>{fmtMinutes(t.minutes)} en la calle · {fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras</Text>
+              {(() => {
+                const outings = countOutings(report.sessions);
+                const houses = detail ? panelItems('contacts', detail).length : countContacts(report.sessions);
+                return (
+                  <Text style={{ fontSize: 12, color: colors.muted }}>
+                    {outings} {outings === 1 ? 'salida' : 'salidas'} · {fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras · {houses} {houses === 1 ? 'casa' : 'casas'}
+                  </Text>
+                );
+              })()}
               <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver quiénes son y quién los cargó.</Text>
             </View>
 

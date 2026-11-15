@@ -55,10 +55,16 @@ export default function ZonaScreen() {
         setLoaded(true);
       }).catch(() => setLoaded(true));
     } else {
+      // En la computadora la ubicación a veces no contesta nunca: si en 4 segundos no llegó, se abre el mapa igual en la ciudad.
+      const fallback = { lat: -27.3671, lng: -55.896 };
+      let done = false;
+      const open = (c: { lat: number; lng: number }) => { if (!done) { done = true; setRegion(regionAround(c, 500)); } };
+      const timer = setTimeout(() => open(fallback), 4000);
       Location.getForegroundPermissionsAsync()
         .then((p) => (p.status === 'granted' ? Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }) : null))
-        .then((here) => setRegion(regionAround(here ? { lat: here.coords.latitude, lng: here.coords.longitude } : { lat: -27.3671, lng: -55.896 }, 500)))
-        .catch(() => setRegion(regionAround({ lat: -27.3671, lng: -55.896 }, 500)));
+        .then((here) => open(here ? { lat: here.coords.latitude, lng: here.coords.longitude } : fallback))
+        .catch(() => open(fallback))
+        .finally(() => clearTimeout(timer));
     }
   }, [id]);
 

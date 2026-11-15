@@ -35,7 +35,7 @@ export type PanelDetail = { visits: PanelVisit[]; came: PanelPerson[]; disciples
 export type PanelItem = { key: string; contact_id: string; name: string; when: string; user_id: string | null };
 
 export const METRIC_LABEL: Record<PanelMetric, string> = {
-  contacts: 'Contactos', presentations: 'Presentaciones', promises: 'Promesas', came: 'Vinieron', discipleship: 'Discipulado', baptisms: 'Bautismos',
+  contacts: 'Contactos', presentations: 'Presentaciones', promises: 'Prometieron venir a la iglesia', came: 'Visitaron la iglesia', discipleship: 'Discipulado', baptisms: 'Bautismos',
 };
 
 /** La lista detrás de cada número. Con userId, solo lo que cargó ese hermano. */
