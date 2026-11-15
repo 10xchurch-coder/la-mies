@@ -157,6 +157,7 @@ export default function NuevaPersona() {
   const parsedWhen = parseAgeOrBirthdate(when);
   const whenHint = parsedWhen.birthdate ? `(${ageFrom(parsedWhen.birthdate)} años)` : isContact ? '(o la fecha)' : '(o la edad)';
 
+  const noPhoneOk = useRef(false);
   const save = async () => {
     if (name.trim().length < 2) {
       Alert.alert('Falta el nombre');
@@ -171,6 +172,14 @@ export default function NuevaPersona() {
         Alert.alert(label[0], 'Escribila como día/mes/año, por ejemplo 15/03/2024.');
         return;
       }
+    }
+    // Sin teléfono después no hay cómo escribirle: conviene pedirlo ahora.
+    if (status === 'visitor' && !phone.trim() && !noPhoneOk.current) {
+      Alert.alert('Falta el teléfono', 'Sin el número no vas a poder escribirle por WhatsApp para agradecerle la visita. Si lo tenés cerca, pedíselo ahora.', [
+        { text: 'Agregar el teléfono', style: 'cancel' },
+        { text: 'Guardar sin teléfono', onPress: () => { noPhoneOk.current = true; save(); } },
+      ]);
+      return;
     }
     setBusy(true);
     try {

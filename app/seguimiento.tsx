@@ -6,8 +6,9 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
-import { Card, Empty, Loading, Tag } from '@/components/ui';
-import { completeFollowUp, listServices, myFirstVisitTasks, myFollowups, type FirstVisitTask } from '@/lib/api';
+import { Card, Empty, Field, Loading, Tag } from '@/components/ui';
+import { completeFollowUp, listServices, myFirstVisitTasks, myFollowups, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
+import { formatPhone } from '@/lib/phone';
 import { INTEREST_LABEL, PROMISE_LABEL, fmtRelativeDay } from '@/lib/format';
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
@@ -27,6 +28,9 @@ export default function Seguimiento() {
   const [rows, setRows] = useState<FollowupRow[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
   const [tasks, setTasks] = useState<FirstVisitTask[]>([]);
+  const [addPhone, setAddPhone] = useState<string | null>(null);
+  const [phoneText, setPhoneText] = useState('');
+  const reloadTasks = () => { myFirstVisitTasks().then(setTasks).catch(() => undefined); };
 
   useEffect(() => {
     listServices().then(setServices).catch(() => undefined);
@@ -74,19 +78,55 @@ export default function Seguimiento() {
                       <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{v.name}</Text>
                       {v.tasks.map((t) => (
                         <Text key={t.id} style={{ fontSize: 12, color: t.overdue ? colors.red : colors.muted }}>
-                          {TASK_LABEL[t.kind] ?? 'Seguir'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
+                          {!v.phone && (t.kind === 'call' || t.kind === 'write2') ? `${t.kind === 'call' ? 'Vino por primera vez' : 'Vino por segunda vez'}: conseguir su teléfono o hablarle` : TASK_LABEL[t.kind] ?? 'Seguir'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
                         </Text>
                       ))}
                     </View>
                   </Pressable>
-                  <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                    <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
-                      onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
-                    {v.tasks.map((t) => (
-                      <Small key={t.id} icon="check" label={t.kind === 'visit' || t.kind === 'absent_visit' ? 'Ya lo visité' : 'Ya le escribí'}
-                        onPress={() => completeFollowUp(t.id).then(() => setTasks((cur) => cur.filter((x) => x.id !== t.id))).catch(() => undefined)} />
-                    ))}
-                  </View>
+                  {(() => {
+                    const done = (t: FirstVisitTask, outcome: FollowUpOutcome) =>
+                      completeFollowUp(t.id, outcome).then(() => { setTasks((cur) => cur.filter((x) => x.id !== t.id)); if (outcome === 'unreachable') reloadTasks(); }).catch(() => undefined);
+                    const writes = v.tasks.filter((t) => t.kind === 'call' || t.kind === 'write2');
+                    const visits = v.tasks.filter((t) => t.kind === 'visit' || t.kind === 'absent_visit');
+                    // Sin teléfono no se le puede escribir: se ofrece cargarlo, o decir con la verdad qué pasó.
+                    if (!v.phone && writes.length) {
+                      return (
+                        <View style={{ gap: 8 }}>
+                          <Text style={{ fontSize: 12, color: colors.amberText }}>No tiene teléfono cargado. Conseguilo, o hablale en persona.</Text>
+                          {addPhone === v.contact_id ? (
+                            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                              <Field label="Teléfono" value={phoneText} onChangeText={setPhoneText} keyboardType="phone-pad" placeholder="Ej: 27-2200" style={{ flex: 1 }} autoFocus />
+                              <Small icon="check" label="Guardar" disabled={phoneText.replace(/\D/g, '').length < 6} onPress={() => {
+                                const phone = formatPhone(phoneText);
+                                updateContact(v.contact_id, { phone }).then(() => { setTasks((cur) => cur.map((x) => (x.contact_id === v.contact_id ? { ...x, phone } : x))); setAddPhone(null); setPhoneText(''); }).catch(() => undefined);
+                              }} />
+                            </View>
+                          ) : (
+                            <View style={{ flexDirection: 'row', gap: 8 }}>
+                              <Small icon="phone" label="Agregar teléfono" onPress={() => { setAddPhone(v.contact_id); setPhoneText(''); }} />
+                            </View>
+                          )}
+                          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                            <Small icon="user-check" label="Le hablé en persona" onPress={() => writes.forEach((t) => done(t, 'in_person'))} />
+                            <Small icon="user-x" label="No lo pude contactar" onPress={() => writes.forEach((t) => done(t, 'unreachable'))} />
+                          </View>
+                          {visits.length ? (
+                            <View style={{ flexDirection: 'row', gap: 8 }}>
+                              {visits.map((t) => <Small key={t.id} icon="check" label="Ya lo visité" onPress={() => done(t, 'visited')} />)}
+                            </View>
+                          ) : null}
+                        </View>
+                      );
+                    }
+                    return (
+                      <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                        <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                          onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
+                        {writes.map((t) => <Small key={t.id} icon="check" label="Ya le escribí" onPress={() => done(t, 'wrote')} />)}
+                        {visits.map((t) => <Small key={t.id} icon="check" label="Ya lo visité" onPress={() => done(t, 'visited')} />)}
+                      </View>
+                    );
+                  })()}
                 </View>
               );
             })}

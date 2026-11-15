@@ -869,8 +869,15 @@ export async function myFirstVisitTasks(): Promise<FirstVisitTask[]> {
   const { data, error } = await supabase.rpc('my_follow_ups');
   return error ? [] : ((data ?? []) as FirstVisitTask[]);
 }
-export async function completeFollowUp(id: string): Promise<void> {
-  ok(await supabase.rpc('complete_follow_up', { p_task: id }));
+/** Cómo se cerró el paso: le escribí, le hablé en persona, no lo pude contactar o lo visité. */
+export type FollowUpOutcome = 'wrote' | 'in_person' | 'unreachable' | 'visited';
+export async function completeFollowUp(id: string, outcome: FollowUpOutcome | null = null): Promise<void> {
+  ok(await supabase.rpc('complete_follow_up', { p_task: id, p_outcome: outcome }));
+}
+/** Quiénes quedaron marcados presentes ese día en cualquier reunión. */
+export async function dayAttendeeIds(date: string): Promise<Set<string>> {
+  const rows = (ok(await supabase.from('attendances').select('contact_id').eq('attended_on', date).limit(5000)) ?? []) as { contact_id: string }[];
+  return new Set(rows.map((r) => r.contact_id));
 }
 
 export type BirthdayRow = { contact_id: string; name: string; phone: string | null; photo_path: string | null; birthdate: string; next_on: string; turns: number };

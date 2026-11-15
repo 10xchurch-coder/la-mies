@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
 import { Loading } from '@/components/ui';
-import { attendanceSheet, classAttendance, classStudents, listClasses, listServices, setAttendance } from '@/lib/api';
+import { attendanceSheet, classAttendance, classStudents, dayAttendeeIds, listClasses, listServices, setAttendance } from '@/lib/api';
 import { summarizeSheet } from '@/lib/desk';
 import { addDays, fmtTime, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -15,7 +15,7 @@ import { colors, themed } from '@/theme';
 import type { ChurchService, ClassRow, SheetRow } from '@/types';
 
 type ServiceDay = { service: ChurchService; rows: SheetRow[] };
-type ClassDay = { cls: ClassRow; present: string[]; absent: string[] };
+type ClassDay = { cls: ClassRow; present: string[]; absent: string[]; listTaken: boolean };
 
 const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -39,18 +39,19 @@ export default function DeskAttendance() {
     const [all, cls] = await Promise.all([listServices(), listClasses().catch(() => [] as ClassRow[])]);
     const todays = all.filter((s) => s.dow === d.getDay());
     const sv = await Promise.all(todays.map(async (service) => ({ service, rows: await attendanceSheet(date, service.id) })));
+    // Un alumno cuenta como presente si lo marcaron en la lista de su clase o en cualquier reunión de ese día:
+    // muchas veces a los chicos se los marca en el culto y no se toma la lista de la clase aparte.
+    const came = await dayAttendeeIds(date).catch(() => new Set<string>());
     const cl = await Promise.all(cls.filter((c) => c.active).map(async (c) => {
-      const [att, students] = await Promise.all([classAttendance(c.id, date), classStudents(c.id).catch(() => [])]);
-      const name = new Map(students.map((s) => [s.id, s.name]));
-      return {
-        cls: c,
-        present: att.filter((a) => a.present).map((a) => name.get(a.contact_id) ?? 'Sin nombre').sort((a, b) => a.localeCompare(b, 'es')),
-        absent: att.filter((a) => !a.present).map((a) => name.get(a.contact_id) ?? 'Sin nombre').sort((a, b) => a.localeCompare(b, 'es')),
-      };
+      const [att, students] = await Promise.all([classAttendance(c.id, date).catch(() => []), classStudents(c.id).catch(() => [])]);
+      const inClass = new Set(att.filter((a) => a.present).map((a) => a.contact_id));
+      const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      const here = sorted.filter((st) => inClass.has(st.id) || came.has(st.id));
+      return { cls: c, present: here.map((st) => st.name), absent: sorted.filter((st) => !here.includes(st)).map((st) => st.name), listTaken: att.length > 0 };
     }));
     if (busy.current) return; // hay un cambio a medio guardar: no pisarlo con datos viejos
     setServices(sv);
-    setClasses(cl.filter((c) => c.present.length + c.absent.length > 0));
+    setClasses(cl);
     setUpdated(new Date());
   }, [date]);
 
@@ -143,14 +144,22 @@ export default function DeskAttendance() {
             );
           })}
 
-          <Panel title="Clases" hint={classes.length ? undefined : 'Ninguna clase tomó asistencia este día todavía.'}>
+          <Panel title="Clases" hint={classes.length ? 'Cuenta a los alumnos marcados en la lista de la clase o en cualquier reunión del día.' : 'La iglesia no tiene clases cargadas.'}>
             {classes.map((c) => (
               <View key={c.cls.id} style={styles.classRow}>
+                <View style={{ width: 70, alignItems: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: c.present.length ? colors.greenSoft : colors.bgSoft }}>
+                  <Text style={{ fontSize: 24, fontWeight: '800', color: c.present.length ? colors.greenText : colors.muted }}>{c.present.length}</Text>
+                </View>
                 <View style={{ width: 190 }}>
                   <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{c.cls.name}</Text>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>{c.present.length} {c.present.length === 1 ? 'presente' : 'presentes'}{c.absent.length ? ` · ${c.absent.length} ${c.absent.length === 1 ? 'ausente' : 'ausentes'}` : ''}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>
+                    de {c.present.length + c.absent.length} {c.present.length + c.absent.length === 1 ? 'alumno' : 'alumnos'}{c.listTaken ? '' : ' · sin lista de la clase'}
+                  </Text>
                 </View>
-                <Text style={{ flex: 1, fontSize: 13, color: colors.text, lineHeight: 19 }}>{c.present.join(' · ') || '—'}</Text>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>{c.present.join(' · ') || 'Ninguno marcado presente'}</Text>
+                  {c.absent.length ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>Faltaron: {c.absent.join(' · ')}</Text> : null}
+                </View>
               </View>
             ))}
           </Panel>

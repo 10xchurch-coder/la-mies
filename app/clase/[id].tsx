@@ -238,7 +238,7 @@ export default function Clase() {
               {students.map((s) => (
                 <Pressable key={s.id} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: s.id } })} style={{ width: 72, alignItems: 'center', gap: 4 }}>
                   <Face name={s.name} path={s.photo_path} size={56} />
-                  <Text numberOfLines={2} style={{ fontSize: 11, fontWeight: '600', textAlign: 'center' }}>{s.name}{s.age != null ? ` (${s.age})` : ''}</Text>
+                  <Text numberOfLines={2} style={{ fontSize: 11, fontWeight: '600', textAlign: 'center', color: colors.text }}>{s.name}{s.age != null ? ` (${s.age})` : ''}</Text>
                 </Pressable>
               ))}
             </View>
