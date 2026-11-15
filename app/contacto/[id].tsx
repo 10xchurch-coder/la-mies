@@ -537,6 +537,15 @@ export default function PersonaDetalle() {
 
           {isLeader ? <DiscipleshipCard c={c} onSave={(patch) => update(patch)} /> : null}
 
+          {/* Punto de partida: quien ya venía antes de usar la app no cuenta como "primera vez" ni como "miembro nuevo". */}
+          {isStaff ? (
+            <Button
+              small variant="ghost" icon={c.baseline ? 'user-plus' : 'flag'}
+              title={c.baseline ? 'Ya estaba en la iglesia al empezar · contar como nuevo' : 'Marcar: ya estaba en la iglesia antes de la app'}
+              onPress={() => update({ baseline: c.baseline ? null : c.status === 'member' ? 'member' : 'person' }, c.baseline ? 'Ahora cuenta como nuevo' : 'Listo: no cuenta como primera vez ni como miembro nuevo')}
+            />
+          ) : null}
+
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 
           {isStaff && c.baptized_on && c.baptized_here !== false ? (

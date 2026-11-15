@@ -6,6 +6,8 @@ export type Church = {
   logo_path?: string | null;
   website?: string | null;
   youtube_channel?: string | null;
+  /** Punto de partida: desde este día se cuenta el crecimiento (primera vez, miembros nuevos, bautismos). */
+  tracking_since?: string | null;
   /** Reglas de seguimiento y mensajes propios de la iglesia (ver lib/followupConfig). */
   followup?: Record<string, unknown> | null;
   /** Redes y podcast de la iglesia: { instagram, facebook, youtube, podcast, whatsapp, threads, x, tiktok }. */
@@ -138,6 +140,8 @@ export type Contact = {
   share_mode: 'group' | 'me' | 'custom';
   follow_up_user_id: string | null;
   archived: boolean;
+  /** Ya estaba en la iglesia al fijar el punto de partida: 'member' (ya era miembro) o 'person' (ya venía). */
+  baseline?: 'member' | 'person' | null;
   status: PersonStatus;
   member_since: string | null;
   photo_path: string | null;

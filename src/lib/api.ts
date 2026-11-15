@@ -612,7 +612,9 @@ export type WeekListKey = 'attendance' | 'first_time' | 'baptisms' | 'new_member
 export type WeekListItem = { key: string; name: string; sub: string; contact_id: string | null };
 
 /** Las listas de la semana que empieza el lunes dado (lunes a domingo). */
-export async function weekLists(monday: string): Promise<Record<WeekListKey, WeekListItem[]>> {
+export async function weekLists(monday: string, since: string | null = null): Promise<Record<WeekListKey, WeekListItem[]>> {
+  // Punto de partida de la iglesia: lo anterior no cuenta como crecimiento.
+  const from0 = since ?? '0000-01-01';
   const start = new Date(`${monday}T00:00:00`);
   const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
   const p2 = (n: number) => String(n).padStart(2, '0');
@@ -620,21 +622,21 @@ export async function weekLists(monday: string): Promise<Record<WeekListKey, Wee
   const to = iso(end);
   const weekend = iso(new Date(end.getFullYear(), end.getMonth(), end.getDate() - 2));
   const day = (s: string | null | undefined) => !s ? 'sin fecha' : new Date(s.length === 10 ? `${s}T12:00:00` : s).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
-  type N = { name: string; status?: string } | null;
+  type N = { name: string; status?: string; baseline?: string | null } | null;
   // Si una consulta falla, esa lista queda vacía; las demás se muestran igual.
   const rows = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error || !Array.isArray(r.data) ? [] : (r.data as T[]));
   const [att, bap, mem, members, vis, rep] = await Promise.all([
-    supabase.from('attendances').select('contact_id, attended_on, contacts(name, status)').gte('attended_on', monday).lt('attended_on', to).order('attended_on').limit(5000),
-    supabase.from('contacts').select('id, name, baptized_on').gte('baptized_on', monday).lt('baptized_on', to).order('baptized_on'),
-    supabase.from('contacts').select('id, name, member_since').gte('member_since', monday).lt('member_since', to).order('member_since'),
+    supabase.from('attendances').select('contact_id, attended_on, contacts(name, status, baseline)').gte('attended_on', monday).lt('attended_on', to).order('attended_on').limit(5000),
+    supabase.from('contacts').select('id, name, baptized_on').gte('baptized_on', monday > from0 ? monday : from0).lt('baptized_on', to).order('baptized_on'),
+    supabase.from('contacts').select('id, name, member_since, baseline').gte('member_since', monday > from0 ? monday : from0).lt('member_since', to).order('member_since'),
     supabase.from('contacts').select('id, name').eq('status', 'member').eq('archived', false).order('name').limit(5000),
     supabase.from('contact_visits').select('contact_id, user_id, visited_at, contacts(name)').eq('gospel_presented', true).gte('visited_at', start.toISOString()).lt('visited_at', end.toISOString()).order('visited_at').limit(2000),
     supabase.rpc('church_report', { p_from: start.toISOString(), p_to: end.toISOString() }),
   ]);
   const attRows = rows<{ contact_id: string; attended_on: string; contacts: N }>(att);
-  const byPerson = new Map<string, { name: string; status: string; days: string[] }>();
+  const byPerson = new Map<string, { name: string; status: string; baseline: string | null; days: string[] }>();
   for (const r of attRows) {
-    const p = byPerson.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', status: r.contacts?.status ?? '', days: [] };
+    const p = byPerson.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', status: r.contacts?.status ?? '', baseline: r.contacts?.baseline ?? null, days: [] };
     if (!p.days.includes(r.attended_on)) p.days.push(r.attended_on);
     byPerson.set(r.contact_id, p);
   }
@@ -651,9 +653,9 @@ export async function weekLists(monday: string): Promise<Record<WeekListKey, Wee
   const people = [...byPerson.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'));
   return {
     attendance: people.map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `${p.status === 'member' ? 'Miembro' : 'Visita'} · ${p.days.map(day).join(', ')}` })),
-    first_time: people.filter(([id]) => !earlier.has(id)).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `Vino el ${p.days.map(day).join(', ')}` })),
+    first_time: people.filter(([id, p]) => !earlier.has(id) && !p.baseline && p.days[0] >= from0).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `Vino el ${p.days.map(day).join(', ')}` })),
     baptisms: rows<{ id: string; name: string; baptized_on: string }>(bap).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Bautizado el ${day(c.baptized_on)}` })),
-    new_members: rows<{ id: string; name: string; member_since: string }>(mem).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Miembro desde el ${day(c.member_since)}` })),
+    new_members: rows<{ id: string; name: string; member_since: string; baseline: string | null }>(mem).filter((c) => c.baseline !== 'member').map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Miembro desde el ${day(c.member_since)}` })),
     absent: rows<{ id: string; name: string }>(members).filter((c) => !cameWeekend.has(c.id)).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: 'No vino el fin de semana' })),
     gospel: rows<{ contact_id: string; user_id: string | null; visited_at: string; contacts: N }>(vis)
       .map((v, i) => ({ key: `${v.contact_id}-${i}`, contact_id: v.contact_id, name: v.contacts?.name ?? 'Sin nombre', sub: `${v.user_id && who.get(v.user_id) ? `Se lo presentó ${who.get(v.user_id)} · ` : ''}${day(v.visited_at)}` })),
@@ -873,6 +875,10 @@ export async function myFirstVisitTasks(): Promise<FirstVisitTask[]> {
 export type FollowUpOutcome = 'wrote' | 'in_person' | 'unreachable' | 'visited';
 export async function completeFollowUp(id: string, outcome: FollowUpOutcome | null = null): Promise<void> {
   ok(await supabase.rpc('complete_follow_up', { p_task: id, p_outcome: outcome }));
+}
+/** Fija el punto de partida de la iglesia: hoy, y marca a todos los que ya están cargados como "ya estaban". */
+export async function setBaseline(): Promise<number> {
+  return (ok(await supabase.rpc('set_baseline', { p_date: null })) as number) ?? 0;
 }
 /** Quiénes quedaron marcados presentes ese día en cualquier reunión. */
 export async function dayAttendeeIds(date: string): Promise<Set<string>> {

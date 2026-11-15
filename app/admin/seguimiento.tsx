@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, SectionTitle } from '@/components/ui';
 import { DEFAULT_FOLLOWUP, MESSAGE_TITLE, PLACEHOLDERS, fillMessage, followupOverrides, mergeFollowup, type FollowupConfig, type FollowupMessageKind } from '@/lib/followupConfig';
+import { setBaseline } from '@/lib/api';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -57,7 +58,7 @@ export default function FollowupSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Seguimiento y mensajes" subtitle="Avisos, discipulado y mensajes" back />
+      <Header title="Seguimiento y mensajes" subtitle="Avisos, punto de partida, discipulado y mensajes" back />
       <Screen>
         <SectionTitle>Cuándo avisar</SectionTitle>
         <Card style={{ gap: 14 }}>
@@ -72,6 +73,22 @@ export default function FollowupSettings() {
               </View>
             </View>
           ))}
+        </Card>
+
+        <SectionTitle>Punto de partida</SectionTitle>
+        <Card style={{ gap: 10 }}>
+          <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>
+            {church?.tracking_since ? `Desde el ${new Date(`${church.tracking_since}T12:00:00`).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Todavía no está fijado'}
+          </Text>
+          <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
+            Es el día en que la iglesia empezó a llevar sus números en la app. Los miembros y las personas que ya estaban cargados ese día no cuentan como “primera vez” ni como “miembros nuevos”: el crecimiento se cuenta desde ahí. La fidelidad y las ausencias también arrancan ese día.
+          </Text>
+          <Button title={church?.tracking_since ? 'Fijar de nuevo: empezar a contar desde hoy' : 'Fijar el punto de partida hoy'} variant="outline" small icon="flag" onPress={() => {
+            Alert.alert('Fijar el punto de partida', 'Desde hoy se cuenta el crecimiento. Todos los miembros y las visitas que ya están cargados quedan como “ya estaban”. Hacelo cuando termines de cargar a tu gente. ¿Seguimos?', [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Fijar hoy', onPress: () => { setBaseline().then(() => refreshProfile()).then(() => Alert.alert('Listo', 'El punto de partida quedó fijado en el día de hoy.')).catch((e) => Alert.alert('No se pudo', errorMessage(e))); } },
+            ]);
+          }} />
         </Card>
 
         <SectionTitle>Programa de discipulado</SectionTitle>

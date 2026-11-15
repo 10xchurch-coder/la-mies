@@ -64,7 +64,7 @@ export default function DeskHome() {
       // este lunes hay que pedirle el lunes siguiente (antes se mostraba una semana corrida).
       set(weeklyReport(mondayOf(addDays(parseDate(monday), 7))), setReport);
       set(weeklyReport(monday), setBefore);
-      weekLists(monday).then((v) => { if (alive) setLists(v); }).catch((e) => { console.warn('weekLists', e); if (alive) setLists({ attendance: [], first_time: [], baptisms: [], new_members: [], absent: [], gospel: [], people_out: [] }); });
+      weekLists(monday, church?.tracking_since ?? null).then((v) => { if (alive) setLists(v); }).catch((e) => { console.warn('weekLists', e); if (alive) setLists({ attendance: [], first_time: [], baptisms: [], new_members: [], absent: [], gospel: [], people_out: [] }); });
       set(churchProgress(12), setProgress);
     }
     if (seesPeople || seesPanel) set(weekendAbsences(lastSaturday()), setAbsences);
