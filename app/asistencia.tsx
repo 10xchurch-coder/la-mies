@@ -8,7 +8,8 @@ import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
 import { Button, Empty, Loading } from '@/components/ui';
-import { addPerson, attendanceSheet, listServices, setAttendance } from '@/lib/api';
+import { addPerson, attendanceCounts, attendanceSheet, listServices, setAttendance } from '@/lib/api';
+import { byFaithfulness, type Times } from '@/lib/faithful';
 import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors, themed } from '@/theme';
@@ -37,6 +38,7 @@ export default function Asistencia() {
   const [service, setService] = useState<ChurchService | null>(null);
   const [date, setDate] = useState(isoDate(new Date()));
   const [rows, setRows] = useState<SheetRow[] | null>(null);
+  const [times, setTimes] = useState<Times>({});
   const [q, setQ] = useState('');
   const [onlyPresent, setOnlyPresent] = useState(false);
   const [quickName, setQuickName] = useState('');
@@ -118,10 +120,20 @@ export default function Asistencia() {
     }
   };
 
+  // Cuántas veces vino cada uno a esta reunión: los más fieles quedan arriba de la lista.
+  useEffect(() => {
+    if (!service) return;
+    let alive = true;
+    setTimes({});
+    attendanceCounts('service', service.id).then((t) => { if (alive) setTimes(t); });
+    return () => { alive = false; };
+  }, [service]);
+
   const shown = useMemo(() => {
     const s = norm(q.trim());
-    return (rows ?? []).filter((r) => (!onlyPresent || r.present) && (!s || norm(r.name).includes(s)));
-  }, [rows, q, onlyPresent]);
+    const list = (rows ?? []).filter((r) => (!onlyPresent || r.present) && (!s || norm(r.name).includes(s)));
+    return byFaithfulness(list, times, (r) => r.contact_id, (r) => r.name);
+  }, [rows, q, onlyPresent, times]);
   const present = rows?.filter((r) => r.present).length ?? 0;
 
   if (!services.length && rows === null) return <Loading />;

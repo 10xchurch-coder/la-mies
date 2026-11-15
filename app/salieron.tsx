@@ -1,6 +1,6 @@
 // Quiénes salieron a evangelizar: se marca a cada hermano que salió ese día, aunque no use la app.
 // Es solo para saber cuántos salieron. No cuenta como asistencia a los cultos ni para la fidelidad.
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -8,7 +8,8 @@ import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
 import { Empty, Loading } from '@/components/ui';
-import { outingSheet, setOutingAttendance, type OutingSheetRow } from '@/lib/api';
+import { attendanceCounts, outingSheet, setOutingAttendance, type OutingSheetRow } from '@/lib/api';
+import { byFaithfulness, type Times } from '@/lib/faithful';
 import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors, themed } from '@/theme';
@@ -25,7 +26,11 @@ export default function Salieron() {
   const [onlyOut, setOnlyOut] = useState(false);
   // Hermanos que salieron con la app pero todavía no tienen su ficha unida a la cuenta.
   const [noCard, setNoCard] = useState(0);
+  const [times, setTimes] = useState<Times>({});
   const busy = useRef(0);
+
+  // Cuántas veces salió cada uno: los que más salen quedan arriba de la lista.
+  useEffect(() => { attendanceCounts('outing').then(setTimes); }, []);
   const { columns } = useLayout();
   const cols = columns(118, 3, 8);
 
@@ -70,8 +75,9 @@ export default function Salieron() {
   const went = (r: OutingSheetRow) => r.marked || r.via_app;
   const shown = useMemo(() => {
     const s = norm(q.trim());
-    return (rows ?? []).filter((r) => (!onlyOut || went(r)) && (!s || norm(r.name).includes(s)));
-  }, [rows, q, onlyOut]);
+    const list = (rows ?? []).filter((r) => (!onlyOut || went(r)) && (!s || norm(r.name).includes(s)));
+    return byFaithfulness(list, times, (r) => r.contact_id, (r) => r.name);
+  }, [rows, q, onlyOut, times]);
   const withApp = (rows?.filter((r) => r.via_app).length ?? 0) + noCard;
   const total = (rows?.filter((r) => r.marked && !r.via_app).length ?? 0) + withApp;
 

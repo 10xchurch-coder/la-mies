@@ -895,6 +895,13 @@ export async function completeFollowUp(id: string, outcome: FollowUpOutcome | nu
 export async function setBaseline(): Promise<number> {
   return (ok(await supabase.rpc('set_baseline', { p_date: null })) as number) ?? 0;
 }
+/** Cuántas veces vino cada persona a esa reunión, clase o salida en los últimos tres meses. Sirve para ordenar las listas. */
+export async function attendanceCounts(kind: 'service' | 'class' | 'outing', ref: string | null = null): Promise<Record<string, number>> {
+  // Si falla, la lista queda por orden alfabético y se puede tomar asistencia igual.
+  const r = await supabase.rpc('attendance_counts', { p_kind: kind, p_ref: ref });
+  return r.error || !r.data || typeof r.data !== 'object' ? {} : (r.data as Record<string, number>);
+}
+
 // ---------- Asistencia de evangelismo: quiénes salieron, aunque no usen la app ----------
 export type OutingSheetRow = { contact_id: string; name: string; photo_path: string | null; status: string; marked: boolean; via_app: boolean };
 /** La planilla de un día: miembros y asistentes, con quién está marcado y quién salió con la app. */

@@ -7,7 +7,8 @@ import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
 import { Card, Empty, Loading } from '@/components/ui';
-import { classAttendance, classStudents, listClasses, saveClassAttendance } from '@/lib/api';
+import { attendanceCounts, classAttendance, classStudents, listClasses, saveClassAttendance } from '@/lib/api';
+import { byFaithfulness, type Times } from '@/lib/faithful';
 import { errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors } from '@/theme';
@@ -24,10 +25,12 @@ export default function AsistenciaClase() {
   const [att, setAtt] = useState<Record<string, ClassAttendance>>({});
   const [notes, setNotes] = useState<Record<string, string>>({});
   const { isWide } = useLayout();
+  const [times, setTimes] = useState<Times>({});
 
   useEffect(() => {
     listClasses().then((cs) => setK(cs.find((c) => c.id === id) ?? null)).catch(() => undefined);
     classStudents(id).then(setStudents).catch(() => setStudents([]));
+    attendanceCounts('class', id).then(setTimes);
   }, [id]);
 
   const load = useCallback(async () => {
@@ -67,6 +70,8 @@ export default function AsistenciaClase() {
   };
 
   if (!students) return <Loading />;
+  // Los alumnos más fieles arriba; los que nunca vinieron, después, por orden alfabético.
+  const ordered = byFaithfulness(students, times, (c) => c.id, (c) => c.name);
   const present = Object.values(att).filter((a) => a.present).length;
 
   return (
@@ -76,7 +81,7 @@ export default function AsistenciaClase() {
         <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
         {!students.length ? <Empty icon="users" title="Esta clase no tiene alumnos" text="Agregalos desde la pantalla de la clase." /> : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-        {students.map((c) => {
+        {ordered.map((c) => {
           const a = att[c.id];
           const on = !!a?.present;
           return (

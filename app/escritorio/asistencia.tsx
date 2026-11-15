@@ -6,7 +6,8 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
 import { Loading } from '@/components/ui';
-import { attendanceSheet, classAttendance, classStudents, dayAttendeeIds, listClasses, listServices, setAttendance } from '@/lib/api';
+import { byFaithfulness } from '@/lib/faithful';
+import { attendanceCounts, attendanceSheet, classAttendance, classStudents, dayAttendeeIds, listClasses, listServices, setAttendance } from '@/lib/api';
 import { summarizeSheet } from '@/lib/desk';
 import { addDays, fmtTime, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -38,14 +39,18 @@ export default function DeskAttendance() {
     const d = new Date(`${date}T12:00:00`);
     const [all, cls] = await Promise.all([listServices(), listClasses().catch(() => [] as ClassRow[])]);
     const todays = all.filter((s) => s.dow === d.getDay());
-    const sv = await Promise.all(todays.map(async (service) => ({ service, rows: await attendanceSheet(date, service.id) })));
+    // En cada reunión, los más fieles van primero y el resto por orden alfabético.
+    const sv = await Promise.all(todays.map(async (service) => {
+      const [rows, times] = await Promise.all([attendanceSheet(date, service.id), attendanceCounts('service', service.id)]);
+      return { service, rows: byFaithfulness(rows, times, (r) => r.contact_id, (r) => r.name) };
+    }));
     // Un alumno cuenta como presente si lo marcaron en la lista de su clase o en cualquier reunión de ese día:
     // muchas veces a los chicos se los marca en el culto y no se toma la lista de la clase aparte.
     const came = await dayAttendeeIds(date).catch(() => new Set<string>());
     const cl = await Promise.all(cls.filter((c) => c.active).map(async (c) => {
-      const [att, students] = await Promise.all([classAttendance(c.id, date).catch(() => []), classStudents(c.id).catch(() => [])]);
+      const [att, students, times] = await Promise.all([classAttendance(c.id, date).catch(() => []), classStudents(c.id).catch(() => []), attendanceCounts('class', c.id)]);
       const inClass = new Set(att.filter((a) => a.present).map((a) => a.contact_id));
-      const sorted = [...students].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+      const sorted = byFaithfulness(students, times, (st) => st.id, (st) => st.name);
       const here = sorted.filter((st) => inClass.has(st.id) || came.has(st.id));
       return { cls: c, present: here.map((st) => st.name), absent: sorted.filter((st) => !here.includes(st)).map((st) => st.name), listTaken: att.length > 0 };
     }));
