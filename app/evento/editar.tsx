@@ -114,15 +114,15 @@ export default function EditarEvento() {
       d = isoDate(addDays(today, (dow - today.getDay() + 7) % 7));
       if (!t) { Alert.alert('Falta la hora', 'Poné la hora, por ejemplo 17:00.'); return; }
     } else {
-      d = parseDateAR(date);
+      d = parseDateAR(date, true);
     }
     if (!title.trim() || !d) {
       Alert.alert('Faltan datos', weekly ? 'Poné el nombre.' : 'Poné el nombre y la fecha (por ejemplo 20/12/2026).');
       return;
     }
-    const end = !weekly && endDate.trim() ? parseDateAR(endDate) : null;
+    const end = !weekly && endDate.trim() ? parseDateAR(endDate, true) : null;
     if (endDate.trim() && !end) { Alert.alert('Fecha de fin', 'Escribila como día/mes/año.'); return; }
-    const deadline = regDeadline.trim() ? parseDateAR(regDeadline) : null;
+    const deadline = regDeadline.trim() ? parseDateAR(regDeadline, true) : null;
     const num = (x: string) => { const n = Number(x.replace(/\./g, '').replace(',', '.')); return x.trim() && Number.isFinite(n) ? n : null; };
     setBusy(true);
     try {

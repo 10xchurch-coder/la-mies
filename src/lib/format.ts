@@ -210,11 +210,12 @@ export function displayAge(p: { birthdate?: string | null; age?: number | null }
 }
 
 /** "DD/MM/AAAA" → ISO, o null si no es una fecha válida. */
-export function parseDateAR(text: string): string | null {
+/** `future`: aceptar años que vienen (eventos); sin eso solo fechas pasadas, como un cumpleaños o un bautismo. */
+export function parseDateAR(text: string, future = false): string | null {
   const m = text.trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
   if (!m) return null;
   const d = Number(m[1]); const mo = Number(m[2]); const y = Number(m[3]);
-  if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900 || y > new Date().getFullYear()) return null;
+  if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1900 || y > new Date().getFullYear() + (future ? 20 : 0)) return null;
   const dt = new Date(y, mo - 1, d);
   if (dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
   return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;

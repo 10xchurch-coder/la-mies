@@ -63,3 +63,10 @@ test('maskDateAR: pone las barras solas y no traba el borrar', () => {
   assert.equal(maskDateAR('23', '23/'), '2'); // borró la barra: se va también el 3
   assert.equal(maskDateAR('23/05', '23/05/'), '23/0');
 });
+
+test('parseDateAR: un evento puede ser del año que viene; un cumpleaños no', () => {
+  const next = new Date().getFullYear() + 1;
+  assert.equal(parseDateAR(`01/01/${next}`), null);
+  assert.equal(parseDateAR(`01/01/${next}`, true), `${next}-01-01`);
+  assert.equal(parseDateAR('31/02/2027', true), null);
+});

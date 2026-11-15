@@ -165,7 +165,7 @@ export default function Eventos() {
       d = isoDate(addDays(today, (dow - today.getDay() + 7) % 7));
       if (!t) { Alert.alert('Falta la hora', 'Poné la hora, por ejemplo 17:00.'); return; }
     } else {
-      d = parseDateAR(date);
+      d = parseDateAR(date, true);
     }
     if (!title.trim() || !d) {
       Alert.alert('Faltan datos', weekly ? 'Poné el nombre.' : 'Poné el nombre y la fecha (por ejemplo 20/12/2026).');
