@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading, SectionTitle } from '@/components/ui';
 import { myBiblePlan, saveBiblePlanDone, startBiblePlan, stopBiblePlan, type BiblePlanRow } from '@/lib/api';
-import { PLANS, planReadings, planStatus, type PlanId } from '@/lib/biblePlan';
+import { PLANS, planDays, planReadings, planStatus, type PlanId } from '@/lib/biblePlan';
 import { addDays, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
@@ -69,30 +69,35 @@ export default function PlanLectura() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Plan de lectura" subtitle={row ? PLANS.find((p) => p.id === row.plan)?.title : 'Leé la Biblia en un año'} back />
+      <Header title="Plan de lectura" subtitle={row ? PLANS.find((p) => p.id === row.plan)?.title : 'Elegí cómo leer la Biblia'} back />
       <Screen>
         {row === undefined ? <Loading /> : row === null || !status ? (
           <>
             <Text style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>Elegí un plan. Cada día la app te dice qué leer en tu Biblia, y lo tildás cuando lo leíste.</Text>
-            {PLANS.map((p) => (
-              <Pressable key={p.id} onPress={() => start(p.id)} accessibilityRole="button" accessibilityLabel={`Empezar: ${p.title}`}>
-                <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
-                    <Feather name="book-open" size={20} color={colors.greenText} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{p.title}</Text>
-                    <Text style={{ fontSize: 13, color: colors.muted }}>{p.hint}</Text>
-                  </View>
-                  <Feather name="chevron-right" size={18} color={colors.gray} />
-                </Card>
-              </Pressable>
+            {([['new', 'Para nuevos creyentes'], ['year', 'La Biblia en un año']] as const).map(([g, title]) => (
+              <React.Fragment key={g}>
+                <SectionTitle>{title}</SectionTitle>
+                {PLANS.filter((p) => p.group === g).map((p) => (
+                  <Pressable key={p.id} onPress={() => start(p.id)} accessibilityRole="button" accessibilityLabel={`Empezar: ${p.title}`}>
+                    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name={g === 'new' ? 'sunrise' : 'book-open'} size={20} color={colors.greenText} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{p.title}</Text>
+                        <Text style={{ fontSize: 13, color: colors.muted }}>{p.hint}</Text>
+                      </View>
+                      <Feather name="chevron-right" size={18} color={colors.gray} />
+                    </Card>
+                  </Pressable>
+                ))}
+              </React.Fragment>
             ))}
           </>
         ) : (
           <>
             <Card style={{ gap: 6 }}>
-              <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.muted }}>HOY · DÍA {status.day + 1} DE 365</Text>
+              <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.muted }}>HOY · DÍA {status.day + 1} DE {planDays(row.plan)}</Text>
               {status.today ? line(status.day, true) : <Text style={{ fontSize: 16, color: colors.text, paddingVertical: 6 }}>Hoy no hay lectura nueva. {status.behind.length ? 'Aprovechá para ponerte al día.' : 'Vas al día.'}</Text>}
             </Card>
 
@@ -102,6 +107,14 @@ export default function PlanLectura() {
                 <View style={{ width: `${Math.round((status.done / status.total) * 100)}%`, height: 8, backgroundColor: colors.green }} />
               </View>
             </Card>
+
+            {status.done >= status.total ? (
+              <Card style={{ gap: 8, backgroundColor: colors.greenSoft }}>
+                <Text style={{ fontSize: 17, fontWeight: '800', color: colors.greenText }}>¡Terminaste este plan!</Text>
+                <Text style={{ fontSize: 14, color: colors.greenText }}>Elegí el próximo para seguir leyendo cada día.</Text>
+                <Button title="Elegir otro plan" icon="arrow-right" onPress={() => { stopBiblePlan().then(() => setRow(null)).catch((e) => Alert.alert('No se pudo', errorMessage(e))); }} />
+              </Card>
+            ) : null}
 
             {status.behind.length ? (
               <>
@@ -113,10 +126,14 @@ export default function PlanLectura() {
               </>
             ) : null}
 
-            <SectionTitle>Los próximos días</SectionTitle>
-            <Card style={{ paddingVertical: 4 }}>
-              {Array.from({ length: 14 }, (_, i) => status.day + 1 + i).filter((d) => d < readings.length && readings[d]).slice(0, 7).map((d) => line(d))}
-            </Card>
+            {status.day + 1 < readings.length ? (
+              <>
+                <SectionTitle>Los próximos días</SectionTitle>
+                <Card style={{ paddingVertical: 4 }}>
+                  {Array.from({ length: 14 }, (_, i) => status.day + 1 + i).filter((d) => d < readings.length && readings[d]).slice(0, 7).map((d) => line(d))}
+                </Card>
+              </>
+            ) : null}
 
             <Button title="Cambiar de plan" variant="ghost" small icon="refresh-cw" onPress={change} />
           </>

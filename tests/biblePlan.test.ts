@@ -38,3 +38,50 @@ test('qué día es hoy y qué quedó atrasado', () => {
   assert.equal(s.done, 2);
   assert.equal(s.total, 365);
 });
+
+import { CHRONO, PLANS, chaptersOf, planDays } from '../src/lib/biblePlan';
+
+test('el plan cronológico tiene los 1189 capítulos, cada uno una sola vez', () => {
+  const chs = chaptersOf('chrono');
+  assert.equal(chs.length, 1189);
+  assert.equal(new Set(chs.map((c) => `${c.book} ${c.ch}`)).size, 1189);
+  assert.ok(CHRONO.length > 66);
+  const r = planReadings('chrono');
+  assert.equal(r.length, 365);
+  assert.ok(r[0].startsWith('Génesis 1'));
+  assert.ok(r[364].includes('Apocalipsis') && r[364].endsWith('22'));
+  assert.ok(r.some((x) => x.includes('Génesis') && x.includes('Job')));
+});
+test('la Biblia con un salmo y un proverbio: no repite Salmos ni Proverbios en la lectura principal', () => {
+  assert.equal(chaptersOf('psalms').length, 1189 - 150 - 31);
+  const r = planReadings('psalms');
+  assert.ok(r[0].startsWith('Génesis 1') && r[0].endsWith(' · Salmo 1 · Proverbios 1'), r[0]);
+  assert.ok(r[150].endsWith(' · Salmo 1 · Proverbios 27'), r[150]);
+  assert.ok(r[364].includes('Apocalipsis') && r[364].endsWith(' · Salmo 65 · Proverbios 24'), r[364]);
+  assert.ok(r.every((x) => !x.split(' · ')[0].includes('Salmos') && !x.split(' · ')[0].includes('Proverbios')));
+});
+test('planes para nuevos creyentes: libros enteros, sin días libres, y empiezan por Juan', () => {
+  assert.equal(chaptersOf('new30').length, 30);
+  const m = planReadings('new30');
+  assert.equal(m.length, 30);
+  assert.equal(m[0], 'Juan 1');
+  assert.equal(m[21], '1 Juan 1');
+  assert.equal(m[29], 'Filipenses 4');
+  for (const id of ['new90', 'new180'] as const) {
+    const r = planReadings(id);
+    assert.equal(r.length, planDays(id));
+    assert.ok(r[0].startsWith('Juan 1'));
+    assert.ok(r.every(Boolean));
+    assert.ok(chaptersOf(id).length >= planDays(id));
+  }
+  assert.ok(planReadings('new180')[179].endsWith('Proverbios 31') || planReadings('new180')[179].includes('Proverbios'));
+  assert.equal(chaptersOf('new90').length, 90);
+  assert.equal(planReadings('new90')[89], '1 Pedro 5');
+  assert.equal(PLANS.filter((p) => p.group === 'new').length, 3);
+});
+test('un plan corto termina en su último día', () => {
+  const s = planStatus('new30', '2026-11-15', [], '2027-03-01');
+  assert.equal(s.day, 29);
+  assert.equal(s.total, 30);
+  assert.equal(s.behind.length, 29);
+});

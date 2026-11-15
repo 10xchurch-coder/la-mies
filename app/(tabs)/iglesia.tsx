@@ -400,7 +400,7 @@ export default function Iglesia() {
         ) : null}
         {(() => {
           const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
-          const title = !st ? 'Leé la Biblia en un año' : st.today ? `Lectura de hoy: ${st.today}` : 'Hoy no hay lectura nueva';
+          const title = !st ? 'Plan de lectura de la Biblia' : st.today ? `Lectura de hoy: ${st.today}` : 'Hoy no hay lectura nueva';
           const hint = !st ? 'Elegí un plan y la app te dice qué leer cada día'
             : st.todayDone && !st.behind.length ? '¡Listo por hoy! Vas al día.'
               : st.behind.length ? `Te ${st.behind.length === 1 ? 'queda 1 lectura atrasada' : `quedan ${st.behind.length} lecturas atrasadas`}` : 'Tocá para tildarla cuando la leas';
