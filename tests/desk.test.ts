@@ -84,3 +84,11 @@ test('cambio contra la semana anterior y lunes de la semana', () => {
   assert.equal(mondayOf(new Date(2026, 10, 15)), '2026-11-09');
   assert.equal(mondayOf(new Date(2026, 10, 9)), '2026-11-09');
 });
+
+import { summarizeSheet } from '../src/lib/desk';
+test('asistencia del día: presentes, miembros, visitas y miembros que faltan', () => {
+  const r = (status: string, present: boolean) => ({ contact_id: status + present, name: 'x', status, present });
+  assert.deepEqual(summarizeSheet([r('member', true), r('member', true), r('visitor', true), r('contact', true), r('member', false), r('visitor', false)]),
+    { present: 4, members: 2, visitors: 2, missing: 1 });
+  assert.deepEqual(summarizeSheet([]), { present: 0, members: 0, visitors: 0, missing: 0 });
+});

@@ -19,6 +19,7 @@ export const DESK_NAV: DeskGroup[] = [
   ] },
   { title: 'Personas', items: [
     { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
+    { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
     { key: 'asistencia', label: 'Tomar asistencia', icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
     { key: 'ausencias', label: 'Ausencias', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
     { key: 'fidelidad', label: 'Fidelidad', icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },
@@ -170,4 +171,16 @@ export function mondayOf(d: Date): string {
   x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
   const p = (n: number) => String(n).padStart(2, '0');
   return `${x.getFullYear()}-${p(x.getMonth() + 1)}-${p(x.getDate())}`;
+}
+
+// ---------- Asistencia del día ----------
+
+export type DaySheetRow = { contact_id: string; name: string; status: string; present: boolean };
+export type DaySummary = { present: number; members: number; visitors: number; missing: number };
+
+/** Los números de una reunión: cuántos vinieron, cuántos son miembros, cuántas visitas, y cuántos miembros faltan marcar. */
+export function summarizeSheet(rows: DaySheetRow[]): DaySummary {
+  const here = rows.filter((r) => r.present);
+  const members = here.filter((r) => r.status === 'member').length;
+  return { present: here.length, members, visitors: here.length - members, missing: rows.filter((r) => !r.present && r.status === 'member').length };
 }
