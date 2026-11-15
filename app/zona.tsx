@@ -1,12 +1,12 @@
 // Una zona para salir: el líder la dibuja tocando el mapa (esquinas), le pone nombre y elige quiénes van.
 // Todos la ven en el mapa; acá se ve el avance (veredas y casas cubiertas desde que se creó).
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { CoverageMap, bboxOfRegion, regionAround } from '@/components/CoverageMap';
-import { Circle, Polygon, type Region } from '@/components/map';
+import { Marker, Polygon, type Region } from '@/components/map';
 import { Header } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
 import { coverageInBbox, deleteZone, housesInBbox, listProfiles, listZones, roadsInBbox, saveZone, zoneProgress } from '@/lib/api';
@@ -126,7 +126,7 @@ export default function ZonaScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={zone ? zone.name : 'Nueva zona'} subtitle={editing ? 'Tocá el mapa para marcar las esquinas' : names.length ? `Van: ${names.join(', ')}` : undefined} back />
+      <Header title={zone ? zone.name : 'Nueva zona'} subtitle={editing ? 'Tocá el mapa para marcar las esquinas. Arrastrá un punto para moverlo.' : names.length ? `Van: ${names.join(', ')}` : undefined} back />
       <View style={{ height: 340 }}>
         <CoverageMap
           roads={roads}
@@ -141,7 +141,20 @@ export default function ZonaScreen() {
           }}
         >
           {poly.length >= 3 ? <Polygon coordinates={poly.map(([lat, lng]) => ({ latitude: lat, longitude: lng }))} strokeColor={color} fillColor={`${color}22`} strokeWidth={3} /> : null}
-          {editing ? poly.map(([lat, lng], i) => <Circle key={i} center={{ latitude: lat, longitude: lng }} radius={6} fillColor={color} strokeColor="#FFFFFF" strokeWidth={2} />) : null}
+          {/* Cada esquina es un punto de tamaño fijo en la pantalla (no se achica al alejar el mapa) y se puede agarrar y mover. */}
+          {editing ? poly.map(([lat, lng], i) => {
+            const move = (e: { nativeEvent: { coordinate: { latitude: number; longitude: number } } }) => {
+              const c = e.nativeEvent.coordinate;
+              setPoly((p) => p.map((pt, j) => (j === i ? [Number(c.latitude.toFixed(6)), Number(c.longitude.toFixed(6))] : pt)));
+            };
+            return (
+              <Marker key={i} coordinate={{ latitude: lat, longitude: lng }} anchor={{ x: 0.5, y: 0.5 }} draggable zIndex={900} onDrag={Platform.OS === 'web' ? move : undefined} onDragEnd={move}>
+                <View style={[styles.corner, { backgroundColor: color }]}>
+                  <Text style={styles.cornerText}>{i + 1}</Text>
+                </View>
+              </Marker>
+            );
+          }) : null}
         </CoverageMap>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
@@ -207,6 +220,8 @@ export default function ZonaScreen() {
 const styles = themed(() => StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', color: colors.label },
   color: { width: 36, height: 36, borderRadius: 18 },
+  corner: { width: 26, height: 26, borderRadius: 13, borderWidth: 3, borderColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000000', shadowOpacity: 0.35, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 4 },
+  cornerText: { fontSize: 11, fontWeight: '800', color: '#FFFFFF' },
   colorOn: { borderWidth: 3, borderColor: colors.text },
   person: { height: 40, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5, borderColor: colors.input, alignItems: 'center', justifyContent: 'center' },
   personOn: { borderColor: colors.green, backgroundColor: colors.greenSoft },

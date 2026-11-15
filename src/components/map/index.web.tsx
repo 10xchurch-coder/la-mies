@@ -152,28 +152,40 @@ export type MarkerProps = {
   zIndex?: number;
   onPress?: () => void;
   onCalloutPress?: () => void;
+  /** Se puede agarrar con el mouse (o el dedo) y moverlo. Solo para marcadores con dibujo propio. */
+  draggable?: boolean;
+  onDrag?: (e: { nativeEvent: { coordinate: LatLng } }) => void;
+  onDragEnd?: (e: { nativeEvent: { coordinate: LatLng } }) => void;
   children?: React.ReactNode;
 };
 
-export function Marker({ coordinate, pinColor = '#B3261E', title, description, zIndex, onPress, onCalloutPress, children }: MarkerProps) {
+export function Marker({ coordinate, pinColor = '#B3261E', title, description, zIndex, onPress, onCalloutPress, draggable, onDrag, onDragEnd, children }: MarkerProps) {
   const map = useContext(MapCtx);
   const [el, setEl] = useState<HTMLElement | null>(null);
   const layer = useRef<L.Layer | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const hasChildren = !!children;
+  // Siempre la última versión de cada función, aunque el marcador no se vuelva a crear.
+  const drag = useRef({ onDrag, onDragEnd });
+  drag.current = { onDrag, onDragEnd };
 
   useEffect(() => {
     if (!map) return;
     if (hasChildren) {
       const icon = L.divIcon({ className: 'lamies-marker', html: '<div></div>', iconSize: undefined });
       // Los que no se tocan (como el punto de "estás acá") dejan pasar los toques al mapa.
-      const mk = L.marker([coordinate.latitude, coordinate.longitude], { icon, interactive: !!onPress, zIndexOffset: zIndex ?? 0 }).addTo(map);
+      const mk = L.marker([coordinate.latitude, coordinate.longitude], { icon, interactive: !!onPress || !!draggable, draggable: !!draggable, zIndexOffset: zIndex ?? 0 }).addTo(map);
       layer.current = mk;
       markerRef.current = mk;
       const root = mk.getElement()?.firstElementChild as HTMLElement | null;
-      if (root) root.style.cssText = `transform:translate(-50%,-50%);display:inline-block${onPress ? '' : ';pointer-events:none'}`;
+      if (root) root.style.cssText = `transform:translate(-50%,-50%);display:inline-block${onPress || draggable ? '' : ';pointer-events:none'}${draggable ? ';cursor:grab' : ''}`;
       setEl(root);
       mk.on('click', () => onPress?.());
+      if (draggable) {
+        const at = () => { const p = mk.getLatLng(); return { nativeEvent: { coordinate: { latitude: p.lat, longitude: p.lng } } }; };
+        mk.on('drag', () => drag.current.onDrag?.(at()));
+        mk.on('dragend', () => drag.current.onDragEnd?.(at()));
+      }
     } else {
       const c = L.circleMarker([coordinate.latitude, coordinate.longitude], { radius: 9, color: '#FFFFFF', weight: 2, fillColor: pinColor, fillOpacity: 1 }).addTo(map);
       layer.current = c;
@@ -194,7 +206,7 @@ export function Marker({ coordinate, pinColor = '#B3261E', title, description, z
     };
     // Los marcadores con dibujo propio se mueven sin volver a crearse (más abajo); los demás se rehacen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, hasChildren ? 0 : coordinate.latitude, hasChildren ? 0 : coordinate.longitude, pinColor, title, description, hasChildren]);
+  }, [map, hasChildren ? 0 : coordinate.latitude, hasChildren ? 0 : coordinate.longitude, pinColor, title, description, hasChildren, draggable]);
 
   useEffect(() => {
     markerRef.current?.setLatLng([coordinate.latitude, coordinate.longitude]);
