@@ -3,9 +3,8 @@
 //   1 semana  → "te extrañamos, ¿cómo estás?, ¿podemos orar por algo?"
 //   2 semanas → coordinar una visita
 //   3 o más   → "recién oré por vos" + recordatorio de visitarlo
-import { telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
@@ -78,7 +77,6 @@ export default function Ausencias() {
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <Btn icon="message-circle" label={sec.weeks === 3 ? 'Oré por vos' : sec.weeks === 2 ? 'Coordinar visita' : 'Lo extrañamos'} disabled={!r.phone}
                       onPress={() => openWhatsApp(r.phone, messageText(sec.kind, { to: r.name, from: profile?.display_name, church: church?.name, services }))} />
-                    <Btn icon="phone" label="Llamar" disabled={!r.phone} onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} />
                     <Btn icon="check-square" label="Visité" onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id, visita: '1' } })} />
                   </View>
                 </View>

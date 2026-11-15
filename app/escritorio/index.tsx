@@ -1,20 +1,20 @@
 // Inicio del escritorio: de un vistazo, cómo viene la iglesia y qué hay para atender.
-import { telDigits } from '@/lib/phone';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
 import { Segmented } from '@/components/ui';
 import {
-  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekendAbsences, weeklyReport,
-  type BirthdayRow, type FirstVisitTask,
+  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport,
+  type BirthdayRow, type FirstVisitTask, type WeekListItem, type WeekListKey,
 } from '@/lib/api';
 import { delta, mondayOf } from '@/lib/desk';
 import { addDays, fmtDateShort, fmtMoney, isoDate, lastSaturday, parseDate } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
-import { openWhatsApp } from '@/lib/messages';
+import { messageText, openWhatsApp } from '@/lib/messages';
+import { missedKind } from '@/lib/followupConfig';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { AbsenceRow, ChurchEvent, Contact, FinBalance, ProgressRow, WeeklyReport } from '@/types';
@@ -26,7 +26,7 @@ const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', '
 
 export default function DeskHome() {
   const router = useRouter();
-  const { profile, can } = useAuth();
+  const { profile, church, can } = useAuth();
   const { width } = useLayout();
   const [week, setWeek] = useState<Week>('last');
   const [report, setReport] = useState<WeeklyReport | null>(null);
@@ -39,6 +39,9 @@ export default function DeskHome() {
   const [people, setPeople] = useState<Contact[]>([]);
   const [funds, setFunds] = useState<FinBalance[]>([]);
   const [newSuggestions, setNewSuggestions] = useState(0);
+  // La lista de nombres detrás del número que se tocó.
+  const [openKpi, setOpenKpi] = useState<WeekListKey | null>(null);
+  const [lists, setLists] = useState<Record<WeekListKey, WeekListItem[]> | null>(null);
 
   const seesPanel = can('inf.panel');
   const seesPeople = can('personas.ver_todas') || can('personas.editar');
@@ -55,8 +58,13 @@ export default function DeskHome() {
     const set = <T,>(p: Promise<T>, f: (v: T) => void) => p.then((v) => { if (alive) f(v); }).catch(() => undefined);
     if (seesPanel) {
       setReport(null);
-      set(weeklyReport(monday), setReport);
-      set(weeklyReport(mondayOf(addDays(parseDate(monday), -7))), setBefore);
+      setLists(null);
+      setOpenKpi(null);
+      // El informe del servidor trae la semana que TERMINA antes del lunes que se le pasa: para la semana que empieza
+      // este lunes hay que pedirle el lunes siguiente (antes se mostraba una semana corrida).
+      set(weeklyReport(mondayOf(addDays(parseDate(monday), 7))), setReport);
+      set(weeklyReport(monday), setBefore);
+      weekLists(monday).then((v) => { if (alive) setLists(v); }).catch((e) => { console.warn('weekLists', e); if (alive) setLists({ attendance: [], first_time: [], baptisms: [], new_members: [], absent: [], gospel: [], people_out: [] }); });
       set(churchProgress(12), setProgress);
     }
     if (seesPeople || seesPanel) set(weekendAbsences(lastSaturday()), setAbsences);
@@ -72,14 +80,14 @@ export default function DeskHome() {
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
   const weekLabel = `Semana del ${fmtDateShort(monday)} al ${fmtDateShort(isoDate(addDays(parseDate(monday), 6)))}`;
 
-  const kpis: { label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean }[] = report ? [
-    { label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true },
-    { label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true },
-    { label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true },
-    { label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true },
-    { label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false },
-    { label: 'Oyeron el evangelio', value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true },
-    { label: 'Salieron a evangelizar', value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true },
+  const kpis: { key: WeekListKey; label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean }[] = report ? [
+    { key: 'attendance', label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true },
+    { key: 'first_time', label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true },
+    { key: 'baptisms', label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true },
+    { key: 'new_members', label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true },
+    { key: 'absent', label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false },
+    { key: 'gospel', label: 'Oyeron el evangelio', value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true },
+    { key: 'people_out', label: 'Salieron a evangelizar', value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true },
   ] : [];
 
   const counts = useMemo(() => ({
@@ -129,7 +137,8 @@ export default function DeskHome() {
               const d = delta(k.value, k.prev);
               const good = d && d.dir !== 'same' ? (d.dir === 'up') === !!k.goodUp : null;
               return (
-                <View key={k.label} style={[styles.kpi, { flexBasis: kpiBasis }]}>
+                <Pressable key={k.label} onPress={() => setOpenKpi(openKpi === k.key ? null : k.key)} accessibilityRole="button" accessibilityLabel={`${k.label}: ${k.value}. Ver los nombres`}
+                  style={(st) => [styles.kpi, { flexBasis: kpiBasis }, openKpi === k.key && { borderColor: colors.green, borderWidth: 2 }, (st as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Feather name={k.icon} size={14} color={colors.muted} />
                     <Text style={styles.kpiLabel} numberOfLines={1}>{k.label}</Text>
@@ -142,10 +151,30 @@ export default function DeskHome() {
                       </Text>
                     ) : null}
                   </View>
-                </View>
+                </Pressable>
               );
             }) : <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 20 }}>Cargando la semana…</Text>}
           </View>
+          {report ? <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver los nombres.</Text> : null}
+          {openKpi ? (
+            <Panel title={`${kpis.find((k) => k.key === openKpi)?.label ?? ''}${lists ? ` · ${lists[openKpi].length}` : ''}`} hint={weekLabel} action="Cerrar" onAction={() => setOpenKpi(null)}>
+              {!lists ? <EmptyLine text="Cargando los nombres…" /> : !lists[openKpi].length ? <EmptyLine text="No hay nadie en esta semana." /> : (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 18 }}>
+                  {lists[openKpi].map((it) => (
+                    <View key={it.key} style={{ width: twoCols ? '31%' : '47%', minWidth: 220 }}>
+                      <Row onPress={it.contact_id ? () => router.push({ pathname: '/contacto/[id]', params: { id: it.contact_id as string } }) : undefined}>
+                        <Face name={it.name} path={null} size={30} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.rowTitle} numberOfLines={1}>{it.name}</Text>
+                          <Text style={styles.rowSub} numberOfLines={1}>{it.sub}</Text>
+                        </View>
+                      </Row>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </Panel>
+          ) : null}
         </View>
       ) : null}
 
@@ -170,8 +199,8 @@ export default function DeskHome() {
                     </Text>
                   </View>
                   <Pill tone={(a.weeks_missed ?? 1) >= 3 ? 'red' : (a.weeks_missed ?? 1) === 2 ? 'amber' : 'gray'} text={(a.weeks_missed ?? 1) >= 3 ? '3 o más' : (a.weeks_missed ?? 1) === 2 ? '2 seguidas' : '1 vez'} />
-                  <IconLink icon="message-circle" label={`WhatsApp a ${a.name}`} disabled={!a.phone} onPress={() => openWhatsApp(a.phone, '')} />
-                  <IconLink icon="phone" label={`Llamar a ${a.name}`} disabled={!a.phone} onPress={() => Linking.openURL(`tel:${telDigits(a.phone)}`)} />
+                  <IconLink icon="message-circle" label={`WhatsApp a ${a.name}`} disabled={!a.phone}
+                    onPress={() => openWhatsApp(a.phone, messageText(missedKind(a.weeks_missed ?? 1), { to: a.name, from: profile?.display_name, church: church?.name }))} />
                 </Row>
               ))}
             </Panel>
@@ -197,7 +226,7 @@ export default function DeskHome() {
 
         <View style={{ flex: twoCols ? 1 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
           <Panel title="Para atender">
-            <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para llamar o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} />
+            <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para escribir o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} />
             {seesPeople || seesPanel ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push('/ausencias')} /> : null}
             {moderates ? <Todo icon="message-square" n={newSuggestions} text="sugerencias sin leer" onPress={() => router.push('/sugerencias')} /> : null}
             <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text="cumpleaños en los próximos 7 días" onPress={() => router.push('/cumples' as Href)} />
@@ -288,9 +317,9 @@ function AttendanceBars({ rows }: { rows: ProgressRow[] }) {
   );
 }
 
-function Row({ children, onPress }: { children: React.ReactNode; onPress: () => void }) {
+function Row({ children, onPress }: { children: React.ReactNode; onPress?: () => void }) {
   return (
-    <Pressable accessibilityRole="link" onPress={onPress} style={(s) => [styles.row, (s as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
+    <Pressable accessibilityRole="link" disabled={!onPress} onPress={onPress} style={(s) => [styles.row, (s as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
       {children}
     </Pressable>
   );

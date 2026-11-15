@@ -607,6 +607,61 @@ export async function setProfileTitle(profileId: string, title: string): Promise
 export async function setChurchRecipients(absence: string[] | null, report: string[] | null): Promise<void> {
   ok(await supabase.rpc('set_church_recipients', { p_absence: absence, p_report: report }));
 }
+// ---------- Quiénes están detrás de cada número del inicio del escritorio ----------
+export type WeekListKey = 'attendance' | 'first_time' | 'baptisms' | 'new_members' | 'absent' | 'gospel' | 'people_out';
+export type WeekListItem = { key: string; name: string; sub: string; contact_id: string | null };
+
+/** Las listas de la semana que empieza el lunes dado (lunes a domingo). */
+export async function weekLists(monday: string): Promise<Record<WeekListKey, WeekListItem[]>> {
+  const start = new Date(`${monday}T00:00:00`);
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  const iso = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
+  const to = iso(end);
+  const weekend = iso(new Date(end.getFullYear(), end.getMonth(), end.getDate() - 2));
+  const day = (s: string | null | undefined) => !s ? 'sin fecha' : new Date(s.length === 10 ? `${s}T12:00:00` : s).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+  type N = { name: string; status?: string } | null;
+  // Si una consulta falla, esa lista queda vacía; las demás se muestran igual.
+  const rows = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error || !Array.isArray(r.data) ? [] : (r.data as T[]));
+  const [att, bap, mem, members, vis, rep] = await Promise.all([
+    supabase.from('attendances').select('contact_id, attended_on, contacts(name, status)').gte('attended_on', monday).lt('attended_on', to).order('attended_on').limit(5000),
+    supabase.from('contacts').select('id, name, baptized_on').gte('baptized_on', monday).lt('baptized_on', to).order('baptized_on'),
+    supabase.from('contacts').select('id, name, member_since').gte('member_since', monday).lt('member_since', to).order('member_since'),
+    supabase.from('contacts').select('id, name').eq('status', 'member').eq('archived', false).order('name').limit(5000),
+    supabase.from('contact_visits').select('contact_id, user_id, visited_at, contacts(name)').eq('gospel_presented', true).gte('visited_at', start.toISOString()).lt('visited_at', end.toISOString()).order('visited_at').limit(2000),
+    supabase.rpc('church_report', { p_from: start.toISOString(), p_to: end.toISOString() }),
+  ]);
+  const attRows = rows<{ contact_id: string; attended_on: string; contacts: N }>(att);
+  const byPerson = new Map<string, { name: string; status: string; days: string[] }>();
+  for (const r of attRows) {
+    const p = byPerson.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', status: r.contacts?.status ?? '', days: [] };
+    if (!p.days.includes(r.attended_on)) p.days.push(r.attended_on);
+    byPerson.set(r.contact_id, p);
+  }
+  const ids = [...byPerson.keys()];
+  // Primera vez: vino esta semana y no tiene ninguna asistencia anterior.
+  const earlier = new Set<string>();
+  if (ids.length) {
+    const prev = rows<{ contact_id: string }>(await supabase.from('attendances').select('contact_id').in('contact_id', ids).lt('attended_on', monday).limit(5000));
+    for (const r of prev) earlier.add(r.contact_id);
+  }
+  const cameWeekend = new Set(attRows.filter((r) => r.attended_on >= weekend).map((r) => r.contact_id));
+  const report = (rep.error ? null : rep.data) as { members?: { user_id: string; display_name: string; sessions: number; presentations: number }[] } | null;
+  const who = new Map((report?.members ?? []).map((m) => [m.user_id, m.display_name]));
+  const people = [...byPerson.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'));
+  return {
+    attendance: people.map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `${p.status === 'member' ? 'Miembro' : 'Visita'} · ${p.days.map(day).join(', ')}` })),
+    first_time: people.filter(([id]) => !earlier.has(id)).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `Vino el ${p.days.map(day).join(', ')}` })),
+    baptisms: rows<{ id: string; name: string; baptized_on: string }>(bap).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Bautizado el ${day(c.baptized_on)}` })),
+    new_members: rows<{ id: string; name: string; member_since: string }>(mem).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Miembro desde el ${day(c.member_since)}` })),
+    absent: rows<{ id: string; name: string }>(members).filter((c) => !cameWeekend.has(c.id)).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: 'No vino el fin de semana' })),
+    gospel: rows<{ contact_id: string; user_id: string | null; visited_at: string; contacts: N }>(vis)
+      .map((v, i) => ({ key: `${v.contact_id}-${i}`, contact_id: v.contact_id, name: v.contacts?.name ?? 'Sin nombre', sub: `${v.user_id && who.get(v.user_id) ? `Se lo presentó ${who.get(v.user_id)} · ` : ''}${day(v.visited_at)}` })),
+    people_out: (report?.members ?? []).filter((m) => m.sessions > 0).sort((a, b) => b.presentations - a.presentations || a.display_name.localeCompare(b.display_name, 'es'))
+      .map((m) => ({ key: m.user_id, contact_id: null, name: m.display_name, sub: `${m.sessions} ${m.sessions === 1 ? 'salida' : 'salidas'} · ${m.presentations} ${m.presentations === 1 ? 'presentación' : 'presentaciones'}` })),
+  };
+}
+
 export async function weeklyReport(monday: string | null = null): Promise<WeeklyReport> {
   return ok(await supabase.rpc('weekly_report', { p_church: null, p_monday: monday })) as WeeklyReport;
 }
