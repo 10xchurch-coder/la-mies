@@ -158,6 +158,12 @@ export default function DeskHome() {
           {report ? <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver los nombres.</Text> : null}
           {openKpi ? (
             <Panel title={`${kpis.find((k) => k.key === openKpi)?.label ?? ''}${lists ? ` · ${lists[openKpi].length}` : ''}`} hint={weekLabel} action="Cerrar" onAction={() => setOpenKpi(null)}>
+              {openKpi === 'people_out' ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
+                  <DeskButton label="Marcar quiénes salieron" icon="user-check" onPress={() => router.push('/salieron' as Href)} />
+                  <Text style={styles.rowSub}>Para anotar a los hermanos que salieron sin usar la app.</Text>
+                </View>
+              ) : null}
               {!lists ? <EmptyLine text="Cargando los nombres…" /> : !lists[openKpi].length ? <EmptyLine text="No hay nadie en esta semana." /> : (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 18 }}>
                   {lists[openKpi].map((it) => (

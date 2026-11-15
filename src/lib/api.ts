@@ -625,13 +625,14 @@ export async function weekLists(monday: string, since: string | null = null): Pr
   type N = { name: string; status?: string; baseline?: string | null } | null;
   // Si una consulta falla, esa lista queda vacía; las demás se muestran igual.
   const rows = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error || !Array.isArray(r.data) ? [] : (r.data as T[]));
-  const [att, bap, mem, members, vis, rep] = await Promise.all([
+  const [att, bap, mem, members, vis, rep, out] = await Promise.all([
     supabase.from('attendances').select('contact_id, attended_on, contacts(name, status, baseline)').gte('attended_on', monday).lt('attended_on', to).order('attended_on').limit(5000),
     supabase.from('contacts').select('id, name, baptized_on').gte('baptized_on', monday > from0 ? monday : from0).lt('baptized_on', to).order('baptized_on'),
     supabase.from('contacts').select('id, name, member_since, baseline').gte('member_since', monday > from0 ? monday : from0).lt('member_since', to).order('member_since'),
     supabase.from('contacts').select('id, name').eq('status', 'member').eq('archived', false).order('name').limit(5000),
     supabase.from('contact_visits').select('contact_id, user_id, visited_at, contacts(name)').eq('gospel_presented', true).gte('visited_at', start.toISOString()).lt('visited_at', end.toISOString()).order('visited_at').limit(2000),
     supabase.rpc('church_report', { p_from: start.toISOString(), p_to: end.toISOString() }),
+    supabase.from('outing_attendance').select('contact_id, went_on, contacts(name, profile_id)').gte('went_on', monday).lt('went_on', to).order('went_on').limit(2000),
   ]);
   const attRows = rows<{ contact_id: string; attended_on: string; contacts: N }>(att);
   const byPerson = new Map<string, { name: string; status: string; baseline: string | null; days: string[] }>();
@@ -651,6 +652,16 @@ export async function weekLists(monday: string, since: string | null = null): Pr
   const report = (rep.error ? null : rep.data) as { members?: { user_id: string; display_name: string; sessions: number; presentations: number }[] } | null;
   const who = new Map((report?.members ?? []).map((m) => [m.user_id, m.display_name]));
   const people = [...byPerson.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'));
+  // Salieron a evangelizar: los que usaron la app y los que se marcaron a mano (sin repetir a nadie).
+  const withApp = (report?.members ?? []).filter((m) => m.sessions > 0);
+  const appIds = new Set(withApp.map((m) => m.user_id));
+  const byHand = new Map<string, { name: string; days: string[] }>();
+  for (const r of rows<{ contact_id: string; went_on: string; contacts: { name: string; profile_id: string | null } | null }>(out)) {
+    if (r.contacts?.profile_id && appIds.has(r.contacts.profile_id)) continue;
+    const p = byHand.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', days: [] };
+    p.days.push(r.went_on);
+    byHand.set(r.contact_id, p);
+  }
   return {
     attendance: people.map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `${p.status === 'member' ? 'Miembro' : 'Visita'} · ${p.days.map(day).join(', ')}` })),
     first_time: people.filter(([id, p]) => !earlier.has(id) && !p.baseline && p.days[0] >= from0).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `Vino el ${p.days.map(day).join(', ')}` })),
@@ -659,8 +670,12 @@ export async function weekLists(monday: string, since: string | null = null): Pr
     absent: rows<{ id: string; name: string }>(members).filter((c) => !cameWeekend.has(c.id)).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: 'No vino el fin de semana' })),
     gospel: rows<{ contact_id: string; user_id: string | null; visited_at: string; contacts: N }>(vis)
       .map((v, i) => ({ key: `${v.contact_id}-${i}`, contact_id: v.contact_id, name: v.contacts?.name ?? 'Sin nombre', sub: `${v.user_id && who.get(v.user_id) ? `Se lo presentó ${who.get(v.user_id)} · ` : ''}${day(v.visited_at)}` })),
-    people_out: (report?.members ?? []).filter((m) => m.sessions > 0).sort((a, b) => b.presentations - a.presentations || a.display_name.localeCompare(b.display_name, 'es'))
-      .map((m) => ({ key: m.user_id, contact_id: null, name: m.display_name, sub: `${m.sessions} ${m.sessions === 1 ? 'salida' : 'salidas'} · ${m.presentations} ${m.presentations === 1 ? 'presentación' : 'presentaciones'}` })),
+    people_out: [
+      ...withApp.sort((a, b) => b.presentations - a.presentations || a.display_name.localeCompare(b.display_name, 'es'))
+        .map((m) => ({ key: m.user_id, contact_id: null, name: m.display_name, sub: `${m.sessions} ${m.sessions === 1 ? 'salida' : 'salidas'} · ${m.presentations} ${m.presentations === 1 ? 'presentación' : 'presentaciones'}` })),
+      ...[...byHand.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'))
+        .map(([id, p]) => ({ key: `mano-${id}`, contact_id: id, name: p.name, sub: `Salió el ${p.days.map(day).join(', ')} · sin la app` })),
+    ],
   };
 }
 
@@ -880,6 +895,19 @@ export async function completeFollowUp(id: string, outcome: FollowUpOutcome | nu
 export async function setBaseline(): Promise<number> {
   return (ok(await supabase.rpc('set_baseline', { p_date: null })) as number) ?? 0;
 }
+// ---------- Asistencia de evangelismo: quiénes salieron, aunque no usen la app ----------
+export type OutingSheetRow = { contact_id: string; name: string; photo_path: string | null; status: string; marked: boolean; via_app: boolean };
+/** La planilla de un día: miembros y asistentes, con quién está marcado y quién salió con la app. */
+export async function outingSheet(date: string): Promise<{ total: number; rows: OutingSheetRow[] }> {
+  const r = ok(await supabase.rpc('outing_sheet', { p_date: date })) as { total: number; rows: OutingSheetRow[] } | null;
+  return { total: Number(r?.total) || 0, rows: r?.rows ?? [] };
+}
+/** Marca (o desmarca) a una persona como que salió a evangelizar ese día. No cuenta para la fidelidad. */
+export async function setOutingAttendance(contactId: string, date: string, went: boolean): Promise<void> {
+  if (went) ok(await supabase.from('outing_attendance').upsert({ contact_id: contactId, went_on: date }, { onConflict: 'contact_id,went_on', ignoreDuplicates: true }));
+  else ok(await supabase.from('outing_attendance').delete().eq('contact_id', contactId).eq('went_on', date));
+}
+
 /** Quiénes quedaron marcados presentes ese día en cualquier reunión. */
 export async function dayAttendeeIds(date: string): Promise<Set<string>> {
   const rows = (ok(await supabase.from('attendances').select('contact_id').eq('attended_on', date).limit(5000)) ?? []) as { contact_id: string }[];

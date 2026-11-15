@@ -157,7 +157,7 @@ export default function Panel() {
                 <Stat value={t.discipleship} label="Discipulado" onPress={() => toggle('discipleship')} active={isOpen('discipleship')} />
                 <Stat value={t.baptisms} label="Bautismos" onPress={() => toggle('baptisms')} active={isOpen('baptisms')} />
                 <Stat value={fmtMinutes(t.minutes)} label="En la calle" />
-                <Stat value={t.members} label="Hermanos" />
+                <Stat value={t.members} label="Hermanos" onPress={() => router.push('/salieron' as never)} />
               </View>
               {(() => {
                 const outings = countOutings(report.sessions);
@@ -169,6 +169,7 @@ export default function Panel() {
                 );
               })()}
               <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver quiénes son y quién los cargó.</Text>
+              <Button title="Marcar quiénes salieron a evangelizar" variant="outline" small icon="user-check" onPress={() => router.push('/salieron' as never)} />
             </View>
 
             {open && !open.user ? list(open.metric) : null}

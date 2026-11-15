@@ -1,6 +1,7 @@
 // Informe semanal (llega como aviso los lunes a las 8 a las personas elegidas) y el camino de los contactos mes a mes.
 import React, { useEffect, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading, SectionTitle, Stat } from '@/components/ui';
 import { pipelineReport, weeklyReport } from '@/lib/api';
@@ -19,6 +20,7 @@ function mondayOf(d: Date): string {
 
 export default function Reporte() {
   const { church } = useAuth();
+  const router = useRouter();
   const [monday, setMonday] = useState(mondayOf(new Date()));
   const [r, setR] = useState<WeeklyReport | null>(null);
   const [pipe, setPipe] = useState<PipelineRow[]>([]);
@@ -52,7 +54,7 @@ export default function Reporte() {
             <SectionTitle>Evangelismo</SectionTitle>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Stat value={r.outings} label="Salidas" />
-              <Stat value={r.people_out} label="Hermanos" />
+              <Stat value={r.people_out} label="Hermanos" onPress={() => router.push('/salieron' as never)} />
               <Stat value={`${r.km} km`} label="Caminados" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
