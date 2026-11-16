@@ -20,6 +20,7 @@ suggestions_list teaches_contact team_totals today_birthdays upcoming_birthdays 
 const QUEUE_RPCS = new Set(['set_attendance']);
 const QUEUE_TABLES: Record<string, string[]> = {
   outing_attendance: ['POST', 'DELETE'],
+  absence_messages: ['POST', 'DELETE'],
   class_attendance: ['POST'],
   bus_pickups: ['POST', 'DELETE'],
   bible_plans: ['PATCH'],

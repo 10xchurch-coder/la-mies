@@ -3,15 +3,17 @@
 //   1 semana  → "te extrañamos, ¿cómo estás?, ¿podemos orar por algo?"
 //   2 semanas → coordinar una visita
 //   3 o más   → "recién oré por vos" + recordatorio de visitarlo
-import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+// Al tocar el WhatsApp, la persona sale de la lista (queda abajo, en "Ya les escribiste", por si hay que volver atrás).
+// "Elegir varios" arma una fila de mensajes: WhatsApp se abre para uno, se manda, y al volver se abre el siguiente.
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState, Platform, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
-import { Empty, Loading, Tag } from '@/components/ui';
-import { listServices, weekendAbsences } from '@/lib/api';
+import { Button, Empty, Loading, Tag } from '@/components/ui';
+import { absenceMessaged, listServices, setAbsenceMessaged, weekendAbsences } from '@/lib/api';
 import { addDays, fmtDateOnly, fmtDateShort, fmtRelativeDay, isoDate, lastSaturday, parseDate } from '@/lib/format';
 import { messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
@@ -36,12 +38,69 @@ export default function Ausencias() {
   useEffect(() => {
     listServices().then(setServices).catch(() => undefined);
   }, []);
+  // A quiénes ya se les escribió este fin de semana: no aparecen en la lista.
+  const [sent, setSent] = useState<Set<string>>(new Set());
+  const [showSent, setShowSent] = useState(false);
+  // Elegir varios para mandarles uno atrás del otro.
+  const [picking, setPicking] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [queue, setQueue] = useState<AbsenceRow[] | null>(null);
+  const [qi, setQi] = useState(0);
+  const waiting = useRef(false);
+
   useFocusEffect(
     useCallback(() => {
       setRows(null);
+      setPicking(false);
+      setPicked(new Set());
       weekendAbsences(sat).then(setRows).catch(() => setRows([]));
+      absenceMessaged(sat).then((ids) => setSent(new Set(ids)));
     }, [sat]),
   );
+
+  const section = (r: AbsenceRow) => SECTIONS[Math.min(3, r.weeks_missed ?? 1) - 1];
+  const mark = (id: string, on: boolean) => {
+    setSent((old) => { const next = new Set(old); if (on) next.add(id); else next.delete(id); return next; });
+    setAbsenceMessaged(id, sat, on).catch(() => undefined);
+  };
+  /** Abre el WhatsApp con el mensaje que le toca y lo saca de la lista. */
+  const write = (r: AbsenceRow) => {
+    openWhatsApp(r.phone, messageText(section(r).kind, { to: r.name, from: profile?.display_name, church: church?.name, services }));
+    mark(r.contact_id, true);
+  };
+
+  const pending = (rows ?? []).filter((r) => !sent.has(r.contact_id));
+  const done = (rows ?? []).filter((r) => sent.has(r.contact_id));
+  const canPick = pending.filter((r) => r.phone);
+  const toggle = (id: string) => setPicked((old) => { const next = new Set(old); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+
+  const start = () => {
+    const list = canPick.filter((r) => picked.has(r.contact_id));
+    if (!list.length) return;
+    setQueue(list);
+    setQi(1);
+    setPicking(false);
+    setPicked(new Set());
+    waiting.current = true;
+    write(list[0]);
+  };
+  const next = useCallback(() => {
+    if (!queue || qi >= queue.length) return;
+    waiting.current = true;
+    write(queue[qi]);
+    setQi(qi + 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue, qi, sat, services]);
+  // En el teléfono: al volver de WhatsApp se abre solo el siguiente.
+  useEffect(() => {
+    if (Platform.OS === 'web' || !queue) return;
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st !== 'active' || !waiting.current) return;
+      waiting.current = false;
+      if (qi < queue.length) setTimeout(next, 900);
+    });
+    return () => sub.remove();
+  }, [queue, qi, next]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -49,11 +108,43 @@ export default function Ausencias() {
       <Screen>
         <DateChips dates={saturdays.includes(sat) ? saturdays : [sat, ...saturdays]} value={sat} onChange={setSat} format={(d) => `Finde ${fmtDateShort(d)}`} />
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-          {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre.
+          {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre. Al escribirle a alguien, sale de la lista.
         </Text>
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="check-circle" title="No faltó nadie" text="¡Gloria a Dios!" /> : null}
+
+        {queue ? (
+          <View style={{ gap: 10, padding: 14, borderRadius: 14, backgroundColor: colors.greenSoft }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.greenText }}>
+              {qi >= queue.length ? `Listo: ${queue.length} ${queue.length === 1 ? 'mensaje abierto' : 'mensajes abiertos'}` : `Mensaje ${qi} de ${queue.length} abierto`}
+            </Text>
+            <Text style={{ fontSize: 13, color: colors.greenText, lineHeight: 18 }}>
+              {qi >= queue.length ? 'Mandá el último en WhatsApp y ya está.'
+                : Platform.OS === 'web' ? `Mandalo en WhatsApp y volvé acá para abrir el de ${queue[qi].name}.`
+                : `Mandalo en WhatsApp y volvé a La Mies: se abre solo el de ${queue[qi].name}.`}
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {qi < queue.length ? <Button title={`Siguiente: ${queue[qi].name}`} icon="message-circle" onPress={next} style={{ flex: 1 }} /> : null}
+              <Button title={qi >= queue.length ? 'Cerrar' : 'Parar'} variant="outline" onPress={() => { setQueue(null); waiting.current = false; }} style={qi >= queue.length ? { flex: 1 } : undefined} />
+            </View>
+          </View>
+        ) : canPick.length > 1 ? (
+          picking ? (
+            <View style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: colors.bgSoft }}>
+              <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}>Tocá a quiénes les querés escribir. WhatsApp se abre para uno; lo mandás, volvés, y se abre el siguiente.</Text>
+              <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                <Button title={picked.size === canPick.length ? 'Ninguno' : `Elegir todos (${canPick.length})`} variant="outline" small onPress={() => setPicked(picked.size === canPick.length ? new Set() : new Set(canPick.map((r) => r.contact_id)))} />
+                <Button title={picked.size ? `Mandar a ${picked.size}` : 'Mandar'} icon="send" small disabled={!picked.size} onPress={start} />
+                <Button title="Cancelar" variant="ghost" small onPress={() => { setPicking(false); setPicked(new Set()); }} />
+              </View>
+            </View>
+          ) : (
+            <Button title="Elegir varios para escribirles" icon="check-square" variant="outline" onPress={() => setPicking(true)} />
+          )
+        ) : null}
+
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="check-circle" title="No faltó nadie" text="¡Gloria a Dios!" />
+          : !pending.length ? <Empty icon="check-circle" title="Ya les escribiste a todos" text="No queda nadie en la lista de este fin de semana." /> : null}
         {SECTIONS.map((sec) => {
-          const list = (rows ?? []).filter((r) => Math.min(3, r.weeks_missed ?? 1) === sec.weeks);
+          const list = pending.filter((r) => section(r) === sec);
           if (!list.length) return null;
           return (
             <View key={sec.weeks} style={{ gap: 8 }}>
@@ -61,29 +152,53 @@ export default function Ausencias() {
                 <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{sec.title} · {list.length}</Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>{sec.hint}</Text>
               </View>
-              {list.map((r) => (
-                <View key={r.contact_id} style={{ gap: 8, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
-                  <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } })} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityRole="button">
-                    <Face name={r.name} path={r.photo_path} size={44} />
-                    <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}</Text>
-                      <Text style={{ fontSize: 12, color: colors.muted }}>
-                        {r.last_attended ? `Vino por última vez: ${fmtDateOnly(r.last_attended)}` : 'Nunca marcado presente'}
-                        {r.last_visit ? ` · visitado ${fmtRelativeDay(r.last_visit)}` : ''}
-                      </Text>
-                    </View>
-                    <Tag text={r.status === 'member' ? 'Miembro' : 'Visita'} tone={r.status === 'member' ? 'green' : sec.tone} />
-                  </Pressable>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Btn icon="message-circle" label={sec.weeks === 3 ? 'Oré por vos' : sec.weeks === 2 ? 'Coordinar visita' : 'Lo extrañamos'} disabled={!r.phone}
-                      onPress={() => openWhatsApp(r.phone, messageText(sec.kind, { to: r.name, from: profile?.display_name, church: church?.name, services }))} />
-                    <Btn icon="check-square" label="Visité" onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id, visita: '1' } })} />
+              {list.map((r) => {
+                const on = picked.has(r.contact_id);
+                return (
+                  <View key={r.contact_id} style={{ gap: 8, padding: 10, borderRadius: 12, borderWidth: on ? 2 : 1, borderColor: on ? colors.green : colors.border, backgroundColor: on ? colors.greenSoft : undefined }}>
+                    <Pressable onPress={() => (picking ? (r.phone ? toggle(r.contact_id) : undefined) : router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } }))} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityRole={picking ? 'checkbox' : 'button'} accessibilityState={picking ? { checked: on, disabled: !r.phone } : undefined}>
+                      {picking ? <Feather name={on ? 'check-circle' : 'circle'} size={24} color={!r.phone ? colors.border : on ? colors.green : colors.muted} /> : null}
+                      <Face name={r.name} path={r.photo_path} size={44} />
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}</Text>
+                        <Text style={{ fontSize: 12, color: colors.muted }}>
+                          {picking && !r.phone ? 'Sin teléfono cargado' : r.last_attended ? `Vino por última vez: ${fmtDateOnly(r.last_attended)}` : 'Nunca marcado presente'}
+                          {r.last_visit ? ` · visitado ${fmtRelativeDay(r.last_visit)}` : ''}
+                        </Text>
+                      </View>
+                      <Tag text={r.status === 'member' ? 'Miembro' : 'Visita'} tone={r.status === 'member' ? 'green' : sec.tone} />
+                    </Pressable>
+                    {picking ? null : (
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <Btn icon="message-circle" label={sec.weeks === 3 ? 'Oré por vos' : sec.weeks === 2 ? 'Coordinar visita' : 'Lo extrañamos'} disabled={!r.phone} onPress={() => write(r)} />
+                        <Btn icon="check-square" label="Visité" onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id, visita: '1' } })} />
+                      </View>
+                    )}
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           );
         })}
+
+        {done.length ? (
+          <View style={{ gap: 8 }}>
+            <Pressable onPress={() => setShowSent(!showSent)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 }}>
+              <Feather name="check-circle" size={16} color={colors.greenText} />
+              <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText }}>Ya les escribiste · {done.length}</Text>
+              <Feather name={showSent ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
+            </Pressable>
+            {showSent ? done.map((r) => (
+              <View key={r.contact_id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 8, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+                <Face name={r.name} path={r.photo_path} size={34} />
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.text }} numberOfLines={1}>{r.name}</Text>
+                <Pressable onPress={() => mark(r.contact_id, false)} accessibilityRole="button" style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, backgroundColor: colors.bgSoft }}>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text }}>Volver a la lista</Text>
+                </Pressable>
+              </View>
+            )) : null}
+          </View>
+        ) : null}
       </Screen>
     </View>
   );

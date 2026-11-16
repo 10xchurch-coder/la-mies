@@ -227,6 +227,17 @@ export async function weekendAbsences(saturday: string): Promise<AbsenceRow[]> {
   return ok(await supabase.rpc('weekend_absences', { p_saturday: saturday })) ?? [];
 }
 
+/** A quiénes ya se les escribió por faltar ese fin de semana (ya no aparecen en la lista). */
+export async function absenceMessaged(saturday: string): Promise<string[]> {
+  const r = await supabase.from('absence_messages').select('contact_id').eq('weekend', saturday).limit(5000);
+  return r.error ? [] : (r.data ?? []).map((x) => x.contact_id as string);
+}
+/** Anota (o saca) que ya se le escribió a alguien que faltó. */
+export async function setAbsenceMessaged(contactId: string, saturday: string, sent: boolean): Promise<void> {
+  if (sent) ok(await supabase.from('absence_messages').upsert({ contact_id: contactId, weekend: saturday }, { onConflict: 'contact_id,weekend', ignoreDuplicates: true }));
+  else ok(await supabase.from('absence_messages').delete().eq('contact_id', contactId).eq('weekend', saturday));
+}
+
 export async function myUpcoming(days = 21): Promise<UpcomingItem[]> {
   return ok(await supabase.rpc('my_upcoming', { p_days: days })) ?? [];
 }

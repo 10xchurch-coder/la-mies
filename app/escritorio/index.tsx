@@ -7,7 +7,7 @@ import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
 import { Segmented } from '@/components/ui';
 import {
-  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport,
+  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport, absenceMessaged, setAbsenceMessaged,
   type BirthdayRow, type FirstVisitTask, type WeekListItem, type WeekListKey,
 } from '@/lib/api';
 import { delta, mondayOf } from '@/lib/desk';
@@ -67,7 +67,8 @@ export default function DeskHome() {
       weekLists(monday, church?.tracking_since ?? null).then((v) => { if (alive) setLists(v); }).catch((e) => { console.warn('weekLists', e); if (alive) setLists({ attendance: [], first_time: [], baptisms: [], new_members: [], absent: [], gospel: [], people_out: [] }); });
       set(churchProgress(12), setProgress);
     }
-    if (seesPeople || seesPanel) set(weekendAbsences(lastSaturday()), setAbsences);
+    // Los que faltaron, sin los que ya recibieron el mensaje.
+    if (seesPeople || seesPanel) set(Promise.all([weekendAbsences(lastSaturday()), absenceMessaged(lastSaturday())]).then(([rows, sent]) => rows.filter((r) => !sent.includes(r.contact_id))), setAbsences);
     if (seesPeople) set(listPeople(), setPeople);
     set(myFirstVisitTasks(), setTasks);
     set(upcomingBirthdays(14), setBdays);
@@ -206,7 +207,12 @@ export default function DeskHome() {
                   </View>
                   <Pill tone={(a.weeks_missed ?? 1) >= 3 ? 'red' : (a.weeks_missed ?? 1) === 2 ? 'amber' : 'gray'} text={(a.weeks_missed ?? 1) >= 3 ? '3 o más' : (a.weeks_missed ?? 1) === 2 ? '2 seguidas' : '1 vez'} />
                   <IconLink icon="message-circle" label={`WhatsApp a ${a.name}`} disabled={!a.phone}
-                    onPress={() => openWhatsApp(a.phone, messageText(missedKind(a.weeks_missed ?? 1), { to: a.name, from: profile?.display_name, church: church?.name }))} />
+                    onPress={() => {
+                      openWhatsApp(a.phone, messageText(missedKind(a.weeks_missed ?? 1), { to: a.name, from: profile?.display_name, church: church?.name }));
+                      // Ya se le escribió: sale de la lista.
+                      setAbsences((list) => list?.filter((x) => x.contact_id !== a.contact_id) ?? null);
+                      setAbsenceMessaged(a.contact_id, lastSaturday(), true).catch(() => undefined);
+                    }} />
                 </Row>
               ))}
             </Panel>
