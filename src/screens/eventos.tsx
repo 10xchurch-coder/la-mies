@@ -11,15 +11,15 @@ import { EventImage } from '@/components/EventImage';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Field, Loading, Segmented, SectionTitle, Toggle } from '@/components/ui';
-import { deleteEvent, listEvents, listServices, rsvpRows, saveEvent, setRsvp } from '@/lib/api';
+import { deleteEvent, listCancellations, listEvents, listServices, rsvpRows, saveEvent, setRsvp } from '@/lib/api';
 import { addDays, dayName, fmtDateShort, isoDate, parseDateAR } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
-import type { ChurchEvent, ChurchService } from '@/types';
+import type { Cancellation, ChurchEvent, ChurchService } from '@/types';
 
 type Occ = { ev: ChurchEvent; date: string; start: Date };
-type WeeklyItem = { key: string; dow: number; time: string; title: string; place: string | null; note: string | null; ev?: ChurchEvent; main?: boolean };
+type WeeklyItem = { key: string; dow: number; time: string; title: string; place: string | null; note: string | null; ev?: ChurchEvent; main?: boolean; serviceId?: string };
 
 const TZ_OFFSET = '-03:00';
 const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // lunes primero
@@ -57,7 +57,7 @@ function special(events: ChurchEvent[]): Occ[] {
 }
 
 function weeklyItems(services: ChurchService[], events: ChurchEvent[]): WeeklyItem[] {
-  const items: WeeklyItem[] = services.map((s) => ({ key: `s-${s.id}`, dow: s.dow, time: s.time, title: s.name, place: null, note: null, main: s.main }));
+  const items: WeeklyItem[] = services.map((s) => ({ key: `s-${s.id}`, dow: s.dow, time: s.time, title: s.name, place: null, note: null, main: s.main, serviceId: s.id }));
   for (const ev of events.filter((e) => e.weekly)) {
     const d = new Date(ev.starts_at);
     items.push({ key: `e-${ev.id}`, dow: d.getDay(), time: ev.all_day ? '' : hhmm(d), title: ev.title, place: ev.place, note: ev.description, ev });
@@ -126,11 +126,13 @@ export default function Eventos() {
   const [desc, setDesc] = useState('');
   const [yearly, setYearly] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [offs, setOffs] = useState<Cancellation[]>([]);
 
   const load = useCallback(() => {
     listEvents().then(setEvents).catch(() => setEvents([]));
     listServices().then(setServices).catch(() => undefined);
     rsvpRows().then(setRsvps).catch(() => undefined);
+    listCancellations(isoDate(new Date()), isoDate(addDays(new Date(), 6))).then(setOffs);
   }, []);
   useFocusEffect(load);
 
@@ -143,6 +145,11 @@ export default function Eventos() {
   const thisMonth = occ.filter((o) => o.date > weekEnd && o.date <= monthEnd);
   const nextUp = occ.filter((o) => o.date > monthEnd).slice(0, 3);
   const todayDow = now.getDay();
+  /** Si la próxima vez (de hoy a 6 días) de una reunión o actividad semanal se suspendió, esa fecha. */
+  const offNext = (w: WeeklyItem): string | null => {
+    const d = isoDate(addDays(now, (w.dow - todayDow + 7) % 7));
+    return offs.some((c) => c.on_date === d && (w.serviceId ? c.service_id === w.serviceId : c.event_id === w.ev?.id)) ? d : null;
+  };
 
   const toggle = async (o: Occ, going: boolean) => {
     try {
@@ -230,13 +237,22 @@ export default function Eventos() {
                 <View key={d} style={{ flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 10, gap: 10, borderBottomWidth: di < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border, backgroundColor: d === todayDow ? colors.greenSoft : 'transparent' }}>
                   <Text style={{ width: 74, fontSize: 13, fontWeight: '800', color: d === todayDow ? colors.greenText : colors.muted }}>{cap(dayName(d))}{d === todayDow ? '\nhoy' : ''}</Text>
                   <View style={{ flex: 1, gap: 4 }}>
-                    {week.filter((w) => w.dow === d).map((w) => (
-                      <Pressable key={w.key} disabled={!w.ev} onPress={() => w.ev && open(w.ev)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Text style={{ width: 44, fontSize: 14, fontWeight: '800', color: colors.green }}>{w.time || '—'}</Text>
-                        <Text style={{ flex: 1, fontSize: 14, fontWeight: w.main ? '800' : '600', color: colors.text }}>{w.title}{w.place ? <Text style={{ fontWeight: '400', color: colors.muted }}> · {w.place}</Text> : null}</Text>
-                        {w.ev ? <Feather name="chevron-right" size={14} color={colors.muted} /> : null}
-                      </Pressable>
-                    ))}
+                    {week.filter((w) => w.dow === d).map((w) => {
+                      const off = offNext(w);
+                      const tappable = !!w.ev || (isStaff && !!w.serviceId);
+                      return (
+                        <Pressable key={w.key} disabled={!tappable}
+                          onPress={() => (w.ev ? open(w.ev) : w.serviceId && router.push({ pathname: '/suspender', params: { servicio: w.serviceId } } as never))}
+                          style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Text style={{ width: 44, fontSize: 14, fontWeight: '800', color: off ? colors.muted : colors.green, textDecorationLine: off ? 'line-through' : 'none' }}>{w.time || '—'}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 14, fontWeight: w.main ? '800' : '600', color: off ? colors.muted : colors.text, textDecorationLine: off ? 'line-through' : 'none' }}>{w.title}{w.place ? <Text style={{ fontWeight: '400', color: colors.muted }}> · {w.place}</Text> : null}</Text>
+                            {off ? <Text style={{ fontSize: 12, fontWeight: '800', color: colors.amberText }}>No hay este {fmtDateShort(off)}</Text> : null}
+                          </View>
+                          {tappable ? <Feather name="chevron-right" size={14} color={colors.muted} /> : null}
+                        </Pressable>
+                      );
+                    })}
                   </View>
                 </View>
               ))}
@@ -287,6 +303,7 @@ export default function Eventos() {
               </View>
             ) : null}
             <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Tocá cualquier fecha para ver los detalles, anotarte o compartirla.</Text>
+            {isStaff ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Si una reunión o una actividad de cada semana no se hace, tocala en &quot;Cada semana&quot; y marcá la fecha: no baja los números.</Text> : null}
           </>
         )}
       </Screen>

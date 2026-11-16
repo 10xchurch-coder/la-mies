@@ -4,6 +4,7 @@ import type { PanelDetail } from './outings';
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
+  Cancellation,
   OutingRow, SessionSummary, HouseRow, Zone, ZoneProgress, FollowupRow, PipelineRow, ChurchEvent, PrayerRow, Announcement, SuggestionRow, DirectoryRow, WeeklyReport,
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
   ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage, MinistryPerson, MinistryPersonRow,
@@ -209,6 +210,20 @@ export async function listServices(): Promise<ChurchService[]> {
 
 export async function listAllServices(): Promise<ChurchService[]> {
   return ok(await supabase.from('church_services').select('*').order('sort_order')) ?? [];
+}
+
+/** Fechas en que una reunión o una actividad semanal no se hizo. Si todavía no existe la tabla, devuelve []. */
+export async function listCancellations(from: string, to?: string): Promise<Cancellation[]> {
+  let q = supabase.from('cancellations').select('id, on_date, service_id, event_id, note').gte('on_date', from);
+  if (to) q = q.lte('on_date', to);
+  const { data, error } = await q.order('on_date');
+  if (error) return [];
+  return (data as Cancellation[]) ?? [];
+}
+
+/** Marca (o desmarca) que una reunión o una actividad semanal no se hizo esa fecha. */
+export async function setCancelled(p: { serviceId?: string | null; eventId?: string | null; date: string; cancelled: boolean; note?: string | null }): Promise<void> {
+  ok(await supabase.rpc('set_cancelled', { p_service: p.serviceId ?? null, p_event: p.eventId ?? null, p_date: p.date, p_cancelled: p.cancelled, p_note: p.note ?? null }));
 }
 
 export async function attendanceSheet(date: string, serviceId: string): Promise<SheetRow[]> {

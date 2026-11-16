@@ -235,6 +235,8 @@ export type TrainingItem = {
 
 // ---------- Parte 2: la iglesia ----------
 export type ChurchService = { id: string; church_id: string; name: string; dow: number; time: string; main: boolean; active: boolean; sort_order: number };
+/** Una fecha en que una reunión (service_id) o una actividad semanal del calendario (event_id) no se hizo. */
+export type Cancellation = { id: string; on_date: string; service_id: string | null; event_id: string | null; note: string | null };
 
 export type ClassRow = { id: string; church_id: string; name: string; age_min: number | null; age_max: number | null; days: string[]; active: boolean; sort_order: number };
 export type ClassTeacher = { class_id: string; profile_id: string; is_helper: boolean };
@@ -374,7 +376,11 @@ export type DirectoryRow = { id: string; display_name: string; phone: string | n
 export type WeeklyReport = {
   from: string; to: string; outings: number; people_out: number; minutes: number; km: number; houses: number; contacts: number; gospel: number;
   promises: number; visits: number; attendance: number; first_time: number; saved: number; baptisms: number; new_members: number; absent: number;
-  services?: { name: string; dow: number; count: number; visitors: number }[];
+  services?: { name: string; dow: number; count: number; visitors: number; cancelled?: boolean }[];
+  /** Lo que no se hizo esa semana (reuniones y actividades semanales). */
+  cancelled?: { name: string; date: string; kind: 'service' | 'event'; note: string | null }[];
+  /** No hubo ninguna reunión principal el fin de semana: no se cuentan ausencias. */
+  weekend_cancelled?: boolean;
   classes?: { name: string; present: number; absent: number; enrolled: number; days: number }[];
 };
 

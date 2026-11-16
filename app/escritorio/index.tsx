@@ -228,8 +228,8 @@ export default function DeskHome() {
               {report.services.map((s) => (
                 <View key={`${s.name}${s.dow}`} style={styles.tRow}>
                   <Text style={[styles.td, { flex: 1 }]} numberOfLines={1}>{s.name}</Text>
-                  <Text style={[styles.td, styles.num, { fontWeight: '800' }]}>{s.count}</Text>
-                  <Text style={[styles.td, styles.num]}>{s.visitors}</Text>
+                  <Text style={[styles.td, styles.num, { fontWeight: '800' }, s.cancelled && !s.count ? { color: colors.amberText } : null]}>{s.cancelled && !s.count ? 'No hubo' : s.count}</Text>
+                  <Text style={[styles.td, styles.num]}>{s.cancelled && !s.count ? '–' : s.visitors}</Text>
                 </View>
               ))}
             </Panel>

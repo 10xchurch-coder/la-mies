@@ -7,8 +7,8 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
 import { EventImage } from '@/components/EventImage';
-import { deleteEvent, deleteRegistration, eventRegistrationCount, eventRegistrations, getEvent, rsvpRows, saveRegistration, setRsvp } from '@/lib/api';
-import { dayName, fmtDateShort, fmtMoney, isoDate } from '@/lib/format';
+import { deleteEvent, deleteRegistration, eventRegistrationCount, eventRegistrations, getEvent, listCancellations, rsvpRows, saveRegistration, setRsvp } from '@/lib/api';
+import { addDays, dayName, fmtDateShort, fmtMoney, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -42,6 +42,8 @@ export default function Evento() {
   const [regCount, setRegCount] = useState(0);
   const [form, setForm] = useState<null | { id?: string; name: string; phone: string; people: string; ride: boolean; lodging: boolean; notes: string }>(null);
   const [busy, setBusy] = useState(false);
+  // Fechas suspendidas de esta actividad semanal (de hoy en adelante).
+  const [offDates, setOffDates] = useState<string[]>([]);
   const staff = can('cal.editar');
 
   const on = fecha ?? (ev ? isoDate(new Date(ev.starts_at)) : '');
@@ -50,6 +52,10 @@ export default function Evento() {
     getEvent(id).then(async (e) => {
       setEv(e);
       if (!e) return;
+      if (e.weekly) {
+        listCancellations(isoDate(new Date()), isoDate(addDays(new Date(), 60)))
+          .then((cs) => setOffDates(cs.filter((c) => c.event_id === e.id).map((c) => c.on_date)));
+      }
       const d = fecha ?? isoDate(new Date(e.starts_at));
       rsvpRows().then((rows) => {
         const mine = rows.filter((r) => r.event_id === e.id && r.occurs_on === d);
@@ -159,6 +165,12 @@ export default function Evento() {
           <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text, letterSpacing: -0.3 }}>{ev.title}</Text>
           <Text style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{when}{ev.yearly ? ' · todos los años' : ''}</Text>
         </View>
+        {ev.weekly && offDates.length ? (
+          <Card style={{ gap: 4, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Se suspende</Text>
+            <Text style={{ fontSize: 14, color: colors.text }}>No hay {ev.title.toLowerCase()} el {offDates.map(fmtDateShort).join(', el ')}.</Text>
+          </Card>
+        ) : null}
         {ev.description ? <Text style={{ fontSize: 16, color: colors.text, lineHeight: 24 }}>{ev.description}</Text> : null}
 
         {!ev.weekly && !past ? (
@@ -277,6 +289,9 @@ export default function Evento() {
           </>
         ) : null}
 
+        {staff && ev.weekly ? (
+          <Button title="Suspender una fecha / no hubo" icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
+        ) : null}
         {staff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Button title="Editar" icon="edit-2" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { id: ev.id } })} style={{ flex: 1 }} />

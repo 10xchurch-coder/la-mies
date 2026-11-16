@@ -113,6 +113,10 @@ const files = [
   'supabase/tests/rls_test_43.sql',
   'supabase/tests/rls_test_44.sql',
   'supabase/tests/rls_test_45.sql',
+  // 0054–0058 se aplicaron directo en Supabase; para probar 0060 alcanza con estas dos columnas.
+  'scripts/local-0060-prep.sql',
+  'supabase/migrations/0060_reuniones_suspendidas.sql',
+  'supabase/tests/rls_test_46.sql',
 ];
 // MIGRATIONS_FIRST=1: todas las migraciones primero y después todas las pruebas (para ver que lo nuevo no rompe lo viejo).
 const order = process.env.MIGRATIONS_FIRST ? [...files.filter((f) => !f.includes('/tests/')), ...files.filter((f) => f.includes('/tests/'))] : files;

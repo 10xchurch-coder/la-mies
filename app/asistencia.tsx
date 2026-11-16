@@ -1,5 +1,6 @@
 // Tomar asistencia de una reunión: elegís la reunión y tocás la cara de cada persona que vino.
 // La pueden tomar capitanes, recepción (ministerio que toma asistencia), secretaría y pastor.
+// Si la reunión no se hizo, se marca "no hubo": esa fecha no cuenta para la fidelidad ni para las ausencias.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -7,14 +8,14 @@ import { Feather } from '@expo/vector-icons';
 import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
-import { Button, Empty, Loading } from '@/components/ui';
-import { addPerson, attendanceCounts, attendanceSheet, listServices, setAttendance } from '@/lib/api';
+import { Button, Card, Empty, Loading } from '@/components/ui';
+import { addPerson, attendanceCounts, attendanceSheet, listCancellations, listServices, setAttendance, setCancelled } from '@/lib/api';
 import { byFaithfulness, type Times } from '@/lib/faithful';
 import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
-import type { ChurchService, SheetRow } from '@/types';
+import type { Cancellation, ChurchService, SheetRow } from '@/types';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -43,6 +44,8 @@ export default function Asistencia() {
   const [onlyPresent, setOnlyPresent] = useState(false);
   const [quickName, setQuickName] = useState('');
   const [adding, setAdding] = useState(false);
+  const [offs, setOffs] = useState<Cancellation[]>([]);
+  const [marking, setMarking] = useState(false);
   const { columns } = useLayout();
   const cols = columns(118, 3, 8);
 
@@ -87,6 +90,35 @@ export default function Asistencia() {
   useEffect(() => {
     if (dates.length && !dates.includes(date)) setDate(dates[0]);
   }, [dates, date]);
+
+  // Fechas en que esta reunión no se hizo.
+  const loadOffs = useCallback(() => {
+    if (!dates.length) return;
+    listCancellations(dates[dates.length - 1]).then(setOffs);
+  }, [dates]);
+  useEffect(loadOffs, [loadOffs]);
+  const offOn = (d: string) => !!service && offs.some((c) => c.service_id === service.id && c.on_date === d);
+  const isOff = offOn(date);
+
+  const markOff = async (off: boolean) => {
+    if (!service) return;
+    setMarking(true);
+    try {
+      await setCancelled({ serviceId: service.id, date, cancelled: off });
+      loadOffs();
+    } catch (e) {
+      Alert.alert('No se pudo', errorMessage(e));
+    } finally {
+      setMarking(false);
+    }
+  };
+  const askOff = () => {
+    if (!service) return;
+    Alert.alert(`¿No hubo ${service.name.toLowerCase()}?`, `${fmtDateShort(date)}. Esa fecha no va a contar para la fidelidad ni para las ausencias, y el informe va a decir "no hubo".`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'No hubo', style: 'destructive', onPress: () => markOff(true) },
+    ]);
+  };
 
   const busyToggles = useRef(0);
   const toggle = async (r: SheetRow) => {
@@ -148,7 +180,9 @@ export default function Asistencia() {
           onChange={(sid) => setService(services.find((s) => s.id === sid) ?? null)}
           format={(sid) => services.find((s) => s.id === sid)?.name ?? ''}
         />
-        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
+        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => `${d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d)}${offOn(d) ? ' · no hubo' : ''}`} />
+        {isOff ? null : (
+        <>
         <View style={styles.counter}>
           <Text style={{ fontSize: 28, fontWeight: '800', color: colors.greenText }}>{present}</Text>
           <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: colors.greenText }}>presentes{rows ? ` de ${rows.length} en la lista` : ''}</Text>
@@ -160,8 +194,31 @@ export default function Asistencia() {
           <Feather name="search" size={18} color={colors.muted} />
           <TextInput value={q} onChangeText={setQ} placeholder="Buscar" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
         </View>
+        </>
+        )}
+        {service && !isOff && rows !== null ? (
+          <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center' }}>
+            {present === 0 ? (
+              <Pressable onPress={askOff} disabled={marking} accessibilityRole="button" hitSlop={8}>
+                <Text style={styles.link}>No hubo esta reunión</Text>
+              </Pressable>
+            ) : null}
+            <Pressable onPress={() => router.push({ pathname: '/suspender', params: { servicio: service.id } } as never)} accessibilityRole="button" hitSlop={8}>
+              <Text style={styles.link}>Suspender una fecha próxima</Text>
+            </Pressable>
+          </View>
+        ) : null}
       </View>
-      {rows === null ? (
+      {isOff && service ? (
+        <View style={styles.list}>
+          <Card style={{ gap: 10, alignItems: 'center', padding: 20, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
+            <Feather name="slash" size={28} color={colors.amberText} />
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>No hubo {service.name.toLowerCase()} el {fmtDateShort(date)}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 19 }}>Esta fecha no cuenta para la fidelidad ni para las ausencias. En el informe semanal figura como &quot;no hubo&quot;.</Text>
+            <Button title="Sí hubo: tomar asistencia" variant="outline" small icon="rotate-ccw" loading={marking} onPress={() => markOff(false)} />
+          </Card>
+        </View>
+      ) : rows === null ? (
         <Loading />
       ) : (
         <FlatList
@@ -188,12 +245,12 @@ export default function Asistencia() {
           )}
         />
       )}
-      <View style={styles.bottom}>
+      {isOff ? null : <View style={styles.bottom}>
         <View style={{ flexDirection: 'row', gap: 8, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
         <TextInput value={quickName} onChangeText={setQuickName} placeholder="Visita nueva: nombre y apellido" placeholderTextColor="#8B918C" style={styles.quick} />
         <Button title="Anotar" small onPress={quickAdd} loading={adding} disabled={quickName.trim().length < 2} style={{ paddingHorizontal: 18 }} />
         </View>
-      </View>
+      </View>}
     </View>
   );
 }
@@ -208,5 +265,6 @@ const styles = themed(() => StyleSheet.create({
   cellOn: { backgroundColor: colors.greenSoft },
   check: { position: 'absolute', right: -2, bottom: -2, width: 24, height: 24, borderRadius: 12, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#FFF' },
   bottom: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, paddingBottom: 28, backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border },
+  link: { fontSize: 13, fontWeight: '700', color: colors.muted, textDecorationLine: 'underline' },
   quick: { flex: 1, height: 44, borderWidth: 1.5, borderColor: colors.input, borderRadius: 12, paddingHorizontal: 12, fontSize: 15, color: colors.text },
 }));

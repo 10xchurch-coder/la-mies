@@ -16,7 +16,7 @@ import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  deleteContact, syncFamilyRoute, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  deleteContact, syncFamilyRoute, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listCancellations, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -28,17 +28,18 @@ import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
 import type {
-  Attendance, ChurchService, Contact, ContactChild, ContactVisit, FaithCategory, Group, JourneyStep, Ministry, PersonStatus, Profile,
+  Attendance, Cancellation, ChurchService, Contact, ContactChild, ContactVisit, FaithCategory, Group, JourneyStep, Ministry, PersonStatus, Profile,
 } from '@/types';
 
-/** Fidelidad de las últimas 12 semanas, contando solo las reuniones principales. */
-function faithOf(c: Contact, atts: Attendance[], services: ChurchService[]): { cat: FaithCategory; attended: number; possible: number } {
+/** Fidelidad de las últimas 12 semanas, contando solo las reuniones principales (sin las fechas en que no hubo). */
+function faithOf(c: Contact, atts: Attendance[], services: ChurchService[], offs: Cancellation[] = []): { cat: FaithCategory; attended: number; possible: number } {
   const main = services.filter((s) => s.main && s.active);
   const today = new Date();
   const start = new Date(Math.max(addDays(today, -84).getTime(), new Date(c.created_at).getTime()));
   let possible = 0;
   for (let d = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12); d <= today; d = addDays(d, 1)) {
-    possible += main.filter((s) => s.dow === d.getDay()).length;
+    const day = isoDate(d);
+    possible += main.filter((s) => s.dow === d.getDay() && !offs.some((o) => o.service_id === s.id && o.on_date === day)).length;
   }
   const mainIds = new Set(main.map((s) => s.id));
   const attended = atts.filter((a) => mainIds.has(a.service_id) && a.attended_on >= isoDate(start)).length;
@@ -159,6 +160,7 @@ export default function PersonaDetalle() {
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [journey, setJourney] = useState<JourneyStep[]>([]);
   const [services, setServices] = useState<ChurchService[]>([]);
+  const [offs, setOffs] = useState<Cancellation[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
@@ -193,6 +195,7 @@ export default function PersonaDetalle() {
       setAttendances(r.attendances);
       personJourney(id).then(setJourney).catch(() => undefined);
       listAllServices().then(setServices).catch(() => undefined);
+      listCancellations(isoDate(addDays(new Date(), -90))).then(setOffs);
       listGroups().then(setGroups).catch(() => undefined);
       listProfiles().then(setPeople).catch(() => undefined);
       // Ministerios donde sirve (por su ficha: también si no usa la app).
@@ -215,7 +218,7 @@ export default function PersonaDetalle() {
 
   const canEdit = !!c && (isStaff || c.created_by === profile?.id || c.follow_up_user_id === profile?.id || c.profile_id === profile?.id
     || (hasRole(profile, 'captain') && !!c.group_id && c.group_id === profile?.group_id));
-  const faith = useMemo(() => (c ? faithOf(c, attendances, services) : null), [c, attendances, services]);
+  const faith = useMemo(() => (c ? faithOf(c, attendances, services, offs) : null), [c, attendances, services, offs]);
 
   const update = async (patch: Partial<Contact>, done?: string) => {
     try {

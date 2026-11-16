@@ -36,8 +36,9 @@ export default function Reporte() {
   const text = r
     ? `Informe semanal · ${church?.name ?? ''}\nDel ${fmtDateShort(r.from)} al ${fmtDateShort(r.to)}\n\n`
       + `EVANGELISMO\n${r.outings} salidas · ${r.people_out} hermanos · ${fmtMinutes(r.minutes)} · ${r.km} km\n${r.houses} casas · ${r.contacts} contactos · ${r.gospel} con el evangelio presentado · ${r.promises} promesas\n\n`
-      + `IGLESIA\n${r.attendance} asistencias · ${r.first_time} vinieron por primera vez · ${r.visits} visitas a casas\n${r.baptisms} bautismos · ${r.new_members} miembros nuevos\n${r.absent} miembros faltaron el último fin de semana`
-      + (r.services?.length ? `\n\nPOR REUNIÓN\n${r.services.map((x) => `${x.name}: ${x.count}`).join('\n')}` : '')
+      + `IGLESIA\n${r.attendance} asistencias · ${r.first_time} vinieron por primera vez · ${r.visits} visitas a casas\n${r.baptisms} bautismos · ${r.new_members} miembros nuevos\n${r.weekend_cancelled ? 'El fin de semana no hubo reunión: no se cuentan ausencias' : `${r.absent} miembros faltaron el último fin de semana`}`
+      + (r.services?.length ? `\n\nPOR REUNIÓN\n${r.services.map((x) => `${x.name}: ${x.cancelled && !x.count ? 'no hubo' : x.count}`).join('\n')}` : '')
+      + (r.cancelled?.length ? `\n\nNO HUBO\n${r.cancelled.map((x) => `${x.name} (${fmtDateShort(x.date)})${x.note ? ` · ${x.note}` : ''}`).join('\n')}` : '')
       + (r.classes?.length ? `\n\nPOR CLASE\n${r.classes.map((x) => `${x.name}: ${x.days ? x.present : '–'}`).join('\n')}\nTotal en clases: ${r.classes.reduce((a, x) => a + x.present, 0)}` : '')
     : '';
 
@@ -73,7 +74,20 @@ export default function Reporte() {
               <Stat value={r.baptisms} label="Bautismos" />
               <Stat value={r.new_members} label="Miembros nuevos" />
             </View>
-            <Text style={{ fontSize: 13, color: colors.muted }}>{r.absent} miembros faltaron el último fin de semana.</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>
+              {r.weekend_cancelled ? 'El fin de semana no hubo reunión, así que no se cuentan ausencias.' : `${r.absent} miembros faltaron el último fin de semana.`}
+            </Text>
+            {r.cancelled?.length ? (
+              <Card style={{ gap: 4, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText, textTransform: 'uppercase', letterSpacing: 0.4 }}>No hubo esta semana</Text>
+                {r.cancelled.map((x, i) => (
+                  <Text key={i} style={{ fontSize: 14, color: colors.text }}>
+                    {x.name} · {fmtDateShort(x.date)}{x.note ? <Text style={{ color: colors.muted }}> · {x.note}</Text> : null}
+                  </Text>
+                ))}
+                <Text style={{ fontSize: 12, color: colors.muted }}>No cuentan para la fidelidad ni para las ausencias.</Text>
+              </Card>
+            ) : null}
             {r.services?.length ? (
               <>
                 <SectionTitle>Por reunión</SectionTitle>
@@ -82,7 +96,9 @@ export default function Reporte() {
                     <View key={i} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderBottomWidth: i < (r.services?.length ?? 0) - 1 ? 1 : 0, borderBottomColor: colors.border }}>
                       <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text }}>{x.name}</Text>
                       <Text style={{ fontSize: 13, color: colors.muted, marginRight: 12 }}>{x.visitors ? `${x.visitors} visitas` : ''}</Text>
-                      <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{x.count}</Text>
+                      {x.cancelled && !x.count
+                        ? <Text style={{ fontSize: 14, fontWeight: '800', color: colors.amberText }}>No hubo</Text>
+                        : <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{x.count}</Text>}
                     </View>
                   ))}
                 </Card>
