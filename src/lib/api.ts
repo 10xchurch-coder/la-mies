@@ -1,6 +1,7 @@
 // Llamadas a la base, con tipos. Si algo falla, lanza un Error con mensaje legible.
 import type { PlanId } from './biblePlan';
 import type { PanelDetail } from './outings';
+import type { FollowContext } from './followWhy';
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
@@ -907,6 +908,15 @@ export async function stopBiblePlan(): Promise<void> {
   ok(await supabase.from('bible_plans').delete().eq('profile_id', u.user.id));
 }
 
+/** De dónde salió cada persona de "Mis contactos para seguir" (por id), y su nota. */
+export async function followContext(ids: string[]): Promise<Record<string, FollowContext>> {
+  if (!ids.length) return {};
+  const r = await supabase.rpc('follow_context', { p_ids: ids });
+  return r.error || !r.data ? {} : (r.data as Record<string, FollowContext>);
+}
+export async function setFollowNote(contactId: string, note: string): Promise<void> {
+  ok(await supabase.rpc('set_follow_note', { p_contact: contactId, p_note: note }));
+}
 export type FirstVisitTask = { id: string; contact_id: string; name: string; phone: string | null; photo_path: string | null; kind: 'call' | 'write2' | 'visit' | 'absent_visit'; due_at: string; overdue: boolean };
 export async function myFirstVisitTasks(): Promise<FirstVisitTask[]> {
   const { data, error } = await supabase.rpc('my_follow_ups');

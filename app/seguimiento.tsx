@@ -1,15 +1,17 @@
 // Mis contactos para seguir: los que anoté (o me asignaron), primero los que prometieron venir y los más interesados.
 // Con un toque: WhatsApp con el mensaje escrito, llamar, cómo llegar o registrar la visita.
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Card, Empty, Field, Loading, Tag } from '@/components/ui';
-import { completeFollowUp, listServices, myFirstVisitTasks, myFollowups, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
+import { completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
+import { whyHere, type FollowContext } from '@/lib/followWhy';
+import { errorMessage } from '@/lib/supabase';
 import { formatPhone } from '@/lib/phone';
-import { INTEREST_LABEL, PROMISE_LABEL, fmtRelativeDay } from '@/lib/format';
+import { INTEREST_LABEL, PROMISE_LABEL, fmtDateShort, fmtRelativeDay } from '@/lib/format';
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -31,6 +33,48 @@ export default function Seguimiento() {
   const [addPhone, setAddPhone] = useState<string | null>(null);
   const [phoneText, setPhoneText] = useState('');
   const reloadTasks = () => { myFirstVisitTasks().then(setTasks).catch(() => undefined); };
+  // De dónde salió cada persona y su nota, para no perder el hilo con nombres que todavía no conocemos.
+  const [ctx, setCtx] = useState<Record<string, FollowContext>>({});
+  const [noteFor, setNoteFor] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState('');
+  const ids = useMemo(() => [...new Set([...(rows ?? []).map((r) => r.id), ...tasks.map((t) => t.contact_id)])].sort().join(','), [rows, tasks]);
+  useEffect(() => {
+    if (ids) followContext(ids.split(',')).then(setCtx);
+  }, [ids]);
+  const saveNote = (id: string) => {
+    const note = noteText.trim();
+    setFollowNote(id, note)
+      .then(() => { setCtx((c) => (c[id] ? { ...c, [id]: { ...c[id], note: note || null } } : c)); setNoteFor(null); })
+      .catch((e) => Alert.alert('No se guardó la nota', errorMessage(e)));
+  };
+  /** Debajo del nombre: por qué está en la lista, qué hacer y la nota. */
+  const about = (id: string, promised = false, todo = true) => {
+    const c = ctx[id];
+    if (!c) return null;
+    const w = whyHere(c, { promised, day: fmtDateShort });
+    return (
+      <View style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row' }}><Tag text={w.tag} tone={w.tone} /></View>
+        <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}>{w.origin}</Text>
+        {todo ? <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}><Text style={{ fontWeight: '800' }}>Qué hacer: </Text>{w.todo}</Text> : null}
+        {c.last_note ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Última visita: “{c.last_note}”</Text> : null}
+        {noteFor === id ? (
+          <View style={{ gap: 8 }}>
+            <Field label="Nota" value={noteText} onChangeText={setNoteText} placeholder="Ej: vino con su hermana, vive cerca de la plaza" multiline autoFocus />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <Small icon="check" label="Guardar nota" onPress={() => saveNote(id)} />
+              <Small icon="x" label="Cancelar" onPress={() => setNoteFor(null)} />
+            </View>
+          </View>
+        ) : (
+          <Pressable onPress={() => { setNoteFor(id); setNoteText(c.note ?? ''); }} accessibilityRole="button" style={{ flexDirection: 'row', gap: 8, padding: 8, borderRadius: 10, backgroundColor: c.note ? colors.amberSoft : colors.bgSoft }}>
+            <Feather name={c.note ? 'file-text' : 'edit-3'} size={15} color={c.note ? colors.amberText : colors.muted} style={{ marginTop: 1 }} />
+            <Text style={{ flex: 1, fontSize: 13, lineHeight: 18, color: c.note ? colors.amberText : colors.muted, fontWeight: c.note ? '600' : '400' }}>{c.note ?? 'Agregar una nota'}</Text>
+          </Pressable>
+        )}
+      </View>
+    );
+  };
 
   useEffect(() => {
     listServices().then(setServices).catch(() => undefined);
@@ -83,6 +127,7 @@ export default function Seguimiento() {
                       ))}
                     </View>
                   </Pressable>
+                  {about(v.contact_id, false, false)}
                   {(() => {
                     const done = (t: FirstVisitTask, outcome: FollowUpOutcome) =>
                       completeFollowUp(t.id, outcome).then(() => { setTasks((cur) => cur.filter((x) => x.id !== t.id)); if (outcome === 'unreachable') reloadTasks(); }).catch(() => undefined);
@@ -147,6 +192,7 @@ export default function Seguimiento() {
                 </View>
                 {r.promise_day ? <Tag text={`Prometió ${PROMISE_LABEL[r.promise_day] ?? ''}`} tone="amber" /> : r.interest ? <Tag text={INTEREST_LABEL[r.interest] ?? r.interest} tone={r.interest === 'very' ? 'green' : 'gray'} /> : null}
               </Pressable>
+              {about(r.id, !!r.promise_day)}
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Small icon="message-circle" label="WhatsApp" disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
                 <Small icon="check-square" label={stale ? 'Visité' : 'Visitado'} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />
