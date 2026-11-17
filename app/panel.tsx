@@ -80,23 +80,30 @@ export default function Panel() {
     load();
   }, [load]);
 
+  // El código de la iglesia no viaja con los datos que leen todos: solo lo pide quien administra.
+  const [joinCode, setJoinCode] = useState<string | null>(null);
+  useEffect(() => {
+    if (profile?.role !== 'admin') return;
+    supabase.rpc('church_join_code').then(({ data }) => setJoinCode(typeof data === 'string' ? data : null));
+  }, [profile?.role]);
+
   const rotate = () => {
     Alert.alert('Nuevo código', 'El código actual deja de funcionar. Los que ya están adentro no se ven afectados.', [
       { text: 'Cancelar', style: 'cancel' },
       {
         text: 'Generar',
         onPress: async () => {
-          const { error } = await supabase.rpc('rotate_join_code');
+          const { data, error } = await supabase.rpc('rotate_join_code');
           if (error) Alert.alert('No se pudo', errorMessage(error));
-          else refreshProfile();
+          else { setJoinCode(typeof data === 'string' ? data : null); refreshProfile(); }
         },
       },
     ]);
   };
 
   const shareCode = () => {
-    if (!church) return;
-    Share.share({ message: `Para usar la app La Mies de ${church.name}: descargala, tocá "Crear cuenta" y poné el código ${church.join_code}` });
+    if (!church || !joinCode) return;
+    Share.share({ message: `Para usar la app La Mies de ${church.name}: descargala, tocá "Crear cuenta" y poné el código ${joinCode}` });
   };
 
   const t = report?.totals;
@@ -247,7 +254,7 @@ export default function Panel() {
             <SectionTitle>Código de la iglesia</SectionTitle>
             <Card style={{ gap: 10 }}>
               <Text style={{ fontSize: 13, color: colors.muted }}>Con este código los hermanos crean su cuenta y entran a tu iglesia. Si se filtra, generá uno nuevo.</Text>
-              <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: 2, textAlign: 'center', color: colors.green }}>{church.join_code}</Text>
+              <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: 2, textAlign: 'center', color: colors.green }}>{joinCode ?? '…'}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Button title="Compartir" variant="outline" small icon="share-2" onPress={shareCode} style={{ flex: 1 }} />
                 <Button title="Nuevo código" variant="ghost" small icon="refresh-cw" onPress={rotate} style={{ flex: 1 }} />

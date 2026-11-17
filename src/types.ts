@@ -18,7 +18,8 @@ export type Church = {
   name: string;
   city: string | null;
   country: string;
-  join_code: string;
+  /** Ya no se lee de acá: el código lo pide solo quien administra, con church_join_code(). */
+  join_code?: string | null;
   timezone: string;
   grouping: 'bus_routes' | 'groups' | 'none';
   giving: Giving | null;
