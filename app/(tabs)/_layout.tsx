@@ -6,6 +6,8 @@ import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { ALL_TABS, tabInfo, tabRoute, useTabs, type TabKey } from '@/lib/tabsPref';
 import { colors } from '@/theme';
+import { featureOfPath, featureOn } from '@/lib/features';
+import { useAuth } from '@/store/auth';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -27,7 +29,11 @@ function churchIcon({ focused }: { focused: boolean }) {
 export const unstable_settings = { initialRouteName: 'iglesia' };
 
 export default function TabsLayout() {
-  const shown = useTabs();
+  const chosen = useTabs();
+  const { church } = useAuth();
+  // Las pestañas de funciones que la iglesia apagó no se ven (Iglesia y Yo siempre quedan).
+  const off = church?.disabled_features;
+  const shown = chosen.filter((k) => { const f = featureOfPath(`/${tabRoute(k)}`); return f === null || featureOn(off, f); });
   // El orden de las pestañas es el orden en que se declaran: primero las elegidas, después las ocultas.
   const order: TabKey[] = [...shown, ...ALL_TABS.filter((k) => !shown.includes(k))];
   return (

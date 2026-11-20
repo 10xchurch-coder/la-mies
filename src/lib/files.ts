@@ -8,7 +8,7 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
 
-export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat';
+export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat' | 'missionaries';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
 
 function randomId(): string {
@@ -206,4 +206,48 @@ export async function pickChatDocument(churchId: string): Promise<ChatAttachment
   if (a.size && a.size > CHAT_MAX_BYTES) { Alert.alert('Archivo muy grande', 'El máximo es 15 MB.'); return null; }
   const path = await upload('chat', churchId, a.uri, a.name, a.mimeType ?? 'application/octet-stream');
   return { path, name: a.name, size: a.size ?? 0, kind: 'file' };
+}
+
+// ---------- Misioneros: foto, PDF del informe y fotos del mes ----------
+/** Foto del misionero (cuadrada, 640 px). Devuelve la ruta o null si canceló. */
+export async function pickMissionaryPhoto(churchId: string): Promise<string | null> {
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+  if (res.canceled || !res.assets?.[0]) return null;
+  const small = await manipulateAsync(res.assets[0].uri, [{ resize: { width: 640 } }], { compress: 0.75, format: SaveFormat.JPEG });
+  return upload('missionaries', churchId, small.uri, 'misionero.jpg', 'image/jpeg');
+}
+
+/** El PDF del informe del mes (hasta 25 MB). */
+export async function pickMissionaryPdf(churchId: string): Promise<{ path: string; name: string } | null> {
+  const res = await DocumentPicker.getDocumentAsync({ type: ['application/pdf'], copyToCacheDirectory: true, multiple: false });
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  if (a.size && a.size > 25 * 1024 * 1024) { Alert.alert('Archivo muy grande', 'El PDF pesa más de 25 MB. Probá achicarlo antes de subirlo.'); return null; }
+  const path = await upload('missionaries', churchId, a.uri, a.name, 'application/pdf');
+  return { path, name: a.name };
+}
+
+/** Varias fotos del mes a la vez, cada una achicada a 1600 px. Devuelve las rutas. */
+export async function pickMissionaryPhotos(churchId: string, max: number): Promise<string[]> {
+  if (max <= 0) return [];
+  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return []; }
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: true, selectionLimit: max, quality: 0.9 });
+  if (res.canceled || !res.assets?.length) return [];
+  const out: string[] = [];
+  for (const a of res.assets.slice(0, max)) {
+    const resize = a.width && a.width > 1600 ? [{ resize: { width: 1600 } }] : [];
+    const img = await manipulateAsync(a.uri, resize, { compress: 0.75, format: SaveFormat.JPEG });
+    out.push(await upload('missionaries', churchId, img.uri, 'foto.jpg', 'image/jpeg'));
+  }
+  return out;
+}
+
+/** Borra archivos de misioneros que ya no se usan. Si falla no pasa nada: solo quedan huérfanos. */
+export async function removeMissionaryFiles(paths: (string | null | undefined)[]): Promise<void> {
+  const list = paths.filter((p): p is string => !!p);
+  if (!list.length) return;
+  await supabase.storage.from('missionaries').remove(list).catch(() => undefined);
 }

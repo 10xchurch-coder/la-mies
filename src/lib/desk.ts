@@ -13,6 +13,8 @@ export type DeskItem = {
 };
 export type DeskGroup = { title: string; items: DeskItem[] };
 
+import { pathOn, type Disabled } from './features';
+
 export const DESK_NAV: DeskGroup[] = [
   { title: 'Resumen', items: [
     { key: 'inicio', label: 'Inicio', icon: 'home', to: '/escritorio', perms: [] },
@@ -33,6 +35,8 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'clases', label: 'Clases', icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
     { key: 'devocionales', label: 'Devocionales', icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
     { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
+    { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
+    { key: 'mensajes', label: 'Mensajes privados', icon: 'mail', to: '/pastor-bandeja', perms: ['admin.permisos'] },
   ] },
   { title: 'Evangelismo', items: [
     { key: 'vivo', label: 'En vivo ahora', icon: 'radio', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
@@ -49,6 +53,7 @@ export const DESK_NAV: DeskGroup[] = [
   { title: 'Administración', items: [
     { key: 'cuentas', label: 'Cuentas', icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
     { key: 'roles', label: 'Roles y permisos', icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
+    { key: 'funciones', label: 'Funciones de la iglesia', icon: 'toggle-right', to: '/admin/funciones', perms: ['admin.permisos'] },
     { key: 'reglas', label: 'Seguimiento y mensajes', icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
     { key: 'importar', label: 'Importar personas', icon: 'upload', to: '/importar', perms: ['personas.editar'] },
     { key: 'ajustes', label: 'Ajustes', icon: 'settings', to: '/ajustes', perms: [] },
@@ -61,9 +66,9 @@ export function canUseDesk(perms: string[]): boolean {
 }
 
 /** El menú del costado, solo con lo que esta persona puede abrir. */
-export function deskNavFor(perms: string[]): DeskGroup[] {
+export function deskNavFor(perms: string[], disabled?: Disabled): DeskGroup[] {
   return DESK_NAV
-    .map((g) => ({ title: g.title, items: g.items.filter((i) => !i.perms.length || i.perms.some((p) => perms.includes(p))) }))
+    .map((g) => ({ title: g.title, items: g.items.filter((i) => (!i.perms.length || i.perms.some((p) => perms.includes(p))) && pathOn(disabled, i.to)) }))
     .filter((g) => g.items.length > 0);
 }
 

@@ -5,8 +5,9 @@ import '@/lib/chatLive'; // y la de la ubicación en tiempo real de los chats
 import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
-import { Stack, useRouter, useSegments, type Href } from 'expo-router';
-import { Platform } from 'react-native';
+import { Stack, usePathname, useRouter, useSegments, type Href } from 'expo-router';
+import { pathOn } from '@/lib/features';
+import { Alert, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -82,6 +83,21 @@ function useAuthGuard() {
   }, [loading, session, profile, first, router]);
 }
 
+/** Si la dirección es de una función que la iglesia apagó (por ejemplo, abriendo un aviso viejo), se vuelve al inicio. */
+function useFeatureGuard() {
+  const { church } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const disabled = church?.disabled_features;
+  useEffect(() => {
+    if (!church || !disabled?.length) return;
+    if (!pathOn(disabled, pathname)) {
+      router.replace('/');
+      Alert.alert('Función apagada', 'Tu iglesia no usa esta parte de la app.');
+    }
+  }, [church, disabled, pathname, router]);
+}
+
 function Gate() {
   const { loading, session, perms } = useAuth();
   const optIn = useLockOptIn();
@@ -90,6 +106,7 @@ function Gate() {
   useEffect(() => { if (perms.length) rememberLockRequired(needsAppLock(perms)); }, [perms]);
   useNotificationLinks();
   useAuthGuard();
+  useFeatureGuard();
   if (loading || optIn === null || cachedRequired === null) return <Loading />;
   // Solo se pide Face ID / huella a quien maneja finanzas o administración, o al que lo activó.
   const lock = Platform.OS !== 'web' && !!session && (required || optIn);

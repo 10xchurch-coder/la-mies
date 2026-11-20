@@ -13,6 +13,7 @@ import { errorMessage } from '@/lib/supabase';
 import { groupWord } from '@/lib/format';
 import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
+import { pathOn } from '@/lib/features';
 import { colors, themed, useThemeMode } from '@/theme';
 import { saveThemeMode } from '@/lib/themeStore';
 import { APP_VERSION } from '@/components/ErrorScreen';
@@ -102,7 +103,12 @@ export default function Ajustes() {
           <>
             <SectionTitle>Cómo trabaja la iglesia</SectionTitle>
             <Card style={{ padding: 0 }}>
-              <RowLink title="Seguimiento y mensajes" subtitle="Cuándo avisar para escribir o visitar, y qué dice cada WhatsApp" icon="message-circle" onPress={() => router.push('/admin/seguimiento' as never)} />
+              {pathOn(church?.disabled_features, '/admin/seguimiento') ? (
+                <RowLink title="Seguimiento y mensajes" subtitle="Cuándo avisar para escribir o visitar, y qué dice cada WhatsApp" icon="message-circle" onPress={() => router.push('/admin/seguimiento' as never)} />
+              ) : null}
+              {can('admin.permisos') ? (
+                <RowLink title="Funciones de la iglesia" subtitle="Prender o apagar cada parte de la app: finanzas, evangelismo, colectivo…" icon="toggle-right" onPress={() => router.push('/admin/funciones' as never)} />
+              ) : null}
             </Card>
           </>
         ) : null}

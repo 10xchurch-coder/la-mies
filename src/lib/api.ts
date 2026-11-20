@@ -6,7 +6,7 @@ import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
 import type {
   Cancellation,
-  OutingRow, SessionSummary, HouseRow, Zone, ZoneProgress, FollowupRow, PipelineRow, ChurchEvent, PrayerRow, Announcement, SuggestionRow, DirectoryRow, WeeklyReport,
+  OutingRow, SessionSummary, HouseRow, Zone, ZoneProgress, FollowupRow, PipelineRow, ChurchEvent, PrayerRow, Announcement, SuggestionRow, DirectoryRow, Missionary, MissionaryReport, PastorMessage, PastorThreadRow, WeeklyReport,
   AbsenceRow, Attendance, ChurchReport, ChurchService, ClassAttendance, ClassRow, ClassSchedule, ClassTeacher, Contact, ContactChild,
   ContactVisit, CoverageRow, Duty, Engagement, Group, JourneyStep, Material, Ministry, MinistryMember, MinistryMessage, MinistryPerson, MinistryPersonRow,
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
@@ -618,6 +618,62 @@ export async function addSuggestion(body: string, anonymous: boolean): Promise<v
 }
 export async function answerSuggestion(id: string, status: SuggestionRow['status'], reply: string | null): Promise<void> {
   ok(await supabase.from('suggestions').update({ status, reply }).eq('id', id));
+}
+
+// Funciones de la iglesia: prender o apagar una parte de la app (solo pastor o administrador de la app)
+export async function setFeature(key: string, enabled: boolean): Promise<string[]> {
+  return (ok(await supabase.rpc('set_feature', { p_key: key, p_enabled: enabled })) ?? []) as string[];
+}
+
+// Mensajes privados al pastor (solo por funciones: nada de esto se guarda para usar sin internet)
+export async function pastorThread(member: string | null): Promise<PastorMessage[]> {
+  return (ok(await supabase.rpc('pastor_thread', { p_member: member })) ?? []) as PastorMessage[];
+}
+export async function pastorInbox(): Promise<PastorThreadRow[]> {
+  return (ok(await supabase.rpc('pastor_inbox')) ?? []) as PastorThreadRow[];
+}
+export async function sendPastorMessage(body: string, member: string | null): Promise<void> {
+  ok(await supabase.rpc('send_pastor_message', { p_body: body, p_member: member }));
+}
+export async function readPastorThread(member: string | null): Promise<void> {
+  ok(await supabase.rpc('read_pastor_thread', { p_member: member }));
+}
+export async function pastorUnread(): Promise<number> {
+  return Number(ok(await supabase.rpc('pastor_unread')) ?? 0);
+}
+
+// Misioneros y sus informes
+export async function missionariesList(): Promise<Missionary[]> {
+  return (ok(await supabase.from('missionaries').select('id, name, field, bio, photo_path, position').order('position').order('name')) ?? []) as Missionary[];
+}
+export async function latestReportMonths(): Promise<Record<string, string>> {
+  const rows = (ok(await supabase.from('missionary_reports').select('missionary_id, month').order('month', { ascending: false })) ?? []) as { missionary_id: string; month: string }[];
+  const out: Record<string, string> = {};
+  for (const r of rows) if (!out[r.missionary_id]) out[r.missionary_id] = r.month;
+  return out;
+}
+export async function missionaryReports(missionaryId: string): Promise<MissionaryReport[]> {
+  return (ok(await supabase.from('missionary_reports').select('id, missionary_id, month, title, summary, pdf_path, pdf_name, photo_paths, created_at')
+    .eq('missionary_id', missionaryId).order('month', { ascending: false })) ?? []) as MissionaryReport[];
+}
+export async function saveMissionary(m: { id?: string; name: string; field: string | null; bio: string | null; photo_path: string | null }): Promise<string> {
+  const row = { name: m.name.trim(), field: m.field?.trim() || null, bio: m.bio?.trim() || null, photo_path: m.photo_path };
+  if (m.id) { ok(await supabase.from('missionaries').update(row).eq('id', m.id)); return m.id; }
+  const res = ok(await supabase.from('missionaries').insert(row).select('id').single()) as { id: string };
+  return res.id;
+}
+export async function deleteMissionary(id: string): Promise<void> {
+  ok(await supabase.from('missionaries').delete().eq('id', id));
+}
+export async function saveMissionaryReport(r: { missionary_id: string; month: string; title: string | null; summary: string | null; pdf_path: string | null; pdf_name: string | null; photo_paths: string[]; announce: boolean }): Promise<void> {
+  const { announce, ...rest } = r;
+  const row = { ...rest, title: r.title?.trim() || null, summary: r.summary?.trim() || null };
+  const { data: found } = await supabase.from('missionary_reports').select('id').eq('missionary_id', r.missionary_id).eq('month', r.month).maybeSingle();
+  if (found?.id) ok(await supabase.from('missionary_reports').update(row).eq('id', found.id));
+  else ok(await supabase.from('missionary_reports').insert({ ...row, announce }));
+}
+export async function deleteMissionaryReport(id: string): Promise<void> {
+  ok(await supabase.from('missionary_reports').delete().eq('id', id));
 }
 
 // Directorio, roles, informe

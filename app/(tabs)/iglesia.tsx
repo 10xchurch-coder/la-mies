@@ -20,12 +20,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myBiblePlan, myUpcoming, readingStreak, type BiblePlanRow } from '@/lib/api';
+import { pastorUnread } from '@/lib/api';
 import { planStatus } from '@/lib/biblePlan';
 import { isoDate as isoDay } from '@/lib/format';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent, DailySocial } from '@/types';
 import { useAuth } from '@/store/auth';
+import { useFeatures } from '@/lib/useFeatures';
+import { pathOn } from '@/lib/features';
 import { setDeskPref } from '@/components/desk/DeskShell';
 import { canUseDesk } from '@/lib/desk';
 import { useTabs } from '@/lib/tabsPref';
@@ -63,8 +66,10 @@ export default function Iglesia() {
   const [bdayText, setBdayText] = useState('');
   const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
   const [outNow, setOutNow] = useState(0);
+  const [pmUnread, setPmUnread] = useState(0);
   const insets = useSafeAreaInsets();
   const tabs = useTabs();
+  const { on } = useFeatures();
   const menu = useMenu();
   const { editar } = useLocalSearchParams<{ editar?: string }>();
   const [edit, setEdit] = useState(false);
@@ -114,6 +119,7 @@ export default function Iglesia() {
       setAskBday(!skipped);
     });
     if (seesLiveOutings) teamLive().then((rows) => setOutNow(rows.length)).catch(() => undefined);
+    pastorUnread().then(setPmUnread).catch(() => undefined);
     supabase.rpc('bus_live_routes').then(({ data }) => {
       const rows = (data ?? []) as { name: string; run_id: string | null }[];
       setBus({ routes: rows.length, live: rows.find((r) => r.run_id)?.name ?? null });
@@ -159,6 +165,9 @@ export default function Iglesia() {
         { icon: 'users', label: 'Directorio', to: '/directorio', show: !tabs.includes('directorio') },
         { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
+        { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
+        { icon: 'mail', label: pmUnread ? `Escribile al pastor (${pmUnread} nuevo${pmUnread > 1 ? 's' : ''})` : 'Escribile al pastor', to: '/pastor-hilo' as Href, show: profile?.role !== 'admin' },
+        { icon: 'mail', label: pmUnread ? `Mensajes privados (${pmUnread})` : 'Mensajes privados', to: '/pastor-bandeja' as Href, show: profile?.role === 'admin' },
       ],
     },
     {
@@ -185,13 +194,17 @@ export default function Iglesia() {
         { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
         { icon: 'book', label: 'Informes y consejos', to: '/informes' as Href, show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
+        { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },
       ],
     },
   ];
 
   // El menú: cada uno lo ordena (favoritos arriba, orden de botones y de grupos, arriba o abajo de todo).
   const tileKey = (t: Tile) => (typeof t.to === 'string' ? t.to : JSON.stringify(t.to));
-  const laid = layout(groups, tileKey, menu).filter((g) => g.tiles.some((t) => t.show));
+  // Lo que la iglesia apagó no aparece en el menú.
+  const toPath = (to: Href): string => (typeof to === 'string' ? to : ((to as { pathname?: string }).pathname ?? ''));
+  const gated = groups.map((g) => ({ ...g, tiles: g.tiles.map((t) => ({ ...t, show: t.show && pathOn(church?.disabled_features, toPath(t.to)) })) }));
+  const laid = layout(gated, tileKey, menu).filter((g) => g.tiles.some((t) => t.show));
   const groupTitles = laid.filter((g) => g.title !== FAV).map((g) => g.title);
   const toggleFav = (k: string) => setMenu({ ...menu, fav: menu.fav.includes(k) ? menu.fav.filter((x) => x !== k) : [...menu.fav, k] });
   const moveTile = (title: string, k: string, dir: -1 | 1) => {
@@ -281,7 +294,7 @@ export default function Iglesia() {
       <Screen>
         <Text style={styles.hello}>{greeting()}{firstName ? `, ${firstName}` : ''}</Text>
         {menu.top ? menuBlock : null}
-        {tomorrow ? (
+        {on('predicas') && tomorrow ? (
           <Pressable onPress={() => router.push(`/predica/${tomorrow.id}` as Href)} accessibilityRole="button">
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
               <Feather name="mic" size={22} color={colors.greenText} />
@@ -293,7 +306,7 @@ export default function Iglesia() {
             </Card>
           </Pressable>
         ) : null}
-        {live ? (
+        {on('vivo') && live ? (
           <Pressable onPress={() => router.push('/vivo' as Href)} accessibilityRole="button" accessibilityLabel="Ver el culto en vivo"
             style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: '#E11D48' }}>
             <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
@@ -306,7 +319,7 @@ export default function Iglesia() {
             <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
         ) : null}
-        {seesLiveOutings && outNow > 0 ? (
+        {on('evangelismo') && seesLiveOutings && outNow > 0 ? (
           <Pressable onPress={() => router.push('/equipo')} accessibilityRole="button"
             style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.green }}>
             <Feather name="radio" size={22} color="#FFF" />
@@ -319,7 +332,7 @@ export default function Iglesia() {
             <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
         ) : null}
-        {bus.live ? (
+        {on('colectivo') && bus.live ? (
           <Pressable onPress={() => router.push('/colectivo-vivo' as Href)} accessibilityRole="button"
             style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: colors.amber }}>
             <Feather name="truck" size={22} color="#FFF" />
@@ -330,7 +343,7 @@ export default function Iglesia() {
             <Feather name="chevron-right" size={20} color="#FFF" />
           </Pressable>
         ) : null}
-        {bdays.length ? (
+        {on('cumples') && bdays.length ? (
           <Card style={{ gap: 10, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
             <Text style={{ fontSize: 13, fontWeight: '900', color: colors.blueText, letterSpacing: 0.5 }}>
               🎂 {bdays.some((b) => b.is_me) ? '¡FELIZ CUMPLEAÑOS!' : bdays.length === 1 ? 'HOY CUMPLE AÑOS' : 'HOY CUMPLEN AÑOS'}
@@ -349,7 +362,7 @@ export default function Iglesia() {
             ) : null}
           </Card>
         ) : null}
-        {askBday ? (
+        {on('cumples') && askBday ? (
           <Card style={{ gap: 8 }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>🎂 ¿Cuándo es tu cumpleaños?</Text>
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Así la iglesia te saluda ese día. Solo se muestra el día, no tu edad.</Text>
@@ -367,7 +380,7 @@ export default function Iglesia() {
             </View>
           </Card>
         ) : null}
-        {daily ? (
+        {on('devocional') && daily ? (
           <View>
             <Pressable onPress={() => router.push('/devocional')} accessibilityRole="button" accessibilityLabel="Abrir el devocional de hoy">
               <VerseCard item={daily} church={church?.name} compact big hideMessage style={styles.dailyCard} />
@@ -398,7 +411,7 @@ export default function Iglesia() {
             </View>
           </View>
         ) : null}
-        {(() => {
+        {!on('devocional') ? null : (() => {
           const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
           const title = !st ? 'Plan de lectura de la Biblia' : st.today ? `Lectura de hoy: ${st.today}` : 'Hoy no hay lectura nueva';
           const hint = !st ? 'Elegí un plan y la app te dice qué leer cada día'
@@ -420,7 +433,7 @@ export default function Iglesia() {
           );
         })()}
 
-        {news.length ? (
+        {!on('anuncios') ? null : news.length ? (
           <Card style={styles.news}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Feather name="volume-2" size={18} color={colors.amberText} />
@@ -443,12 +456,14 @@ export default function Iglesia() {
 
         {!menu.top ? menuBlock : null}
 
-        <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Feather name="map" size={22} color={colors.green} />
-          <Text style={{ flex: 1, fontSize: 13, color: colors.text, lineHeight: 18 }}>
-            Para salir a evangelizar o a repartir volantes, andá a la pestaña Mapa y tocá Iniciar salida.
-          </Text>
-        </Card>
+        {on('evangelismo') ? (
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Feather name="map" size={22} color={colors.green} />
+            <Text style={{ flex: 1, fontSize: 13, color: colors.text, lineHeight: 18 }}>
+              Para salir a evangelizar o a repartir volantes, andá a la pestaña Mapa y tocá Iniciar salida.
+            </Text>
+          </Card>
+        ) : null}
 
         {socialLinks(church?.social, church?.website).length ? (
           <>

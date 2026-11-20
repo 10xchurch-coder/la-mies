@@ -4,11 +4,14 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { PickerModal } from './Picker';
 import { Button } from './ui';
-import { DEFAULT_TABS, TAB_OPTIONS, setTabs, tabInfo, useTabs, type TabKey } from '../lib/tabsPref';
+import { DEFAULT_TABS, TAB_OPTIONS, setTabs, tabInfo, tabRoute, useTabs, type TabKey } from '../lib/tabsPref';
+import { featureOfPath, featureOn } from '../lib/features';
+import { useAuth } from '../store/auth';
 import { colors, themed } from '../theme';
 
 export function TabsEditor() {
   const tabs = useTabs();
+  const { church } = useAuth();
   const [sel, setSel] = useState(2);
   const [picking, setPicking] = useState(false);
   const key = tabs[sel];
@@ -47,7 +50,7 @@ export function TabsEditor() {
       <Button title={fixed ? `${tabInfo(key).title} queda siempre` : `Cambiar ${tabInfo(key).title} por otra`} icon="repeat" small onPress={() => setPicking(true)} disabled={fixed} />
       {!same ? <Text onPress={() => { setTabs(DEFAULT_TABS); setSel(2); }} style={{ fontSize: 14, fontWeight: '700', color: colors.green, textAlign: 'center' }}>Volver a la barra de siempre</Text> : null}
       <PickerModal visible={picking} title={`¿Qué querés en lugar de ${tabInfo(key).title}?`}
-        items={TAB_OPTIONS.filter((t) => !tabs.includes(t.key)).map((t) => ({ id: t.key, title: t.title }))}
+        items={TAB_OPTIONS.filter((t) => !tabs.includes(t.key) && (() => { const f = featureOfPath(`/${tabRoute(t.key)}`); return f === null || featureOn(church?.disabled_features, f); })()).map((t) => ({ id: t.key, title: t.title }))}
         onClose={() => setPicking(false)}
         onPick={(id) => {
           setPicking(false);

@@ -9,6 +9,7 @@ import { Segmented } from '@/components/ui';
 import {
   churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport, absenceMessaged, setAbsenceMessaged,
   type BirthdayRow, type FirstVisitTask, type WeekListItem, type WeekListKey,
+  pastorUnread,
 } from '@/lib/api';
 import { delta, mondayOf } from '@/lib/desk';
 import { addDays, fmtDateShort, fmtMoney, isoDate, lastSaturday, parseDate } from '@/lib/format';
@@ -16,6 +17,7 @@ import { useLayout } from '@/lib/layout';
 import { messageText, openWhatsApp } from '@/lib/messages';
 import { missedKind } from '@/lib/followupConfig';
 import { useAuth } from '@/store/auth';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors, themed } from '@/theme';
 import type { AbsenceRow, ChurchEvent, Contact, FinBalance, ProgressRow, WeeklyReport } from '@/types';
 
@@ -27,6 +29,7 @@ const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', '
 export default function DeskHome() {
   const router = useRouter();
   const { profile, church, can } = useAuth();
+  const { on } = useFeatures();
   const { width } = useLayout();
   const [week, setWeek] = useState<Week>('last');
   const [report, setReport] = useState<WeeklyReport | null>(null);
@@ -39,14 +42,16 @@ export default function DeskHome() {
   const [people, setPeople] = useState<Contact[]>([]);
   const [funds, setFunds] = useState<FinBalance[]>([]);
   const [newSuggestions, setNewSuggestions] = useState(0);
+  const [pmUnread, setPmUnread] = useState(0);
   // La lista de nombres detrás del número que se tocó.
   const [openKpi, setOpenKpi] = useState<WeekListKey | null>(null);
   const [lists, setLists] = useState<Record<WeekListKey, WeekListItem[]> | null>(null);
 
   const seesPanel = can('inf.panel');
   const seesPeople = can('personas.ver_todas') || can('personas.editar');
-  const seesMoney = can('fin.ver');
-  const moderates = can('com.moderar');
+  const seesMoney = can('fin.ver') && on('finanzas');
+  const moderates = can('com.moderar') && on('sugerencias');
+  const isPastor = profile?.role === 'admin' && on('mensajes_pastor');
 
   const monday = useMemo(() => {
     const m = parseDate(mondayOf(new Date()));
@@ -74,9 +79,10 @@ export default function DeskHome() {
     set(upcomingBirthdays(14), setBdays);
     set(listEvents(), setEvents);
     if (seesMoney) set(finBalances(), setFunds);
+    if (isPastor) set(pastorUnread(), setPmUnread);
     if (moderates) set(suggestionsList(), (rows) => setNewSuggestions(rows.filter((r) => r.status === 'new').length));
     return () => { alive = false; };
-  }, [monday, seesPanel, seesPeople, seesMoney, moderates]));
+  }, [monday, seesPanel, seesPeople, seesMoney, moderates, isPastor]));
 
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
   const weekLabel = `Semana del ${fmtDateShort(monday)} al ${fmtDateShort(isoDate(addDays(parseDate(monday), 6)))}`;
@@ -121,8 +127,8 @@ export default function DeskHome() {
       subtitle="Cómo viene la iglesia y qué hay para atender."
       actions={<>
         {seesPeople ? <DeskButton label="Agregar persona" icon="user-plus" onPress={() => router.push('/persona/nueva')} /> : null}
-        {can('com.anuncios') ? <DeskButton label="Mandar anuncio" icon="bell" onPress={() => router.push('/anuncios')} /> : null}
-        {can('personas.asistencia') ? <DeskButton label="Tomar asistencia" icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
+        {can('com.anuncios') && on('anuncios') ? <DeskButton label="Mandar anuncio" icon="bell" onPress={() => router.push('/anuncios')} /> : null}
+        {can('personas.asistencia') && on('asistencia') ? <DeskButton label="Tomar asistencia" icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
       </>}
     >
       {seesPanel ? (
@@ -187,13 +193,13 @@ export default function DeskHome() {
 
       <View style={{ flexDirection: twoCols ? 'row' : 'column', gap: 18, alignItems: 'flex-start' }}>
         <View style={{ flex: twoCols ? 1.5 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
-          {seesPanel ? (
+          {seesPanel && on('asistencia') ? (
             <Panel title="Asistencia promedio por mes" hint="Promedio de los cultos de cada mes, últimos 12 meses" action="Ver progreso" onAction={() => router.push('/progreso-iglesia')}>
               <AttendanceBars rows={progress} />
             </Panel>
           ) : null}
 
-          {seesPeople || seesPanel ? (
+          {(seesPeople || seesPanel) && on('asistencia') ? (
             <Panel title="Faltaron el último fin de semana" hint={absences ? `${absences.length} en total · ${absent3.length} hace tres semanas o más` : 'Cargando…'} action="Ver todos" onAction={() => router.push('/ausencias')}>
               {absences && !absences.length ? <EmptyLine text="Nadie faltó. ¡Gloria a Dios!" /> : null}
               {absentShown.map((a) => (
@@ -218,7 +224,7 @@ export default function DeskHome() {
             </Panel>
           ) : null}
 
-          {seesPanel && report?.services?.length ? (
+          {seesPanel && on('asistencia') && report?.services?.length ? (
             <Panel title="Cultos de la semana" hint={weekLabel}>
               <View style={styles.tHead}>
                 <Text style={[styles.th, { flex: 1 }]}>Culto</Text>
@@ -238,10 +244,11 @@ export default function DeskHome() {
 
         <View style={{ flex: twoCols ? 1 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
           <Panel title="Para atender">
-            <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para escribir o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} />
-            {seesPeople || seesPanel ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push('/ausencias')} /> : null}
+            {on('seguimiento') ? <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para escribir o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} /> : null}
+            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push('/ausencias')} /> : null}
+            {isPastor ? <Todo icon="mail" n={pmUnread} text="mensajes privados sin leer" onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
             {moderates ? <Todo icon="message-square" n={newSuggestions} text="sugerencias sin leer" onPress={() => router.push('/sugerencias')} /> : null}
-            <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text="cumpleaños en los próximos 7 días" onPress={() => router.push('/cumples' as Href)} />
+            {on('cumples') ? <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text="cumpleaños en los próximos 7 días" onPress={() => router.push('/cumples' as Href)} /> : null}
           </Panel>
 
           {seesPeople ? (
@@ -254,7 +261,7 @@ export default function DeskHome() {
             </Panel>
           ) : null}
 
-          <Panel title="Próximos eventos" hint="Las próximas tres semanas" action="Calendario" onAction={() => router.push('/eventos')}>
+          {on('eventos') ? <Panel title="Próximos eventos" hint="Las próximas tres semanas" action="Calendario" onAction={() => router.push('/eventos')}>
             {!soon.length ? <EmptyLine text="No hay eventos cargados para estas semanas." /> : null}
             {soon.map((e) => {
               const d = new Date(e.starts_at);
@@ -273,9 +280,9 @@ export default function DeskHome() {
                 </Row>
               );
             })}
-          </Panel>
+          </Panel> : null}
 
-          <Panel title="Cumpleaños" hint="Los próximos 14 días" action="Ver todos" onAction={() => router.push('/cumples' as Href)}>
+          {on('cumples') ? <Panel title="Cumpleaños" hint="Los próximos 14 días" action="Ver todos" onAction={() => router.push('/cumples' as Href)}>
             {!bdays.length ? <EmptyLine text="Nadie cumple años en estos días." /> : null}
             {bdays.slice(0, 6).map((b) => (
               <Row key={b.contact_id} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: b.contact_id } })}>
@@ -287,7 +294,7 @@ export default function DeskHome() {
                 <IconLink icon="message-circle" label={`Saludar a ${b.name}`} disabled={!b.phone} onPress={() => openWhatsApp(b.phone, '')} />
               </Row>
             ))}
-          </Panel>
+          </Panel> : null}
 
           {seesMoney && funds.length ? (
             <Panel title="Fondos" hint="Saldo de hoy" action="Finanzas" onAction={() => router.push('/finanzas')}>

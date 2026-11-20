@@ -13,6 +13,8 @@ export type Church = {
   /** Redes y podcast de la iglesia: { instagram, facebook, youtube, podcast, whatsapp, threads, x, tiktok }. */
   social?: import('./lib/social').ChurchSocial | null;
   absence_recipients?: string[] | null;
+  /** Funciones de la app que esta iglesia apagó (ver lib/features). Vacío o ausente: todo prendido. */
+  disabled_features?: string[] | null;
   report_recipients?: string[] | null;
   id: string;
   name: string;
@@ -373,6 +375,10 @@ export type Announcement = {
   audience: 'all' | 'staff' | 'leaders' | 'teachers' | 'ministry' | 'group'; ministry_id: string | null; group_id: string | null; sent_to: number; created_at: string;
 };
 export type SuggestionRow = { id: string; author: string | null; mine: boolean; body: string; anonymous: boolean; status: 'new' | 'seen' | 'done'; reply: string | null; created_at: string };
+export type Missionary = { id: string; name: string; field: string | null; bio: string | null; photo_path: string | null; position: number };
+export type MissionaryReport = { id: string; missionary_id: string; month: string; title: string | null; summary: string | null; pdf_path: string | null; pdf_name: string | null; photo_paths: string[]; created_at: string };
+export type PastorMessage = { id: string; body: string; created_at: string; mine: boolean; read_at: string | null };
+export type PastorThreadRow = { member_id: string; name: string; photo_path: string | null; last_body: string; last_at: string; last_mine: boolean; unread: number };
 export type DirectoryRow = { id: string; display_name: string; phone: string | null; title: string | null; photo_path: string | null; contact_id: string | null };
 export type WeeklyReport = {
   from: string; to: string; outings: number; people_out: number; minutes: number; km: number; houses: number; contacts: number; gospel: number;

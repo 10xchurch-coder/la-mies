@@ -33,7 +33,7 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   const narrow = width < 900;
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [path]);
-  const nav = deskNavFor(perms);
+  const nav = deskNavFor(perms, church?.disabled_features);
   const isHere = (i: DeskItem) => (i.to === '/escritorio' ? path === '/escritorio' : path === i.to || path.startsWith(`${i.to}/`));
 
   const side = (
