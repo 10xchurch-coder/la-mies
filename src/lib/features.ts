@@ -45,7 +45,7 @@ export const FEATURES: Feature[] = [
     routes: ['/ministerios', '/ministerio'] },
   { key: 'predicas', label: 'Prédicas', group: 'Reuniones y enseñanza',
     hint: 'Los mensajes de cada semana con su video y su audio.',
-    routes: ['/predicas', '/predica'] },
+    routes: ['/predicas', '/t-predicas', '/predica'] },
   { key: 'vivo', label: 'Culto en vivo', group: 'Reuniones y enseñanza',
     hint: 'La transmisión del culto, con comentarios y notas.',
     routes: ['/vivo'] },
