@@ -226,6 +226,7 @@ export default function Evento() {
                 <View style={{ gap: 6 }}>
                   <Tag text={`Estás inscripto${mine.people > 1 ? ` (${mine.people} personas)` : ''}`} tone="green" />
                   {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>{mine.paid_amount >= ev.reg_price * mine.people ? 'Pagado ✓' : `Falta pagar ${fmtMoney(ev.reg_price * mine.people - mine.paid_amount)}`}</Text> : null}
+                  <Button title="Mi entrada (QR)" icon="tag" onPress={() => router.push({ pathname: '/evento/boleto', params: { id: ev.id, fecha: on } } as never)} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <Button title="Cambiar" variant="outline" small onPress={openForm} style={{ flex: 1 }} />
                     <Button title="Darme de baja" variant="ghost" small onPress={() => deleteRegistration(mine.id).then(load)} style={{ flex: 1 }} />
@@ -291,6 +292,12 @@ export default function Evento() {
 
         {staff && ev.weekly ? (
           <Button title="Suspender una fecha / no hubo" icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
+        ) : null}
+        {!ev.weekly && (staff || can('personas.asistencia')) ? (
+          <Button title="Puerta: anotar y marcar entradas" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
+        ) : null}
+        {!ev.weekly && staff ? (
+          <Button title="Hacer una rifa de este evento" icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
         ) : null}
         {staff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>

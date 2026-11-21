@@ -365,6 +365,7 @@ export type ChurchEvent = {
 export type EventRegistration = {
   id: string; event_id: string; occurs_on: string; user_id: string | null; name: string; phone: string | null; people: number;
   needs_ride: boolean; needs_lodging: boolean; notes: string | null; paid_amount: number; paid_note: string | null; created_at: string;
+  ticket_code?: string; checked_in_at?: string | null; walk_in?: boolean;
 };
 export type PrayerRow = {
   id: string; user_id: string; author: string | null; body: string; visibility: 'church' | 'pastor' | 'people'; people: string[];
@@ -414,3 +415,13 @@ export type FinByCategory = { direction: 'in' | 'out'; category: string; fund: s
 export type FinAccountBalance = { account_id: string; account: string; fund_id: string; fund: string; currency: string; balance: number };
 
 export type MeetingPoint = { id: string; church_id: string; created_by: string | null; lat: number; lng: number; meet_at: string; note: string | null; created_at: string };
+
+export type ChurchLink = { id: string; kind: import('@/lib/links').LinkKind; title: string; url: string | null; note: string | null; position: number };
+export type DoorCounts = { registered: number; checked_in: number; walk_ins: number; people_in: number };
+export type DoorMatch = { id: string; name: string; phone: string | null; people: number; checked_in: boolean; walk_in: boolean };
+export type DoorResult = { id: string; name: string; ticket_code?: string; people?: number; event_title?: string; occurs_on?: string; already: boolean };
+export type Raffle = {
+  id: string; title: string; prize: string | null; pool: import('@/lib/raffle').RafflePool; event_id: string | null; class_id: string | null;
+  occurs_on: string; unique_winner: boolean; created_at: string;
+};
+export type RaffleWinner = { id: string; raffle_id: string; name: string; phone: string | null; claimed: boolean; drawn_at: string };

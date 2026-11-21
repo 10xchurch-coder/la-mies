@@ -1040,3 +1040,69 @@ export async function setPicked(contact: string, group: string, on: boolean): Pr
 export async function setBusRider(contact: string, on: boolean): Promise<void> {
   ok(await supabase.rpc('set_bus_rider', { p_contact: contact, p_on: on }));
 }
+
+// Enlaces de la iglesia (música y radio)
+export async function churchLinks(): Promise<import('@/types').ChurchLink[]> {
+  return (ok(await supabase.from('church_links').select('id, kind, title, url, note, position').order('position').order('title')) ?? []) as import('@/types').ChurchLink[];
+}
+export async function saveChurchLink(l: { id?: string; kind: string; title: string; url: string | null; note: string | null; position?: number }): Promise<void> {
+  const row = { kind: l.kind, title: l.title.trim(), url: l.url, note: l.note?.trim() || null, ...(l.position === undefined ? {} : { position: l.position }) };
+  if (l.id) ok(await supabase.from('church_links').update(row).eq('id', l.id));
+  else ok(await supabase.from('church_links').insert(row));
+}
+export async function deleteChurchLink(id: string): Promise<void> {
+  ok(await supabase.from('church_links').delete().eq('id', id));
+}
+
+// La puerta de un evento: entradas con QR y registro rápido
+export async function doorRegister(eventId: string, on: string, name: string, phone: string | null, people: number): Promise<import('@/types').DoorResult> {
+  const rows = ok(await supabase.rpc('event_door_register', { p_event: eventId, p_on: on, p_name: name, p_phone: phone, p_people: people })) as { id: string; name: string; ticket_code: string; already: boolean }[];
+  return rows[0];
+}
+export async function doorCheckIn(by: { code?: string; reg?: string }): Promise<import('@/types').DoorResult> {
+  const rows = ok(await supabase.rpc('event_check_in', { p_code: by.code ?? null, p_reg: by.reg ?? null })) as import('@/types').DoorResult[];
+  return rows[0];
+}
+export async function doorCounts(eventId: string, on: string): Promise<import('@/types').DoorCounts> {
+  const rows = ok(await supabase.rpc('event_door_counts', { p_event: eventId, p_on: on })) as import('@/types').DoorCounts[];
+  return rows[0] ?? { registered: 0, checked_in: 0, walk_ins: 0, people_in: 0 };
+}
+export async function doorSearch(eventId: string, on: string, q: string): Promise<import('@/types').DoorMatch[]> {
+  return (ok(await supabase.rpc('event_door_search', { p_event: eventId, p_on: on, p_q: q })) ?? []) as import('@/types').DoorMatch[];
+}
+export async function canDoor(): Promise<boolean> {
+  return !!ok(await supabase.rpc('can_door'));
+}
+
+// Rifas
+export async function listRaffles(): Promise<import('@/types').Raffle[]> {
+  return (ok(await supabase.from('raffles').select('*').order('occurs_on', { ascending: false }).order('created_at', { ascending: false }).limit(100)) ?? []) as import('@/types').Raffle[];
+}
+export async function getRaffle(id: string): Promise<import('@/types').Raffle | null> {
+  return (ok(await supabase.from('raffles').select('*').eq('id', id).maybeSingle()) as import('@/types').Raffle | null) ?? null;
+}
+export async function createRaffle(r: { title: string; prize: string | null; pool: string; event_id: string | null; class_id: string | null; occurs_on: string; unique_winner: boolean }): Promise<string> {
+  const res = ok(await supabase.from('raffles').insert({ ...r, title: r.title.trim(), prize: r.prize?.trim() || null }).select('id').single()) as { id: string };
+  return res.id;
+}
+export async function deleteRaffle(id: string): Promise<void> {
+  ok(await supabase.from('raffles').delete().eq('id', id));
+}
+export async function rafflePoolCount(id: string): Promise<number> {
+  return Number(ok(await supabase.rpc('raffle_pool_count', { p_raffle: id })) ?? 0);
+}
+export async function drawRaffle(id: string, count: number): Promise<{ id: string; name: string; phone: string | null }[]> {
+  return (ok(await supabase.rpc('draw_raffle', { p_raffle: id, p_count: count })) ?? []) as { id: string; name: string; phone: string | null }[];
+}
+export async function raffleWinners(id: string): Promise<import('@/types').RaffleWinner[]> {
+  return (ok(await supabase.from('raffle_winners').select('id, raffle_id, name, phone, claimed, drawn_at').eq('raffle_id', id).order('drawn_at')) ?? []) as import('@/types').RaffleWinner[];
+}
+export async function raffleWinnerNames(id: string): Promise<{ name: string; drawn_at: string }[]> {
+  return (ok(await supabase.rpc('raffle_winner_names', { p_raffle: id })) ?? []) as { name: string; drawn_at: string }[];
+}
+export async function setWinnerClaimed(id: string, claimed: boolean): Promise<void> {
+  ok(await supabase.from('raffle_winners').update({ claimed }).eq('id', id));
+}
+export async function removeWinner(id: string): Promise<void> {
+  ok(await supabase.from('raffle_winners').delete().eq('id', id));
+}

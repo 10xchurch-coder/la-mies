@@ -59,6 +59,13 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "La Mies usa la cámara solo para leer el código QR de las entradas en la puerta de un evento.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Para que no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida de evangelismo o un viaje del colectivo que vos iniciaste está activo.",
