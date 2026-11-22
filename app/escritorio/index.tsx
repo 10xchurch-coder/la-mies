@@ -1,13 +1,13 @@
 // Inicio del escritorio: de un vistazo, cómo viene la iglesia y qué hay para atender.
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage, Panel } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
 import { Segmented } from '@/components/ui';
 import {
-  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport, absenceMessaged, setAbsenceMessaged,
+  churchProgress, finBalances, listEvents, listPeople, myFirstVisitTasks, completeFollowUp, suggestionsList, upcomingBirthdays, weekLists, weekendAbsences, weeklyReport, absenceMessaged, setAbsenceMessaged,
   type BirthdayRow, type FirstVisitTask, type WeekListItem, type WeekListKey,
   pastorUnread,
 } from '@/lib/api';
@@ -245,6 +245,26 @@ export default function DeskHome() {
         <View style={{ flex: twoCols ? 1 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
           <Panel title="Para atender">
             {on('seguimiento') ? <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para escribir o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} /> : null}
+            {on('seguimiento') && tasks.length ? (
+              <Pressable onPress={() => {
+                // Empezar la semana de cero: cierra los recordatorios sin marcarlos como hechos.
+                const monday = new Date(); monday.setHours(0, 0, 0, 0); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+                const old = tasks.filter((t) => new Date(t.due_at) < monday);
+                const clear = async (list: typeof tasks) => {
+                  for (let i = 0; i < list.length; i += 8) await Promise.allSettled(list.slice(i, i + 8).map((t) => completeFollowUp(t.id, null)));
+                  myFirstVisitTasks().then(setTasks).catch(() => undefined);
+                };
+                const people = (l: typeof tasks) => new Set(l.map((t) => t.contact_id)).size;
+                const buttons: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
+                if (old.length && old.length < tasks.length) buttons.push({ text: `Solo los de antes de esta semana (${people(old)})`, style: 'destructive', onPress: () => { clear(old); } });
+                buttons.push({ text: `Todos (${people(tasks)})`, style: 'destructive', onPress: () => { clear([...tasks]); } });
+                buttons.push({ text: 'Cancelar', style: 'cancel' });
+                Alert.alert('¿Borrar los recordatorios de visitas nuevas?', 'Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.', buttons);
+              }} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 10, marginLeft: 36, borderRadius: 8, borderWidth: 1, borderColor: colors.amberText }}>
+                <Feather name="trash-2" size={14} color={colors.amberText} />
+                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText }}>Borrar estos recordatorios</Text>
+              </Pressable>
+            ) : null}
             {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push('/ausencias')} /> : null}
             {isPastor ? <Todo icon="mail" n={pmUnread} text="mensajes privados sin leer" onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
             {moderates ? <Todo icon="message-square" n={newSuggestions} text="sugerencias sin leer" onPress={() => router.push('/sugerencias')} /> : null}
