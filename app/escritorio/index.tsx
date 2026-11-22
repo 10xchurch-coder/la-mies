@@ -244,7 +244,28 @@ export default function DeskHome() {
 
         <View style={{ flex: twoCols ? 1 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
           <Panel title="Para atender">
-            {on('seguimiento') ? <Todo icon="phone-call" n={tasks.length} text="visitas nuevas para escribir o visitar" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} /> : null}
+            {on('seguimiento') ? (() => {
+              // Por persona y por su paso más urgente (igual que en "Para seguir").
+              const by = new Map<string, string[]>();
+              for (const t of tasks) by.set(t.contact_id, [...(by.get(t.contact_id) ?? []), t.kind]);
+              const n = (pick: (k: string[]) => boolean) => [...by.values()].filter(pick).length;
+              const first = n((k) => k.includes('call'));
+              const again = n((k) => !k.includes('call') && k.includes('write2'));
+              const visit = n((k) => !k.includes('call') && !k.includes('write2'));
+              return (
+                <>
+                  <Todo icon="user-plus" n={first} text="vinieron por primera vez: mandarles la bienvenida" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} />
+                  {again ? <Todo icon="repeat" n={again} text="volvieron otra semana: escribirles y coordinar visita" onPress={() => router.push('/seguimiento')} /> : null}
+                  {visit ? <Todo icon="home" n={visit} text="para visitar en su casa" onPress={() => router.push('/seguimiento')} /> : null}
+                </>
+              );
+            })() : null}
+            {(seesPeople || seesPanel) && on('asistencia') && absentRest.length ? (
+              <>
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text="faltaron este fin de semana: escribirles" onPress={() => router.push('/ausencias')} /> : null}
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text="faltaron 2 semanas seguidas: coordinar visita" onPress={() => router.push('/ausencias')} /> : null}
+              </>
+            ) : null}
             {on('seguimiento') && tasks.length ? (
               <Pressable onPress={() => {
                 // Empezar la semana de cero: cierra los recordatorios sin marcarlos como hechos.

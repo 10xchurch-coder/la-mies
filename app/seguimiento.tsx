@@ -7,11 +7,11 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Button, Card, Empty, Field, Loading, Tag } from '@/components/ui';
-import { completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
+import { absenceMessaged, weekendAbsences, completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
 import { whyHere, type FollowContext } from '@/lib/followWhy';
 import { errorMessage } from '@/lib/supabase';
 import { formatPhone } from '@/lib/phone';
-import { INTEREST_LABEL, PROMISE_LABEL, fmtDateShort, fmtRelativeDay } from '@/lib/format';
+import { INTEREST_LABEL, PROMISE_LABEL, fmtDateShort, fmtRelativeDay, lastSaturday } from '@/lib/format';
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -26,9 +26,18 @@ const TASK_LABEL: Record<string, string> = {
   absent_visit: 'Está faltando: visitarlo',
 };
 
+// Los grupos de "Para hacer esta semana", en este orden. Cada persona va al grupo de su paso más urgente.
+const GROUPS: { key: string; title: string; hint: string; kinds: string[] }[] = [
+  { key: 'first', title: 'Vinieron por primera vez', hint: 'Mandales el mensaje de bienvenida. Al tocar WhatsApp, salen de la lista.', kinds: ['call'] },
+  { key: 'again', title: 'Volvieron otra semana', hint: 'Escribiles y coordiná una visita a su casa.', kinds: ['write2'] },
+  { key: 'visit', title: 'Para visitar en su casa', hint: 'Cuando los visites, tocá “Ya lo visité”.', kinds: ['visit'] },
+  { key: 'absent', title: 'Faltaron 2 semanas: visitarlos', hint: 'Pasá a verlos esta semana. Cuando los visites, tocá “Ya lo visité”.', kinds: ['absent_visit'] },
+];
+const groupOf = (kinds: string[]) => GROUPS.find((g) => g.kinds.some((k) => kinds.includes(k))) ?? GROUPS[2];
+
 export default function Seguimiento() {
   const router = useRouter();
-  const { profile, church } = useAuth();
+  const { profile, church, can } = useAuth();
   const [rows, setRows] = useState<FollowupRow[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
   const [tasks, setTasks] = useState<FirstVisitTask[]>([]);
@@ -81,8 +90,17 @@ export default function Seguimiento() {
   useEffect(() => {
     listServices().then(setServices).catch(() => undefined);
   }, []);
+  // Los que faltaron el último fin de semana (se les escribe desde "Faltaron"): acá solo se cuentan, para tener todo a la vista.
+  const seesAbsences = can('personas.ver_todas') || can('inf.panel');
+  const [absent, setAbsent] = useState<number[] | null>(null);
   useFocusEffect(
     useCallback(() => {
+      if (seesAbsences) {
+        Promise.all([weekendAbsences(lastSaturday()), absenceMessaged(lastSaturday())]).then(([r, sent]) => {
+          const left = r.filter((x) => !sent.includes(x.contact_id));
+          setAbsent([1, 2, 3].map((w) => left.filter((x) => Math.min(3, x.weeks_missed ?? 1) === w).length));
+        }).catch(() => undefined);
+      }
       myFollowups().then(setRows).catch(() => setRows([]));
       myFirstVisitTasks().then(setTasks).catch(() => undefined);
     }, []),
@@ -143,11 +161,31 @@ export default function Seguimiento() {
             downloadText(`para-visitar-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(['Nombre', 'Teléfono', 'Qué hacer', 'Cuándo', 'Dirección', 'Nota'], [...taskRows, ...contactRows])).catch(() => undefined);
           }} />
         ) : null}
+        {absent && absent.some(Boolean) ? (
+          <Pressable onPress={() => router.push('/ausencias')} accessibilityRole="button">
+            <Card style={{ gap: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>Faltaron el último fin de semana</Text>
+                <Feather name="chevron-right" size={18} color={colors.muted} />
+              </View>
+              {[['Faltaron este fin de semana', 'escribirles que los extrañamos'], ['Faltaron 2 semanas seguidas', 'coordinar una visita'], ['Faltaron 3 semanas o más', 'orar, escribirles y visitarlos']].map(([t, what], i) => absent[i] ? (
+                <Text key={t} style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{absent[i]}</Text> {t.toLowerCase()}: {what}</Text>
+              ) : null)}
+              <Text style={{ fontSize: 12, color: colors.green, fontWeight: '700' }}>Tocá acá para mandarles el mensaje</Text>
+            </Card>
+          </Pressable>
+        ) : null}
         {tasks.length ? (
           <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Para hacer esta semana</Text>
-            <Text style={{ fontSize: 12, color: colors.amberText }}>Visitas nuevas y personas que están faltando. El botón de WhatsApp abre el mensaje ya escrito. Cuando hagas cada paso, tocá “Ya le escribí” o “Ya lo visité” y sale de la lista.</Text>
-            {visitors.map((v) => {
+            <Text style={{ fontSize: 12, color: colors.amberText }}>El botón de WhatsApp abre el mensaje ya escrito y saca a la persona de la lista. Las visitas a la casa salen cuando tocás “Ya lo visité”.</Text>
+            {GROUPS.map((g) => ({ g, people: visitors.filter((v) => groupOf(v.tasks.map((t) => t.kind)).key === g.key) })).filter((x) => x.people.length).map(({ g, people }) => (
+            <View key={g.key} style={{ gap: 8, marginTop: 6 }}>
+              <View style={{ paddingTop: 8, borderTopWidth: 2, borderTopColor: colors.amber }}>
+                <Text style={{ fontSize: 16, fontWeight: '900', color: colors.text }}>{g.title} ({people.length})</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{g.hint}</Text>
+              </View>
+            {people.map((v) => {
               const kinds = v.tasks.map((t) => t.kind);
               // El mensaje que corresponde: segunda visita, primera visita, o coordinar la visita (por faltar o por la 2ª vez).
               const msg: MessageKind = kinds.includes('write2') ? 'secondvisit' : kinds.includes('call') ? 'firstvisit' : kinds.includes('absent_visit') ? 'missed2' : 'visit';
@@ -202,9 +240,13 @@ export default function Seguimiento() {
                     }
                     return (
                       <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                        <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
-                          onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
-                        {writes.length ? <Small icon="check" label="Ya le escribí" onPress={() => writes.forEach((t) => done(t, 'wrote'))} /> : null}
+                        {writes.length ? (
+                          <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                            onPress={() => { openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services })); writes.forEach((t) => done(t, 'wrote')); }} />
+                        ) : (
+                          <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                            onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
+                        )}
                         {visits.length ? <Small icon="check" label="Ya lo visité" onPress={() => visits.forEach((t) => done(t, 'visited'))} /> : null}
                       </View>
                     );
@@ -212,6 +254,8 @@ export default function Seguimiento() {
                 </View>
               );
             })}
+            </View>
+            ))}
             <Pressable onPress={clearAll} disabled={clearing} accessibilityRole="button"
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 42, marginTop: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.amberText, opacity: clearing ? 0.5 : 1 }}>
               <Feather name="trash-2" size={16} color={colors.amberText} />
