@@ -104,7 +104,7 @@ export default function Puerta() {
         <SectionTitle>Persona nueva</SectionTitle>
         <Card style={{ gap: 10 }}>
           <Field key={`n${nonce}`} autoFocus={nonce > 0} label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
-          <Field label="Teléfono" hint="(para la rifa y para avisarle)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" returnKeyType="done" onSubmitEditing={register} />
+          <Field label="Teléfono" hint="(para el sorteo y para avisarle)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" returnKeyType="done" onSubmitEditing={register} />
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }}>Cuántos entran</Text>
             <Button title="−" variant="outline" small onPress={() => setPeople((p) => Math.max(1, p - 1))} />

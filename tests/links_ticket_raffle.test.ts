@@ -43,7 +43,7 @@ test('entrada: el QR se lee de vuelta y se acepta el código a mano', () => {
 });
 
 test('rifa: avisa lo que falta', () => {
-  assert.equal(raffleProblem({ title: 'B', pool: 'bus', eventId: null, classId: null }), 'Ponele un nombre a la rifa');
+  assert.equal(raffleProblem({ title: 'B', pool: 'bus', eventId: null, classId: null }), 'Ponele un nombre al sorteo');
   assert.equal(raffleProblem({ title: 'Biblia', pool: 'event_checkins', eventId: null, classId: null }), 'Elegí el evento');
   assert.equal(raffleProblem({ title: 'Biblia', pool: 'class', eventId: null, classId: null }), 'Elegí la clase');
   assert.equal(raffleProblem({ title: 'Biblia', pool: 'bus', eventId: null, classId: null }), null);

@@ -169,7 +169,7 @@ export default function Iglesia() {
         { icon: 'music', label: 'Música', to: '/musica' as Href, show: true },
         { icon: 'book-open', label: 'Cancionero', to: '/canciones' as Href, show: true },
         { icon: 'radio', label: 'Radio', to: '/radio' as Href, show: true },
-        { icon: 'gift', label: 'Rifas', to: '/rifas' as Href, show: true },
+        { icon: 'gift', label: 'Sorteos', to: '/rifas' as Href, show: true },
         { icon: 'mail', label: pmUnread ? `Escribile al pastor (${pmUnread} nuevo${pmUnread > 1 ? 's' : ''})` : 'Escribile al pastor', to: '/pastor-hilo' as Href, show: profile?.role !== 'admin' },
         { icon: 'mail', label: pmUnread ? `Mensajes privados (${pmUnread})` : 'Mensajes privados', to: '/pastor-bandeja' as Href, show: profile?.role === 'admin' },
       ],

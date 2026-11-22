@@ -34,7 +34,7 @@ export default function RifaPantalla() {
   useFocusEffect(load);
 
   if (r === undefined) return <Loading />;
-  if (!r) return <Empty icon="gift" title="Esta rifa ya no está" />;
+  if (!r) return <Empty icon="gift" title="Este sorteo ya no está" />;
 
   const draw = async () => {
     setBusy(true);
@@ -45,10 +45,10 @@ export default function RifaPantalla() {
       load();
     } catch (e) { Alert.alert('No se pudo sacar', errorMessage(e)); } finally { setBusy(false); }
   };
-  const confirmRemove = (w: RaffleWinner) => Alert.alert('¿Sacar a este ganador?', `${w.name} vuelve a entrar en la rifa y podés sacar otro.`, [
+  const confirmRemove = (w: RaffleWinner) => Alert.alert('¿Sacar a este ganador?', `${w.name} vuelve a entrar en el sorteo y podés sacar otro.`, [
     { text: 'Cancelar', style: 'cancel' }, { text: 'Sacar', style: 'destructive', onPress: () => removeWinner(w.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
   ]);
-  const confirmDelete = () => Alert.alert('¿Borrar la rifa?', 'Se borran también sus ganadores.', [
+  const confirmDelete = () => Alert.alert('¿Borrar el sorteo?', 'Se borran también sus ganadores.', [
     { text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => deleteRaffle(id).then(() => router.back()).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
   ]);
 
@@ -104,7 +104,7 @@ export default function RifaPantalla() {
           <Card style={{ gap: 6 }}>{names.map((n) => <Text key={n} style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>🎉 {n}</Text>)}</Card>
         )}
 
-        {staff ? <Button title="Borrar la rifa" icon="trash-2" variant="ghost" onPress={confirmDelete} /> : null}
+        {staff ? <Button title="Borrar el sorteo" icon="trash-2" variant="ghost" onPress={confirmDelete} /> : null}
       </Screen>
     </View>
   );

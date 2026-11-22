@@ -36,7 +36,7 @@ export default function RifaNueva() {
     listClasses().then(setClasses).catch(() => undefined);
   }, []);
 
-  if (!can('cal.editar')) return <Empty icon="lock" title="Solo quien maneja el calendario" text="Pedile al pastor o a la secretaría que arme la rifa." />;
+  if (!can('cal.editar')) return <Empty icon="lock" title="Solo quien maneja el calendario" text="Pedile al pastor o a la secretaría que arme el sorteo." />;
 
   const save = async () => {
     const problem = raffleProblem({ title, pool, eventId, classId });
@@ -51,11 +51,11 @@ export default function RifaNueva() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Nueva rifa" back />
+      <Header title="Nuevo sorteo" back />
       <Screen>
         <Card style={{ gap: 10 }}>
-          <Field label="Nombre de la rifa" value={title} onChangeText={setTitle} placeholder="Rifa de la noche del sábado" />
-          <Field label="Qué se rifa" hint="(opcional)" value={prize} onChangeText={setPrize} placeholder="Una Biblia, una bicicleta, una pelota…" />
+          <Field label="Nombre del sorteo" value={title} onChangeText={setTitle} placeholder="Sorteo de la noche del sábado" />
+          <Field label="Qué se sortea" hint="(opcional)" value={prize} onChangeText={setPrize} placeholder="Una Biblia, una bicicleta, una pelota…" />
           <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>Entran los que…</Text>
           <Choice options={POOLS.map((p) => ({ value: p, label: POOL_LABEL[p] }))} value={pool} onChange={setPool} />
           <Text style={{ fontSize: 13, color: colors.muted }}>{POOL_HINT[pool]}</Text>
@@ -73,8 +73,8 @@ export default function RifaNueva() {
             </>
           ) : null}
           <Field label="Día" value={day} onChangeText={setDay} placeholder="2026-07-18" autoCorrect={false} />
-          <Toggle label="Que no gane dos veces el mismo día" hint="Quien ya ganó otra rifa ese día no entra a esta." value={unique} onChange={setUnique} />
-          <Button title="Crear la rifa" icon="gift" onPress={save} loading={busy} />
+          <Toggle label="Que no gane dos veces el mismo día" hint="Quien ya ganó otro sorteo ese día no entra a este." value={unique} onChange={setUnique} />
+          <Button title="Crear el sorteo" icon="gift" onPress={save} loading={busy} />
         </Card>
       </Screen>
     </View>

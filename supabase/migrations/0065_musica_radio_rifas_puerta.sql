@@ -259,9 +259,9 @@ returns table (id uuid, name text, phone text)
 language plpgsql security definer set search_path = public as $$
 declare v_church uuid := public.current_church_id();
 begin
-  if not public.has_perm('cal.editar') then raise exception 'Solo quien maneja el calendario puede sacar la rifa'; end if;
+  if not public.has_perm('cal.editar') then raise exception 'Solo quien maneja el calendario puede hacer el sorteo'; end if;
   if p_count is null or p_count < 1 or p_count > 20 then raise exception 'Se pueden sacar de 1 a 20 por vez'; end if;
-  if not exists (select 1 from public.raffles where raffles.id = p_raffle and church_id = v_church) then raise exception 'Esa rifa no es de tu iglesia'; end if;
+  if not exists (select 1 from public.raffles where raffles.id = p_raffle and church_id = v_church) then raise exception 'Ese sorteo no es de tu iglesia'; end if;
   perform pg_advisory_xact_lock(hashtext(p_raffle::text));
   return query
   with pick as (

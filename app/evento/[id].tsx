@@ -297,7 +297,7 @@ export default function Evento() {
           <Button title="Puerta: anotar y marcar entradas" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
         ) : null}
         {!ev.weekly && staff ? (
-          <Button title="Hacer una rifa de este evento" icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
+          <Button title="Hacer un sorteo de este evento" icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
         ) : null}
         {staff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>

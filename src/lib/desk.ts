@@ -37,7 +37,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'devocionales', label: 'Devocionales', icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
     { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
     { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
-    { key: 'rifas', label: 'Rifas', icon: 'gift', to: '/rifas', perms: [] },
+    { key: 'rifas', label: 'Sorteos', icon: 'gift', to: '/rifas', perms: [] },
     { key: 'cancionero', label: 'Cancionero', icon: 'book-open', to: '/canciones', perms: [] },
     { key: 'musica', label: 'Música', icon: 'music', to: '/musica', perms: [] },
     { key: 'radio', label: 'Radio', icon: 'radio', to: '/radio', perms: [] },

@@ -1074,7 +1074,7 @@ export async function canDoor(): Promise<boolean> {
   return !!ok(await supabase.rpc('can_door'));
 }
 
-// Rifas
+// Sorteos
 export async function listRaffles(): Promise<import('@/types').Raffle[]> {
   return (ok(await supabase.from('raffles').select('*').order('occurs_on', { ascending: false }).order('created_at', { ascending: false }).limit(100)) ?? []) as import('@/types').Raffle[];
 }

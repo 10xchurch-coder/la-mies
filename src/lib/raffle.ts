@@ -1,4 +1,4 @@
-// Rifas: de dónde salen los que participan. Sin pantalla ni base.
+// Sorteos: de dónde salen los que participan. Sin pantalla ni base.
 
 export type RafflePool = 'event_checkins' | 'event_registered' | 'class' | 'bus';
 
@@ -19,9 +19,9 @@ export const POOL_HINT: Record<RafflePool, string> = {
 export const needsEvent = (p: RafflePool): boolean => p === 'event_checkins' || p === 'event_registered';
 export const needsClass = (p: RafflePool): boolean => p === 'class';
 
-/** Un error legible si falta algo para armar la rifa, o null si está todo. */
+/** Un error legible si falta algo para armar el sorteo, o null si está todo. */
 export function raffleProblem(r: { title: string; pool: RafflePool; eventId: string | null; classId: string | null }): string | null {
-  if (r.title.trim().length < 2) return 'Ponele un nombre a la rifa';
+  if (r.title.trim().length < 2) return 'Ponele un nombre al sorteo';
   if (needsEvent(r.pool) && !r.eventId) return 'Elegí el evento';
   if (needsClass(r.pool) && !r.classId) return 'Elegí la clase';
   return null;
