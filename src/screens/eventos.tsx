@@ -203,12 +203,13 @@ export default function Eventos() {
           <View style={{ position: 'absolute', left: 4, top: 4, backgroundColor: big ? colors.amber : 'rgba(255,255,255,0.95)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, alignItems: 'center' }}>
             <Text style={{ fontSize: 9, fontWeight: '800', color: big ? '#FFF' : colors.greenText }}>{dayName(d.getDay()).slice(0, 3).toUpperCase()}</Text>
             <Text style={{ fontSize: 15, fontWeight: '900', color: big ? '#FFF' : colors.green, lineHeight: 17 }}>{d.getDate()}</Text>
+            <Text style={{ fontSize: 9, fontWeight: '900', color: big ? '#FFF' : colors.greenText }}>{MONTHS[d.getMonth()].slice(0, 3).toUpperCase()}</Text>
           </View>
         </EventImage>
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontSize: big ? 17 : 15, fontWeight: '800', color: colors.text }}>{o.ev.title}</Text>
           <Text style={{ fontSize: 12, color: colors.muted }}>
-            {o.ev.all_day ? (endIso && endIso > o.date ? `Hasta el ${fmtDateShort(endIso)}` : 'Todo el día') : hhmm(o.start)}
+            {cap(d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))} · {o.ev.all_day ? (endIso && endIso > o.date ? `hasta el ${fmtDateShort(endIso)}` : 'todo el día') : hhmm(o.start)}
             {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? ' · todos los años' : ''}{count ? ` · ${count} van` : ''}
           </Text>
           {o.ev.description ? <Text numberOfLines={2} style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
