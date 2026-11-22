@@ -104,23 +104,28 @@ export default function Seguimiento() {
   // Empezar de cero: cierra todos los recordatorios sin marcarlos como hechos (no cuentan como "le escribí" ni "lo visité").
   // Las personas quedan cargadas; si vuelven a venir o a faltar, la app arma recordatorios nuevos.
   const [clearing, setClearing] = useState(false);
+  const clearTasks = async (list: FirstVisitTask[]) => {
+    setClearing(true);
+    let failed = 0;
+    for (let i = 0; i < list.length; i += 8) {
+      const res = await Promise.allSettled(list.slice(i, i + 8).map((t) => completeFollowUp(t.id, null)));
+      failed += res.filter((r) => r.status === 'rejected').length;
+    }
+    setClearing(false);
+    reloadTasks();
+    if (failed) Alert.alert('Quedaron algunos', `${failed} no se pudieron borrar. Probá de nuevo con señal.`);
+  };
   const clearAll = () => {
-    const n = visitors.length;
-    Alert.alert('¿Borrar todos los recordatorios?', `Se borran los recordatorios de ${n} ${n === 1 ? 'persona' : 'personas'} y empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar todos', style: 'destructive', onPress: async () => {
-        setClearing(true);
-        const all = [...tasks];
-        let failed = 0;
-        for (let i = 0; i < all.length; i += 8) {
-          const res = await Promise.allSettled(all.slice(i, i + 8).map((t) => completeFollowUp(t.id, null)));
-          failed += res.filter((r) => r.status === 'rejected').length;
-        }
-        setClearing(false);
-        reloadTasks();
-        if (failed) Alert.alert('Quedaron algunos', `${failed} no se pudieron borrar. Probá de nuevo con señal.`);
-      } },
-    ]);
+    // "De la semana pasada" = los que vencían antes de este lunes.
+    const monday = new Date(); monday.setHours(0, 0, 0, 0); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    const old = tasks.filter((t) => new Date(t.due_at) < monday);
+    const people = (list: FirstVisitTask[]) => new Set(list.map((t) => t.contact_id)).size;
+    const nAll = people(tasks), nOld = people(old);
+    const buttons: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
+    if (nOld && nOld < nAll) buttons.push({ text: `Solo los de antes de esta semana (${nOld})`, style: 'destructive', onPress: () => clearTasks(old) });
+    buttons.push({ text: `Todos (${nAll})`, style: 'destructive', onPress: () => clearTasks([...tasks]) });
+    buttons.push({ text: 'Cancelar', style: 'cancel' });
+    Alert.alert('¿Borrar recordatorios?', 'Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.', buttons);
   };
 
   const week = Date.now() - 7 * 86400000;
@@ -210,7 +215,7 @@ export default function Seguimiento() {
             <Pressable onPress={clearAll} disabled={clearing} accessibilityRole="button"
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 42, marginTop: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.amberText, opacity: clearing ? 0.5 : 1 }}>
               <Feather name="trash-2" size={16} color={colors.amberText} />
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{clearing ? 'Borrando…' : `Borrar todos los recordatorios (${visitors.length})`}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{clearing ? 'Borrando…' : `Borrar recordatorios (${visitors.length})`}</Text>
             </Pressable>
           </Card>
         ) : null}
