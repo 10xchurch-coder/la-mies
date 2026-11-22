@@ -9,7 +9,7 @@ import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Field, Loading, SectionTitle } from '@/components/ui';
-import { addFinAttachment, addFinCategory, finAccounts, finCategories, finEntry, finFunds, finVendorHistory, readReceipt, saveFinEntry, readBankBalance, bankIncomeGuess, saveBankSnapshot } from '@/lib/api';
+import { addFinAttachment, addFinCategory, finAccounts, finCategories, finEntry, finFunds, finVendorHistory, finCategoryUsage, readReceipt, saveFinEntry, readBankBalance, bankIncomeGuess, saveBankSnapshot } from '@/lib/api';
 import { pickAndUploadReceipt, signedUrl, type FinPhoto } from '@/lib/files';
 import { fmtDateShort, fmtMoney, isoDate, parseDateAR, parseMoney } from '@/lib/format';
 import { categoryForVendor, isoToDMY, methodForAccount, todayDMY } from '@/lib/receipt';
@@ -53,6 +53,8 @@ export default function Movimiento() {
   const [reading, setReading] = useState(false);
   const [readNote, setReadNote] = useState<string | null>(null);
   const [newCat, setNewCat] = useState<string | null>(null);
+  const [usage, setUsage] = useState<Record<string, number>>({});
+  const [allCats, setAllCats] = useState(false);   // ver todas las categorías (si no, solo las más usadas)
   const [bankBal, setBankBal] = useState<{ balance: number; path: string } | null>(null);   // saldo leído de la captura del banco
   const [busy, setBusy] = useState(false);
 
@@ -69,6 +71,7 @@ export default function Movimiento() {
       }
     }).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
     finVendorHistory().then(setHistory).catch(() => undefined);
+    finCategoryUsage().then(setUsage).catch(() => undefined);
     if (params.id) {
       finEntry(params.id).then((e) => {
         if (!e) return;
@@ -82,7 +85,11 @@ export default function Movimiento() {
   }, [params.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const date = parseDateAR(dateText);
-  const outCats = useMemo(() => cats.filter((c) => c.direction === 'out'), [cats]);
+  const outCats = useMemo(() => cats.filter((c) => c.direction === 'out')
+    .sort((a, b) => (usage[b.id] ?? 0) - (usage[a.id] ?? 0) || a.name.localeCompare(b.name)), [cats, usage]);
+  // Las 5 más usadas por la iglesia; la elegida siempre se ve aunque no esté entre ellas.
+  const TOP = 5;
+  const shownCats = allCats ? outCats : [...outCats.slice(0, TOP), ...outCats.slice(TOP).filter((c) => c.id === cat)];
   const month = (date ?? isoDate(new Date())).slice(0, 7);
   const fundObj = funds.find((f) => f.id === fund);
   const accObj = accounts.find((a) => a.id === account);
@@ -228,6 +235,13 @@ export default function Movimiento() {
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Header title={params.id ? `Corregir ${TITLE[kind].toLowerCase()}` : TITLE[kind]} back />
       <Screen>
+        {kind !== 'transfer' ? (
+          <>
+            <SectionTitle>{kind === 'income' ? 'Entró en' : 'Se pagó con'}</SectionTitle>
+            <Pills items={accItems} value={account} onPick={setAccount} />
+          </>
+        ) : null}
+
         {kind === 'expense' ? (
           <Card style={{ gap: 10 }}>
             {receiptPhotos.length ? photoRow(receiptPhotos) : null}
@@ -243,10 +257,10 @@ export default function Movimiento() {
           </Card>
         ) : null}
 
-        {kind === 'income' && !params.id && accounts.some((a) => a.kind === 'bank') ? (
+        {kind === 'income' && !params.id && accObj?.kind === 'bank' ? (
           <Card style={{ gap: 10 }}>
             {photoRow(photos.filter((p) => p.kind === 'bank_screen'))}
-            <Button title="¿Entró al banco? Subí la captura del saldo" icon="smartphone" variant="outline" onPress={attachBank} disabled={reading} />
+            <Button title="Subí la captura del saldo del banco" icon="smartphone" variant="outline" onPress={attachBank} disabled={reading} />
             {reading ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <ActivityIndicator color={colors.green} />
@@ -296,8 +310,21 @@ export default function Movimiento() {
               <>
                 <SectionTitle>Categoría</SectionTitle>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {outCats.map((c) => <Pressable key={c.id} onPress={() => { setCat(c.id); setCatAuto(false); }} style={pill(cat === c.id)} accessibilityRole="button"><Text style={pillText(cat === c.id)}>{c.name}</Text></Pressable>)}
-                  {financeLevel >= 3 && newCat === null ? <Pressable onPress={() => setNewCat('')} style={pill(false)} accessibilityRole="button"><Text style={pillText(false)}>+ Otra</Text></Pressable> : null}
+                  {shownCats.map((c) => <Pressable key={c.id} onPress={() => { setCat(c.id); setCatAuto(false); }} style={pill(cat === c.id)} accessibilityRole="button"><Text style={pillText(cat === c.id)}>{c.name}</Text></Pressable>)}
+                </View>
+                <View style={{ flexDirection: 'row', gap: 16, marginTop: -4 }}>
+                  {outCats.length > TOP ? (
+                    <Pressable onPress={() => setAllCats((x) => !x)} accessibilityRole="button" hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Feather name={allCats ? 'chevron-up' : 'chevron-down'} size={16} color={colors.green} />
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.green }}>{allCats ? 'Ver menos' : `Ver más (${outCats.length - TOP})`}</Text>
+                    </Pressable>
+                  ) : null}
+                  {financeLevel >= 3 && newCat === null ? (
+                    <Pressable onPress={() => { setNewCat(''); setAllCats(true); }} accessibilityRole="button" hitSlop={8} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <Feather name="plus" size={16} color={colors.green} />
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.green }}>Agregar categoría</Text>
+                    </Pressable>
+                  ) : null}
                 </View>
                 {catAuto && cat ? <Text style={{ fontSize: 12, color: colors.greenText, marginTop: -6 }}>Elegida por la app. Tocá otra si no es.</Text> : null}
                 {newCat !== null ? (
@@ -308,9 +335,6 @@ export default function Movimiento() {
                 ) : null}
               </>
             ) : null}
-
-            <SectionTitle>{kind === 'income' ? 'Entró en' : 'Se pagó con'}</SectionTitle>
-            <Pills items={accItems} value={account} onPick={setAccount} />
 
             {kind === 'expense' ? (
               <Field label="A quién se pagó (opcional)" value={counterpart} onChangeText={vendorChanged} placeholder="Edenor, ferretería…" />

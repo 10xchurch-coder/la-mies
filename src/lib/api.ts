@@ -1182,3 +1182,12 @@ export async function saveSong(s: { id?: string; title: string; author: string |
 export async function deleteSong(id: string): Promise<void> {
   ok(await supabase.from('songs').delete().eq('id', id));
 }
+
+/** Cuántas veces se usó cada categoría de gasto (las más usadas se muestran primero). */
+export async function finCategoryUsage(): Promise<Record<string, number>> {
+  const rows = (ok(await supabase.from('fin_entries').select('category_id').eq('kind', 'expense').is('voided_at', null).not('category_id', 'is', null)
+    .order('created_at', { ascending: false }).limit(3000)) ?? []) as { category_id: string }[];
+  const out: Record<string, number> = {};
+  for (const r of rows) out[r.category_id] = (out[r.category_id] ?? 0) + 1;
+  return out;
+}
