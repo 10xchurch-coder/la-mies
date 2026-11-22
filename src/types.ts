@@ -3,6 +3,8 @@ export type Role = 'member' | 'captain' | 'evangelism' | 'deacon' | 'secretary' 
 export type OutingKind = 'soulwinning' | 'flyers';
 
 export type Church = {
+  /** Finanzas: anotar quién dio cada ingreso (algunas iglesias lo llevan; otras no). */
+  fin_track_donors?: boolean;
   /** Meses sin venir para pasar a inactivos (vacío = apagado). */
   inactive_months?: number | null;
   logo_path?: string | null;
@@ -437,3 +439,6 @@ export type InactiveRow = {
   id: string; name: string; phone: string | null; photo_path: string | null; inactive_since: string | null; inactive_auto: boolean;
   prev_status: PersonStatus | null; last_seen: string | null; total: number;
 };
+
+export type ReceiptRead = { total: number | null; currency: 'ARS' | 'USD' | null; vendor: string | null; date: string | null; category: string | null };
+export type Song = { id: string; title: string; author: string | null; lyrics: string; spotify_url: string | null; youtube_url: string | null; song_key: string | null; position: number; created_at: string };

@@ -5,8 +5,8 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Field, Loading, SectionTitle } from '@/components/ui';
-import { finAccountBalances, finBalances, saveFinFund } from '@/lib/api';
+import { Button, Card, Field, Loading, SectionTitle, Toggle } from '@/components/ui';
+import { finAccountBalances, finBalances, saveFinFund, setFinTrackDonors } from '@/lib/api';
 import { fmtMoney, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -24,7 +24,7 @@ function monthRange(d = new Date()): [string, string] {
 
 export default function Finanzas() {
   const router = useRouter();
-  const { financeLevel } = useAuth();
+  const { financeLevel, can, church, refreshProfile } = useAuth();
   const [all, setAll] = useState<FinBalance[] | null>(null);
   const [month, setMonth] = useState<FinBalance[]>([]);
   const [newFund, setNewFund] = useState<string | null>(null);
@@ -82,11 +82,10 @@ export default function Finanzas() {
 
             {financeLevel >= 2 ? (
               <>
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Button title="Ingreso" icon="plus-circle" onPress={() => go('/finanzas/movimiento?kind=income')} style={{ flex: 1 }} />
-                  <Button title="Gasto" icon="minus-circle" variant="outline" onPress={() => go('/finanzas/movimiento?kind=expense')} style={{ flex: 1 }} />
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <Button title="Ingreso" icon="plus-circle" onPress={() => go('/finanzas/movimiento?kind=income')} style={{ flex: 1, height: 56 }} />
+                  <Button title="Gasto" icon="camera" variant="outline" onPress={() => go('/finanzas/movimiento?kind=expense')} style={{ flex: 1, height: 56 }} />
                 </View>
-                <Button title="Pasar plata de un fondo a otro" icon="repeat" variant="outline" onPress={() => go('/finanzas/movimiento?kind=transfer')} />
               </>
             ) : null}
 
@@ -128,6 +127,7 @@ export default function Finanzas() {
             <Card style={{ padding: 0 }}>
               {([
                 ['list', 'Movimientos', 'Todo lo que entró y salió, mes por mes', '/finanzas/movimientos'],
+                ...(financeLevel >= 2 ? [['shuffle', 'Pasar plata', 'De un fondo a otro, o del banco a efectivo', '/finanzas/movimiento?kind=transfer']] : []),
                 ['folder', 'Comprobantes', 'Fotos de recibos y del banco, en carpetas por mes', '/finanzas/comprobantes'],
                 ['bar-chart-2', 'Informe', 'Por mes, por fondo y por categoría', '/finanzas/informe'],
                 ['repeat', 'Pases automáticos', 'Cada mes, de un fondo a otro (ej. General → Vehículo)', '/finanzas/automaticos'],
@@ -144,6 +144,10 @@ export default function Finanzas() {
                 </Pressable>
               ))}
             </Card>
+            {financeLevel >= 3 || can('admin.permisos') ? (
+              <Toggle label="Anotar quién dio cada ingreso" hint="Apagado: los ingresos se cargan sin nombre." value={!!church?.fin_track_donors}
+                onChange={(v) => setFinTrackDonors(v).then(refreshProfile).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+            ) : null}
             <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
               Nada se borra: si algo se cargó mal, se anula con el motivo y queda en el historial. {financeLevel >= 4 ? 'Los roles de finanzas se dan en Administración → Hermanos.' : ''}
             </Text>

@@ -7,7 +7,7 @@ export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
   | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
-  | 'musica' | 'radio' | 'rifas'
+  | 'musica' | 'cancionero' | 'radio' | 'rifas'
   | 'finanzas' | 'ofrendar' | 'informes';
 
 export type FeatureGroup = 'Evangelismo y visitas' | 'Reuniones y enseñanza' | 'Comunidad' | 'Dinero e informes';
@@ -87,6 +87,9 @@ export const FEATURES: Feature[] = [
   { key: 'musica', label: 'Música de la iglesia', group: 'Comunidad',
     hint: 'Las listas de Spotify y YouTube Music con la música que cantamos y escuchamos.',
     routes: ['/musica', '/admin/musica'] },
+  { key: 'cancionero', label: 'Cancionero', group: 'Comunidad',
+    hint: 'Las canciones que cantamos, con la letra y el enlace para escucharlas.',
+    routes: ['/canciones'] },
   { key: 'radio', label: 'Radio de la iglesia', group: 'Comunidad',
     hint: 'La radio FM y la radio por internet para escuchar desde la app.',
     routes: ['/radio', '/admin/radio'] },

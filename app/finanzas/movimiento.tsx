@@ -1,24 +1,24 @@
-// Cargar o corregir un movimiento: ingreso, gasto o pase entre fondos.
-// Para una transferencia que entró, se adjunta la foto de la pantalla del banco; para un gasto, la del recibo.
-// Las fotos quedan en la carpeta del mes del movimiento.
+// Cargar o corregir un movimiento. Se entra desde los botones Ingreso o Gasto de Finanzas (y "Pasar plata" para un pase).
+// Gasto: lo primero es la foto del recibo; la app lee el total y el comercio, y elige la categoría que se usó la última vez para ese comercio.
+// Ingreso: solo monto, fecha, fondo y si entró en efectivo o al banco.
+// La fecha ya viene con la de hoy; se toca para cambiarla.
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { DateChips } from '@/components/Picker';
 import { Button, Card, Choice, Field, Loading, SectionTitle } from '@/components/ui';
-import { addFinAttachment, addFinCategory, finAccounts, finCategories, finEntry, finFunds, saveFinEntry } from '@/lib/api';
+import { addFinAttachment, addFinCategory, finAccounts, finCategories, finEntry, finFunds, finVendorHistory, readReceipt, saveFinEntry, readBankBalance, bankIncomeGuess, saveBankSnapshot } from '@/lib/api';
 import { pickAndUploadReceipt, signedUrl, type FinPhoto } from '@/lib/files';
-import { addDays, fmtDateShort, fmtMoney, isoDate, parseDateAR, parseMoney } from '@/lib/format';
+import { fmtDateShort, fmtMoney, isoDate, parseDateAR, parseMoney } from '@/lib/format';
+import { categoryForVendor, isoToDMY, methodForAccount, todayDMY } from '@/lib/receipt';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
-import type { FinAccount, FinCategory, FinFund, FinKind, FinMethod } from '@/types';
+import type { FinAccount, FinCategory, FinFund, FinKind } from '@/types';
 
-const KIND_LABEL: Record<FinKind, string> = { income: 'Ingreso', expense: 'Gasto', transfer: 'Pase entre fondos' };
-const METHOD_LABEL: Record<FinMethod, string> = { cash: 'Efectivo', transfer: 'Transferencia', card: 'Tarjeta', check: 'Cheque', other: 'Otro' };
+const TITLE: Record<FinKind, string> = { income: 'Ingreso', expense: 'Gasto', transfer: 'Pasar plata' };
 
 function Thumb({ path }: { path: string }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -35,9 +35,9 @@ export default function Movimiento() {
   const [funds, setFunds] = useState<FinFund[]>([]);
   const [accounts, setAccounts] = useState<FinAccount[]>([]);
   const [cats, setCats] = useState<FinCategory[]>([]);
+  const [history, setHistory] = useState<{ counterpart: string | null; category_id: string | null }[]>([]);
   const [loaded, setLoaded] = useState(!params.id);
-  const [date, setDate] = useState(isoDate(new Date()));
-  const [otherDate, setOtherDate] = useState('');
+  const [dateText, setDateText] = useState(todayDMY());   // lo que se ve en el campo; ya viene con hoy
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState<'ARS' | 'USD'>('ARS');
   const [fund, setFund] = useState<string>('');
@@ -45,87 +45,150 @@ export default function Movimiento() {
   const [between, setBetween] = useState<'funds' | 'accounts'>('funds');
   const [toAccount, setToAccount] = useState<string>('');
   const [cat, setCat] = useState<string>('');
+  const [catAuto, setCatAuto] = useState(false);         // la eligió la app (se muestra el aviso)
   const [account, setAccount] = useState<string>('');
-  const [method, setMethod] = useState<FinMethod>('cash');
   const [counterpart, setCounterpart] = useState('');
   const [desc, setDesc] = useState('');
   const [photos, setPhotos] = useState<(FinPhoto & { kind: 'receipt' | 'bank_screen' })[]>([]);
+  const [reading, setReading] = useState(false);
+  const [readNote, setReadNote] = useState<string | null>(null);
   const [newCat, setNewCat] = useState<string | null>(null);
+  const [bankBal, setBankBal] = useState<{ balance: number; path: string } | null>(null);   // saldo leído de la captura del banco
   const [busy, setBusy] = useState(false);
+
+  const trackDonors = !!church?.fin_track_donors;
 
   useEffect(() => {
     Promise.all([finFunds(), finAccounts(), finCategories()]).then(([f, a, c]) => {
       setFunds(f.filter((x) => x.active));
-      setAccounts(a);
+      setAccounts(a.filter((x) => x.active));
       setCats(c);
       if (!params.id) {
         setFund(params.fund ?? f.find((x) => x.kind === 'general')?.id ?? f[0]?.id ?? '');
-        setAccount(a[0]?.id ?? '');
+        setAccount(a.find((x) => x.kind === 'cash')?.id ?? a[0]?.id ?? '');
       }
     }).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+    finVendorHistory().then(setHistory).catch(() => undefined);
     if (params.id) {
       finEntry(params.id).then((e) => {
         if (!e) return;
-        setKind(e.kind); setDate(e.on_date); setAmount(String(e.amount).replace('.', ',')); setCurrency(e.currency === 'USD' ? 'USD' : 'ARS');
+        setKind(e.kind); setDateText(isoToDMY(e.on_date)); setAmount(String(e.amount).replace('.', ',')); setCurrency(e.currency === 'USD' ? 'USD' : 'ARS');
         setFund(e.fund_id); setToFund(e.to_fund_id ?? ''); setCat(e.category_id ?? ''); setAccount(e.account_id ?? '');
         setToAccount(e.to_account_id ?? ''); if (e.kind === 'transfer' && e.to_fund_id === e.fund_id) setBetween('accounts');
-        setMethod(e.method); setCounterpart(e.counterpart ?? ''); setDesc(e.description ?? '');
+        setCounterpart(e.counterpart ?? ''); setDesc(e.description ?? '');
         setLoaded(true);
       });
     }
   }, [params.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const dirCats = useMemo(() => cats.filter((c) => c.direction === (kind === 'income' ? 'in' : 'out')), [cats, kind]);
-  const dates = useMemo(() => Array.from({ length: 10 }, (_, i) => isoDate(addDays(new Date(), -i))), []);
-  const month = date.slice(0, 7);
+  const date = parseDateAR(dateText);
+  const outCats = useMemo(() => cats.filter((c) => c.direction === 'out'), [cats]);
+  const month = (date ?? isoDate(new Date())).slice(0, 7);
   const fundObj = funds.find((f) => f.id === fund);
+  const accObj = accounts.find((a) => a.id === account);
   const needsDetail = kind !== 'transfer' && fundObj?.kind === 'designated';
 
-  const attach = async (k: 'receipt' | 'bank_screen') => {
+  // Al escribir el comercio, si ya se le pagó antes, se elige sola la misma categoría (se puede cambiar).
+  const vendorChanged = (t: string) => {
+    setCounterpart(t);
+    if (kind !== 'expense' || (cat && !catAuto)) return;
+    const c = categoryForVendor(t, history);
+    if (c) { setCat(c); setCatAuto(true); }
+  };
+
+  const snapReceipt = async () => {
     if (!church) return;
     try {
-      const p = await pickAndUploadReceipt(church.id, month, k === 'bank_screen' ? 'Pantalla del banco' : 'Recibo / factura');
-      if (p) setPhotos((x) => [...x, { ...p, kind: k }]);
+      const p = await pickAndUploadReceipt(church.id, month, 'Foto del recibo');
+      if (!p) return;
+      setPhotos((x) => [...x, { ...p, kind: 'receipt' }]);
+      if (/\.pdf$/i.test(p.path)) return;
+      setReading(true); setReadNote(null);
+      const r = await readReceipt(p.path, outCats.map((c) => c.name)).catch(() => null);
+      setReading(false);
+      if (!r) { setReadNote('No pude leer el recibo. Escribí el monto.'); return; }
+      const filled: string[] = [];
+      if (r.total && !parseMoney(amount)) { setAmount(String(r.total).replace('.', ',')); filled.push('el monto'); }
+      if (r.currency === 'USD') setCurrency('USD');
+      if (r.vendor && !counterpart) { setCounterpart(r.vendor); filled.push('el comercio'); }
+      if (r.date && /^\d{4}-\d{2}-\d{2}$/.test(r.date) && r.date <= isoDate(new Date())) { setDateText(isoToDMY(r.date)); filled.push('la fecha'); }
+      if (!cat || catAuto) {
+        const remembered = categoryForVendor(r.vendor, history);
+        const guessed = remembered ?? outCats.find((c) => c.name.toLowerCase() === (r.category ?? '').toLowerCase())?.id ?? null;
+        if (guessed) { setCat(guessed); setCatAuto(true); filled.push('la categoría'); }
+      }
+      setReadNote(filled.length ? `Leí ${filled.join(', ').replace(/, ([^,]*)$/, ' y $1')} del recibo. Revisalo antes de guardar.` : 'No encontré el total en la foto. Escribí el monto.');
     } catch (e) {
+      setReading(false);
       Alert.alert('No se pudo subir', errorMessage(e));
     }
+  };
+
+  // Ingreso al banco: con la captura del saldo, lo que entró = saldo nuevo − (saldo de la vez anterior + lo que ya se cargó del banco desde entonces).
+  const attachBank = async () => {
+    if (!church) return;
+    try {
+      const p = await pickAndUploadReceipt(church.id, month, 'Captura del banco');
+      if (!p) return;
+      setPhotos((x) => [...x, { ...p, kind: 'bank_screen' }]);
+      const bank = accounts.find((a) => a.kind === 'bank');
+      if (!bank || /\.pdf$/i.test(p.path)) return;
+      setAccount(bank.id);
+      setReading(true); setReadNote(null);
+      const bal = await readBankBalance(p.path).catch(() => null);
+      if (bal === null) { setReading(false); setReadNote('No pude leer el saldo en la captura. Escribí el monto que entró.'); return; }
+      setBankBal({ balance: bal, path: p.path });
+      const g = await bankIncomeGuess(bank.id, bal).catch(() => null);
+      setReading(false);
+      if (!g) { setReadNote(`Saldo leído: ${fmtMoney(bal)}. Es la primera vez: guardo este saldo y la próxima vez calculo solo lo que entró. Ahora escribí el monto.`); return; }
+      const when = new Date(g.prev_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' });
+      if (g.suggested > 0) {
+        setAmount(String(g.suggested).replace('.', ','));
+        setReadNote(`Saldo ahora ${fmtMoney(bal)}. El ${when} había ${fmtMoney(g.prev_balance)}${g.recorded_since ? ` y desde entonces se cargaron ${fmtMoney(g.recorded_since)} en el banco` : ''}. Entraron ${fmtMoney(g.suggested)}. Revisalo antes de guardar.`);
+      } else {
+        setReadNote(`Saldo ahora ${fmtMoney(bal)}. Comparado con el ${when} (${fmtMoney(g.prev_balance)}${g.recorded_since ? ` más lo cargado: ${fmtMoney(g.recorded_since)}` : ''}) no entró plata nueva. Revisá si falta cargar algún gasto del banco.`);
+      }
+    } catch (e) { setReading(false); Alert.alert('No se pudo subir', errorMessage(e)); }
   };
 
   const createCat = async () => {
     if (!newCat?.trim()) return;
     try {
-      const c = await addFinCategory(newCat.trim(), kind === 'income' ? 'in' : 'out');
-      setCats((x) => [...x, c]);
-      setCat(c.id);
-      setNewCat(null);
-    } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
-    }
+      const c = await addFinCategory(newCat.trim(), 'out');
+      setCats((x) => [...x, c]); setCat(c.id); setCatAuto(false); setNewCat(null);
+    } catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
   };
 
   const save = async () => {
     const v = parseMoney(amount);
     if (!v) { Alert.alert('Falta el monto', 'Escribí el monto, por ejemplo 15.000 o 15000,50.'); return; }
+    if (!date) { Alert.alert('La fecha no sirve', 'Escribila así: 22/11/2026.'); return; }
+    if (date > isoDate(new Date())) { Alert.alert('Fecha en el futuro', 'Revisá la fecha.'); return; }
     if (!fund) { Alert.alert('Elegí el fondo'); return; }
+    if (kind === 'expense' && !cat) { Alert.alert('Elegí la categoría', '¿En qué se gastó?'); return; }
     if (kind === 'transfer' && between === 'funds' && (!toFund || toFund === fund)) { Alert.alert('Elegí a qué fondo pasa'); return; }
-    if (kind === 'transfer' && between === 'accounts' && (!account || !toAccount || account === toAccount)) { Alert.alert('Elegí de qué cuenta sale y a cuál entra'); return; }
+    if (kind === 'transfer' && between === 'accounts' && (!account || !toAccount || account === toAccount)) { Alert.alert('Elegí de dónde sale y a dónde entra'); return; }
     if (needsDetail && !desc.trim()) { Alert.alert('¿Para qué es?', 'En el fondo Designado, escribí para qué se dio o en qué se usó.'); return; }
-    if (kind !== 'transfer' && method === 'transfer' && !photos.length && !params.id) {
-      const go = await new Promise<boolean>((resolve) => Alert.alert('Sin foto', kind === 'income' ? '¿Guardar sin la foto de la pantalla del banco?' : '¿Guardar sin la foto del comprobante?', [
-        { text: 'Agregar foto', style: 'cancel', onPress: () => resolve(false) },
+    if (kind === 'expense' && !photos.length && !params.id) {
+      const go = await new Promise<boolean>((resolve) => Alert.alert('Sin recibo', '¿Guardar el gasto sin la foto del recibo?', [
+        { text: 'Sacar foto', style: 'cancel', onPress: () => resolve(false) },
         { text: 'Guardar igual', onPress: () => resolve(true) },
       ]));
-      if (!go) return;
+      if (!go) { snapReceipt(); return; }
     }
     setBusy(true);
     try {
       const id = await saveFinEntry({
         id: params.id, on_date: date, kind, fund_id: fund, to_fund_id: kind === 'transfer' ? (between === 'accounts' ? fund : toFund) : null, amount: v, currency,
         to_account_id: kind === 'transfer' && between === 'accounts' ? toAccount : null,
-        category_id: kind === 'transfer' ? null : cat || null, account_id: account || null, method,
-        counterpart: counterpart.trim() || null, description: desc.trim() || null,
+        category_id: kind === 'expense' ? cat || null : null,
+        account_id: account || null, method: methodForAccount(accObj?.kind),
+        counterpart: kind === 'expense' || trackDonors ? counterpart.trim() || null : null,
+        description: kind === 'expense' || needsDetail || kind === 'transfer' ? desc.trim() || null : null,
       });
-      for (const p of photos) await addFinAttachment({ entry_id: id, month, path: p.path, kind: p.kind, file_name: p.name });
+      for (const p of photos) await addFinAttachment({ entry_id: id, month: date.slice(0, 7), path: p.path, kind: p.kind, file_name: p.name });
+      // El saldo que se leyó queda guardado para calcular el próximo ingreso.
+      if (bankBal && accObj?.kind === 'bank') await saveBankSnapshot(accObj.id, bankBal.balance, id, bankBal.path).catch(() => undefined);
       router.back();
     } catch (e) {
       Alert.alert('No se pudo guardar', errorMessage(e));
@@ -139,104 +202,133 @@ export default function Movimiento() {
 
   const pill = (on: boolean) => ({ height: 40, paddingHorizontal: 14, borderRadius: 999, borderWidth: 1.5, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.greenSoft : colors.bg, justifyContent: 'center' as const });
   const pillText = (on: boolean) => ({ fontSize: 14, fontWeight: (on ? '800' : '600') as '800' | '600', color: on ? colors.greenText : colors.text });
+  const Pills = ({ items, value, onPick }: { items: { id: string; name: string }[]; value: string; onPick: (id: string) => void }) => (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      {items.map((x) => <Pressable key={x.id} onPress={() => onPick(x.id)} style={pill(value === x.id)} accessibilityRole="button" accessibilityState={{ selected: value === x.id }}><Text style={pillText(value === x.id)}>{x.name}</Text></Pressable>)}
+    </View>
+  );
+  // Efectivo o banco: las cuentas se muestran con ese nombre corto.
+  const accItems = accounts.map((a) => ({ id: a.id, name: a.kind === 'bank' ? (accounts.filter((x) => x.kind === 'bank').length > 1 ? a.name : 'Banco') : (accounts.filter((x) => x.kind === 'cash').length > 1 ? a.name : 'Efectivo') }));
+  const receiptPhotos = photos.filter((p) => p.kind === 'receipt');
+
+  const photoRow = (list: typeof photos) => list.length ? (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      {list.map((p) => (
+        <View key={p.path}>
+          <Thumb path={p.path} />
+          <Pressable onPress={() => setPhotos((x) => x.filter((y) => y.path !== p.path))} style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center' }} accessibilityLabel="Quitar">
+            <Feather name="x" size={14} color="#FFF" />
+          </Pressable>
+        </View>
+      ))}
+    </View>
+  ) : null;
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title={params.id ? 'Corregir movimiento' : KIND_LABEL[kind]} back />
+      <Header title={params.id ? `Corregir ${TITLE[kind].toLowerCase()}` : TITLE[kind]} back />
       <Screen>
-        {!params.id ? (
-          <Choice columns={3} options={(Object.keys(KIND_LABEL) as FinKind[]).map((k) => ({ value: k, label: k === 'transfer' ? 'Pase' : KIND_LABEL[k] }))} value={kind} onChange={(k) => { setKind(k); setCat(''); }} />
+        {kind === 'expense' ? (
+          <Card style={{ gap: 10 }}>
+            {receiptPhotos.length ? photoRow(receiptPhotos) : null}
+            <Button title={receiptPhotos.length ? 'Agregar otra foto' : 'Sacar foto del recibo'} icon="camera" variant={receiptPhotos.length ? 'outline' : 'primary'} onPress={snapReceipt} disabled={reading} />
+            {reading ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator color={colors.green} />
+                <Text style={{ fontSize: 13, color: colors.muted }}>Leyendo el recibo…</Text>
+              </View>
+            ) : readNote ? <Text style={{ fontSize: 13, color: colors.greenText }}>{readNote}</Text> : (
+              <Text style={{ fontSize: 12, color: colors.muted }}>La app lee el total, el comercio y la fecha, y elige la categoría.</Text>
+            )}
+          </Card>
+        ) : null}
+
+        {kind === 'income' && !params.id && accounts.some((a) => a.kind === 'bank') ? (
+          <Card style={{ gap: 10 }}>
+            {photoRow(photos.filter((p) => p.kind === 'bank_screen'))}
+            <Button title="¿Entró al banco? Subí la captura del saldo" icon="smartphone" variant="outline" onPress={attachBank} disabled={reading} />
+            {reading ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <ActivityIndicator color={colors.green} />
+                <Text style={{ fontSize: 13, color: colors.muted }}>Leyendo el saldo…</Text>
+              </View>
+            ) : readNote ? <Text style={{ fontSize: 13, color: colors.greenText, lineHeight: 19 }}>{readNote}</Text> : (
+              <Text style={{ fontSize: 12, color: colors.muted }}>La app lee el saldo y calcula cuánto entró desde la última vez.</Text>
+            )}
+          </Card>
         ) : null}
 
         <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-          <Field label="Monto" value={amount} onChangeText={setAmount} placeholder="15.000" keyboardType="decimal-pad" style={{ flex: 1 }} autoFocus={!params.id} />
+          <Field label="Monto" value={amount} onChangeText={setAmount} placeholder="15.000" keyboardType="decimal-pad" style={{ flex: 1 }} autoFocus={!params.id && kind !== 'expense'} />
           <Choice columns={2} options={[{ value: 'ARS', label: '$' }, { value: 'USD', label: 'US$' }]} value={currency} onChange={setCurrency} style={{ width: 120 }} />
         </View>
         {parseMoney(amount) ? <Text style={{ fontSize: 13, color: colors.muted, marginTop: -8 }}>{fmtMoney(parseMoney(amount), currency)}</Text> : null}
 
-        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fecha</Text>
-        <DateChips dates={dates.includes(date) ? dates : [date, ...dates]} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-          <Field label="Otra fecha" value={otherDate} onChangeText={setOtherDate} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" style={{ flex: 1 }} />
-          <Button title="Usar" small variant="outline" onPress={() => { const d = parseDateAR(otherDate); if (d) setDate(d); else Alert.alert('Fecha inválida', 'Escribila así: 15/03/2026.'); }} />
-        </View>
+        <Field label="Fecha" value={dateText} onChangeText={setDateText} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" selectTextOnFocus />
+        <Text style={{ fontSize: 12, color: date ? colors.muted : colors.red, marginTop: -8 }}>
+          {date ? (date === isoDate(new Date()) ? 'Hoy, ' : '') + new Date(`${date}T12:00:00`).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'Escribila así: 22/11/2026'}
+        </Text>
 
         {kind === 'transfer' ? (
-          <Choice columns={2} options={[{ value: 'funds', label: 'Entre fondos' }, { value: 'accounts', label: 'Banco ↔ caja' }]} value={between} onChange={setBetween} />
+          <Choice columns={2} options={[{ value: 'funds', label: 'De un fondo a otro' }, { value: 'accounts', label: 'Banco ↔ efectivo' }]} value={between} onChange={setBetween} />
         ) : null}
+
         <SectionTitle>{kind === 'transfer' && between === 'funds' ? 'Sale del fondo' : 'Fondo'}</SectionTitle>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {funds.map((f) => <Pressable key={f.id} onPress={() => setFund(f.id)} style={pill(fund === f.id)} accessibilityRole="button"><Text style={pillText(fund === f.id)}>{f.name}</Text></Pressable>)}
-        </View>
+        <Pills items={funds} value={fund} onPick={setFund} />
+
         {kind === 'transfer' ? (
           between === 'funds' ? (
             <>
               <SectionTitle>Entra al fondo</SectionTitle>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {funds.filter((f) => f.id !== fund).map((f) => <Pressable key={f.id} onPress={() => setToFund(f.id)} style={pill(toFund === f.id)} accessibilityRole="button"><Text style={pillText(toFund === f.id)}>{f.name}</Text></Pressable>)}
-              </View>
+              <Pills items={funds.filter((f) => f.id !== fund)} value={toFund} onPick={setToFund} />
             </>
           ) : (
             <>
               <SectionTitle>Sale de</SectionTitle>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {accounts.map((a) => <Pressable key={a.id} onPress={() => setAccount(a.id)} style={pill(account === a.id)} accessibilityRole="button"><Text style={pillText(account === a.id)}>{a.name}</Text></Pressable>)}
-              </View>
+              <Pills items={accItems} value={account} onPick={setAccount} />
               <SectionTitle>Entra a</SectionTitle>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {accounts.filter((a) => a.id !== account).map((a) => <Pressable key={a.id} onPress={() => setToAccount(a.id)} style={pill(toAccount === a.id)} accessibilityRole="button"><Text style={pillText(toAccount === a.id)}>{a.name}</Text></Pressable>)}
-              </View>
-              <Text style={{ fontSize: 12, color: colors.muted }}>Por ejemplo, sacar plata del banco para la caja. El saldo del fondo no cambia.</Text>
+              <Pills items={accItems.filter((a) => a.id !== account)} value={toAccount} onPick={setToAccount} />
             </>
           )
         ) : (
           <>
-            <SectionTitle>Categoría</SectionTitle>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {dirCats.map((c) => <Pressable key={c.id} onPress={() => setCat(c.id)} style={pill(cat === c.id)} accessibilityRole="button"><Text style={pillText(cat === c.id)}>{c.name}</Text></Pressable>)}
-              {financeLevel >= 3 && newCat === null ? <Pressable onPress={() => setNewCat('')} style={pill(false)} accessibilityRole="button"><Text style={pillText(false)}>+ Otra</Text></Pressable> : null}
-            </View>
-            {newCat !== null ? (
-              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-                <Field label="Nueva categoría" value={newCat} onChangeText={setNewCat} style={{ flex: 1 }} />
-                <Button title="Crear" small onPress={createCat} />
-              </View>
+            {kind === 'expense' ? (
+              <>
+                <SectionTitle>Categoría</SectionTitle>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {outCats.map((c) => <Pressable key={c.id} onPress={() => { setCat(c.id); setCatAuto(false); }} style={pill(cat === c.id)} accessibilityRole="button"><Text style={pillText(cat === c.id)}>{c.name}</Text></Pressable>)}
+                  {financeLevel >= 3 && newCat === null ? <Pressable onPress={() => setNewCat('')} style={pill(false)} accessibilityRole="button"><Text style={pillText(false)}>+ Otra</Text></Pressable> : null}
+                </View>
+                {catAuto && cat ? <Text style={{ fontSize: 12, color: colors.greenText, marginTop: -6 }}>Elegida por la app. Tocá otra si no es.</Text> : null}
+                {newCat !== null ? (
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                    <Field label="Nueva categoría" value={newCat} onChangeText={setNewCat} style={{ flex: 1 }} />
+                    <Button title="Crear" small onPress={createCat} />
+                  </View>
+                ) : null}
+              </>
             ) : null}
 
-            <SectionTitle>Cómo</SectionTitle>
-            <Choice columns={3} options={(['cash', 'transfer', 'card'] as FinMethod[]).map((m) => ({ value: m, label: METHOD_LABEL[m] }))} value={method} onChange={setMethod} />
-            {accounts.length ? (
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {accounts.map((a) => <Pressable key={a.id} onPress={() => setAccount(a.id)} style={pill(account === a.id)} accessibilityRole="button"><Text style={pillText(account === a.id)}>{a.name}</Text></Pressable>)}
-              </View>
+            <SectionTitle>{kind === 'income' ? 'Entró en' : 'Se pagó con'}</SectionTitle>
+            <Pills items={accItems} value={account} onPick={setAccount} />
+
+            {kind === 'expense' ? (
+              <Field label="A quién se pagó (opcional)" value={counterpart} onChangeText={vendorChanged} placeholder="Edenor, ferretería…" />
+            ) : trackDonors ? (
+              <Field label="Quién lo dio (opcional)" value={counterpart} onChangeText={setCounterpart} />
             ) : null}
-            <Field label={kind === 'income' ? 'Quién lo dio (opcional)' : 'A quién se pagó (opcional)'} value={counterpart} onChangeText={setCounterpart} placeholder={kind === 'income' ? 'Ofrenda del culto, iglesia que apoya…' : 'Edenor, ferretería…'} />
           </>
         )}
-        <Field label={needsDetail ? 'Para qué es (obligatorio en Designado)' : 'Detalle (opcional)'} value={desc} onChangeText={setDesc} multiline />
 
-        <SectionTitle>Comprobantes</SectionTitle>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {photos.map((p) => (
-            <View key={p.path}>
-              <Thumb path={p.path} />
-              <Pressable onPress={() => setPhotos((x) => x.filter((y) => y.path !== p.path))} style={{ position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center' }} accessibilityLabel="Quitar">
-                <Feather name="x" size={14} color="#FFF" />
-              </Pressable>
-            </View>
-          ))}
-        </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          {kind !== 'expense' ? <Button title="Pantalla del banco" icon="smartphone" variant="outline" small onPress={() => attach('bank_screen')} style={{ flex: 1 }} /> : null}
-          {kind !== 'income' ? <Button title="Recibo / factura" icon="file-text" variant="outline" small onPress={() => attach('receipt')} style={{ flex: 1 }} /> : null}
-          {kind === 'income' ? <Button title="Otro" icon="paperclip" variant="ghost" small onPress={() => attach('receipt')} style={{ flex: 1 }} /> : null}
-        </View>
-        <Text style={{ fontSize: 12, color: colors.muted }}>Se guardan en la carpeta de {new Date(`${date}T12:00:00`).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}.</Text>
+        {kind !== 'income' || needsDetail ? (
+          <Field label={needsDetail ? 'Para qué es (obligatorio en Designado)' : 'Nota (opcional)'} value={desc} onChangeText={setDesc} multiline />
+        ) : null}
+
 
         <Card style={{ padding: 12, backgroundColor: colors.bgSoft, borderColor: colors.bgSoft }}>
           <Text style={{ fontSize: 14, color: colors.text }}>
-            {KIND_LABEL[kind]} de <Text style={{ fontWeight: '800' }}>{fmtMoney(parseMoney(amount) ?? 0, currency)}</Text>
-            {kind === 'transfer' ? (between === 'accounts' ? ` en ${fundObj?.name ?? '…'}: ${accounts.find((a) => a.id === account)?.name ?? '…'} → ${accounts.find((a) => a.id === toAccount)?.name ?? '…'}` : ` de ${fundObj?.name ?? '…'} a ${funds.find((f) => f.id === toFund)?.name ?? '…'}`) : ` en ${fundObj?.name ?? '…'}`} · {fmtDateShort(date)}
+            {TITLE[kind]} de <Text style={{ fontWeight: '800' }}>{fmtMoney(parseMoney(amount) ?? 0, currency)}</Text>
+            {kind === 'transfer' ? (between === 'accounts' ? ` en ${fundObj?.name ?? '…'}` : ` de ${fundObj?.name ?? '…'} a ${funds.find((f) => f.id === toFund)?.name ?? '…'}`) : ` · ${fundObj?.name ?? '…'} · ${accItems.find((a) => a.id === account)?.name ?? ''}`}{date ? ` · ${fmtDateShort(date)}` : ''}
           </Text>
         </Card>
         <Button title="Guardar" onPress={save} loading={busy} />

@@ -1129,3 +1129,56 @@ export async function inactiveSweepNow(): Promise<number> {
 export async function inactiveSearch(q: string): Promise<{ id: string; name: string; photo_path: string | null }[]> {
   return (ok(await supabase.rpc('inactive_search', { p_q: q })) ?? []) as { id: string; name: string; photo_path: string | null }[];
 }
+
+// Finanzas: a qué categoría se cargó cada comercio (el más nuevo primero), para elegirla sola la próxima vez.
+export async function finVendorHistory(): Promise<{ counterpart: string | null; category_id: string | null }[]> {
+  return (ok(await supabase.from('fin_entries').select('counterpart, category_id').eq('kind', 'expense').is('voided_at', null)
+    .not('counterpart', 'is', null).not('category_id', 'is', null).order('created_at', { ascending: false }).limit(500)) ?? []) as { counterpart: string | null; category_id: string | null }[];
+}
+
+/** Lee la foto de un recibo (total, comercio, fecha y la categoría más probable). Si todavía no está activado en el servidor, da null. */
+export async function readReceipt(path: string, categories: string[]): Promise<import('@/types').ReceiptRead | null> {
+  const { data, error } = await supabase.functions.invoke('leer-recibo', { body: { path, categories, mode: 'receipt' } });
+  if (error || !data || (data as { error?: string }).error) return null;
+  return data as import('@/types').ReceiptRead;
+}
+
+/** Lee el saldo disponible de una captura de la app del banco. null si no se pudo. */
+export async function readBankBalance(path: string): Promise<number | null> {
+  const { data, error } = await supabase.functions.invoke('leer-recibo', { body: { path, mode: 'bank' } });
+  if (error || !data || (data as { error?: string }).error) return null;
+  const b = (data as { balance?: number | null }).balance;
+  return typeof b === 'number' && Number.isFinite(b) ? b : null;
+}
+
+/** Con el saldo nuevo: el saldo anterior que se guardó, lo cargado desde entonces y cuánto entró. null si es la primera vez. */
+export async function bankIncomeGuess(accountId: string, balance: number): Promise<{ prev_balance: number; prev_at: string; recorded_since: number; suggested: number } | null> {
+  const rows = ok(await supabase.rpc('fin_bank_income_guess', { p_account: accountId, p_balance: balance })) as { prev_balance: number; prev_at: string; recorded_since: number; suggested: number }[] | null;
+  const r = rows?.[0];
+  return r ? { prev_balance: Number(r.prev_balance), prev_at: r.prev_at, recorded_since: Number(r.recorded_since), suggested: Number(r.suggested) } : null;
+}
+
+export async function saveBankSnapshot(accountId: string, balance: number, entryId: string | null, photo: string | null): Promise<void> {
+  ok(await supabase.rpc('fin_save_bank_snapshot', { p_account: accountId, p_balance: balance, p_entry: entryId, p_photo: photo }));
+}
+
+export async function setFinTrackDonors(on: boolean): Promise<void> {
+  ok(await supabase.rpc('set_fin_track_donors', { p_on: on }));
+}
+
+// Cancionero
+export async function listSongs(): Promise<import('@/types').Song[]> {
+  return (ok(await supabase.from('songs').select('*').order('position').order('title')) ?? []) as import('@/types').Song[];
+}
+export async function getSong(id: string): Promise<import('@/types').Song | null> {
+  return (ok(await supabase.from('songs').select('*').eq('id', id).maybeSingle()) as import('@/types').Song | null) ?? null;
+}
+export async function saveSong(s: { id?: string; title: string; author: string | null; lyrics: string; spotify_url: string | null; youtube_url: string | null; song_key: string | null }): Promise<string> {
+  const row = { title: s.title.trim(), author: s.author?.trim() || null, lyrics: s.lyrics.trim(), spotify_url: s.spotify_url, youtube_url: s.youtube_url, song_key: s.song_key?.trim() || null };
+  if (s.id) { ok(await supabase.from('songs').update(row).eq('id', s.id)); return s.id; }
+  const r = ok(await supabase.from('songs').insert(row).select('id').single()) as { id: string };
+  return r.id;
+}
+export async function deleteSong(id: string): Promise<void> {
+  ok(await supabase.from('songs').delete().eq('id', id));
+}
