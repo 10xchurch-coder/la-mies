@@ -198,6 +198,7 @@ export default function Iglesia() {
         { icon: 'book', label: 'Informes y consejos', to: '/informes' as Href, show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
         { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },
+        { icon: 'eye', label: 'Ver como miembro', to: '/miembro-vista' as Href, show: can('admin.permisos') },
       ],
     },
   ];

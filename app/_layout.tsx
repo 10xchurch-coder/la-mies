@@ -15,6 +15,7 @@ import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
 import { OutingBanner } from '@/components/OutingBanner';
+import { MemberViewBanner } from '@/components/MemberViewBanner';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
@@ -99,7 +100,7 @@ function useFeatureGuard() {
 }
 
 function Gate() {
-  const { loading, session, perms } = useAuth();
+  const { loading, session, realPerms: perms } = useAuth();
   const optIn = useLockOptIn();
   const cachedRequired = useLockRequiredCache();
   const required = perms.length ? needsAppLock(perms) : !!cachedRequired;
@@ -114,6 +115,7 @@ function Gate() {
     <LockGate enabled={lock}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       {session ? <OutingBanner /> : null}
+      {session ? <MemberViewBanner /> : null}
     </LockGate>
   );
 }

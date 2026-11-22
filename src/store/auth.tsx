@@ -45,6 +45,11 @@ type AuthState = {
   /** Permisos efectivos (rol + permisos sueltos). */
   perms: string[];
   can: (p: Perm) => boolean;
+  /** "Ver como miembro": el pastor mira la app como la ve un hermano común. Solo cambia lo que se muestra, no lo que se puede hacer en la base. */
+  viewAsMember: boolean;
+  setViewAsMember: (on: boolean) => void;
+  /** Permisos reales de la cuenta (no cambian con "ver como miembro"). */
+  realPerms: string[];
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -75,10 +80,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [church, setChurch] = useState<Church | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [me, setMe] = useState<Contact | null>(null);
-  const [perms, setPerms] = useState<string[]>([]);
+  const [realPerms, setPerms] = useState<string[]>([]);
+  const [viewAsMember, setViewAsMemberRaw] = useState(false);
 
   const loadProfile = useCallback(async (userId: string | undefined) => {
     if (!userId) {
+      setViewAsMemberRaw(false);
       setProfile(null);
       setPerms([]);
       setChurch(null);
@@ -143,26 +150,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [loadProfile]);
 
+  const canSwitchView = realPerms.includes('admin.permisos');
   const value = useMemo<AuthState>(
-    () => ({
-      loading,
-      session,
-      profile,
-      church,
-      group,
-      me,
-      isAdmin: perms.includes('admin.permisos'),
-      isStaff: perms.includes('personas.editar'),
-      isLeader: perms.includes('personas.ver_todas') || perms.includes('inf.panel') || hasRole(profile, 'captain'),
-      financeLevel: financeLevelFromPerms(perms),
-      perms,
-      can: (k: Perm) => perms.includes(k),
-      refreshProfile: () => loadProfile(session?.user.id),
-      signOut: async () => {
-        await supabase.auth.signOut();
-      },
-    }),
-    [loading, session, profile, church, group, me, perms, loadProfile],
+    () => {
+      const asMember = viewAsMember && canSwitchView;
+      // Mirando como miembro: sin rol especial, sin permisos sueltos y sin rol de finanzas.
+      const shownProfile = asMember && profile ? { ...profile, role: 'member', extra_roles: [], finance_role: null } as Profile : profile;
+      const perms = asMember ? permsOf(shownProfile) : realPerms;
+      return {
+        loading,
+        session,
+        profile: shownProfile,
+        church,
+        group,
+        me,
+        isAdmin: perms.includes('admin.permisos'),
+        isStaff: perms.includes('personas.editar'),
+        isLeader: perms.includes('personas.ver_todas') || perms.includes('inf.panel') || hasRole(shownProfile, 'captain'),
+        financeLevel: financeLevelFromPerms(perms),
+        perms,
+        can: (k: Perm) => perms.includes(k),
+        viewAsMember: asMember,
+        setViewAsMember: (on: boolean) => setViewAsMemberRaw(on && canSwitchView),
+        realPerms,
+        refreshProfile: () => loadProfile(session?.user.id),
+        signOut: async () => {
+          setViewAsMemberRaw(false);
+          await supabase.auth.signOut();
+        },
+      };
+    },
+    [loading, session, profile, church, group, me, realPerms, viewAsMember, canSwitchView, loadProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
