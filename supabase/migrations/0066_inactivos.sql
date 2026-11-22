@@ -110,11 +110,12 @@ end $$;
 -- 4. Si vuelve, vuelve solo: al tomarle asistencia (culto, clase, colectivo o chicos) sale de inactivos.
 create or replace function public.inactive_comeback() returns trigger
 language plpgsql security definer set search_path = public as $$
-declare v_id uuid;
+declare v_row jsonb := to_jsonb(new); v_id uuid;
 begin
-  v_id := case tg_table_name when 'child_checkins' then new.child_id else new.contact_id end;
-  if tg_table_name = 'class_attendance' and not new.present then return null; end if;
-  if exists (select 1 from public.contacts where id = v_id and status = 'inactive') then
+  -- to_jsonb: cada tabla tiene su columna (contact_id o child_id); leerla así no falla en ninguna.
+  v_id := coalesce(v_row->>'contact_id', v_row->>'child_id')::uuid;
+  if tg_table_name = 'class_attendance' and not coalesce((v_row->>'present')::boolean, false) then return null; end if;
+  if v_id is not null and exists (select 1 from public.contacts where id = v_id and status = 'inactive') then
     perform public._set_inactive(v_id, false, false);
   end if;
   return null;
