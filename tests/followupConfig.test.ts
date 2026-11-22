@@ -31,3 +31,11 @@ test('arma el mensaje con los datos de la persona', () => {
 test('el mensaje cambia según cuánto faltó', () => {
   assert.deepEqual([1, 2, 3, 5].map(missedKind), ['missed1', 'missed2', 'missed3', 'missed3']);
 });
+
+test('{reuniones} lista el sábado y el domingo con su hora', async () => {
+  const { serviceList } = await import('../src/lib/followupConfig');
+  const s = (dow: number, time: string, main = true) => ({ id: String(dow), church_id: 'c', name: 'x', dow, time, main, active: true, sort_order: 0 });
+  assert.equal(serviceList([s(0, '10:00'), s(6, '20:00'), s(6, '18:30', false)] as never), 'el sábado a las 20:00 y el domingo a las 10:00');
+  assert.equal(serviceList([] as never), 'el domingo');
+  assert.equal(fillMessage('Te esperamos {reuniones}.', { nombre: 'A', yo: 'B', iglesia: 'C', cuando: 'el domingo', reuniones: 'el sábado y el domingo' }), 'Te esperamos el sábado y el domingo.');
+});

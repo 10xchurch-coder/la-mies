@@ -1,5 +1,6 @@
 // Mensajes de WhatsApp ya escritos, desde la persona que los manda (no "la iglesia").
 // Se abren en el WhatsApp del teléfono con el texto puesto; se pueden cambiar antes de enviar.
+import { serviceList } from '@/lib/followupConfig';
 import { fillMessage, mergeFollowup, type FollowupConfig } from './followupConfig';
 import { Alert, Linking } from 'react-native';
 import { whatsappNumber } from './format';
@@ -54,6 +55,7 @@ export function messageText(kind: MessageKind, c: MessageContext): string {
     yo: firstName(c.from) || 'yo',
     iglesia: c.church ?? 'la iglesia',
     cuando: serviceWhen(c.services, c.promiseDay),
+    reuniones: serviceList(c.services),
   });
 }
 

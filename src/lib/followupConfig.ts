@@ -20,7 +20,7 @@ export type FollowupConfig = {
 };
 
 /** En los mensajes se puede usar: {nombre} (de la persona), {yo} (quien escribe), {iglesia} y {cuando} ("el domingo a las 10:00"). */
-export const PLACEHOLDERS = ['{nombre}', '{yo}', '{iglesia}', '{cuando}'] as const;
+export const PLACEHOLDERS = ['{nombre}', '{yo}', '{iglesia}', '{cuando}', '{reuniones}'] as const;
 
 export const DEFAULT_FOLLOWUP: FollowupConfig = {
   write_hours: 48,
@@ -30,7 +30,7 @@ export const DEFAULT_FOLLOWUP: FollowupConfig = {
   disc_one_classes: 4,
   disc_course_classes: 13,
   messages: {
-    firstvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez {cuando}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.',
+    firstvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez este próximo fin de semana: {reuniones}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.',
     secondvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué bueno verte otra vez! Nos alegra mucho que hayas vuelto. Me gustaría pasar a visitarte esta semana para conocerte mejor. ¿Qué día y horario te queda bien?',
     missed1: 'Hola {nombre}, soy {yo}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?',
     missed2: 'Hola {nombre}, soy {yo}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
@@ -84,11 +84,22 @@ export function followupOverrides(c: FollowupConfig): Record<string, unknown> {
 }
 
 /** Arma el mensaje reemplazando {nombre}, {yo}, {iglesia} y {cuando}. */
-export function fillMessage(template: string, v: { nombre: string; yo: string; iglesia: string; cuando: string }): string {
-  return template.replace(/\{(nombre|yo|iglesia|cuando)\}/g, (_, k: 'nombre' | 'yo' | 'iglesia' | 'cuando') => v[k]);
+export function fillMessage(template: string, v: { nombre: string; yo: string; iglesia: string; cuando: string; reuniones?: string }): string {
+  return template.replace(/\{(nombre|yo|iglesia|cuando|reuniones)\}/g, (_, k: 'nombre' | 'yo' | 'iglesia' | 'cuando' | 'reuniones') => v[k] ?? v.cuando);
 }
 
 /** Qué mensaje corresponde según cuántos fines de semana faltó. */
 export function missedKind(weeks: number): 'missed1' | 'missed2' | 'missed3' {
   return weeks >= 3 ? 'missed3' : weeks === 2 ? 'missed2' : 'missed1';
+}
+
+const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+/** Todas las reuniones principales, en orden de la semana: "el sábado a las 20:00 y el domingo a las 10:00". */
+export function serviceList(services: { dow: number; time: string | null; main: boolean; active: boolean }[] | undefined): string {
+  const order = (d: number) => (d + 6) % 7;   // lunes primero, domingo último
+  const t = (x: string | null) => (x ?? '').slice(0, 5);
+  const main = (services ?? []).filter((s) => s.active && s.main).sort((a, b) => order(a.dow) - order(b.dow) || t(a.time).localeCompare(t(b.time)));
+  if (!main.length) return 'el domingo';
+  const parts = main.map((s) => `el ${DIAS[s.dow]} a las ${t(s.time)}`);
+  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}`;
 }

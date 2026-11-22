@@ -30,7 +30,7 @@ export default function FollowupSettings() {
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<FollowupMessageKind | null>(null);
   const dirty = useMemo(() => JSON.stringify(followupOverrides(cfg)) !== JSON.stringify(followupOverrides(mergeFollowup(church?.followup))), [cfg, church?.followup]);
-  const sample = { nombre: 'María', yo: (profile?.display_name ?? 'Pastor').split(' ')[0], iglesia: church?.name ?? 'la iglesia', cuando: 'el domingo a las 10:00' };
+  const sample = { nombre: 'María', yo: (profile?.display_name ?? 'Pastor').split(' ')[0], iglesia: church?.name ?? 'la iglesia', cuando: 'el domingo a las 10:00', reuniones: 'el sábado a las 20:00 y el domingo a las 10:00' };
 
   if (!can('admin.iglesia')) {
     return (
@@ -109,7 +109,7 @@ export default function FollowupSettings() {
 
         <SectionTitle>Mensajes de WhatsApp</SectionTitle>
         <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-          Tocá un mensaje para cambiarlo. Podés usar {PLACEHOLDERS.join(', ')}: la app los reemplaza por el nombre de la persona, tu nombre, el nombre de la iglesia y el día y la hora del culto.
+          Tocá un mensaje para cambiarlo. Podés usar {PLACEHOLDERS.join(', ')}: la app los reemplaza por el nombre de la persona, tu nombre, el nombre de la iglesia, el día y la hora del culto, y todas las reuniones del fin de semana con su hora.
         </Text>
         {ORDER.map((k) => {
           const changed = cfg.messages[k].trim() !== DEFAULT_FOLLOWUP.messages[k];
