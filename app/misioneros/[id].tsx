@@ -1,6 +1,7 @@
 // Un misionero: quién es y sus informes mes a mes (PDF y fotos).
 import React, { useCallback, useState } from 'react';
 import { Alert, Linking, Modal, Pressable, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { router, useFocusEffect, useLocalSearchParams, type Href } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { SignedImage } from '@/components/SignedImage';
@@ -62,12 +63,48 @@ export default function MisioneroDetalle() {
       <Screen>
         {m === undefined ? <Loading /> : m === null ? <Empty icon="globe" title="No encontramos a este misionero" /> : (
           <>
-            <Card style={{ alignItems: 'center', gap: 10 }}>
-              <SignedImage bucket="missionaries" path={m.photo_path} style={{ width: 112, height: 112, borderRadius: 56 }} />
-              <Text style={{ fontSize: 20, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{m.name}</Text>
-              {m.field ? <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>{m.field}</Text> : null}
-              {m.bio ? <Text style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>{m.bio}</Text> : null}
+            <Card style={{ padding: 0, overflow: 'hidden' }}>
+              {m.photo_path ? (
+                <SignedImage bucket="missionaries" path={m.photo_path} onPress={() => setBig(m.photo_path)} style={{ width: '100%', aspectRatio: 4 / 3, borderRadius: 0 }} />
+              ) : (
+                <View style={{ height: 120, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name="globe" size={44} color={colors.green} />
+                </View>
+              )}
+              <View style={{ padding: 16, gap: 6 }}>
+                <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text, letterSpacing: -0.4 }}>{m.name}</Text>
+                {m.field ? (
+                  <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
+                    <Feather name="map-pin" size={15} color={colors.green} style={{ marginTop: 2 }} />
+                    <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.muted, lineHeight: 20 }}>{m.field}</Text>
+                  </View>
+                ) : null}
+                {reports?.length ? <Text style={{ fontSize: 13, color: colors.greenText, fontWeight: '700' }}>{reports.length} {reports.length === 1 ? 'informe' : 'informes'} · último: {monthLabel(reports[0].month)}</Text> : null}
+              </View>
             </Card>
+            {m.bio ? (() => {
+              // "Cómo orar por ellos:" en la biografía se muestra aparte, como lista para orar.
+              const at = m.bio.search(/c[oó]mo orar/i);
+              const about = (at >= 0 ? m.bio.slice(0, at) : m.bio).trim();
+              const pray = at >= 0 ? m.bio.slice(at).split('\n').slice(1) : [];
+              const prayItems = pray.filter((l) => l.trim().startsWith('•')).map((l) => l.replace(/^\s*•\s*/, ''));
+              const rest = pray.filter((l) => l.trim() && !l.trim().startsWith('•')).join('\n').trim();
+              return (
+                <>
+                  {about ? <Card><Text selectable style={{ fontSize: 15, color: colors.text, lineHeight: 23 }}>{about}</Text></Card> : null}
+                  {prayItems.length ? (
+                    <Card style={{ gap: 8, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Feather name="heart" size={18} color={colors.blueText} />
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors.blueText }}>Cómo orar por ellos</Text>
+                      </View>
+                      {prayItems.map((t) => <Text key={t} style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>•  {t}</Text>)}
+                    </Card>
+                  ) : null}
+                  {rest ? <Text selectable style={{ fontSize: 13, color: colors.muted, paddingHorizontal: 4 }}>{rest}</Text> : null}
+                </>
+              );
+            })() : null}
             {isStaff ? (
               <View style={{ gap: 8 }}>
                 <Button title="Subir informe del mes" icon="upload" onPress={() => router.push({ pathname: '/misioneros/informe', params: { missionary: m.id } } as unknown as Href)} />
