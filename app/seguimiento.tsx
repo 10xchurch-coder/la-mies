@@ -194,7 +194,7 @@ export default function Seguimiento() {
                           </View>
                           {visits.length ? (
                             <View style={{ flexDirection: 'row', gap: 8 }}>
-                              {visits.map((t) => <Small key={t.id} icon="check" label="Ya lo visité" onPress={() => done(t, 'visited')} />)}
+                              <Small icon="check" label="Ya lo visité" onPress={() => visits.forEach((t) => done(t, 'visited'))} />
                             </View>
                           ) : null}
                         </View>
@@ -204,8 +204,8 @@ export default function Seguimiento() {
                       <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
                           onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
-                        {writes.map((t) => <Small key={t.id} icon="check" label="Ya le escribí" onPress={() => done(t, 'wrote')} />)}
-                        {visits.map((t) => <Small key={t.id} icon="check" label="Ya lo visité" onPress={() => done(t, 'visited')} />)}
+                        {writes.length ? <Small icon="check" label="Ya le escribí" onPress={() => writes.forEach((t) => done(t, 'wrote'))} /> : null}
+                        {visits.length ? <Small icon="check" label="Ya lo visité" onPress={() => visits.forEach((t) => done(t, 'visited'))} /> : null}
                       </View>
                     );
                   })()}
