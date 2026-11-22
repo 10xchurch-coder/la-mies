@@ -1,12 +1,13 @@
 // Un informe escrito. El texto viene con títulos (## …), viñetas (- …) y **negritas**.
-import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { Alert, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Loading } from '@/components/ui';
 import { shareText } from '@/lib/share';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { downloadView } from '@/lib/download';
 
 function Inline({ text, style }: { text: string; style?: object }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -14,6 +15,7 @@ function Inline({ text, style }: { text: string; style?: object }) {
 }
 
 export default function Informe() {
+  const shot = useRef<React.ComponentRef<typeof View>>(null);   // lo que se descarga como imagen (o se imprime en la web)
   const { id } = useLocalSearchParams<{ id: string }>();
   const [r, setR] = useState<{ title: string; body: string } | null | undefined>(undefined);
   useEffect(() => {
@@ -26,6 +28,7 @@ export default function Informe() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={r.title} back />
       <Screen>
+        <View ref={shot} collapsable={false} style={{ gap: 16, backgroundColor: colors.bg, paddingVertical: 4 }}>
         <View style={{ gap: 8 }}>
           {r.body.split('\n').map((line, i) => {
             const t = line.trimEnd();
@@ -37,6 +40,8 @@ export default function Informe() {
           })}
         </View>
         <Button title="Compartir" icon="share-2" variant="outline" onPress={() => shareText(`${r.title}\n\n${r.body.replace(/\*\*/g, '')}`, r.title)} />
+        </View>
+        <Button title="Descargar" icon="download" variant="outline" onPress={() => downloadView(shot.current, r.title).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
       </Screen>
     </View>
   );

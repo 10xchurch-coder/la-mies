@@ -2,17 +2,18 @@
 // No importa nada de la app para poder probarse sola.
 
 export type ChurchSocial = Partial<Record<'whatsapp' | 'instagram' | 'facebook' | 'youtube' | 'podcast' | 'threads' | 'x' | 'tiktok' | 'podcast_name', string | null>>;
-export type SocialLink = { key: string; label: string; icon: string; url: string };
+export type SocialLink = { key: string; label: string; icon: string; url: string; color: string | null };
 
-const ORDER: { key: Exclude<keyof ChurchSocial, 'podcast_name'>; label: string; icon: string }[] = [
-  { key: 'whatsapp', label: 'WhatsApp', icon: 'logo-whatsapp' },
-  { key: 'instagram', label: 'Instagram', icon: 'logo-instagram' },
-  { key: 'facebook', label: 'Facebook', icon: 'logo-facebook' },
-  { key: 'youtube', label: 'YouTube', icon: 'logo-youtube' },
-  { key: 'podcast', label: 'Podcast', icon: 'mic-outline' },
-  { key: 'threads', label: 'Threads', icon: 'at-outline' },
-  { key: 'x', label: 'X', icon: 'logo-twitter' },
-  { key: 'tiktok', label: 'TikTok', icon: 'logo-tiktok' },
+// color: el de cada marca. null = el color del texto (X, Threads y TikTok son negros: así se ven también en modo oscuro).
+const ORDER: { key: Exclude<keyof ChurchSocial, 'podcast_name'>; label: string; icon: string; color: string | null }[] = [
+  { key: 'whatsapp', label: 'WhatsApp', icon: 'logo-whatsapp', color: '#25D366' },
+  { key: 'instagram', label: 'Instagram', icon: 'logo-instagram', color: '#E1306C' },
+  { key: 'facebook', label: 'Facebook', icon: 'logo-facebook', color: '#1877F2' },
+  { key: 'youtube', label: 'YouTube', icon: 'logo-youtube', color: '#FF0000' },
+  { key: 'podcast', label: 'Podcast', icon: 'mic-outline', color: '#9933CC' },
+  { key: 'threads', label: 'Threads', icon: 'at-outline', color: null },
+  { key: 'x', label: 'X', icon: 'logo-twitter', color: null },
+  { key: 'tiktok', label: 'TikTok', icon: 'logo-tiktok', color: null },
 ];
 
 const url = (v: string) => (/^https?:\/\//i.test(v) ? v : `https://${v}`);
@@ -23,9 +24,9 @@ export function socialLinks(social: ChurchSocial | null | undefined, website?: s
   for (const o of ORDER) {
     const v = (social?.[o.key] ?? '').trim();
     // El podcast se muestra con su nombre propio si la iglesia lo cargó.
-    if (v) out.push({ key: o.key, label: o.key === 'podcast' ? (social?.podcast_name ?? '').trim() || o.label : o.label, icon: o.icon, url: url(v) });
+    if (v) out.push({ key: o.key, label: o.key === 'podcast' ? (social?.podcast_name ?? '').trim() || o.label : o.label, icon: o.icon, url: url(v), color: o.color });
   }
   const w = (website ?? '').trim();
-  if (w) out.push({ key: 'web', label: 'Sitio web', icon: 'globe-outline', url: url(w) });
+  if (w) out.push({ key: 'web', label: 'Sitio web', icon: 'globe-outline', url: url(w), color: null });
   return out;
 }

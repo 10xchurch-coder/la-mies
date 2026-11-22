@@ -476,7 +476,7 @@ export default function Iglesia() {
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
               {socialLinks(church?.social, church?.website).map((l) => (
                 <Pressable key={l.key} onPress={() => Linking.openURL(l.url).catch(() => undefined)} accessibilityRole="link" accessibilityLabel={`${l.label} de la iglesia`} style={styles.social}>
-                  <Ionicons name={l.icon as React.ComponentProps<typeof Ionicons>['name']} size={24} color={colors.greenText} />
+                  <Ionicons name={l.icon as React.ComponentProps<typeof Ionicons>['name']} size={26} color={l.color ?? (l.key === 'web' ? colors.greenText : colors.text)} />
                   <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text, textAlign: 'center' }} numberOfLines={2}>{l.label}</Text>
                 </Pressable>
               ))}

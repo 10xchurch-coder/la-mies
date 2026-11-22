@@ -1,7 +1,7 @@
 // Informe de finanzas: gráfico mes a mes (entró / salió) de todos los fondos o de uno, último año o toda
 // la historia; el mes elegido por categoría; saldos; y observaciones automáticas para mirar.
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading, Segmented, SectionTitle } from '@/components/ui';
@@ -10,6 +10,8 @@ import { fmtMoney, isoDate } from '@/lib/format';
 import { shareText } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { downloadView, downloadText } from '@/lib/download';
+import { toCsv } from '@/lib/desk';
 import type { FinBalance, FinByCategory, FinMonthly } from '@/types';
 import { monthTitle } from './movimientos';
 
@@ -66,6 +68,7 @@ function pointers(months: Month[], sel: string, balances: FinBalance[], cats: Fi
 }
 
 export default function FinInforme() {
+  const shot = useRef<React.ComponentRef<typeof View>>(null);   // lo que se descarga como imagen (o se imprime en la web)
   const { church } = useAuth();
   const [range, setRange] = useState<'12' | 'all'>('12');
   const [rows, setRows] = useState<FinMonthly[] | null>(null);
@@ -137,6 +140,7 @@ export default function FinInforme() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Informe de finanzas" subtitle={monthTitle(sel)} back />
       <Screen>
+        <View ref={shot} collapsable={false} style={{ gap: 16, backgroundColor: colors.bg, paddingVertical: 4 }}>
         <Segmented options={[{ value: '12', label: 'Último año' }, { value: 'all', label: 'Toda la historia' }]} value={range} onChange={setRange} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
           {[[null, 'Todos los fondos'] as [string | null, string], ...funds].map(([id, name]) => (
@@ -210,6 +214,13 @@ export default function FinInforme() {
             <Button title="Compartir el informe del mes" icon="share-2" variant="outline" onPress={share} />
           </>
         )}
+        </View>
+        <Button title="Descargar" icon="download" variant="outline" onPress={() => downloadView(shot.current, `Informe de finanzas ${monthTitle(sel)}`).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
+        <Button title="Descargar para Excel" icon="file-text" variant="ghost" onPress={() => downloadText(`finanzas-${sel}.csv`, toCsv(['Tipo', 'Categoría', 'Fondo', 'Monto'], [
+          ...inCats.map((c) => ['Ingreso', c.category, c.fund, c.total]),
+          ...outCats.map((c) => ['Gasto', c.category, c.fund, c.total]),
+          ...(fund ? bal.filter((b) => b.fund_id === fund) : bal).map((b) => ['Saldo al cierre', '', b.fund, b.closing]),
+        ])).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
       </Screen>
     </View>
   );

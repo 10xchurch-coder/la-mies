@@ -6,7 +6,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
-import { Card, Empty, Field, Loading, Tag } from '@/components/ui';
+import { Button, Card, Empty, Field, Loading, Tag } from '@/components/ui';
 import { completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
 import { whyHere, type FollowContext } from '@/lib/followWhy';
 import { errorMessage } from '@/lib/supabase';
@@ -15,6 +15,8 @@ import { INTEREST_LABEL, PROMISE_LABEL, fmtDateShort, fmtRelativeDay } from '@/l
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { downloadText } from '@/lib/download';
+import { toCsv } from '@/lib/desk';
 import type { ChurchService, FollowupRow } from '@/types';
 
 const TASK_LABEL: Record<string, string> = {
@@ -128,6 +130,14 @@ export default function Seguimiento() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Mis contactos para seguir" subtitle={rows ? `${rows.length} personas · ${pending.length} sin contacto esta semana` : undefined} back />
       <Screen>
+        {tasks.length || rows?.length ? (
+          <Button title="Descargar la lista para visitar" icon="download" variant="outline" small onPress={() => {
+            const due = (t: FirstVisitTask) => (t.overdue ? 'atrasado' : new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }));
+            const taskRows = visitors.map((v) => [v.name, v.phone ? formatPhone(v.phone) : '', v.tasks.map((t) => TASK_LABEL[t.kind] ?? 'Seguir').join(' + '), v.tasks.map(due).join(' / '), '', ctx[v.contact_id]?.note ?? '']);
+            const contactRows = (rows ?? []).map((r) => [r.name, r.phone ? formatPhone(r.phone) : '', r.promise_day ? `Prometió venir ${PROMISE_LABEL[r.promise_day] ?? ''}` : 'Seguir / visitar', r.last_visit ? `último contacto ${fmtDateShort(r.last_visit)}` : 'sin visitas todavía', r.address_hint ?? '', ctx[r.id]?.note ?? '']);
+            downloadText(`para-visitar-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(['Nombre', 'Teléfono', 'Qué hacer', 'Cuándo', 'Dirección', 'Nota'], [...taskRows, ...contactRows])).catch(() => undefined);
+          }} />
+        ) : null}
         {tasks.length ? (
           <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Para hacer esta semana</Text>

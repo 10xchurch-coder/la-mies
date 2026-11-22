@@ -1,5 +1,5 @@
 // Informe semanal (llega como aviso los lunes a las 8 a las personas elegidas) y el camino de los contactos mes a mes.
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
@@ -9,6 +9,7 @@ import { addDays, fmtDateShort, fmtMinutes, isoDate, parseDate } from '@/lib/for
 import { shareText } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { downloadView } from '@/lib/download';
 import type { PipelineRow, WeeklyReport } from '@/types';
 
 /** Lunes que cierra el informe (el informe cubre los 7 días anteriores). El domingo ya muestra la semana que termina hoy. */
@@ -19,6 +20,7 @@ function mondayOf(d: Date): string {
 }
 
 export default function Reporte() {
+  const shot = useRef<React.ComponentRef<typeof View>>(null);   // lo que se descarga como imagen (o se imprime en la web)
   const { church } = useAuth();
   const router = useRouter();
   const [monday, setMonday] = useState(mondayOf(new Date()));
@@ -46,6 +48,7 @@ export default function Reporte() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title="Informe semanal" subtitle={r ? `Del ${fmtDateShort(r.from)} al ${fmtDateShort(r.to)}` : undefined} back />
       <Screen>
+        <View ref={shot} collapsable={false} style={{ gap: 16, backgroundColor: colors.bg, paddingVertical: 4 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Button title="Semana anterior" variant="outline" small icon="chevron-left" onPress={() => setMonday(isoDate(addDays(parseDate(monday), -7)))} style={{ flex: 1 }} />
           <Button title="Siguiente" variant="outline" small onPress={() => setMonday(isoDate(addDays(parseDate(monday), 7)))} disabled={monday >= mondayOf(new Date())} style={{ flex: 1 }} />
@@ -148,6 +151,8 @@ export default function Reporte() {
             </Card>
           </>
         ) : null}
+        </View>
+        <Button title="Descargar" icon="download" variant="outline" onPress={() => downloadView(shot.current, r ? `Informe semanal ${r.from}` : 'Informe semanal').catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
       </Screen>
     </View>
   );

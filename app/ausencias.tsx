@@ -18,6 +18,9 @@ import { addDays, fmtDateOnly, fmtDateShort, fmtRelativeDay, isoDate, lastSaturd
 import { messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { downloadText } from '@/lib/download';
+import { toCsv } from '@/lib/desk';
+import { formatPhone } from '@/lib/phone';
 import type { AbsenceRow, ChurchService } from '@/types';
 
 const SECTIONS: { weeks: number; title: string; hint: string; kind: MessageKind; tone: 'amber' | 'red' | 'blue' }[] = [
@@ -107,6 +110,14 @@ export default function Ausencias() {
       <Header title="Faltaron" subtitle={`Fin de semana del ${fmtDateShort(sat)} y ${fmtDateShort(isoDate(addDays(parseDate(sat), 1)))}`} back />
       <Screen>
         <DateChips dates={saturdays.includes(sat) ? saturdays : [sat, ...saturdays]} value={sat} onChange={setSat} format={(d) => `Finde ${fmtDateShort(d)}`} />
+        {rows?.length ? (
+          <Button title="Descargar la lista para visitar" icon="download" variant="outline" small onPress={() => {
+            const list = [...rows].sort((a, b) => (b.weeks_missed ?? 1) - (a.weeks_missed ?? 1) || a.name.localeCompare(b.name));
+            downloadText(`faltaron-${sat}.csv`, toCsv(['Nombre', 'Teléfono', 'Semanas sin venir', 'Qué hacer', 'Ruta / grupo', 'Última vez que vino', 'Ya le escribieron'],
+              list.map((r) => [r.name, r.phone ? formatPhone(r.phone) : '', (r.weeks_missed ?? 1) >= 3 ? '3 o más' : r.weeks_missed ?? 1, section(r).hint, r.group_name ?? '', r.last_attended ? fmtDateShort(r.last_attended) : '', sent.has(r.contact_id) ? 'Sí' : 'No'])))
+              .catch(() => undefined);
+          }} />
+        ) : null}
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
           {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre. Al escribirle a alguien, sale de la lista.
         </Text>

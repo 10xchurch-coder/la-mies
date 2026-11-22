@@ -1,6 +1,6 @@
 // Una zona para salir: el líder la dibuja tocando el mapa (esquinas), le pone nombre y elige quiénes van.
 // Todos la ven en el mapa; acá se ve el avance (veredas y casas cubiertas desde que se creó).
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -11,6 +11,7 @@ import { Header } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
 import { coverageInBbox, deleteZone, housesInBbox, listProfiles, listZones, roadsInBbox, saveZone, zoneProgress } from '@/lib/api';
 import { errorMessage } from '@/lib/supabase';
+import { downloadView } from '@/lib/download';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { CoverageRow, HouseRow, Profile, RoadRow, Zone, ZoneProgress } from '@/types';
@@ -18,6 +19,7 @@ import type { CoverageRow, HouseRow, Profile, RoadRow, Zone, ZoneProgress } from
 const COLORS = ['#2F8F5B', '#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488'];
 
 export default function ZonaScreen() {
+  const shot = useRef<React.ComponentRef<typeof View>>(null);   // el mapa con el nombre, para descargarlo como foto
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { isLeader, profile } = useAuth();
@@ -127,7 +129,7 @@ export default function ZonaScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={zone ? zone.name : 'Nueva zona'} subtitle={editing ? 'Tocá el mapa para marcar las esquinas. Arrastrá un punto para moverlo.' : names.length ? `Van: ${names.join(', ')}` : undefined} back />
-      <View style={{ height: 340 }}>
+      <View ref={shot} collapsable={false} style={{ height: 340 }}>
         <CoverageMap
           roads={roads}
           coverage={coverage}
@@ -156,6 +158,12 @@ export default function ZonaScreen() {
             );
           }) : null}
         </CoverageMap>
+        {zone && !editing ? (
+          <View pointerEvents="none" style={{ position: 'absolute', left: 10, top: 10, maxWidth: '80%', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.92)' }}>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: '#111' }} numberOfLines={1}>{zone.name}</Text>
+            {progress ? <Text style={{ fontSize: 11, color: '#444' }}>{pct}% hecho · {progress.done} de {progress.sidewalks} veredas</Text> : null}
+          </View>
+        ) : null}
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         {editing ? (
@@ -203,6 +211,10 @@ export default function ZonaScreen() {
                 <Feather name="flag" size={18} color={colors.greenText} />
                 <Text style={{ flex: 1, fontSize: 13, color: colors.greenText }}>Esta zona es tuya. Las veredas que camines se van pintando y el avance sube solo.</Text>
               </View>
+            ) : null}
+            {zone ? (
+              <Button title="Descargar foto del mapa" icon="download" variant="outline"
+                onPress={() => downloadView(shot.current, `Zona ${zone.name}`).catch((e) => Alert.alert('No se pudo descargar', errorMessage(e)))} />
             ) : null}
             {isLeader ? (
               <View style={{ flexDirection: 'row', gap: 8 }}>
