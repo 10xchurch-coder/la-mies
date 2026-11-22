@@ -99,6 +99,28 @@ export default function Seguimiento() {
     return [...by.values()];
   }, [tasks]);
 
+  // Empezar de cero: cierra todos los recordatorios sin marcarlos como hechos (no cuentan como "le escribí" ni "lo visité").
+  // Las personas quedan cargadas; si vuelven a venir o a faltar, la app arma recordatorios nuevos.
+  const [clearing, setClearing] = useState(false);
+  const clearAll = () => {
+    const n = visitors.length;
+    Alert.alert('¿Borrar todos los recordatorios?', `Se borran los recordatorios de ${n} ${n === 1 ? 'persona' : 'personas'} y empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Borrar todos', style: 'destructive', onPress: async () => {
+        setClearing(true);
+        const all = [...tasks];
+        let failed = 0;
+        for (let i = 0; i < all.length; i += 8) {
+          const res = await Promise.allSettled(all.slice(i, i + 8).map((t) => completeFollowUp(t.id, null)));
+          failed += res.filter((r) => r.status === 'rejected').length;
+        }
+        setClearing(false);
+        reloadTasks();
+        if (failed) Alert.alert('Quedaron algunos', `${failed} no se pudieron borrar. Probá de nuevo con señal.`);
+      } },
+    ]);
+  };
+
   const week = Date.now() - 7 * 86400000;
   const pending = (rows ?? []).filter((r) => !r.last_visit || new Date(r.last_visit).getTime() < week);
 
@@ -175,6 +197,11 @@ export default function Seguimiento() {
                 </View>
               );
             })}
+            <Pressable onPress={clearAll} disabled={clearing} accessibilityRole="button"
+              style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 42, marginTop: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.amberText, opacity: clearing ? 0.5 : 1 }}>
+              <Feather name="trash-2" size={16} color={colors.amberText} />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{clearing ? 'Borrando…' : `Borrar todos los recordatorios (${visitors.length})`}</Text>
+            </Pressable>
           </Card>
         ) : null}
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title="No tenés contactos para seguir" text="Los contactos que anotás en las salidas (o que te asignan) aparecen acá." /> : null}
