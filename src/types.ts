@@ -3,6 +3,8 @@ export type Role = 'member' | 'captain' | 'evangelism' | 'deacon' | 'secretary' 
 export type OutingKind = 'soulwinning' | 'flyers';
 
 export type Church = {
+  /** Meses sin venir para pasar a inactivos (vacío = apagado). */
+  inactive_months?: number | null;
   logo_path?: string | null;
   website?: string | null;
   youtube_channel?: string | null;
@@ -146,6 +148,11 @@ export type Contact = {
   /** Ya estaba en la iglesia al fijar el punto de partida: 'member' (ya era miembro) o 'person' (ya venía). */
   baseline?: 'member' | 'person' | null;
   status: PersonStatus;
+  /** Lista de inactivos: desde cuándo, qué era antes, y si nunca se lo mueve solo. */
+  inactive_since?: string | null;
+  inactive_prev?: PersonStatus | null;
+  inactive_auto?: boolean;
+  inactive_exempt?: boolean;
   member_since: string | null;
   photo_path: string | null;
   birthdate: string | null;
@@ -156,7 +163,7 @@ export type Contact = {
   auto_created: boolean;
 };
 
-export type PersonStatus = 'contact' | 'visitor' | 'member';
+export type PersonStatus = 'contact' | 'visitor' | 'member' | 'inactive';
 
 export type ContactChild = { id: string; contact_id: string; name: string; age: number | null; birthdate: string | null; child_contact_id?: string | null; photo_path?: string | null };
 
@@ -425,3 +432,8 @@ export type Raffle = {
   occurs_on: string; unique_winner: boolean; created_at: string;
 };
 export type RaffleWinner = { id: string; raffle_id: string; name: string; phone: string | null; claimed: boolean; drawn_at: string };
+
+export type InactiveRow = {
+  id: string; name: string; phone: string | null; photo_path: string | null; inactive_since: string | null; inactive_auto: boolean;
+  prev_status: PersonStatus | null; last_seen: string | null; total: number;
+};

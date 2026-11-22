@@ -165,7 +165,7 @@ export const ROLE_LABEL: Record<string, string> = {
   admin: 'Pastor',
 };
 
-export const STATUS_LABEL: Record<string, string> = { contact: 'Contacto', visitor: 'Visita', member: 'Miembro' };
+export const STATUS_LABEL: Record<string, string> = { contact: 'Contacto', visitor: 'Visita', member: 'Miembro', inactive: 'Inactivo' };
 
 export const FAITH_LABEL: Record<string, { label: string; hint: string; tone: 'green' | 'blue' | 'amber' | 'gray' | 'red' }> = {
   fiel: { label: 'Nunca falta', hint: '95% o más', tone: 'green' },

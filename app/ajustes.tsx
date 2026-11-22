@@ -110,6 +110,9 @@ export default function Ajustes() {
                 <RowLink title="Funciones de la iglesia" subtitle="Prender o apagar cada parte de la app: finanzas, evangelismo, colectivo…" icon="toggle-right" onPress={() => router.push('/admin/funciones' as never)} />
               ) : null}
               {can('admin.permisos') ? (
+                <RowLink title="Inactivos" subtitle="A los cuántos meses sin venir un miembro pasa solo a la lista de inactivos, o apagarlo" icon="user-x" onPress={() => router.push('/admin/inactivos' as never)} />
+              ) : null}
+              {can('admin.permisos') ? (
                 <RowLink title="Ver como miembro" subtitle="Mirá la app como la ve un hermano común y volvé a tu vista cuando quieras" icon="eye" onPress={() => router.push('/miembro-vista' as never)} />
               ) : null}
             </Card>

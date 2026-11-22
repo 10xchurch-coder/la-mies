@@ -24,6 +24,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
     { key: 'asistencia', label: 'Tomar asistencia', icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
     { key: 'ausencias', label: 'Ausencias', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'inactivos', label: 'Inactivos', icon: 'user-minus', to: '/inactivos', perms: ['personas.ver_todas', 'personas.editar'] },
     { key: 'fidelidad', label: 'Fidelidad', icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },
     { key: 'seguimiento', label: 'Para seguir', icon: 'user-check', to: '/seguimiento', perms: [] },
     { key: 'cumples', label: 'Cumpleaños', icon: 'gift', to: '/cumples', perms: [] },

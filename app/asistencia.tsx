@@ -9,7 +9,7 @@ import { Header } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { DateChips } from '@/components/Picker';
 import { Button, Card, Empty, Loading } from '@/components/ui';
-import { addPerson, attendanceCounts, attendanceSheet, listCancellations, listServices, setAttendance, setCancelled } from '@/lib/api';
+import { addPerson, attendanceCounts, attendanceSheet, inactiveSearch, listCancellations, listServices, setAttendance, setCancelled } from '@/lib/api';
 import { byFaithfulness, type Times } from '@/lib/faithful';
 import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
@@ -43,6 +43,13 @@ export default function Asistencia() {
   const [q, setQ] = useState('');
   const [onlyPresent, setOnlyPresent] = useState(false);
   const [quickName, setQuickName] = useState('');
+  // Inactivos que coinciden con la búsqueda: si alguien volvió, se lo marca presente y vuelve solo a su lista.
+  const [back, setBack] = useState<{ id: string; name: string; photo_path: string | null }[]>([]);
+  useEffect(() => {
+    if (q.trim().length < 2) { setBack([]); return; }
+    const t = setTimeout(() => inactiveSearch(q.trim()).then(setBack).catch(() => setBack([])), 300);
+    return () => clearTimeout(t);
+  }, [q]);
   const [adding, setAdding] = useState(false);
   const [offs, setOffs] = useState<Cancellation[]>([]);
   const [marking, setMarking] = useState(false);
@@ -228,6 +235,22 @@ export default function Asistencia() {
           numColumns={cols}
           contentContainerStyle={styles.list}
           columnWrapperStyle={{ gap: 8 }}
+          ListFooterComponent={back.length ? (
+            <View style={{ gap: 8, marginTop: 12 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>EN INACTIVOS · ¿VOLVIÓ?</Text>
+              {back.map((b) => (
+                <Pressable key={b.id} accessibilityRole="button" onPress={async () => {
+                  if (!service) return;
+                  try { await setAttendance(b.id, date, service.id, true); setQ(''); await load(); Alert.alert('¡Volvió!', `${b.name} quedó presente y volvió a su lista.`); }
+                  catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+                }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 12, backgroundColor: colors.bgSoft }}>
+                  <Face name={b.name} path={b.photo_path} size={40} />
+                  <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text }}>{b.name}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Marcar presente</Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : undefined}
           ListEmptyComponent={<Empty icon="users" title="No hay nadie en la lista" text="Aparecen los miembros, las visitas y quienes prometieron venir. Agregá una visita nueva abajo." />}
           renderItem={({ item: r }) => (
             <Pressable onPress={() => toggle(r)} onLongPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } })} accessibilityRole="checkbox" accessibilityState={{ checked: r.present }} style={[styles.cell, { maxWidth: `${100 / cols}%` }, r.present && styles.cellOn]}>

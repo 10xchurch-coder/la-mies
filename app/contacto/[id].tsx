@@ -13,10 +13,10 @@ import { showActions } from '@/components/ActionSheet';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
-import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag } from '@/components/ui';
+import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag, Toggle } from '@/components/ui';
 import { regionAround } from '@/components/CoverageMap';
 import {
-  deleteContact, syncFamilyRoute, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listCancellations, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact,
+  deleteContact, syncFamilyRoute, familyChildren, familyParents, getContact, listPeople, mergeContacts, listAllServices, listCancellations, listGroups, listMinistries, listProfiles, ministryPeopleRows, personJourney, setAttendance, updateContact, setContactInactive, setInactiveExempt,
 } from '@/lib/api';
 import { pickAndUploadPhoto } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
@@ -502,6 +502,23 @@ export default function PersonaDetalle() {
                 onChange={(v) => setStatus(v as PersonStatus)}
               />
               <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Solo la secretaría y el pastor marcan miembros. Los miembros aparecen para todos en Personas y en el reporte de ausencias.</Text>
+              {c.status === 'inactive' ? (
+                <>
+                  <Text style={{ fontSize: 13, color: colors.text }}>Está en <Text style={{ fontWeight: '800' }}>Inactivos</Text>{c.inactive_since ? ` desde el ${new Date(c.inactive_since).toLocaleDateString('es-AR')}` : ''}. Si viene y se le toma asistencia, vuelve solo.</Text>
+                  <Button title={`Volver a ${STATUS_LABEL[c.inactive_prev ?? 'member'].toLowerCase()}s`} icon="user-check" variant="outline" small
+                    onPress={() => setContactInactive(c.id, false).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+                </>
+              ) : (
+                <Button title="Pasar a inactivos" icon="user-x" variant="ghost" small
+                  onPress={() => Alert.alert('¿Pasar a inactivos?', `${c.name} sale de ${STATUS_LABEL[c.status].toLowerCase()}s y queda en la lista de inactivos con todos sus datos.`, [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Pasar', onPress: () => setContactInactive(c.id, true).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+                  ])} />
+              )}
+              {c.status === 'member' ? (
+                <Toggle label="Nunca moverlo solo a inactivos" hint="Para quien no puede venir por un tiempo (enfermedad, viaje, misión)." value={!!c.inactive_exempt}
+                  onChange={(v) => setInactiveExempt(c.id, v).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+              ) : null}
             </Card>
           ) : null}
 

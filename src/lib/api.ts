@@ -77,7 +77,7 @@ export async function panelDetail(from: Date, to: Date): Promise<PanelDetail> {
 }
 
 export async function listContacts(): Promise<Contact[]> {
-  return ok(await supabase.from('contacts').select('*').eq('archived', false).order('created_at', { ascending: false }).limit(500)) ?? [];
+  return ok(await supabase.from('contacts').select('*').eq('archived', false).neq('status', 'inactive').order('created_at', { ascending: false }).limit(500)) ?? [];
 }
 
 export async function getContact(id: string) {
@@ -157,7 +157,7 @@ export async function uid(): Promise<string> {
 }
 
 export async function listPeople(): Promise<Contact[]> {
-  return ok(await supabase.from('contacts').select('*').eq('archived', false).order('name').limit(2000)) ?? [];
+  return ok(await supabase.from('contacts').select('*').eq('archived', false).neq('status', 'inactive').order('name').limit(2000)) ?? [];
 }
 
 /** Une dos fichas de la misma persona. Devuelve el id de la que queda. */
@@ -1105,4 +1105,27 @@ export async function setWinnerClaimed(id: string, claimed: boolean): Promise<vo
 }
 export async function removeWinner(id: string): Promise<void> {
   ok(await supabase.from('raffle_winners').delete().eq('id', id));
+}
+
+// Inactivos: los que no vienen hace tiempo, en una lista aparte
+export async function inactiveList(q: string, limit = 50, offset = 0): Promise<import('@/types').InactiveRow[]> {
+  return (ok(await supabase.rpc('inactive_list', { p_q: q || null, p_limit: limit, p_offset: offset })) ?? []) as import('@/types').InactiveRow[];
+}
+export async function setContactInactive(id: string, inactive: boolean): Promise<void> {
+  ok(await supabase.rpc('set_contact_inactive', { p_contact: id, p_inactive: inactive }));
+}
+export async function setInactiveExempt(id: string, exempt: boolean): Promise<void> {
+  ok(await supabase.rpc('set_inactive_exempt', { p_contact: id, p_exempt: exempt }));
+}
+export async function setInactiveMonths(months: number | null): Promise<void> {
+  ok(await supabase.rpc('set_inactive_months', { p_months: months }));
+}
+export async function inactivePreview(months: number): Promise<number> {
+  return Number(ok(await supabase.rpc('inactive_preview', { p_months: months })) ?? 0);
+}
+export async function inactiveSweepNow(): Promise<number> {
+  return Number(ok(await supabase.rpc('inactive_sweep_now')) ?? 0);
+}
+export async function inactiveSearch(q: string): Promise<{ id: string; name: string; photo_path: string | null }[]> {
+  return (ok(await supabase.rpc('inactive_search', { p_q: q })) ?? []) as { id: string; name: string; photo_path: string | null }[];
 }
