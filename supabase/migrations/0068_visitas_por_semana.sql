@@ -1,5 +1,5 @@
--- 0068: las visitas se cuentan por semana (sábado y domingo del mismo fin de semana = una visita).
--- Aplicada en vivo como migraciones "visitas_por_fin_de_semana" y "por_que_esta_cuenta_semanas":
---   first_visit_tasks() cuenta count(distinct date_trunc('week', attended_on)) y no repite si ya vino esa semana;
---   follow_context() devuelve 'times' en semanas;
---   se borraron los recordatorios abiertos de "segunda vez" / "visitar" que se habían armado mal con la regla vieja.
+-- 0068: SOLO para los recordatorios y el mensaje de primera / segunda visita, las visitas se cuentan por semana
+-- (sábado y domingo del mismo fin de semana = primera visita). La asistencia y todo lo demás sigue contando cada día y cada reunión.
+-- Aplicada en vivo como "visitas_por_fin_de_semana": first_visit_tasks() cuenta count(distinct date_trunc('week', attended_on))
+-- y no arma otro recordatorio si ya vino esa semana; se borraron los recordatorios abiertos de "segunda vez" / "visitar"
+-- que se habían armado mal con la regla vieja. (follow_context sigue contando días.)
