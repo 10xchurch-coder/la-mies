@@ -16,6 +16,7 @@ import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
 import { OutingBanner } from '@/components/OutingBanner';
 import { MemberViewBanner } from '@/components/MemberViewBanner';
+import { PhotoCropperHost } from '@/components/PhotoCropper';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
@@ -116,6 +117,7 @@ function Gate() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       {session ? <OutingBanner /> : null}
       {session ? <MemberViewBanner /> : null}
+      <PhotoCropperHost />
     </LockGate>
   );
 }

@@ -1,12 +1,13 @@
 // Fotos y archivos: elegir, achicar, subir a Supabase Storage y mostrar con links firmados.
 // Cada archivo vive en una carpeta con el id de la iglesia; la base solo deja leer
 // los de la propia iglesia (ver 0004_church.sql).
-import { Alert, Platform } from 'react-native';
+import { Alert, Image as RNImage, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
+import { cropPhoto } from '@/components/PhotoCropper';
 
 export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat' | 'missionaries';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
@@ -27,26 +28,66 @@ async function upload(bucket: Bucket, churchId: string, uri: string, name: strin
   return path;
 }
 
-/** Pregunta cámara o galería, deja recortar en cuadrado, achica a 480 px y sube. Devuelve la ruta o null. */
-export async function pickAndUploadPhoto(churchId: string, o: { free?: boolean; width?: number } = {}): Promise<string | null> {
-  const source = await new Promise<'camera' | 'library' | null>((resolve) => {
+/** Tamaño real de una foto (si el selector no lo dio). */
+function imageSize(uri: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve) => RNImage.getSize(uri, (width, height) => resolve({ width, height }), () => resolve({ width: 0, height: 0 })));
+}
+
+/** Muestra el recortador (acercar, alejar, mover) y deja la foto cuadrada del ancho pedido. Null si canceló. */
+async function cropAndShrink(uri: string, w: number, h: number, width: number, round = true, aspect = 1): Promise<string | null> {
+  if (!w || !h) ({ width: w, height: h } = await imageSize(uri));
+  const crop = await cropPhoto(uri, w, h, round, aspect);
+  if (!crop) return null;
+  const out = await manipulateAsync(uri, [{ crop }, { resize: { width: Math.min(width, crop.width) } }], { compress: 0.75, format: SaveFormat.JPEG });
+  return out.uri;
+}
+
+/** Trae una foto que ya está subida para volver a acomodarla. */
+async function localCopy(bucket: Bucket, path: string): Promise<string | null> {
+  const url = await signedUrl(bucket, path);
+  if (!url) return null;
+  if (Platform.OS === 'web') return URL.createObjectURL(await (await fetch(url)).blob());
+  const { File: F, Paths } = await import('expo-file-system');
+  const dest = new F(Paths.cache, `ajustar-${randomId()}.jpg`);
+  const got = await F.downloadFileAsync(url, dest);
+  return got.uri;
+}
+
+/**
+ * Pregunta cámara o galería (o acomodar la foto que ya tiene), deja acercar, alejar y mover la foto
+ * dentro del cuadro, la achica y la sube. Devuelve la ruta nueva o null.
+ */
+export async function pickAndUploadPhoto(churchId: string, o: { free?: boolean; width?: number; current?: string | null } = {}): Promise<string | null> {
+  const source = await new Promise<'camera' | 'library' | 'current' | null>((resolve) => {
     Alert.alert('Foto', '¿De dónde sacamos la foto?', [
       { text: 'Sacar foto', onPress: () => resolve('camera') },
       { text: 'Elegir de la galería', onPress: () => resolve('library') },
-      { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+      ...(o.current && !o.free ? [{ text: 'Acomodar la foto actual', onPress: () => resolve('current' as const) }] : []),
+      { text: 'Cancelar', style: 'cancel' as const, onPress: () => resolve(null) },
     ]);
   });
   if (!source) return null;
+  if (source === 'current') {
+    const uri = o.current ? await localCopy('photos', o.current) : null;
+    if (!uri) { Alert.alert('No se pudo abrir la foto actual'); return null; }
+    const done = await cropAndShrink(uri, 0, 0, o.width ?? 640);
+    return done ? upload('photos', churchId, done, 'foto.jpg', 'image/jpeg') : null;
+  }
   const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
     Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
     return null;
   }
-  const opts: ImagePicker.ImagePickerOptions = o.free ? { mediaTypes: ['images'], allowsEditing: false, quality: 0.85 } : { mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.8 };
+  const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: o.free ? 0.85 : 0.9 };
   const res = source === 'camera' ? await ImagePicker.launchCameraAsync(opts) : await ImagePicker.launchImageLibraryAsync(opts);
   if (res.canceled || !res.assets?.[0]) return null;
-  const small = await manipulateAsync(res.assets[0].uri, [{ resize: { width: o.width ?? 480 } }], { compress: 0.7, format: SaveFormat.JPEG });
-  return upload('photos', churchId, small.uri, 'foto.jpg', 'image/jpeg');
+  const a = res.assets[0];
+  if (o.free) {
+    const small = await manipulateAsync(a.uri, [{ resize: { width: o.width ?? 480 } }], { compress: 0.7, format: SaveFormat.JPEG });
+    return upload('photos', churchId, small.uri, 'foto.jpg', 'image/jpeg');
+  }
+  const done = await cropAndShrink(a.uri, a.width, a.height, o.width ?? 640);
+  return done ? upload('photos', churchId, done, 'foto.jpg', 'image/jpeg') : null;
 }
 
 export type PickedFile = { uri: string; name: string; size: number | null; mimeType: string };
@@ -213,10 +254,11 @@ export async function pickChatDocument(churchId: string): Promise<ChatAttachment
 export async function pickMissionaryPhoto(churchId: string): Promise<string | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
-  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.85 });
+  const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.9 });
   if (res.canceled || !res.assets?.[0]) return null;
-  const small = await manipulateAsync(res.assets[0].uri, [{ resize: { width: 640 } }], { compress: 0.75, format: SaveFormat.JPEG });
-  return upload('missionaries', churchId, small.uri, 'misionero.jpg', 'image/jpeg');
+  const a = res.assets[0];
+  const done = await cropAndShrink(a.uri, a.width, a.height, 1000, false, 4 / 3);
+  return done ? upload('missionaries', churchId, done, 'misionero.jpg', 'image/jpeg') : null;
 }
 
 /** El PDF del informe del mes (hasta 25 MB). */

@@ -233,7 +233,7 @@ export default function PersonaDetalle() {
   const changePhoto = async () => {
     if (!church) return;
     try {
-      const path = await pickAndUploadPhoto(church.id);
+      const path = await pickAndUploadPhoto(church.id, { current: c?.photo_path });
       if (path) await update({ photo_path: path });
     } catch (e) {
       Alert.alert('No se pudo subir la foto', errorMessage(e));

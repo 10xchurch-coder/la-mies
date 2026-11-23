@@ -109,7 +109,7 @@ export default function NuevaPersona() {
   const choosePhoto = async () => {
     if (!church) return;
     try {
-      const p = await pickAndUploadPhoto(church.id);
+      const p = await pickAndUploadPhoto(church.id, { current: photo });
       if (p) setPhoto(p);
     } catch (e) {
       Alert.alert('No se pudo subir la foto', errorMessage(e));

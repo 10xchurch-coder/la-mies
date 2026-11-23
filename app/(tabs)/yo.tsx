@@ -40,7 +40,7 @@ export default function Yo() {
   const changePhoto = async () => {
     if (!church || !me) return;
     try {
-      const p = await pickAndUploadPhoto(church.id);
+      const p = await pickAndUploadPhoto(church.id, { current: me.photo_path });
       if (p) {
         await updateContact(me.id, { photo_path: p });
         await refreshProfile();
