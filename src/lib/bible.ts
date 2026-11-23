@@ -34,6 +34,8 @@ export const chaptersIn = (i: number): number => BOOKS[i]?.[1] ?? 0;
 /** Sin tildes, mayúsculas ni espacios de más, para comparar nombres. */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 const BY_NAME = new Map(BOOKS.map((b, i) => [plain(b[0]), i]));
+// En los planes con un salmo por día, la lectura dice "Salmo 5" (en singular).
+BY_NAME.set('salmo', BOOKS.findIndex((b) => b[0] === 'Salmos'));
 
 /** Posición del libro por su nombre ("Juan", "1 Corintios", "genesis"), o -1. */
 export function findBook(name: string): number {

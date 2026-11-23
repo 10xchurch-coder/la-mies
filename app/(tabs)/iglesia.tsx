@@ -23,6 +23,7 @@ import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncem
 import { pastorUnread } from '@/lib/api';
 import { dmUnread } from '@/lib/dm';
 import { planStatus } from '@/lib/biblePlan';
+import { parseReading } from '@/lib/bible';
 import { isoDate as isoDay } from '@/lib/format';
 import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
@@ -488,6 +489,17 @@ export default function Iglesia() {
                   <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{title}</Text>
                   <Text style={{ fontSize: 13, color: colors.muted }}>{hint}</Text>
                 </View>
+                {(() => {
+                  const at = st?.today ? parseReading(st.today) : null;
+                  return at ? (
+                    <Pressable onPress={() => router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } })} hitSlop={6}
+                      accessibilityRole="button" accessibilityLabel={`Leer ${st?.today} en la Biblia`}
+                      style={{ paddingHorizontal: 12, height: 34, borderRadius: 17, backgroundColor: colors.blueSoft, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Feather name="book-open" size={15} color={colors.blueText} />
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>Leer</Text>
+                    </Pressable>
+                  ) : null;
+                })()}
                 <Feather name="chevron-right" size={18} color={colors.gray} />
               </Card>
             </Pressable>

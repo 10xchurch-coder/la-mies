@@ -37,6 +37,7 @@ test('parseReading entiende las lecturas de los planes', () => {
   assert.deepEqual(parseReading('Génesis 50; Éxodo 1–2'), { book: 0, chapter: 50 });
   assert.deepEqual(parseReading('Judas'), { book: findBook('Judas'), chapter: 1 });
   assert.deepEqual(parseReading('Hechos 3 · Salmo 5 · Proverbios 3'), { book: findBook('Hechos'), chapter: 3 });
+  assert.deepEqual(parseReading('Salmo 5'), { book: findBook('Salmos'), chapter: 5 });
   assert.equal(parseReading('Juan 99'), null);
   assert.equal(parseReading(''), null);
 });

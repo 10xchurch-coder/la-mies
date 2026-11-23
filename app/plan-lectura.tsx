@@ -13,6 +13,20 @@ import { addDays, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
 
+/** El texto de una lectura, con cada pasaje tocable para abrirlo en la Biblia: "Génesis 50; Éxodo 1–2" tiene dos. */
+function ReadingText({ text, style, onOpen }: { text: string; style: object; onOpen: (at: { book: number; chapter: number }) => void }) {
+  return (
+    <Text style={style}>
+      {text.split(/(\s*[;·]\s*)/).map((chunk, i) => {
+        const at = i % 2 === 0 ? parseReading(chunk) : null;
+        return at ? (
+          <Text key={i} onPress={() => onOpen(at)} accessibilityRole="link" accessibilityLabel={`Leer ${chunk} en la Biblia`} style={{ color: colors.blueText, textDecorationLine: 'underline' }}>{chunk}</Text>
+        ) : chunk;
+      })}
+    </Text>
+  );
+}
+
 const dayText = (startedOn: string, d: number) =>
   addDays(new Date(`${startedOn}T12:00:00`), d).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
 
@@ -53,19 +67,23 @@ export default function PlanLectura() {
     ]);
   };
 
+  const openBible = (at: { book: number; chapter: number }) =>
+    router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } });
+
   const line = (d: number, big?: boolean) => {
     const on = !!row && row.done.includes(d);
     return (
-      <Pressable key={d} onPress={() => toggle(d)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${readings[d]}. ${on ? 'Leído' : 'Sin leer'}`}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: big ? 6 : 10 }}>
-        <View style={{ width: big ? 34 : 26, height: big ? 34 : 26, borderRadius: 8, borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+      <View key={d} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: big ? 6 : 10 }}>
+        <Pressable onPress={() => toggle(d)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${readings[d]}. ${on ? 'Leído' : 'Sin leer'}`} hitSlop={8}
+          style={{ width: big ? 34 : 26, height: big ? 34 : 26, borderRadius: 8, borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
           {on ? <Feather name="check" size={big ? 22 : 16} color="#FFFFFF" /> : null}
-        </View>
+        </Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: big ? 22 : 15, fontWeight: big ? '800' : '700', color: colors.text, textDecorationLine: on && !big ? 'line-through' : 'none' }}>{readings[d]}</Text>
+          <ReadingText text={readings[d]} onOpen={openBible}
+            style={{ fontSize: big ? 22 : 15, fontWeight: big ? '800' : '700', color: colors.text, textDecorationLine: on && !big ? 'line-through' : 'none' }} />
           {big ? null : <Text style={{ fontSize: 12, color: colors.muted }}>{row ? dayText(row.started_on, d) : ''}</Text>}
         </View>
-      </Pressable>
+      </View>
     );
   };
 
@@ -103,7 +121,7 @@ export default function PlanLectura() {
               {status.today ? line(status.day, true) : <Text style={{ fontSize: 16, color: colors.text, paddingVertical: 6 }}>Hoy no hay lectura nueva. {status.behind.length ? 'Aprovechá para ponerte al día.' : 'Vas al día.'}</Text>}
               {(() => {
                 const at = status.today ? parseReading(status.today) : null;
-                return at ? <Button title="Leerla en la Biblia" icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } })} /> : null;
+                return at ? <Button title="Leerla en la Biblia" icon="book-open" variant="outline" small onPress={() => openBible(at)} /> : null;
               })()}
             </Card>
 
