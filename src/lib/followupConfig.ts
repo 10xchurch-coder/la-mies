@@ -32,9 +32,9 @@ export const DEFAULT_FOLLOWUP: FollowupConfig = {
   messages: {
     firstvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez este próximo fin de semana: {reuniones}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.',
     secondvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué bueno verte otra vez! Nos alegra mucho que hayas vuelto. Me gustaría pasar a visitarte esta semana para conocerte mejor. ¿Qué día y horario te queda bien?',
-    missed1: 'Hola {nombre}, soy {yo}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?',
-    missed2: 'Hola {nombre}, soy {yo}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
-    missed3: 'Hola {nombre}, soy {yo}. Recién oré por vos. Espero que estés bien. Dios te ama; buscalo de todo corazón y Él te va a sostener. Te esperamos {cuando}.',
+    missed1: 'Hola {nombre}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?',
+    missed2: 'Hola {nombre}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
+    missed3: 'Hola {nombre}. Recién oré por vos. Espero que estés bien. Dios te ama; buscalo de todo corazón y Él te va a sostener. Te esperamos {cuando}.',
     promise: 'Hola {nombre}, soy {yo} de {iglesia}. Te escribo para recordarte que {cuando} tenemos el culto. ¡Me encantaría verte ahí! Si necesitás que te pasemos a buscar, avisame.',
     followup: 'Hola {nombre}, soy {yo} de {iglesia}. Fue una alegría conocerte. Te quería invitar: {cuando} tenemos el culto y me encantaría que vengas. ¿Te puedo ayudar en algo?',
     visit: 'Hola {nombre}, soy {yo} de {iglesia}. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
