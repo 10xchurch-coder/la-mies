@@ -41,3 +41,10 @@ jobs:
           eas build --platform ios --profile production --non-interactive $SUBIR --json > build.json
           cat build.json
           node -e "const b=require('./build.json')[0]; console.log('\n=== LISTO ==='); console.log('Página de la compilación: https://expo.dev/accounts/hopeforargentinas-team/projects/la-mies/builds/' + b.id)" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # Si la compilación falla en Expo, se muestra solo el motivo (no el registro completo).
+      - name: Qué falló
+        if: failure()
+        run: |
+          eas build:list --platform ios --limit 1 --json --non-interactive > last.json || exit 0
+          node -e "const b=require('./last.json')[0]||{}; console.log('Estado:', b.status); console.log('Motivo:', JSON.stringify(b.error||{}, null, 1));"
