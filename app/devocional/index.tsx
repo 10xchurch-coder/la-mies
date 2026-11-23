@@ -194,7 +194,7 @@ export default function Devocional() {
           setShot({ kind, done: async (view) => {
             try {
               const { captureRef } = await import('react-native-view-shot');
-              resolve(await captureRef(view as unknown as number, { format: 'jpg', quality: 0.95, result: 'tmpfile' }));
+              resolve(await captureRef(view as unknown as number, { format: 'jpg', quality: 1, result: 'tmpfile' }));
             } catch (e) { reject(e); } finally { setShot(null); }
           } });
         }), 'image/jpeg')

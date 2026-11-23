@@ -60,6 +60,10 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+  // Las mismas letras que en el teléfono: Lora para el texto y Playfair Display para la cita. Si no cargan, queda la del sistema.
+  const { TITLE_FONT, VERSE_FONT, VERSE_FONT_BOLD, loadShareFonts } = await import('./shareFonts');
+  const fancy = await loadShareFonts() && await Promise.all([VERSE_FONT, VERSE_FONT_BOLD, TITLE_FONT].map((f) => document.fonts.load(`20px "${f}"`))).then((r) => r.every((x) => x.length > 0)).catch(() => false);
+  const F = (weight: number, size: number, family: string) => (fancy ? `${size}px "${family}", ${FONT}` : `${weight} ${size}px ${FONT}`);
   ctx.scale(K, K);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
@@ -89,7 +93,8 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
 
   const PAD = 28;
   const maxW = w - PAD * 2;
-  const shadow = (blur: number, a: number) => { ctx.shadowColor = `rgba(0,0,0,${a})`; ctx.shadowBlur = blur; ctx.shadowOffsetY = 1; };
+  // Sombra corta: una sombra ancha deja un halo que hace ver la letra borrosa.
+  const shadow = (blur: number, a: number) => { ctx.shadowColor = `rgba(0,0,0,${a})`; ctx.shadowBlur = Math.min(blur, 1.5) * K; ctx.shadowOffsetY = 0.75 * K; };
   const noShadow = () => { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; };
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
@@ -117,7 +122,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   // El devocional es más largo: se achica la letra hasta que entre entero en la imagen.
   for (const size of input.kind === 'devotional' ? [19, 17, 16, 15, 14, 13, 12, 11, 10] : [sz.size]) {
     if (input.kind === 'devotional') sz = { size, line: Math.round(size * 1.42) };
-    ctx.font = `${weight} ${sz.size}px ${FONT}`;
+    ctx.font = F(weight, sz.size, input.kind === 'verse' ? VERSE_FONT : VERSE_FONT_BOLD);
     lines = wrapLines((t) => ctx.measureText(t).width, body, maxW);
     if (lines.length * sz.line <= areaH) break;
   }
@@ -128,12 +133,12 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
     ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
     for (const l of lines) { ty += sz.line; ctx.fillText(l, PAD, ty - 10); }
     noShadow();
-    ctx.font = `700 15px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.font = F(700, 16, TITLE_FONT); ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.fillText(refText, PAD, ty + 26);
   } else {
-    ctx.font = `800 22px ${FONT}`; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
+    ctx.font = F(800, 25, TITLE_FONT); ctx.fillStyle = '#FFFFFF'; shadow(3, 0.55);
     ctx.fillText(refText, PAD, refY);
-    ctx.font = `${weight} ${sz.size}px ${FONT}`; shadow(3, 0.6);
+    ctx.font = F(weight, sz.size, input.kind === 'verse' ? VERSE_FONT : VERSE_FONT_BOLD); shadow(3, 0.6);
     for (const l of lines) { ty += sz.line; ctx.fillText(l, PAD, ty - 10); }
     noShadow();
   }
@@ -142,7 +147,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   const logo = input.logoUrl ? await loadImage(input.logoUrl) : null;
   const LH = 44, GAP = 12; // alto del logo y espacio hasta el nombre
   const LW = logo ? Math.min(LH, (logo.width / logo.height) * LH) : 0;
-  ctx.font = `800 18px ${FONT}`;
+  ctx.font = F(800, 18, VERSE_FONT_BOLD);
   const nameMax = maxW - (logo ? LW + GAP : 0);
   const nameW = Math.min(ctx.measureText(input.churchName).width, nameMax);
   const rowW = (logo ? LW + GAP : 0) + nameW;
@@ -163,7 +168,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   ctx.fillText('App La Mies · RV1960', nameX, rowY + 16);
   noShadow();
 
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.95));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.98));
 }
 
 /** Comparte varias imágenes juntas (versículo, frase y devocional). Si el teléfono no deja, las baja una por una. */
