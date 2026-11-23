@@ -2,13 +2,14 @@
 // programa, contacto, "Voy" e inscripción. Quien maneja el calendario ve los inscriptos y quién pagó.
 import { formatPhone, phoneProblem } from '@/lib/phone';
 import { PhoneField, phoneInputValue } from '@/components/PhoneField';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, Share, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
 import { EventImage } from '@/components/EventImage';
+import { canPlan } from '@/lib/eventPlan';
 import { deleteEvent, deleteRegistration, eventRegistrationCount, eventRegistrations, getEvent, listCancellations, rsvpRows, saveRegistration, setRsvp } from '@/lib/api';
 import { addDays, dayName, fmtDateShort, fmtMoney, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -47,6 +48,10 @@ export default function Evento() {
   // Fechas suspendidas de esta actividad semanal (de hoy en adelante).
   const [offDates, setOffDates] = useState<string[]>([]);
   const staff = can('cal.editar');
+  // Los organizadores del evento (su equipo) también lo planifican, aunque no manejen el calendario.
+  const [teamMember, setTeamMember] = useState(false);
+  useEffect(() => { if (id) canPlan(id).then(setTeamMember).catch(() => undefined); }, [id]);
+  const mayPlan = staff || teamMember;
 
   const on = fecha ?? (ev ? isoDate(new Date(ev.starts_at)) : '');
 
@@ -297,8 +302,11 @@ export default function Evento() {
         {staff && ev.weekly ? (
           <Button title="Suspender una fecha / no hubo" icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
         ) : null}
-        {!ev.weekly && (staff || can('personas.asistencia')) ? (
-          <Button title="Puerta: anotar y marcar entradas" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
+        {!ev.weekly && mayPlan ? (
+          <Button title="Planificar este evento" icon="clipboard" onPress={() => router.push({ pathname: '/evento/plan', params: { id: ev.id } } as never)} />
+        ) : null}
+        {!ev.weekly && (staff || mayPlan || can('personas.asistencia')) ? (
+          <Button title="Puerta: anotar y marcar entradas" variant="outline" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
         ) : null}
         {!ev.weekly && staff ? (
           <Button title="Hacer un sorteo de este evento" icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />

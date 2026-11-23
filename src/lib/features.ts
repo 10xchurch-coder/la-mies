@@ -65,7 +65,7 @@ export const FEATURES: Feature[] = [
     routes: ['/oracion', '/t-oracion'] },
   { key: 'eventos', label: 'Calendario y eventos', group: 'Comunidad',
     hint: 'Los eventos de la iglesia, con inscripción y cómo llegar.',
-    routes: ['/eventos', '/t-eventos', '/evento'] },
+    routes: ['/eventos', '/t-eventos', '/evento', '/e'] },
   { key: 'directorio', label: 'Directorio', group: 'Comunidad',
     hint: 'La lista de hermanos con su teléfono, para los que aceptaron mostrarse.',
     routes: ['/directorio', '/t-directorio'] },

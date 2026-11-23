@@ -10,6 +10,7 @@ import { Button, Card, Empty, Field, Loading, SectionTitle, Stat, Tag } from '@/
 import { TicketScanner, scannerAvailable } from '@/components/TicketScanner';
 import { canDoor, doorCheckIn, doorCounts, doorRegister, doorSearch, getEvent } from '@/lib/api';
 import { parseTicket, showCode } from '@/lib/ticket';
+import { nfcBuilt, readChip } from '@/lib/nfc';
 import { isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
@@ -76,6 +77,17 @@ export default function Puerta() {
     doorSearch(id, on, t).then(setMatches).catch(() => setMatches([]));
   };
 
+  // Chip NFC: se apoya la credencial en el teléfono y entra, igual que con el QR.
+  const chip = async () => {
+    try {
+      const text = await readChip();
+      const c = parseTicket(text);
+      if (!c) { say({ tone: 'red', text: text ? 'Ese chip no es una entrada de La Mies' : 'El chip está vacío: todavía no se le grabó la entrada' }); return; }
+      checkIn({ code: c });
+    } catch (e) {
+      if ((e as Error).message !== 'cancelado') say({ tone: 'red', text: (e as Error).message });
+    }
+  };
   const onScanned = (text: string) => {
     const c = parseTicket(text);
     if (!c) { say({ tone: 'red', text: 'Ese QR no es una entrada de La Mies' }); return; }
@@ -120,6 +132,7 @@ export default function Puerta() {
 
         <SectionTitle>Ya tiene su entrada o estaba anotado</SectionTitle>
         <Card style={{ gap: 10 }}>
+          {nfcBuilt ? <Button title="Leer el chip de la credencial" icon="radio" variant="outline" onPress={chip} /> : null}
           {scannerAvailable ? (scan ? <TicketScanner onCode={onScanned} onClose={() => setScan(false)} /> : <Button title="Leer el QR de la entrada" icon="camera" onPress={() => setScan(true)} />) : null}
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
             <Field label="Código de la entrada" value={code} onChangeText={setCode} autoCapitalize="characters" autoCorrect={false} placeholder="1A2B-3C4D" style={{ flex: 1 }} onSubmitEditing={byCode} />

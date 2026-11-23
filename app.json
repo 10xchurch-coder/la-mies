@@ -109,6 +109,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#1F6B45"
         }
+      ],
+      [
+        "react-native-nfc-manager",
+        {
+          "nfcPermission": "La Mies usa el lector NFC para leer y grabar las credenciales con chip en la puerta de un evento.",
+          "includeNdefEntitlement": false
+        }
       ]
     ],
     "experiments": {
