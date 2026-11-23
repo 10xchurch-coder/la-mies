@@ -21,6 +21,7 @@ import {
 } from '@/lib/api';
 import * as Clipboard from 'expo-clipboard';
 import { shareImage, shareText, tryShareText, WEB_URL } from '@/lib/share';
+import { ShareShot, type ShotKind, type ShotView } from '@/components/ShareShot';
 import { renderCardPng, shareCardBlob, type CardKind } from '@/lib/shareCardWeb';
 import { cachedSignedUrl } from '@/lib/files';
 import { BACKGROUNDS } from '@/lib/backgroundColors';
@@ -85,6 +86,7 @@ export default function Devocional() {
   const [streak, setStreak] = useState<ReadingStreak | null>(null);
   const [page, setPage] = useState(0);
   const [textShare, setTextShare] = useState<string | null>(null);
+  const [shot, setShot] = useState<null | { kind: ShotKind; done: (view: ShotView) => void }>(null);
   const [sheet, setSheet] = useState<null | 'comments' | 'days' | 'streak' | 'reader' | 'share'>(abrir === 'comentarios' ? 'comments' : abrir === 'compartir' ? 'share' : null);
   const pager = useRef<React.ComponentRef<typeof ScrollView>>(null);
   const slideRefs = useRef<Record<string, React.ComponentRef<typeof View> | null>>({});
@@ -185,7 +187,18 @@ export default function Devocional() {
     }
     try {
       const ref = slideRefs.current[kind === 'devotional' ? 'reading' : kind];
-      const ok = ref
+      // El versículo y la frase se dibujan aparte en alta definición (1080 × 1920) para que salgan nítidos en los estados.
+      const hd = kind === 'verse' || kind === 'phrase';
+      const ok = hd
+        ? await shareImage(() => new Promise<string>((resolve, reject) => {
+          setShot({ kind, done: async (view) => {
+            try {
+              const { captureRef } = await import('react-native-view-shot');
+              resolve(await captureRef(view as unknown as number, { format: 'jpg', quality: 0.95, result: 'tmpfile' }));
+            } catch (e) { reject(e); } finally { setShot(null); }
+          } });
+        }), 'image/jpeg')
+        : ref
         ? await shareImage(async () => {
           const { captureRef } = await import('react-native-view-shot');
           return captureRef(ref as unknown as number, { format: 'png', quality: 1, result: 'tmpfile' });
@@ -196,6 +209,7 @@ export default function Devocional() {
         if (r === 'copied') Alert.alert('Texto copiado', 'Quedó copiado para pegarlo donde quieras. Para compartirlo como imagen, usá la app del teléfono.');
       }
     } catch (e) {
+      setShot(null);
       Alert.alert('No se pudo compartir', errorMessage(e));
     }
   };
@@ -275,7 +289,16 @@ export default function Devocional() {
 
   return (
     <View style={styles.black}>
+      {shot && item ? <ShareShot item={item} kind={shot.kind} onReady={shot.done} /> : null}
       <StatusBar style="light" />
+      {shot ? (
+        <View pointerEvents="none" style={{ position: 'absolute', zIndex: 20, top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 14, backgroundColor: 'rgba(0,0,0,0.75)' }}>
+            <ActivityIndicator color="#FFF" />
+            <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700' }}>Preparando la imagen…</Text>
+          </View>
+        </View>
+      ) : null}
       <View style={{ width: W, height: H, alignSelf: 'center' }}>
         <ScrollView
           ref={pager}

@@ -43,11 +43,11 @@ export async function tryShareText(text: string, title = 'La Mies'): Promise<'sh
 }
 
 /** Comparte una imagen capturada de un componente (solo teléfono). Devuelve false si no se pudo. */
-export async function shareImage(captureRef: () => Promise<string>): Promise<boolean> {
+export async function shareImage(captureRef: () => Promise<string>, mimeType = 'image/png'): Promise<boolean> {
   if (Platform.OS === 'web') return false;
   const Sharing = await import('expo-sharing');
   if (!(await Sharing.isAvailableAsync())) return false;
   const uri = await captureRef();
-  await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir versículo' });
+  await Sharing.shareAsync(uri, { mimeType, UTI: mimeType === 'image/jpeg' ? 'public.jpeg' : 'public.png', dialogTitle: 'Compartir versículo' });
   return true;
 }
