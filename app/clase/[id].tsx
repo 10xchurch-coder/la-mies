@@ -8,7 +8,7 @@ import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Field, Loading, RowLink, SectionTitle, Tag } from '@/components/ui';
 import {
-  addPerson, classSchedule, classStudents, classTeachers, listClasses, listMaterials, listPeople, listProfiles, saveSchedule, scheduleName,
+  addPerson, classSchedule, classStudents, classTeachers, listClasses, listMaterials, listMembers, listPeople, listProfiles, saveSchedule, scheduleName,
 } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtDateShort, isoDate, upcomingDates } from '@/lib/format';
@@ -24,6 +24,7 @@ export default function Clase() {
   const { profile, isStaff, can } = useAuth();
   const [k, setK] = useState<ClassRow | null | undefined>(undefined);
   const [teachers, setTeachers] = useState<ClassTeacher[]>([]);
+  const [members, setMembers] = useState<Contact[]>([]);
   const [students, setStudents] = useState<Contact[]>([]);
   const [sched, setSched] = useState<ClassSchedule[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
@@ -47,6 +48,7 @@ export default function Clase() {
       setSched(s);
       setPeople(p);
       setMaterials(m);
+      listMembers().then(setMembers).catch(() => setMembers([]));
       classStudents(id).then(setStudents).catch(() => setStudents([]));
     } catch {
       setK(null);
@@ -67,6 +69,8 @@ export default function Clase() {
   const canAttend = canStudents || hasTurn;
   const nameOf = (pid: string | null) => people.find((p) => p.id === pid)?.display_name ?? null;
   const mainTeachers = teachers.filter((t) => !t.is_helper);
+  const teacherName = (t: ClassTeacher) => (t.profile_id ? nameOf(t.profile_id) : members.find((m) => m.id === t.contact_id)?.name) ?? 'Maestro';
+  const sameTeacher = (t: ClassTeacher, s: { teacher_id: string | null; teacher_contact_id: string | null }) => (t.profile_id ? t.profile_id === s.teacher_id : !!t.contact_id && t.contact_id === s.teacher_contact_id);
 
   // Última clase que pasó (o hoy), para tomar asistencia.
   const lastClassDate = useMemo(() => {
@@ -78,19 +82,24 @@ export default function Clase() {
     return isoDate(today);
   }, [dows]);
 
-  const addTeacher = async (pid: string | null, helper: boolean) => {
+  // Se elige entre los miembros de la iglesia, tengan o no la app. Si la tiene, queda unido a su cuenta (ve la clase y recibe los avisos).
+  const addTeacher = async (cid: string | null, helper: boolean) => {
     setPicker(null);
-    if (!pid) return;
-    const { error } = await supabase.from('class_teachers').upsert({ class_id: id, profile_id: pid, is_helper: helper });
+    const c = members.find((m) => m.id === cid);
+    if (!c) return;
+    const { error } = c.profile_id
+      ? await supabase.from('class_teachers').upsert({ class_id: id, profile_id: c.profile_id, is_helper: helper }, { onConflict: 'class_id,profile_id' })
+      : await supabase.from('class_teachers').upsert({ class_id: id, contact_id: c.id, is_helper: helper }, { onConflict: 'class_id,contact_id' });
     if (error) Alert.alert('No se pudo', errorMessage(error));
     load();
   };
 
   const removeTeacher = (t: ClassTeacher) => {
-    Alert.alert('Quitar', `¿Sacar a ${nameOf(t.profile_id)} de esta clase?`, [
+    Alert.alert('Quitar', `¿Sacar a ${teacherName(t)} de esta clase?`, [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Quitar', style: 'destructive', onPress: async () => {
-        await supabase.from('class_teachers').delete().eq('class_id', id).eq('profile_id', t.profile_id);
+        const q = supabase.from('class_teachers').delete().eq('class_id', id);
+        await (t.profile_id ? q.eq('profile_id', t.profile_id) : q.eq('contact_id', t.contact_id ?? ''));
         load();
       } },
     ]);
@@ -126,7 +135,7 @@ export default function Clase() {
       return;
     }
     const last = [...sched].filter((s) => s.teacher_id || s.teacher_contact_id).sort((a, b) => a.on_date.localeCompare(b.on_date)).pop();
-    let i = last ? Math.max(0, mainTeachers.findIndex((t) => t.profile_id === last.teacher_id) + 1) : 0;
+    let i = last ? Math.max(0, mainTeachers.findIndex((t) => sameTeacher(t, last)) + 1) : 0;
     // Mismo maestro el sábado y el domingo del mismo fin de semana; alterna cada semana.
     let lastWeek = '';
     for (const d of dates) {
@@ -136,7 +145,8 @@ export default function Clase() {
       const weekKey = isoDate(addDays(dt, -((dt.getDay() + 1) % 7)));
       if (lastWeek && weekKey !== lastWeek) i++;
       lastWeek = weekKey;
-      await saveSchedule({ class_id: id, on_date: d, teacher_id: mainTeachers[i % mainTeachers.length].profile_id });
+      const who = mainTeachers[i % mainTeachers.length];
+      await saveSchedule(who.profile_id ? { class_id: id, on_date: d, teacher_id: who.profile_id } : { class_id: id, on_date: d, teacher_id: null, teacher_contact_id: who.contact_id ?? null });
     }
     load();
   };
@@ -220,7 +230,7 @@ export default function Clase() {
         <SectionTitle>Maestros</SectionTitle>
         <Card style={{ padding: 0 }}>
           {teachers.map((t) => (
-            <RowLink key={t.profile_id} icon="user" title={nameOf(t.profile_id) ?? 'Maestro'} subtitle={`${t.is_helper ? 'Ayudante' : 'Maestro'}${canManage ? ' · tocá para quitarlo de la clase' : ''}`} onPress={canManage ? () => removeTeacher(t) : undefined} />
+            <RowLink key={t.profile_id ?? t.contact_id} icon="user" title={teacherName(t)} subtitle={`${t.is_helper ? 'Ayudante' : 'Maestro'}${t.profile_id ? '' : ' · sin la app'}${canManage ? ' · tocá para quitarlo de la clase' : ''}`} onPress={canManage ? () => removeTeacher(t) : undefined} />
           ))}
           {!teachers.length ? <Text style={{ padding: 14, color: colors.muted }}>Todavía no hay maestros.</Text> : null}
         </Card>
@@ -259,7 +269,8 @@ export default function Clase() {
       </Screen>
 
       <PickerModal visible={picker === 'teacher' || picker === 'helper'} title={picker === 'helper' ? 'Elegí el ayudante' : 'Elegí el maestro'}
-        items={people.map((p) => ({ id: p.id, title: p.display_name }))} onClose={() => setPicker(null)} onPick={(pid) => addTeacher(pid, picker === 'helper')} />
+        items={members.filter((m) => !teachers.some((t) => (m.profile_id && t.profile_id === m.profile_id) || t.contact_id === m.id)).map((m) => ({ id: m.id, title: m.name, subtitle: m.profile_id ? undefined : 'No tiene la app', photo: m.photo_path }))}
+        onClose={() => setPicker(null)} onPick={(cid) => addTeacher(cid, picker === 'helper')} />
       <PickerModal visible={picker === 'student'} title="Elegí el alumno"
         items={allPeople.filter((p) => !students.some((s) => s.id === p.id)).map((p) => ({ id: p.id, title: p.name, subtitle: p.age != null ? `${p.age} años` : undefined, photo: p.photo_path }))}
         onClose={() => setPicker(null)} onPick={addStudent} />

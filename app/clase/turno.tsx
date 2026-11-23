@@ -69,7 +69,7 @@ export default function Turno() {
   if (!loaded) return <Loading />;
   const nameOf = (cid: string | null) => members.find((c) => c.id === cid)?.name;
   const m = materials.find((x) => x.id === material);
-  const isClassTeacher = (c: Contact) => (c.profile_id ? teachers.find((t) => t.profile_id === c.profile_id) : undefined);
+  const isClassTeacher = (c: Contact) => teachers.find((t) => (c.profile_id && t.profile_id === c.profile_id) || t.contact_id === c.id);
   // Primero los maestros de la clase, después el resto de los miembros.
   const ordered = [...members].sort((a, b) => Number(!!isClassTeacher(b)) - Number(!!isClassTeacher(a)) || a.name.localeCompare(b.name));
   const items = ordered.map((c) => {

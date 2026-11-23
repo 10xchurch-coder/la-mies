@@ -92,7 +92,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": false
+          "microphonePermission": "La Mies usa el micrófono para grabar los mensajes de voz que mandás en el chat."
         }
       ],
       [

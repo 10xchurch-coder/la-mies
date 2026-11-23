@@ -2,7 +2,7 @@
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { socialLinks } from '@/lib/social';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -68,6 +68,7 @@ export default function Iglesia() {
   const [outNow, setOutNow] = useState(0);
   const [pmUnread, setPmUnread] = useState(0);
   const insets = useSafeAreaInsets();
+  const { width: winW, height: winH } = useWindowDimensions();
   const tabs = useTabs();
   const { on } = useFeatures();
   const menu = useMenu();
@@ -336,7 +337,7 @@ export default function Iglesia() {
             <Text style={styles.churchName} numberOfLines={1}>{church?.name ?? 'Iglesia'}</Text>
             <Text style={styles.motto}>Más como Cristo cada día</Text>
           </View>
-          {Platform.OS === 'web' && canUseDesk(perms) ? (
+          {(Platform.OS === 'web' || Math.min(winW, winH) >= 700) && canUseDesk(perms) ? (
             <Pressable accessibilityRole="link" accessibilityLabel="Abrir el escritorio" onPress={() => { setDeskPref(true); router.push('/escritorio' as Href); }}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 9, borderWidth: 1, borderColor: colors.input }}>
               <Feather name="monitor" size={15} color={colors.text} />

@@ -19,7 +19,8 @@ import {
   type ChatMessage, type ChatPrivacy, type ChatRoomKind, type PollOption, type Receipt, type RoomRef,
 } from '@/lib/chat';
 import { currentPlace, startLiveShare, stopLiveShare } from '@/lib/chatLive';
-import { downloadUrl, pickChatDocument, pickChatImage, signedUrl, type ChatAttachment } from '@/lib/files';
+import { downloadUrl, pickChatDocument, pickChatImage, signedUrl, uploadChatVoice, type ChatAttachment } from '@/lib/files';
+import { VoiceBubble, VoiceRecorder, isVoice, voiceAvailable } from '@/components/ChatVoice';
 import { moderate } from '@/lib/moderation';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { fmtRelativeDay, fmtTime } from '@/lib/format';
@@ -191,6 +192,13 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
     guard(async () => { const a = await pick(); if (a) { await chatSendAttachment(ref, a, text); setText(''); } });
   };
 
+  const [recording, setRecording] = useState(false);
+  const sendVoice = async (uri: string) => {
+    if (!church?.id) return;
+    await chatSendAttachment(ref, await uploadChatVoice(church.id, uri), '');
+    load();
+  };
+
   const liveChoice = () => showActions('Ubicación en tiempo real', 'Los del chat ven cómo te movés en el mapa. Podés dejar de compartir cuando quieras.', [
     ...SEND_LIVE.map((m) => ({ text: m === 60 ? '1 hora' : `${m} minutos`, icon: 'radio' as const, onPress: () => guard(() => startLiveShare(ref, m)) })),
     { text: 'Cancelar', icon: 'x' as const },
@@ -249,7 +257,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       <>
         {m.kind === 'announcement' ? <Text style={styles.annTag}>📢 ANUNCIO</Text> : null}
         {m.kind === 'image' && m.attachment_path ? <ChatImage path={m.attachment_path} onOpen={setViewer} /> : null}
-        {m.kind === 'file' ? (
+        {m.kind === 'file' && isVoice(m.attachment_name) && m.attachment_path ? <VoiceBubble path={m.attachment_path} /> : m.kind === 'file' ? (
           <Pressable onPress={() => openFile(m)} accessibilityRole="button" accessibilityLabel={`Abrir ${m.attachment_name ?? 'documento'}`} style={styles.file}>
             <Feather name="file-text" size={26} color={colors.green} />
             <View style={{ flex: 1 }}>
@@ -333,6 +341,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
               <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText, flex: 1 }}>Mandar como anuncio (les llega aviso al teléfono a todos)</Text>
             </Pressable>
           ) : null}
+          {recording ? <View style={styles.inputLine}><VoiceRecorder onSend={sendVoice} onCancel={() => setRecording(false)} /></View> : (
           <View style={styles.inputLine}>
             <View style={styles.pill}>
               {canAttach ? (
@@ -342,10 +351,17 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
               ) : <View style={{ width: 8 }} />}
               <TextInput value={text} onChangeText={onType} placeholder={placeholder} placeholderTextColor="#8B918C" multiline maxLength={room === 'ministry' ? 4000 : 1000} style={styles.input} />
             </View>
+            {voiceAvailable && !text.trim() && !busy && room !== 'outing' ? (
+              <Pressable onPress={() => setRecording(true)} style={[styles.sendBtn, { backgroundColor: colors.violet }]} accessibilityRole="button" accessibilityLabel="Grabar un mensaje de voz">
+                <Feather name="mic" size={20} color="#FFF" />
+              </Pressable>
+            ) : (
             <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, announce && { backgroundColor: colors.amber }, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel="Enviar">
               {busy ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
             </Pressable>
+            )}
           </View>
+          )}
         </View>
       )}
       <AttachSheet visible={menu} items={attachItems()} onClose={() => setMenu(false)} />

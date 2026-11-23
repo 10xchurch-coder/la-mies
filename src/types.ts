@@ -251,7 +251,8 @@ export type ChurchService = { id: string; church_id: string; name: string; dow: 
 export type Cancellation = { id: string; on_date: string; service_id: string | null; event_id: string | null; note: string | null };
 
 export type ClassRow = { id: string; church_id: string; name: string; age_min: number | null; age_max: number | null; days: string[]; active: boolean; sort_order: number };
-export type ClassTeacher = { class_id: string; profile_id: string; is_helper: boolean };
+/** Maestro o ayudante de una clase: alguien con la app (profile_id) o un hermano que no la tiene (contact_id). */
+export type ClassTeacher = { class_id: string; profile_id: string | null; contact_id?: string | null; is_helper: boolean };
 export type ClassSchedule = {
   id: string; church_id: string; class_id: string; on_date: string; teacher_id: string | null; helper_id: string | null; material_id: string | null; note: string | null;
   /** Maestro y ayudante por ficha de persona (no necesitan cuenta). */

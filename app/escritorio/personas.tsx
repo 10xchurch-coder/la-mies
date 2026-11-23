@@ -1,4 +1,5 @@
 // Tabla de personas del escritorio: buscar, filtrar, ordenar, corregir un dato sin salir de la tabla y bajar la lista a Excel.
+import { downloadText } from '@/lib/download';
 import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import { formatPhone, phoneProblem, telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,10 +30,15 @@ function Select({ value, options, onChange, label, width }: { value: string; opt
     }, options.map((o) => React.createElement('option', { key: o.value, value: o.value }, o.label)));
   }
   const i = Math.max(0, options.findIndex((o) => o.value === value));
+  // En el iPad: con pocas opciones se elige de una lista; con muchas, cada toque pasa a la siguiente.
+  const pick = () => (options.length <= 7
+    ? Alert.alert(label, undefined, [...options.map((o) => ({ text: o.label, onPress: () => onChange(o.value) })), { text: 'Cancelar', style: 'cancel' as const }])
+    : onChange(options[(i + 1) % options.length].value));
   return (
-    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={() => onChange(options[(i + 1) % options.length].value)}
-      style={{ height: 36, paddingHorizontal: 10, borderRadius: 9, borderWidth: 1, borderColor: colors.input, justifyContent: 'center' }}>
-      <Text style={{ fontSize: 13, fontWeight: '600', color: colors.text }}>{options[i]?.label}</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={pick}
+      style={{ height: 44, paddingHorizontal: 12, borderRadius: 9, borderWidth: 1, borderColor: colors.input, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{options[i]?.label}</Text>
+      <Feather name="chevron-down" size={14} color={colors.muted} />
     </Pressable>
   );
 }
@@ -98,7 +104,7 @@ export default function DeskPeople() {
       shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,
         fmtDateAR(c.birthdate), ageOf(c), c.baptized || c.baptized_on ? 'Sí' : 'No', fmtDateAR(c.member_since), fmtDateAR(last.get(c.id) ?? null), pct.has(c.id) ? Math.round(pct.get(c.id)!) : '']),
     );
-    if (Platform.OS !== 'web') return;
+    if (Platform.OS !== 'web') { downloadText(`personas-${new Date().toISOString().slice(0, 10)}.csv`, csv).catch(() => undefined); return; }
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url; a.download = `personas-${new Date().toISOString().slice(0, 10)}.csv`;

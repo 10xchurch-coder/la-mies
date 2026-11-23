@@ -4,6 +4,8 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, typ
 import { Image } from 'expo-image';
 import { usePathname, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChurchLogo } from '@/components/BrandFooter';
 import { deskNavFor, norm, type DeskItem } from '@/lib/desk';
 import { useLayout } from '@/lib/layout';
@@ -14,13 +16,27 @@ import { colors, themed, toneOf } from '@/theme';
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
 const PREF = 'lamies.escritorio';
-/** ¿Prefiere la vista de teléfono aunque esté en la computadora? (se recuerda en este navegador) */
+let nativeOff = false;
+/** En el iPad la preferencia se guarda en el aparato; se lee una vez al abrir la app. */
+export async function loadDeskPref(): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try { nativeOff = (await AsyncStorage.getItem(PREF)) === 'off'; } catch { /* sin almacenamiento: queda el escritorio */ }
+}
+/** ¿Prefiere la vista de teléfono aunque esté en la computadora o en el iPad? (se recuerda en este aparato) */
 export function deskPrefOff(): boolean {
-  try { return Platform.OS === 'web' && globalThis.localStorage?.getItem(PREF) === 'off'; } catch { return false; }
+  if (Platform.OS !== 'web') return nativeOff;
+  try { return globalThis.localStorage?.getItem(PREF) === 'off'; } catch { return false; }
 }
 export function setDeskPref(on: boolean): void {
-  try { if (Platform.OS === 'web') globalThis.localStorage?.setItem(PREF, on ? 'on' : 'off'); } catch { /* sin almacenamiento: no pasa nada */ }
+  if (Platform.OS !== 'web') { nativeOff = !on; AsyncStorage.setItem(PREF, on ? 'on' : 'off').catch(() => undefined); return; }
+  try { globalThis.localStorage?.setItem(PREF, on ? 'on' : 'off'); } catch { /* sin almacenamiento: no pasa nada */ }
 }
+/** ¿Esta pantalla es de computadora o de iPad? (el escritorio entra; en un teléfono no) */
+export function deskFits(width: number, height: number): boolean {
+  return Platform.OS === 'web' ? width >= 1000 : Math.min(width, height) >= 700;
+}
+// Con el dedo hace falta más lugar para tocar que con el mouse.
+const TOUCH = Platform.OS !== 'web';
 
 const SIDE = 252;
 
@@ -30,6 +46,7 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const path = usePathname();
   const logo = useChurchLogo();
+  const insets = useSafeAreaInsets();
   const narrow = width < 900;
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [path]);
@@ -42,7 +59,7 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   const isHere = (i: DeskItem) => (i.to === '/escritorio' ? path === '/escritorio' : path === i.to || path.startsWith(`${i.to}/`));
 
   const side = (
-    <View style={[styles.side, narrow && styles.sideFloating]}>
+    <View style={[styles.side, narrow && styles.sideFloating, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left }]}>
       <View style={styles.brand}>
         {logo ? <Image source={{ uri: logo }} style={{ width: 34, height: 34 }} contentFit="contain" /> : null}
         <View style={{ flex: 1 }}>
@@ -104,9 +121,9 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   return (
     <View style={styles.root}>
       {narrow ? null : side}
-      <View style={{ flex: 1, minWidth: 0 }}>
+      <View style={{ flex: 1, minWidth: 0, paddingTop: narrow ? 0 : insets.top, paddingRight: insets.right }}>
         {narrow ? (
-          <View style={styles.narrowBar}>
+          <View style={[styles.narrowBar, { height: 50 + insets.top, paddingTop: insets.top }]}>
             <Pressable accessibilityRole="button" accessibilityLabel="Menú" onPress={() => setOpen((v) => !v)} style={{ padding: 10 }}>
               <Feather name={open ? 'x' : 'menu'} size={22} color={colors.text} />
             </Pressable>
@@ -186,10 +203,10 @@ const styles = themed(() => StyleSheet.create({
   brandName: { fontSize: 14, fontWeight: '800', color: colors.text, lineHeight: 17 },
   brandSub: { fontSize: 11, fontWeight: '600', color: colors.muted, marginTop: 1 },
   groupTitle: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase', color: colors.muted },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 36, paddingHorizontal: 8, borderRadius: 9 },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 10, height: TOUCH ? 44 : 36, paddingHorizontal: 8, borderRadius: 9 },
   itemIcon: { width: 24, height: 24, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
-  find: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36, marginHorizontal: 12, marginBottom: 6, paddingHorizontal: 10, borderRadius: 9, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.bgPage },
-  itemText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
+  find: { flexDirection: 'row', alignItems: 'center', gap: 8, height: TOUCH ? 42 : 36, marginHorizontal: 12, marginBottom: 6, paddingHorizontal: 10, borderRadius: 9, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.bgPage },
+  itemText: { flex: 1, fontSize: TOUCH ? 15 : 14, fontWeight: '600', color: colors.text },
   foot: { padding: 14, borderTopWidth: 1, borderTopColor: colors.border },
   footName: { fontSize: 13, fontWeight: '800', color: colors.text },
   footRole: { fontSize: 12, color: colors.muted },
@@ -204,5 +221,5 @@ const styles = themed(() => StyleSheet.create({
   panelHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   panelTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
   panelHint: { fontSize: 12, color: colors.muted, marginTop: 1 },
-  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 9, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.bg },
+  btn: { flexDirection: 'row', alignItems: 'center', gap: 6, height: TOUCH ? 44 : 36, paddingHorizontal: TOUCH ? 14 : 12, borderRadius: 9, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.bg },
 }));

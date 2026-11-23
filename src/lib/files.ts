@@ -210,6 +210,16 @@ export async function pickAndUploadReceipt(churchId: string, month: string, labe
 export type ChatAttachment = { path: string; name: string; size: number; kind: 'image' | 'file' };
 const CHAT_MAX_BYTES = 15 * 1024 * 1024;
 
+/** Sube un mensaje de voz recién grabado. */
+export async function uploadChatVoice(churchId: string, uri: string): Promise<ChatAttachment> {
+  const web = Platform.OS === 'web';
+  const blobType = web ? (await (await fetch(uri)).blob()).type : '';
+  const ext = web ? (blobType.includes('mp4') ? 'm4a' : blobType.includes('ogg') ? 'ogg' : 'webm') : 'm4a';
+  const name = `voz-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.${ext}`;
+  const path = await upload('chat', churchId, uri, name, ext === 'm4a' ? 'audio/mp4' : `audio/${ext}`);
+  return { path, name, size: 0, kind: 'file' };
+}
+
 /** Saca una foto o elige una de la galería (los GIF se mandan tal cual, para que se muevan). */
 export async function pickChatImage(churchId: string, source: 'camera' | 'library'): Promise<ChatAttachment | null> {
   const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();

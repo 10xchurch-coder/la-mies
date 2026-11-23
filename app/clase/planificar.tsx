@@ -57,11 +57,14 @@ export default function Planificar() {
   }, [from, to]);
   useEffect(() => { loadExisting(); setPlan(null); }, [loadExisting]);
 
-  const nameOf = (pid: string | null) => (pid ? people.find((p) => p.id === pid)?.display_name ?? 'Sin nombre' : null);
-  const pool = useMemo(() => [...new Set(teachers.map((t) => t.profile_id))].sort((a, b) => (nameOf(a) ?? '').localeCompare(nameOf(b) ?? '')), [teachers, people]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Cada maestro tiene una clave: su cuenta si tiene la app, o "c:" + su ficha si no la tiene.
+  const keyOf = (t: ClassTeacher) => t.profile_id ?? `c:${t.contact_id}`;
+  const nameOf = (pid: string | null) => (!pid ? null : pid.startsWith('c:') ? members.find((c) => c.id === pid.slice(2))?.name ?? 'Sin nombre' : people.find((p) => p.id === pid)?.display_name ?? 'Sin nombre');
+  const pool = useMemo(() => [...new Set(teachers.map(keyOf))].sort((a, b) => (nameOf(a) ?? '').localeCompare(nameOf(b) ?? '')), [teachers, people, members]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setLimit = async (pid: string, v: number | null) => {
     setLimits((l) => ({ ...l, [pid]: v }));
+    if (pid.startsWith('c:')) return; // sin la app, el tope vale para este armado y no queda guardado
     const { error } = await supabase.from('teacher_prefs').upsert({ profile_id: pid, church_id: church?.id, per_month: v, updated_at: new Date().toISOString() });
     if (error) Alert.alert('No se pudo guardar', errorMessage(error));
   };
@@ -71,10 +74,12 @@ export default function Planificar() {
     const rc = classes.map((k) => ({
       id: k.id,
       days: k.days ?? ['sat', 'sun'],
-      teachers: teachers.filter((t) => t.class_id === k.id && !t.is_helper).map((t) => t.profile_id),
-      helpers: teachers.filter((t) => t.class_id === k.id && t.is_helper).map((t) => t.profile_id),
+      teachers: teachers.filter((t) => t.class_id === k.id && !t.is_helper).map(keyOf),
+      helpers: teachers.filter((t) => t.class_id === k.id && t.is_helper).map(keyOf),
     }));
-    setPlan(planMonth({ year: ym.y, month: ym.m, classes: rc, limits, existing, replace }));
+    const had = existing.map((e) => ({ class_id: e.class_id, on_date: e.on_date,
+      teacher_id: e.teacher_id ?? (e.teacher_contact_id ? `c:${e.teacher_contact_id}` : null), helper_id: e.helper_id ?? (e.helper_contact_id ? `c:${e.helper_contact_id}` : null) }));
+    setPlan(planMonth({ year: ym.y, month: ym.m, classes: rc, limits, existing: had, replace }));
   };
 
   const counts = useMemo(() => {
@@ -83,7 +88,8 @@ export default function Planificar() {
     return c;
   }, [plan]);
 
-  const contactOf = (pid: string | null) => (pid ? members.find((c) => c.profile_id === pid)?.id ?? null : null);
+  const contactOf = (pid: string | null) => (!pid ? null : pid.startsWith('c:') ? pid.slice(2) : members.find((c) => c.profile_id === pid)?.id ?? null);
+  const profileOf = (pid: string | null) => (pid && !pid.startsWith('c:') ? pid : null);
 
   const save = () => {
     if (!plan) return;
@@ -97,7 +103,7 @@ export default function Planificar() {
             const prev = existing.find((e) => e.class_id === s.class_id && e.on_date === s.on_date);
             await saveSchedule({
               class_id: s.class_id, on_date: s.on_date,
-              teacher_id: s.teacher_id, helper_id: s.helper_id,
+              teacher_id: profileOf(s.teacher_id), helper_id: profileOf(s.helper_id),
               teacher_contact_id: contactOf(s.teacher_id), helper_contact_id: contactOf(s.helper_id),
               material_id: prev?.material_id ?? null, note: prev?.note ?? null,
             });
@@ -125,7 +131,7 @@ export default function Planificar() {
 
   const move = (d: number) => setYm(({ y, m }) => { const n = m + d; return { y: y + Math.floor(n / 12), m: ((n % 12) + 12) % 12 }; });
   const editing = edit && plan ? plan[edit.i] : null;
-  const editPool = editing ? teachers.filter((t) => t.class_id === editing.class_id && t.is_helper === (edit!.who === 'helper')).map((t) => t.profile_id) : [];
+  const editPool = editing ? teachers.filter((t) => t.class_id === editing.class_id && t.is_helper === (edit!.who === 'helper')).map(keyOf) : [];
   const busyThatDay = (pid: string) => (plan ?? []).some((s, j) => j !== edit?.i && s.on_date === editing?.on_date && (s.teacher_id === pid || s.helper_id === pid));
 
   return (

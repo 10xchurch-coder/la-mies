@@ -17,6 +17,7 @@ import { LockGate } from '@/components/LockGate';
 import { OutingBanner } from '@/components/OutingBanner';
 import { MemberViewBanner } from '@/components/MemberViewBanner';
 import { PhotoCropperHost } from '@/components/PhotoCropper';
+import { loadDeskPref } from '@/components/desk/DeskShell';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
@@ -130,7 +131,7 @@ export default function RootLayout() {
   useEffect(() => startNetSync(), []);
   useEffect(() => { if (Platform.OS === 'web') registerWebShell(); }, []);
   useEffect(() => {
-    Promise.all([loadThemeMode(), loadTabs(), loadMenu()]).finally(() => setThemeReady(true));
+    Promise.all([loadThemeMode(), loadTabs(), loadMenu(), loadDeskPref()]).finally(() => setThemeReady(true));
   }, []);
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
