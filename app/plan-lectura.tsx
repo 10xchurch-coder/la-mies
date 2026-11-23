@@ -2,11 +2,12 @@
 // cada día ve qué capítulos le tocan y los tilda cuando los leyó.
 import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading, SectionTitle } from '@/components/ui';
 import { myBiblePlan, saveBiblePlanDone, startBiblePlan, stopBiblePlan, type BiblePlanRow } from '@/lib/api';
+import { parseReading } from '@/lib/bible';
 import { PLANS, planDays, planReadings, planStatus, type PlanId } from '@/lib/biblePlan';
 import { addDays, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -16,6 +17,7 @@ const dayText = (startedOn: string, d: number) =>
   addDays(new Date(`${startedOn}T12:00:00`), d).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
 
 export default function PlanLectura() {
+  const router = useRouter();
   const [row, setRow] = useState<BiblePlanRow | null | undefined>(undefined);
   const [showAll, setShowAll] = useState(false);
   const today = isoDate(new Date());
@@ -99,6 +101,10 @@ export default function PlanLectura() {
             <Card style={{ gap: 6 }}>
               <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.muted }}>HOY · DÍA {status.day + 1} DE {planDays(row.plan)}</Text>
               {status.today ? line(status.day, true) : <Text style={{ fontSize: 16, color: colors.text, paddingVertical: 6 }}>Hoy no hay lectura nueva. {status.behind.length ? 'Aprovechá para ponerte al día.' : 'Vas al día.'}</Text>}
+              {(() => {
+                const at = status.today ? parseReading(status.today) : null;
+                return at ? <Button title="Leerla en la Biblia" icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } })} /> : null;
+              })()}
             </Card>
 
             <Card style={{ gap: 8 }}>

@@ -493,6 +493,20 @@ export default function Iglesia() {
             </Pressable>
           );
         })()}
+        {!on('devocional') ? null : (
+          <Pressable onPress={() => router.push('/biblia' as Href)} accessibilityRole="button" accessibilityLabel="Biblia. Leé la Biblia en la app, sin internet">
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Feather name="book" size={19} color={colors.blueText} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Biblia</Text>
+                <Text style={{ fontSize: 13, color: colors.muted }}>Leela en la app, sin internet</Text>
+              </View>
+              <Feather name="chevron-right" size={18} color={colors.gray} />
+            </Card>
+          </Pressable>
+        )}
 
         {!on('anuncios') ? null : news.length ? (
           <Card style={styles.news}>

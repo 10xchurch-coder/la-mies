@@ -7,7 +7,7 @@ const BY_SEGMENT: Record<string, AreaTone> = {
   asistencia: 'green', ninos: 'green', eventos: 'green', evento: 'green', vivo: 'green', colectivo: 'green', 'colectivo-vivo': 'green', rifas: 'green', suspender: 'green',
   // Crecer
   crecimiento: 'blue', oracion: 'blue', predicas: 'blue', predica: 'blue', clases: 'blue', clase: 'blue', canciones: 'blue', musica: 'blue', radio: 'blue',
-  devocional: 'blue', 'plan-lectura': 'blue', capacitacion: 'blue', material: 'blue', materiales: 'blue', notas: 'blue', progreso: 'blue', certificado: 'blue',
+  devocional: 'blue', 'plan-lectura': 'blue', biblia: 'blue', capacitacion: 'blue', material: 'blue', materiales: 'blue', notas: 'blue', progreso: 'blue', certificado: 'blue',
   // Comunidad
   chat: 'violet', directorio: 'violet', ministerios: 'violet', ministerio: 'violet', anuncios: 'violet', misioneros: 'violet', dar: 'violet', sugerencias: 'violet',
   mensajes: 'violet', 'pastor-hilo': 'violet', 'pastor-bandeja': 'violet', avisos: 'violet',
