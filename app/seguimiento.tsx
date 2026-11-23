@@ -1,5 +1,6 @@
 // Mis contactos para seguir: los que anoté (o me asignaron), primero los que prometieron venir y los más interesados.
 // Con un toque: WhatsApp con el mensaje escrito, llamar, cómo llegar o registrar la visita.
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -10,7 +11,7 @@ import { Button, Card, Empty, Field, Loading, Tag } from '@/components/ui';
 import { absenceMessaged, weekendAbsences, completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
 import { whyHere, type FollowContext } from '@/lib/followWhy';
 import { errorMessage } from '@/lib/supabase';
-import { formatPhone } from '@/lib/phone';
+import { formatPhone, phoneProblem } from '@/lib/phone';
 import { INTEREST_LABEL, PROMISE_LABEL, fmtDateShort, fmtRelativeDay, lastSaturday } from '@/lib/format';
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { useAuth } from '@/store/auth';
@@ -215,8 +216,8 @@ export default function Seguimiento() {
                           <Text style={{ fontSize: 12, color: colors.amberText }}>No tiene teléfono cargado. Conseguilo, o hablale en persona.</Text>
                           {addPhone === v.contact_id ? (
                             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-                              <Field label="Teléfono" value={phoneText} onChangeText={setPhoneText} keyboardType="phone-pad" placeholder="Ej: 27-2200" style={{ flex: 1 }} autoFocus />
-                              <Small icon="check" label="Guardar" disabled={phoneText.replace(/\D/g, '').length < 6} onPress={() => {
+                              <PhoneField label="Teléfono" value={phoneText} onChangeText={setPhoneText} style={{ flex: 1 }} autoFocus />
+                              <Small icon="check" label="Guardar" disabled={!phoneText.trim() || !!phoneProblem(phoneText)} onPress={() => {
                                 const phone = formatPhone(phoneText);
                                 updateContact(v.contact_id, { phone }).then(() => { setTasks((cur) => cur.map((x) => (x.contact_id === v.contact_id ? { ...x, phone } : x))); setAddPhone(null); setPhoneText(''); }).catch(() => undefined);
                               }} />

@@ -1,6 +1,7 @@
 // Marcar una casa: todo en una pantalla.
 // Arriba lo rápido (nombre, ¿evangelio?, ¿prometió venir?, nota). Abajo, si hay tiempo, el resto de los datos.
-import { formatPhone } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
+import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -60,6 +61,8 @@ export default function NuevoContacto() {
 
   const save = async () => {
     if (!name.trim()) return;
+    const bad = phoneProblem(phone);
+    if (bad) { Alert.alert('Revisá el teléfono', bad); return; }
     setBusy(true);
     try {
       const day = promised ? promiseDay : null;
@@ -136,7 +139,7 @@ export default function NuevoContacto() {
         <Button title="Guardar contacto" onPress={save} loading={busy} disabled={!name.trim()} />
 
         <Text style={styles.more}>Más datos (opcional)</Text>
-        <Field label="Teléfono" hint="(si te lo dio)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="376 ..." />
+        <PhoneField label="Teléfono" hint="(si te lo dio)" value={phone} onChangeText={setPhone} />
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
           <Field label="Edad" value={age} onChangeText={(v) => setAge(v.replace(/\D/g, ''))} keyboardType="number-pad" style={{ width: 104 }} />
           <View style={{ flex: 1, gap: 6 }}>

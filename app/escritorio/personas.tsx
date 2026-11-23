@@ -1,5 +1,6 @@
 // Tabla de personas del escritorio: buscar, filtrar, ordenar, corregir un dato sin salir de la tabla y bajar la lista a Excel.
-import { formatPhone, telDigits } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
+import { formatPhone, phoneProblem, telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, FlatList, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
@@ -267,7 +268,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
   onClose: () => void; onDeleted: () => void; onSaved: (patch: Partial<Contact>) => void; onOpenFull: () => void;
 }) {
   const start = useMemo(() => ({
-    name: person.name, phone: person.phone ? formatPhone(person.phone) : '', email: person.email ?? '', address: person.address ?? '',
+    name: person.name, phone: phoneInputValue(person.phone), email: person.email ?? '', address: person.address ?? '',
     birth: fmtDateAR(person.birthdate), status: person.status as string, group: person.group_id ?? '',
   }), [person]);
   const [f, setF] = useState(start);
@@ -279,6 +280,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
   const save = async () => {
     const birthdate = f.birth.trim() ? parseDateAR(f.birth) : null;
     if (!f.name.trim()) return Alert.alert('Falta el nombre', 'Escribí el nombre de la persona.');
+    if (phoneProblem(f.phone)) return Alert.alert('Revisá el teléfono', phoneProblem(f.phone) ?? '');
     if (f.birth.trim() && !birthdate) return Alert.alert('Revisá la fecha', 'Escribí la fecha de nacimiento así: 08/12/1993.');
     // Se manda solo lo que cambió, para no pisar lo que otro haya corregido mientras tanto.
     const patch: Partial<Contact> = {};
@@ -342,7 +344,7 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
           </View>
         ) : null}
         <Input label="Nombre" value={f.name} onChange={(name) => setF((x) => ({ ...x, name }))} editable={canEdit} />
-        <Input label="Teléfono" value={f.phone} onChange={(phone) => setF((x) => ({ ...x, phone }))} editable={canEdit} keyboard="phone-pad" />
+        {canEdit ? <PhoneField label="Teléfono" value={f.phone} onChangeText={(phone) => setF((x) => ({ ...x, phone }))} /> : <Input label="Teléfono" value={f.phone} onChange={() => undefined} editable={false} />}
         <Input label="Correo" value={f.email} onChange={(email) => setF((x) => ({ ...x, email }))} editable={canEdit} keyboard="email-address" />
         <Input label="Domicilio" value={f.address} onChange={(address) => setF((x) => ({ ...x, address }))} editable={canEdit} />
         <Input label="Fecha de nacimiento" placeholder="08/12/1993" value={f.birth} onChange={(birth) => setF((x) => ({ ...x, birth: maskDateAR(birth, x.birth) }))} editable={canEdit} />

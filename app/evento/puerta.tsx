@@ -1,5 +1,7 @@
 // La puerta de un evento grande: anotar rápido a los que llegan sin estar anotados y marcar a los que ya tienen su entrada (QR o nombre).
 // Pensado para el teléfono o la tablet de quien recibe a la gente: cada persona son pocos toques.
+import { formatPhone, phoneProblem } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import React, { useCallback, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -47,9 +49,11 @@ export default function Puerta() {
   const register = async () => {
     const n = name.trim();
     if (n.length < 2) { say({ tone: 'red', text: 'Escribí el nombre' }); return; }
+    const bad = phoneProblem(phone);
+    if (bad) { say({ tone: 'red', text: bad }); return; }
     setBusy(true);
     try {
-      const r = await doorRegister(id, on, n, phone.trim() || null, people);
+      const r = await doorRegister(id, on, n, formatPhone(phone) || null, people);
       say(r.already ? { tone: 'amber', text: `${r.name} ya estaba anotado y ya había entrado` } : { tone: 'green', text: `✓ ${r.name} anotado${people > 1 ? ` (${people} personas)` : ''}` });
       setName(''); setPhone(''); setPeople(1); refresh(on);
       setNonce((x) => x + 1);
@@ -104,7 +108,7 @@ export default function Puerta() {
         <SectionTitle>Persona nueva</SectionTitle>
         <Card style={{ gap: 10 }}>
           <Field key={`n${nonce}`} autoFocus={nonce > 0} label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
-          <Field label="Teléfono" hint="(para el sorteo y para avisarle)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" returnKeyType="done" onSubmitEditing={register} />
+          <PhoneField label="Teléfono" hint="(para el sorteo y para avisarle)" value={phone} onChangeText={setPhone} returnKeyType="done" onSubmitEditing={register} />
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }}>Cuántos entran</Text>
             <Button title="−" variant="outline" small onPress={() => setPeople((p) => Math.max(1, p - 1))} />

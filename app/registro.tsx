@@ -1,3 +1,5 @@
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
+import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 import { useRouter, type Href } from 'expo-router';
@@ -25,7 +27,7 @@ export default function Registro() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const join = async (c = code, n = name, ph = phone) => {
-    const { error } = await supabase.rpc('join_church', { p_code: c.trim(), p_display_name: n.trim(), p_phone: ph.trim() });
+    const { error } = await supabase.rpc('join_church', { p_code: c.trim(), p_display_name: n.trim(), p_phone: formatPhone(ph) });
     if (error) throw error;
     await refreshProfile();
     router.replace('/');
@@ -40,7 +42,7 @@ export default function Registro() {
     if (!session || tried.current) return;
     tried.current = true;
     if (meta.display_name) setName(meta.display_name);
-    if (meta.phone) setPhone(meta.phone);
+    if (meta.phone) setPhone(phoneInputValue(meta.phone));
     if (meta.join_code) setCode(meta.join_code);
     if (!meta.join_code || !meta.display_name) { setAutoJoining(false); return; }
     join(meta.join_code, meta.display_name, meta.phone ?? '').catch((e) => {
@@ -64,7 +66,7 @@ export default function Registro() {
         email: email.trim().toLowerCase(),
         password,
         options: {
-          data: { display_name: name.trim(), phone: phone.trim(), join_code: code.trim().toUpperCase() },
+          data: { display_name: name.trim(), phone: formatPhone(phone), join_code: code.trim().toUpperCase() },
           emailRedirectTo: `${WEB_URL}/login`,
         },
       });
@@ -103,10 +105,10 @@ export default function Registro() {
             <PasswordField label="Contraseña" value={password} onChangeText={setPassword} personal={[name, email.split('@')[0] ?? '']} />
           </>
         ) : null}
-        <Field label="Tu celular" hint="(obligatorio: así te encontramos si la iglesia ya te tiene cargado)" keyboardType="phone-pad" autoComplete="tel" value={phone} onChangeText={setPhone} placeholder="Ej: 376 455-1234" />
+        <PhoneField label="Tu celular" hint="(obligatorio, con el código de área: así te encontramos si la iglesia ya te tiene cargado)" value={phone} onChangeText={setPhone} required />
         <Field label="Código de la iglesia" autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} placeholder="Ej: VICTORIA-2026" />
         {msg ? <Text style={styles.msg}>{msg}</Text> : null}
-        <Button title={session ? 'Unirme' : 'Crear cuenta'} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || phone.replace(/\D/g, '').length < 8 || (!session && (!email || !password))} />
+        <Button title={session ? 'Unirme' : 'Crear cuenta'} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || !!phoneProblem(phone, true) || (!session && (!email || !password))} />
         <Text style={styles.note}>
           Tus datos y los contactos que marques los ve solo tu iglesia. Los administradores de la iglesia ven todo; vos elegís con quién más compartir cada contacto.
         </Text>

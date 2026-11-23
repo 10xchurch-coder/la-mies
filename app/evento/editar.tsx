@@ -1,5 +1,7 @@
 // Agregar o editar un evento del calendario, con todos sus datos: foto, costo, transporte,
 // qué llevar, programa, contacto e inscripción.
+import { formatPhone } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import React, { useEffect, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -69,7 +71,7 @@ export default function EditarEvento() {
         setBring(ev.bring ?? '');
         setProgram(ev.program ?? '');
         setContactName(ev.contact_name ?? '');
-        setContactPhone(ev.contact_phone ?? '');
+        setContactPhone(phoneInputValue(ev.contact_phone));
         setPhoto(ev.photo_path ?? null);
         setImageKey(ev.image_key ?? null);
         setReg(!!ev.registration);
@@ -131,7 +133,7 @@ export default function EditarEvento() {
         title: title.trim(), starts_at: `${d}T${t ?? '00:00'}:00${TZ_OFFSET}`, ends_at: end ? `${end}T23:59:00${TZ_OFFSET}` : null,
         all_day: !t, place: place.trim() || null, description: desc.trim() || null, weekly, yearly: !weekly && yearly,
         cost: cost.trim() || null, transport: transport.trim() || null, bring: bring.trim() || null, program: program.trim() || null,
-        contact_name: contactName.trim() || null, contact_phone: contactPhone.trim() || null,
+        contact_name: contactName.trim() || null, contact_phone: formatPhone(contactPhone) || null,
         photo_path: photo, image_key: imageKey ?? guessImageKey(title),
         registration: !weekly && reg, reg_price: reg ? num(regPrice) : null, reg_capacity: reg ? num(regCap) : null,
         reg_deadline: reg ? deadline : null, reg_ask_ride: reg && askRide, reg_ask_lodging: reg && askLodging,
@@ -199,7 +201,7 @@ export default function EditarEvento() {
         <Field label="Qué llevar" value={bring} onChangeText={setBring} multiline placeholder="Ropa deportiva, agua, Biblia" />
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <Field label="Contacto" value={contactName} onChangeText={setContactName} placeholder="Nombre" style={{ flex: 1 }} />
-          <Field label="Teléfono" value={contactPhone} onChangeText={setContactPhone} placeholder="3764…" keyboardType="phone-pad" style={{ flex: 1 }} />
+          <PhoneField label="Teléfono" value={contactPhone} onChangeText={setContactPhone} style={{ flex: 1 }} />
         </View>
 
         {kind === 'special' ? (

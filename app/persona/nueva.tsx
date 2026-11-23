@@ -2,7 +2,8 @@
 // Cualquiera puede agregar; solo la secretaría o el pastor marcan "miembro".
 // Acá viven también los datos que no van en la ficha corta: miembro desde, discipulado,
 // bautismo, quién hace el seguimiento y la cuenta en la app.
-import { formatPhone } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
+import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -77,7 +78,7 @@ export default function NuevaPersona() {
         setOrig(x);
         setPhoto(x.photo_path);
         setName(x.name);
-        setPhone(x.phone ?? '');
+        setPhone(phoneInputValue(x.phone));
         setWhen(whenText(x.birthdate, x.age));
         setSex(x.sex);
         setMarital(x.marital);
@@ -173,6 +174,8 @@ export default function NuevaPersona() {
         return;
       }
     }
+    const bad = phoneProblem(phone);
+    if (bad) { Alert.alert('Revisá el celular', bad); return; }
     // Sin teléfono después no hay cómo escribirle: conviene pedirlo ahora.
     if (status === 'visitor' && !phone.trim() && !noPhoneOk.current) {
       Alert.alert('Falta el teléfono', 'Sin el número no vas a poder escribirle por WhatsApp para agradecerle la visita. Si lo tenés cerca, pedíselo ahora.', [
@@ -271,7 +274,7 @@ export default function NuevaPersona() {
         </View>
 
         <Field label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" />
-        <Field label="Celular" keyboardType="phone-pad" value={phone} onChangeText={setPhone} hint="(solo escribí el número; se agrega +54 9 3764. Si es de otra zona, escribí el código)" placeholder="Ej: 27-2200" />
+        <PhoneField label="Celular" hint="(con el código de área)" value={phone} onChangeText={setPhone} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Field
             label={isContact ? 'Edad' : 'Fecha de nacimiento'}

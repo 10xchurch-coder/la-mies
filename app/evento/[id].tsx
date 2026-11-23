@@ -1,5 +1,7 @@
 // Página de un evento: foto, cuándo y dónde (con "Cómo llegar"), costo, transporte, qué llevar,
 // programa, contacto, "Voy" e inscripción. Quien maneja el calendario ve los inscriptos y quién pagó.
+import { formatPhone, phoneProblem } from '@/lib/phone';
+import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import React, { useCallback, useState } from 'react';
 import { Alert, Linking, Pressable, Share, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -103,16 +105,18 @@ export default function Evento() {
   };
 
   const openForm = () => setForm(mine
-    ? { id: mine.id, name: mine.name, phone: mine.phone ?? '', people: String(mine.people), ride: mine.needs_ride, lodging: mine.needs_lodging, notes: mine.notes ?? '' }
-    : { name: me?.name ?? profile?.display_name ?? '', phone: me?.phone ?? '', people: '1', ride: false, lodging: false, notes: '' });
+    ? { id: mine.id, name: mine.name, phone: phoneInputValue(mine.phone), people: String(mine.people), ride: mine.needs_ride, lodging: mine.needs_lodging, notes: mine.notes ?? '' }
+    : { name: me?.name ?? profile?.display_name ?? '', phone: phoneInputValue(me?.phone), people: '1', ride: false, lodging: false, notes: '' });
 
   const submit = async () => {
     if (!form) return;
     const people = Math.max(1, Math.min(50, Number(form.people) || 1));
     if (!form.name.trim()) { Alert.alert('Falta el nombre'); return; }
+    const bad = phoneProblem(form.phone);
+    if (bad) { Alert.alert('Revisá el teléfono', bad); return; }
     setBusy(true);
     try {
-      await saveRegistration({ id: form.id, event_id: ev.id, occurs_on: on, name: form.name.trim(), phone: form.phone.trim() || null, people, needs_ride: form.ride, needs_lodging: form.lodging, notes: form.notes.trim() || null });
+      await saveRegistration({ id: form.id, event_id: ev.id, occurs_on: on, name: form.name.trim(), phone: formatPhone(form.phone) || null, people, needs_ride: form.ride, needs_lodging: form.lodging, notes: form.notes.trim() || null });
       if (!going) await setRsvp(ev.id, on, true).catch(() => undefined);
       setForm(null);
       load();
@@ -242,7 +246,7 @@ export default function Evento() {
                 <View style={{ gap: 10 }}>
                   <Field label="Nombre" value={form.name} onChangeText={(t) => setForm({ ...form, name: t })} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Field label="Teléfono" value={form.phone} onChangeText={(t) => setForm({ ...form, phone: t })} keyboardType="phone-pad" style={{ flex: 1 }} />
+                    <PhoneField label="Teléfono" value={form.phone} onChangeText={(t) => setForm({ ...form, phone: t })} style={{ flex: 1 }} />
                     <Field label="Cuántos van" value={form.people} onChangeText={(t) => setForm({ ...form, people: t.replace(/\D/g, '') })} keyboardType="number-pad" style={{ width: 110 }} />
                   </View>
                   {ev.reg_ask_ride ? <Toggle label="Necesito transporte" value={form.ride} onChange={(v) => setForm({ ...form, ride: v })} /> : null}
