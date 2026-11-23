@@ -95,6 +95,22 @@ function label(chs: Chapter[]): string {
   return parts.join('; ');
 }
 
+const chaptersCache: Partial<Record<PlanId, Chapter[]>> = {};
+function chaptersCached(plan: PlanId): Chapter[] {
+  return (chaptersCache[plan] ??= chaptersOf(plan));
+}
+
+/** Los capítulos que toca leer un día (en el plan con un salmo y un proverbio por día, también esos dos). */
+export function planDayChapters(plan: PlanId, d: number): { book: string; ch: number }[] {
+  const chs = chaptersCached(plan);
+  const days = planDays(plan);
+  const from = Math.ceil((d * chs.length) / days);
+  const to = Math.ceil(((d + 1) * chs.length) / days);
+  const out = chs.slice(from, to).map((c) => ({ book: c.book, ch: c.ch }));
+  if (plan === 'psalms' && out.length) out.push({ book: 'Salmos', ch: (d % 150) + 1 }, { book: 'Proverbios', ch: (d % 31) + 1 });
+  return out;
+}
+
 const cache: Partial<Record<PlanId, string[]>> = {};
 
 /**
@@ -104,7 +120,7 @@ const cache: Partial<Record<PlanId, string[]>> = {};
 export function planReadings(plan: PlanId): string[] {
   const hit = cache[plan];
   if (hit) return hit;
-  const chs = chaptersOf(plan);
+  const chs = chaptersCached(plan);
   const days = planDays(plan);
   const out: string[] = [];
   for (let d = 0; d < days; d++) {

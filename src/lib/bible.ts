@@ -1,6 +1,6 @@
 // La Biblia dentro de la app: versiones disponibles, libros, referencias y cómo se arma el texto para compartir.
 // Sin nada de la app ni de la base, para poder probarse sola.
-import { BOOKS } from './biblePlan';
+import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
 
 export type BibleVersionId = 'rv1909';
@@ -107,4 +107,40 @@ export function cleanPlace(libro: unknown, cap: unknown): { book: number; chapte
   if (!Number.isInteger(book) || book < 0 || book >= BOOKS.length) return null;
   if (!Number.isInteger(chapter) || chapter < 1 || chapter > chaptersIn(book)) return null;
   return { book, chapter };
+}
+
+// ---- Marcar solo lo leído en el plan de lectura ----
+
+/** Cómo se anota un capítulo leído: "42:3" = Juan 3 (libro 42, capítulo 3). */
+export const chapterKey = (book: number, chapter: number): string => `${book}:${chapter}`;
+
+const dayMap: Partial<Record<PlanId, Map<string, number[]>>> = {};
+/** Para cada capítulo, los días del plan en que toca leerlo. */
+function daysByChapter(plan: PlanId): Map<string, number[]> {
+  const hit = dayMap[plan];
+  if (hit) return hit;
+  const m = new Map<string, number[]>();
+  for (let d = 0; d < planDays(plan); d++) {
+    for (const c of planDayChapters(plan, d)) {
+      const k = chapterKey(findBook(c.book), c.ch);
+      m.set(k, [...(m.get(k) ?? []), d]);
+    }
+  }
+  return (dayMap[plan] = m);
+}
+
+/** Los días del plan en que toca leer este capítulo ([] si no es parte del plan). */
+export function chapterDays(plan: PlanId, book: number, chapter: number): number[] {
+  return daysByChapter(plan).get(chapterKey(book, chapter)) ?? [];
+}
+
+/**
+ * Al leer un capítulo: los días del plan que con eso quedan completos, o sea que ya se leyeron todos sus capítulos
+ * y todavía no estaban tildados. Solo mira los días de ese capítulo, así un día que la persona destildó a mano
+ * no se vuelve a tildar solo al leer otra cosa.
+ */
+export function daysCompletedBy(plan: PlanId, book: number, chapter: number, read: ReadonlySet<string>, done: readonly number[]): number[] {
+  const have = new Set(done);
+  return chapterDays(plan, book, chapter).filter((d) =>
+    !have.has(d) && planDayChapters(plan, d).every((c) => read.has(chapterKey(findBook(c.book), c.ch))));
 }

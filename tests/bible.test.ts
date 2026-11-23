@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { BOOKS } from '../src/lib/biblePlan';
-import { VERSIONS, chapterText, cleanPlace, findBook, neighbor, parseReading, shareVerses, verseSpan } from '../src/lib/bible';
+import { VERSIONS, chapterDays, chapterKey, chapterText, daysCompletedBy, cleanPlace, findBook, neighbor, parseReading, shareVerses, verseSpan } from '../src/lib/bible';
 import { planReadings } from '../src/lib/biblePlan';
 
 const rv = VERSIONS[0];
@@ -81,4 +81,37 @@ test('al compartir va el texto completo y la cita con la sigla', () => {
   assert.ok(two.endsWith('— Juan 3:16, 17 (RV1909)'));
   assert.ok(shareVerses(rv, findBook('Judas'), 1, [3]).endsWith('— Judas 3 (RV1909)'));
   assert.equal(shareVerses(rv, juan, 3, [999]), '');
+});
+
+test('un día del plan se tilda solo cuando se leyeron todos sus capítulos', () => {
+  // "Toda la Biblia en un año": el día 1 es Génesis 1–4.
+  const days = chapterDays('bible', 0, 1);
+  assert.deepEqual(days, [0]);
+  const read = new Set<string>();
+  for (const c of [1, 2, 3]) {
+    read.add(chapterKey(0, c));
+    assert.deepEqual(daysCompletedBy('bible', 0, c, read, []), [], `Génesis ${c} todavía no completa el día`);
+  }
+  read.add(chapterKey(0, 4));
+  assert.deepEqual(daysCompletedBy('bible', 0, 4, read, []), [0]);
+  // Si ya estaba tildado, no se repite.
+  assert.deepEqual(daysCompletedBy('bible', 0, 4, read, [0]), []);
+});
+
+test('en el plan con salmo y proverbio, el día pide también esos dos', () => {
+  const read = new Set<string>();
+  const first = planReadings('psalms')[0];
+  assert.ok(first.includes('Salmo 1') && first.includes('Proverbios 1'));
+  const main = chapterDays('psalms', 0, 1);
+  assert.deepEqual(main, [0]);
+  read.add(chapterKey(0, 1)); read.add(chapterKey(0, 2)); read.add(chapterKey(0, 3));
+  assert.deepEqual(daysCompletedBy('psalms', 0, 3, read, []), []);
+  read.add(chapterKey(findBook('Salmos'), 1));
+  read.add(chapterKey(findBook('Proverbios'), 1));
+  assert.deepEqual(daysCompletedBy('psalms', findBook('Proverbios'), 1, read, []), [0]);
+});
+
+test('un capítulo fuera del plan no tilda nada', () => {
+  assert.deepEqual(chapterDays('new30', 0, 1), []);
+  assert.deepEqual(daysCompletedBy('new30', 0, 1, new Set([chapterKey(0, 1)]), []), []);
 });
