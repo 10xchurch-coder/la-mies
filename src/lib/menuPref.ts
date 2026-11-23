@@ -8,8 +8,9 @@ export type MenuPref = {
   order: Record<string, string[]>;  // orden de los botones de cada grupo
   groups: string[];                 // orden de los grupos
   top: boolean;                     // el menú va arriba (antes de los anuncios y el devocional)
+  fold: Record<string, boolean>;    // grupos que cada uno abrió (false) o cerró (true); sin dato, queda como viene
 };
-export const DEFAULT_MENU: MenuPref = { fav: [], order: {}, groups: [], top: false };
+export const DEFAULT_MENU: MenuPref = { fav: [], order: {}, groups: [], top: false, fold: {} };
 export const FAV = 'Favoritos';
 
 const KEY = 'lamies.menu';
@@ -21,7 +22,9 @@ export function normalizeMenu(x: unknown): MenuPref {
   const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((s): s is string => typeof s === 'string').slice(0, 80) : []);
   const order: Record<string, string[]> = {};
   if (o.order && typeof o.order === 'object') for (const [k, v] of Object.entries(o.order)) order[k] = strs(v);
-  return { fav: strs(o.fav).filter((k, i, a) => a.indexOf(k) === i), order, groups: strs(o.groups), top: !!o.top };
+  const fold: Record<string, boolean> = {};
+  if (o.fold && typeof o.fold === 'object') for (const [k, v] of Object.entries(o.fold).slice(0, 40)) fold[k] = !!v;
+  return { fav: strs(o.fav).filter((k, i, a) => a.indexOf(k) === i), order, groups: strs(o.groups), top: !!o.top, fold };
 }
 
 export async function loadMenu(): Promise<void> {

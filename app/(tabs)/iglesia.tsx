@@ -2,7 +2,7 @@
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
 import { hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { socialLinks } from '@/lib/social';
 import { useFocusEffect, useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -30,10 +30,10 @@ import { useAuth } from '@/store/auth';
 import { useFeatures } from '@/lib/useFeatures';
 import { pathOn } from '@/lib/features';
 import { setDeskPref } from '@/components/desk/DeskShell';
-import { canUseDesk } from '@/lib/desk';
+import { canUseDesk, norm } from '@/lib/desk';
 import { useTabs } from '@/lib/tabsPref';
 import { FAV, layout, moved, resetMenu, setMenu, useMenu } from '@/lib/menuPref';
-import { colors, themed } from '@/theme';
+import { colors, themed, toneOf, type Tone } from '@/theme';
 import type { Announcement, Ministry, Sermon, UpcomingItem } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
@@ -73,6 +73,7 @@ export default function Iglesia() {
   const menu = useMenu();
   const { editar } = useLocalSearchParams<{ editar?: string }>();
   const [edit, setEdit] = useState(false);
+  const [find, setFind] = useState('');
   useEffect(() => { if (editar) setEdit(true); }, [editar]);
 
   // Los líderes ven en el inicio cuando hay hermanos evangelizando, para seguirlos en vivo sin iniciar una salida.
@@ -139,66 +140,84 @@ export default function Iglesia() {
 
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
 
-  type Tile = { icon: IconName; label: string; to: Href; show: boolean; tone?: 'green' };
+  type Tile = { icon: IconName; label: string; to: Href; show: boolean; strong?: boolean; tone?: Tone };
+  type Group = { title: string; tone: Tone; closed?: boolean; tiles: Tile[] };
   const ministryTile: Tile = isLeader
     ? { icon: 'layers', label: 'Ministerios', to: '/ministerios', show: true }
     : myMinistries.length === 1
       ? { icon: 'layers', label: 'Mi ministerio', to: { pathname: '/ministerio/[id]', params: { id: myMinistries[0].id } } as unknown as Href, show: true }
       : { icon: 'layers', label: 'Mis ministerios', to: '/ministerios', show: myMinistries.length > 1 };
-  const groups: { title: string; tiles: Tile[] }[] = [
+  const takes = isLeader || takesAttendance || !!profile?.takes_attendance;
+  // Seis áreas, cada una con su color. Las dos últimas (informes y administración) vienen cerradas: se abren tocando el título.
+  const groups: Group[] = [
     {
-      title: 'Para vos',
+      title: 'Reuniones', tone: 'green',
       tiles: [
-        { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: isLeader || takesAttendance || !!profile?.takes_attendance, tone: 'green' },
+        { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: takes, strong: true },
+        { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: takes || can('personas.asistencia') },
         { icon: 'calendar', label: 'Calendario', to: '/eventos', show: !tabs.includes('eventos') },
-        { icon: 'radio', label: 'En vivo', to: '/vivo' as Href, show: true },
+        { icon: 'video', label: 'En vivo', to: '/vivo' as Href, show: true },
+        { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
+        { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
+        { icon: 'award', label: 'Sorteos', to: '/rifas' as Href, show: true },
+      ],
+    },
+    {
+      title: 'Crecer', tone: 'blue',
+      tiles: [
         { icon: 'sunrise', label: 'Crecimiento', to: '/crecimiento' as Href, show: !tabs.includes('crecimiento') },
         { icon: 'heart', label: 'Oración', to: '/oracion', show: !tabs.includes('oracion') },
-        ministryTile,
-        { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
-        { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
-        { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: isLeader || takesAttendance || !!profile?.takes_attendance || can('personas.asistencia') },
-        { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
-        { icon: 'message-circle', label: 'Chat de la iglesia', to: '/chat' as Href, show: !tabs.includes('chat') },
         { icon: 'play-circle', label: 'Prédicas', to: '/predicas' as Href, show: !tabs.includes('predicas') },
-        { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
-        { icon: 'users', label: 'Directorio', to: '/directorio', show: !tabs.includes('directorio') },
-        { icon: 'gift', label: 'Ofrendar', to: '/dar', show: true },
-        { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
-        { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
-        { icon: 'music', label: 'Música', to: '/musica' as Href, show: true },
-        { icon: 'book-open', label: 'Cancionero', to: '/canciones' as Href, show: true },
+        { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
+        { icon: 'music', label: 'Cancionero', to: '/canciones' as Href, show: true },
+        { icon: 'headphones', label: 'Música', to: '/musica' as Href, show: true },
         { icon: 'radio', label: 'Radio', to: '/radio' as Href, show: true },
-        { icon: 'gift', label: 'Sorteos', to: '/rifas' as Href, show: true },
+      ],
+    },
+    {
+      title: 'Comunidad', tone: 'violet',
+      tiles: [
+        { icon: 'message-circle', label: 'Chat de la iglesia', to: '/chat' as Href, show: !tabs.includes('chat') },
+        { icon: 'users', label: 'Directorio', to: '/directorio', show: !tabs.includes('directorio') },
+        ministryTile,
+        { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
+        { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
+        { icon: 'credit-card', label: 'Ofrendar', to: '/dar', show: true },
+        { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
         { icon: 'mail', label: pmUnread ? `Escribile al pastor (${pmUnread} nuevo${pmUnread > 1 ? 's' : ''})` : 'Escribile al pastor', to: '/pastor-hilo' as Href, show: profile?.role !== 'admin' },
         { icon: 'mail', label: pmUnread ? `Mensajes privados (${pmUnread})` : 'Mensajes privados', to: '/pastor-bandeja' as Href, show: profile?.role === 'admin' },
       ],
     },
     {
-      title: 'Liderazgo',
+      title: 'Personas y seguimiento', tone: 'amber',
       tiles: [
+        { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
         { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader || !!(profile && church?.absence_recipients?.includes(profile.id)) },
-        { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
-        { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
-        { icon: 'radio', label: 'Evangelismo en vivo', to: '/equipo', show: isLeader || can('evang.ver_salidas') },
-        { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
-        { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
-        { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
+        { icon: 'user', label: 'Hermanos', to: '/admin/miembros', show: isStaff },
+        { icon: 'user-minus', label: 'Inactivos', to: '/inactivos' as Href, show: isStaff },
         { icon: 'gift', label: 'Cumpleaños', to: '/cumples' as Href, show: isLeader },
+        { icon: 'trending-up', label: 'Fidelidad y camino', to: '/fidelidad', show: isLeader },
       ],
     },
     {
-      title: 'Administración',
+      title: 'Informes', tone: 'teal', closed: true,
       tiles: [
-        { icon: 'dollar-sign', label: 'Finanzas', to: '/finanzas' as Href, show: financeLevel >= 1 },
-        { icon: 'users', label: 'Hermanos', to: '/admin/miembros', show: isStaff },
-        { icon: 'key', label: 'Roles y permisos', to: '/admin/roles', show: isStaff },
-        { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
-        { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
+        { icon: 'file-text', label: 'Informe semanal', to: '/reporte', show: isLeader },
+        { icon: 'activity', label: 'Progreso de la iglesia', to: '/progreso-iglesia' as Href, show: isLeader },
+        { icon: 'bar-chart-2', label: 'Panel del pastor', to: '/panel', show: isLeader },
+        { icon: 'map-pin', label: 'Evangelismo en vivo', to: '/equipo', show: isLeader || can('evang.ver_salidas') },
         { icon: 'navigation', label: 'Salidas de todos', to: '/salidas?todos=1' as Href, show: isStaff },
         { icon: 'book', label: 'Informes y consejos', to: '/informes' as Href, show: isStaff },
+      ],
+    },
+    {
+      title: 'Administración', tone: 'pink', closed: true,
+      tiles: [
+        { icon: 'dollar-sign', label: 'Finanzas', to: '/finanzas' as Href, show: financeLevel >= 1 },
+        { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
+        { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
+        { icon: 'key', label: 'Roles y permisos', to: '/admin/roles', show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
-        { icon: 'user-x', label: 'Inactivos', to: '/inactivos' as Href, show: isStaff },
         { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },
         { icon: 'eye', label: 'Ver como miembro', to: '/miembro-vista' as Href, show: can('admin.permisos') },
       ],
@@ -209,7 +228,8 @@ export default function Iglesia() {
   const tileKey = (t: Tile) => (typeof t.to === 'string' ? t.to : JSON.stringify(t.to));
   // Lo que la iglesia apagó no aparece en el menú.
   const toPath = (to: Href): string => (typeof to === 'string' ? to : ((to as { pathname?: string }).pathname ?? ''));
-  const gated = groups.map((g) => ({ ...g, tiles: g.tiles.map((t) => ({ ...t, show: t.show && pathOn(church?.disabled_features, toPath(t.to)) })) }));
+  const gated = groups.map((g) => ({ ...g, tiles: g.tiles.map((t) => ({ ...t, tone: g.tone, show: t.show && pathOn(church?.disabled_features, toPath(t.to)) })) }));
+  const meta = new Map(groups.map((g) => [g.title, g]));
   const laid = layout(gated, tileKey, menu).filter((g) => g.tiles.some((t) => t.show));
   const groupTitles = laid.filter((g) => g.title !== FAV).map((g) => g.title);
   const toggleFav = (k: string) => setMenu({ ...menu, fav: menu.fav.includes(k) ? menu.fav.filter((x) => x !== k) : [...menu.fav, k] });
@@ -219,6 +239,31 @@ export default function Iglesia() {
     setMenu(title === FAV ? { ...menu, fav: next } : { ...menu, order: { ...menu.order, [title]: next } });
   };
   const moveGroup = (title: string, dir: -1 | 1) => setMenu({ ...menu, groups: moved(groupTitles, title, dir) });
+  const isClosed = (title: string) => !edit && title !== FAV && (menu.fold[title] ?? !!meta.get(title)?.closed);
+  const toggleFold = (title: string) => setMenu({ ...menu, fold: { ...menu.fold, [title]: !isClosed(title) } });
+  const q = norm(find.trim());
+  const found = q ? gated.flatMap((g) => g.tiles).filter((t) => t.show && norm(t.label).includes(q)) : [];
+  const renderTile = (t: Tile, title: string, ti: number, count: number) => {
+    const k = tileKey(t);
+    const isFav = menu.fav.includes(k);
+    const c = toneOf(t.tone);
+    return (
+      <Pressable key={k} onPress={() => (edit ? toggleFav(k) : router.push(t.to))} accessibilityRole="button" accessibilityLabel={t.label}
+        style={({ pressed }) => [styles.tile, t.strong && { backgroundColor: c.solid, borderColor: c.solid }, edit && { borderStyle: 'dashed', borderColor: c.solid }, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
+        <View style={[styles.tileIcon, { backgroundColor: t.strong ? 'rgba(255,255,255,0.18)' : c.soft }]}>
+          <Feather name={t.icon} size={22} color={t.strong ? '#FFF' : c.solid} />
+        </View>
+        <Text style={{ fontSize: 13, fontWeight: '800', color: t.strong ? '#FFF' : colors.text, textAlign: 'center' }} numberOfLines={2}>{t.label}</Text>
+        {edit ? (
+          <View style={{ flexDirection: 'row', gap: 3, marginTop: 2 }}>
+            <Pressable disabled={ti === 0} onPress={() => moveTile(title, k, -1)} accessibilityLabel={`Mover ${t.label} atrás`} style={[styles.mini, styles.tiny, ti === 0 && { opacity: 0.3 }]}><Feather name="chevron-left" size={14} color={colors.text} /></Pressable>
+            <Pressable onPress={() => toggleFav(k)} accessibilityLabel={isFav ? `Sacar ${t.label} de favoritos` : `Fijar ${t.label} arriba`} style={[styles.mini, styles.tiny, isFav && { backgroundColor: colors.amber, borderColor: colors.amber }]}><Feather name="star" size={14} color={isFav ? '#FFF' : colors.text} /></Pressable>
+            <Pressable disabled={ti === count - 1} onPress={() => moveTile(title, k, 1)} accessibilityLabel={`Mover ${t.label} adelante`} style={[styles.mini, styles.tiny, ti === count - 1 && { opacity: 0.3 }]}><Feather name="chevron-right" size={14} color={colors.text} /></Pressable>
+          </View>
+        ) : null}
+      </Pressable>
+    );
+  };
   const menuBlock = (
     <View style={{ gap: 14 }}>
       {edit ? (
@@ -235,14 +280,38 @@ export default function Iglesia() {
             <Button title="Listo" small style={{ flex: 1 }} onPress={() => setEdit(false)} />
           </View>
         </Card>
-      ) : null}
-      {laid.map((g) => {
+      ) : (
+        <View style={styles.search}>
+          <Feather name="search" size={18} color={colors.muted} />
+          <TextInput value={find} onChangeText={setFind} placeholder="Buscar en la app: asistencia, finanzas, sorteos…" placeholderTextColor={colors.muted}
+            accessibilityLabel="Buscar en la app" autoCorrect={false} returnKeyType="search" style={styles.searchInput} />
+          {find ? <Pressable onPress={() => setFind('')} hitSlop={10} accessibilityLabel="Borrar la búsqueda"><Feather name="x" size={18} color={colors.muted} /></Pressable> : null}
+        </View>
+      )}
+      {q ? (
+        found.length
+          ? <View style={styles.grid}>{found.map((t, i) => renderTile(t, '', i, found.length))}</View>
+          : <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center', paddingVertical: 10 }}>No encontré nada con “{find.trim()}”. Probá con otra palabra.</Text>
+      ) : laid.map((g) => {
         const shown = g.tiles.filter((t) => t.show);
         const gi = groupTitles.indexOf(g.title);
+        const c = toneOf(g.title === FAV ? 'amber' : meta.get(g.title)?.tone);
+        const closed = isClosed(g.title);
         return (
           <View key={g.title} style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ flex: 1 }}><SectionTitle>{g.title === FAV ? '★ Favoritos' : g.title}</SectionTitle></View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pressable disabled={edit || g.title === FAV} onPress={() => toggleFold(g.title)} accessibilityRole="button"
+                accessibilityLabel={`${g.title}, ${shown.length} ${shown.length === 1 ? 'opción' : 'opciones'}. ${closed ? 'Abrir' : 'Cerrar'}`}
+                style={[styles.groupHead, { backgroundColor: c.soft }]}>
+                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: c.solid }} />
+                <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: c.text }}>{g.title === FAV ? '★ Favoritos' : g.title}</Text>
+                {g.title !== FAV && !edit ? (
+                  <>
+                    {closed ? <Text style={{ fontSize: 13, fontWeight: '700', color: c.text }}>{shown.length}</Text> : null}
+                    <Feather name={closed ? 'chevron-down' : 'chevron-up'} size={18} color={c.text} />
+                  </>
+                ) : null}
+              </Pressable>
               {edit && g.title !== FAV ? (
                 <View style={{ flexDirection: 'row', gap: 6 }}>
                   <Pressable disabled={gi <= 0} onPress={() => moveGroup(g.title, -1)} accessibilityLabel={`Subir ${g.title}`} style={[styles.mini, gi <= 0 && { opacity: 0.3 }]}><Feather name="chevron-up" size={18} color={colors.text} /></Pressable>
@@ -250,32 +319,11 @@ export default function Iglesia() {
                 </View>
               ) : null}
             </View>
-            <View style={styles.grid}>
-              {shown.map((t, ti) => {
-                const k = tileKey(t);
-                const isFav = menu.fav.includes(k);
-                return (
-                  <Pressable key={k} onPress={() => (edit ? toggleFav(k) : router.push(t.to))} accessibilityRole="button"
-                    style={({ pressed }) => [styles.tile, t.tone === 'green' && styles.tileGreen, edit && { borderStyle: 'dashed', borderColor: colors.green }, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}>
-                    <View style={[styles.tileIcon, t.tone === 'green' && { backgroundColor: 'rgba(255,255,255,0.18)' }]}>
-                      <Feather name={t.icon} size={22} color={t.tone === 'green' ? '#FFF' : colors.green} />
-                    </View>
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: t.tone === 'green' ? '#FFF' : colors.text, textAlign: 'center' }} numberOfLines={2}>{t.label}</Text>
-                    {edit ? (
-                      <View style={{ flexDirection: 'row', gap: 3, marginTop: 2 }}>
-                        <Pressable disabled={ti === 0} onPress={() => moveTile(g.title, k, -1)} accessibilityLabel={`Mover ${t.label} atrás`} style={[styles.mini, styles.tiny, ti === 0 && { opacity: 0.3 }]}><Feather name="chevron-left" size={14} color={colors.text} /></Pressable>
-                        <Pressable onPress={() => toggleFav(k)} accessibilityLabel={isFav ? `Sacar ${t.label} de favoritos` : `Fijar ${t.label} arriba`} style={[styles.mini, styles.tiny, isFav && { backgroundColor: colors.amber, borderColor: colors.amber }]}><Feather name="star" size={14} color={isFav ? '#FFF' : colors.text} /></Pressable>
-                        <Pressable disabled={ti === shown.length - 1} onPress={() => moveTile(g.title, k, 1)} accessibilityLabel={`Mover ${t.label} adelante`} style={[styles.mini, styles.tiny, ti === shown.length - 1 && { opacity: 0.3 }]}><Feather name="chevron-right" size={14} color={colors.text} /></Pressable>
-                      </View>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
-            </View>
+            {closed ? null : <View style={styles.grid}>{shown.map((t, ti) => renderTile(t, g.title, ti, shown.length))}</View>}
           </View>
         );
       })}
-      {!edit ? <Text onPress={() => setEdit(true)} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center' }}>✎ Ordenar mi menú</Text> : null}
+      {!edit && !q ? <Text onPress={() => setEdit(true)} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center' }}>✎ Ordenar mi menú</Text> : null}
     </View>
   );
 
@@ -302,10 +350,10 @@ export default function Iglesia() {
         {menu.top ? menuBlock : null}
         {on('predicas') && tomorrow ? (
           <Pressable onPress={() => router.push(`/predica/${tomorrow.id}` as Href)} accessibilityRole="button">
-            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
-              <Feather name="mic" size={22} color={colors.greenText} />
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.violetSoft, borderColor: colors.violetSoft }}>
+              <Feather name="mic" size={22} color={colors.violetText} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }}>MAÑANA EN LA IGLESIA</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.violetText }}>MAÑANA EN LA IGLESIA</Text>
                 <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{tomorrow.title}</Text>
                 {tomorrow.passage || tomorrow.preacher ? <Text style={{ fontSize: 13, color: colors.muted }}>{[tomorrow.passage, tomorrow.preacher].filter(Boolean).join(' · ')}</Text> : null}
               </View>
@@ -426,8 +474,8 @@ export default function Iglesia() {
           return (
             <Pressable onPress={() => router.push('/plan-lectura' as Href)} accessibilityRole="button" accessibilityLabel={`${title}. ${hint}`}>
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
-                  <Feather name={st?.todayDone ? 'check' : 'book-open'} size={19} color={colors.greenText} />
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <Feather name={st?.todayDone ? 'check' : 'book-open'} size={19} color={colors.blueText} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{title}</Text>
@@ -503,8 +551,10 @@ const styles = themed(() => StyleSheet.create({
   news: { gap: 10, backgroundColor: colors.amberSoft, borderColor: colors.amberSoft },
   mini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
   tiny: { width: 24, height: 24, borderRadius: 12 },
-  tileGreen: { backgroundColor: colors.green, borderColor: colors.green },
-  social: { width: 96, alignItems: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 14, backgroundColor: colors.greenSoft },
+  groupHead: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44, paddingHorizontal: 14, borderRadius: 12 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5, borderColor: colors.input, backgroundColor: colors.bg },
+  searchInput: { flex: 1, height: '100%', fontSize: 15, color: colors.text },
+  social: { width: 96, alignItems: 'center', gap: 6, paddingVertical: 12, paddingHorizontal: 6, borderRadius: 14, backgroundColor: colors.bgSoft },
   dailyAct: { alignItems: 'center', gap: 3, minWidth: 64 },
   dailyActText: { fontSize: 11, fontWeight: '600', color: '#FFFFFF', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
   // La foto baja hasta abajo y los botones van encima, sin la franja verde.

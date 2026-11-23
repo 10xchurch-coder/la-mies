@@ -6,6 +6,9 @@ export type Palette = {
   blue: string; blueSoft: string; blueText: string; blueLight: string;
   amber: string; amberSoft: string; amberText: string;
   red: string; redSoft: string; redText: string;
+  violet: string; violetSoft: string; violetText: string;
+  teal: string; tealSoft: string; tealText: string;
+  pink: string; pinkSoft: string; pinkText: string;
   gray: string; orange: string; orangeMid: string; orangeLight: string; tan: string;
   graySoft: string; grayText: string;
   text: string; muted: string; label: string; border: string; input: string;
@@ -27,6 +30,15 @@ const LIGHT: Palette = {
   red: '#B3261E',
   redSoft: '#F8E1DF',
   redText: '#8E1D16',
+  violet: '#6D4BC3',
+  violetSoft: '#E9E2F8',
+  violetText: '#4E3396',
+  teal: '#0F7F87',
+  tealSoft: '#D9F0F1',
+  tealText: '#0B5D63',
+  pink: '#C2387A',
+  pinkSoft: '#FBE1EC',
+  pinkText: '#932259',
   gray: '#B9BEC4',
   orange: '#E0670B',
   orangeMid: '#F29B38',
@@ -61,6 +73,15 @@ const DARK: Palette = {
   red: '#E0574E',
   redSoft: '#3F1F1C',
   redText: '#F3A09A',
+  violet: '#9B80E6',
+  violetSoft: '#2A2245',
+  violetText: '#CBBBF5',
+  teal: '#35AEB6',
+  tealSoft: '#12343A',
+  tealText: '#9FDDE2',
+  pink: '#E36AA3',
+  pinkSoft: '#40192C',
+  pinkText: '#F4AFCD',
   gray: '#5D646B',
   orange: '#F0812A',
   orangeMid: '#F29B38',
@@ -154,3 +175,17 @@ export const FLYERS_LEGEND = [
   { color: colors.orangeLight, label: 'Este mes' },
   { color: colors.tan, label: 'Hace más de un mes' },
 ];
+
+/** Un color por área de la app (personas, crecer, comunidad...): el fuerte, el fondo suave y el del texto. */
+export type Tone = 'green' | 'blue' | 'amber' | 'violet' | 'teal' | 'pink' | 'red';
+export function toneOf(t: Tone | undefined): { solid: string; soft: string; text: string } {
+  switch (t) {
+    case 'blue': return { solid: colors.blue, soft: colors.blueSoft, text: colors.blueText };
+    case 'amber': return { solid: colors.amber, soft: colors.amberSoft, text: colors.amberText };
+    case 'violet': return { solid: colors.violet, soft: colors.violetSoft, text: colors.violetText };
+    case 'teal': return { solid: colors.teal, soft: colors.tealSoft, text: colors.tealText };
+    case 'pink': return { solid: colors.pink, soft: colors.pinkSoft, text: colors.pinkText };
+    case 'red': return { solid: colors.red, soft: colors.redSoft, text: colors.redText };
+    default: return { solid: colors.green, soft: colors.greenSoft, text: colors.greenText };
+  }
+}

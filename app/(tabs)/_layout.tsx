@@ -5,7 +5,10 @@ import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { ALL_TABS, tabInfo, tabRoute, useTabs, type TabKey } from '@/lib/tabsPref';
-import { colors } from '@/theme';
+import { colors, toneOf, type Tone } from '@/theme';
+
+// Cada pestaña se enciende con el color de su área.
+const TAB_TONE: Partial<Record<TabKey, Tone>> = { mapa: 'teal', personas: 'amber', chat: 'violet', directorio: 'violet', crecimiento: 'blue', predicas: 'blue', oracion: 'pink', eventos: 'green' };
 import { featureOfPath, featureOn } from '@/lib/features';
 import { useAuth } from '@/store/auth';
 
@@ -56,7 +59,7 @@ export default function TabsLayout() {
           <Tabs.Screen key={k} name={tabRoute(k)} options={{ title: t.title, tabBarIcon: churchIcon, href: visible ? undefined : null,
             tabBarLabelStyle: { fontSize: 11, fontWeight: '900', color: colors.green }, tabBarIconStyle: { width: 52 } }} />
         ) : (
-          <Tabs.Screen key={k} name={tabRoute(k)} options={{ title: t.title, tabBarIcon: icon(t.icon), href: visible ? undefined : null }} />
+          <Tabs.Screen key={k} name={tabRoute(k)} options={{ title: t.title, tabBarIcon: icon(t.icon), href: visible ? undefined : null, tabBarActiveTintColor: toneOf(TAB_TONE[k]).solid }} />
         );
       })}
     </Tabs>

@@ -18,7 +18,7 @@ import { messageText, openWhatsApp } from '@/lib/messages';
 import { missedKind } from '@/lib/followupConfig';
 import { useAuth } from '@/store/auth';
 import { useFeatures } from '@/lib/useFeatures';
-import { colors, themed } from '@/theme';
+import { colors, themed, toneOf, type Tone } from '@/theme';
 import type { AbsenceRow, ChurchEvent, Contact, FinBalance, ProgressRow, WeeklyReport } from '@/types';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
@@ -87,14 +87,14 @@ export default function DeskHome() {
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
   const weekLabel = `Semana del ${fmtDateShort(monday)} al ${fmtDateShort(isoDate(addDays(parseDate(monday), 6)))}`;
 
-  const kpis: { key: WeekListKey; label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean }[] = report ? [
-    { key: 'attendance', label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true },
-    { key: 'first_time', label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true },
-    { key: 'baptisms', label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true },
-    { key: 'new_members', label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true },
-    { key: 'absent', label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false },
-    { key: 'gospel', label: 'Oyeron el evangelio', value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true },
-    { key: 'people_out', label: 'Salieron a evangelizar', value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true },
+  const kpis: { key: WeekListKey; label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean; tone: Tone }[] = report ? [
+    { key: 'attendance', label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true, tone: 'green' },
+    { key: 'first_time', label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true, tone: 'amber' },
+    { key: 'baptisms', label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true, tone: 'blue' },
+    { key: 'new_members', label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true, tone: 'violet' },
+    { key: 'absent', label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false, tone: 'red' },
+    { key: 'gospel', label: 'Oyeron el evangelio', value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true, tone: 'teal' },
+    { key: 'people_out', label: 'Salieron a evangelizar', value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true, tone: 'pink' },
   ] : [];
 
   const counts = useMemo(() => ({
@@ -145,9 +145,11 @@ export default function DeskHome() {
               const good = d && d.dir !== 'same' ? (d.dir === 'up') === !!k.goodUp : null;
               return (
                 <Pressable key={k.label} onPress={() => setOpenKpi(openKpi === k.key ? null : k.key)} accessibilityRole="button" accessibilityLabel={`${k.label}: ${k.value}. Ver los nombres`}
-                  style={(st) => [styles.kpi, { flexBasis: kpiBasis }, openKpi === k.key && { borderColor: colors.green, borderWidth: 2 }, (st as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
+                  style={(st) => [styles.kpi, { flexBasis: kpiBasis }, openKpi === k.key && { borderColor: toneOf(k.tone).solid, borderWidth: 2 }, (st as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Feather name={k.icon} size={14} color={colors.muted} />
+                    <View style={{ width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: toneOf(k.tone).soft }}>
+                      <Feather name={k.icon} size={14} color={toneOf(k.tone).solid} />
+                    </View>
                     <Text style={styles.kpiLabel} numberOfLines={1}>{k.label}</Text>
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
@@ -435,7 +437,7 @@ const styles = themed(() => StyleSheet.create({
   th: { fontSize: 11, fontWeight: '800', letterSpacing: 0.4, textTransform: 'uppercase', color: colors.muted },
   td: { fontSize: 14, color: colors.text },
   num: { width: 90, textAlign: 'right' },
-  dateBox: { width: 40, height: 40, borderRadius: 9, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' },
-  dateDay: { fontSize: 16, fontWeight: '800', color: colors.greenText, lineHeight: 18 },
-  dateMonth: { fontSize: 10, fontWeight: '700', color: colors.greenText, textTransform: 'uppercase' },
+  dateBox: { width: 40, height: 40, borderRadius: 9, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' },
+  dateDay: { fontSize: 16, fontWeight: '800', color: colors.blueText, lineHeight: 18 },
+  dateMonth: { fontSize: 10, fontWeight: '700', color: colors.blueText, textTransform: 'uppercase' },
 }));

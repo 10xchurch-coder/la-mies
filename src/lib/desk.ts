@@ -11,51 +11,55 @@ export type DeskItem = {
   /** Alcanza con tener uno de estos permisos. Vacío: lo ve cualquiera que entra al escritorio. */
   perms: string[];
 };
-export type DeskGroup = { title: string; items: DeskItem[] };
+export type DeskTone = 'green' | 'blue' | 'amber' | 'violet' | 'teal' | 'pink';
+export type DeskGroup = { title: string; tone: DeskTone; items: DeskItem[] };
 
 import { pathOn, type Disabled } from './features';
 
+// Las mismas áreas y colores que el menú del teléfono, para que todo se encuentre en el mismo lugar.
 export const DESK_NAV: DeskGroup[] = [
-  { title: 'Resumen', items: [
+  { title: 'Resumen', tone: 'green', items: [
     { key: 'inicio', label: 'Inicio', icon: 'home', to: '/escritorio', perms: [] },
   ] },
-  { title: 'Personas', items: [
-    { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
-    { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
+  { title: 'Reuniones', tone: 'green', items: [
     { key: 'asistencia', label: 'Tomar asistencia', icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
-    { key: 'ausencias', label: 'Ausencias', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
+    { key: 'calendario', label: 'Calendario', icon: 'calendar', to: '/eventos', perms: [] },
+    { key: 'rifas', label: 'Sorteos', icon: 'award', to: '/rifas', perms: [] },
+  ] },
+  { title: 'Personas y seguimiento', tone: 'amber', items: [
+    { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
+    { key: 'seguimiento', label: 'Para seguir', icon: 'user-check', to: '/seguimiento', perms: [] },
+    { key: 'ausencias', label: 'Faltaron', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
     { key: 'inactivos', label: 'Inactivos', icon: 'user-minus', to: '/inactivos', perms: ['personas.ver_todas', 'personas.editar'] },
     { key: 'fidelidad', label: 'Fidelidad', icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'seguimiento', label: 'Para seguir', icon: 'user-check', to: '/seguimiento', perms: [] },
     { key: 'cumples', label: 'Cumpleaños', icon: 'gift', to: '/cumples', perms: [] },
   ] },
-  { title: 'Iglesia', items: [
-    { key: 'calendario', label: 'Calendario', icon: 'calendar', to: '/eventos', perms: [] },
-    { key: 'anuncios', label: 'Anuncios', icon: 'bell', to: '/anuncios', perms: ['com.anuncios'] },
-    { key: 'ministerios', label: 'Ministerios', icon: 'layers', to: '/ministerios', perms: ['ens.ver', 'ens.editar'] },
+  { title: 'Crecer', tone: 'blue', items: [
     { key: 'clases', label: 'Clases', icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
     { key: 'devocionales', label: 'Devocionales', icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
-    { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
-    { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
-    { key: 'rifas', label: 'Sorteos', icon: 'gift', to: '/rifas', perms: [] },
-    { key: 'cancionero', label: 'Cancionero', icon: 'book-open', to: '/canciones', perms: [] },
-    { key: 'musica', label: 'Música', icon: 'music', to: '/musica', perms: [] },
+    { key: 'cancionero', label: 'Cancionero', icon: 'music', to: '/canciones', perms: [] },
+    { key: 'musica', label: 'Música', icon: 'headphones', to: '/musica', perms: [] },
     { key: 'radio', label: 'Radio', icon: 'radio', to: '/radio', perms: [] },
+  ] },
+  { title: 'Comunidad', tone: 'violet', items: [
+    { key: 'anuncios', label: 'Anuncios', icon: 'bell', to: '/anuncios', perms: ['com.anuncios'] },
+    { key: 'ministerios', label: 'Ministerios', icon: 'layers', to: '/ministerios', perms: ['ens.ver', 'ens.editar'] },
+    { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
+    { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
     { key: 'mensajes', label: 'Mensajes privados', icon: 'mail', to: '/pastor-bandeja', perms: ['admin.permisos'] },
   ] },
-  { title: 'Evangelismo', items: [
-    { key: 'vivo', label: 'En vivo ahora', icon: 'radio', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
+  { title: 'Informes y evangelismo', tone: 'teal', items: [
+    { key: 'reporte', label: 'Informe semanal', icon: 'file-text', to: '/reporte', perms: ['inf.panel'] },
+    { key: 'progreso', label: 'Progreso de la iglesia', icon: 'trending-up', to: '/progreso-iglesia', perms: ['inf.panel'] },
+    { key: 'vivo', label: 'Evangelismo en vivo', icon: 'map-pin', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
     { key: 'panel', label: 'Panel de salidas', icon: 'bar-chart-2', to: '/panel', perms: ['inf.panel'] },
     { key: 'salieron', label: 'Quiénes salieron', icon: 'user-check', to: '/salieron', perms: ['inf.panel', 'personas.asistencia'] },
     { key: 'salidas', label: 'Salidas', icon: 'map', to: '/salidas', perms: ['evang.ver_salidas'] },
     { key: 'zonas', label: 'Zonas', icon: 'grid', to: '/zonas', perms: ['evang.zonas'] },
   ] },
-  { title: 'Informes y finanzas', items: [
-    { key: 'reporte', label: 'Informe semanal', icon: 'file-text', to: '/reporte', perms: ['inf.panel'] },
-    { key: 'progreso', label: 'Progreso de la iglesia', icon: 'trending-up', to: '/progreso-iglesia', perms: ['inf.panel'] },
+  { title: 'Administración', tone: 'pink', items: [
     { key: 'finanzas', label: 'Finanzas', icon: 'dollar-sign', to: '/finanzas', perms: ['fin.ver'] },
-  ] },
-  { title: 'Administración', items: [
     { key: 'cuentas', label: 'Cuentas', icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
     { key: 'roles', label: 'Roles y permisos', icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
     { key: 'funciones', label: 'Funciones de la iglesia', icon: 'toggle-right', to: '/admin/funciones', perms: ['admin.permisos'] },
@@ -73,7 +77,7 @@ export function canUseDesk(perms: string[]): boolean {
 /** El menú del costado, solo con lo que esta persona puede abrir. */
 export function deskNavFor(perms: string[], disabled?: Disabled): DeskGroup[] {
   return DESK_NAV
-    .map((g) => ({ title: g.title, items: g.items.filter((i) => (!i.perms.length || i.perms.some((p) => perms.includes(p))) && pathOn(disabled, i.to)) }))
+    .map((g) => ({ title: g.title, tone: g.tone, items: g.items.filter((i) => (!i.perms.length || i.perms.some((p) => perms.includes(p))) && pathOn(disabled, i.to)) }))
     .filter((g) => g.items.length > 0);
 }
 

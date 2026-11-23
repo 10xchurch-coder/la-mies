@@ -1,15 +1,15 @@
 // El marco del escritorio: menú fijo a la izquierda y el contenido a la derecha, pensado para computadora.
 import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Image } from 'expo-image';
 import { usePathname, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useChurchLogo } from '@/components/BrandFooter';
-import { deskNavFor, type DeskItem } from '@/lib/desk';
+import { deskNavFor, norm, type DeskItem } from '@/lib/desk';
 import { useLayout } from '@/lib/layout';
 import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
-import { colors, themed } from '@/theme';
+import { colors, themed, toneOf } from '@/theme';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -33,7 +33,12 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   const narrow = width < 900;
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [path]);
-  const nav = deskNavFor(perms, church?.disabled_features);
+  const [find, setFind] = useState('');
+  const q = norm(find.trim());
+  // Con algo escrito en el buscador quedan solo las secciones que coinciden.
+  const nav = deskNavFor(perms, church?.disabled_features)
+    .map((g) => ({ ...g, items: q ? g.items.filter((i) => norm(`${i.label} ${g.title}`).includes(q)) : g.items }))
+    .filter((g) => g.items.length > 0);
   const isHere = (i: DeskItem) => (i.to === '/escritorio' ? path === '/escritorio' : path === i.to || path.startsWith(`${i.to}/`));
 
   const side = (
@@ -45,24 +50,39 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
           <Text style={styles.brandSub}>Escritorio · La Mies</Text>
         </View>
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 6, paddingHorizontal: 10, gap: 14 }}>
-        {nav.map((g) => (
-          <View key={g.title} style={{ gap: 2 }}>
-            <Text style={styles.groupTitle}>{g.title}</Text>
-            {g.items.map((i) => {
-              const here = isHere(i);
-              const inside = i.to.startsWith('/escritorio');
-              return (
-                <Pressable key={i.key} accessibilityRole="link" accessibilityLabel={i.label} onPress={() => router.push(i.to as Href)}
-                  style={(s) => [styles.item, (s as { hovered?: boolean }).hovered && !here && { backgroundColor: colors.bgSoft }, here && { backgroundColor: colors.greenSoft }]}>
-                  <Feather name={i.icon as IconName} size={17} color={here ? colors.greenText : colors.muted} />
-                  <Text style={[styles.itemText, here && { color: colors.greenText, fontWeight: '800' }]} numberOfLines={1}>{i.label}</Text>
-                  {!inside ? <Feather name="chevron-right" size={14} color={colors.gray} /> : null}
-                </Pressable>
-              );
-            })}
-          </View>
-        ))}
+      <View style={styles.find}>
+        <Feather name="search" size={15} color={colors.muted} />
+        <TextInput value={find} onChangeText={setFind} placeholder="Buscar una sección…" placeholderTextColor={colors.muted} accessibilityLabel="Buscar una sección" autoCorrect={false}
+          style={{ flex: 1, height: '100%', fontSize: 13, color: colors.text, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) }} />
+        {find ? <Pressable onPress={() => setFind('')} hitSlop={8} accessibilityLabel="Borrar la búsqueda"><Feather name="x" size={15} color={colors.muted} /></Pressable> : null}
+      </View>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 6, paddingHorizontal: 10, gap: 14 }} keyboardShouldPersistTaps="handled">
+        {nav.length ? null : <Text style={{ fontSize: 13, color: colors.muted, padding: 10 }}>No hay ninguna sección con ese nombre.</Text>}
+        {nav.map((g) => {
+          const c = toneOf(g.tone);
+          return (
+            <View key={g.title} style={{ gap: 2 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingBottom: 3 }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.solid }} />
+                <Text style={[styles.groupTitle, { color: c.text }]}>{g.title}</Text>
+              </View>
+              {g.items.map((i) => {
+                const here = isHere(i);
+                const inside = i.to.startsWith('/escritorio');
+                return (
+                  <Pressable key={i.key} accessibilityRole="link" accessibilityLabel={i.label} onPress={() => router.push(i.to as Href)}
+                    style={(s) => [styles.item, (s as { hovered?: boolean }).hovered && !here && { backgroundColor: colors.bgSoft }, here && { backgroundColor: c.soft }]}>
+                    <View style={[styles.itemIcon, { backgroundColor: here ? c.solid : c.soft }]}>
+                      <Feather name={i.icon as IconName} size={14} color={here ? '#FFFFFF' : c.solid} />
+                    </View>
+                    <Text style={[styles.itemText, here && { color: c.text, fontWeight: '800' }]} numberOfLines={1}>{i.label}</Text>
+                    {!inside ? <Feather name="chevron-right" size={14} color={colors.gray} /> : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          );
+        })}
       </ScrollView>
       <View style={styles.foot}>
         <Text style={styles.footName} numberOfLines={1}>{profile?.display_name ?? ''}</Text>
@@ -165,8 +185,10 @@ const styles = themed(() => StyleSheet.create({
   brand: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, paddingBottom: 12 },
   brandName: { fontSize: 14, fontWeight: '800', color: colors.text, lineHeight: 17 },
   brandSub: { fontSize: 11, fontWeight: '600', color: colors.muted, marginTop: 1 },
-  groupTitle: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase', color: colors.muted, paddingHorizontal: 10, paddingBottom: 3 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 34, paddingHorizontal: 10, borderRadius: 8 },
+  groupTitle: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase', color: colors.muted },
+  item: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 36, paddingHorizontal: 8, borderRadius: 9 },
+  itemIcon: { width: 24, height: 24, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  find: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 36, marginHorizontal: 12, marginBottom: 6, paddingHorizontal: 10, borderRadius: 9, borderWidth: 1, borderColor: colors.input, backgroundColor: colors.bgPage },
   itemText: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
   foot: { padding: 14, borderTopWidth: 1, borderTopColor: colors.border },
   footName: { fontSize: 13, fontWeight: '800', color: colors.text },

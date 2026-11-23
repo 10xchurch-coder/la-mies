@@ -30,6 +30,6 @@ test('moved cambia de lugar y respeta los bordes', () => {
   assert.deepEqual(moved(['a', 'b', 'c'], 'c', 1), ['a', 'b', 'c']);
 });
 test('normalizeMenu limpia datos raros', () => {
-  assert.deepEqual(normalizeMenu({ fav: ['x', 'x', 5], order: { A: 'no' }, groups: null, top: 1 }), { fav: ['x'], order: { A: [] }, groups: [], top: true });
+  assert.deepEqual(normalizeMenu({ fav: ['x', 'x', 5], order: { A: 'no' }, groups: null, top: 1 }), { fav: ['x'], order: { A: [] }, groups: [], top: true, fold: {} });
   assert.deepEqual(normalizeMenu(null), DEFAULT_MENU);
 });
