@@ -21,6 +21,7 @@ import { UpcomingList } from '@/components/Upcoming';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { dailyFor, dailySocial, setDailyLike, teamLive, liveState, listAnnouncements, listClasses, listMinistries, ministryMembers, myBiblePlan, myUpcoming, readingStreak, type BiblePlanRow } from '@/lib/api';
 import { pastorUnread } from '@/lib/api';
+import { dmUnread } from '@/lib/dm';
 import { planStatus } from '@/lib/biblePlan';
 import { isoDate as isoDay } from '@/lib/format';
 import { fmtRelativeDay } from '@/lib/format';
@@ -67,6 +68,7 @@ export default function Iglesia() {
   const [bus, setBus] = useState<{ routes: number; live: string | null }>({ routes: 0, live: null });
   const [outNow, setOutNow] = useState(0);
   const [pmUnread, setPmUnread] = useState(0);
+  const [dmNew, setDmNew] = useState(0);
   const insets = useSafeAreaInsets();
   const { width: winW, height: winH } = useWindowDimensions();
   const tabs = useTabs();
@@ -122,6 +124,7 @@ export default function Iglesia() {
     });
     if (seesLiveOutings) teamLive().then((rows) => setOutNow(rows.length)).catch(() => undefined);
     pastorUnread().then(setPmUnread).catch(() => undefined);
+    dmUnread().then(setDmNew).catch(() => undefined);
     supabase.rpc('bus_live_routes').then(({ data }) => {
       const rows = (data ?? []) as { name: string; run_id: string | null }[];
       setBus({ routes: rows.length, live: rows.find((r) => r.run_id)?.name ?? null });
@@ -148,6 +151,7 @@ export default function Iglesia() {
     : myMinistries.length === 1
       ? { icon: 'layers', label: 'Mi ministerio', to: { pathname: '/ministerio/[id]', params: { id: myMinistries[0].id } } as unknown as Href, show: true }
       : { icon: 'layers', label: 'Mis ministerios', to: '/ministerios', show: myMinistries.length > 1 };
+  const dmOn = pathOn(church?.disabled_features, '/mensajes');
   const takes = isLeader || takesAttendance || !!profile?.takes_attendance;
   // Seis áreas, cada una con su color. Las dos últimas (informes y administración) vienen cerradas: se abren tocando el título.
   const groups: Group[] = [
@@ -185,8 +189,10 @@ export default function Iglesia() {
         { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
         { icon: 'credit-card', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
-        { icon: 'mail', label: pmUnread ? `Escribile al pastor (${pmUnread} nuevo${pmUnread > 1 ? 's' : ''})` : 'Escribile al pastor', to: '/pastor-hilo' as Href, show: profile?.role !== 'admin' },
-        { icon: 'mail', label: pmUnread ? `Mensajes privados (${pmUnread})` : 'Mensajes privados', to: '/pastor-bandeja' as Href, show: profile?.role === 'admin' },
+        { icon: 'send', label: dmNew + pmUnread ? `Mensajes (${dmNew + pmUnread})` : 'Mensajes', to: '/mensajes' as Href, show: true, strong: dmNew + pmUnread > 0 },
+        // Si la iglesia apagó los mensajes entre hermanos, queda el botón directo al pastor.
+        { icon: 'mail', label: pmUnread ? `Escribile al pastor (${pmUnread} nuevo${pmUnread > 1 ? 's' : ''})` : 'Escribile al pastor', to: '/pastor-hilo' as Href, show: profile?.role !== 'admin' && !dmOn },
+        { icon: 'mail', label: pmUnread ? `Mensajes privados (${pmUnread})` : 'Mensajes privados', to: '/pastor-bandeja' as Href, show: profile?.role === 'admin' && !dmOn },
       ],
     },
     {

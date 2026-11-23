@@ -2,19 +2,22 @@
 import { telDigits } from '@/lib/phone';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Linking, Pressable, Text, TextInput, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Card, Empty, Loading, Toggle } from '@/components/ui';
 import { directoryList, setDirectoryVisible } from '@/lib/api';
 import { whatsappNumber } from '@/lib/format';
+import { pathOn } from '@/lib/features';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { DirectoryRow } from '@/types';
 
 export default function Directorio() {
-  const { profile, refreshProfile } = useAuth();
+  const { profile, church, refreshProfile } = useAuth();
+  const router = useRouter();
+  const dmOn = pathOn(church?.disabled_features, '/mensajes');
   const [rows, setRows] = useState<DirectoryRow[] | null>(null);
   const [q, setQ] = useState('');
   const [visible, setVisible] = useState(!!profile?.directory_visible);
@@ -59,6 +62,11 @@ export default function Directorio() {
               <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{r.display_name}</Text>
               {r.title ? <Text style={{ fontSize: 12, color: colors.greenText, fontWeight: '700' }}>{r.title}</Text> : null}
             </View>
+            {r.id !== profile?.id && dmOn ? (
+              <Pressable onPress={() => router.push({ pathname: '/mensajes/[id]', params: { id: r.id, name: r.display_name } } as unknown as Href)} style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel={`Mandarle un mensaje a ${r.display_name}`}>
+                <Feather name="send" size={20} color={colors.violet} />
+              </Pressable>
+            ) : null}
             {r.phone ? (
               <>
                 <Pressable onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} style={{ padding: 8 }} accessibilityLabel={`Llamar a ${r.display_name}`}>

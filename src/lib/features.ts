@@ -7,7 +7,7 @@ export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
   | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
-  | 'musica' | 'cancionero' | 'radio' | 'rifas'
+  | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
   | 'finanzas' | 'ofrendar' | 'informes';
 
 export type FeatureGroup = 'Evangelismo y visitas' | 'Reuniones y enseñanza' | 'Comunidad' | 'Dinero e informes';
@@ -93,6 +93,9 @@ export const FEATURES: Feature[] = [
   { key: 'radio', label: 'Radio de la iglesia', group: 'Comunidad',
     hint: 'La radio FM y la radio por internet para escuchar desde la app.',
     routes: ['/radio', '/admin/radio'] },
+  { key: 'mensajes', label: 'Mensajes entre hermanos', group: 'Comunidad',
+    hint: 'Conversaciones privadas entre dos hermanos (texto, fotos y voz). Solo las ven ellos dos; se puede bloquear y denunciar.',
+    routes: ['/mensajes'] },
   { key: 'rifas', label: 'Sorteos', group: 'Comunidad',
     hint: 'Sorteos digitales: entran los que estuvieron presentes y la app saca al azar.',
     routes: ['/rifas'] },
