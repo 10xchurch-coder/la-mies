@@ -50,7 +50,7 @@ export default function MisioneroDetalle() {
         try {
           const all = reports ?? [];
           await deleteMissionary(m.id);
-          await removeMissionaryFiles([m.photo_path, ...all.flatMap((r) => [r.pdf_path, ...r.photo_paths])]);
+          await removeMissionaryFiles([m.photo_path, m.thumb_path, ...all.flatMap((r) => [r.pdf_path, ...r.photo_paths])]);
           router.back();
         } catch (e) { Alert.alert('No se pudo quitar', errorMessage(e)); }
       } },

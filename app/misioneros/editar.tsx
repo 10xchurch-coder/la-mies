@@ -6,7 +6,7 @@ import { Header, Screen } from '@/components/Screen';
 import { SignedImage } from '@/components/SignedImage';
 import { Button, Card, Empty, Field } from '@/components/ui';
 import { missionariesList, saveMissionary } from '@/lib/api';
-import { pickMissionaryPhoto, removeMissionaryFiles } from '@/lib/files';
+import { adjustMissionaryThumb, pickMissionaryPhoto, removeMissionaryFiles } from '@/lib/files';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -19,13 +19,16 @@ export default function MisioneroEditar() {
   const [bio, setBio] = useState('');
   const [photo, setPhoto] = useState<string | null>(null);
   const [oldPhoto, setOldPhoto] = useState<string | null>(null);
+  const [thumb, setThumb] = useState<string | null>(null);
+  const [oldThumb, setOldThumb] = useState<string | null>(null);
+  const [fresh, setFresh] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     missionariesList().then((l) => {
       const m = l.find((x) => x.id === id);
-      if (m) { setName(m.name); setField(m.field ?? ''); setBio(m.bio ?? ''); setPhoto(m.photo_path); setOldPhoto(m.photo_path); }
+      if (m) { setName(m.name); setField(m.field ?? ''); setBio(m.bio ?? ''); setPhoto(m.photo_path); setOldPhoto(m.photo_path); setThumb(m.thumb_path); setOldThumb(m.thumb_path); }
     }).catch(() => undefined);
   }, [id]);
 
@@ -33,14 +36,23 @@ export default function MisioneroEditar() {
     if (!church) return;
     try {
       const p = await pickMissionaryPhoto(church.id);
-      if (p) setPhoto(p);
+      if (p) { setPhoto(p.photo); setThumb(p.thumb); setFresh((f) => [...f, p.photo, ...(p.thumb ? [p.thumb] : [])]); }
+    } catch (e) { Alert.alert('No se pudo subir la foto', errorMessage(e)); }
+  };
+  const fixCircle = async () => {
+    if (!church || !photo) return;
+    try {
+      const t = await adjustMissionaryThumb(church.id, photo);
+      if (t) { setThumb(t); setFresh((f) => [...f, t]); }
     } catch (e) { Alert.alert('No se pudo subir la foto', errorMessage(e)); }
   };
   const save = async () => {
     setBusy(true);
     try {
-      await saveMissionary({ id, name, field, bio, photo_path: photo });
-      if (oldPhoto && oldPhoto !== photo) await removeMissionaryFiles([oldPhoto]);
+      await saveMissionary({ id, name, field, bio, photo_path: photo, thumb_path: thumb });
+      // Lo que ya no se usa (la foto o el círculo de antes, o lo que se probó y se cambió) se borra.
+      const keep = new Set([photo, thumb]);
+      await removeMissionaryFiles([oldPhoto, oldThumb, ...fresh].filter((p): p is string => !!p && !keep.has(p)));
       router.back();
     } catch (e) {
       Alert.alert('No se pudo guardar', errorMessage(e));
@@ -56,8 +68,18 @@ export default function MisioneroEditar() {
         {!isStaff ? <Empty icon="lock" title="Solo el pastor y la secretaría" /> : (
           <Card style={{ gap: 12 }}>
             <View style={{ alignItems: 'center', gap: 8 }}>
-              <SignedImage bucket="missionaries" path={photo} style={{ width: 112, height: 112, borderRadius: 56 }} />
-              <Button title={photo ? 'Cambiar la foto' : 'Elegir una foto'} icon="camera" variant="outline" small onPress={pick} />
+              {photo ? (
+                <>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.label }}>Arriba en el perfil</Text>
+                  <SignedImage bucket="missionaries" path={photo} style={{ width: 240, aspectRatio: 4 / 3, borderRadius: 12 }} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.label }}>En la lista</Text>
+                </>
+              ) : null}
+              <SignedImage bucket="missionaries" path={thumb ?? photo} style={{ width: 112, height: 112, borderRadius: 56 }} />
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Button title={photo ? 'Cambiar la foto' : 'Elegir una foto'} icon="camera" variant="outline" small onPress={pick} />
+                {photo ? <Button title="Acomodar el círculo" icon="crop" variant="outline" small onPress={fixCircle} /> : null}
+              </View>
             </View>
             <Field label="Nombre" value={name} onChangeText={setName} placeholder="Pastor …" maxLength={120} />
             <Field label="Dónde sirve" value={field} onChangeText={setField} placeholder="Ciudad, país" maxLength={160} />

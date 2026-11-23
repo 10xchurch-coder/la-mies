@@ -34,9 +34,9 @@ function imageSize(uri: string): Promise<{ width: number; height: number }> {
 }
 
 /** Muestra el recortador (acercar, alejar, mover) y deja la foto cuadrada del ancho pedido. Null si canceló. */
-async function cropAndShrink(uri: string, w: number, h: number, width: number, round = true, aspect = 1): Promise<string | null> {
+async function cropAndShrink(uri: string, w: number, h: number, width: number, round = true, aspect = 1, text: { title?: string; hint?: string } = {}): Promise<string | null> {
   if (!w || !h) ({ width: w, height: h } = await imageSize(uri));
-  const crop = await cropPhoto(uri, w, h, round, aspect);
+  const crop = await cropPhoto(uri, w, h, round, aspect, text);
   if (!crop) return null;
   const out = await manipulateAsync(uri, [{ crop }, { resize: { width: Math.min(width, crop.width) } }], { compress: 0.75, format: SaveFormat.JPEG });
   return out.uri;
@@ -250,15 +250,30 @@ export async function pickChatDocument(churchId: string): Promise<ChatAttachment
 }
 
 // ---------- Misioneros: foto, PDF del informe y fotos del mes ----------
-/** Foto del misionero (cuadrada, 640 px). Devuelve la ruta o null si canceló. */
-export async function pickMissionaryPhoto(churchId: string): Promise<string | null> {
+const BIG = { title: '1 de 2: la foto grande', hint: 'Así se ve arriba en el perfil del misionero.' };
+const CIRCLE = { title: '2 de 2: el círculo', hint: 'Así se ve en la lista. Acercala para que se vean bien las caras.' };
+
+/** Foto del misionero: primero la grande del perfil, después el círculo de la lista (de la misma foto). */
+export async function pickMissionaryPhoto(churchId: string): Promise<{ photo: string; thumb: string | null } | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
   const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.9 });
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
-  const done = await cropAndShrink(a.uri, a.width, a.height, 1000, false, 4 / 3);
-  return done ? upload('missionaries', churchId, done, 'misionero.jpg', 'image/jpeg') : null;
+  const big = await cropAndShrink(a.uri, a.width, a.height, 1000, false, 4 / 3, BIG);
+  if (!big) return null;
+  const photo = await upload('missionaries', churchId, big, 'misionero.jpg', 'image/jpeg');
+  const small = await cropAndShrink(a.uri, a.width, a.height, 400, true, 1, CIRCLE);
+  const thumb = small ? await upload('missionaries', churchId, small, 'misionero-circulo.jpg', 'image/jpeg') : null;
+  return { photo, thumb };
+}
+
+/** Volver a acomodar solo el círculo, a partir de la foto grande que ya está. */
+export async function adjustMissionaryThumb(churchId: string, photoPath: string): Promise<string | null> {
+  const uri = await localCopy('missionaries', photoPath);
+  if (!uri) { Alert.alert('No se pudo abrir la foto'); return null; }
+  const small = await cropAndShrink(uri, 0, 0, 400, true, 1, { title: 'El círculo', hint: CIRCLE.hint });
+  return small ? upload('missionaries', churchId, small, 'misionero-circulo.jpg', 'image/jpeg') : null;
 }
 
 /** El PDF del informe del mes (hasta 25 MB). */

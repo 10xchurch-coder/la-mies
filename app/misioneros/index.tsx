@@ -30,7 +30,7 @@ export default function Misioneros() {
         ) : rows.map((m) => (
           <Pressable key={m.id} accessibilityRole="button" onPress={() => router.push(`/misioneros/${m.id}` as Href)}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12 }}>
-              <SignedImage bucket="missionaries" path={m.photo_path} style={{ width: 72, height: 72, borderRadius: 36 }} />
+              <SignedImage bucket="missionaries" path={m.thumb_path ?? m.photo_path} style={{ width: 72, height: 72, borderRadius: 36 }} />
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{m.name}</Text>
                 {m.field ? <Text style={{ fontSize: 13, color: colors.muted }}>{m.field}</Text> : null}

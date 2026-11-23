@@ -644,7 +644,7 @@ export async function pastorUnread(): Promise<number> {
 
 // Misioneros y sus informes
 export async function missionariesList(): Promise<Missionary[]> {
-  return (ok(await supabase.from('missionaries').select('id, name, field, bio, photo_path, position').order('position').order('name')) ?? []) as Missionary[];
+  return (ok(await supabase.from('missionaries').select('id, name, field, bio, photo_path, thumb_path, position').order('position').order('name')) ?? []) as Missionary[];
 }
 export async function latestReportMonths(): Promise<Record<string, string>> {
   const rows = (ok(await supabase.from('missionary_reports').select('missionary_id, month').order('month', { ascending: false })) ?? []) as { missionary_id: string; month: string }[];
@@ -656,8 +656,8 @@ export async function missionaryReports(missionaryId: string): Promise<Missionar
   return (ok(await supabase.from('missionary_reports').select('id, missionary_id, month, title, summary, pdf_path, pdf_name, photo_paths, created_at')
     .eq('missionary_id', missionaryId).order('month', { ascending: false })) ?? []) as MissionaryReport[];
 }
-export async function saveMissionary(m: { id?: string; name: string; field: string | null; bio: string | null; photo_path: string | null }): Promise<string> {
-  const row = { name: m.name.trim(), field: m.field?.trim() || null, bio: m.bio?.trim() || null, photo_path: m.photo_path };
+export async function saveMissionary(m: { id?: string; name: string; field: string | null; bio: string | null; photo_path: string | null; thumb_path: string | null }): Promise<string> {
+  const row = { name: m.name.trim(), field: m.field?.trim() || null, bio: m.bio?.trim() || null, photo_path: m.photo_path, thumb_path: m.thumb_path };
   if (m.id) { ok(await supabase.from('missionaries').update(row).eq('id', m.id)); return m.id; }
   const res = ok(await supabase.from('missionaries').insert(row).select('id').single()) as { id: string };
   return res.id;
