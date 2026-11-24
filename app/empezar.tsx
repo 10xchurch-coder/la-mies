@@ -38,6 +38,9 @@ export default function Empezar() {
   const create = async (d: SignupDraft) => {
     await selfServeCreate(cleanDraft(d), timezoneForCountry(d.country));
     await refreshProfile();
+    // Si la app todavía estaba leyendo el perfil de antes (sin iglesia), esa lectura vieja puede llegar última: se lee una vez más.
+    await new Promise((r) => setTimeout(r, 400));
+    await refreshProfile();
     refreshChurchExtras();
     router.replace('/admin/alta' as Href);
   };
@@ -85,7 +88,8 @@ export default function Empezar() {
         router.replace(`/registro-enviado?email=${encodeURIComponent(email)}` as Href);
         return;
       }
-      await create(draft);
+      // Ya entró (el correo no necesita confirmación): la iglesia la crea el aviso de arriba, que corre con la sesión nueva.
+      setAuto(true);
     } catch (e) {
       setMsg(errorMessage(e));
     } finally {
