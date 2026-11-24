@@ -20,7 +20,7 @@ export function useChurchLogo(): string | null {
   return url;
 }
 
-export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' }) {
+export function BrandFooter({ align = 'center', bible = 'RV1960' }: { align?: 'center' | 'left'; /** Sigla de la Biblia del versículo. */ bible?: string }) {
   const { church } = useAuth();
   const name = church?.name ?? tx('La Mies');
   const logo = useChurchLogo();
@@ -29,7 +29,7 @@ export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' })
       {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" cachePolicy="memory-disk" /> : null}
       <View style={{ flexShrink: 1 }}>
         <Text style={styles.name} numberOfLines={2}>{name}</Text>
-        <Text style={styles.app}>{tx('App La Mies · RV1960')}</Text>
+        <Text style={styles.app}>{tx('App La Mies')} · {bible}</Text>
       </View>
     </View>
   );

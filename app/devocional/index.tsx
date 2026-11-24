@@ -22,6 +22,7 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import { shareImage, shareText, tryShareText, WEB_URL } from '@/lib/share';
 import { ShareShot, type ShotKind, type ShotView } from '@/components/ShareShot';
+import { bibleOf } from '@/lib/dailyVerse';
 import { renderCardPng, shareCardBlob, type CardKind } from '@/lib/shareCardWeb';
 import { cachedSignedUrl } from '@/lib/files';
 import { BACKGROUNDS } from '@/lib/backgroundColors';
@@ -134,11 +135,11 @@ export default function Devocional() {
     for (const kind of ['verse', ...(item.message ? ['phrase'] : []), ...(item.devotional ? ['devotional'] : [])] as CardKind[]) {
       const key = cardKeyOf(kind);
       if (!key || cards.current[key]) continue;
-      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, devotional: item.devotional ? plain(item.devotional) : null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? tx('La Mies'), logoUrl, uploadedUrl: uploaded });
+      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, devotional: item.devotional ? plain(item.devotional) : null, background: bg ?? null, onDate: item.on_date, bible: bibleOf(item), churchName: church?.name ?? tx('La Mies'), logoUrl, uploadedUrl: uploaded });
       p.catch(() => { delete cards.current[key]; });
       cards.current[key] = p;
     }
-  }, [item?.on_date, item?.background, item?.message, item?.devotional, logoUrl]);
+  }, [item?.on_date, item?.background, item?.message, item?.devotional, item?.bible, logoUrl]);
 
   const goTo = (i: number) => {
     pager.current?.scrollTo({ x: i * W, animated: true });
@@ -153,10 +154,10 @@ export default function Devocional() {
   };
 
   const churchName = church?.name ?? tx('La Mies');
-  const verseText = item ? `"${item.verse}"\n${item.reference} (RV1960)` : '';
+  const verseText = item ? `"${item.verse}"\n${item.reference} (${bibleOf(item)})` : '';
   const fullText = item
     ? [
-      `${item.reference} (RV1960)`, `"${item.verse}"`, item.message ?? '',
+      `${item.reference} (${bibleOf(item)})`, `"${item.verse}"`, item.message ?? '',
       item.devotional ? `LECTURA DE HOY\n${plain(item.devotional)}` : '',
       item.study ? `ESTUDIO\n${plain(item.study)}` : '',
       item.prayer ? `ORACIÓN\n${item.prayer}` : '',
@@ -166,7 +167,7 @@ export default function Devocional() {
 
   // Versículo + frase + devocional corto, todo junto y en texto (una imagen no alcanza para los tres).
   const threeText = item
-    ? [`${item.reference} (RV1960)`, `"${item.verse}"`, item.message ?? '', item.devotional ? plain(item.devotional) : '', `${churchName} · ${WEB_URL}`].filter(Boolean).join('\n\n')
+    ? [`${item.reference} (${bibleOf(item)})`, `"${item.verse}"`, item.message ?? '', item.devotional ? plain(item.devotional) : '', `${churchName} · ${WEB_URL}`].filter(Boolean).join('\n\n')
     : '';
 
   /** Comparte la tarjeta como imagen: solo el versículo o solo la frase. */
@@ -326,7 +327,7 @@ export default function Devocional() {
                     <Text style={styles.phrase}>{item.message}</Text>
                     <Text style={styles.slideRef}>{item.reference}</Text>
                   </View>
-                  <BrandFooter />
+                  <BrandFooter bible={bibleOf(item)} />
                 </View>
               ) : s === 'reading' ? (
                 <View ref={(r) => { slideRefs.current.reading = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
@@ -335,7 +336,7 @@ export default function Devocional() {
                   <ScrollView style={{ flex: 1, marginVertical: 14 }} contentContainerStyle={{ gap: 14, flexGrow: 1, justifyContent: 'center' }} nestedScrollEnabled>
                     <Paragraphs text={item.devotional as string} size={18} color="#FFFFFF" headingColor="#FFFFFF" />
                   </ScrollView>
-                  <BrandFooter />
+                  <BrandFooter bible={bibleOf(item)} />
                 </View>
               ) : (
                 <View style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
@@ -598,7 +599,7 @@ function ReaderSheet({ visible, item, label, social, onShare, onComments, onClos
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14, maxWidth: 680, width: '100%', alignSelf: 'center' }}>
           <View style={styles.readerVerse}>
             <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontWeight: '600', fontStyle: 'italic' }}>{item.verse}</Text>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} {tx('· RV1960')}</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} · {bibleOf(item)}</Text>
           </View>
           {item.devotional ? (
             <>

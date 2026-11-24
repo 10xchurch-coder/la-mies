@@ -3,6 +3,8 @@ export type Role = 'member' | 'captain' | 'evangelism' | 'deacon' | 'secretary' 
 export type OutingKind = 'soulwinning' | 'flyers';
 
 export type Church = {
+  /** El versículo del día se muestra como se escribió (true) o en la Biblia de inicio de la iglesia (false). */
+  daily_verse_written?: boolean | null;
   /** Finanzas: anotar quién dio cada ingreso (algunas iglesias lo llevan; otras no). */
   fin_track_donors?: boolean;
   /** Meses sin venir para pasar a inactivos (vacío = apagado). */
@@ -323,6 +325,8 @@ export type DailyContent = {
   on_date: string;
   reference: string;
   verse: string;
+  /** La sigla de la Biblia en la que quedó el versículo (ver lib/dailyVerse). */
+  bible?: string | null;
   message: string | null;
   devotional: string | null;
   /** Estudio completo (5–10 min, con pasajes en texto completo). */

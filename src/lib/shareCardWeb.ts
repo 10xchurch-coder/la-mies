@@ -15,6 +15,8 @@ export type CardInput = {
   devotional?: string | null;
   background: string | null;
   onDate: string;
+  /** Sigla de la Biblia del versículo. */
+  bible?: string;
   churchName: string;
   logoUrl: string | null;
   /** Foto subida por la iglesia (ya con permiso para bajarla). */
@@ -166,7 +168,7 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   ctx.textAlign = 'left'; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.6);
   ctx.fillText(input.churchName, nameX, rowY - 1, nameMax);
   ctx.font = `600 9.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText(tx('App La Mies · RV1960'), nameX, rowY + 11);
+  ctx.fillText(`${tx('App La Mies')} · ${input.bible ?? 'RV1960'}`, nameX, rowY + 11);
   noShadow();
 
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(tx('No se pudo armar la imagen')))), 'image/jpeg', 0.98));

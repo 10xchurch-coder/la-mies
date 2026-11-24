@@ -16,6 +16,7 @@ export type CardHandle = React.ComponentRef<typeof View>;
 
 import { BACKGROUNDS } from '../lib/backgroundColors';
 import { tx } from '@/lib/i18n';
+import { bibleOf } from '../lib/dailyVerse';
 export { BACKGROUNDS };
 export const BACKGROUND_NAMES = Object.keys(BACKGROUNDS);
 
@@ -71,7 +72,7 @@ export const VerseCard = forwardRef<CardHandle, {
         </Text>
         {item.message && !hideMessage ? <Text style={[styles.msg, compact && { fontSize: 13, lineHeight: 18 }]} numberOfLines={compact ? 2 : undefined}>{item.message}</Text> : null}
       </View>
-      {compact ? <Text style={[styles.foot, { fontSize: 10 }]}>{church ?? tx('La Mies')} {tx('· RV1960')}</Text> : <BrandFooter />}
+      {compact ? <Text style={[styles.foot, { fontSize: 10 }]}>{church ?? tx('La Mies')} · {bibleOf(item)}</Text> : <BrandFooter bible={bibleOf(item)} />}
     </View>
   );
 });

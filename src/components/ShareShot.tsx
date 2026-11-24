@@ -1,6 +1,7 @@
 // La imagen que se comparte (versículo o frase del día), dibujada aparte en alta definición:
 // siempre 1440 × 2560 píxeles (más que la pantalla de cualquier teléfono), con letra propia, en cualquier teléfono, para que el texto y el logo salgan nítidos
 // en los estados de WhatsApp, Instagram, etc. No se ve en la pantalla: se arma, se captura y se saca.
+import { bibleOf } from '../lib/dailyVerse';
 import React, { useEffect, useRef, useState } from 'react';
 import { PixelRatio, Text, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -73,7 +74,7 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
           {logo ? <Image source={{ uri: logo }} style={{ width: 24 * k, height: 26 * k }} contentFit="contain" cachePolicy="memory-disk" onLoad={() => setLogoOk(true)} onError={() => setLogoOk(true)} /> : null}
           <View style={{ flexShrink: 1 }}>
             <T numberOfLines={1} style={{ color: '#FFFFFF', fontSize: 12.5 * k, ...nameFont }}>{church?.name ?? tx('La Mies')}</T>
-            <T style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9.5 * k, fontWeight: '600', marginTop: 1 * k }}>{tx('App La Mies · RV1960')}</T>
+            <T style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9.5 * k, fontWeight: '600', marginTop: 1 * k }}>{tx('App La Mies')} · {bibleOf(item)}</T>
           </View>
         </View>
       </View>

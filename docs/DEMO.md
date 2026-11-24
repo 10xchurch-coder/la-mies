@@ -100,7 +100,7 @@ Las fechas se calculan el día que se carga, así que sirve cualquier día.
   ("Bolívar 1555" no es la casa de nadie de la iglesia) y nunca cae a menos de 15 metros del punto de una persona de una iglesia real.
 - En el mapa hay zonas muy recorridas, zonas recorridas a medias y zonas sin tocar, para que se vean los colores.
   Las paradas del colectivo están en esquinas reales.
-- En la base, la ciudad de la iglesia de ejemplo dice "Ciudad de ejemplo" (no "Posadas"), para que nadie la confunda con una iglesia real de Posadas.
+- En la base, la ciudad de la iglesia de ejemplo dice "Posadas": el mapa muestra calles reales del centro. El nombre y la gente siguen siendo inventados.
 - Quedaron guardadas 18 calles inventadas del primer mapa (lejos, en La Pampa). No se usan ni se ven; no se borraron porque acá no se borra nada.
 - Las fotos están vacías (nadie tiene foto) y las prédicas no tienen video.
 - "Entrada de los chicos", "Inactivos", "Sorteos" y "Colectivo en vivo" se ven vacías: son cosas que pasan en el momento.

@@ -1,5 +1,6 @@
 // Llamadas a la base, con tipos. Si algo falla, lanza un Error con mensaje legible.
 import type { PlanId } from './biblePlan';
+import { localizeDaily } from './dailyVerse';
 import type { PanelDetail } from './outings';
 import type { FollowContext } from './followWhy';
 import { supabase, errorMessage } from './supabase';
@@ -397,12 +398,12 @@ export async function getSermon(id: string): Promise<Sermon | null> {
 // ---------- Parte 3: versículo del día, devocional, racha, cuentas ----------
 export async function dailyFor(date: string | null = null): Promise<DailyContent | null> {
   const d = ok(await supabase.rpc('daily_for', { p_date: date })) as DailyContent | null;
-  return d && d.id ? d : null;
+  return d && d.id ? localizeDaily(d) : null;
 }
 
 /** Lo de los últimos días (hoy primero), como máximo 31. */
 export async function dailyRange(days = 31): Promise<DailyContent[]> {
-  return ((ok(await supabase.rpc('daily_range', { p_days: days })) ?? []) as DailyContent[]).filter((d) => d && d.id);
+  return Promise.all(((ok(await supabase.rpc('daily_range', { p_days: days })) ?? []) as DailyContent[]).filter((d) => d && d.id).map(localizeDaily));
 }
 export async function dailyComments(date: string): Promise<DailyComment[]> {
   return ok(await supabase.rpc('daily_comments_list', { p_date: date })) ?? [];

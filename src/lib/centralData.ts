@@ -100,6 +100,8 @@ export async function centralChurch(id: string): Promise<CentralChurchDetail> {
 }
 export const noteAdd = async (church: string, kind: string, body: string) => ok(await supabase.rpc('central_note_add', { p_church: church, p_kind: kind, p_body: body })) as string;
 export const noteArchive = async (id: string) => { ok(await supabase.rpc('central_note_archive', { p_id: id })); };
+/** Prender o apagar una función de otra iglesia (queda anotado y al pastor le llega un aviso). */
+export const setChurchFeature = async (church: string, feature: string, on: boolean) => (ok(await supabase.rpc('central_set_feature', { p_church: church, p_feature: feature, p_on: on })) ?? []) as string[];
 export const suggestFeature = async (church: string, feature: string, message?: string) => { ok(await supabase.rpc('central_suggest_feature', { p_church: church, p_feature: feature, p_message: message ?? null })); };
 
 // ---------- Equipo ----------

@@ -11,6 +11,7 @@ import { RulesGate } from '@/components/RulesGate';
 import { Stack, usePathname, useRouter, useSegments, type Href } from 'expo-router';
 import { featureInfo, featureOfPath, pathOn } from '@/lib/features';
 import { setChurchBible } from '@/lib/bible';
+import { setDailyVerseWritten } from '@/lib/dailyVerse';
 import { useChurchSync } from '@/lib/useChurchSync';
 import { FeatureOff } from '@/components/FeatureOff';
 import { Platform, StyleSheet, View } from 'react-native';
@@ -119,6 +120,7 @@ function Gate() {
   const router = useRouter();
   // La Biblia que permite la iglesia: se deja lista antes de dibujar cualquier pantalla.
   setChurchBible(church?.bible ?? null);
+  setDailyVerseWritten(church?.daily_verse_written);
   useChurchSync();
   // Para La Mies Central: contar cuántos usan la app, con qué versión e idioma (nunca qué hace cada uno).
   useEffect(() => { if (session && profile?.church_id) pingCentral(session.user.id, APP_VERSION); }, [session, profile?.church_id]);

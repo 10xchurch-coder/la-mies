@@ -12,7 +12,7 @@ import { Button, Choice, Field, Loading, Tag } from '@/components/ui';
 import { activityLabel, COUNTRIES, progress, SIGNUP_STATUS_LABEL, SIZES, STATE_LABEL, STEPS, stepState } from '@/lib/alta';
 import { netSetStatus } from '@/lib/altaData';
 import { addDaysIso, attentionOf, buildReport, daysAgo, mondayIso, NOTE_KINDS, periodOf, series, type PeriodKind } from '@/lib/central';
-import { centralChurch, noteAdd, noteArchive, suggestFeature, type TechCount } from '@/lib/centralData';
+import { centralChurch, noteAdd, noteArchive, setChurchFeature, type TechCount } from '@/lib/centralData';
 import { timezoneLabel } from '@/lib/churchSetup';
 import { FEATURE_GROUPS, FEATURES, featureOn } from '@/lib/features';
 import { dayName, fmtDayYear } from '@/lib/format';
@@ -57,10 +57,14 @@ export default function CentralChurchPage() {
     { text: tx('Cancelar'), style: 'cancel' },
     { text: tx('Sacar'), style: 'destructive', onPress: () => { run(() => noteArchive(noteId)); } },
   ]);
-  const suggest = (label: string) => Alert.alert(tx('Sugerir esta función'), tx('Al pastor de {name} le llega un aviso: "Podés prender {label}". No se le cambia nada: lo decide él.', { name: c.name, label }), [
-    { text: tx('Cancelar'), style: 'cancel' },
-    { text: tx('Mandar la sugerencia'), onPress: () => { run(async () => { await suggestFeature(c.id, label); Alert.alert(tx('Listo'), tx('Le llegó el aviso al pastor. Quedó anotado en las notas.')); }); } },
-  ]);
+  // El equipo puede prender o apagar una función por la iglesia (más fácil que explicarle dónde está).
+  const flip = (key: string, label: string, on: boolean) => Alert.alert(
+    on ? tx('Apagar {label}', { label }) : tx('Prender {label}', { label }),
+    on ? tx('A la gente de {name} se le va de la app. No se borra nada: se puede volver a prender. Al pastor le llega un aviso.', { name: c.name })
+      : tx('A la gente de {name} le aparece en la app. Al pastor le llega un aviso.', { name: c.name }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: on ? tx('Apagar') : tx('Prender'), style: on ? 'destructive' : 'default', onPress: () => { run(() => setChurchFeature(c.id, key, !on)); } },
+    ]);
   const tech = (title: string, rows: TechCount[], names: Record<string, string> = {}) => (
     <View style={{ flex: 1, minWidth: 200, gap: 4 }}>
       <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted }}>{title}</Text>
@@ -155,23 +159,23 @@ export default function CentralChurchPage() {
         </Panel>
       ) : null}
 
-      <Panel title={tx('Funciones prendidas y apagadas')} hint={owner && !c.is_host ? tx('Solo para mirar. Podés sugerirle una función al pastor: le llega un aviso y decide él.') : tx('Solo para mirar. Cada iglesia decide qué usa.')}>
+      <Panel title={tx('Funciones prendidas y apagadas')} hint={tx('Tocá una función para prenderla o apagarla por la iglesia. Queda anotado y al pastor le llega un aviso.')}>
         {FEATURE_GROUPS.map((g) => (
           <View key={g} style={{ gap: 6 }}>
             <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted }}>{tx(g)}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {FEATURES.filter((f) => f.group === g).map((f) => {
+                const own = !(c.disabled_features ?? []).includes(f.key);
                 const on = featureOn(c.disabled_features, f.key);
+                // Una parte con su función principal apagada se ve apagada aunque esté prendida: se avisa con otro color.
+                const held = own && !on;
                 const chip = (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 9, height: 30, borderRadius: 999, backgroundColor: on ? colors.greenSoft : colors.graySoft }}>
-                    <Feather name={on ? 'check' : 'x'} size={12} color={on ? colors.greenText : colors.grayText} />
-                    <Text style={{ fontSize: 12, fontWeight: '700', color: on ? colors.greenText : colors.grayText }}>{f.label}</Text>
-                    {!on && owner && !c.is_host ? <Text style={{ fontSize: 12, fontWeight: '800', color: colors.pink }}> {tx('· Sugerir')}</Text> : null}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, height: 34, borderRadius: 999, backgroundColor: on ? colors.greenSoft : held ? colors.amberSoft : colors.graySoft }}>
+                    <Feather name={on ? 'check' : held ? 'minus' : 'x'} size={13} color={on ? colors.greenText : held ? colors.amberText : colors.grayText} />
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: on ? colors.greenText : held ? colors.amberText : colors.grayText }}>{f.label}</Text>
                   </View>
                 );
-                return !on && owner && !c.is_host
-                  ? <Pressable key={f.key} accessibilityRole="button" accessibilityLabel={tx('Sugerir {label}', { label: f.label })} disabled={busy} onPress={() => suggest(f.label)}>{chip}</Pressable>
-                  : <View key={f.key}>{chip}</View>;
+                return <Pressable key={f.key} accessibilityRole="switch" accessibilityState={{ checked: own }} accessibilityLabel={f.label} disabled={busy} onPress={() => flip(f.key, f.label, own)}>{chip}</Pressable>;
               })}
             </View>
           </View>
