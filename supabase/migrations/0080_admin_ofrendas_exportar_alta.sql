@@ -218,7 +218,7 @@ $$;
 revoke all on function public.admin_random_code(integer) from public, anon, authenticated;
 
 create or replace function public.admin_token_hash(p_token text) returns text
-language sql immutable as $$
+language sql immutable set search_path = public as $$
   select encode(sha256(convert_to(upper(btrim(coalesce(p_token, ''))), 'UTF8')), 'hex')
 $$;
 revoke all on function public.admin_token_hash(text) from public, anon, authenticated;

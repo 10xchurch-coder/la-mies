@@ -11,6 +11,15 @@ export const isPastorInvite = (code: string | null | undefined): boolean => clea
 export function inviteLink(webUrl: string, token: string): string {
   return `${webUrl.replace(/\/+$/, '')}/registro?invitacion=${encodeURIComponent(cleanCode(token))}`;
 }
+/** Saca la invitación de la dirección de la página ("?invitacion=PASTOR-..."), o null si no hay. */
+export function inviteFromSearch(search: string | null | undefined): string | null {
+  const m = /[?&]invitacion=([^&#]+)/.exec(search ?? '');
+  if (!m) return null;
+  let v = m[1];
+  try { v = decodeURIComponent(v); } catch { /* queda como vino */ }
+  v = cleanCode(v);
+  return /^[A-Z0-9-]{6,40}$/.test(v) ? v : null;
+}
 /** El mensaje listo para mandar por WhatsApp. */
 export function inviteMessage(o: { church: string; token: string; link: string; days: number }): string {
   return [

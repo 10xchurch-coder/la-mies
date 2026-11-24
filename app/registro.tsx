@@ -3,7 +3,7 @@ import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
-import { isPastorInvite } from '@/lib/churchSetup';
+import { inviteFromSearch, isPastorInvite } from '@/lib/churchSetup';
 import { acceptPastorInvite } from '@/lib/churchSetupData';
 import { takeSignupDraft } from '@/lib/signupDraft';
 import { Header, Screen } from '@/components/Screen';
@@ -23,9 +23,11 @@ export default function Registro() {
   const [draft] = useState(() => takeSignupDraft());
   const [email, setEmail] = useState(draft?.email ?? '');
   const [password, setPassword] = useState(draft?.password ?? '');
-  // El enlace de la invitación de pastor trae el código ya escrito.
+  // El enlace de la invitación de pastor trae el código ya escrito (se lee también de la dirección, por si la página recién abre).
   const { invitacion } = useLocalSearchParams<{ invitacion?: string }>();
-  const [code, setCode] = useState(typeof invitacion === 'string' ? invitacion : '');
+  const linked = (typeof invitacion === 'string' && invitacion) || (Platform.OS === 'web' && typeof window !== 'undefined' ? inviteFromSearch(window.location.search) : null) || '';
+  const [code, setCode] = useState(linked.toUpperCase());
+  useEffect(() => { if (linked) setCode((c) => c || linked.toUpperCase()); }, [linked]);
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);

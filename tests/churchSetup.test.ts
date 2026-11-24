@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CLASS_IDEAS, clampStep, cleanTime, inviteLink, inviteMessage, isPastorInvite, joinCodeProblem, missingIdeas, SERVICE_IDEAS, SETUP_STEPS, START_OFF, suggestJoinCode, TIMEZONES, VICTORIA_OFF } from '../src/lib/churchSetup';
+import { CLASS_IDEAS, clampStep, cleanTime, inviteFromSearch, inviteLink, inviteMessage, isPastorInvite, joinCodeProblem, missingIdeas, SERVICE_IDEAS, SETUP_STEPS, START_OFF, suggestJoinCode, TIMEZONES, VICTORIA_OFF } from '../src/lib/churchSetup';
 import { isFeatureKey } from '../src/lib/features';
 
 test('la invitación de pastor se reconoce por cómo empieza, y un código de miembros nunca empieza así', () => {
@@ -33,6 +33,12 @@ test('el enlace y el mensaje de la invitación llevan el código', () => {
   assert.equal(link, 'https://ejemplo.invalid/la-mies/registro?invitacion=PASTOR-ABCDEFGH2345');
   const msg = inviteMessage({ church: 'Iglesia de Prueba', token: 'PASTOR-ABCDEFGH2345', link, days: 14 });
   assert.ok(msg.includes('Iglesia de Prueba') && msg.includes(link) && msg.includes('PASTOR-ABCDEFGH2345') && msg.includes('14 días'));
+  // Al abrir el enlace, la invitación se saca de la dirección.
+  assert.equal(inviteFromSearch(new URL(link).search), 'PASTOR-ABCDEFGH2345');
+  assert.equal(inviteFromSearch('?x=1&invitacion=pastor-abcdefgh2345#a'), 'PASTOR-ABCDEFGH2345');
+  assert.equal(inviteFromSearch('?otra=cosa'), null);
+  assert.equal(inviteFromSearch('?invitacion=%3Cscript%3E'), null);
+  assert.equal(inviteFromSearch(''), null);
 });
 
 test('los valores de inicio existen y son funciones de verdad', () => {
