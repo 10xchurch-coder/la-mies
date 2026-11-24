@@ -176,12 +176,12 @@ import { METRICS, METRIC_GROUPS } from '../src/lib/central';
 test('en inglés: las funciones y los números de Central cambian de etiqueta, no de clave ni de grupo', () => {
   const keys = FEATURES.map((f) => `${f.key}|${f.group}|${f.parent ?? ''}|${f.routes.join(',')}`);
   const perGroup = FEATURE_GROUPS.map((g) => topFeatures(g).length);
+  const esLabel = FEATURES.find((f) => f.key === 'asistencia')?.label ?? '';
   inEnglish(en, () => {
     assert.deepEqual(FEATURES.map((f) => `${f.key}|${f.group}|${f.parent ?? ''}|${f.routes.join(',')}`), keys);
     assert.deepEqual(FEATURE_GROUPS.map((g) => topFeatures(g).length), perGroup, 'se siguen agrupando igual');
-    assert.equal(FEATURES.find((f) => f.key === 'asistencia')?.label, 'Attendance');
+    assert.equal(FEATURES.find((f) => f.key === 'asistencia')?.label, en[esLabel], 'la etiqueta sale en inglés');
     assert.equal(t(FEATURE_GROUPS[0]), 'Soul winning and visits');
-    assert.ok(FEATURES.every((f) => en[t(f.label)] === undefined || true));
     assert.deepEqual([...METRIC_GROUPS], ['Gente', 'Reuniones', 'Decisiones', 'Evangelismo', 'Uso de la app', 'Soporte']);
     assert.ok(METRICS.every((m) => (METRIC_GROUPS as readonly string[]).includes(m.group)));
     assert.equal(t('Uso de la app'), 'App use');
