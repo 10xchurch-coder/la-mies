@@ -1,91 +1,181 @@
-# La app en inglés: qué haría falta
+# La app en inglés
 
-Nota corta para decidir. Fecha: 24 de noviembre de 2026.
+Fecha: 24 de noviembre de 2026. Reemplaza la nota anterior (que era solo la cuenta y el plan).
 
 ## En una frase
 
-Se puede, pero **no es un botón**: hoy todos los textos de la app están escritos en castellano dentro de cada pantalla. Para tener inglés hay que sacar cada texto de su lugar, ponerlo en una lista, y traducir esa lista. Es un trabajo grande y conviene hacerlo por partes.
+En Ajustes hay una opción **Idioma / Language** (Español / English). Al tocarla, toda la app cambia en el momento, sin cerrarla. También hay un botoncito para cambiar de idioma en Entrar y en Crear cuenta. El idioma queda guardado en el teléfono.
 
-**Hoy no se tradujo nada.** Esta nota es solo la cuenta y el plan.
+**Ojo: falta un paso que hace el encargado.** En la rama `feat/ingles` está todo lo necesario (el ayudante, la lista de textos en inglés y el programa que prepara las pantallas), pero las pantallas todavía no fueron tocadas, para no chocar con el trabajo de los demás. Cuando las otras ramas estén unidas, se corre un programa y recién ahí la app queda en los dos idiomas. Los pasos están más abajo.
 
-## Cuánto texto hay (contado, no adivinado)
+## Cómo funciona
 
-Se contó con un programita que quedó guardado: `node scripts/contar-textos.mjs`. Lee todos los archivos de `app/` y `src/`.
+1. **El castellano sigue escrito en el código**, como siempre. No hay nombres raros para cada texto.
+2. Cada texto que ve la gente queda envuelto así: `tx('Guardar')`. Si la app está en castellano, devuelve lo mismo. Si está en inglés, busca "Guardar" en la lista y devuelve "Save". **Si un texto no está en la lista, se ve en castellano** (nunca queda un hueco ni un error).
+3. **La lista en inglés** es `src/i18n/en.json`: a la izquierda el texto en castellano, a la derecha el inglés.
+4. Los textos con datos adentro usan huecos con nombre: `` `Faltaron ${n} personas` `` pasa a ser `tx('Faltaron {n} personas', { n })`. En inglés el hueco puede ir en otro lugar: `"{n} people were absent"`.
+5. **Singular y plural:** donde el código ya elige ("persona" / "personas"), se traduce cada palabra. Además, la traducción puede elegir sola: `"{n} {n|person|people}"` pone "person" si n es 1 y "people" si no.
+6. **Una palabra con dos sentidos** ("Salida" es una salida de evangelismo, pero en la puerta de un evento es por donde se sale): en ese archivo la clave lleva un contexto, `tx('Salida##puerta')`. Lo de después de `##` no se muestra nunca. Se anota en `scripts/i18n-config.json`, en `contexts`.
+7. **Cambio al instante:** `app/_layout.tsx` vuelve a dibujar toda la app cuando cambia el idioma (el mismo truco que ya se usaba para el modo oscuro). Por eso, si alguien cambia el idioma con un formulario a medio llenar, lo escrito en esa pantalla se pierde. En Entrar y en Crear cuenta el botón está arriba, antes de los campos.
+8. **La lista en inglés no hace más lenta la app.** Se baja recién cuando alguien elige inglés (en la web es un archivo aparte).
 
-| Qué | Cantidad |
+Archivos nuevos:
+
+| Archivo | Qué es |
 |---|---|
-| Archivos revisados | 299 |
-| Textos entre comillas en total (incluye cosas internas que nadie lee) | 17.750 |
-| **Textos que ve la gente, en castellano** | **5.948** (4.164 distintos) |
-| Palabras para traducir | unas 26.000 (como un libro de 90 páginas) |
-| Archivos que hay que tocar | 245 |
+| `src/lib/i18n.ts` | El ayudante: `t` / `tx`, `txList`, `txLocale`. No depende de nada, así se puede probar solo. |
+| `src/lib/i18nStore.ts` | Guarda el idioma en el teléfono y carga la lista cuando hace falta. |
+| `src/components/LangChoice.tsx` | La tarjeta de Ajustes y el botón de Entrar / Crear cuenta. |
+| `src/i18n/en.json` | Los textos en inglés. |
+| `src/i18n/claves.json` | La lista de todos los textos en castellano que la app pide (la arma el programa). |
+| `src/i18n/faltan.json` | Los que todavía no tienen inglés (hoy está vacío). |
+| `scripts/i18n-codemod.mjs` | El programa que envuelve los textos en `tx(...)`. |
+| `scripts/i18n-extract.mjs` | El programa que arma `claves.json` y `faltan.json`. |
+| `scripts/i18n-lib.mjs`, `scripts/i18n-config.json` | El motor de los dos programas y sus ajustes. |
+| `docs/INGLES-revisar.txt` | Lo que el programa no se animó a tocar (para mirar a mano). |
+| `tests/i18n.test.ts` | Las pruebas. |
 
-Dónde están:
+Archivos de siempre que se tocaron a mano (pocos): `app/_layout.tsx`, `app/ajustes.tsx`, `app/login.tsx`, `app/registro.tsx`, `src/lib/format.ts`, `src/lib/bible.ts`.
 
-| Parte | Textos | Palabras |
+### Fechas, números y plata
+
+- `src/lib/format.ts` es **el único lugar** que decide cómo se escriben: "sáb 24 oct" / "Sat, Oct 24", "2,3 km" / "2.3 km", "$ 1.234,50" / "$ 1,234.50".
+- Las pantallas que arman fechas por su cuenta con `toLocaleDateString('es-AR', ...)`: el programa les cambia `'es-AR'` por `txLocale()` (son 29 lugares).
+- Las listas de días y meses sueltas ("enero", "lunes") pasan a `txList([...])`, que traduce cada nombre cuando se lee.
+- **Lo que no cambia:** las fechas que se **escriben** siguen siendo día/mes/año (23/05/1990) en los dos idiomas, y las horas siguen de 0 a 24. Cambiar el orden a la manera de Estados Unidos haría que alguien cargue mal un cumpleaños sin darse cuenta.
+- **La plata que se escribe:** en castellano no cambió nada. En inglés, "1,500" y "1,500.50" se leen como mil quinientos (la coma separa los miles), y "1.500,50" se sigue entendiendo.
+
+### La Biblia
+
+- En inglés, los nombres de los libros salen en inglés ("John") y, **si la persona nunca eligió una versión**, se abre la King James. Si ya había elegido una, no se toca.
+- Los devocionales y los planes de lectura no cambian: los escribe la iglesia en castellano.
+
+## Pasos para dejarlo andando (los hace el encargado, en `main`)
+
+Con las demás ramas ya unidas:
+
+```bash
+git merge feat/ingles
+
+node scripts/i18n-codemod.mjs          # envuelve los textos (toca unos 265 archivos)
+node scripts/i18n-codemod.mjs --dry    # tiene que decir "Archivos que cambiarían: 0"
+npx tsc --noEmit                       # tiene que pasar
+npm test                               # tiene que pasar; avisa si faltan textos en inglés
+node scripts/i18n-extract.mjs          # actualiza claves.json y deja lo nuevo en src/i18n/faltan.json
+npx expo export --platform web         # tiene que armar
+
+git add -A && git commit
+```
+
+Si `tsc` falla en un archivo después del programa:
+
+1. Mirar el texto que marca el error.
+2. Agregarlo en `scripts/i18n-config.json`, en `skipTexts`, bajo el nombre del archivo: `"app/tal.tsx": ["El texto"]`. (O poner el comentario `// i18n-skip` en esa línea.)
+3. `git checkout app/tal.tsx` y volver a correr `node scripts/i18n-codemod.mjs`.
+
+Después hay que **probar la app en inglés en un teléfono de verdad** antes de publicarla (ver "Lo que no se probó").
+
+## Después de cada cambio futuro
+
+Las pantallas nuevas se siguen escribiendo **en castellano, como siempre**. Antes de publicar:
+
+```bash
+node scripts/i18n-codemod.mjs     # envuelve lo nuevo (lo que ya estaba no lo toca)
+node scripts/i18n-extract.mjs     # dice cuántos textos faltan en inglés
+```
+
+Para traducir lo que falta: abrir `src/i18n/faltan.json`, escribir el inglés al lado de cada texto, y correr:
+
+```bash
+node scripts/i18n-extract.mjs --agregar src/i18n/faltan.json
+node scripts/i18n-extract.mjs --limpiar   # opcional: saca de en.json lo que la app ya no usa
+```
+
+Si no se hace, no se rompe nada: lo nuevo se ve en castellano dentro de la app en inglés, y `npm test` lo avisa ("Inglés: faltan N textos").
+
+Reglas para traducir: inglés simple de Estados Unidos, con las palabras de una iglesia bautista: culto → *service*, hermanos → *members* (o *brethren*), colectivo → *bus*, seguimiento → *follow-up*, prédica → *sermon*, ofrenda → *offering*, salida de evangelismo → *soul-winning outing*, jefe de ruta → *route captain*, ficha → *profile*, vereda → *sidewalk*. **Los huecos `{así}` no se traducen ni se borran** (hay una prueba que falla si falta uno).
+
+## Qué envuelve el programa y qué no
+
+Lee cada archivo de `app/` y `src/` con el compilador de TypeScript (con los tipos) y decide texto por texto.
+
+**Sí envuelve:**
+
+- El texto suelto de las pantallas y los atributos que se muestran (`title`, `label`, `placeholder`, `text`, `subtitle`, `hint`, `accessibilityLabel`, etc.).
+- Los avisos (`Alert.alert`, confirmaciones), los mensajes de error que se le muestran a la persona y los textos de botones.
+- Las frases armadas con pedazos: `<Text>Faltaron {n} personas</Text>` y `` `Hola ${nombre}` `` quedan como una sola frase con huecos (solo si los pedazos son textos o números; lo sabe por los tipos).
+- **Tablas que están fuera de una función** (`features.ts`, `desk.ts`, `perms.ts`, `format.ts`…): `label: 'Asistencia'` pasa a `get label() { return tx('Asistencia'); }`. Así el texto se traduce **cuando se lee**, no cuando se abre la app, y cambia con el idioma.
+- **Valores que son a la vez clave y texto** (por ejemplo los grupos de funciones, "Tarjeta / Llavero / Pulsera"): el valor no se toca (se sigue comparando y guardando igual) y se traduce solo donde se muestra: `{tx(grupo)}`. El programa lo descubre por el tipo.
+
+**No toca:** rutas, claves, valores de la base, permisos, consultas, nombres de archivo, estilos, lo que va a `console`, lo que está dentro de una llamada a `supabase`, los tipos, los nombres de los libros de la Biblia, el contenido (`src/lib/*Data.ts`, `biblePlan.ts`, `bibleStudy.ts`, `importPeople.ts`, `content/`) ni nada de `tests/`.
+
+**Por seguridad tampoco toca** (y lo anota en `docs/INGLES-revisar.txt`):
+
+- Un texto que en algún archivo se compara con `===`, `case`, `includes` o `startsWith` (por ejemplo el error `'cancelado'` del lector de chips).
+- Un mensaje de error que coincide con una búsqueda (`/permiso/i.test(mensaje)`).
+- Textos fuera de una función que no son una propiedad (una constante suelta, una lista de valores).
+- Palabras sueltas en minúscula que podrían ser una clave.
+
+Se puede correr las veces que haga falta: **la segunda vez no cambia nada**.
+
+## Cómo sumar otro idioma (por ejemplo portugués)
+
+1. En `src/lib/i18n.ts`: agregar `'pt'` al tipo `Lang`, a `isLang` y a la lista `LANGS` (`{ id: 'pt', name: 'Português' }`).
+2. En `src/lib/i18nStore.ts`, en `ensureDict`: agregar la línea que carga `../i18n/pt.json`.
+3. Copiar `src/i18n/claves.json` como base, traducir, y guardar como `src/i18n/pt.json` (mismo formato que `en.json`).
+4. En `src/lib/i18n.ts`, `txLocale`: devolver `'pt-BR'`. En `src/lib/format.ts`: sumar los días y meses cortos y revisar los lugares que hoy preguntan "¿es inglés?".
+5. En `tests/i18n.test.ts`: repetir la prueba de los huecos para `pt.json`.
+
+Las pantallas no se tocan: ya están envueltas.
+
+## Lo que sigue en castellano (dicho claro)
+
+1. **Los avisos que llegan al teléfono y a la campanita.** Los arma la base de datos, en castellano. Son 46 funciones (recordatorios, informe semanal, cumpleaños, anuncios, colectivo, turnos, mensajes…).
+   *Camino recomendado:* guardar el idioma de cada persona en su perfil (una columna nueva `profiles.lang`), y que la función `notify` reciba una clave y los datos en vez del texto ya armado; el texto se arma en el teléfono al mostrarlo, con la misma lista `en.json`. Para el aviso que aparece con la app cerrada hace falta además que la base tenga las frases en los dos idiomas (una tabla chica). Es un trabajo aparte y hay que hacerlo función por función.
+2. **Los errores que vienen de la base** ("Solo el pastor o el tesorero…"): unos 275 mensajes. *Camino recomendado:* agregarlos a `en.json` con su texto exacto y pasar el mensaje por `tx()` en `errorMessage` (`src/lib/supabase.ts`); sirve para los que no llevan datos adentro.
+3. **Los correos** (confirmar cuenta, cambiar contraseña): salen de las plantillas de Supabase, en castellano.
+4. **El contenido:** devocionales, capacitación, crecimiento, planes de lectura (las lecturas dicen "Génesis 1–4"), lecciones, anuncios y todo lo que escribe la gente.
+5. **La página pública de la iglesia y las tiendas** (App Store, Google Play), y las páginas de privacidad.
+6. **Las hojas para imprimir armadas como página web** (el resumen de ofrendas del año) y los nombres de las columnas de la copia de datos.
+7. **Parte de lo anotado en `docs/INGLES-revisar.txt`** (97 renglones). Lo que seguro queda en castellano: "hoy" en algunas fechas, "Tarjeta" como forma de pago en las ofrendas, "Cancelar" en dos menús, la fuerza de la contraseña ("débil") y algunos errores de permisos de ubicación. Las listas que figuran ahí (motivos de denuncia, "¿Cómo nos conociste?", tipos de chip, grupos de funciones) en general **sí** se traducen al mostrarse; están anotadas para que alguien lo confirme mirando la pantalla.
+8. **Lo que se guarda con nombre por defecto** (por ejemplo "Culto del domingo" al crear una lista, o los mensajes de WhatsApp de seguimiento): quien usa la app en inglés los crea en inglés; lo ya guardado no cambia.
+9. La voz que lee la Biblia sigue la versión de la Biblia, no el idioma de la app.
+
+## Medidas
+
+| Qué | Antes | Después |
 |---|---|---|
-| Pantallas (`app/`) | 4.414 | 19.700 |
-| Piezas de pantalla (`src/components`) | 318 | 1.300 |
-| Mensajes, etiquetas y textos largos (`src/lib`) | 1.028 | 4.300 |
+| Lo que baja la web al abrir (los dos archivos de arranque) | 7.636.286 bytes (2.235.028 comprimido) | 7.660.573 bytes (2.239.680 comprimido): **+0,3 %** |
+| Lista en inglés (se baja solo si alguien elige inglés) | — | 310.978 bytes (104.196 comprimido) |
+| Textos distintos | — | 4.513 (24.502 palabras), **todos con inglés** |
+| Lugares envueltos | — | 6.378 en 265 archivos |
+| Para revisar a mano | — | 97 renglones |
 
-Ojo: el programa cuenta con una regla simple (busca frases y palabras en castellano). Puede errar para arriba o para abajo en un 10 %. Sirve para saber el tamaño, no para facturar.
+## Riesgos (para el que lo aplica)
 
-## Lo que el programa NO cuenta (y también está en castellano)
+Es un cambio que toca 265 archivos de una app que se usa todos los días. Lo que puede fallar:
 
-1. **Los avisos de la base de datos.** Cuando algo no se puede hacer ("Solo el pastor o el tesorero"), ese texto sale de la base. Hay unos 390 en los archivos de la base (algunos repetidos o viejos).
-2. **Los avisos al teléfono** (notificaciones) y los correos. Se arman en la base, en castellano.
-3. **El contenido**: devocionales, capacitación, crecimiento, planes de lectura. Eso no es "la app", es material escrito. Traducirlo es otro trabajo (y los devocionales nuevos habría que escribirlos en los dos idiomas).
-4. **La Biblia.** Hoy es RV1960. En inglés tendría que ser KJV: hay que cargar el texto entero de otra Biblia.
-5. **Fechas, plata y teléfonos.** Hoy están pensados para Argentina ("sáb 24 oct", "$ 1.000", código de área). Unos 26 archivos arman fechas o montos así.
-6. **Los textos de las tiendas** (App Store y Google Play).
+- **Un texto que también es un valor.** Si un texto traducido se compara en otro archivo de una forma que el programa no ve (por ejemplo pasa por tres funciones antes de compararse), en inglés esa comparación da distinto. El programa mira `===`, `case`, `includes`, `startsWith` y claves en **todos** los archivos, pero no puede seguir un valor por todo el código.
+- **Lo que se guarda en la base** desde una pantalla en inglés queda en inglés (nombres por defecto). Si alguna consulta busca por ese nombre en castellano, no lo encuentra.
+- **Tablas que se arman al abrir la app a partir de otra tabla** (por ejemplo un `Object.fromEntries` de etiquetas, fuera de una función): quedan en el idioma que había al cargarse ese archivo.
+- **Dos textos distintos que en inglés son iguales** dentro de una misma lista pueden repetir la `key` de la lista (aviso en la consola; rara vez se ve mal).
+- **Textos más largos en inglés** que no entren en un botón. Hay que mirar las pantallas.
+- **La traducción la hizo una máquina.** Hay que hacerla leer por alguien que hable inglés y conozca el vocabulario de la iglesia.
+- **Palabras con dos sentidos** que todavía no tienen contexto: se arreglan sumando una línea en `contexts` y corriendo el programa.
 
-## Qué habría que construir
+## Lo que se probó y lo que no
 
-1. **Una lista de textos por idioma.** Un archivo para castellano y otro para inglés. Cada texto con un nombre. Ejemplo: `guardar` → "Guardar" / "Save".
-2. **Un ayudante** que cada pantalla usa para pedir el texto: en vez de escribir `"Guardar"`, la pantalla escribe `t('guardar')`. Se puede hacer sin instalar nada nuevo (la app ya tiene lo que hace falta), así sale como una actualización normal, sin pasar por las tiendas.
-3. **El interruptor de idioma** en Ajustes, guardado para cada persona. La primera vez puede tomar el idioma del teléfono.
-4. **Sacar los textos de las 245 pantallas y piezas** y reemplazarlos por el ayudante. Esta es la parte larga. Hay muchos textos armados con pedazos ("3 ofrendas", "Faltaron 2 hermanos"): en inglés el orden y los plurales cambian, y cada uno se revisa a mano.
-5. **Traducir** las 26.000 palabras, con cuidado en las palabras de iglesia (culto, hermanos, jefe de ruta, seguimiento, ofrenda).
-6. **Probar todo dos veces**, una en cada idioma. Los textos en inglés tienen otro largo y a veces no entran en un botón.
-7. **Una regla nueva para siempre:** cada pantalla nueva se escribe en los dos idiomas. Si no, el inglés queda con huecos en castellano a los pocos meses.
+Se probó, sobre una copia con el programa ya corrido:
 
-## Por dónde empezar (si se decide hacerlo)
+- `npx tsc --noEmit` pasa. `npm test` pasa (272 pruebas, 7 nuevas).
+- Correr el programa dos veces: la segunda no cambia nada.
+- La web arma (`expo export`).
+- En un navegador sin pantalla, con datos de mentira (sin tocar la base real): Entrar y Crear cuenta en los dos idiomas, el idioma queda al recargar, Ajustes cambia al instante sin salir de la pantalla, y se abrieron las 149 pantallas que no necesitan un dato para abrirse, en castellano y en inglés. 145 abren sin errores en los dos idiomas; las otras 4 fallan igual **antes** del cambio (les falta el dato con que se abren), así que no es por esto.
 
-Lo que más se nota con menos trabajo:
+**No se probó:**
 
-| Etapa | Qué incluye | Textos | Palabras |
-|---|---|---|---|
-| **1. Lo que ve cualquier hermano** | El menú del teléfono, entrar y crear cuenta, ajustes, devocional, oración, eventos, prédicas, chat, directorio, anuncios, cumpleaños, ofrendar | unos 1.300 | unas 5.700 |
-| 2. Lo de los líderes | Asistencia, seguimiento, personas, clases, ministerios, informes | unos 2.000 (a ojo) | — |
-| 3. Administración y lo demás | Finanzas, roles, evangelismo con mapa, planificador de eventos, presentación, escritorio | unos 2.600 (a ojo) | — |
-| 4. La base y los avisos | Mensajes de error y notificaciones | unos 400 | — |
-
-La etapa 1 está contada con el programa. Las etapas 2 y 3 son el resto repartido a ojo.
-| Aparte | Biblia KJV, devocionales y material en inglés | — | — |
-
-Con la etapa 1 sola, un hermano que habla inglés puede usar la app sin perderse. El pastor y los líderes seguirían viendo sus pantallas en castellano hasta las etapas 2 y 3.
-
-## Tamaño aproximado
-
-- **Etapa 1:** el ayudante, el interruptor y unas 26 pantallas. Es un trabajo mediano: varias tandas de trabajo, más una revisión de alguien que hable bien inglés.
-- **Toda la app (etapas 1 a 4):** es el cambio más grande que tendría la app desde que nació, porque toca casi todos los archivos (245 de 299). Mientras se hace, cualquier otro cambio en esas pantallas se cruza con este.
-- **Biblia y contenido:** aparte, y depende de cuánto material se quiera tener en inglés.
-
-No se puede prometer una fecha sin hacer primero la etapa 1 y medir cuánto llevó.
-
-## Riesgos, dichos claro
-
-- **Romper lo que anda.** Tocar 245 archivos puede meter errores en pantallas que hoy funcionan. Se baja el riesgo yendo por etapas y probando cada una.
-- **Inglés a medias.** Si solo se hace la etapa 1, habrá pantallas mezcladas (menú en inglés, pantalla de adentro en castellano). Hay que avisarlo.
-- **Más trabajo para siempre.** Cada función nueva costará un poco más, porque se escribe dos veces.
-- **Una traducción hecha por máquina necesita un lector de verdad.** Las palabras de iglesia se traducen mal si nadie las revisa.
-
-## Para decidir
-
-Tres caminos posibles:
-
-1. **No hacerlo por ahora.** Si las iglesias que van a usar la app hablan castellano, el inglés no les suma.
-2. **Hacer solo la etapa 1.** Sirve si hay hermanos o visitas que hablan inglés. Es el mejor punto de partida y deja armado el ayudante para seguir después.
-3. **Hacer todo.** Tiene sentido solo si una iglesia de habla inglesa va a usar la app completa, con su pastor y sus líderes.
-
-Una pregunta que ayuda: **¿quién la va a usar en inglés?** Si son miembros, alcanza con la etapa 1. Si es una iglesia entera, hace falta todo, más la Biblia KJV.
+- En un teléfono de verdad (iPhone y Android). En particular: que la lista en inglés cargue bien ahí, y los avisos del sistema (permisos, lector de chips).
+- Con datos de verdad: las pantallas se abrieron vacías, así que los textos que solo aparecen cuando hay personas, salidas o plata cargada no se vieron.
+- Las pantallas que necesitan un dato para abrirse (la ficha de una persona, un evento, una clase).
+- Guardar cosas estando en inglés.
+- Que cada texto en inglés entre en su lugar.

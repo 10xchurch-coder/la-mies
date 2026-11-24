@@ -15,6 +15,7 @@ import { PasswordField } from '@/components/PasswordField';
 import { WEB_URL } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { LangSwitch } from '@/components/LangChoice';
 
 export default function Registro() {
   const router = useRouter();
@@ -106,6 +107,7 @@ export default function Registro() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Header title={session ? 'Unirme a mi iglesia' : 'Crear cuenta'} back={!session} subtitle="Pedile el código al administrador de tu iglesia" />
       <Screen style={{ gap: 16 }}>
+        {!session ? <LangSwitch /> : null}
         {draft?.email && draft.password && !session ? (
           <Text style={styles.msg}>Ya cargamos tu correo y tu contraseña. Completá tu nombre, tu celular y el código de la iglesia, y tocá "Crear cuenta".</Text>
         ) : null}

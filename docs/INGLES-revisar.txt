@@ -1,0 +1,107 @@
+Textos que el programa scripts/i18n-codemod.mjs NO tocó porque no está seguro. Hay que mirarlos a mano.
+Si un texto de acá se ve en pantalla, se puede envolver a mano con tx(...) donde se muestra.
+
+   33  el tipo es una lista cerrada de valores
+   24  texto fuera de una función (se crea una sola vez al abrir la app)
+   23  ese texto se compara en algún archivo (===, case, includes o una expresión regular)
+    7  lista de textos fuera de una función (¿se muestran o son valores?)
+    5  palabra suelta en minúscula (¿texto o clave?)
+    2  va a la base: no se tocó
+    2  en otro lado se busca "…" con startsWith/includes
+
+app/ausencias.tsx:89  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  persona
+app/ausencias.tsx:89  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  personas
+app/capacitacion/index.tsx:40  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
+app/chips.tsx:21  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tarjeta | Llavero | Pulsera
+app/chips.tsx:31  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
+app/evento/plan.tsx:103  [palabra suelta en minúscula (¿texto o clave?)]  inscripción
+app/fidelidad.tsx:21  [texto fuera de una función (se crea una sola vez al abrir la app)]  Contactados
+app/fidelidad.tsx:21  [texto fuera de una función (se crea una sola vez al abrir la app)]  marcados en la calle o cargados
+app/fidelidad.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Vinieron a la iglesia
+app/fidelidad.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  al menos una vez
+app/fidelidad.tsx:23  [texto fuera de una función (se crea una sola vez al abrir la app)]  En discipulado
+app/fidelidad.tsx:24  [texto fuera de una función (se crea una sola vez al abrir la app)]  Vienen sábado y domingo
+app/fidelidad.tsx:24  [texto fuera de una función (se crea una sola vez al abrir la app)]  constantes o fieles
+app/fidelidad.tsx:25  [texto fuera de una función (se crea una sola vez al abrir la app)]  Bautizados
+app/fidelidad.tsx:26  [texto fuera de una función (se crea una sola vez al abrir la app)]  Miembros
+app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  Salen a evangelizar
+app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  usan la app para salir
+app/fidelidad.tsx:28  [texto fuera de una función (se crea una sola vez al abrir la app)]  Sirven en un ministerio
+app/finanzas/[id].tsx:18  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
+app/mensajes/[id].tsx:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  Es ofensivo o me falta el respeto | Me incomoda o me asusta | Pide plata o es un engaño | Otra cosa
+app/seguridad.tsx:46  [va a la base: no se tocó]  La Mies …
+src/components/ActionSheet.tsx:22  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Cancelar
+src/components/BaptismCertificate.tsx:17  [texto fuera de una función (se crea una sola vez al abrir la app)]  Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó de los muertos por la gloria del Padre, así también nos
+src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
+src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
+src/components/PhotoCropper.tsx:120  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Cancelar
+src/lib/api.ts:178  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  No tenés permiso para borrar a esta persona.
+src/lib/api.ts:1210  [va a la base: no se tocó]  Lista del culto
+src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
+src/lib/bible.ts:32  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
+src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
+src/lib/busTask.ts:80  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para mostrar el colectivo.
+src/lib/busTask.ts:82  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Sin el permiso de ubicación "todo el tiempo", el colectivo solo se ve con la app abierta.
+src/lib/chatLive.ts:56  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para mandar dónde estás.
+src/lib/churchSetup.ts:99  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tu iglesia | Reuniones | Clases | Funciones | Código para los hermanos
+src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hija
+src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hijo
+src/lib/features.ts:27  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:30  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:33  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:36  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:40  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:43  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:46  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:49  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:52  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:55  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:58  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:61  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:64  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:67  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:70  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:74  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:77  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:80  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:83  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:86  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:89  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:92  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:95  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:98  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:101  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:104  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:107  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:110  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:113  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:116  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:120  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:123  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:126  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:131  [lista de textos fuera de una función (¿se muestran o son valores?)]  Evangelismo y visitas | Reuniones y enseñanza | Comunidad | Dinero e informes
+src/lib/files.ts:325  [texto fuera de una función (se crea una sola vez al abrir la app)]  La foto
+src/lib/files.ts:326  [texto fuera de una función (se crea una sola vez al abrir la app)]  El video
+src/lib/files.ts:327  [texto fuera de una función (se crea una sola vez al abrir la app)]  El audio
+src/lib/format.ts:42  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
+src/lib/giving.ts:8  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
+src/lib/menuPref.ts:15  [texto fuera de una función (se crea una sola vez al abrir la app)]  Favoritos
+src/lib/moderation.ts:9  [lista de textos fuera de una función (¿se muestran o son valores?)]  Ofensivo o irrespetuoso | Contenido inapropiado | Información privada de otra persona | Spam o engaño | Otro motivo
+src/lib/nfc.ts:66  [palabra suelta en minúscula (¿texto o clave?)]  vacío
+src/lib/password.ts:28  [palabra suelta en minúscula (¿texto o clave?)]  débil
+src/lib/password.ts:53  [texto fuera de una función (se crea una sola vez al abrir la app)]  Esa contraseña apareció en filtraciones de internet. Elegí otra que no uses en ningún otro lado.
+src/lib/personas.ts:9  [texto fuera de una función (se crea una sola vez al abrir la app)]  Discipulado
+src/lib/personas.ts:11  [lista de textos fuera de una función (¿se muestran o son valores?)]  La salvación y el bautismo | Qué es la iglesia | Lo que creemos | Cómo vivimos y servimos
+src/lib/personas.ts:12  [texto fuera de una función (se crea una sola vez al abrir la app)]  Recibido como miembro
+src/lib/personas.ts:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
+src/lib/personas.ts:167  [lista de textos fuera de una función (¿se muestran o son valores?)]  Me invitó un amigo o familiar | Me visitaron en mi casa | Vivo cerca | Por internet o redes | Otro
+src/lib/personasApi.ts:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  No tenés permiso para borrar esto.
+src/lib/verses.ts:42  [palabra suelta en minúscula (¿texto o clave?)]  versículos
+src/screens/crecimiento.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Evangelismo personal
+src/screens/crecimiento.tsx:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
+src/screens/crecimiento.tsx:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
+src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Toda la iglesia
+src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Solo el pastor
+src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Personas elegidas
+src/store/outing.tsx:165  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para marcar las calles.
+src/store/outing.tsx:169  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Sin el permiso de ubicación en segundo plano no podemos marcar las calles con el teléfono bloqueado.

@@ -1,0 +1,50 @@
+{
+  "skipFiles": [
+    "src/i18n/",
+    "src/lib/i18n.ts",
+    "src/lib/i18nStore.ts",
+    "src/data/",
+    "src/lib/bibleData.ts",
+    "src/lib/bibleStudyData.ts",
+    "src/lib/bibleStudy.ts",
+    "src/lib/biblePlan.ts",
+    "src/lib/importPeople.ts"
+  ],
+  "skipTexts": {
+    "*": [],
+    "src/lib/format.ts": [
+      "toda",
+      "todo"
+    ]
+  },
+  "words": [
+    "hoy",
+    "ayer",
+    "mañana",
+    "recién"
+  ],
+  "contexts": {
+    "app/evento/puerta.tsx": {
+      "Salida": "puerta",
+      "Entrada": "puerta",
+      "Entrar": "puerta"
+    },
+    "app/ninos.tsx": {
+      "Entrada": "chicos"
+    },
+    "app/finanzas/informe.tsx": {
+      "Entró": "plata",
+      "Salió": "plata"
+    },
+    "app/finanzas/movimientos.tsx": {
+      "Entró": "plata",
+      "Salió": "plata"
+    },
+    "app/presentar/index.tsx": {
+      "Seguir": "reproducir"
+    },
+    "app/seguimiento.tsx": {
+      "Seguir": "seguimiento"
+    }
+  }
+}

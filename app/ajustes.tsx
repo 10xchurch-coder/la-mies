@@ -21,6 +21,7 @@ import { updateLabel } from '@/lib/otaUpdates';
 import { blockedPeople, unblockUser } from '@/lib/moderation';
 import { RULES } from '@/components/RulesGate';
 import { TabsEditor } from '@/components/TabsEditor';
+import { LangChoice } from '@/components/LangChoice';
 
 export default function Ajustes() {
   const router = useRouter();
@@ -87,6 +88,8 @@ export default function Ajustes() {
             onChange={(v) => saveThemeMode(v ? 'dark' : 'light')}
           />
         </Card>
+
+        <LangChoice />
 
         <SectionTitle>Barra de abajo</SectionTitle>
         <Card>
