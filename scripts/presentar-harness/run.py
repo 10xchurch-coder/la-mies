@@ -481,12 +481,12 @@ def main():
         print('10. Traer el orden del culto')
         today = op.evaluate("(() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })()")
         plans = [{'id': 'p1', 'church_id': 'c1', 'service_date': today, 'title': 'Culto de la mañana', 'items': [
-            {'kind': 'oracion', 'who': 'Hermano Ejemplo'},
-            {'kind': 'cancion', 'title': 'sublime gracia'},
-            {'kind': 'cancion', 'title': 'Una que no está'},
-            {'kind': 'anuncios'},
-            {'kind': 'lectura', 'ref': 'Salmo 23'},
-            {'kind': 'predica', 'title': 'Cántaros vacíos', 'ref': '2 Reyes 4:1-7'},
+            {'id': 'a', 'type': 'prayer', 'title': 'Oración', 'whoName': 'Hermano Ejemplo'},
+            {'id': 'b', 'type': 'song', 'title': 'sublime gracia', 'songId': None},
+            {'id': 'c', 'type': 'song', 'title': 'Una que no está', 'songId': None},
+            {'id': 'd', 'type': 'notices', 'title': 'Anuncios'},
+            {'id': 'e', 'type': 'reading', 'title': 'Lectura bíblica', 'ref': 'Salmos 23'},
+            {'id': 'f', 'type': 'sermon', 'title': 'Cántaros vacíos', 'note': '2 Reyes 4:1-7'},
         ]}]
         op.evaluate('p => localStorage.setItem("harness-plans", JSON.stringify(p))', plans)
         op.evaluate("localStorage.removeItem('harness-set')")
@@ -506,7 +506,7 @@ def main():
         check('la canción trae la letra del Cancionero', thumb(op, 2).count() == 1)
         thumb(op, 1).click()
         check('...y se puede mandar a la pantalla', wait_text(out, 'Sublime gracia del Señor'))
-        row(op, 'Salmo 23').click()
+        row(op, 'Salmos 23').click()
         check('la lectura trae el pasaje (6 versículos)', thumb(op, 6).count() == 1 and op.get_by_label('Mostrar diapositiva 7', exact=True).count() == 0)
         row(op, 'Cántaros vacíos').click()
         check('la prédica trae el título y su pasaje (1 + 7)', thumb(op, 8).count() == 1 and op.get_by_label('Mostrar diapositiva 9', exact=True).count() == 0)

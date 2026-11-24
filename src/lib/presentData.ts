@@ -2,7 +2,8 @@
 import { listAnnouncements, listEvents } from './api';
 import { supabase } from './supabase';
 import type { AnnouncementsItem, NoticeCard } from './present';
-import { announcementCards, cleanPlanEntries, type PlanEntry } from './presentExtras';
+import { announcementCards } from './presentExtras';
+import { cleanItems as cleanPlanItems, type PlanItem } from './servicePlan';
 
 /** Arma de nuevo las diapositivas de anuncios con lo que hay ahora en Anuncios y en el Calendario. */
 export async function loadAnnouncementCards(item: AnnouncementsItem): Promise<NoticeCard[]> {
@@ -35,10 +36,10 @@ export async function listServicePlans(churchId: string): Promise<ServicePlanRow
 }
 
 /** Las partes de un orden del culto. null si no se pudo leer. */
-export async function getServicePlanEntries(id: string): Promise<PlanEntry[] | null> {
+export async function getServicePlanEntries(id: string): Promise<PlanItem[] | null> {
   try {
     const { data, error } = await supabase.from('service_plans').select('items').eq('id', id).maybeSingle();
     if (error || !data) return null;
-    return cleanPlanEntries((data as { items?: unknown }).items);
+    return cleanPlanItems((data as { items?: unknown }).items);
   } catch { return null; }
 }

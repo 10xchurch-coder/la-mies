@@ -2,6 +2,7 @@
 // Solo lógica: sin pantalla ni base, para poder probarse sola.
 import { MAX_CARDS, newItem, parsePassage, type NoticeCard, type PresentItem } from './present';
 import { findRefs, refLabel } from './sermonOutline';
+import { typeInfo as planType, type PlanItem } from './servicePlan';
 import { searchKey } from './songs';
 
 // ---------- Anuncios y eventos ----------
@@ -92,31 +93,13 @@ export function announcementCards(anns: AnnLike[], events: EventLike[], o: CardO
 }
 
 // ---------- Orden del culto ----------
+// El orden del culto se arma en otra parte de la app (ver servicePlan.ts): acá se convierte en partes de la lista.
 
-export type PlanEntry = { kind: string; title: string; song_id: string | null; ref: string; who: string };
 export type SongLike = { id: string; title: string; lyrics: string };
 
-const text = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
-
-/** Lo que vino de la tabla del orden del culto, revisado. Lo que no se entiende se tira. */
-export function cleanPlanEntries(raw: unknown): PlanEntry[] {
-  if (!Array.isArray(raw)) return [];
-  const out: PlanEntry[] = [];
-  for (const r of raw as Record<string, unknown>[]) {
-    if (!r || typeof r !== 'object') continue;
-    const kind = text(r.kind, 20) || 'otro';
-    const e: PlanEntry = { kind, title: text(r.title, 160), song_id: typeof r.song_id === 'string' && r.song_id ? r.song_id : null, ref: text(r.ref, 120), who: text(r.who, 120) };
-    if (e.title || e.song_id || e.ref || kind !== 'otro') out.push(e);
-    if (out.length >= 80) break;
-  }
-  return out;
-}
-
-const KIND_TITLE: Record<string, string> = { oracion: 'Oración', ofrenda: 'Ofrenda', anuncios: 'Anuncios', lectura: 'Lectura bíblica', predica: 'Prédica', cancion: 'Canción', otro: '' };
-
 /** La canción del Cancionero que corresponde: por su número de la base y, si no, por el nombre (sin tildes ni mayúsculas). */
-export function matchSong(e: { title: string; song_id: string | null }, songs: SongLike[]): SongLike | null {
-  if (e.song_id) { const byId = songs.find((s) => s.id === e.song_id); if (byId) return byId; }
+export function matchSong(e: { title: string; songId: string | null }, songs: SongLike[]): SongLike | null {
+  if (e.songId) { const byId = songs.find((s) => s.id === e.songId); if (byId) return byId; }
   const k = searchKey(e.title);
   if (!k) return null;
   const same = songs.filter((s) => searchKey(s.title) === k);
@@ -127,28 +110,35 @@ export function matchSong(e: { title: string; song_id: string | null }, songs: S
 }
 
 /** El orden del culto convertido en partes de la lista: canciones con su letra, lecturas con su pasaje y lo demás como cartel. */
-export function planToItems(entries: PlanEntry[], songs: SongLike[]): PresentItem[] {
+export function planToItems(entries: PlanItem[], songs: SongLike[]): PresentItem[] {
   const out: PresentItem[] = [];
   for (const e of entries) {
-    const title = e.title || KIND_TITLE[e.kind] || '';
-    if (e.kind === 'cancion') {
-      const s = matchSong(e, songs);
+    const label = planType(e.type).label;
+    const title = (e.title ?? '').trim() || label;
+    const who = (e.whoName ?? '').trim();
+    if (e.type === 'song') {
+      // Una canción sin nombre ("Canción") no se busca por nombre: se elige a mano.
+      const s = matchSong({ title: title === label ? '' : title, songId: e.songId }, songs);
       const it = newItem('song');
       // Si no está en el Cancionero queda sin letra: al abrirla, la app pide elegir la canción.
-      out.push(s ? { ...it, type: 'song', title: s.title, songId: s.id, lyrics: s.lyrics } as PresentItem : { ...it, title: title || 'Canción' } as PresentItem);
-    } else if (e.kind === 'lectura') {
-      const direct = e.ref && parsePassage(e.ref) ? e.ref : '';
-      const loose = !direct && e.ref ? findRefs(e.ref).refs[0] : undefined;
+      out.push(s ? { ...it, title: s.title, songId: s.id, lyrics: s.lyrics } as PresentItem : { ...it, title } as PresentItem);
+    } else if (e.type === 'reading') {
+      const raw = (e.ref ?? '').trim();
+      const direct = raw && parsePassage(raw) ? raw : '';
+      const loose = !direct && raw ? findRefs(raw).refs[0] : undefined;
       const ref = direct || (loose ? refLabel(loose).replace('–', '-').replace('…', '') : '');
       if (ref) out.push({ ...newItem('passage'), title, ref } as PresentItem);
-      else out.push({ ...newItem('notice'), title: title || 'Lectura bíblica', body: [e.ref, e.who].filter(Boolean).join('\n') } as PresentItem);
-    } else if (e.kind === 'predica') {
-      out.push({ ...newItem('sermon'), title: title || 'Prédica', outline: [e.title || 'Prédica', e.ref].filter(Boolean).join('\n') } as PresentItem);
-    } else if (e.kind === 'anuncios') {
-      out.push({ ...newItem('announcements'), title: title || 'Anuncios' } as PresentItem);
+      else out.push({ ...newItem('notice'), title, body: [raw, who].filter(Boolean).join('\n') } as PresentItem);
+    } else if (e.type === 'sermon') {
+      // El título de la prédica y, si en la nota hay citas, van abajo para que se abran solas.
+      const note = (e.note ?? '').trim();
+      const refs = note && findRefs(note).refs.length ? note : '';
+      out.push({ ...newItem('sermon'), title, outline: [title, refs].filter(Boolean).join('\n') } as PresentItem);
+    } else if (e.type === 'notices') {
+      out.push({ ...newItem('announcements'), title } as PresentItem);
     } else {
-      if (!title && !e.who) continue;
-      out.push({ ...newItem('notice'), title: title || e.who, body: title ? e.who : '' } as PresentItem);
+      // Oración, ofrenda y lo demás: un cartel con el nombre de la parte y quién la hace.
+      out.push({ ...newItem('notice'), title, body: who } as PresentItem);
     }
   }
   return out;

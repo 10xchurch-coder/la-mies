@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { VERSIONS } from '../src/lib/bible';
 import { autoNext, autoOf, cleanItems, cleanLive, itemSlides, newItem, stageOf, type Slide } from '../src/lib/present';
-import { announcementCards, cleanPlanEntries, dayWords, matchSong, planToItems, whenWords } from '../src/lib/presentExtras';
+import { announcementCards, dayWords, matchSong, planToItems, whenWords } from '../src/lib/presentExtras';
+import { cleanItems as cleanPlanItems } from '../src/lib/servicePlan';
 
 const rv = VERSIONS[0];
 // Martes 24 de noviembre de 2026, 10 de la mañana (hora del aparato).
@@ -116,19 +117,6 @@ test('cleanLive deja pasar lo de la vista de escenario, revisado', () => {
   assert.deepEqual(cleanLive({ v: 1, mode: 'black', slide: null, stamp: 'b', at: 1, stage: { next: null, item: 'X', n: 1, total: 1 } })!.stage, { next: null, nextLabel: null, item: 'X', n: 1, total: 1 });
 });
 
-test('orden del culto: se revisa lo que viene de la base', () => {
-  assert.deepEqual(cleanPlanEntries('nada'), []);
-  const e = cleanPlanEntries([
-    { kind: 'cancion', title: ' Sublime gracia ', song_id: 's1' },
-    { kind: 'lectura', ref: 'Salmo 23' },
-    null, 'texto', {},
-    { kind: 'ofrenda' },
-    { title: 'Bienvenida', who: 'Hermano de la puerta' },
-  ]);
-  assert.deepEqual(e.map((x) => x.kind), ['cancion', 'lectura', 'ofrenda', 'otro']);
-  assert.deepEqual(e[0], { kind: 'cancion', title: 'Sublime gracia', song_id: 's1', ref: '', who: '' });
-});
-
 test('orden del culto: canciones del Cancionero, lecturas y lo demás', () => {
   const songs = [
     { id: 's1', title: 'Sublime gracia', lyrics: 'Sublime gracia del Señor\nque a un infeliz salvó' },
@@ -136,33 +124,45 @@ test('orden del culto: canciones del Cancionero, lecturas y lo demás', () => {
     { id: 's3', title: 'Santo', lyrics: 'Santo, santo' },
     { id: 's4', title: 'Santo, santo, santo', lyrics: 'Santo, santo, santo' },
   ];
-  assert.equal(matchSong({ title: 'otra cosa', song_id: 's2' }, songs)!.id, 's2');
-  assert.equal(matchSong({ title: 'SUBLIME GRACIA', song_id: null }, songs)!.id, 's1');
-  assert.equal(matchSong({ title: 'cuan grande es el', song_id: 'borrada' }, songs)!.id, 's2');
-  assert.equal(matchSong({ title: 'Cuán grande es Él (2 estrofas)', song_id: null }, songs)!.id, 's2');
-  assert.equal(matchSong({ title: 'Santo', song_id: null }, songs)!.id, 's3');
-  assert.equal(matchSong({ title: 'No existe', song_id: null }, songs), null);
-  assert.equal(matchSong({ title: '', song_id: null }, songs), null);
+  assert.equal(matchSong({ title: 'otra cosa', songId: 's2' }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'SUBLIME GRACIA', songId: null }, songs)!.id, 's1');
+  assert.equal(matchSong({ title: 'cuan grande es el', songId: 'borrada' }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'Cuán grande es Él (2 estrofas)', songId: null }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'Santo', songId: null }, songs)!.id, 's3');
+  assert.equal(matchSong({ title: 'No existe', songId: null }, songs), null);
+  assert.equal(matchSong({ title: '', songId: null }, songs), null);
 
-  const items = planToItems(cleanPlanEntries([
-    { kind: 'oracion', who: 'Hermano Ejemplo' },
-    { kind: 'cancion', title: 'Sublime gracia' },
-    { kind: 'cancion', title: 'Una que no está' },
-    { kind: 'anuncios' },
-    { kind: 'ofrenda' },
-    { kind: 'lectura', ref: 'Salmo 23', who: 'Hermana Ejemplo' },
-    { kind: 'lectura', ref: 'Jn 3:16-18' },
-    { kind: 'lectura', title: 'Lectura a elección' },
-    { kind: 'predica', title: 'Cántaros vacíos', ref: '2 Reyes 4:1-7' },
-    { kind: 'otro', title: 'Despedida' },
-    { kind: 'otro' },
-  ]), songs);
-  assert.deepEqual(items.map((i) => i.type), ['notice', 'song', 'song', 'announcements', 'notice', 'passage', 'passage', 'notice', 'sermon', 'notice']);
+  // Tal como lo guarda la pantalla del orden del culto (servicePlan.ts).
+  const plan = cleanPlanItems([
+    { id: '1', type: 'prayer', title: 'Oración', whoName: 'Hermano Ejemplo' },
+    { id: '2', type: 'song', title: 'Otro nombre', songId: 's1' },
+    { id: '3', type: 'song', title: 'cuan grande es el' },
+    { id: '4', type: 'song', title: 'Una que no está' },
+    { id: '5', type: 'song' },
+    { id: '6', type: 'notices' },
+    { id: '7', type: 'offering' },
+    { id: '8', type: 'reading', title: 'Lectura bíblica', ref: 'Salmos 23', whoName: 'Hermana Ejemplo' },
+    { id: '9', type: 'reading', ref: 'Jn 3:16-18' },
+    { id: '10', type: 'reading', title: 'Lectura a elección' },
+    { id: '11', type: 'sermon', title: 'Cántaros vacíos', note: '2 Reyes 4:1-7' },
+    { id: '12', type: 'sermon', title: 'Sin citas', note: 'traer el cántaro de ejemplo' },
+    { id: '13', type: 'other', title: 'Despedida' },
+    { id: '14', type: 'algo raro' },
+  ]);
+  const items = planToItems(plan, songs);
+  assert.deepEqual(items.map((i) => i.type), ['notice', 'song', 'song', 'song', 'song', 'announcements', 'notice', 'passage', 'passage', 'notice', 'sermon', 'sermon', 'notice', 'notice']);
   assert.ok(items[0].type === 'notice' && items[0].title === 'Oración' && items[0].body === 'Hermano Ejemplo');
-  assert.ok(items[1].type === 'song' && items[1].songId === 's1' && items[1].lyrics.startsWith('Sublime'));
-  assert.ok(items[2].type === 'song' && items[2].songId === null && items[2].title === 'Una que no está' && items[2].lyrics === '');
-  assert.ok(items[5].type === 'passage' && items[5].ref === 'Salmo 23' && itemSlides(items[5], rv).length === 6);
-  assert.ok(items[6].type === 'passage' && items[6].ref === 'Juan 3:16-18' && itemSlides(items[6], rv).length === 3);
-  assert.ok(items[8].type === 'sermon' && itemSlides(items[8], rv).length === 8);
+  assert.ok(items[1].type === 'song' && items[1].songId === 's1' && items[1].title === 'Sublime gracia' && items[1].lyrics.startsWith('Sublime'));
+  assert.ok(items[2].type === 'song' && items[2].songId === 's2');
+  assert.ok(items[3].type === 'song' && items[3].songId === null && items[3].title === 'Una que no está' && items[3].lyrics === '');
+  assert.ok(items[4].type === 'song' && items[4].songId === null && items[4].title === 'Canción');
+  assert.ok(items[6].type === 'notice' && items[6].title === 'Ofrenda' && items[6].body === '');
+  assert.ok(items[7].type === 'passage' && items[7].ref === 'Salmos 23' && itemSlides(items[7], rv).length === 6);
+  assert.ok(items[8].type === 'passage' && items[8].ref === 'Juan 3:16-18' && itemSlides(items[8], rv).length === 3);
+  assert.ok(items[9].type === 'notice' && items[9].title === 'Lectura a elección');
+  assert.ok(items[10].type === 'sermon' && itemSlides(items[10], rv).length === 8);
+  // La nota de la prédica sin citas no va a la pantalla.
+  assert.ok(items[11].type === 'sermon' && items[11].outline === 'Sin citas');
   assert.equal(new Set(items.map((i) => i.id)).size, items.length);
+  assert.deepEqual(planToItems([], songs), []);
 });
