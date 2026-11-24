@@ -16,10 +16,10 @@ export function showActions(title: string, message: string | undefined, actions:
   if (Platform.OS === 'ios') {
     // En iPhone, un Modal no se puede abrir encima de otro Modal (por ejemplo, los comentarios del devocional):
     // quedaba invisible y bloqueaba la pantalla. La hoja nativa de iOS siempre aparece arriba de todo.
-    const list = actions.filter((a) => a.text !== 'Cancelar');
+    const list = actions.filter((a) => a.text !== 'Cancelar' && a.text !== tx('Cancelar'));
     const destructive = list.map((a, i) => (a.destructive ? i : -1)).filter((i) => i >= 0);
     ActionSheetIOS.showActionSheetWithOptions(
-      { title, message, options: [...list.map((a) => a.text), 'Cancelar'], cancelButtonIndex: list.length, destructiveButtonIndex: destructive },
+      { title, message, options: [...list.map((a) => a.text), tx('Cancelar')], cancelButtonIndex: list.length, destructiveButtonIndex: destructive },
       (i) => { if (i < list.length) setTimeout(() => list[i].onPress?.(), 300); },
     );
     return;

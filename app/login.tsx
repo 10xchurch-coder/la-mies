@@ -10,8 +10,10 @@ import { WEB_URL } from '@/lib/share';
 import { colors, themed } from '@/theme';
 import { LangSwitch } from '@/components/LangChoice';
 import { tx } from '@/lib/i18n';
+import { useLang } from '@/lib/i18nStore';
 
 export default function Login() {
+  useLang(); // al cambiar de idioma esta pantalla se redibuja sola, sin perder lo escrito
   const router = useRouter();
   // Viene de "Crear cuenta": el correo ya queda escrito.
   const { email: emailParam } = useLocalSearchParams<{ email?: string }>();

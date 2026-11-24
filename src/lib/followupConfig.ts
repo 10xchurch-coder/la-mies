@@ -102,5 +102,5 @@ export function serviceList(services: { dow: number; time: string | null; main: 
   const main = (services ?? []).filter((s) => s.active && s.main).sort((a, b) => order(a.dow) - order(b.dow) || t(a.time).localeCompare(t(b.time)));
   if (!main.length) return tx('el domingo');
   const parts = main.map((s) => tx('el {DIAS} a las {t}', { DIAS: DIAS[s.dow], t: t(s.time) }));
-  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}`;
+  return parts.length === 1 ? parts[0] : tx('{list} y {last}', { list: parts.slice(0, -1).join(', '), last: parts[parts.length - 1] });
 }

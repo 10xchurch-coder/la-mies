@@ -86,7 +86,7 @@ export default function Ausencias() {
   const removeAll = () => {
     const list = [...pending];
     const go = () => list.forEach((r) => mark(r.contact_id, true));
-    const text = tx('Salen de esta lista {n} {pl}. No se borran de la iglesia y no se les manda nada. Quedan abajo, en "Ya atendidos", por si querés volver atrás.', { n: list.length, pl: list.length === 1 ? 'persona' : 'personas' });
+    const text = tx('Salen de esta lista {n} {pl}. No se borran de la iglesia y no se les manda nada. Quedan abajo, en "Ya atendidos", por si querés volver atrás.', { n: list.length, pl: list.length === 1 ? tx('persona') : tx('personas') });
     if (Platform.OS === 'web') { if (typeof window !== 'undefined' && window.confirm(text)) go(); return; }
     Alert.alert(tx('¿Quitar a todos de esta lista?'), text, [{ text: tx('Cancelar'), style: 'cancel' }, { text: tx('Quitar a todos'), style: 'destructive', onPress: go }]);
   };

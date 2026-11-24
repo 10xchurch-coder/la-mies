@@ -1,6 +1,7 @@
 // Bosquejo de la prédica: del texto pegado (título, puntos y citas) salen las partes para armar diapositivas.
 // Solo lógica: sin pantalla ni base, para poder probarse sola.
 import { bookName, chaptersIn } from './bible';
+import { EN_BOOKS } from './bibleStudyData';
 import { BOOKS } from './biblePlan';
 
 /** Una cita ya entendida. `to` null = hasta el final del capítulo. */
@@ -31,6 +32,9 @@ const ABBR: string[][] = [
 const NAMES = new Map<string, number>();
 BOOKS.forEach((b, i) => NAMES.set(plain(b[0]), i));
 ABBR.forEach((list, i) => list.forEach((a) => { if (!NAMES.has(a)) NAMES.set(a, i); }));
+// También los nombres en inglés ("John 3:16"), por si el bosquejo se escribe con la app en inglés. Los de castellano mandan.
+EN_BOOKS.forEach((name, i) => { if (!NAMES.has(plain(name))) NAMES.set(plain(name), i); });
+if (!NAMES.has('psalm')) NAMES.set('psalm', 18);
 const FULL = BOOKS.map((b) => plain(b[0]));
 
 const ORDINAL: Record<string, string> = {

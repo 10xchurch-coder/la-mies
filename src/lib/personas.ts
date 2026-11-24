@@ -21,7 +21,7 @@ export function lessonNames(saved: readonly (string | null | undefined)[] | null
 /** Las lecciones de la clase de miembros: las de la iglesia o las de siempre. */
 export function memberLessons(saved: readonly (string | null | undefined)[] | null | undefined): string[] {
   const own = (saved ?? []).map((s) => (s ?? '').trim()).filter(Boolean);
-  return own.length ? own.slice(0, MAX_LESSONS) : DEFAULT_MEMBER_LESSONS;
+  return own.length ? own.slice(0, MAX_LESSONS) : DEFAULT_MEMBER_LESSONS.map((s) => tx(s));
 }
 
 /** Lo que se escribió en la pantalla de lecciones, listo para guardar. Devuelve el problema si hay uno. */
@@ -73,7 +73,7 @@ export function isStale(lastMet: string | null | undefined, startedOn: string | 
 /** "hoy", "ayer", "hace 5 días". */
 export function agoText(days: number | null): string {
   if (days === null) return tx('todavía no');
-  if (days === 0) return 'hoy';
+  if (days === 0) return tx('hoy');
   if (days === 1) return tx('ayer');
   return tx('hace {days} días', { days });
 }

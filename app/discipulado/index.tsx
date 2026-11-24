@@ -35,7 +35,7 @@ export default function Discipulado() {
 
   const total = data?.total ?? 0;
   const names = lessonNames(cfg?.disc_lessons, total);
-  const course = cfg?.disc_course_name?.trim() || DEFAULT_COURSE;
+  const course = cfg?.disc_course_name?.trim() || tx(DEFAULT_COURSE);
   const groups = useMemo(() => {
     const rows = (data?.rows ?? []).filter((r) => r.active);
     const done = rows.filter((r) => lessonProgress(r.lessons, total).complete);

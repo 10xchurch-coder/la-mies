@@ -222,7 +222,7 @@ export default function Panel() {
                       {num('contacts', m.contacts)}
                       {num('presentations', m.presentations)}
                       {num('promises', m.promises)}
-                      <Text style={[styles.td, { textAlign: 'right', color: m.last_session && fmtRelativeDay(m.last_session) === 'hoy' ? colors.greenText : colors.muted }]}>{m.last_session ? fmtRelativeDay(m.last_session) : '—'}</Text>
+                      <Text style={[styles.td, { textAlign: 'right', color: m.last_session && fmtRelativeDay(m.last_session) === tx('hoy') ? colors.greenText : colors.muted }]}>{m.last_session ? fmtRelativeDay(m.last_session) : '—'}</Text>
                     </View>
                     {open && open.user === m.user_id ? <View style={{ paddingHorizontal: 8, paddingBottom: 10 }}>{list(open.metric, m.user_id)}</View> : null}
                   </View>

@@ -1,6 +1,6 @@
 // Misioneros: los meses del informe y cómo se ordenan. Sin nada de la base ni de la pantalla para poder probarse sola.
 
-import { txList } from './i18n';
+import { tx, txList } from './i18n';
 const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 
 /** "2026-11-01" -> "noviembre de 2026". Si no es una fecha, devuelve lo mismo que le dieron. */
@@ -8,7 +8,7 @@ export function monthLabel(month: string): string {
   const m = /^(\d{4})-(\d{2})/.exec(month);
   if (!m) return month;
   const i = Number(m[2]) - 1;
-  return i >= 0 && i < 12 ? `${MONTHS[i]} de ${m[1]}` : month;
+  return i >= 0 && i < 12 ? tx('{month} de {y}', { month: MONTHS[i], y: m[1] }) : month;
 }
 
 /** Primer día del mes de una fecha: "2026-11-19" -> "2026-11-01". */

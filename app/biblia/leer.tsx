@@ -192,7 +192,7 @@ export default function LeerBiblia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: look.bg }}>
-      <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={second ? `${version.short} y ${second.short}` : version.name} back
+      <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={second ? tx('{a} y {b}', { a: version.short, b: second.short }) : version.name} back
         right={<View style={{ flexDirection: 'row', gap: 8 }}>
           {speakAvailable ? headBtn(speaking >= 0 ? 'square' : 'volume-2', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, speaking >= 0) : null}
           {headBtn('more-horizontal', tx('Letra, fondo, tamaño y comparar dos versiones'), () => setMenu(true))}
@@ -292,7 +292,7 @@ export default function LeerBiblia() {
           <Button title={tx('Anterior')} icon="chevron-left" variant="outline" disabled={!prev} onPress={() => prev && open(prev)} style={{ flex: 1 }} />
           <Button title={tx('Siguiente')} icon="chevron-right" disabled={!next} onPress={goNext} style={{ flex: 1 }} />
         </View>
-        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{version.notice}{second ? `\n${second.notice}` : ''}</Text>
+        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{tx(version.notice)}{second ? `\n${tx(second.notice)}` : ''}</Text>
       </ScrollView>
 
       {picked.length ? (

@@ -6,7 +6,7 @@ Fecha: 24 de noviembre de 2026. Reemplaza la nota anterior (que era solo la cuen
 
 En Ajustes hay una opción **Idioma / Language** (Español / English). Al tocarla, toda la app cambia en el momento, sin cerrarla. También hay un botoncito para cambiar de idioma en Entrar y en Crear cuenta. El idioma queda guardado en el teléfono.
 
-**Ojo: falta un paso que hace el encargado.** En la rama `feat/ingles` está todo lo necesario (el ayudante, la lista de textos en inglés y el programa que prepara las pantallas), pero las pantallas todavía no fueron tocadas, para no chocar con el trabajo de los demás. Cuando las otras ramas estén unidas, se corre un programa y recién ahí la app queda en los dos idiomas. Los pasos están más abajo.
+**Estado (24 de noviembre de 2026, segunda pasada):** el programa ya se corrió en `main` y todas las pantallas pasan por el traductor. En la rama `feat/ingles2` se tradujeron los textos de las pantallas nuevas (hoy son 5.115 textos, todos con inglés), se arreglaron a mano los casos anotados más abajo y se miró la app en inglés a lo ancho de un teléfono.
 
 ## Cómo funciona
 
@@ -137,7 +137,7 @@ Las pantallas no se tocan: ya están envueltas.
 4. **El contenido:** devocionales, capacitación, crecimiento, planes de lectura (las lecturas dicen "Génesis 1–4"), lecciones, anuncios y todo lo que escribe la gente.
 5. **La página pública de la iglesia y las tiendas** (App Store, Google Play), y las páginas de privacidad.
 6. **Las hojas para imprimir armadas como página web** (el resumen de ofrendas del año) y los nombres de las columnas de la copia de datos.
-7. **Parte de lo anotado en `docs/INGLES-revisar.txt`** (97 renglones). Lo que seguro queda en castellano: "hoy" en algunas fechas, "Tarjeta" como forma de pago en las ofrendas, "Cancelar" en dos menús, la fuerza de la contraseña ("débil") y algunos errores de permisos de ubicación. Las listas que figuran ahí (motivos de denuncia, "¿Cómo nos conociste?", tipos de chip, grupos de funciones) en general **sí** se traducen al mostrarse; están anotadas para que alguien lo confirme mirando la pantalla.
+7. **Parte de lo anotado en `docs/INGLES-revisar.txt`** (90 renglones; casi todos son valores que está bien no tocar). Lo que seguro queda en castellano: los nombres de los lugares guardados de "Ubicación en familia" que ya están en la base, los días cortos ("sáb 24/10") en las diapositivas de anuncios, "sí/no" dentro de la copia de datos, la planilla modelo para importar (los títulos van en castellano, que es lo que la app reconoce seguro) y los títulos de los planes de lectura. Las listas que figuran ahí (motivos de denuncia, "¿Cómo nos conociste?", tipos de chip, grupos de funciones) en general **sí** se traducen al mostrarse; están anotadas para que alguien lo confirme mirando la pantalla.
 8. **Lo que se guarda con nombre por defecto** (por ejemplo "Culto del domingo" al crear una lista, o los mensajes de WhatsApp de seguimiento): quien usa la app en inglés los crea en inglés; lo ya guardado no cambia.
 9. La voz que lee la Biblia sigue la versión de la Biblia, no el idioma de la app.
 
@@ -147,9 +147,36 @@ Las pantallas no se tocan: ya están envueltas.
 |---|---|---|
 | Lo que baja la web al abrir (los dos archivos de arranque) | 7.636.286 bytes (2.235.028 comprimido) | 7.660.573 bytes (2.239.680 comprimido): **+0,3 %** |
 | Lista en inglés (se baja solo si alguien elige inglés) | — | 310.978 bytes (104.196 comprimido) |
-| Textos distintos | — | 4.513 (24.502 palabras), **todos con inglés** |
-| Lugares envueltos | — | 6.378 en 265 archivos |
-| Para revisar a mano | — | 97 renglones |
+| Textos distintos | — | 5.115 (29.342 palabras), **todos con inglés** |
+| Lugares envueltos | — | unos 7.200 |
+| Para revisar a mano | — | 90 renglones |
+
+## Segunda pasada: lo que se arregló a mano y lo que hay que saber
+
+**Errores de verdad que tenía el cambio automático (ya arreglados):**
+
+- **El menú de opciones en iPhone** (`src/components/ActionSheet.tsx`) sacaba el botón "Cancelar" comparando el texto. En inglés el texto era "Cancel", no lo encontraba, y el botón salía dos veces. Ahora compara con los dos.
+- **Importar personas** (`src/lib/importSmart.ts`): el valor "no miembro" de una planilla había quedado envuelto. Se le sacó.
+- **Tablas que quedaban fijas en el idioma en que se abrió la app**: formas de dar la ofrenda, parentescos, países de "Empezar", y las opciones de columnas de los dos importadores. Ahora leen el texto cada vez.
+
+**Regla nueva del programa:** los textos dentro de `['a', 'b'].includes(x)` y de `new Set([...])` ya no se envuelven.
+
+**Lo que el programa no puede ver (hay que mirarlo a mano en cada pantalla nueva):**
+
+1. Un texto envuelto en una pantalla y comparado **en otro archivo** (como el "Cancelar" de arriba).
+2. Una tabla armada fuera de una función **copiando** etiquetas de otra (`OPCIONES = TABLA.map((x) => ({ label: x.label }))`). Hay que escribir `get label() { return x.label; }`.
+3. Frases armadas solo con palabritas cortas (`${dia} de ${mes}`, `${a} y ${b}`): no las toma. Se envuelven a mano (ya se hizo con las 8 que había).
+
+**Ajustes nuevos en `scripts/i18n-config.json`:**
+
+- `identityLists`: archivos donde las listas sueltas son valores para comparar (títulos de planilla, abreviaturas de libros). Ni se tocan ni se anotan.
+- `extraKeys`: textos que se traducen con `tx(variable)` y que el programa no puede adivinar (por ejemplo "débil", "fuerte", "buena" de la contraseña). Sin esto, `--limpiar` los borraría de `en.json`.
+
+**Cambiar de idioma sin perder lo escrito:** sin sesión (Entrar, Crear cuenta, Empezar) el cambio de idioma ya no vuelve a armar la app; esas tres pantallas se redibujan solas (`useLang()`), y lo escrito queda. Con sesión sigue como antes (se vuelve a armar todo, como con el modo oscuro).
+
+**Lo que se revisó de las pantallas nuevas:** ubicación en familia, alta de iglesias e importadores (los títulos de las columnas se reconocen igual en los dos idiomas), demostración (el aviso se sigue reconociendo por su texto en castellano, que es el que manda la base), presentación y bosquejo (los libros en castellano se entienden con la app en inglés, y ahora también "John 3:16"), personas, comparar Biblias y palabras originales. Hay pruebas nuevas en `tests/i18n.test.ts` para todo esto.
+
+**A lo ancho de un teléfono, en inglés:** se abrieron 54 pantallas en los dos idiomas buscando textos cortados o que se salen. No hay ninguno cortado; los botones del menú ocupan dos renglones igual que en castellano. Se acortó el texto del buscador del inicio.
 
 ## Riesgos (para el que lo aplica)
 

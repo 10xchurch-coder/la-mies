@@ -1,24 +1,20 @@
 Textos que el programa scripts/i18n-codemod.mjs NO tocó porque no está seguro. Hay que mirarlos a mano.
 Si un texto de acá se ve en pantalla, se puede envolver a mano con tx(...) donde se muestra.
 
-   39  lista de textos fuera de una función (¿se muestran o son valores?)
    34  el tipo es una lista cerrada de valores
-   33  ese texto se compara en algún archivo (===, case, includes o una expresión regular)
-   31  texto fuera de una función (se crea una sola vez al abrir la app)
-    7  palabra suelta en minúscula (¿texto o clave?)
+   30  texto fuera de una función (se crea una sola vez al abrir la app)
+    8  ese texto se compara en algún archivo (===, case, includes o una expresión regular)
+    7  lista de textos fuera de una función (¿se muestran o son valores?)
+    5  palabra suelta en minúscula (¿texto o clave?)
     4  en otro lado se busca "…" con startsWith/includes
     2  va a la base: no se tocó
 
-app/ausencias.tsx:89  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  persona
-app/ausencias.tsx:89  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  personas
 app/capacitacion/index.tsx:40  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
 app/chips.tsx:21  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tarjeta | Llavero | Pulsera
 app/chips.tsx:31  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
-app/evento/plan.tsx:103  [palabra suelta en minúscula (¿texto o clave?)]  inscripción
-app/familia-ubicacion.tsx:24  [texto fuera de una función (se crea una sola vez al abrir la app)]  Familia
-app/familia-ubicacion.tsx:24  [texto fuera de una función (se crea una sola vez al abrir la app)]  Pastor
-app/familia-ubicacion.tsx:24  [texto fuera de una función (se crea una sola vez al abrir la app)]  Elegido por vos
-app/familia-ubicacion.tsx:157  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  No pudimos saber dónde estás. Revisá el permiso de ubicación, o tocá el lugar en el mapa.
+app/familia-ubicacion.tsx:25  [texto fuera de una función (se crea una sola vez al abrir la app)]  Familia
+app/familia-ubicacion.tsx:25  [texto fuera de una función (se crea una sola vez al abrir la app)]  Pastor
+app/familia-ubicacion.tsx:25  [texto fuera de una función (se crea una sola vez al abrir la app)]  Elegido por vos
 app/fidelidad.tsx:21  [texto fuera de una función (se crea una sola vez al abrir la app)]  Contactados
 app/fidelidad.tsx:21  [texto fuera de una función (se crea una sola vez al abrir la app)]  marcados en la calle o cargados
 app/fidelidad.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Vinieron a la iglesia
@@ -31,35 +27,23 @@ app/fidelidad.tsx:26  [texto fuera de una función (se crea una sola vez al abri
 app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  Salen a evangelizar
 app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  usan la app para salir
 app/fidelidad.tsx:28  [texto fuera de una función (se crea una sola vez al abrir la app)]  Sirven en un ministerio
-app/finanzas/[id].tsx:18  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
-app/finanzas/[id].tsx:18  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Otro
 app/mensajes/[id].tsx:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  Es ofensivo o me falta el respeto | Me incomoda o me asusta | Pide plata o es un engaño | Otra cosa
 app/presentar/index.tsx:729  [palabra suelta en minúscula (¿texto o clave?)]  mié
 app/presentar/index.tsx:729  [palabra suelta en minúscula (¿texto o clave?)]  sáb
-app/presentar/index.tsx:739  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
 app/seguridad.tsx:46  [va a la base: no se tocó]  La Mies …
-src/components/ActionSheet.tsx:22  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Cancelar
 src/components/BaptismCertificate.tsx:17  [texto fuera de una función (se crea una sola vez al abrir la app)]  Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó de los muertos por la gloria del Padre, así también nos
 src/components/BibleWordsSheet.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0.
 src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
 src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
-src/components/PhotoCropper.tsx:120  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Cancelar
-src/lib/alta.ts:222  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
-src/lib/api.ts:178  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  No tenés permiso para borrar a esta persona.
 src/lib/api.ts:1210  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
 src/lib/bible.ts:32  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
 src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
-src/lib/busTask.ts:80  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para mostrar el colectivo.
-src/lib/busTask.ts:82  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Sin el permiso de ubicación "todo el tiempo", el colectivo solo se ve con la app abierta.
-src/lib/chatLive.ts:56  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para mandar dónde estás.
 src/lib/churchSetup.ts:99  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tu iglesia | Reuniones | Clases | Funciones | Código para los hermanos
 src/lib/demoCore.ts:7  [texto fuera de una función (se crea una sola vez al abrir la app)]  Es una demostración
 src/lib/demoCore.ts:8  [en otro lado se busca "Esto es una demostración" con startsWith/includes]  Esto es una demostración: acá no se guardan cambios.
 src/lib/demoCore.ts:9  [en otro lado se busca "Esto es una demostración" con startsWith/includes]  Esto es una demostración: acá no se guardan cambios. Podés seguir mirando todo.
 src/lib/demoCore.ts:14  [texto fuera de una función (se crea una sola vez al abrir la app)]  Quiero La Mies para mi iglesia
-src/lib/famLocTask.ts:178  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Sin el permiso de ubicación no se puede compartir.
-src/lib/famLocTask.ts:180  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Falta el permiso de ubicación. Lo podés dar en los Ajustes del teléfono.
 src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hija
 src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hijo
 src/lib/features.ts:27  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
@@ -100,27 +84,6 @@ src/lib/features.ts:134  [lista de textos fuera de una función (¿se muestran o
 src/lib/files.ts:325  [texto fuera de una función (se crea una sola vez al abrir la app)]  La foto
 src/lib/files.ts:326  [texto fuera de una función (se crea una sola vez al abrir la app)]  El video
 src/lib/files.ts:327  [texto fuera de una función (se crea una sola vez al abrir la app)]  El audio
-src/lib/format.ts:42  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
-src/lib/format.ts:104  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  domingo
-src/lib/giving.ts:8  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Tarjeta
-src/lib/giving.ts:8  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Otro
-src/lib/giving.ts:11  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Otro
-src/lib/importSmart.ts:24  [lista de textos fuera de una función (¿se muestran o son valores?)]  nombre y apellido | apellido y nombre | nombre completo | nombres y apellidos | apellidos y nombres | full name
-src/lib/importSmart.ts:25  [lista de textos fuera de una función (¿se muestran o son valores?)]  last name
-src/lib/importSmart.ts:26  [lista de textos fuera de una función (¿se muestran o son valores?)]  first name
-src/lib/importSmart.ts:27  [lista de textos fuera de una función (¿se muestran o son valores?)]  nro de celular | numero de telefono
-src/lib/importSmart.ts:28  [lista de textos fuera de una función (¿se muestran o son valores?)]  e mail | correo electronico
-src/lib/importSmart.ts:31  [lista de textos fuera de una función (¿se muestran o son valores?)]  fecha de nacimiento | fecha nac | f nac | fec nac | date of birth
-src/lib/importSmart.ts:32  [lista de textos fuera de una función (¿se muestran o son valores?)]  fecha de bautismo | fecha bautismo | baptism date | baptized on
-src/lib/importSmart.ts:34  [lista de textos fuera de una función (¿se muestran o son valores?)]  es miembro
-src/lib/importSmart.ts:35  [lista de textos fuera de una función (¿se muestran o son valores?)]  grupo familiar
-src/lib/importSmart.ts:37  [lista de textos fuera de una función (¿se muestran o son valores?)]  estado civil | marital status
-src/lib/importSmart.ts:289  [lista de textos fuera de una función (¿se muestran o son valores?)]  Nombre | Apellido | Celular | Correo | Dirección | Barrio
-src/lib/importSmart.ts:291  [lista de textos fuera de una función (¿se muestran o son valores?)]  Marcela | Quiroga | Av. Los Lapachos 123 | Centro | Sí | Sí
-src/lib/importSmart.ts:292  [lista de textos fuera de una función (¿se muestran o son valores?)]  Rubén | Benítez | Av. Los Lapachos 123 | Centro | Sí | Sí
-src/lib/importSmart.ts:293  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tobías | Benítez | Av. Los Lapachos 123 | Centro | Quiroga Benítez
-src/lib/importSmart.ts:294  [lista de textos fuera de una función (¿se muestran o son valores?)]  Elvira | Sosa | Calle 8 casi 15 | San Jorge | Sí | Sí
-src/lib/importSmart.ts:295  [lista de textos fuera de una función (¿se muestran o son valores?)]  Nahuel | Acosta | Itaembé Miní
 src/lib/menuPref.ts:15  [texto fuera de una función (se crea una sola vez al abrir la app)]  Favoritos
 src/lib/moderation.ts:9  [lista de textos fuera de una función (¿se muestran o son valores?)]  Ofensivo o irrespetuoso | Contenido inapropiado | Información privada de otra persona | Spam o engaño | Otro motivo
 src/lib/nfc.ts:66  [palabra suelta en minúscula (¿texto o clave?)]  vacío
@@ -129,33 +92,10 @@ src/lib/password.ts:53  [texto fuera de una función (se crea una sola vez al ab
 src/lib/personas.ts:9  [texto fuera de una función (se crea una sola vez al abrir la app)]  Discipulado
 src/lib/personas.ts:11  [lista de textos fuera de una función (¿se muestran o son valores?)]  La salvación y el bautismo | Qué es la iglesia | Lo que creemos | Cómo vivimos y servimos
 src/lib/personas.ts:12  [texto fuera de una función (se crea una sola vez al abrir la app)]  Recibido como miembro
-src/lib/personas.ts:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hoy
 src/lib/personas.ts:167  [lista de textos fuera de una función (¿se muestran o son valores?)]  Me invitó un amigo o familiar | Me visitaron en mi casa | Vivo cerca | Por internet o redes | Otro
-src/lib/personasApi.ts:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  No tenés permiso para borrar esto.
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 sam
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 sam
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 rey
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 rey
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 cro
-src/lib/sermonOutline.ts:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 cro
-src/lib/sermonOutline.ts:23  [lista de textos fuera de una función (¿se muestran o son valores?)]  cantar de los cantares
-src/lib/sermonOutline.ts:26  [lista de textos fuera de una función (¿se muestran o son valores?)]  hechos de los apostoles
-src/lib/sermonOutline.ts:26  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 cor
-src/lib/sermonOutline.ts:26  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 cor
-src/lib/sermonOutline.ts:27  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 tes
-src/lib/sermonOutline.ts:27  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 tes
-src/lib/sermonOutline.ts:27  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 tim
-src/lib/sermonOutline.ts:28  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 tim
-src/lib/sermonOutline.ts:28  [lista de textos fuera de una función (¿se muestran o son valores?)]  1 ped
-src/lib/sermonOutline.ts:28  [lista de textos fuera de una función (¿se muestran o son valores?)]  2 ped
-src/lib/sermonOutline.ts:69  [texto fuera de una función (se crea una sola vez al abrir la app)]  A-Za-zÁÉÍÓÚÜÑáéíóúüñ
-src/lib/servicePlan.ts:109  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  domingo
-src/lib/verses.ts:42  [palabra suelta en minúscula (¿texto o clave?)]  versículos
 src/screens/crecimiento.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Evangelismo personal
 src/screens/crecimiento.tsx:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
 src/screens/crecimiento.tsx:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
 src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Toda la iglesia
 src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Solo el pastor
 src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Personas elegidas
-src/store/outing.tsx:165  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Necesitamos el permiso de ubicación para marcar las calles.
-src/store/outing.tsx:169  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Sin el permiso de ubicación en segundo plano no podemos marcar las calles con el teléfono bloqueado.

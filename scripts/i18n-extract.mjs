@@ -6,7 +6,7 @@
 // Explicado en docs/INGLES.md.
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, run } from './i18n-lib.mjs';
+import { CONFIG, ROOT, run } from './i18n-lib.mjs';
 
 const dir = join(ROOT, 'src', 'i18n');
 const enPath = join(dir, 'en.json');
@@ -24,7 +24,8 @@ if (add > 0) {
 }
 
 const { keys, pending } = run({ write: false });
-const all = [...new Set([...keys.keys(), ...pending.keys()])];
+// extraKeys (scripts/i18n-config.json): textos que se traducen con tx(variable) y que el programa no puede adivinar leyendo el código.
+const all = [...new Set([...keys.keys(), ...pending.keys(), ...(CONFIG.extraKeys ?? [])])];
 if (process.argv.includes('--limpiar')) {
   const live = new Set(all);
   let gone = 0;

@@ -15,7 +15,7 @@ import { colors } from '@/theme';
 import type { FinAccount, FinAttachment, FinCategory, FinEntry, FinFund } from '@/types';
 import { tx, txLocale } from '@/lib/i18n';
 
-const METHOD: Record<string, string> = { get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, card: 'Tarjeta', get check() { return tx('Cheque'); }, other: 'Otro' };
+const METHOD: Record<string, string> = { get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, get card() { return tx('Tarjeta'); }, get check() { return tx('Cheque'); }, get other() { return tx('Otro'); } };
 
 export function ReceiptThumb({ a, size = 96 }: { a: FinAttachment; size?: number }) {
   const [url, setUrl] = useState<string | null>(null);

@@ -21,7 +21,7 @@ type ClassDay = { cls: ClassRow; present: string[]; absent: string[]; listTaken:
 
 const DAYS = txList(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']);
 const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
-const longDate = (d: Date) => `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+const longDate = (d: Date) => tx('{day} {d} de {month}', { day: DAYS[d.getDay()], d: d.getDate(), month: MONTHS[d.getMonth()] });
 
 export default function DeskAttendance() {
   const router = useRouter();

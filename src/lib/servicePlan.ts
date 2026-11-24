@@ -106,5 +106,5 @@ export function mainRoles(items: PlanItem[]): { label: string; names: string[] }
 export function titleFor(isoDate: string): string {
   const [y, m, d] = isoDate.split('-').map(Number);
   const dow = new Date(y, (m || 1) - 1, d || 1, 12).getDay();
-  return tx('Culto del {v1}', { v1: ['domingo', tx('lunes'), tx('martes'), tx('miércoles'), tx('jueves'), tx('viernes'), tx('sábado')][dow] });
+  return tx('Culto del {v1}', { v1: [tx('domingo'), tx('lunes'), tx('martes'), tx('miércoles'), tx('jueves'), tx('viernes'), tx('sábado')][dow] });
 }

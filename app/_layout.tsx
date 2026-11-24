@@ -5,7 +5,7 @@ import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
 import '@/lib/busTask'; // y la del colectivo en vivo
 import '@/lib/chatLive'; // y la de la ubicación en tiempo real de los chats
 import '@/lib/famLocTask'; // y la de la ubicación en familia
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
 import { Stack, usePathname, useRouter, useSegments, type Href } from 'expo-router';
@@ -137,10 +137,29 @@ function Gate() {
   );
 }
 
+/**
+ * La clave hace que toda la app se vuelva a dibujar con los colores nuevos al cambiar de modo, y con los textos nuevos al cambiar de idioma.
+ * Sin sesión (Entrar, Crear cuenta, Empezar) el cambio de idioma NO vuelve a armar la app, porque se borraría lo que la persona ya escribió:
+ * esas pantallas se redibujan solas con useLang().
+ */
+function Keyed({ mode }: { mode: string }) {
+  const lang = useLang();
+  const { session } = useAuth();
+  const keyLang = useRef(lang);
+  if (session) keyLang.current = lang;
+  const k = `${mode}-${keyLang.current}`;
+  return (
+    <>
+      <Gate key={k} />
+      <ActionSheetHost key={`sheet-${k}`} />
+      <RulesGate key={`rules-${k}`} />
+    </>
+  );
+}
+
 export default function RootLayout() {
   const [themeReady, setThemeReady] = useState(false);
   const mode = useThemeMode();
-  const lang = useLang();
   useOtaUpdates();
   useEffect(() => startOfflineSync(), []);
   useEffect(() => startNetSync(), []);
@@ -161,10 +180,7 @@ export default function RootLayout() {
         <OutingProvider>
           <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
           <ErrorBoundary>
-            {/* La clave hace que toda la app se vuelva a dibujar con los colores nuevos al cambiar de modo, y con los textos nuevos al cambiar de idioma. */}
-            <Gate key={`${mode}-${lang}`} />
-            <ActionSheetHost key={`sheet-${mode}-${lang}`} />
-            <RulesGate key={`rules-${mode}-${lang}`} />
+            <Keyed mode={mode} />
             <HideOnOutput><OfflineBadge /></HideOnOutput>
           </ErrorBoundary>
         </OutingProvider>

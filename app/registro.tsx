@@ -17,8 +17,10 @@ import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import { LangSwitch } from '@/components/LangChoice';
 import { tx } from '@/lib/i18n';
+import { useLang } from '@/lib/i18nStore';
 
 export default function Registro() {
+  useLang(); // al cambiar de idioma esta pantalla se redibuja sola, sin perder lo escrito
   const router = useRouter();
   const { session, refreshProfile } = useAuth();
   const [name, setName] = useState('');
@@ -74,7 +76,7 @@ export default function Registro() {
       }
       const check = checkPassword(password, [name, email.split('@')[0] ?? '']);
       if (!check.ok) throw new Error(check.problems[0]);
-      if (await leakedCount(password)) throw new Error(LEAKED_MSG);
+      if (await leakedCount(password)) throw new Error(tx(LEAKED_MSG));
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,

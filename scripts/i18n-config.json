@@ -53,5 +53,16 @@
     "app/seguimiento.tsx": {
       "Seguir": "seguimiento"
     }
-  }
+  },
+  "identityLists": [
+    "src/lib/importSmart.ts",
+    "src/lib/sermonOutline.ts"
+  ],
+  "extraKeys": [
+    "débil",
+    "fuerte",
+    "buena",
+    "Reina-Valera 1909 · Dominio público",
+    "King James Version · Dominio público"
+  ]
 }

@@ -14,7 +14,8 @@ export const SMART_LABELS: Record<SmartField, string> = {
   get birthdate() { return tx('Fecha de nacimiento'); }, get sex() { return tx('Sexo'); }, get marital() { return tx('Estado civil'); }, get baptized_on() { return tx('Fecha de bautismo'); },
   get baptized() { return tx('¿Bautizado? (sí o no)'); }, get member() { return tx('¿Miembro? (sí o no)'); }, get family() { return tx('Familia'); }, get skip() { return tx('No usar'); },
 };
-export const SMART_OPTIONS = (Object.keys(SMART_LABELS) as SmartField[]).map((v) => ({ value: v, label: SMART_LABELS[v] }));
+// La etiqueta se lee cada vez (no se copia al abrir la app), así sale en el idioma del momento.
+export const SMART_OPTIONS = (Object.keys(SMART_LABELS) as SmartField[]).map((v) => ({ value: v, get label() { return SMART_LABELS[v]; } }));
 
 export const norm = (s: unknown): string =>
   String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -156,7 +157,7 @@ export const analyzeText = (text: string): ParsedTable => analyzeTable(parseDeli
 export function yesNo(v: unknown): boolean | undefined {
   const n = norm(v);
   if (['si', 's', 'yes', 'y', 'x', '1', 'true', 'verdadero', 'bautizado', 'bautizada', 'miembro', 'activo', 'activa'].includes(n)) return true;
-  if (['no', 'n', '0', 'false', 'falso', 'visita', 'visitante', tx('no miembro'), 'simpatizante'].includes(n)) return false;
+  if (['no', 'n', '0', 'false', 'falso', 'visita', 'visitante', 'no miembro', 'simpatizante'].includes(n)) return false;
   return undefined;
 }
 const sexOf = (v: string) => { const n = norm(v); return ['m', 'masculino', 'hombre', 'varon', 'male', 'h'].includes(n) ? 'm' : ['f', 'femenino', 'mujer', 'female'].includes(n) ? 'f' : undefined; };

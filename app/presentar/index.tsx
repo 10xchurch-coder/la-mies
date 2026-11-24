@@ -736,7 +736,7 @@ function cardsWhen(item: AnnouncementsItem): string {
   const d = new Date(item.loadedAt);
   const today = new Date().toDateString() === d.toDateString();
   const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return tx('Actualizado {v1} a las {time}.', { v1: today ? 'hoy' : `el ${d.getDate()}/${d.getMonth() + 1}`, time });
+  return tx('Actualizado {v1} a las {time}.', { v1: today ? tx('hoy') : tx('el {d}/{m}', { d: d.getDate(), m: d.getMonth() + 1 }), time });
 }
 
 // En la computadora se recuerda en qué diapositiva de la lista se estaba, por si se recarga la página en medio del culto.

@@ -39,7 +39,7 @@ export function countByChild(done: VerseDone[], activeVerseIds?: Iterable<string
 }
 
 /** "3 versículos", "1 versículo". */
-export const versesLabel = (n: number): string => `${n} ${n === 1 ? tx('versículo') : 'versículos'}`;
+export const versesLabel = (n: number): string => `${n} ${n === 1 ? tx('versículo') : tx('versículos')}`;
 
 /** Lo que se le dice al chico (o al maestro) sobre lo que falta. */
 export function progressText(count: number): string {

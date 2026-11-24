@@ -17,11 +17,14 @@ import { refreshChurchExtras } from '@/lib/useChurchExtras';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import { tx } from '@/lib/i18n';
+import { useLang } from '@/lib/i18nStore';
+import { LangSwitch } from '@/components/LangChoice';
 
 const EMPTY: SignupForm = { church: '', city: '', province: '', country: 'AR', pastor: '', email: '', whatsapp: '', size: '' };
-const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.label }));
+const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, get label() { return c.label; } }));
 
 export default function Empezar() {
+  useLang(); // al cambiar de idioma esta pantalla se redibuja sola, sin perder lo escrito
   const router = useRouter();
   const { loading, session, profile, church, refreshProfile } = useAuth();
   const [f, setF] = useState<SignupForm>(EMPTY);
@@ -71,7 +74,7 @@ export default function Empezar() {
       if (session) { await create(f); return; }
       const check = checkPassword(password, [f.pastor, f.email.split('@')[0] ?? '']);
       if (!check.ok) throw new Error(check.problems[0]);
-      if (await leakedCount(password)) throw new Error(LEAKED_MSG);
+      if (await leakedCount(password)) throw new Error(tx(LEAKED_MSG));
       const email = f.email.trim().toLowerCase();
       const draft = cleanDraft(f);
       const { data, error } = await supabase.auth.signUp({
@@ -127,6 +130,7 @@ export default function Empezar() {
             {tx('Llenás esta hoja una sola vez. Después la app te lleva de la mano, paso a paso, hasta dejarla lista para tu iglesia.')}
           </Text>
         </View>
+        {!session ? <LangSwitch /> : null}
 
         <Card style={{ gap: 12 }}>
           <Text style={styles.h2}>{tx('1. Tu iglesia')}</Text>

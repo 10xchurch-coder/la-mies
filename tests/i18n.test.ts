@@ -127,3 +127,45 @@ test('la Biblia según el idioma: King James y nombres en inglés si la persona 
   assert.equal(findBook('Juan'), 42);
   assert.equal(findBook('Psalm'), 18);
 });
+
+// ---------- Con la app en inglés, lo que se compara y lo que se lee de afuera tiene que seguir andando ----------
+import { fieldOfHeader, SMART_OPTIONS, yesNo } from '../src/lib/importSmart';
+import { findRefs, parseOutline, refLabel } from '../src/lib/sermonOutline';
+import { roleLabel } from '../src/lib/families';
+import { METHODS, methodLabel } from '../src/lib/giving';
+import { isDemoError, DEMO_MESSAGE } from '../src/lib/demoCore';
+import { memberLessons } from '../src/lib/personas';
+
+test('en inglés: los títulos y los valores de una planilla se siguen reconociendo', () => {
+  inEnglish(en, () => {
+    for (const [h, f] of [['Nombre', 'name'], ['Apellido', 'lastname'], ['Celular', 'phone'], ['Fecha de nacimiento', 'birthdate'], ['Full Name', 'name'], ['Last name', 'lastname']] as const) assert.equal(fieldOfHeader(h), f, h);
+    assert.equal(yesNo('Sí'), true);
+    assert.equal(yesNo('no miembro'), false, 'el valor "no miembro" de la planilla no se traduce');
+    assert.equal(SMART_OPTIONS.find((o) => o.value === 'lastname')?.label, 'Last name', 'la etiqueta sale en el idioma del momento');
+  });
+  assert.equal(SMART_OPTIONS.find((o) => o.value === 'lastname')?.label, 'Apellido');
+});
+
+test('en inglés: el bosquejo en castellano se sigue entendiendo, y también con libros en inglés', () => {
+  inEnglish(en, () => {
+    const o = parseOutline('El amor de Dios\n1. Dios ama a todos (Juan 3:16)\n1 Juan 4:9-10');
+    assert.equal(o.title, 'El amor de Dios');
+    assert.deepEqual(findRefs('Ro 5:8; 1 Co 13:4').refs.map((r) => [r.book, r.chapter, r.from]), [[44, 5, 8], [45, 13, 4]]);
+    assert.equal(findRefs('Juan 3:16').refs.map(refLabel)[0], 'John 3:16', 'la cita se muestra con el nombre en inglés');
+    assert.equal(findRefs('John 3:16').refs[0]?.book, 42);
+  });
+  assert.equal(findRefs('Juan 3:16').refs.map(refLabel)[0], 'Juan 3:16');
+});
+
+test('en inglés: tablas que antes quedaban fijas en castellano', () => {
+  assert.equal(roleLabel('madre'), 'Mamá');
+  assert.equal(METHODS.find((m) => m.value === 'card')?.label, 'Tarjeta');
+  inEnglish(en, () => {
+    assert.equal(roleLabel('madre'), 'Mom');
+    assert.equal(METHODS.find((m) => m.value === 'card')?.label, 'Card');
+    assert.equal(methodLabel('other'), 'Other');
+    assert.equal(memberLessons(null)[0], 'Salvation and baptism');
+    assert.equal(isDemoError({ message: DEMO_MESSAGE }), true, 'el aviso de la demostración se sigue reconociendo por su texto en castellano');
+  });
+  assert.equal(memberLessons(null)[0], 'La salvación y el bautismo');
+});

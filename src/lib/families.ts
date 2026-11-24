@@ -15,8 +15,8 @@ export const FAMILY_ROLES: { value: FamilyRole; label: string }[] = [
   { value: 'otro', get label() { return tx('Otro familiar'); } },
 ];
 
-const LABEL = new Map(FAMILY_ROLES.map((r) => [r.value, r.label]));
-export const roleLabel = (r: string | null | undefined): string => LABEL.get(r as FamilyRole) ?? tx('Familiar');
+const LABEL = new Map(FAMILY_ROLES.map((r) => [r.value, r]));
+export const roleLabel = (r: string | null | undefined): string => LABEL.get(r as FamilyRole)?.label ?? tx('Familiar');
 
 export const isChildRole = (r: string | null | undefined): boolean => r === 'hijo' || r === 'hija';
 

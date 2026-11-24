@@ -175,9 +175,9 @@ export async function startDevice(): Promise<DeviceMode> {
   if (!user) throw new Error(tx('Tenés que entrar a la app.'));
   const already = await Location.getForegroundPermissionsAsync().catch(() => null);
   const needsBg = canBackground && (await Location.getBackgroundPermissionsAsync().catch(() => null))?.status !== 'granted';
-  if ((already?.status !== 'granted' || needsBg) && !(await disclosure())) throw new Error('Sin el permiso de ubicación no se puede compartir.');
+  if ((already?.status !== 'granted' || needsBg) && !(await disclosure())) throw new Error(tx('Sin el permiso de ubicación no se puede compartir.'));
   const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error('Falta el permiso de ubicación. Lo podés dar en los Ajustes del teléfono.');
+  if (fg.status !== 'granted') throw new Error(tx('Falta el permiso de ubicación. Lo podés dar en los Ajustes del teléfono.'));
   if (needsBg) await Location.requestBackgroundPermissionsAsync().catch(() => undefined);
   await AsyncStorage.setItem(KEY, JSON.stringify({ userId: user }));
   await AsyncStorage.removeItem(LAST);

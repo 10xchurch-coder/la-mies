@@ -77,9 +77,9 @@ function disclosure(): Promise<boolean> {
 export async function startBus(groupId: string, name: string): Promise<void> {
   if (Platform.OS === 'web') throw new Error(tx('El colectivo en vivo se prende desde el teléfono.'));
   const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para mostrar el colectivo.');
+  if (fg.status !== 'granted') throw new Error(tx('Necesitamos el permiso de ubicación para mostrar el colectivo.'));
   const already = await Location.getBackgroundPermissionsAsync();
-  if (already.status !== 'granted' && !(await disclosure())) throw new Error('Sin el permiso de ubicación "todo el tiempo", el colectivo solo se ve con la app abierta.');
+  if (already.status !== 'granted' && !(await disclosure())) throw new Error(tx('Sin el permiso de ubicación "todo el tiempo", el colectivo solo se ve con la app abierta.'));
   if (already.status !== 'granted') await Location.requestBackgroundPermissionsAsync();
   const here = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null);
   const { data, error } = await supabase.rpc('start_bus_run', { p_group: groupId, p_lat: here?.coords.latitude ?? null, p_lng: here?.coords.longitude ?? null });

@@ -19,7 +19,7 @@ const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(
 const dayDiff = (a: Date, b: Date) => Math.round((midnight(a).getTime() - midnight(b).getTime()) / DAY_MS);
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const hhmm = (d: Date) => `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-const dayMonth = (d: Date) => `${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+const dayMonth = (d: Date) => tx('{d} de {month}', { d: d.getDate(), month: MONTHS[d.getMonth()] });
 
 /** "Hoy", "Mañana", "Sábado 28 de noviembre". */
 export function dayWords(d: Date, now: Date): string {
