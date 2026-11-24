@@ -6,6 +6,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Loading } from '@/components/ui';
 import { StudyNotes } from '@/components/StudyNotes';
 import { getMaterial } from '@/lib/api';
+import { materialLink } from '@/lib/culto';
 import { downloadUrl, signedUrl } from '@/lib/files';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -17,9 +18,11 @@ export default function MaterialVer() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile, isStaff } = useAuth();
   const [m, setM] = useState<Material | null | undefined>(undefined);
+  const [link, setLink] = useState<string | null>(null);
 
   useEffect(() => {
     getMaterial(id).then(setM).catch(() => setM(null));
+    materialLink(id).then(setLink).catch(() => undefined);
   }, [id]);
 
   const open = async (download: boolean) => {
@@ -56,6 +59,7 @@ export default function MaterialVer() {
             </View>
           </Card>
         ) : null}
+        {link ? <Button title="Abrir el enlace" icon="external-link" variant="outline" onPress={() => Linking.openURL(link)} /> : null}
         {m.body ? <Text selectable style={{ fontSize: 17, lineHeight: 27, color: colors.text }}>{m.body}</Text> : null}
         <StudyNotes kind="material" refId={String(id)} title={m.title} />
         {isStaff || m.created_by === profile?.id ? (

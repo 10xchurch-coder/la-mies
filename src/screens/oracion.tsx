@@ -2,11 +2,12 @@
 // "Oré" para que la persona sepa que están orando por ella.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Empty, Field, Loading, Tag, Toggle } from '@/components/ui';
-import { addPrayer, deletePrayer, listProfiles, markPrayerAnswered, prayerList, setPrayed } from '@/lib/api';
+import { addPrayer, deletePrayer, listProfiles, prayerList, setPrayed } from '@/lib/api';
+import { markAnswered } from '@/lib/culto';
 import { fmtRelativeDay } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -17,7 +18,12 @@ import { moderate } from '@/lib/moderation';
 const VIS_LABEL = { church: 'Toda la iglesia', pastor: 'Solo el pastor', people: 'Personas elegidas' } as const;
 
 export default function Oracion() {
-  const { profile } = useAuth();
+  const { profile, can } = useAuth();
+  const router = useRouter();
+  // Marcar "Dios respondió": quien hizo el pedido o quien modera, con un testimonio corto si quiere.
+  const [answerFor, setAnswerFor] = useState<string | null>(null);
+  const [testimony, setTestimony] = useState('');
+  const [marking, setMarking] = useState(false);
   const [rows, setRows] = useState<PrayerRow[] | null>(null);
   const [people, setPeople] = useState<Profile[]>([]);
   const [writing, setWriting] = useState(false);
@@ -50,6 +56,19 @@ export default function Oracion() {
       Alert.alert('No se pudo enviar', errorMessage(e));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const answered = async (id: string) => {
+    setMarking(true);
+    try {
+      await markAnswered(id, testimony.trim() || null);
+      setAnswerFor(null); setTestimony('');
+      load();
+    } catch (e) {
+      Alert.alert('No se pudo', errorMessage(e));
+    } finally {
+      setMarking(false);
     }
   };
 
@@ -93,6 +112,7 @@ export default function Oracion() {
         ) : (
           <Button title="Pedir oración" icon="plus" onPress={() => setWriting(true)} />
         )}
+        <Button title="Oraciones respondidas" icon="sun" variant="outline" small onPress={() => router.push('/oraciones-respondidas' as Href)} />
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="heart" title="No hay pedidos" text="Cuando alguien pida oración, aparece acá." /> : null}
         {(rows ?? []).map((r) => (
           <Card key={r.id} style={{ gap: 8, padding: 12 }}>
@@ -109,8 +129,8 @@ export default function Oracion() {
                 <Text style={{ fontSize: 13, fontWeight: '800', color: r.i_prayed ? '#FFF' : colors.greenText }}>{r.i_prayed ? 'Oré' : 'Orar'}{r.prayed ? ` · ${r.prayed}` : ''}</Text>
               </Pressable>
               <View style={{ flex: 1 }} />
-              {r.mine && !r.answered_at ? (
-                <Pressable onPress={() => markPrayerAnswered(r.id, null).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} style={{ padding: 6 }} accessibilityRole="button">
+              {(r.mine || can('com.moderar')) && !r.answered_at && answerFor !== r.id ? (
+                <Pressable onPress={() => { setAnswerFor(r.id); setTestimony(''); }} style={{ padding: 6 }} accessibilityRole="button">
                   <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Dios respondió</Text>
                 </Pressable>
               ) : null}
@@ -125,6 +145,15 @@ export default function Oracion() {
                 </Pressable>
               ) : null}
             </View>
+            {answerFor === r.id ? (
+              <View style={{ gap: 8 }}>
+                <Field label="¿Qué hizo Dios?" hint="(opcional)" value={testimony} onChangeText={setTestimony} multiline maxLength={600} placeholder="Contá en pocas palabras cómo respondió…" />
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button title="Cancelar" variant="ghost" small onPress={() => setAnswerFor(null)} style={{ flex: 1 }} />
+                  <Button title="Dios respondió" icon="check" small onPress={() => answered(r.id)} loading={marking} style={{ flex: 2 }} />
+                </View>
+              </View>
+            ) : null}
           </Card>
         ))}
       </Screen>

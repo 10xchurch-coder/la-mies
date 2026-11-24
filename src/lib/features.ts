@@ -5,7 +5,8 @@
 
 export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
-  | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
+  | 'discipulado'
+  | 'asistencia' | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
   | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
   | 'finanzas' | 'ofrendar' | 'informes';
@@ -28,6 +29,9 @@ export const FEATURES: Feature[] = [
   { key: 'seguimiento', label: 'Seguimiento de visitas', group: 'Evangelismo y visitas',
     hint: 'Mis contactos para seguir y los avisos de a quién escribir o visitar.',
     routes: ['/seguimiento', '/admin/seguimiento'] },
+  { key: 'discipulado', label: 'Discipulado, decisiones y visitas nuevas', group: 'Evangelismo y visitas',
+    hint: 'Quién discipula a quién y por qué lección va, las decisiones, la clase de miembros, el regalo de bienvenida y la tarjeta de visita por QR.',
+    routes: ['/discipulado', '/decisiones', '/bienvenida', '/tarjeta-visita', '/visita', '/clase-miembros'] },
   { key: 'colectivo', label: 'Colectivo y rutas', group: 'Evangelismo y visitas',
     hint: 'Las rutas del colectivo, los pasajeros, las paradas en orden y el colectivo en vivo.',
     routes: ['/colectivo', '/colectivo-vivo', '/colectivo-paradas'] },
@@ -35,6 +39,12 @@ export const FEATURES: Feature[] = [
   { key: 'asistencia', label: 'Asistencia a las reuniones', group: 'Reuniones y enseñanza',
     hint: 'Tomar asistencia (a mano o con el chip de cada uno), quiénes faltaron y la fidelidad de cada uno.',
     routes: ['/asistencia', '/asistencia-chip', '/chips', '/ausencias', '/fidelidad', '/suspender', '/escritorio/asistencia', '/admin/reuniones'] },
+  { key: 'culto', label: 'Orden del culto', group: 'Reuniones y enseñanza',
+    hint: 'Las partes de cada culto en orden y quién se ocupa de cada una, con un aviso el día antes.',
+    routes: ['/culto'] },
+  { key: 'preguntas', label: 'Caja de preguntas', group: 'Reuniones y enseñanza',
+    hint: 'Los hermanos mandan preguntas de la Biblia, con su nombre o sin él, y el pastor las responde.',
+    routes: ['/preguntas'] },
   { key: 'ninos', label: 'Entrada y retiro de los chicos', group: 'Reuniones y enseñanza',
     hint: 'La guardería y las clases de los chicos, con una etiqueta para el chico y otra para el adulto que lo retira.',
     routes: ['/ninos'] },
@@ -65,7 +75,7 @@ export const FEATURES: Feature[] = [
     routes: ['/chat', '/t-chat'] },
   { key: 'oracion', label: 'Pedidos de oración', group: 'Comunidad',
     hint: 'Pedidos de oración y quiénes oran por cada uno.',
-    routes: ['/oracion', '/t-oracion'] },
+    routes: ['/oracion', '/t-oracion', '/oraciones-respondidas'] },
   { key: 'eventos', label: 'Calendario y eventos', group: 'Comunidad',
     hint: 'Los eventos de la iglesia, con inscripción y cómo llegar.',
     routes: ['/eventos', '/t-eventos', '/evento', '/e'] },
@@ -108,7 +118,7 @@ export const FEATURES: Feature[] = [
 
   { key: 'finanzas', label: 'Finanzas de la iglesia', group: 'Dinero e informes',
     hint: 'Ingresos, gastos, fondos y comprobantes. Si tu iglesia lleva las cuentas en otro lado, apagalo.',
-    routes: ['/finanzas'] },
+    routes: ['/finanzas', '/mis-ofrendas'] },
   { key: 'ofrendar', label: 'Ofrendar', group: 'Dinero e informes',
     hint: 'Los datos de la cuenta de la iglesia para dar la ofrenda.',
     routes: ['/dar'] },

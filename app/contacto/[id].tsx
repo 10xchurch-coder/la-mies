@@ -12,6 +12,8 @@ import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/l
 import { showActions } from '@/components/ActionSheet';
 import { Header, Screen } from '@/components/Screen';
 import { FamilyCard } from '@/components/FamilyCard';
+import { VerseBadges } from '@/components/VerseBadges';
+import { PersonasPanel } from '@/components/PersonasPanel';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag, Toggle } from '@/components/ui';
@@ -473,6 +475,7 @@ export default function PersonaDetalle() {
           ) : null}
 
           <FamilyCard key={c.id} contactId={c.id} person={{ name: c.name, sex: c.sex, age: displayAge(c) }} canEdit={canEdit} canSetPickup={can('personas.editar')} />
+          <VerseBadges key={`v-${c.id}`} contactId={c.id} />
 
           {ministries.length ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -558,6 +561,7 @@ export default function PersonaDetalle() {
             />
           ) : null}
 
+          <PersonasPanel c={c} onChanged={load} />
           {isLeader ? <DiscipleshipCard c={c} onSave={(patch) => update(patch)} /> : null}
 
           {/* Punto de partida: quien ya venía antes de usar la app no cuenta como "primera vez" ni como "miembro nuevo". */}
