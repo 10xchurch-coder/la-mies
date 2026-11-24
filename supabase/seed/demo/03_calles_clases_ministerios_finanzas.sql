@@ -37,26 +37,29 @@ insert into public.class_teachers (id, class_id, profile_id, contact_id, is_help
   (demo_id('kt13'), demo_id('k5'), demo_p(8), null, false),
   (demo_id('kt14'), demo_id('k5'), demo_p(10), null, true)
 on conflict (id) do nothing;
-insert into public.materials (id, church_id, series, title, chapter_order, body, class_id, created_by) values
-  (demo_id('mt2-0'), demo_c(), 'Conociendo a Jesús', 'Jesús nació en Belén', 1, 'Lección 1 de "Conociendo a Jesús". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k2'), demo_p(9)),
-  (demo_id('mt2-1'), demo_c(), 'Conociendo a Jesús', 'Jesús calma la tormenta', 2, 'Lección 2 de "Conociendo a Jesús". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k2'), demo_p(9)),
-  (demo_id('mt2-2'), demo_c(), 'Conociendo a Jesús', 'Jesús ama a los niños', 3, 'Lección 3 de "Conociendo a Jesús". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k2'), demo_p(9)),
-  (demo_id('mt2-3'), demo_c(), 'Conociendo a Jesús', 'Jesús vive', 4, 'Lección 4 de "Conociendo a Jesús". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k2'), demo_p(9)),
-  (demo_id('mt3-0'), demo_c(), 'Héroes de la Biblia', 'Noé obedece a Dios', 1, 'Lección 1 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt3-1'), demo_c(), 'Héroes de la Biblia', 'José perdona a sus hermanos', 2, 'Lección 2 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt3-2'), demo_c(), 'Héroes de la Biblia', 'David y el gigante', 3, 'Lección 3 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt3-3'), demo_c(), 'Héroes de la Biblia', 'Daniel ora a Dios', 4, 'Lección 4 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt3-4'), demo_c(), 'Héroes de la Biblia', 'Ester es valiente', 5, 'Lección 5 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt3-5'), demo_c(), 'Héroes de la Biblia', 'Jonás aprende a obedecer', 6, 'Lección 6 de "Héroes de la Biblia". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k3'), demo_p(9)),
-  (demo_id('mt4-0'), demo_c(), 'Los Diez Mandamientos', 'Dios primero', 1, 'Lección 1 de "Los Diez Mandamientos". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k4'), demo_p(9)),
-  (demo_id('mt4-1'), demo_c(), 'Los Diez Mandamientos', 'Honrar a papá y a mamá', 2, 'Lección 2 de "Los Diez Mandamientos". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k4'), demo_p(9)),
-  (demo_id('mt4-2'), demo_c(), 'Los Diez Mandamientos', 'Decir la verdad', 3, 'Lección 3 de "Los Diez Mandamientos". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k4'), demo_p(9)),
-  (demo_id('mt4-3'), demo_c(), 'Los Diez Mandamientos', 'Estar contentos con lo que tenemos', 4, 'Lección 4 de "Los Diez Mandamientos". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k4'), demo_p(9)),
-  (demo_id('mt5-0'), demo_c(), 'Vida cristiana', 'Cómo sé que soy salvo', 1, 'Lección 1 de "Vida cristiana". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k5'), demo_p(9)),
-  (demo_id('mt5-1'), demo_c(), 'Vida cristiana', 'Leer la Biblia cada día', 2, 'Lección 2 de "Vida cristiana". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k5'), demo_p(9)),
-  (demo_id('mt5-2'), demo_c(), 'Vida cristiana', 'Cómo orar', 3, 'Lección 3 de "Vida cristiana". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k5'), demo_p(9)),
-  (demo_id('mt5-3'), demo_c(), 'Vida cristiana', 'Contarles a mis amigos', 4, 'Lección 4 de "Vida cristiana". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k5'), demo_p(9))
-on conflict (id) do nothing;
+insert into public.materials (id, church_id, series, title, chapter_order, body, class_id, created_by)
+select demo_id('mt' || v.k || '-' || (v.o - 1)), demo_c(), v.series, v.title, v.o,
+  'Lección ' || v.o || ' de "' || v.series || '". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k' || v.k), demo_p(9)
+from (values
+  (2, 'Conociendo a Jesús', 'Jesús nació en Belén', 1),
+  (2, 'Conociendo a Jesús', 'Jesús calma la tormenta', 2),
+  (2, 'Conociendo a Jesús', 'Jesús ama a los niños', 3),
+  (2, 'Conociendo a Jesús', 'Jesús vive', 4),
+  (3, 'Héroes de la Biblia', 'Noé obedece a Dios', 1),
+  (3, 'Héroes de la Biblia', 'José perdona a sus hermanos', 2),
+  (3, 'Héroes de la Biblia', 'David y el gigante', 3),
+  (3, 'Héroes de la Biblia', 'Daniel ora a Dios', 4),
+  (3, 'Héroes de la Biblia', 'Ester es valiente', 5),
+  (3, 'Héroes de la Biblia', 'Jonás aprende a obedecer', 6),
+  (4, 'Los Diez Mandamientos', 'Dios primero', 1),
+  (4, 'Los Diez Mandamientos', 'Honrar a papá y a mamá', 2),
+  (4, 'Los Diez Mandamientos', 'Decir la verdad', 3),
+  (4, 'Los Diez Mandamientos', 'Estar contentos con lo que tenemos', 4),
+  (5, 'Vida cristiana', 'Cómo sé que soy salvo', 1),
+  (5, 'Vida cristiana', 'Leer la Biblia cada día', 2),
+  (5, 'Vida cristiana', 'Cómo orar', 3),
+  (5, 'Vida cristiana', 'Contarles a mis amigos', 4)
+) v(k, series, title, o) on conflict (id) do nothing;
 insert into public.memory_verses (id, church_id, class_id, reference, body, position, created_by) values
   (demo_id('mv0'), demo_c(), demo_id('k2'), 'Génesis 1:1', 'En el principio creó Dios los cielos y la tierra.', 0, demo_p(9)),
   (demo_id('mv1'), demo_c(), demo_id('k2'), 'Salmos 56:3', 'En el día que temo, Yo en ti confío.', 1, demo_p(9)),

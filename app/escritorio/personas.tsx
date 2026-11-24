@@ -1,5 +1,6 @@
 // Tabla de personas del escritorio: buscar, filtrar, ordenar, corregir un dato sin salir de la tabla y bajar la lista a Excel.
 import { downloadText } from '@/lib/download';
+import { demoBlocked } from '@/lib/demo';
 import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import { formatPhone, phoneProblem, telDigits } from '@/lib/phone';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -103,6 +104,7 @@ export default function DeskPeople() {
     .map((c) => (c.key === 'group' ? { ...c, label: gw } : c));
 
   const exportCsv = () => {
+    if (demoBlocked('Bajar esta lista')) return;
     const csv = toCsv(
       ['Nombre', 'Estado', gw, 'Familia', 'Teléfono', 'Correo', 'Domicilio', 'Nacimiento', 'Edad', 'Bautizado', 'Miembro desde', 'Última vez que vino', 'Asistencia % (12 semanas)'],
       shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', families.get(c.id)?.name ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,

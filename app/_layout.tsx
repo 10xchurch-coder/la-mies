@@ -1,4 +1,6 @@
 import '@/lib/webAlert'; // en la web, los avisos y confirmaciones se muestran como ventanas
+import { installDemo, wasDemoHere } from '@/lib/demo'; // la iglesia de ejemplo (demostración)
+import { DemoRibbon } from '@/components/DemoRibbon';
 import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
 import '@/lib/busTask'; // y la del colectivo en vivo
 import '@/lib/chatLive'; // y la de la ubicación en tiempo real de los chats
@@ -71,7 +73,9 @@ function useNotificationLinks() {
 
 // Pantallas que se pueden ver sin haber entrado.
 // 'e' = la página pública de un evento: se abre sin cuenta. 'visita' = la tarjeta de visita del QR de la puerta.
-const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita']);
+// 'demo' = la puerta de la iglesia de ejemplo: entra sola con una cuenta que no puede guardar nada.
+const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita', 'demo']);
+installDemo();
 
 /** Sin sesión no se ve nada de la iglesia: siempre a Entrar. Con sesión pero sin iglesia: a unirse.
  *  (Antes, abrir un link directo, por ejemplo al devocional, mostraba la pantalla sin sesión y fallaban los botones.) */
@@ -82,7 +86,8 @@ function useAuthGuard() {
   const first = (segments[0] ?? '') as string;
   useEffect(() => {
     if (loading) return;
-    if (!session && !PUBLIC.has(first)) router.replace('/login');
+    // El que estaba mirando la demostración y se quedó sin sesión vuelve a entrar solo, sin pasar por Entrar.
+    if (!session && !PUBLIC.has(first)) router.replace(wasDemoHere() ? '/demo' : '/login');
     else if (session && profile && !profile.church_id && !PUBLIC.has(first)) router.replace('/registro');
   }, [loading, session, profile, first, router]);
 }
@@ -119,6 +124,7 @@ function Gate() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       {session ? <OutingBanner /> : null}
       {session ? <MemberViewBanner /> : null}
+      {session ? <DemoRibbon /> : null}
       <PhotoCropperHost />
     </LockGate>
   );

@@ -1,6 +1,7 @@
 // Copia de todos los datos: lee cada tabla con los permisos de quien está logueado (nunca con una llave maestra),
 // de a tandas, avisa cómo va, y baja un ZIP con una planilla por tabla.
 import { Platform } from 'react-native';
+import { demoBlocked } from './demo';
 import { supabase } from './supabase';
 import { downloadText } from './download';
 import { backupName, backupPlan, backupReadme, nextRange, rowsToCsv, zipFiles, type BackupResult, type BackupTable } from './backup';
@@ -31,6 +32,7 @@ async function readAll(t: BackupTable, churchId: string, onRows: (n: number) => 
 
 /** Baja un archivo que no es texto (el ZIP). */
 async function downloadBytes(fileName: string, bytes: Uint8Array, mime: string): Promise<void> {
+  if (demoBlocked('Bajar la copia de los datos')) return;
   if (Platform.OS === 'web') {
     const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: mime }));
     const a = document.createElement('a');

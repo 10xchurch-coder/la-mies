@@ -74,9 +74,12 @@ where k.church_id = ${C} on conflict do nothing;
 insert into public.class_teachers (id, class_id, profile_id, contact_id, is_helper) values
 ${teach.map(([k, prof, person, helper], i) => `  (demo_id('kt${i}'), demo_id('k${k}'), ${prof ? P(prof) : 'null'}, ${person ? c(person) : 'null'}, ${helper})`).join(',\n')}
 on conflict (id) do nothing;
-insert into public.materials (id, church_id, series, title, chapter_order, body, class_id, created_by) values
-${lessons.flatMap(([k, series, titles]) => titles.map((t, i) => `  (demo_id('mt${k}-${i}'), ${C}, ${q(series)}, ${q(t)}, ${i + 1}, ${q(`Lección ${i + 1} de "${series}". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.`)}, demo_id('k${k}'), ${P(9)})`)).join(',\n')}
-on conflict (id) do nothing;
+insert into public.materials (id, church_id, series, title, chapter_order, body, class_id, created_by)
+select demo_id('mt' || v.k || '-' || (v.o - 1)), ${C}, v.series, v.title, v.o,
+  'Lección ' || v.o || ' de "' || v.series || '". Contá la historia con tus palabras, hacé dos o tres preguntas y repasen juntos el versículo de memoria.', demo_id('k' || v.k), ${P(9)}
+from (values
+${lessons.flatMap(([k, series, titles]) => titles.map((t, i) => `  (${k}, ${q(series)}, ${q(t)}, ${i + 1})`)).join(',\n')}
+) v(k, series, title, o) on conflict (id) do nothing;
 insert into public.memory_verses (id, church_id, class_id, reference, body, position, created_by) values
 ${verses.map(([k, ref, body], i) => `  (demo_id('mv${i}'), ${C}, demo_id('k${k}'), ${q(ref)}, ${q(body)}, ${i}, ${P(9)})`).join(',\n')}
 on conflict (id) do nothing;
@@ -237,12 +240,12 @@ on conflict do nothing;
     [48, 3, 'church', false, 'Por los misioneros y sus familias.', null, null],
   ];
   const chat = [
-    [0.3, 3, 'Buen día, hermanos. Les recuerdo que el miércoles hay reunión de oración a las 20.'], [0.4, 10, 'Buen día. Ahí estaremos.'],
-    [2.2, 6, 'El colectivo de la Ruta Norte sale 9:10 el domingo. Avisen si alguien más necesita que lo pasemos a buscar.'], [2.3, 2, 'Gracias, Hugo. Nosotros vamos por nuestra cuenta.'],
-    [5.1, 8, 'Hermosa salida la de ayer. Visitamos 24 casas y dos familias prometieron venir.'], [5.2, 1, '¡Gloria a Dios! Gracias a todos los que salieron.'], [5.3, 13, 'Estuve orando por ustedes toda la mañana.'],
-    [9.5, 9, 'Maestros: ya están cargadas las lecciones del mes en la app.'], [9.6, 11, '¡Gracias, Sofía!'],
+    [0.4, 3, 'Buen día, hermanos. Les recuerdo que el miércoles hay reunión de oración a las 20.'], [0.3, 10, 'Buen día. Ahí estaremos.'],
+    [2.3, 6, 'El colectivo de la Ruta Norte sale 9:10 el domingo. Avisen si alguien más necesita que lo pasemos a buscar.'], [2.2, 2, 'Gracias, Hugo. Nosotros vamos por nuestra cuenta.'],
+    [5.3, 8, 'Hermosa salida la de ayer. Visitamos 24 casas y dos familias prometieron venir.'], [5.2, 1, '¡Gloria a Dios! Gracias a todos los que salieron.'], [5.1, 13, 'Estuve orando por ustedes toda la mañana.'],
+    [9.6, 9, 'Maestros: ya están cargadas las lecciones del mes en la app.'], [9.5, 11, '¡Gracias, Sofía!'],
     [13.2, 5, 'Se cumplió la meta de la ofrenda misionera de este mes. Gracias por dar.'],
-    [17.4, 12, '¿Alguien tiene un alargue para prestar el domingo? El nuestro se rompió.'], [17.5, 14, 'Yo llevo uno.'],
+    [17.5, 12, '¿Alguien tiene un alargue para prestar el domingo? El nuestro se rompió.'], [17.4, 14, 'Yo llevo uno.'],
     [21.3, 4, 'No se olviden de orar por los hermanos que están enfermos. La lista está en Oración.'],
     [25.2, 7, 'La Ruta Sur trajo 14 personas hoy. ¡Sigamos invitando!'],
   ];
@@ -419,13 +422,13 @@ on conflict (id) do nothing;
   const devos = [
     ['Mateo 9:37-38', 'Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos. Rogad, pues, al Señor de la mies, que envíe obreros a su mies.', 'Hay mucho por hacer, y Dios quiere usarte.',
       'Jesús miró a la gente y vio una cosecha lista. No vio un problema: vio personas que necesitaban a Dios.\n\nLo primero que pidió no fue salir corriendo. Pidió orar. El que ora por obreros termina siendo uno.',
-      'Pensá en tu cuadra. ¿Cuántos vecinos conocen el evangelio? Jesús dijo: "id, y haced discípulos a todas las naciones" (Mateo 28:19). Empezá por orar por una persona con nombre y apellido, y esta semana contale lo que Cristo hizo por vos.', 'Señor de la mies, mandá obreros. Y empezá conmigo. Amén.'],
+      'Pensá en tu cuadra. ¿Cuántos vecinos conocen el evangelio? Jesús dijo: "Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del Padre, y del Hijo, y del Espíritu Santo" (Mateo 28:19). Empezá por orar por una persona con nombre y apellido, y esta semana contale lo que Cristo hizo por vos.', 'Señor de la mies, mandá obreros. Y empezá conmigo. Amén.'],
     ['Salmos 23:1', 'Jehová es mi pastor; nada me faltará.', 'Si él te cuida, no te va a faltar lo que de verdad necesitás.',
       'Una oveja no se cuida sola. Necesita un pastor que la guíe, la alimente y la defienda.\n\nDavid había sido pastor. Sabía de qué hablaba. Y dijo: el Señor es MI pastor.',
       'No dice "nada voy a querer". Dice "nada me faltará". Dios no promete darte todo lo que pedís, pero sí todo lo que te hace falta. Hoy, cuando aparezca una preocupación, decilo en voz alta: "Jehová es mi pastor".', 'Señor, gracias por cuidarme. Hoy confío en vos. Amén.'],
     ['Filipenses 4:6-7', 'Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias. Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.', 'Cambiá la preocupación por oración.',
       'La preocupación da vueltas en la cabeza y no arregla nada. La oración lleva el problema a quien sí puede.\n\nDios no promete sacarte el problema hoy. Promete darte su paz mientras tanto.',
-      'Fijate en el orden: primero orar, con gracias, y después llega la paz. Hacé una lista corta de lo que hoy te quita el sueño. Contale cada cosa a Dios y dale gracias por algo concreto. "Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros" (1 Pedro 5:7).', 'Padre, te dejo mis cargas. Dame tu paz. Amén.'],
+      'Fijate en el orden: primero orar, con gracias, y después llega la paz. Hacé una lista corta de lo que hoy te quita el sueño. Contale cada cosa a Dios y dale gracias por algo concreto. La Biblia dice: "echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros" (1 Pedro 5:7).', 'Padre, te dejo mis cargas. Dame tu paz. Amén.'],
     ['Juan 3:16', 'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.', 'Dios te amó primero, y lo demostró.',
       'El amor de Dios no fue una palabra: fue un regalo. Dio a su Hijo.\n\n"Todo aquel" te incluye a vos. No hay que ganárselo. Hay que creer.',
       'La salvación es un regalo: "Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios; no por obras, para que nadie se gloríe" (Efesios 2:8-9). Si ya creíste, dale gracias. Y pensá a quién le podés contar este versículo hoy.', 'Gracias, Señor, por amarme así. Ayudame a contarlo. Amén.'],

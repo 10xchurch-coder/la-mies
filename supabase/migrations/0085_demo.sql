@@ -405,7 +405,7 @@ begin
   if public.is_demo_church(p_church) is not true then raise exception 'No es una iglesia de ejemplo'; end if;
   if auth.uid() is not null then raise exception 'Solo el dueño de la base'; end if;
   -- Sin disparadores: no se mandan avisos ni se crean tareas solas mientras se cargan datos de ejemplo.
-  perform set_config('session_replication_role', 'replica', true);
+  set local session_replication_role = replica;
   select pastor_id, member_id into v_pastor, v_member from public.demo_churches where church_id = p_church;
   v_rec := coalesce((select id from public.profiles where church_id = p_church and role::text = 'secretary' order by created_at, id limit 1), v_pastor);
 
@@ -561,7 +561,7 @@ begin
   where s.church_id = p_church and (s.started_at at time zone v_tz)::date between p_from and p_to
   on conflict (contact_id, went_on) do nothing;
 
-  perform set_config('session_replication_role', 'origin', true);
+  set local session_replication_role = origin;
   return v_out;
 end $$;
 revoke all on function public.demo_fill(uuid, date, date) from public, anon, authenticated;
@@ -574,7 +574,7 @@ declare v_tz constant text := 'America/Argentina/Buenos_Aires';
 begin
   if public.is_demo_church(p_church) is not true then raise exception 'No es una iglesia de ejemplo'; end if;
   if auth.uid() is not null then raise exception 'Solo el dueño de la base'; end if;
-  perform set_config('session_replication_role', 'replica', true);
+  set local session_replication_role = replica;
 
   insert into public.announcements (id, church_id, author_id, title, body, audience, sent_to, created_at)
   select public.demo_id('an' || a.id::text), a.church_id, a.author_id, a.title, a.body, a.audience, a.sent_to, a.created_at + interval '56 days'
@@ -631,7 +631,7 @@ begin
   update public.events set public_page = false where church_id = p_church and public_page;
   update public.churches set join_code = null where id = p_church and join_code is not null;
 
-  perform set_config('session_replication_role', 'origin', true);
+  set local session_replication_role = origin;
 end $$;
 revoke all on function public.demo_echo(uuid, date) from public, anon, authenticated;
 
@@ -650,7 +650,7 @@ begin
     v_sun := v_today - case when extract(dow from v_today)::int = 0 then 7 else extract(dow from v_today)::int end;
     v_week := to_char(v_sun, 'IYYY-IW');
     if public.job_once(d.church_id, 'demo_week', v_week) then
-      perform set_config('session_replication_role', 'replica', true);
+      set local session_replication_role = replica;
       update public.demo_plan set stop_on = null where church_id = d.church_id and stop_on < v_today - 30 and public.demo_h(hk || v_week) < 650;
       update public.demo_plan set stop_on = v_sun - 1 where church_id = d.church_id and stop_on is null
         and hk in (select x.hk from (select distinct hk from public.demo_plan where church_id = d.church_id and stop_on is null and hp >= 740 and hk ~ '^\d+$' and hk::int > 14) x
@@ -671,7 +671,7 @@ begin
       where exists (select 1 from public.contacts where id = public.demo_id(v_key)) on conflict do nothing;
       update public.follow_up_tasks set done_at = due_at + interval '1 day', done_by = assigned_to
         where church_id = d.church_id and done_at is null and kind = 'call' and due_at < now() - interval '9 days' and public.demo_h(id::text) < 700;
-      perform set_config('session_replication_role', 'origin', true);
+      set local session_replication_role = origin;
     end if;
     v_from := greatest(least(coalesce((select max(attended_on) + 1 from public.attendances where church_id = d.church_id), v_today - 10), v_today - 10), v_today - 90);
     v_out := v_out || jsonb_build_object(d.church_id::text, public.demo_fill(d.church_id, v_from, v_today - 1));

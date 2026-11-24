@@ -153,18 +153,18 @@ insert into public.suggestions (id, church_id, user_id, body, anonymous, status,
   (demo_id('sg2'), demo_c(), null, 'Que el culto de la noche empiece puntual, por favor.', true, 'new', null, now() - interval '3 days')
 on conflict (id) do nothing;
 insert into public.church_chat_messages (id, church_id, user_id, body, created_at, kind) values
-  (demo_id('ch0'), demo_c(), demo_p(3), 'Buen día, hermanos. Les recuerdo que el miércoles hay reunión de oración a las 20.', now() - interval '7 hours', 'text'),
-  (demo_id('ch1'), demo_c(), demo_p(10), 'Buen día. Ahí estaremos.', now() - interval '10 hours', 'text'),
-  (demo_id('ch2'), demo_c(), demo_p(6), 'El colectivo de la Ruta Norte sale 9:10 el domingo. Avisen si alguien más necesita que lo pasemos a buscar.', now() - interval '53 hours', 'text'),
-  (demo_id('ch3'), demo_c(), demo_p(2), 'Gracias, Hugo. Nosotros vamos por nuestra cuenta.', now() - interval '55 hours', 'text'),
-  (demo_id('ch4'), demo_c(), demo_p(8), 'Hermosa salida la de ayer. Visitamos 24 casas y dos familias prometieron venir.', now() - interval '122 hours', 'text'),
+  (demo_id('ch0'), demo_c(), demo_p(3), 'Buen día, hermanos. Les recuerdo que el miércoles hay reunión de oración a las 20.', now() - interval '10 hours', 'text'),
+  (demo_id('ch1'), demo_c(), demo_p(10), 'Buen día. Ahí estaremos.', now() - interval '7 hours', 'text'),
+  (demo_id('ch2'), demo_c(), demo_p(6), 'El colectivo de la Ruta Norte sale 9:10 el domingo. Avisen si alguien más necesita que lo pasemos a buscar.', now() - interval '55 hours', 'text'),
+  (demo_id('ch3'), demo_c(), demo_p(2), 'Gracias, Hugo. Nosotros vamos por nuestra cuenta.', now() - interval '53 hours', 'text'),
+  (demo_id('ch4'), demo_c(), demo_p(8), 'Hermosa salida la de ayer. Visitamos 24 casas y dos familias prometieron venir.', now() - interval '127 hours', 'text'),
   (demo_id('ch5'), demo_c(), demo_p(1), '¡Gloria a Dios! Gracias a todos los que salieron.', now() - interval '125 hours', 'text'),
-  (demo_id('ch6'), demo_c(), demo_p(13), 'Estuve orando por ustedes toda la mañana.', now() - interval '127 hours', 'text'),
-  (demo_id('ch7'), demo_c(), demo_p(9), 'Maestros: ya están cargadas las lecciones del mes en la app.', now() - interval '228 hours', 'text'),
-  (demo_id('ch8'), demo_c(), demo_p(11), '¡Gracias, Sofía!', now() - interval '230 hours', 'text'),
+  (demo_id('ch6'), demo_c(), demo_p(13), 'Estuve orando por ustedes toda la mañana.', now() - interval '122 hours', 'text'),
+  (demo_id('ch7'), demo_c(), demo_p(9), 'Maestros: ya están cargadas las lecciones del mes en la app.', now() - interval '230 hours', 'text'),
+  (demo_id('ch8'), demo_c(), demo_p(11), '¡Gracias, Sofía!', now() - interval '228 hours', 'text'),
   (demo_id('ch9'), demo_c(), demo_p(5), 'Se cumplió la meta de la ofrenda misionera de este mes. Gracias por dar.', now() - interval '317 hours', 'text'),
-  (demo_id('ch10'), demo_c(), demo_p(12), '¿Alguien tiene un alargue para prestar el domingo? El nuestro se rompió.', now() - interval '418 hours', 'text'),
-  (demo_id('ch11'), demo_c(), demo_p(14), 'Yo llevo uno.', now() - interval '420 hours', 'text'),
+  (demo_id('ch10'), demo_c(), demo_p(12), '¿Alguien tiene un alargue para prestar el domingo? El nuestro se rompió.', now() - interval '420 hours', 'text'),
+  (demo_id('ch11'), demo_c(), demo_p(14), 'Yo llevo uno.', now() - interval '418 hours', 'text'),
   (demo_id('ch12'), demo_c(), demo_p(4), 'No se olviden de orar por los hermanos que están enfermos. La lista está en Oración.', now() - interval '511 hours', 'text'),
   (demo_id('ch13'), demo_c(), demo_p(7), 'La Ruta Sur trajo 14 personas hoy. ¡Sigamos invitando!', now() - interval '605 hours', 'text')
 on conflict (id) do nothing;
