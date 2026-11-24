@@ -3,11 +3,12 @@
 // Igual que la King James: todo se pide con import(), así en la web se baja recién cuando hace falta.
 // Este archivo se arma solo (la lista de libros); no tiene lógica. Para leer los datos, ver bibleOrig.ts.
 
-/** Un libro: "w" formas separadas por espacio, "l" el lema de cada forma, "c" capítulos -> versículos (ver bibleOrig.ts). */
-export type OrigBookRaw = { w: string; l: string; c: string[][] };
-/** Tabla de lemas de un idioma: campos separados por tabulador, en el mismo orden. */
-export type OrigLexRaw = { s: string; w: string; t: string; g: string; b: string };
-export type OrigDefsRaw = Record<string, string>;
+/** Un libro: "k" sus letras, "w" formas separadas por espacio, "l" el lema de cada forma, "c" un texto por capítulo (ver bibleOrig.ts). */
+export type OrigBookRaw = { k: string; w: string; l: string; c: string[] };
+/** Tabla de lemas de un idioma: "k" letras; los demás, campos separados por tabulador, en el mismo orden. */
+export type OrigLexRaw = { k: string; s: string; w: string; t: string; g: string; b: string };
+/** Definiciones: "k" letras, "d" el texto de cada número. */
+export type OrigDefsRaw = { k: string; d: Record<string, string> };
 
 type Mod<T> = { default: T } | T;
 const pick = <T,>(m: Mod<T>): T => ((m as { default?: T }).default ?? (m as T));

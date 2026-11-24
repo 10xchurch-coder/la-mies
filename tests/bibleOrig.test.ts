@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { chapterText, ensureBook, versionOf } from '../src/lib/bible';
 import {
   buildBook, buildLex, decodeNums, defChunk, definition, encodeNum, ensureDefinition, ensureOrig, ensureStrong, hasDefinitions, origLang, origReady,
-  parseStrong, strongBase, strongBooks, strongInBook, strongInfo, strongLabel, strongSenses, strongVerses, verseWords,
+  parseStrong, strongBase, unpackText, unpackWord, strongBooks, strongInBook, strongInfo, strongLabel, strongSenses, strongVerses, verseWords,
 } from '../src/lib/bibleOrig';
 import { BOOKS } from '../src/lib/biblePlan';
 import { BIBLE_SOURCES } from '../src/lib/bibleSources';
@@ -58,14 +58,23 @@ test('los números de Strong se escriben y se entienden de varias formas', () =>
 });
 
 test('un libro y una tabla de lemas chicos, armados a mano', () => {
-  const lex = buildLex({ s: 'H0001G\tH0002\tH0001H', w: 'a\tb\tc', t: 'ta\ttb\ttc', g: 'father\tson\tchief', b: `${encodeNum(0)}${encodeNum(65)}\t${encodeNum(1)}\t${encodeNum(2)}` });
+  // "ñ" es la letra 0 de la tabla: en los textos va como "`" y su lugar.
+  assert.equal(unpackText('ñé', `a\`${encodeNum(0)}o \`${encodeNum(1)}!`), 'año é!');
+  assert.equal(unpackText('ñ', 'sin nada raro'), 'sin nada raro');
+  assert.equal(unpackText('', ''), '');
+  assert.equal(unpackWord('abc', [2, 0, 1].map(encodeNum).join('')), 'cab');
+  const lex = buildLex({ k: 'ñ', s: 'H0001G\tH0002\tH0001H', w: `a\`${encodeNum(0)}\tb\tc`, t: 'ta\ttb\ttc', g: 'father\tson\tchief', b: `${encodeNum(0)}${encodeNum(65)}\t${encodeNum(1)}\t${encodeNum(2)}` });
   assert.deepEqual(lex.books, [[0, 65], [1], [2]]);
   assert.deepEqual(lex.byBase.get('H0001'), [0, 2]);
   assert.equal(lex.at.get('H0002'), 1);
-  const book = buildBook({ w: 'uno dos tres', l: [0, 1, 2].map(encodeNum).join(''), c: [[[2, 0].map(encodeNum).join(''), '']] });
-  assert.deepEqual(book.forms, ['uno', 'dos', 'tres']);
+  assert.equal(lex.lemma[0], 'añ');
+  const w = (t: string) => [...t].map((ch) => encodeNum('unodstre'.indexOf(ch))).join('');
+  const book = buildBook({ k: 'unodstre', w: `${w('uno')} ${w('dos')} ${w('tres')}`, l: [0, 1, 2].map(encodeNum).join(''), c: [`${[2, 0].map(encodeNum).join('')} `, ''] });
+  assert.deepEqual(book.forms.map((f) => unpackWord(book.table, f)), ['uno', 'dos', 'tres']);
   assert.deepEqual(book.lemmaOf, [0, 1, 2]);
-  assert.deepEqual(buildBook({ w: '', l: '', c: [] }).forms, []);
+  // Capítulo 1: dos versículos (el segundo sin palabras). Capítulo 2: vacío.
+  assert.deepEqual(book.chapters, [[[2, 0].map(encodeNum).join(''), ''], []]);
+  assert.deepEqual(buildBook({ k: '', w: '', l: '', c: [] }).forms, []);
 });
 
 test('antes de pedirlas no hay palabras; después, Génesis 1:1 y Juan 3:16 están enteros y en orden', async () => {
@@ -188,14 +197,18 @@ test('la definición está solo para el griego y se pide de a tandas', async () 
 test('lo que se incluye respeta el permiso: sin definiciones del hebreo, sin traducciones palabra por palabra, y con el reconocimiento', () => {
   const dir = new URL('../src/data/bible/orig/', import.meta.url);
   const lexH = JSON.parse(readFileSync(new URL('lex-h.json', dir), 'utf8'));
-  assert.deepEqual(Object.keys(lexH).sort(), ['b', 'g', 's', 't', 'w']);
+  assert.deepEqual(Object.keys(lexH).sort(), ['b', 'g', 'k', 's', 't', 'w']);
   const n = lexH.s.split('\t').length;
   for (const k of ['w', 't', 'g', 'b']) assert.equal(lexH[k].split('\t').length, n, k);
   // Las glosas son de una o pocas palabras (no las definiciones de Online Bible, que empiezan con "1) ...").
   assert.ok(!/\d\) /.test(lexH.g));
   assert.ok(lexH.g.split('\t').every((g: string) => g.length < 80));
   const gen = JSON.parse(readFileSync(new URL('00.json', dir), 'utf8'));
-  assert.deepEqual(Object.keys(gen).sort(), ['c', 'l', 'w']);
+  assert.deepEqual(Object.keys(gen).sort(), ['c', 'k', 'l', 'w']);
+  // Todo el libro va en letras comunes salvo la lista de letras: así ocupa la mitad dentro de la app del teléfono.
+  assert.ok(/^[\x20-\x7e]*$/.test(gen.w) && gen.c.every((c: string) => /^[\x20-\x7e]*$/.test(c)));
+  const defs = JSON.parse(readFileSync(new URL('def-g-00.json', dir), 'utf8'));
+  assert.ok(Object.values(defs.d as Record<string, string>).every((d) => /^[\x0a\x20-\x7e]*$/.test(d)));
   const src = BIBLE_SOURCES.find((s) => /Palabras originales/.test(s.title));
   assert.ok(src);
   assert.match(src.licence, /CC BY 4\.0/);

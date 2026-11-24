@@ -130,10 +130,12 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 }}>
                     <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted, width: 18, textAlign: 'center' }}>{i + 1}</Text>
                     <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: 22, lineHeight: 32, color: colors.text, textAlign: 'left' }}>{w.word}</Text>
-                      <Text style={{ fontSize: 13, color: colors.muted }} numberOfLines={1}>
-                        {w.lemma !== w.word ? `${w.lemma} · ` : ''}<Text style={{ fontStyle: 'italic' }}>{w.translit}</Text>
-                      </Text>
+                      <Text style={{ fontSize: 22, lineHeight: 32, color: colors.text, textAlign: 'left', writingDirection: 'ltr' }}>{w.word}</Text>
+                      {/* En dos textos separados: si van juntos, el hebreo (que se escribe de derecha a izquierda) da vuelta el renglón. */}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        {w.lemma !== w.word ? <Text style={{ fontSize: 15, color: colors.muted }}>{w.lemma}</Text> : null}
+                        <Text style={{ fontSize: 13, fontStyle: 'italic', color: colors.muted }}>{w.translit}</Text>
+                      </View>
                       <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{w.gloss}</Text>
                     </View>
                     <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -156,10 +158,15 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
         ) : (
           <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 18, gap: 12, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
             <View style={{ gap: 2 }}>
-              <Text style={{ fontSize: 30, lineHeight: 44, color: colors.text }}>{info?.lemma || open.lemma}</Text>
+              <Text style={{ fontSize: 30, lineHeight: 44, color: colors.text, textAlign: 'left', writingDirection: 'ltr' }}>{info?.lemma || open.lemma}</Text>
               <Text style={{ fontSize: 15, fontStyle: 'italic', color: colors.muted }}>{info?.translit || open.translit}</Text>
               <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 4 }}>{info?.gloss || open.gloss}</Text>
-              {open.word !== (info?.lemma || open.lemma) ? <Text style={{ fontSize: 13, color: colors.muted, marginTop: 2 }}>En el versículo está escrita así: <Text style={{ fontSize: 17, color: colors.text }}>{open.word}</Text></Text> : null}
+              {open.word !== (info?.lemma || open.lemma) ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
+                  <Text style={{ fontSize: 13, color: colors.muted }}>En el versículo está escrita así:</Text>
+                  <Text style={{ fontSize: 17, color: colors.text }}>{open.word}</Text>
+                </View>
+              ) : null}
             </View>
             {senses.length > 1 ? (
               <View style={{ gap: 3 }}>

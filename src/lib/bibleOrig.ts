@@ -7,6 +7,8 @@ import { BOOKS } from './biblePlan';
 import { OT_COUNT } from './bible';
 import { ORIG_DEF_CHUNKS, fetchOrigBook, fetchOrigDefs, fetchOrigLex, type OrigBookRaw, type OrigDefsRaw, type OrigLexRaw } from './bibleOrigData';
 
+// Cómo están guardados los datos (para que ocupen poco dentro de la app) lo explica scripts/bible-import-strongs.py.
+
 export type OrigLang = 'H' | 'G';
 /** El idioma original de un libro: hebreo (con algo de arameo) hasta Malaquías, griego desde Mateo. */
 export const origLang = (book: number): OrigLang => (book < OT_COUNT ? 'H' : 'G');
@@ -40,6 +42,35 @@ export function encodeNum(n: number): string {
   return out;
 }
 
+/**
+ * Una palabra hebrea o griega guardada con letras comunes: cada letra es su lugar (en base 45) dentro de `table`,
+ * la lista de letras del archivo. Así ocupa la mitad dentro de la app del teléfono.
+ */
+export function unpackWord(table: string, packed: string): string {
+  let out = '';
+  for (const i of decodeNums(packed)) out += table.charAt(i);
+  return out;
+}
+/** Un texto casi todo en letras comunes: donde hay un "`" sigue el lugar (en base 45) de una letra de `table`. */
+export function unpackText(table: string, packed: string): string {
+  if ((packed ?? '').indexOf('`') < 0) return packed ?? '';
+  let out = '';
+  let i = 0;
+  while (i < packed.length) {
+    const ch = packed[i++];
+    if (ch !== '`') { out += ch; continue; }
+    let n = 0;
+    while (i < packed.length) {
+      const c = packed.charCodeAt(i++);
+      const d = c - 35 - (c > 92 ? 1 : 0);
+      if (c < 35 || c > 126 || c === 92 || d >= 90) break;
+      if (d >= 45) n = n * 45 + (d - 45);
+      else { out += table.charAt(n * 45 + d); break; }
+    }
+  }
+  return out;
+}
+
 // ---------- Números de Strong ----------
 
 /** El número sin la letra que agrega STEPBible para separar sentidos: "H7225G" -> "H7225". */
@@ -67,18 +98,18 @@ type Lex = {
   /** Los lemas de cada número sin letra. */
   byBase: Map<string, number[]>;
 };
-type Book = { forms: string[]; lemmaOf: number[]; chapters: string[][] };
+type Book = { table: string; /** Las formas, todavía guardadas (ver unpackWord). */ forms: string[]; lemmaOf: number[]; /** Cada capítulo: sus versículos. */ chapters: string[][] };
 
 const lexes: Partial<Record<OrigLang, Lex>> = {};
 const books: (Book | undefined)[] = [];
-const defs: (OrigDefsRaw | undefined)[] = [];
+const defs: (Record<string, string> | undefined)[] = [];
 
 /** Arma la tabla de lemas a partir del archivo. Se exporta para probarla sola. */
 export function buildLex(raw: OrigLexRaw): Lex {
   const strong = raw.s.split('\t');
-  const lemma = raw.w.split('\t');
-  const translit = raw.t.split('\t');
-  const gloss = raw.g.split('\t');
+  const lemma = unpackText(raw.k, raw.w).split('\t');
+  const translit = unpackText(raw.k, raw.t).split('\t');
+  const gloss = unpackText(raw.k, raw.g).split('\t');
   const bk = raw.b.split('\t').map((s) => decodeNums(s));
   const at = new Map<string, number>();
   const byBase = new Map<string, number[]>();
@@ -92,7 +123,7 @@ export function buildLex(raw: OrigLexRaw): Lex {
 }
 /** Arma un libro a partir del archivo. Se exporta para probarlo solo. */
 export function buildBook(raw: OrigBookRaw): Book {
-  return { forms: raw.w ? raw.w.split(' ') : [], lemmaOf: decodeNums(raw.l), chapters: raw.c };
+  return { table: raw.k ?? '', forms: raw.w ? raw.w.split(' ') : [], lemmaOf: decodeNums(raw.l), chapters: (raw.c ?? []).map((ch) => (ch ? ch.split(' ') : [])) };
 }
 
 const validBook = (book: number) => Number.isInteger(book) && book >= 0 && book < BOOKS.length;
@@ -144,7 +175,7 @@ export function verseWords(book: number, chapter: number, verse: number): OrigWo
   for (const f of decodeNums(packed)) {
     const li = b.lemmaOf[f];
     if (b.forms[f] == null || li == null || lex.strong[li] == null) continue;
-    out.push({ word: b.forms[f], strong: lex.strong[li], label: strongLabel(lex.strong[li]), lemma: lex.lemma[li] ?? '', translit: lex.translit[li] ?? '', gloss: lex.gloss[li] ?? '' });
+    out.push({ word: unpackWord(b.table, b.forms[f]), strong: lex.strong[li], label: strongLabel(lex.strong[li]), lemma: lex.lemma[li] ?? '', translit: lex.translit[li] ?? '', gloss: lex.gloss[li] ?? '' });
   }
   return out;
 }
@@ -250,7 +281,12 @@ export async function ensureDefinition(strong: string): Promise<void> {
   if (!hasDefinitions(strong)) return;
   const k = defChunk(strong);
   if (defs[k]) return;
-  try { defs[k] = await fetchOrigDefs(k); } catch { /* sin conexión */ }
+  try {
+    const raw: OrigDefsRaw = await fetchOrigDefs(k);
+    const out: Record<string, string> = {};
+    for (const s of Object.keys(raw.d ?? {})) out[s] = unpackText(raw.k, raw.d[s]);
+    defs[k] = out;
+  } catch { /* sin conexión */ }
 }
 /** La definición del léxico (en inglés). '' si no hay, si es hebreo o si falta ensureDefinition. */
 export function definition(strong: string): string {

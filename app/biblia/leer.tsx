@@ -252,7 +252,7 @@ export default function LeerBiblia() {
               );
               return (
                 <View key={n} style={twoCols
-                  ? { flexDirection: 'row', gap: 14, marginBottom: Math.round(fs * 0.45) }
+                  ? { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: Math.round(fs * 0.45) }
                   : { marginBottom: Math.round(fs * 0.6), paddingBottom: Math.round(fs * 0.45), borderBottomWidth: 1, borderBottomColor: look.line }}>
                   {cellA}
                   {cellB}

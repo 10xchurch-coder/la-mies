@@ -26,12 +26,17 @@ Cambios que se le hacen al dato (la licencia pide anotarlos):
 - De la definición griega se quitan las marcas de formato (<b>, <i>, <ref>); el texto queda entero.
 La numeración de versículos que queda es la de la King James. El programa avisa dónde no coincide con la KJV de la app.
 
-Formato de salida (ver src/lib/bibleOrig.ts, que lo lee):
-- NN.json por libro: {"w": formas separadas por espacio, "l": lema de cada forma (números pegados), "c": capítulos -> versículos,
-  cada versículo un texto con el número de forma de cada palabra}. Los números van en base 45 (ver enc()).
-- lex-h.json y lex-g.json: tabla de lemas del hebreo y del griego: {"s": números, "w": formas, "t": pronunciación, "g": glosa,
-  "b": en qué libros aparece cada uno}. Campos separados por tabulador, en el mismo orden.
-- def-g-N.json: definiciones del griego, de a 500 números de Strong: {"G0026": "texto"}.
+Formato de salida (ver src/lib/bibleOrig.ts, que lo lee). Está pensado para ocupar poco dentro de la app del teléfono,
+donde un texto con una sola letra hebrea o griega ocupa el doble: por eso casi todo se guarda con letras comunes (ASCII).
+- Los números van en base 45 (ver enc()): los chicos ocupan una letra.
+- NN.json por libro: {"k": las letras hebreas o griegas que usa el libro, de la más usada a la menos usada,
+  "w": las formas separadas por espacio, cada letra escrita como su lugar en "k" (ver pack_word()),
+  "l": el lema de cada forma (números pegados), "c": un texto por capítulo, con los versículos separados por espacio;
+  cada versículo es el número de forma de cada palabra}.
+- lex-h.json y lex-g.json: tabla de lemas del hebreo y del griego: {"k": letras, "s": números, "w": formas de diccionario,
+  "t": pronunciación, "g": glosa, "b": en qué libros aparece cada uno}. Campos separados por tabulador, en el mismo orden.
+  En "w", "t" y "g" las letras que no son ASCII van como "`" + su lugar en "k" (ver pack_text()).
+- def-g-N.json: definiciones del griego, de a 500 números de Strong: {"k": letras, "d": {"G0026": texto como en pack_text()}}.
 """
 import collections, glob, json, os, re, sys, unicodedata
 
@@ -55,6 +60,25 @@ def enc(n):
         out.append(ALPHA[45 + n % 45])
         n //= 45
     return ''.join(reversed(out))
+
+MARK = '`'
+
+def table_of(texts, ascii_too):
+    """Las letras que hay que guardar aparte, de la más usada a la menos usada."""
+    freq = collections.Counter()
+    for t in texts:
+        for ch in t:
+            if ascii_too or ord(ch) > 126 or ord(ch) < 32 or ch == MARK: freq[ch] += 1
+    for ch in freq: assert ord(ch) < 0x10000, ch
+    return ''.join(ch for ch, _ in freq.most_common())
+
+def pack_word(word, pos):
+    """Una palabra hebrea o griega: cada letra es su lugar en la tabla, en base 45. Queda todo en ASCII, sin espacios."""
+    return ''.join(enc(pos[ch]) for ch in word)
+
+def pack_text(text, pos):
+    """Un texto casi todo en ASCII: las letras de la tabla van como "`" + su lugar. Lo demás queda igual."""
+    return ''.join(MARK + enc(pos[ch]) if ch in pos else ch for ch in text)
 
 ROW = re.compile(r'^([1-3A-Z][A-Za-z0-9]{2})\.(\d+)\.(\d+)(?:([\(\[\{])(\d+)\.(\d+)[\)\]\}])?#(\d+)=(\S+)$')
 STRONG = re.compile(r'^[HG]\d{4,5}[A-Za-z]?$')
@@ -161,11 +185,14 @@ def main():
         lidx = {s: i for i, s in enumerate(lemmas)}
         rows = [lex[lang](s) or ('', '', '', '') for s in lemmas]
         for r in rows: assert not any('\t' in x for x in r[:3])
+        k = table_of([x for r in rows for x in r[:3]], False)
+        pos = {ch: i for i, ch in enumerate(k)}
         table = {
+            'k': k,
             's': '\t'.join(lemmas),
-            'w': '\t'.join(r[0] for r in rows),
-            't': '\t'.join(r[1] for r in rows),
-            'g': '\t'.join(r[2] for r in rows),
+            'w': '\t'.join(pack_text(r[0], pos) for r in rows),
+            't': '\t'.join(pack_text(r[1], pos) for r in rows),
+            'g': '\t'.join(pack_text(r[2], pos) for r in rows),
             'b': '\t'.join(''.join(enc(b) for b in sorted(where[s])) for s in lemmas),
         }
         with open(os.path.join(out, f'lex-{lang.lower()}.json'), 'w', encoding='utf-8') as f:
@@ -176,8 +203,10 @@ def main():
                 d = clean_def(r[3])
                 if d: chunks[min(int(s[1:5 if len(re.sub(r'[A-Za-z]$', '', s)) == 5 else 6]) // 500, 12)][s] = d
             for k in range(13):
+                dk = table_of(chunks.get(k, {}).values(), False)
+                dpos = {ch: i for i, ch in enumerate(dk)}
                 with open(os.path.join(out, f'def-g-{k:02d}.json'), 'w', encoding='utf-8') as f:
-                    json.dump(chunks.get(k, {}), f, ensure_ascii=False, separators=(',', ':'), sort_keys=True)
+                    json.dump({'k': dk, 'd': {s: pack_text(d, dpos) for s, d in sorted(chunks.get(k, {}).items())}}, f, ensure_ascii=False, separators=(',', ':'))
             report.append(f'G: definiciones {sum(len(c) for c in chunks.values())}')
         for b in books:
             ffreq = collections.Counter(t for toks in tokens[b].values() for t in toks)
@@ -198,7 +227,10 @@ def main():
                         report.append(f'OJO {CODES[b]} {c + 1}: {len(ch)} versículos acá, {len(kjv[c])} en la KJV de la app')
                     empty = [v + 1 for v, t in enumerate(ch) if not t and v < len(kjv[c])]
                     if empty: report.append(f'OJO {CODES[b]} {c + 1}: sin palabras en los versículos {empty}')
-            data = {'w': ' '.join(w for w, _ in forms), 'l': ''.join(enc(lidx[s]) for _, s in forms), 'c': chapters}
+            wk = table_of([w for w, _ in forms], True)
+            wpos = {ch: i for i, ch in enumerate(wk)}
+            data = {'k': wk, 'w': ' '.join(pack_word(w, wpos) for w, _ in forms), 'l': ''.join(enc(lidx[s]) for _, s in forms),
+                    'c': [' '.join(ch) for ch in chapters]}
             with open(os.path.join(out, f'{b:02d}.json'), 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, separators=(',', ':'))
     print('palabras', total)
