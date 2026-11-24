@@ -86,12 +86,12 @@ function WebVideo({ slide }: { slide: Extract<LiveSlide, { kind: 'video' }> }) {
   );
 }
 
-function Note({ icon, text, height }: { icon: React.ComponentProps<typeof Feather>['name']; text: string; height: number }) {
-  const fs = Math.max(9, Math.min(22, height * 0.09));
+function Note({ icon, text, height, big }: { icon: React.ComponentProps<typeof Feather>['name']; text: string; height: number; big?: boolean }) {
+  const fs = big ? Math.max(12, Math.min(34, height * 0.045)) : Math.max(9, Math.min(22, height * 0.09));
   return (
     <View style={{ alignItems: 'center', gap: fs * 0.4, paddingHorizontal: 8 }}>
       <Feather name={icon} size={fs * 2} color={SOFT} />
-      <Text style={{ color: SOFT, fontSize: fs, fontWeight: '700', textAlign: 'center' }}>{text}</Text>
+      <Text style={{ color: SOFT, fontSize: fs, lineHeight: fs * 1.4, fontWeight: '700', textAlign: 'center' }}>{text}</Text>
     </View>
   );
 }
@@ -116,7 +116,15 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
   }
   if (s.kind === 'video') {
     if (!output) return <View style={box}><Note icon="film" text={s.playing ? 'Video en pantalla' : 'Video en pausa'} height={height} /></View>;
-    if (Platform.OS !== 'web') return <View style={box}><Note icon="film" text="Los videos se ven desde la computadora. Abrí la pantalla de salida en el navegador." height={height} /></View>;
+    // En la tablet y el teléfono la app todavía no puede reproducir videos: se avisa claro, sin asustar a la iglesia.
+    if (Platform.OS !== 'web') {
+      return (
+        <View style={box}>
+          <Note icon="film" big height={height}
+            text={'Acá va un video.\nEn la tablet o el teléfono todavía no se pueden ver.\nPara mostrarlo, abrí la pantalla de salida en una computadora (en el navegador).'} />
+        </View>
+      );
+    }
     return <View style={box}><WebVideo key={s.url} slide={s} /></View>;
   }
   if (s.kind === 'countdown') {

@@ -2,11 +2,12 @@
 // Solo lógica: sin pantalla ni base, para poder probarse sola.
 import { bookName, chapterText, chaptersIn, findBook, type BibleVersion } from './bible';
 import { lyricBlocks } from './songs';
+import { parseOutline, refLabel } from './sermonOutline';
 
 /** Un archivo que subió la iglesia (foto, video o música) en el depósito "present". */
 export type MediaRef = { path: string; name: string };
 
-export type PresentItemType = 'countdown' | 'song' | 'passage' | 'image' | 'video' | 'music' | 'text' | 'notice';
+export type PresentItemType = 'countdown' | 'song' | 'passage' | 'image' | 'video' | 'music' | 'text' | 'notice' | 'announcements' | 'sermon';
 
 type Base = { id: string; title: string };
 export type CountdownItem = Base & { type: 'countdown'; minutes: number; message: string };
@@ -30,7 +31,31 @@ export type VideoItem = Base & { type: 'video'; media: MediaRef | null };
 export type MusicItem = Base & { type: 'music'; media: MediaRef | null };
 export type TextItem = Base & { type: 'text'; body: string };
 export type NoticeItem = Base & { type: 'notice'; body: string };
-export type PresentItem = CountdownItem | SongItem | PassageItem | ImageItem | VideoItem | MusicItem | TextItem | NoticeItem;
+/** Una diapositiva de anuncio ya armada (título amarillo y detalle). */
+export type NoticeCard = { title: string; body: string };
+/**
+ * Anuncios y próximos eventos de la app, en rueda antes del culto. Las diapositivas se guardan en la lista
+ * (para que anden sin conexión) y se vuelven a traer de la app al abrir la lista o al tocar "Actualizar".
+ */
+export type AnnouncementsItem = Base & {
+  type: 'announcements';
+  /** Segundos por diapositiva. */
+  secs: number;
+  /** Anuncios de los últimos N días. */
+  days: number;
+  /** Eventos de los próximos N días. */
+  ahead: number;
+  anns: boolean;
+  events: boolean;
+  /** Sumar también las reuniones que se repiten todas las semanas. */
+  weekly: boolean;
+  cards: NoticeCard[];
+  /** Cuándo se trajeron de la app (0 = nunca). */
+  loadedAt: number;
+};
+/** La prédica: se pega el bosquejo y salen el título, un punto por diapositiva y los versículos de cada cita. */
+export type SermonItem = Base & { type: 'sermon'; outline: string; version: string; perSlide: number };
+export type PresentItem = CountdownItem | SongItem | PassageItem | ImageItem | VideoItem | MusicItem | TextItem | NoticeItem | AnnouncementsItem | SermonItem;
 
 export const ITEM_TYPES: { type: PresentItemType; label: string; icon: string }[] = [
   { type: 'song', label: 'Canción', icon: 'music' },
@@ -41,6 +66,8 @@ export const ITEM_TYPES: { type: PresentItemType; label: string; icon: string }[
   { type: 'music', label: 'Música', icon: 'headphones' },
   { type: 'text', label: 'Texto libre', icon: 'type' },
   { type: 'notice', label: 'Anuncio', icon: 'volume-2' },
+  { type: 'announcements', label: 'Anuncios de la app', icon: 'bell' },
+  { type: 'sermon', label: 'Prédica (bosquejo)', icon: 'align-left' },
 ];
 export const typeInfo = (t: PresentItemType) => ITEM_TYPES.find((x) => x.type === t) ?? ITEM_TYPES[0];
 
@@ -72,6 +99,8 @@ export function newItem(type: PresentItemType): PresentItem {
     case 'music': return { id, type, title: 'Música', media: null };
     case 'text': return { id, type, title: 'Texto', body: '' };
     case 'notice': return { id, type, title: 'Anuncio', body: '' };
+    case 'announcements': return { id, type, title: 'Anuncios', secs: 10, days: 7, ahead: 14, anns: true, events: true, weekly: false, cards: [], loadedAt: 0 };
+    case 'sermon': return { id, type, title: 'Prédica', outline: '', version: 'rv1909', perSlide: 1 };
   }
 }
 
@@ -79,6 +108,20 @@ function cleanMedia(v: unknown): MediaRef | null {
   const m = v as { path?: unknown; name?: unknown } | null;
   if (!m || typeof m.path !== 'string' || !m.path) return null;
   return { path: m.path.slice(0, 300), name: str(m.name, 120, 'archivo') };
+}
+
+export const MAX_CARDS = 40;
+export function cleanCards(v: unknown): NoticeCard[] {
+  if (!Array.isArray(v)) return [];
+  const out: NoticeCard[] = [];
+  for (const c of v as { title?: unknown; body?: unknown }[]) {
+    if (!c || typeof c !== 'object') continue;
+    const title = str(c.title, 160).trim();
+    const body = str(c.body, 600).trim();
+    if (title || body) out.push({ title, body });
+    if (out.length >= MAX_CARDS) break;
+  }
+  return out;
 }
 
 /** Lo que vuelve de la base, revisado: se tira lo que no se entiende y se acomodan los números. */
@@ -104,6 +147,12 @@ export function cleanItems(raw: unknown): PresentItem[] {
       case 'music': out.push({ id, type: 'music', title, media: cleanMedia(r.media) }); break;
       case 'text': out.push({ id, type: 'text', title, body: str(r.body, 20000) }); break;
       case 'notice': out.push({ id, type: 'notice', title, body: str(r.body, 2000) }); break;
+      case 'announcements': out.push({
+        id, type: 'announcements', title, secs: clamp(Math.round(num(r.secs, 10)), SECS_MIN, SECS_MAX), days: clamp(Math.round(num(r.days, 7)), 1, 60),
+        ahead: clamp(Math.round(num(r.ahead, 14)), 1, 90), anns: r.anns !== false, events: r.events !== false, weekly: r.weekly === true,
+        cards: cleanCards(r.cards), loadedAt: Math.max(0, num(r.loadedAt, 0)),
+      }); break;
+      case 'sermon': out.push({ id, type: 'sermon', title, outline: str(r.outline, 20000), version: str(r.version, 20, 'rv1909'), perSlide: clamp(Math.round(num(r.perSlide, 1)), 1, 4) }); break;
       default: break;
     }
   }
@@ -192,6 +241,32 @@ export function textSlides(body: string): Slide[] {
     .map((text) => ({ kind: 'text' as const, text, label: null, footer: null }));
 }
 
+// ---------- Prédica ----------
+
+/** Tope de versículos por cita en la prédica (un capítulo entero largo no llena la lista de diapositivas). */
+export const SERMON_MAX_VERSES = 40;
+
+/**
+ * El bosquejo en diapositivas: el título, una por punto (los sub-puntos llevan arriba el punto al que pertenecen)
+ * y, después de cada punto, los versículos de sus citas con el texto de la Biblia de la app.
+ */
+export function sermonSlides(outline: string, version: BibleVersion, perSlide = 1): Slide[] {
+  const o = parseOutline(outline);
+  const out: Slide[] = [];
+  if (o.title) out.push({ kind: 'notice', title: o.title, body: '' });
+  for (const p of o.parts) {
+    if (p.kind === 'point') {
+      out.push({ kind: 'text', text: p.text, label: p.parent, footer: p.refs.length ? p.refs.map(refLabel).join(' · ') : null });
+    }
+    for (const r of p.refs) {
+      const total = chapterText(version, r.book, r.chapter).length;
+      const last = Math.min(r.to ?? total, total, r.from + SERMON_MAX_VERSES - 1);
+      out.push(...passageSlides(version, { ...r, to: last }, perSlide));
+    }
+  }
+  return out;
+}
+
 /** Las diapositivas de una parte de la lista. La música no tiene: suena y la pantalla queda como está. */
 export function itemSlides(item: PresentItem, version: BibleVersion): Slide[] {
   switch (item.type) {
@@ -203,6 +278,8 @@ export function itemSlides(item: PresentItem, version: BibleVersion): Slide[] {
     case 'music': return [];
     case 'text': return textSlides(item.body);
     case 'notice': return item.title.trim() || item.body.trim() ? [{ kind: 'notice', title: item.title.trim(), body: item.body.trim() }] : [];
+    case 'announcements': return item.cards.map((c) => ({ kind: 'notice' as const, title: c.title, body: c.body }));
+    case 'sermon': return sermonSlides(item.outline, version, item.perSlide);
   }
 }
 
@@ -210,7 +287,23 @@ export function itemSlides(item: PresentItem, version: BibleVersion): Slide[] {
 export function itemTitle(item: PresentItem): string {
   if (item.type === 'passage') return item.ref.trim() || 'Pasaje bíblico';
   if (item.type === 'countdown') return `Cuenta regresiva · ${item.minutes} min`;
+  if (item.type === 'sermon') return parseOutline(item.outline).title || item.title.trim() || 'Prédica';
   return item.title.trim() || typeInfo(item.type).label;
+}
+
+/** ¿Esta parte pasa sola? Cada cuánto, y si al terminar vuelve a empezar (los anuncios dan vueltas). */
+export function autoOf(item: PresentItem | null | undefined): { ms: number; loop: boolean } | null {
+  if (!item) return null;
+  if (item.type === 'song' && item.auto) return { ms: autoMs(item.secs, item.speed), loop: false };
+  if (item.type === 'announcements') return { ms: autoMs(item.secs, 1), loop: true };
+  return null;
+}
+
+/** La diapositiva que sigue cuando avanza sola. null = queda quieta (la última de una canción, o una sola diapositiva). */
+export function autoNext(total: number, index: number, loop: boolean): number | null {
+  if (total <= 1) return null;
+  if (index + 1 < total) return index + 1;
+  return loop ? 0 : null;
 }
 
 // ---------- Avanzar ----------
@@ -281,6 +374,60 @@ export type LiveSlide =
   /** startedAt cambia cada vez que el video tiene que arrancar de nuevo. */
   | { kind: 'video'; url: string; playing: boolean; startedAt: number };
 
+/** Lo que necesita la vista de escenario (los que cantan y el que predica): qué viene después. */
+export type StageInfo = {
+  /** El texto de la diapositiva que sigue. null si no hay más. */
+  next: string | null;
+  nextLabel: string | null;
+  /** La parte de la lista que está en pantalla ("Sublime gracia"). */
+  item: string;
+  /** Diapositiva número n de total, dentro de esa parte. */
+  n: number;
+  total: number;
+};
+
+/** Una diapositiva en pocas palabras, para la vista de escenario. */
+export function slideWords(s: Slide): { text: string; label: string | null } {
+  switch (s.kind) {
+    case 'text': return { text: s.text, label: s.label ?? s.footer };
+    case 'notice': return { text: [s.title, s.body].filter(Boolean).join('\n'), label: null };
+    case 'countdown': return { text: `Cuenta regresiva · ${s.minutes} min`, label: null };
+    case 'image': return { text: `Foto: ${s.media.name}`, label: null };
+    case 'video': return { text: `Video: ${s.media.name}`, label: null };
+  }
+}
+
+/** Qué está en pantalla y qué sigue, para mandarle a la vista de escenario. */
+export function stageOf(parts: { title: string; slides: Slide[]; loop: boolean }[], pos: Pos): StageInfo | null {
+  const part = parts[pos.item];
+  if (!part || !part.slides[pos.slide]) return null;
+  let nextSlide: Slide | null = null;
+  let nextPart: string | null = null;
+  if (pos.slide + 1 < part.slides.length) nextSlide = part.slides[pos.slide + 1];
+  else if (part.loop && part.slides.length > 1) nextSlide = part.slides[0];
+  else {
+    const np = step(parts.map((p) => p.slides.length), pos, 1);
+    if (np) { nextSlide = parts[np.item].slides[np.slide]; nextPart = parts[np.item].title; }
+  }
+  const w = nextSlide ? slideWords(nextSlide) : null;
+  return {
+    next: w ? w.text.slice(0, 1200) : null,
+    // Si lo que sigue es otra parte de la lista, se avisa cuál.
+    nextLabel: w ? (nextPart ? `Sigue: ${nextPart}`.slice(0, 160) : w.label) : null,
+    item: part.title.slice(0, 160), n: pos.slide + 1, total: part.slides.length,
+  };
+}
+
+function cleanStage(v: unknown): StageInfo | undefined {
+  const g = v as Partial<StageInfo> | null;
+  if (!g || typeof g !== 'object') return undefined;
+  return {
+    next: typeof g.next === 'string' ? g.next.slice(0, 1200) : null,
+    nextLabel: typeof g.nextLabel === 'string' ? g.nextLabel.slice(0, 160) : null,
+    item: str(g.item, 160), n: Math.max(0, Math.round(num(g.n, 0))), total: Math.max(0, Math.round(num(g.total, 0))),
+  };
+}
+
 export type LiveState = {
   v: 1;
   mode: 'slide' | 'black' | 'logo';
@@ -289,6 +436,8 @@ export type LiveState = {
   stamp: string;
   /** Hora del reloj del operador al mandarlo (para acomodar la cuenta regresiva en otro aparato). */
   at: number;
+  /** Para la vista de escenario. Las versiones viejas de la app no lo mandan ni lo miran. */
+  stage?: StageInfo;
 };
 
 export const BLACK: LiveState = { v: 1, mode: 'black', slide: null, stamp: 'inicio', at: 0 };
@@ -312,7 +461,10 @@ export function cleanLive(raw: unknown): LiveState | null {
       || (s.kind === 'video' && typeof s.url === 'string' && /^https:\/\//.test(s.url));
     if (!okSlide) return null;
   }
-  return { v: 1, mode: r.mode, slide: r.mode === 'slide' ? (s as LiveSlide) : null, stamp: r.stamp, at: r.at };
+  const out: LiveState = { v: 1, mode: r.mode, slide: r.mode === 'slide' ? (s as LiveSlide) : null, stamp: r.stamp, at: r.at };
+  const stage = cleanStage(r.stage);
+  if (stage) out.stage = stage;
+  return out;
 }
 
 /** ¿Hay que tomar lo que llegó? Sí si es más nuevo que lo que se está mostrando. */

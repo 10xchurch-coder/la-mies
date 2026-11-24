@@ -1,0 +1,168 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { VERSIONS } from '../src/lib/bible';
+import { autoNext, autoOf, cleanItems, cleanLive, itemSlides, newItem, stageOf, type Slide } from '../src/lib/present';
+import { announcementCards, cleanPlanEntries, dayWords, matchSong, planToItems, whenWords } from '../src/lib/presentExtras';
+
+const rv = VERSIONS[0];
+// Martes 24 de noviembre de 2026, 10 de la mañana (hora del aparato).
+const now = new Date(2026, 10, 24, 10, 0, 0);
+const at = (y: number, m: number, d: number, h = 0, min = 0) => new Date(y, m - 1, d, h, min).toISOString();
+const all = { days: 7, ahead: 14, anns: true, events: true, weekly: false };
+const ev = (title: string, starts_at: string, extra: Partial<{ ends_at: string | null; all_day: boolean; place: string | null; weekly: boolean; yearly: boolean }> = {}) =>
+  ({ title, starts_at, ends_at: null, all_day: false, place: null, weekly: false, yearly: false, ...extra });
+
+test('dayWords y whenWords', () => {
+  assert.equal(dayWords(new Date(2026, 10, 24, 20), now), 'Hoy');
+  assert.equal(dayWords(new Date(2026, 10, 25, 9), now), 'Mañana');
+  assert.equal(dayWords(new Date(2026, 10, 28, 19), now), 'Sábado 28 de noviembre');
+  assert.equal(whenWords(new Date(2026, 10, 28, 19, 30), null, false, now), 'Sábado 28 de noviembre · 19:30 h');
+  assert.equal(whenWords(new Date(2026, 10, 28), null, true, now), 'Sábado 28 de noviembre');
+  assert.equal(whenWords(new Date(2026, 10, 28, 9), new Date(2026, 11, 2, 18), false, now), 'Del 28 de noviembre al 2 de diciembre');
+});
+
+test('anuncios: solo los de toda la iglesia y de los últimos días, el más nuevo primero', () => {
+  const cards = announcementCards([
+    { title: 'Viejo', body: 'x', audience: 'all', created_at: at(2026, 11, 10, 9) },
+    { title: 'Ensayo', body: 'Jueves a las 20', audience: 'all', created_at: at(2026, 11, 20, 9) },
+    { title: 'Solo líderes', body: 'reunión', audience: 'leaders', created_at: at(2026, 11, 23, 9) },
+    { title: 'Ofrenda especial', body: 'El domingo', audience: 'all', created_at: at(2026, 11, 23, 12) },
+    { title: 'De un grupo', body: 'x', audience: 'group', created_at: at(2026, 11, 23, 12) },
+  ], [], all, now);
+  assert.deepEqual(cards, [{ title: 'Ofrenda especial', body: 'El domingo' }, { title: 'Ensayo', body: 'Jueves a las 20' }]);
+  assert.deepEqual(announcementCards([{ title: 'Ensayo', body: 'x', audience: 'all', created_at: at(2026, 11, 20) }], [], { ...all, anns: false }, now), []);
+  // Los textos largos se cortan para que entren en la pantalla.
+  const long = announcementCards([{ title: 'T', body: 'palabra '.repeat(200), audience: 'all', created_at: at(2026, 11, 23) }], [], all, now)[0];
+  assert.ok(long.body.length <= 420 && long.body.endsWith('…'));
+});
+
+test('eventos: los que vienen, por fecha, con día, hora y lugar', () => {
+  const events = [
+    ev('Campamento', at(2026, 12, 4, 8), { ends_at: at(2026, 12, 6, 18), place: 'Quinta del río' }),
+    ev('Cena de matrimonios', at(2026, 11, 28, 21), { place: 'Salón' }),
+    ev('Ya pasó', at(2026, 11, 20, 19)),
+    ev('Muy lejos', at(2027, 1, 20, 19)),
+    ev('Hoy a la noche', at(2026, 11, 24, 20)),
+    ev('Hoy temprano', at(2026, 11, 24, 6)),
+    ev('Reunión de jóvenes', at(2026, 11, 7, 19), { weekly: true }),
+    ev('Aniversario', at(2020, 11, 29, 10), { yearly: true, all_day: true }),
+  ];
+  const cards = announcementCards([], events, all, now);
+  assert.deepEqual(cards, [
+    { title: 'Hoy a la noche', body: 'Hoy · 20:00 h' },
+    { title: 'Cena de matrimonios', body: 'Sábado 28 de noviembre · 21:00 h\nSalón' },
+    { title: 'Aniversario', body: 'Domingo 29 de noviembre' },
+    { title: 'Campamento', body: 'Del 4 de diciembre al 6 de diciembre\nQuinta del río' },
+  ]);
+  // Con las reuniones de todas las semanas: la próxima vez que toca (el 7 fue sábado).
+  const weekly = announcementCards([], events, { ...all, weekly: true }, now);
+  assert.ok(weekly.some((c) => c.title === 'Reunión de jóvenes' && c.body === 'Sábado 28 de noviembre · 19:00 h'));
+  assert.deepEqual(announcementCards([], events, { ...all, events: false }, now), []);
+  // Un evento de varios días que ya empezó sigue saliendo hasta que termina.
+  const going = announcementCards([], [ev('Conferencia', at(2026, 11, 22, 9), { ends_at: at(2026, 11, 25, 22) })], all, now);
+  assert.equal(going.length, 1);
+});
+
+test('la parte "Anuncios de la app": diapositivas, avance solo y vuelta al principio', () => {
+  const it = { ...newItem('announcements'), cards: [{ title: 'A', body: 'uno' }, { title: 'B', body: 'dos' }], secs: 8 };
+  assert.deepEqual(itemSlides(it, rv), [{ kind: 'notice', title: 'A', body: 'uno' }, { kind: 'notice', title: 'B', body: 'dos' }]);
+  assert.deepEqual(autoOf(it), { ms: 8000, loop: true });
+  assert.equal(autoOf({ ...newItem('song') }), null);
+  const song = cleanItems([{ id: 's', type: 'song', title: 'T', lyrics: 'x', auto: true, secs: 10, speed: 2 }])[0];
+  assert.deepEqual(autoOf(song), { ms: 5000, loop: false });
+  assert.equal(autoOf(newItem('text')), null);
+  // Los anuncios vuelven a empezar; la canción se queda en la última.
+  assert.equal(autoNext(3, 0, true), 1);
+  assert.equal(autoNext(3, 2, true), 0);
+  assert.equal(autoNext(3, 2, false), null);
+  assert.equal(autoNext(1, 0, true), null);
+  assert.equal(autoNext(0, -1, true), null);
+});
+
+test('cleanItems entiende las partes nuevas y acomoda sus números', () => {
+  const items = cleanItems([
+    { id: 'a', type: 'announcements', title: 'Anuncios', secs: 1, days: 500, ahead: 0, cards: [{ title: 'Hola', body: 'x' }, { title: '', body: '' }, 'roto'], loadedAt: 5 },
+    { id: 'p', type: 'sermon', title: 'Prédica', outline: 'Título\nJuan 3:16', perSlide: 9 },
+  ]);
+  const a = items[0];
+  assert.ok(a.type === 'announcements' && a.secs === 2 && a.days === 60 && a.ahead === 1 && a.anns && a.events && !a.weekly && a.cards.length === 1 && a.loadedAt === 5);
+  assert.ok(items[1].type === 'sermon' && items[1].perSlide === 4 && items[1].version === 'rv1909');
+});
+
+test('vista de escenario: qué sigue', () => {
+  const t = (text: string, label: string | null = null): Slide => ({ kind: 'text', text, label, footer: null });
+  const parts = [
+    { title: 'Canción uno', slides: [t('a'), t('b', 'Coro')], loop: false },
+    { title: 'Música', slides: [], loop: false },
+    { title: 'Anuncios', slides: [{ kind: 'notice', title: 'Cena', body: 'Sábado' } as Slide, { kind: 'notice', title: 'Campamento', body: '' } as Slide], loop: true },
+    { title: 'Juan 3:16', slides: [{ kind: 'text', text: 'Porque de tal manera', label: null, footer: 'Juan 3:16 (RV1909)' } as Slide], loop: false },
+  ];
+  assert.deepEqual(stageOf(parts, { item: 0, slide: 0 }), { next: 'b', nextLabel: 'Coro', item: 'Canción uno', n: 1, total: 2 });
+  // Al final de una parte, sigue la primera de la próxima que tenga diapositivas, y se avisa cuál es.
+  assert.deepEqual(stageOf(parts, { item: 0, slide: 1 }), { next: 'Cena\nSábado', nextLabel: 'Sigue: Anuncios', item: 'Canción uno', n: 2, total: 2 });
+  // Los anuncios dan vueltas: después del último viene el primero.
+  assert.equal(stageOf(parts, { item: 2, slide: 1 })!.next, 'Cena\nSábado');
+  assert.deepEqual(stageOf(parts, { item: 3, slide: 0 }), { next: null, nextLabel: null, item: 'Juan 3:16', n: 1, total: 1 });
+  assert.equal(stageOf(parts, { item: 1, slide: 0 }), null);
+  assert.equal(stageOf(parts, { item: 9, slide: 0 }), null);
+});
+
+test('cleanLive deja pasar lo de la vista de escenario, revisado', () => {
+  const base = { v: 1, mode: 'slide', slide: { kind: 'text', text: 'Hola', label: null, footer: null }, stamp: 'a', at: 100 };
+  assert.equal(cleanLive(base)!.stage, undefined);
+  const s = cleanLive({ ...base, stage: { next: 'x'.repeat(5000), nextLabel: 7, item: 'Canción', n: 2.4, total: 3 } })!.stage!;
+  assert.equal(s.next!.length, 1200);
+  assert.deepEqual([s.nextLabel, s.item, s.n, s.total], [null, 'Canción', 2, 3]);
+  assert.deepEqual(cleanLive({ v: 1, mode: 'black', slide: null, stamp: 'b', at: 1, stage: { next: null, item: 'X', n: 1, total: 1 } })!.stage, { next: null, nextLabel: null, item: 'X', n: 1, total: 1 });
+});
+
+test('orden del culto: se revisa lo que viene de la base', () => {
+  assert.deepEqual(cleanPlanEntries('nada'), []);
+  const e = cleanPlanEntries([
+    { kind: 'cancion', title: ' Sublime gracia ', song_id: 's1' },
+    { kind: 'lectura', ref: 'Salmo 23' },
+    null, 'texto', {},
+    { kind: 'ofrenda' },
+    { title: 'Bienvenida', who: 'Hermano de la puerta' },
+  ]);
+  assert.deepEqual(e.map((x) => x.kind), ['cancion', 'lectura', 'ofrenda', 'otro']);
+  assert.deepEqual(e[0], { kind: 'cancion', title: 'Sublime gracia', song_id: 's1', ref: '', who: '' });
+});
+
+test('orden del culto: canciones del Cancionero, lecturas y lo demás', () => {
+  const songs = [
+    { id: 's1', title: 'Sublime gracia', lyrics: 'Sublime gracia del Señor\nque a un infeliz salvó' },
+    { id: 's2', title: 'Cuán grande es Él', lyrics: 'Señor mi Dios' },
+    { id: 's3', title: 'Santo', lyrics: 'Santo, santo' },
+    { id: 's4', title: 'Santo, santo, santo', lyrics: 'Santo, santo, santo' },
+  ];
+  assert.equal(matchSong({ title: 'otra cosa', song_id: 's2' }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'SUBLIME GRACIA', song_id: null }, songs)!.id, 's1');
+  assert.equal(matchSong({ title: 'cuan grande es el', song_id: 'borrada' }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'Cuán grande es Él (2 estrofas)', song_id: null }, songs)!.id, 's2');
+  assert.equal(matchSong({ title: 'Santo', song_id: null }, songs)!.id, 's3');
+  assert.equal(matchSong({ title: 'No existe', song_id: null }, songs), null);
+  assert.equal(matchSong({ title: '', song_id: null }, songs), null);
+
+  const items = planToItems(cleanPlanEntries([
+    { kind: 'oracion', who: 'Hermano Ejemplo' },
+    { kind: 'cancion', title: 'Sublime gracia' },
+    { kind: 'cancion', title: 'Una que no está' },
+    { kind: 'anuncios' },
+    { kind: 'ofrenda' },
+    { kind: 'lectura', ref: 'Salmo 23', who: 'Hermana Ejemplo' },
+    { kind: 'lectura', ref: 'Jn 3:16-18' },
+    { kind: 'lectura', title: 'Lectura a elección' },
+    { kind: 'predica', title: 'Cántaros vacíos', ref: '2 Reyes 4:1-7' },
+    { kind: 'otro', title: 'Despedida' },
+    { kind: 'otro' },
+  ]), songs);
+  assert.deepEqual(items.map((i) => i.type), ['notice', 'song', 'song', 'announcements', 'notice', 'passage', 'passage', 'notice', 'sermon', 'notice']);
+  assert.ok(items[0].type === 'notice' && items[0].title === 'Oración' && items[0].body === 'Hermano Ejemplo');
+  assert.ok(items[1].type === 'song' && items[1].songId === 's1' && items[1].lyrics.startsWith('Sublime'));
+  assert.ok(items[2].type === 'song' && items[2].songId === null && items[2].title === 'Una que no está' && items[2].lyrics === '');
+  assert.ok(items[5].type === 'passage' && items[5].ref === 'Salmo 23' && itemSlides(items[5], rv).length === 6);
+  assert.ok(items[6].type === 'passage' && items[6].ref === 'Juan 3:16-18' && itemSlides(items[6], rv).length === 3);
+  assert.ok(items[8].type === 'sermon' && itemSlides(items[8], rv).length === 8);
+  assert.equal(new Set(items.map((i) => i.id)).size, items.length);
+});
