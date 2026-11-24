@@ -91,7 +91,8 @@ test('antes de pedirlas no hay palabras; después, Génesis 1:1 y Juan 3:16 est�
   const jn = B('Juan');
   await ensureOrig(jn);
   const v = verseWords(jn, 3, 16);
-  assert.equal(v.length, 25);
+  // 26 palabras en el texto tradicional (con el "su" de "su Hijo unigénito", que otros textos griegos no traen).
+  assert.equal(v.length, 26);
   assert.equal(v[0].word, N('οὕτως'));
   assert.ok(v.some((w) => w.label === 'G25' && w.lemma === N('ἀγαπάω') && w.gloss === 'to love'));
   assert.ok(v.some((w) => w.label === 'G2316' && w.translit === 'theos'));

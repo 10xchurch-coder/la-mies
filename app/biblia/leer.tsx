@@ -3,18 +3,22 @@
 // Al tocar versículos quedan subrayados con puntitos y abajo se abre la barra: color para resaltar, nota, copiar, compartir y guardar.
 // Lo que se marca va por libro, capítulo y versículo, así se ve igual en cualquier versión. Lo leído se anota solo en el plan de lectura.
 // "Referencias" abre los versículos relacionados con el que se tocó. La versión (español o inglés) se cambia en los tres puntos.
+// "Palabras originales" muestra el versículo en hebreo o griego con los números de Strong.
+// En los tres puntos también está "Comparar dos versiones": las dos a la vez, versículo por versículo. Si no se compara, la segunda ni se carga.
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
 import { BibleRefsSheet } from '@/components/BibleRefsSheet';
 import { BibleVersionChips } from '@/components/BibleVersionChips';
+import { BibleWordsSheet, wordsTitle } from '@/components/BibleWordsSheet';
 import { Header } from '@/components/Screen';
 import { Button } from '@/components/ui';
 import { myBiblePlan, type BiblePlanRow } from '@/lib/api';
-import { bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
+import { VERSIONS, bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
+import { alignVerses, compareColumns, compareNotice, compareVersion, COMPARE_WIDE } from '@/lib/bibleCompare';
 import { loadBibleFont } from '@/lib/bibleFonts';
 import { useBibleReady } from '@/lib/bibleReady';
 import { BIBLE_FONTS, BIBLE_THEMES, MARK_COLORS, SPACINGS, fontOf, markBg, spacingOf, themeOf, type BibleFontId, type BibleTheme } from '@/lib/bibleLook';
@@ -45,6 +49,11 @@ export default function LeerBiblia() {
   const [copied, setCopied] = useState(false);
   const [marks, setMarksState] = useState<Record<number, BibleMark>>({});
   const [refsOpen, setRefsOpen] = useState(false);
+  const [wordsOpen, setWordsOpen] = useState(false);
+  // Comparar dos versiones: cuál es la segunda (nada = no se compara) y si en el teléfono van en dos columnas.
+  const [compareId, setCompareId] = useState<string | undefined>(undefined);
+  const [compareCols, setCompareCols] = useState(false);
+  const { width } = useWindowDimensions();
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [speaking, setSpeaking] = useState(-1);
@@ -53,9 +62,14 @@ export default function LeerBiblia() {
   const [note, setNote] = useState<string | null>(recentPlanNote());
 
   // La King James se baja de a un libro: cuando llega, el capítulo se arma de nuevo.
-  const bibleReady = useBibleReady([[version.id, book]]);
+  // La segunda versión solo se pide (y se dibuja) si la persona eligió comparar.
+  const second = compareVersion(version.id, compareId);
+  const bibleReady = useBibleReady(second ? [[version.id, book], [second.id, book]] : [[version.id, book]]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const verses = useMemo(() => chapterText(version, book, chapter), [version, book, chapter, bibleReady]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const rows = useMemo(() => (second ? alignVerses(verses, chapterText(second, book, chapter)) : null), [second, verses, book, chapter, bibleReady]);
+  const twoCols = compareColumns(width, compareCols);
   const prev = neighbor(book, chapter, -1);
   const next = neighbor(book, chapter, 1);
   const single = chaptersIn(book) === 1;
@@ -75,12 +89,14 @@ export default function LeerBiblia() {
       setFontId(fontOf(p.font).id);
       setThemeId(themeOf(p.theme)?.id ?? 'auto');
       setSpacing(p.spacing ?? 'normal');
+      setCompareId(p.compare);
+      setCompareCols(!!p.compareCols);
       setLoaded(true);
     });
   }, []);
   useEffect(() => {
-    if (loaded) saveBiblePrefs({ version: version.id, book, chapter, size, font: fontId, theme: themeId, spacing });
-  }, [loaded, version.id, book, chapter, size, fontId, themeId, spacing]);
+    if (loaded) saveBiblePrefs({ version: version.id, book, chapter, size, font: fontId, theme: themeId, spacing, compare: compareId, compareCols: compareCols || undefined });
+  }, [loaded, version.id, book, chapter, size, fontId, themeId, spacing, compareId, compareCols]);
   // La letra se baja recién cuando se elige. Mientras tanto se sigue leyendo con la anterior.
   useEffect(() => {
     let alive = true;
@@ -175,18 +191,76 @@ export default function LeerBiblia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: look.bg }}>
-      <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={version.name} back
+      <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={second ? `${version.short} y ${second.short}` : version.name} back
         right={<View style={{ flexDirection: 'row', gap: 8 }}>
           {speakAvailable ? headBtn(speaking >= 0 ? 'square' : 'volume-2', speaking >= 0 ? 'Parar la lectura' : 'Escuchar el capítulo', listen, speaking >= 0) : null}
-          {headBtn('more-horizontal', 'Letra, fondo y tamaño', () => setMenu(true))}
+          {headBtn('more-horizontal', 'Letra, fondo, tamaño y comparar dos versiones', () => setMenu(true))}
         </View>} />
-      <ScrollView key={`${book}-${chapter}`} style={{ flex: 1, backgroundColor: look.bg }} contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: insets.bottom + 28, width: '100%', maxWidth: 760, alignSelf: 'center' }}>
+      <ScrollView key={`${book}-${chapter}`} style={{ flex: 1, backgroundColor: look.bg }} contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: insets.bottom + 28, width: '100%', maxWidth: second && width >= COMPARE_WIDE ? 1180 : 760, alignSelf: 'center' }}>
         {note ? (
           <View style={{ backgroundColor: colors.greenSoft, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, marginBottom: 10 }}>
             <Text style={{ fontSize: 14, fontWeight: '700', color: colors.greenText }}>{note}</Text>
           </View>
         ) : null}
-        {verses.map((t, i) => {
+        {rows && second ? (
+          <>
+            {/* Dos versiones a la vez. La que se lee va primero (o a la izquierda); la segunda, un poco más clarita. */}
+            <View style={{ flexDirection: 'row', gap: 14, marginBottom: 10, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: look.line }}>
+              {twoCols ? (
+                <>
+                  <Text style={{ flex: 1, fontSize: 12, fontWeight: '800', color: look.accent }}>{version.name.toUpperCase()}</Text>
+                  <Text style={{ flex: 1, fontSize: 12, fontWeight: '800', color: look.muted }}>{second.name.toUpperCase()}</Text>
+                </>
+              ) : (
+                <Text style={{ flex: 1, fontSize: 12, color: look.muted, lineHeight: 17 }}>
+                  Cada versículo está dos veces: primero en <Text style={{ fontWeight: '800', color: look.accent }}>{version.short}</Text> y abajo, más clarito, en <Text style={{ fontWeight: '800' }}>{second.short}</Text>.
+                </Text>
+              )}
+            </View>
+            {compareNotice(book, chapter, version.id, second.id) ? (
+              <View style={{ backgroundColor: look.dark ? '#3A3320' : '#FFF4D6', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12, marginBottom: 10 }}>
+                <Text style={{ fontSize: 13, color: look.dark ? '#F1DFA8' : '#6B5200', lineHeight: 18 }}>En este capítulo las dos Biblias no cuentan igual los versículos. Algún versículo puede quedar al lado del de antes o del de después.</Text>
+              </View>
+            ) : null}
+            {rows.map((r) => {
+              const n = r.n;
+              const on = picked.includes(n);
+              const m = marks[n];
+              const bg = speaking === n ? (look.dark ? '#3A4A2A' : '#E4F3D8') : markBg(m?.color, look.dark);
+              const deco = on ? { textDecorationLine: 'underline' as const, textDecorationStyle: 'dotted' as const, textDecorationColor: look.accent } : null;
+              const fsB = twoCols ? fs : Math.round(fs * 0.9);
+              const lhB = twoCols ? lh : Math.round(lh * 0.9);
+              // Lo que se marca, copia y comparte es de la versión que se lee: si ahí no está ese número, no se puede tocar.
+              const press = r.a != null ? () => toggle(n) : undefined;
+              const cellA = (
+                <Text onPress={press} accessibilityRole={press ? 'button' : undefined} accessibilityLabel={`Versículo ${n}, ${version.short}. ${r.a ?? 'No está en esta Biblia.'}`} suppressHighlighting
+                  style={[{ fontSize: fs, lineHeight: lh, color: look.text }, twoCols ? { flex: 1 } : null, family()]}>
+                  <Text style={[{ fontSize: Math.round(fs * 0.72), color: look.accent }, family(true)]}>{n}{' '}</Text>
+                  {!twoCols ? <Text style={{ fontSize: Math.round(fs * 0.6), fontWeight: '800', color: look.accent }}>{version.short}{'  '}</Text> : null}
+                  {r.a != null ? <Text style={[bg ? { backgroundColor: bg } : null, deco]}>{r.a}</Text> : <Text style={{ color: look.muted }}>—</Text>}
+                  {m?.note ? <Text style={{ color: look.accent }}>{' ✎'}</Text> : null}
+                  {m?.saved ? <Text style={{ color: look.accent }}>{' ★'}</Text> : null}
+                </Text>
+              );
+              const cellB = (
+                <Text onPress={press} accessibilityRole={press ? 'button' : undefined} accessibilityLabel={`Versículo ${n}, ${second.short}. ${r.b ?? 'No está en esta Biblia.'}`} suppressHighlighting
+                  style={[{ fontSize: fsB, lineHeight: lhB, color: look.muted }, twoCols ? { flex: 1 } : { marginTop: Math.round(fs * 0.12) }, family()]}>
+                  {twoCols ? <Text style={[{ fontSize: Math.round(fs * 0.72) }, family(true)]}>{n}{' '}</Text>
+                    : <Text style={{ fontSize: Math.round(fs * 0.6), fontWeight: '800' }}>{second.short}{'  '}</Text>}
+                  {r.b != null ? <Text style={[bg ? { backgroundColor: bg } : null, deco]}>{r.b}</Text> : <Text>—</Text>}
+                </Text>
+              );
+              return (
+                <View key={n} style={twoCols
+                  ? { flexDirection: 'row', gap: 14, marginBottom: Math.round(fs * 0.45) }
+                  : { marginBottom: Math.round(fs * 0.6), paddingBottom: Math.round(fs * 0.45), borderBottomWidth: 1, borderBottomColor: look.line }}>
+                  {cellA}
+                  {cellB}
+                </View>
+              );
+            })}
+          </>
+        ) : verses.map((t, i) => {
           const n = i + 1;
           const on = picked.includes(n);
           const m = marks[n];
@@ -217,20 +291,27 @@ export default function LeerBiblia() {
           <Button title="Anterior" icon="chevron-left" variant="outline" disabled={!prev} onPress={() => prev && open(prev)} style={{ flex: 1 }} />
           <Button title="Siguiente" icon="chevron-right" disabled={!next} onPress={goNext} style={{ flex: 1 }} />
         </View>
-        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{version.notice}</Text>
+        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{version.notice}{second ? `\n${second.notice}` : ''}</Text>
       </ScrollView>
 
       {picked.length ? (
         <View style={{ paddingTop: 10, paddingHorizontal: 12, paddingBottom: insets.bottom + 8, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg, gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }} numberOfLines={1}>{text().split('\n').pop()}</Text>
+            <Pressable onPress={() => { setPicked([]); setCopied(false); }} accessibilityRole="button" accessibilityLabel="Quitar selección" hitSlop={10}>
+              <Feather name="x" size={22} color={colors.muted} />
+            </Pressable>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <Pressable onPress={() => setRefsOpen(true)} accessibilityRole="button" accessibilityLabel="Referencias: versículos que hablan de lo mismo"
               style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 999, backgroundColor: colors.blueSoft }}>
               <Feather name="link" size={14} color={colors.blueText} />
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>Referencias</Text>
             </Pressable>
-            <Pressable onPress={() => { setPicked([]); setCopied(false); }} accessibilityRole="button" accessibilityLabel="Quitar selección" hitSlop={10}>
-              <Feather name="x" size={22} color={colors.muted} />
+            <Pressable onPress={() => setWordsOpen(true)} accessibilityRole="button" accessibilityLabel={`${wordsTitle(version)}: el versículo en hebreo o griego, con los números de Strong`}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 999, backgroundColor: colors.blueSoft }}>
+              <Feather name="book-open" size={14} color={colors.blueText} />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>{wordsTitle(version)}</Text>
             </Pressable>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -259,6 +340,9 @@ export default function LeerBiblia() {
       <BibleRefsSheet visible={refsOpen} onClose={() => setRefsOpen(false)} version={version} book={book} chapter={chapter} verses={sorted}
         onOpen={(r) => { setRefsOpen(false); router.push({ pathname: '/biblia/leer', params: { libro: String(r.book), cap: String(r.chapter), v: version.id, ver: String(r.verse) } }); }} />
 
+      <BibleWordsSheet visible={wordsOpen} onClose={() => setWordsOpen(false)} version={version} book={book} chapter={chapter} verses={sorted}
+        onOpen={(r) => { setWordsOpen(false); router.push({ pathname: '/biblia/leer', params: { libro: String(r.book), cap: String(r.chapter), v: version.id, ver: String(r.verse) } }); }} />
+
       {/* Letra, tamaño, fondo y espacio entre líneas */}
       <Modal visible={menu} transparent animationType="slide" onRequestClose={() => setMenu(false)}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={() => setMenu(false)} accessibilityLabel="Cerrar" />
@@ -272,6 +356,30 @@ export default function LeerBiblia() {
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>BIBLIA</Text>
               <BibleVersionChips value={version.id} onChange={(v) => router.replace({ pathname: '/biblia/leer', params: { libro: String(book), cap: String(chapter), v: v.id } })} />
             </View>
+            {VERSIONS.length > 1 ? (
+              <View style={{ gap: 8 }}>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>COMPARAR DOS VERSIONES</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {chip('No comparar', !second, () => setCompareId(undefined))}
+                  {VERSIONS.filter((v) => v.id !== version.id).map((v) => chip(`Con ${v.name}`, second?.id === v.id, () => setCompareId(v.id)))}
+                </View>
+                {second ? (
+                  width >= COMPARE_WIDE ? (
+                    <Text style={{ fontSize: 12, color: colors.muted }}>Se ven las dos a la vez, una al lado de la otra. Lo que resaltás, anotás, copiás o compartís es de la {version.name}.</Text>
+                  ) : (
+                    <>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                        {chip('Una debajo de la otra', !compareCols, () => setCompareCols(false))}
+                        {chip('En dos columnas', compareCols, () => setCompareCols(true))}
+                      </View>
+                      <Text style={{ fontSize: 12, color: colors.muted }}>En el teléfono se lee mejor una debajo de la otra. Lo que resaltás, anotás, copiás o compartís es de la {version.name}.</Text>
+                    </>
+                  )
+                ) : (
+                  <Text style={{ fontSize: 12, color: colors.muted }}>Para leer el mismo capítulo en dos Biblias a la vez, versículo por versículo.</Text>
+                )}
+              </View>
+            ) : null}
             <View style={{ gap: 8 }}>
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>TAMAÑO DE LA LETRA</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
