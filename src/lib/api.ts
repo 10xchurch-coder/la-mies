@@ -1191,3 +1191,22 @@ export async function finCategoryUsage(): Promise<Record<string, number>> {
   for (const r of rows) out[r.category_id] = (out[r.category_id] ?? 0) + 1;
   return out;
 }
+
+// ---------- Modo presentación: listas del culto ----------
+export type PresentSetRow = { id: string; name: string; items: unknown; updated_at: string };
+export async function listPresentSets(): Promise<Omit<PresentSetRow, 'items'>[]> {
+  return (ok(await supabase.from('present_sets').select('id, name, updated_at').order('updated_at', { ascending: false })) ?? []) as Omit<PresentSetRow, 'items'>[];
+}
+export async function getPresentSet(id: string): Promise<PresentSetRow | null> {
+  return (ok(await supabase.from('present_sets').select('id, name, items, updated_at').eq('id', id).maybeSingle()) as PresentSetRow | null) ?? null;
+}
+export async function createPresentSet(name: string): Promise<string> {
+  const r = ok(await supabase.from('present_sets').insert({ name: name.trim() }).select('id').single()) as { id: string };
+  return r.id;
+}
+export async function savePresentSet(id: string, name: string, items: unknown[]): Promise<void> {
+  ok(await supabase.from('present_sets').update({ name: name.trim() || 'Lista del culto', items }).eq('id', id));
+}
+export async function deletePresentSet(id: string): Promise<void> {
+  ok(await supabase.from('present_sets').delete().eq('id', id));
+}

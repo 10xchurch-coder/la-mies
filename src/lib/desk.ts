@@ -26,6 +26,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
     { key: 'calendario', label: 'Calendario', icon: 'calendar', to: '/eventos', perms: [] },
     { key: 'rifas', label: 'Sorteos', icon: 'award', to: '/rifas', perms: [] },
+    { key: 'presentar', label: 'Modo presentación', icon: 'monitor', to: '/presentar', perms: ['personas.ver_todas', 'inf.panel'] },
   ] },
   { title: 'Personas y seguimiento', tone: 'amber', items: [
     { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },

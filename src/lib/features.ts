@@ -5,7 +5,7 @@
 
 export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
-  | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'devocional' | 'biblioteca'
+  | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
   | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
   | 'finanzas' | 'ofrendar' | 'informes';
@@ -50,6 +50,9 @@ export const FEATURES: Feature[] = [
   { key: 'vivo', label: 'Culto en vivo', group: 'Reuniones y enseñanza',
     hint: 'La transmisión del culto, con comentarios y notas.',
     routes: ['/vivo'] },
+  { key: 'presentar', label: 'Modo presentación', group: 'Reuniones y enseñanza',
+    hint: 'Mostrar en el proyector las letras de las canciones, pasajes de la Biblia, fotos, videos y una cuenta regresiva.',
+    routes: ['/presentar'] },
   { key: 'devocional', label: 'Devocional y lectura de la Biblia', group: 'Reuniones y enseñanza',
     hint: 'El versículo del día, la Biblia para leer en la app, los planes de lectura y los artículos de crecimiento.',
     routes: ['/devocional', '/crecimiento', '/t-crecimiento', '/plan-lectura', '/biblia', '/admin/devocionales'] },

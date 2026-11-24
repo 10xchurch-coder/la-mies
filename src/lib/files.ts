@@ -9,7 +9,7 @@ import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
 import { cropPhoto } from '@/components/PhotoCropper';
 
-export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat' | 'missionaries';
+export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat' | 'missionaries' | 'present';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
 
 function randomId(): string {
@@ -317,4 +317,60 @@ export async function removeMissionaryFiles(paths: (string | null | undefined)[]
   const list = paths.filter((p): p is string => !!p);
   if (!list.length) return;
   await supabase.storage.from('missionaries').remove(list).catch(() => undefined);
+}
+
+// ---------- Modo presentación: fotos, videos y música para el proyector ----------
+const PRESENT_TEXT = {
+  image: { word: 'La foto', types: ['image/*'] },
+  video: { word: 'El video', types: ['video/*'] },
+  audio: { word: 'El audio', types: ['audio/*'] },
+} as const;
+
+/** Elige una foto, un video o un audio (hasta 50 MB) y lo sube al depósito de la presentación. Null si canceló. */
+export async function pickPresentMedia(churchId: string, kind: 'image' | 'video' | 'audio'): Promise<{ path: string; name: string } | null> {
+  const t = PRESENT_TEXT[kind];
+  const tooBig = () => Alert.alert('Archivo muy grande', `${t.word} pesa más de 50 MB. Probá con uno más corto o más liviano.`);
+  // En el teléfono o la tablet, las fotos y los videos salen de la galería.
+  if (Platform.OS !== 'web' && kind !== 'audio') {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: [kind === 'image' ? 'images' : 'videos'], allowsEditing: false, quality: 0.9 });
+    if (res.canceled || !res.assets?.[0]) return null;
+    const a = res.assets[0];
+    if (kind === 'image') {
+      // 1920 px de ancho alcanza para un proyector y pesa poco.
+      const resize = a.width && a.width > 1920 ? [{ resize: { width: 1920 } }] : [];
+      const img = await manipulateAsync(a.uri, resize, { compress: 0.82, format: SaveFormat.JPEG });
+      return { path: await upload('present', churchId, img.uri, 'foto.jpg', 'image/jpeg'), name: a.fileName ?? 'foto.jpg' };
+    }
+    if (a.fileSize && a.fileSize > MAX_FILE_BYTES) { tooBig(); return null; }
+    const name = a.fileName ?? 'video.mp4';
+    return { path: await upload('present', churchId, a.uri, name, a.mimeType ?? 'video/mp4'), name };
+  }
+  const res = await DocumentPicker.getDocumentAsync({ type: [...t.types], copyToCacheDirectory: true, multiple: false });
+  if (res.canceled || !res.assets?.[0]) return null;
+  const a = res.assets[0];
+  if (a.size && a.size > MAX_FILE_BYTES) { tooBig(); return null; }
+  const mime = a.mimeType ?? '';
+  if (!mime.startsWith(`${kind}/`)) { Alert.alert('Ese archivo no sirve', kind === 'image' ? 'Elegí una foto.' : kind === 'video' ? 'Elegí un video (MP4 anda en todos lados).' : 'Elegí un audio (MP3 anda en todos lados).'); return null; }
+  return { path: await upload('present', churchId, a.uri, a.name, mime), name: a.name };
+}
+
+/** Borra archivos de la presentación que ya no se usan. Si falla no pasa nada: solo quedan huérfanos. */
+export async function removePresentFiles(paths: (string | null | undefined)[]): Promise<void> {
+  const list = paths.filter((p): p is string => !!p);
+  if (!list.length) return;
+  await supabase.storage.from('present').remove(list).catch(() => undefined);
+}
+
+const presentUrls = new Map<string, { url: string; until: number }>();
+/** Link firmado de un archivo de la presentación. Dura 8 horas, para que alcance todo el culto. */
+export async function presentUrl(path: string | null | undefined): Promise<string | null> {
+  if (!path) return null;
+  const hit = presentUrls.get(path);
+  if (hit && hit.until > Date.now()) return hit.url;
+  const { data } = await supabase.storage.from('present').createSignedUrl(path, 8 * 3600);
+  const url = data?.signedUrl ?? null;
+  if (url) presentUrls.set(path, { url, until: Date.now() + 7 * 3600 * 1000 });
+  return url;
 }
