@@ -5,7 +5,7 @@
 
 export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
-  | 'asistencia' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
+  | 'asistencia' | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
   | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
   | 'finanzas' | 'ofrendar' | 'informes';
@@ -35,6 +35,12 @@ export const FEATURES: Feature[] = [
   { key: 'asistencia', label: 'Asistencia a las reuniones', group: 'Reuniones y enseñanza',
     hint: 'Tomar asistencia (a mano o con el chip de cada uno), quiénes faltaron y la fidelidad de cada uno.',
     routes: ['/asistencia', '/asistencia-chip', '/chips', '/ausencias', '/fidelidad', '/suspender', '/escritorio/asistencia', '/admin/reuniones'] },
+  { key: 'culto', label: 'Orden del culto', group: 'Reuniones y enseñanza',
+    hint: 'Las partes de cada culto en orden y quién se ocupa de cada una, con un aviso el día antes.',
+    routes: ['/culto'] },
+  { key: 'preguntas', label: 'Caja de preguntas', group: 'Reuniones y enseñanza',
+    hint: 'Los hermanos mandan preguntas de la Biblia, con su nombre o sin él, y el pastor las responde.',
+    routes: ['/preguntas'] },
   { key: 'ninos', label: 'Entrada y retiro de los chicos', group: 'Reuniones y enseñanza',
     hint: 'La guardería y las clases de los chicos, con una etiqueta para el chico y otra para el adulto que lo retira.',
     routes: ['/ninos'] },
@@ -65,7 +71,7 @@ export const FEATURES: Feature[] = [
     routes: ['/chat', '/t-chat'] },
   { key: 'oracion', label: 'Pedidos de oración', group: 'Comunidad',
     hint: 'Pedidos de oración y quiénes oran por cada uno.',
-    routes: ['/oracion', '/t-oracion'] },
+    routes: ['/oracion', '/t-oracion', '/oraciones-respondidas'] },
   { key: 'eventos', label: 'Calendario y eventos', group: 'Comunidad',
     hint: 'Los eventos de la iglesia, con inscripción y cómo llegar.',
     routes: ['/eventos', '/t-eventos', '/evento', '/e'] },

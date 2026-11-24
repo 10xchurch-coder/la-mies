@@ -27,6 +27,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'calendario', label: 'Calendario', icon: 'calendar', to: '/eventos', perms: [] },
     { key: 'rifas', label: 'Sorteos', icon: 'award', to: '/rifas', perms: [] },
     { key: 'presentar', label: 'Modo presentación', icon: 'monitor', to: '/presentar', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'culto', label: 'Orden del culto', icon: 'list', to: '/culto', perms: ['personas.ver_todas', 'inf.panel'] },
   ] },
   { title: 'Personas y seguimiento', tone: 'amber', items: [
     { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
@@ -40,6 +41,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'clases', label: 'Clases', icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
     { key: 'devocionales', label: 'Devocionales', icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
     { key: 'cancionero', label: 'Cancionero', icon: 'music', to: '/canciones', perms: [] },
+    { key: 'preguntas', label: 'Preguntas', icon: 'help-circle', to: '/preguntas', perms: ['com.moderar'] },
     { key: 'musica', label: 'Música', icon: 'headphones', to: '/musica', perms: [] },
     { key: 'radio', label: 'Radio', icon: 'radio', to: '/radio', perms: [] },
   ] },

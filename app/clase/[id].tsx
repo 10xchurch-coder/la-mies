@@ -182,6 +182,11 @@ export default function Clase() {
           <Button title={`Tomar asistencia · ${fmtDateShort(lastClassDate)}`} icon="check-square" onPress={() => router.push({ pathname: '/clase/asistencia', params: { id, date: lastClassDate } })} />
         ) : null}
 
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Button title="Lecciones" icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/clase/lecciones', params: { id } } as never)} style={{ flex: 1 }} />
+          <Button title="Versículos" icon="award" variant="outline" small onPress={() => router.push({ pathname: '/clase/versiculos', params: { id } } as never)} style={{ flex: 1 }} />
+        </View>
+
         <SectionTitle>Próximas clases</SectionTitle>
         <Card style={{ padding: 0 }}>
           {dates.map((d) => {

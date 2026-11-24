@@ -168,6 +168,7 @@ export default function Iglesia() {
         { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
         { icon: 'award', label: 'Sorteos', to: '/rifas' as Href, show: true },
         { icon: 'monitor', label: 'Modo presentación', to: '/presentar' as Href, show: isLeader },
+        { icon: 'list', label: 'Orden del culto', to: '/culto' as Href, show: true },
       ],
     },
     {
@@ -176,6 +177,9 @@ export default function Iglesia() {
         { icon: 'sunrise', label: 'Crecimiento', to: '/crecimiento' as Href, show: !tabs.includes('crecimiento') },
         { icon: 'heart', label: 'Oración', to: '/oracion', show: !tabs.includes('oracion') },
         { icon: 'play-circle', label: 'Prédicas', to: '/predicas' as Href, show: !tabs.includes('predicas') },
+        { icon: 'edit-3', label: 'Mis notas de prédicas', to: '/predica/mis-notas' as Href, show: true },
+        { icon: 'sun', label: 'Oraciones respondidas', to: '/oraciones-respondidas' as Href, show: true },
+        { icon: 'help-circle', label: 'Preguntas', to: '/preguntas' as Href, show: true },
         { icon: 'book-open', label: isLeader ? 'Clases' : 'Mis clases', to: '/clases', show: isLeader || hasClasses },
         { icon: 'music', label: 'Cancionero', to: '/canciones' as Href, show: true },
         { icon: 'headphones', label: 'Música', to: '/musica' as Href, show: true },

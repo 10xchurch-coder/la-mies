@@ -2,7 +2,7 @@
 // y el bosquejo para completar con los espacios en blanco (cada uno guarda sus respuestas).
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Linking, Pressable, Text, TextInput, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
 import { Image } from 'expo-image';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { Feather } from '@expo/vector-icons';
@@ -75,9 +75,10 @@ function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string 
   const blanks = lines.reduce((n, l) => n + (l.split('___').length - 1), 0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
-  const [saved, setSaved] = useState<'idle' | 'saving' | 'ok'>('idle');
+  const [saved, setSaved] = useState<'idle' | 'saving' | 'ok' | 'error'>('idle');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loaded = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     mySermonNotes(sermonId).then((n) => {
@@ -86,13 +87,25 @@ function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string 
     }).catch(() => { loaded.current = true; });
   }, [sermonId]);
 
+  // Lo último que se escribió y todavía no se guardó: si la persona sale de la pantalla enseguida, se guarda igual.
+  const pending = useRef<{ a: string[]; n: string } | null>(null);
+  const flush = () => {
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null;
+    saveSermonNotes(sermonId, p.a, p.n.trim() || null).then(() => setSaved('ok')).catch(() => { if (!pending.current) pending.current = p; setSaved('error'); });
+  };
+  const flushRef = useRef(flush);
+  flushRef.current = flush;
+  useEffect(() => () => flushRef.current(), []);
+
   const queue = (a: string[], n: string) => {
     if (!loaded.current) return;
     if (timer.current) clearTimeout(timer.current);
+    pending.current = { a, n };
     setSaved('saving');
-    timer.current = setTimeout(() => {
-      saveSermonNotes(sermonId, a, n.trim() || null).then(() => setSaved('ok')).catch(() => setSaved('idle'));
-    }, 900);
+    timer.current = setTimeout(flush, 900);
   };
 
   let k = -1;
@@ -124,7 +137,8 @@ function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string 
         </Card>
       ) : null}
       <Field label="Mis notas" value={notes} onChangeText={(t) => { setNotes(t); queue(answers, t); }} multiline placeholder="Lo que Dios me habló hoy…" />
-      <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'right' }}>{saved === 'saving' ? 'Guardando…' : saved === 'ok' ? 'Guardado' : 'Solo vos ves tus apuntes'}</Text>
+      <Text style={{ fontSize: 12, color: saved === 'error' ? colors.red : colors.muted, textAlign: 'right' }}>{saved === 'saving' ? 'Guardando…' : saved === 'ok' ? 'Guardado' : saved === 'error' ? 'No se pudo guardar. Revisá tu conexión y escribí de nuevo.' : 'Solo vos ves tus apuntes'}</Text>
+      <Text onPress={() => { flush(); router.push('/predica/mis-notas' as Href); }} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center', paddingVertical: 6 }}>Ver todas mis notas de prédicas</Text>
     </>
   );
 }
