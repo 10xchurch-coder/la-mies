@@ -104,7 +104,7 @@ export function installDemo(): void {
   const A = Alert as unknown as { alert: (title: string, message?: string, buttons?: AlertButton[], options?: unknown) => void };
   const baseAlert = A.alert.bind(Alert);
   A.alert = (title, message, buttons, options) => {
-    if (isDemoError(message) || isDemoError(title) || (demoOn && looksLikeDemoBlock(message))) return baseAlert(DEMO_TITLE, DEMO_MESSAGE_LONG, undefined, options);
+    if (isDemoError(message) || isDemoError(title) || (demoOn && looksLikeDemoBlock(message))) return baseAlert(tx(DEMO_TITLE), tx(DEMO_MESSAGE_LONG), undefined, options);
     return baseAlert(title, message, buttons, options);
   };
 

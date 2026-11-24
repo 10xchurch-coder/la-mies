@@ -32,7 +32,7 @@ export default function ClaseMiembros() {
   const fail = (e: unknown) => Alert.alert(tx('No se pudo'), errorMessage(e));
 
   const names = memberLessons(cfg?.member_lessons);
-  const finalLabel = cfg?.member_final?.trim() || DEFAULT_MEMBER_FINAL;
+  const finalLabel = cfg?.member_final?.trim() || tx(DEFAULT_MEMBER_FINAL);
   const doing = (rows ?? []).filter((r) => !r.final_on);
   const finished = (rows ?? []).filter((r) => r.final_on);
 

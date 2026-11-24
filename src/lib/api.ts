@@ -175,7 +175,7 @@ export async function updateContact(id: string, patch: Partial<Contact>): Promis
 export async function deleteContact(id: string): Promise<void> {
   const { data, error } = await supabase.from('contacts').delete().eq('id', id).select('id');
   if (error) throw error;
-  if (!data || data.length === 0) throw new Error('No tenés permiso para borrar a esta persona.');
+  if (!data || data.length === 0) throw new Error(tx('No tenés permiso para borrar a esta persona.'));
 }
 
 /**

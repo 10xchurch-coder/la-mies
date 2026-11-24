@@ -39,7 +39,7 @@ export function BibleHits({ version, books, query, unit, bars, onOpen, onWord }:
         return (
           <View key={b.book} style={k ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}>
             <Pressable onPress={() => setOpen((o) => ({ ...o, [b.book]: showing ? 0 : STEP }))} accessibilityRole="button" accessibilityState={{ expanded: showing > 0 }}
-              accessibilityLabel={`${name}, ${n} ${unit === 'veces' && n === 1 ? tx('vez') : unit === 'versículos' && n === 1 ? tx('versículo') : unit}`} style={{ paddingVertical: 12, gap: 6 }}>
+              accessibilityLabel={`${name}, ${n} ${unit === 'veces' && n === 1 ? tx('vez') : unit === 'versículos' && n === 1 ? tx('versículo') : tx(unit)}`} style={{ paddingVertical: 12, gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Text style={{ flex: 1, fontSize: 16, fontWeight: '700', color: colors.text }}>{name}</Text>
                 <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{n}</Text>

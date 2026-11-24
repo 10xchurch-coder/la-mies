@@ -100,7 +100,7 @@ function Hub({ ev }: { ev: PlanEvent }) {
       {tile('bell', 'amber', tx('Avisos a los inscriptos'), n.updates ? plural(n.updates, tx('aviso enviado'), tx('avisos enviados')) : tx('Cambios de horario, recordatorios, novedades'), () => go('avisos'))}
 
       <SectionTitle>{tx('El día del evento')}</SectionTitle>
-      {tile('list', 'blue', tx('Inscriptos'), st ? tx('{plural} · {web} por la página · {door} en la puerta', { plural: plural(st.registrations, 'inscripción', 'inscripciones'), web: st.web, door: st.door }) : tx('Buscar, ver quién pagó y quién entró'), () => go('inscriptos'))}
+      {tile('list', 'blue', tx('Inscriptos'), st ? tx('{plural} · {web} por la página · {door} en la puerta', { plural: plural(st.registrations, tx('inscripción'), tx('inscripciones')), web: st.web, door: st.door }) : tx('Buscar, ver quién pagó y quién entró'), () => go('inscriptos'))}
       {tile('log-in', 'green', tx('Puerta'), tx('Escanear entradas, anotar a los que llegan sin inscribirse'), () => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as unknown as Href))}
       {tile('monitor', 'teal', tx('Contador en vivo'), tx('Cuántos hay adentro ahora y por cada entrada. Para una pantalla grande'), () => router.push({ pathname: '/evento/contador', params: { id: ev.id, fecha: on } } as unknown as Href))}
       {n.sessions ? tile('check-square', 'violet', tx('Asistencia al programa'), n.atSessions ? tx('{plural} en talleres y sesiones', { plural: plural(n.atSessions, tx('persona anotada'), tx('personas anotadas')) }) : tx('Leer la credencial en cada taller para saber quién fue'), () => router.push({ pathname: '/evento/sesion', params: { id: ev.id } } as unknown as Href)) : null}

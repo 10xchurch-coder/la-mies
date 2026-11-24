@@ -53,7 +53,7 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(CHAT_LIVE_TASK)) {
 
 async function ensurePermission(): Promise<void> {
   const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para mandar dónde estás.');
+  if (fg.status !== 'granted') throw new Error(tx('Necesitamos el permiso de ubicación para mandar dónde estás.'));
 }
 
 /** Dónde estoy ahora (para mandar una ubicación). */

@@ -16,7 +16,7 @@ import { tx } from '@/lib/i18n';
 
 type Status = 'member' | 'visitor' | 'contact';
 type Preview = { new: number; duplicates: number; invalid: number };
-const FIELD_OPTIONS = (Object.keys(FIELD_LABELS) as ImportField[]).map((v) => ({ value: v, label: FIELD_LABELS[v] }));
+const FIELD_OPTIONS = (Object.keys(FIELD_LABELS) as ImportField[]).map((v) => ({ value: v, get label() { return tx(FIELD_LABELS[v]); } }));
 const BATCH = 400;
 
 // Una fecha de Excel viene como Date; se pasa a AAAA-MM-DD sin correrla un día por la zona horaria.

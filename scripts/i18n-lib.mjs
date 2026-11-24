@@ -327,6 +327,12 @@ export function run({ write = false } = {}) {
         if (root === 'Alert' || VISIBLE_CALL.has(name)) return r('shown', { call: name });
         return r('maybe', { call: name });
       }
+      if (ts.isArrayLiteralExpression(q)) {
+        // ['si', 'no'].includes(x) y new Set(['a', 'b']): son valores para comparar, no textos.
+        const up = q.parent;
+        if (ts.isPropertyAccessExpression(up) && up.expression === q && ['includes', 'indexOf', 'lastIndexOf', 'some', 'find', 'findIndex'].includes(up.name.text)) return r('no');
+        if ((ts.isNewExpression(up) || ts.isCallExpression(up)) && ['Set', 'Map'].includes(calleeName(up))) return r('no');
+      }
       if (ts.isReturnStatement(q) || ts.isArrowFunction(q) || ts.isVariableDeclaration(q) || ts.isArrayLiteralExpression(q) || ts.isParameter(q) || ts.isBindingElement(q)) return r('maybe');
       if (ts.isBinaryExpression(q) && [ts.SyntaxKind.EqualsToken, ts.SyntaxKind.PlusEqualsToken, ts.SyntaxKind.QuestionQuestionEqualsToken, ts.SyntaxKind.BarBarEqualsToken].includes(q.operatorToken.kind) && q.right === c) return r('maybe');
       if (ts.isPropertyAccessExpression(q) && q.expression === c && ts.isCallExpression(q.parent) && ['trim', 'toLowerCase', 'toUpperCase'].includes(q.name.text)) return r('maybe');

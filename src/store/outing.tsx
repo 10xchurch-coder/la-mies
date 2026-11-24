@@ -162,11 +162,11 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
   const start = useCallback(async (kind: OutingKind) => {
     if (Platform.OS === 'web') throw new Error(tx('Las salidas se hacen desde el teléfono: la computadora no puede seguir el recorrido.'));
     const fg = await Location.requestForegroundPermissionsAsync();
-    if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para marcar las calles.');
+    if (fg.status !== 'granted') throw new Error(tx('Necesitamos el permiso de ubicación para marcar las calles.'));
     // Aviso destacado que Google exige antes de pedir la ubicación en segundo plano.
     const already = await Location.getBackgroundPermissionsAsync();
     if (already.status !== 'granted' && !(await backgroundDisclosure())) {
-      throw new Error('Sin el permiso de ubicación en segundo plano no podemos marcar las calles con el teléfono bloqueado.');
+      throw new Error(tx('Sin el permiso de ubicación en segundo plano no podemos marcar las calles con el teléfono bloqueado.'));
     }
     const bg = already.status === 'granted' ? already : await Location.requestBackgroundPermissionsAsync();
     setBackgroundGranted(bg.status === 'granted');

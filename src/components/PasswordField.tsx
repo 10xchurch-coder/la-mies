@@ -23,7 +23,7 @@ export function PasswordField({ label, value, onChangeText, personal = [], isNew
       </View>
       {check ? (
         <Text style={{ fontSize: 12, color: tone, lineHeight: 17 }}>
-          {check.ok ? tx('Contraseña {strength}.', { strength: check.strength }) : check.problems[0]}
+          {check.ok ? tx('Contraseña {strength}.', { strength: tx(check.strength) }) : check.problems[0]}
         </Text>
       ) : null}
     </View>

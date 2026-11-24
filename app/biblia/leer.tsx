@@ -292,7 +292,7 @@ export default function LeerBiblia() {
           <Button title={tx('Anterior')} icon="chevron-left" variant="outline" disabled={!prev} onPress={() => prev && open(prev)} style={{ flex: 1 }} />
           <Button title={tx('Siguiente')} icon="chevron-right" disabled={!next} onPress={goNext} style={{ flex: 1 }} />
         </View>
-        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{version.notice}{second ? `\n${second.notice}` : ''}</Text>
+        <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>{tx(version.notice)}{second ? `\n${tx(second.notice)}` : ''}</Text>
       </ScrollView>
 
       {picked.length ? (

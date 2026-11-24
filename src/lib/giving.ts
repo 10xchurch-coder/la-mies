@@ -5,10 +5,10 @@ import { tx, txLocale } from './i18n';
 export type GivingMethod = 'cash' | 'transfer' | 'card' | 'check' | 'other';
 
 export const METHOD_LABEL: Record<GivingMethod, string> = {
-  get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, card: 'Tarjeta', get check() { return tx('Cheque'); }, other: 'Otro',
+  get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, get card() { return tx('Tarjeta'); }, get check() { return tx('Cheque'); }, get other() { return tx('Otro'); },
 };
-export const METHODS: { value: GivingMethod; label: string }[] = (Object.keys(METHOD_LABEL) as GivingMethod[]).map((m) => ({ value: m, label: METHOD_LABEL[m] }));
-export const methodLabel = (m: string | null | undefined): string => METHOD_LABEL[m as GivingMethod] ?? 'Otro';
+export const METHODS: { value: GivingMethod; label: string }[] = (Object.keys(METHOD_LABEL) as GivingMethod[]).map((m) => ({ value: m, get label() { return METHOD_LABEL[m]; } }));
+export const methodLabel = (m: string | null | undefined): string => METHOD_LABEL[m as GivingMethod] ?? tx('Otro');
 
 /** Una ofrenda como la ve quien lleva las finanzas. */
 export type GivingRow = {

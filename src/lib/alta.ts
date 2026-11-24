@@ -219,7 +219,7 @@ export function activityLabel(last: string | null | undefined, now = new Date())
   if (!last) return tx('sin movimiento');
   const days = Math.floor((now.getTime() - new Date(last).getTime()) / 86400000);
   if (!Number.isFinite(days)) return tx('sin movimiento');
-  if (days <= 0) return 'hoy';
+  if (days <= 0) return tx('hoy');
   if (days === 1) return tx('ayer');
   return tx('hace {days} días', { days });
 }

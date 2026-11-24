@@ -39,7 +39,7 @@ export function isSameDay(a: Date, b: Date): boolean {
 export function fmtRelativeDay(d: Date | string | number): string {
   const x = new Date(d);
   const now = new Date();
-  if (isSameDay(x, now)) return 'hoy';
+  if (isSameDay(x, now)) return tx('hoy');
   const y = new Date(now);
   y.setDate(now.getDate() - 1);
   if (isSameDay(x, y)) return tx('ayer');
@@ -101,7 +101,7 @@ export const MARITAL_LABEL: Record<string, string> = {
   divorced: 'Divorciado/a',
 };
 
-export const PROMISE_LABEL: Record<string, string> = { get sat() { return tx('sábado'); }, sun: 'domingo' };
+export const PROMISE_LABEL: Record<string, string> = { get sat() { return tx('sábado'); }, get sun() { return tx('domingo'); } };
 
 export function groupWord(grouping: string | null | undefined, plural = false): string {
   if (grouping === 'bus_routes') return plural ? tx('Rutas') : tx('Ruta');

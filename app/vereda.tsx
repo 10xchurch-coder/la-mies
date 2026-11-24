@@ -41,7 +41,7 @@ export default function Vereda() {
                 <View style={{ width: 6, borderRadius: 3, backgroundColor: coverageColor(r.covered_at, r.kind), alignSelf: 'stretch' }} />
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
-                    {fmtRelativeDay(r.covered_at) === 'hoy' ? tx('Hoy') : fmtDayYear(r.covered_at)} · {fmtTime(r.covered_at)}
+                    {fmtRelativeDay(r.covered_at) === tx('hoy') ? tx('Hoy') : fmtDayYear(r.covered_at)} · {fmtTime(r.covered_at)}
                   </Text>
                   <Text style={{ fontSize: 13, color: colors.muted }}>
                     {r.user_name ?? tx('Un hermano')} · {r.manual ? tx('marcada a mano') : r.kind === 'flyers' ? tx('volantes') : <>{tx('{presentations} {pl} · {promises} {pl2} en esa salida', { presentations: r.presentations, pl: r.presentations === 1 ? tx('presentación') : tx('presentaciones'), promises: r.promises, pl2: r.promises === 1 ? tx('promesa') : tx('promesas') })}</>}

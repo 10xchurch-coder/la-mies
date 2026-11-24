@@ -117,7 +117,7 @@ function Cropper({ req, onDone }: { req: Req; onDone: (c: Crop | null) => void }
           {btn('+', () => apply(z * 1.25, F / 2, FH / 2))}
         </View>
         <View style={{ flexDirection: 'row', gap: 10, width: F }}>
-          {btn('Cancelar', () => onDone(null))}
+          {btn(tx('Cancelar'), () => onDone(null))}
           {btn(tx('Usar esta foto'), () => onDone(cropRect(off, s, F, req.width, req.height, FH)), true)}
         </View>
       </View>

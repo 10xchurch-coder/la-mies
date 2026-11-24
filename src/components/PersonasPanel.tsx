@@ -49,7 +49,7 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
     setPicker(which);
   };
 
-  const course = cfg?.disc_course_name?.trim() || DEFAULT_COURSE;
+  const course = cfg?.disc_course_name?.trim() || tx(DEFAULT_COURSE);
   const names = lessonNames(cfg?.disc_lessons, info.total);
   const prog = lessonProgress(info.lessons, info.total);
   const track = info.track?.active ? info.track : null;

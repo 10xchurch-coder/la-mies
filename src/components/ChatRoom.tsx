@@ -381,7 +381,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
               {info ? ([['Visto por', infoReceipts(info).read, true], ['Entregado a', infoReceipts(info).delivered, false], [tx('Todavía no le llegó'), infoReceipts(info).waiting, false]] as const).map(([title, list, blue]) => (
                 list.length ? (
                   <View key={title} style={{ gap: 6, marginTop: 12 }}>
-                    <Text style={{ fontSize: 12, fontWeight: '800', color: blue ? '#2E9BD6' : colors.muted, letterSpacing: 0.4 }}>{title.toUpperCase()}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: '800', color: blue ? '#2E9BD6' : colors.muted, letterSpacing: 0.4 }}>{tx(title).toUpperCase()}</Text>
                     {list.map((r) => (
                       <View key={r.user_id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                         <Face name={r.name} path={r.photo_path} size={34} />

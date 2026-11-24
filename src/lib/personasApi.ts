@@ -67,7 +67,7 @@ export const recentDecisions = async () => ok(await supabase.rpc('personas_decis
 export async function removeDecision(id: string): Promise<void> {
   const r = await supabase.from('decisions').delete().eq('id', id).select('id');
   if (r.error) throw r.error;
-  if (!r.data?.length) throw new Error('No tenés permiso para borrar esto.');
+  if (!r.data?.length) throw new Error(tx('No tenés permiso para borrar esto.'));
 }
 
 // ---------- Regalo de bienvenida y visita ----------

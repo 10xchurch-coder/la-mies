@@ -105,7 +105,7 @@ export default function Biblia() {
         <SectionTitle>{tx('Nuevo Testamento')}</SectionTitle>
         {books(OT_COUNT, BOOKS.length)}
         <Pressable onPress={() => router.push('/biblia/textos')} accessibilityRole="button" accessibilityLabel={tx('Acerca de los textos: de dónde sale cada Biblia')} hitSlop={8}>
-          <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{version.notice}</Text>
+          <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx(version.notice)}</Text>
           <Text style={{ fontSize: 13, fontWeight: '700', color: colors.blueText, textAlign: 'center', marginTop: 4 }}>{tx('Acerca de los textos')}</Text>
         </Pressable>
       </Screen>

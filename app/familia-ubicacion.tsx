@@ -155,7 +155,7 @@ export default function FamiliaUbicacion() {
   const startDraft = () => setDraft({ name: me.places.some((p) => p.name === 'Casa') ? 'Iglesia' : 'Casa', other: '', radius: '200', pos: null });
   const useHere = () => run('aca', async () => {
     const pos = await hereNow();
-    if (!pos) throw new Error('No pudimos saber dónde estás. Revisá el permiso de ubicación, o tocá el lugar en el mapa.');
+    if (!pos) throw new Error(tx('No pudimos saber dónde estás. Revisá el permiso de ubicación, o tocá el lugar en el mapa.'));
     setDraft((d) => (d ? { ...d, pos } : d));
   });
   const savePlace = () => {
