@@ -15,18 +15,17 @@ import { fmtDayYear } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
 import { colors } from '@/theme';
 
-type Col = { key: ChurchSort | 'pastor' | 'attention'; label: string; flex: number; num?: boolean; sort?: ChurchSort };
+type Col = { key: ChurchSort | 'attention'; label: string; flex: number; num?: boolean; sort?: ChurchSort };
 const COLS: Col[] = [
-  { key: 'name', label: 'Iglesia', flex: 2.4, sort: 'name' },
-  { key: 'state', label: 'Estado', flex: 1.3, sort: 'state' },
-  { key: 'pastor', label: 'Pastor', flex: 1.5 },
-  { key: 'created', label: 'Desde', flex: 1, sort: 'created' },
+  { key: 'name', label: 'Iglesia', flex: 2.3, sort: 'name' },
+  { key: 'state', label: 'Estado', flex: 1.5, sort: 'state' },
+  { key: 'created', label: 'Desde', flex: 0.95, sort: 'created' },
   { key: 'accounts', label: 'Cuentas', flex: 0.8, num: true, sort: 'accounts' },
-  { key: 'people', label: 'Fichas', flex: 0.8, num: true, sort: 'people' },
-  { key: 'attendance', label: 'Asistencia', flex: 0.9, num: true, sort: 'attendance' },
-  { key: 'active', label: 'Activos 7 días', flex: 0.9, num: true, sort: 'active' },
-  { key: 'last', label: 'Último movimiento', flex: 1.2, sort: 'last' },
-  { key: 'attention', label: 'Atención', flex: 1.8 },
+  { key: 'people', label: 'Fichas', flex: 0.7, num: true, sort: 'people' },
+  { key: 'attendance', label: 'Asistencia', flex: 1, num: true, sort: 'attendance' },
+  { key: 'active', label: 'Usaron 7 d.', flex: 1, num: true, sort: 'active' },
+  { key: 'last', label: 'Último uso', flex: 1.05, sort: 'last' },
+  { key: 'attention', label: 'Atención', flex: 2.7 },
 ];
 
 export default function CentralChurches() {
@@ -64,22 +63,27 @@ export default function CentralChurches() {
         </View>
       );
       case 'state': return <View style={{ alignItems: 'flex-start' }}><StateChip church={c} /></View>;
-      case 'pastor': return <Text style={T.td} numberOfLines={1}>{c.pastor_name ?? '—'}</Text>;
-      case 'created': return <Text style={T.td} numberOfLines={1}>{fmtDayYear(c.created_at)}</Text>;
+      case 'created': return <Text style={T.td} numberOfLines={1}>{c.created_at.slice(0, 10).split('-').reverse().join('/')}</Text>;
       case 'accounts': return <Text style={T.num}>{c.facts.accounts}</Text>;
       case 'people': return <Text style={T.num}>{c.facts.people}</Text>;
       case 'attendance': return <Text style={T.num}>{attendance.get(c.id) ?? 0}</Text>;
       case 'active': return <Text style={T.num}>{c.active_7}</Text>;
       case 'last': return <Text style={T.td} numberOfLines={1}>{activityLabel(c.last_activity)}</Text>;
       default: {
+        // En la tabla van como renglones de texto (los chips no entran en una columna angosta).
         const why = attentionOf(c);
-        return why.length ? <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>{why.slice(0, 2).map((w) => <Tag key={w.key} text={w.text} tone={w.tone} />)}{why.length > 2 ? <Tag text={`+${why.length - 2}`} /> : null}</View>
-          : <Text style={[T.td, { color: colors.muted }]}>Todo bien</Text>;
+        const tone = { red: colors.redText, amber: colors.amberText, blue: colors.blueText } as const;
+        return why.length ? (
+          <View style={{ gap: 2 }}>
+            {why.slice(0, 2).map((w) => <Text key={w.key} style={{ fontSize: 12, fontWeight: '700', color: tone[w.tone], lineHeight: 16 }} numberOfLines={2}>{`• ${w.text}`}</Text>)}
+            {why.length > 2 ? <Text style={{ fontSize: 12, color: colors.muted }}>{`y ${why.length - 2} más`}</Text> : null}
+          </View>
+        ) : <Text style={[T.td, { color: colors.muted }]}>Todo bien</Text>;
       }
     }
   };
 
-  const wide = width >= 1150;
+  const wide = width >= 1250;
   return (
     <DeskPage title="Iglesias" subtitle={`${rows.length} de ${data.churches.length}`}
       actions={<>

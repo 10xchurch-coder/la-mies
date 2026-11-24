@@ -24,6 +24,17 @@ export const DESK_NAV: DeskGroup[] = [
   { get title() { return tx('Resumen'); }, tone: 'green', items: [
     { key: 'inicio', get label() { return tx('Inicio'); }, icon: 'home', to: '/escritorio', perms: [] },
   ] },
+  // Solo para el equipo de La Mies (la iglesia que hospeda la app). Las demás iglesias no lo ven ni lo pueden apagar.
+  { title: 'La Mies Central', tone: 'pink', items: [
+    { key: 'central', label: 'Resumen de la red', icon: 'globe', to: '/central', perms: [], when: 'central' },
+    { key: 'central-iglesias', label: 'Iglesias', icon: 'home', to: '/central/iglesias', perms: [], when: 'central' },
+    { key: 'central-ayuda', label: 'Pedidos de ayuda', icon: 'life-buoy', to: '/central/ayuda', perms: [], when: 'central' },
+    { key: 'central-ideas', label: 'Ideas para La Mies', icon: 'zap', to: '/central/ideas', perms: [], when: 'central' },
+    { key: 'central-errores', label: 'Errores de la app', icon: 'alert-triangle', to: '/central/errores', perms: [], when: 'central' },
+    { key: 'central-informes', label: 'Informes de la red', icon: 'bar-chart', to: '/central/informes', perms: [], when: 'central' },
+    { key: 'central-equipo', label: 'Equipo de La Mies', icon: 'shield', to: '/central/equipo', perms: [], when: 'central' },
+    { key: 'red', label: 'Crear iglesias e invitar pastores', icon: 'plus-circle', to: '/admin/red', perms: [], when: 'net' },
+  ] },
   { get title() { return tx('Reuniones'); }, tone: 'green', items: [
     { key: 'asistencia', get label() { return tx('Tomar asistencia'); }, icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
     { key: 'hoy', get label() { return tx('Asistencia del día'); }, icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
@@ -81,17 +92,6 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'copia', get label() { return tx('Copia de todos los datos'); }, icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
     { key: 'ayuda-lamies', label: 'Pedir ayuda a La Mies', icon: 'life-buoy', to: '/admin/ayuda', perms: ['admin.iglesia', 'admin.permisos'] },
     { key: 'ajustes', get label() { return tx('Ajustes'); }, icon: 'settings', to: '/ajustes', perms: [] },
-  ] },
-  // Solo para el equipo de La Mies (la iglesia que hospeda la app). Las demás iglesias no lo ven ni lo pueden apagar.
-  { title: 'La Mies Central', tone: 'pink', items: [
-    { key: 'central', label: 'Resumen de la red', icon: 'globe', to: '/central', perms: [], when: 'central' },
-    { key: 'central-iglesias', label: 'Iglesias', icon: 'home', to: '/central/iglesias', perms: [], when: 'central' },
-    { key: 'central-ayuda', label: 'Pedidos de ayuda', icon: 'life-buoy', to: '/central/ayuda', perms: [], when: 'central' },
-    { key: 'central-ideas', label: 'Ideas para La Mies', icon: 'zap', to: '/central/ideas', perms: [], when: 'central' },
-    { key: 'central-errores', label: 'Errores de la app', icon: 'alert-triangle', to: '/central/errores', perms: [], when: 'central' },
-    { key: 'central-informes', label: 'Informes de la red', icon: 'bar-chart', to: '/central/informes', perms: [], when: 'central' },
-    { key: 'central-equipo', label: 'Equipo de La Mies', icon: 'shield', to: '/central/equipo', perms: [], when: 'central' },
-    { key: 'red', label: 'Crear iglesias e invitar pastores', icon: 'plus-circle', to: '/admin/red', perms: [], when: 'net' },
   ] },
 ];
 
