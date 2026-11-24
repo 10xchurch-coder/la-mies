@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChurchLogo } from '@/components/BrandFooter';
 import { deskNavFor, norm, type DeskItem } from '@/lib/desk';
+import { useDeskFlags } from '@/lib/centralData';
 import { useLayout } from '@/lib/layout';
 import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
@@ -54,10 +55,11 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
   const [find, setFind] = useState('');
   const q = norm(find.trim());
   // Con algo escrito en el buscador quedan solo las secciones que coinciden.
-  const nav = deskNavFor(perms, church?.disabled_features)
+  const flags = useDeskFlags();
+  const nav = deskNavFor(perms, church?.disabled_features, flags)
     .map((g) => ({ ...g, items: q ? g.items.filter((i) => norm(`${i.label} ${g.title}`).includes(q)) : g.items }))
     .filter((g) => g.items.length > 0);
-  const isHere = (i: DeskItem) => (i.to === '/escritorio' ? path === '/escritorio' : path === i.to || path.startsWith(`${i.to}/`));
+  const isHere = (i: DeskItem) => (i.to === '/escritorio' || i.to === '/central' ? path === i.to : path === i.to || path.startsWith(`${i.to}/`));
 
   const side = (
     <View style={[styles.side, narrow && styles.sideFloating, { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left }]}>
@@ -86,7 +88,7 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
               </View>
               {g.items.map((i) => {
                 const here = isHere(i);
-                const inside = i.to.startsWith('/escritorio');
+                const inside = i.to.startsWith('/escritorio') || i.to.startsWith('/central');
                 return (
                   <Pressable key={i.key} accessibilityRole="link" accessibilityLabel={i.label} onPress={() => router.push(i.to as Href)}
                     style={(s) => [styles.item, (s as { hovered?: boolean }).hovered && !here && { backgroundColor: colors.bgSoft }, here && { backgroundColor: c.soft }]}>

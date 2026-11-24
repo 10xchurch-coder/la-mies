@@ -306,6 +306,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = ['Evangelismo y visitas', 'Reunion
 export const CORE_ROUTES = [
   '/', '/login', '/demo', '/registro', '/registro-enviado', '/recuperar', '/empezar', '/ajustes', '/seguridad', '/avisos', '/panel', '/importar',
   '/persona', '/contacto', '/personas', '/iglesia', '/yo', '/admin', '/escritorio', '/miembro-vista', '/inactivos',
+  '/central', // La Mies Central: solo el equipo de La Mies; ninguna iglesia lo puede apagar
 ];
 
 /** Lo que siempre está prendido, con el porqué, para mostrarlo en la pantalla de Funciones. */

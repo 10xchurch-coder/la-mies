@@ -14,6 +14,7 @@ import { setChurchBible } from '@/lib/bible';
 import { useChurchSync } from '@/lib/useChurchSync';
 import { FeatureOff } from '@/components/FeatureOff';
 import { Platform, StyleSheet, View } from 'react-native';
+import { pingCentral } from '@/lib/centralData';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -29,7 +30,7 @@ import { loadDeskPref } from '@/components/desk/DeskShell';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
-import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
+import { APP_VERSION, ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
 import { loadLang, useLang } from '@/lib/i18nStore';
 import { loadTabs } from '@/lib/tabsPref';
@@ -114,11 +115,13 @@ function useFeatureGuard() {
 }
 
 function Gate() {
-  const { loading, session, realPerms: perms, church, can } = useAuth();
+  const { loading, session, realPerms: perms, church, can, profile } = useAuth();
   const router = useRouter();
   // La Biblia que permite la iglesia: se deja lista antes de dibujar cualquier pantalla.
   setChurchBible(church?.bible ?? null);
   useChurchSync();
+  // Para La Mies Central: contar cuántos usan la app, con qué versión e idioma (nunca qué hace cada uno).
+  useEffect(() => { if (session && profile?.church_id) pingCentral(session.user.id, APP_VERSION); }, [session, profile?.church_id]);
   const optIn = useLockOptIn();
   const cachedRequired = useLockRequiredCache();
   const required = perms.length ? needsAppLock(perms) : !!cachedRequired;

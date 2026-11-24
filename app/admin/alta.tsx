@@ -35,6 +35,7 @@ import { refreshChurchExtras } from '@/lib/useChurchExtras';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchService, ClassRow } from '@/types';
+import { logHelp } from '@/lib/centralData';
 import { tx } from '@/lib/i18n';
 
 const fail = (e: unknown) => Alert.alert(tx('No se pudo'), errorMessage(e));
@@ -216,6 +217,7 @@ export default function Alta() {
 
   const askHelp = (s: Step) => {
     const h = helpLinks({ church: church.name, step: s.title });
+    logHelp({ step: s.title, screen: '/admin/alta' });
     const openMail = () => { Linking.openURL(h.mailto).catch(() => Alert.alert(tx('Escribinos'), h.email)); };
     if (!h.whatsapp) {
       Alert.alert(tx('Te ayudamos'), tx('Escribile a {email} y contanos en qué paso estás. Te respondemos lo antes posible.', { email: h.email }), [

@@ -17,6 +17,7 @@ import {
 } from '@/lib/importSmart';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
+import { useCentralRole } from '@/lib/centralData';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
 
@@ -52,7 +53,9 @@ export default function ImportarFacil() {
   const counts = useMemo(() => countRows(rows), [rows]);
   const out = useMemo(() => rowsToSend(rows), [rows]);
 
-  const allowed = other ? !!profile?.is_network_admin : can('personas.editar');
+  const centralRole = useCentralRole();
+  // En otra iglesia: el dueño de la red o el equipo de La Mies (la base revisa además que el pastor lo haya pedido).
+  const allowed = other ? !!profile?.is_network_admin || !!centralRole : can('personas.editar');
   if (!allowed) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
