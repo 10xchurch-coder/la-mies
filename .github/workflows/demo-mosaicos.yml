@@ -1,0 +1,16 @@
+# Mosaicos del mapa de una zona chica, para las fotos del manual y del folleto. Quedan como archivo adjunto de la corrida.
+name: Mosaicos para capturas
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mosaicos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/demo_mosaicos.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mosaicos
+          path: mosaicos
