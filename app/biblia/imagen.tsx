@@ -8,6 +8,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header } from '@/components/Screen';
 import { Button } from '@/components/ui';
 import { bookName, chapterText, cleanPlace, verseSpan, versionOf } from '@/lib/bible';
+import { useBibleReady } from '@/lib/bibleReady';
 import { ALL_PHOTOS, photoUrl } from '@/lib/backgrounds';
 import { loadBibleFont } from '@/lib/bibleFonts';
 import { BIBLE_FONTS, fontOf, type BibleFontId } from '@/lib/bibleLook';
@@ -98,7 +99,9 @@ export default function ImagenVersiculo() {
   const { width } = useWindowDimensions();
   const place = cleanPlace(params.libro, params.cap) ?? { book: 42, chapter: 3 };
   const version = versionOf(params.v);
-  const all = useMemo(() => chapterText(version, place.book, place.chapter), [version, place.book, place.chapter]);
+  const bibleReady = useBibleReady([[version.id, place.book]]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const all = useMemo(() => chapterText(version, place.book, place.chapter), [version, place.book, place.chapter, bibleReady]);
   const nums = useMemo(() => (params.vs ?? '').split(',').map(Number).filter((n) => n >= 1 && n <= all.length).sort((a, b) => a - b), [params.vs, all.length]);
   const text = nums.map((n) => all[n - 1]).join(' ');
   const refText = `${bookName(place.book)} ${place.chapter}:${verseSpan(nums)} · ${version.short}`;

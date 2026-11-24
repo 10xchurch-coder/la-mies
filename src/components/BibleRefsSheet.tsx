@@ -1,12 +1,13 @@
 // La hoja de "Referencias": los versículos relacionados con el que se tocó, con su texto en la versión que se está leyendo.
 // Tocar uno lo abre. Los datos son de OpenBible.info (CC BY) y se cargan recién cuando se abre la hoja.
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Button } from '@/components/ui';
 import type { BibleVersion } from '@/lib/bible';
-import { crossRefs, numberingDiffers, refLabel, refText, type Ref } from '@/lib/bibleStudy';
+import { useBibleReady } from '@/lib/bibleReady';
+import { crossRefs, ensureRefs, numberingDiffers, refLabel, refText, type Ref } from '@/lib/bibleStudy';
 import { colors } from '@/theme';
 
 const STEP = 20;
@@ -20,13 +21,26 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
   const key = verses.join(',');
   useEffect(() => { if (visible) setShown(STEP); }, [visible, key, book, chapter]);
 
+  // Las referencias de este libro se piden recién cuando la hoja se abre.
+  const [ready, setReady] = useState(-1);
+  useEffect(() => {
+    if (!visible) return;
+    let alive = true;
+    ensureRefs(book).then(() => { if (alive) setReady(book); });
+    return () => { alive = false; };
+  }, [visible, book]);
+  const loading = visible && ready !== book;
+
   // Cada versículo tocado con sus referencias. No se calcula nada hasta que la hoja se abre.
   const groups = useMemo(() => {
-    if (!visible) return [];
+    if (!visible || ready !== book) return [];
     return verses.map((v) => ({ verse: v, refs: crossRefs(book, chapter, v) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, key, book, chapter]);
+  }, [visible, ready, key, book, chapter]);
   const total = groups.reduce((n, g) => n + g.refs.length, 0);
+  // El texto de las que se ven, en la versión que se está leyendo (si esa versión se baja de a un libro, se piden esos libros).
+  const visibleRefs = groups.flatMap((g) => g.refs).slice(0, shown);
+  useBibleReady(visibleRefs.map((r) => [version.id, r.book]));
   let left = shown;
 
   return (
@@ -41,7 +55,8 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
           <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
         </View>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 18, gap: 10, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
-          {!total ? <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>No hay referencias para {verses.length > 1 ? 'estos versículos' : 'este versículo'}.</Text> : null}
+          {loading ? <ActivityIndicator color={colors.blue} style={{ marginVertical: 24 }} /> : null}
+          {!total && !loading ? <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>No hay referencias para {verses.length > 1 ? 'estos versículos' : 'este versículo'}.</Text> : null}
           {total && version.id !== 'kjv' && numberingDiffers(book, chapter) ? (
             <Text style={{ fontSize: 12, color: colors.muted }}>En este capítulo los números de versículo no son iguales en todas las Biblias. Alguna referencia puede caer un versículo antes o después.</Text>
           ) : null}
@@ -63,7 +78,7 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
                         <Feather name="chevron-right" size={18} color={colors.muted} />
                       </View>
                       <Text style={{ fontSize: 15, lineHeight: 21, color: text ? colors.text : colors.muted }} numberOfLines={5}>
-                        {text || 'En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.'}
+                        {text || (version.load && !version.books[r.book]().length ? 'Cargando…' : 'En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.')}
                       </Text>
                     </Pressable>
                   );

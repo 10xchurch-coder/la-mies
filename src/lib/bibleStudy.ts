@@ -2,8 +2,8 @@
 // (todos los versículos que tienen una palabra) y las referencias cruzadas (versículos que hablan de lo mismo).
 // Sin nada de la app ni de la base, para poder probarse sola.
 import { BOOKS } from './biblePlan';
-import { bookNameIn, chapterText, chaptersIn, type BibleVersion } from './bible';
-import { EN_BOOKS, XREFS } from './bibleStudyData';
+import { bookNameIn, chapterText, chaptersIn, ensureBook, type BibleVersion } from './bible';
+import { EN_BOOKS, XREFS, loadRefsBook } from './bibleStudyData';
 
 // ---------- Comparar texto sin tildes ----------
 
@@ -78,7 +78,7 @@ export function findBookLoose(name: string): number {
 /**
  * Entiende una cita escrita a mano: "Juan 3:16", "jn 3 16", "1 Co 13:4-7", "Salmo 23", "Judas 5", "John 3.16".
  * Devuelve null si no es una cita o si el capítulo o el versículo no existen en ese libro.
- * (El versículo se revisa contra la versión que se pasa; sin versión, solo que sea 1 o más.)
+ * (El versículo se revisa contra la versión que se pasa; sin versión, o si ese libro todavía no se cargó, solo que sea 1 o más.)
  */
 export function parseRef(text: string, version?: BibleVersion): Place | null {
   const t = (text ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[–—]/g, '-').replace(/\s+/g, ' ').trim();
@@ -108,8 +108,8 @@ export function parseRef(text: string, version?: BibleVersion): Place | null {
     if (verse < 1) return null;
     if (version) {
       const n = chapterText(version, book, chapter).length;
-      if (verse > n) return null;
-      if (end != null) end = Math.min(end, n);
+      if (n && verse > n) return null;
+      if (n && end != null) end = Math.min(end, n);
     }
     if (end != null && end <= verse) end = undefined;
   }
@@ -150,7 +150,8 @@ function foldedBook(version: BibleVersion, book: number): string[][] {
   let hit = folded.get(key);
   if (!hit) {
     hit = version.books[book]().map((ch) => ch.map((t) => ` ${fold(t)} `));
-    folded.set(key, hit);
+    // Un libro que todavía no se cargó viene vacío: no se guarda, así se rehace cuando esté.
+    if (hit.length) folded.set(key, hit);
   }
   return hit;
 }
@@ -246,7 +247,13 @@ export function decodeRef(n: number): Ref {
   return { book, chapter, verse, end: verse + extra };
 }
 
-/** Los versículos relacionados con uno, el más votado primero. [] si no hay o si el lugar no existe. */
+/** Deja listas las referencias de un libro (se bajan recién cuando hacen falta). Nunca falla. */
+export async function ensureRefs(book: number): Promise<void> {
+  if (!Number.isInteger(book) || book < 0 || book >= BOOKS.length) return;
+  try { await loadRefsBook(book); } catch { /* sin conexión en la web: queda sin referencias por ahora */ }
+}
+
+/** Los versículos relacionados con uno, el más votado primero. [] si no hay, si el lugar no existe o si falta ensureRefs(libro). */
 export function crossRefs(book: number, chapter: number, verse: number): Ref[] {
   if (!Number.isInteger(book) || book < 0 || book >= XREFS.length || chapter < 1 || verse < 1) return [];
   const list = XREFS[book]()[chapter - 1]?.[verse - 1] ?? [];
@@ -291,6 +298,7 @@ export function numberingDiffers(book: number, chapter: number): boolean {
 
 /**
  * Igual que searchBible, pero de a pocos libros y dejando respirar a la pantalla entre tanda y tanda.
+ * También trae cada libro si hacía falta (searchBible y searchBook solo miran lo que ya está cargado).
  * `alive` deja cortar una búsqueda vieja cuando la persona ya pidió otra: si devuelve false, se devuelve null.
  */
 export async function searchBibleAsync(version: BibleVersion, q: Query, alive: () => boolean = () => true, onProgress?: (done: number) => void, batch = 6): Promise<SearchResult | null> {
@@ -301,6 +309,7 @@ export async function searchBibleAsync(version: BibleVersion, q: Query, alive: (
       if (!alive()) return null;
       onProgress?.(b);
     }
+    await ensureBook(version, b);
     const r = searchBook(version, b, q);
     if (!r.hits.length) continue;
     out.books.push(r);

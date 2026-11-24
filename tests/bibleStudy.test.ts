@@ -1,17 +1,24 @@
-import test from 'node:test';
+import test, { before } from 'node:test';
 import assert from 'node:assert/strict';
 import { BOOKS } from '../src/lib/biblePlan';
-import { VERSIONS, chapterText, findBook, shareVerses, versionOf } from '../src/lib/bible';
+import { VERSIONS, chapterText, ensureBooks, findBook, shareVerses, versionOf } from '../src/lib/bible';
 import { EN_BOOKS, XREFS } from '../src/lib/bibleStudyData';
 import { BIBLE_NOT_INCLUDED, BIBLE_SOURCES } from '../src/lib/bibleSources';
 import {
-  NUMBERING_DIFFS, concordance, crossRefs, decodeRef, findBookLoose, fold, makeQuery, numberingDiffers, parseRef, pieces,
+  NUMBERING_DIFFS, concordance, crossRefs, decodeRef, ensureRefs, findBookLoose, fold, makeQuery, numberingDiffers, parseRef, pieces,
   refLabel, refText, searchBible, searchBibleAsync, searchBook,
 } from '../src/lib/bibleStudy';
 
 const rv = versionOf('rv1909');
 const kjv = versionOf('kjv');
 const B = (name: string) => findBook(name);
+const ALL = BOOKS.map((_, i) => i);
+
+// Estas pruebas trabajan con todo cargado. Lo de pedir libro por libro se prueba en bibleStudyLoad.test.ts.
+before(async () => {
+  await ensureBooks(kjv, ALL);
+  await Promise.all(ALL.map(ensureRefs));
+});
 
 test('la King James trae los 66 libros, 31102 versículos y ninguno vacío', () => {
   assert.equal(VERSIONS.length, 2);

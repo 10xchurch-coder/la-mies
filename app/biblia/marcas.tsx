@@ -5,8 +5,9 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading } from '@/components/ui';
-import { bookName, chapterText, versionOf } from '@/lib/bible';
+import { bookNameIn, chapterText, versionOf } from '@/lib/bible';
 import { MARK_COLORS } from '@/lib/bibleLook';
+import { useBibleReady } from '@/lib/bibleReady';
 import { myMarks, type BibleMark } from '@/lib/bibleMarks';
 import { loadBiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
@@ -30,6 +31,8 @@ export default function MisMarcas() {
     myMarks().then(setRows).catch(() => setRows([]));
   }, []));
 
+  // En una versión que se baja de a un libro (King James), el texto aparece cuando el libro llega.
+  useBibleReady((rows ?? []).map((m) => [version.id, m.book]));
   const list = useMemo(() => (rows ?? []).filter((m) => (tab === 'notas' ? !!m.note : tab === 'resaltados' ? !!m.color : m.saved)), [rows, tab]);
   const count = (t: Tab) => (rows ?? []).filter((m) => (t === 'notas' ? !!m.note : t === 'resaltados' ? !!m.color : m.saved)).length;
 
@@ -59,7 +62,7 @@ export default function MisMarcas() {
               <Card style={{ gap: 6 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   {dot ? <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: dot }} /> : null}
-                  <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>{bookName(m.book)} {m.chapter}:{m.verse}</Text>
+                  <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>{bookNameIn(version, m.book)} {m.chapter}:{m.verse}</Text>
                   {m.saved ? <Feather name="star" size={15} color={colors.blueText} /> : null}
                   <Feather name="chevron-right" size={18} color={colors.muted} />
                 </View>

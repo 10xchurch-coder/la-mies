@@ -16,6 +16,7 @@ import { Button } from '@/components/ui';
 import { myBiblePlan, type BiblePlanRow } from '@/lib/api';
 import { bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
 import { loadBibleFont } from '@/lib/bibleFonts';
+import { useBibleReady } from '@/lib/bibleReady';
 import { BIBLE_FONTS, BIBLE_THEMES, MARK_COLORS, SPACINGS, fontOf, markBg, spacingOf, themeOf, type BibleFontId, type BibleTheme } from '@/lib/bibleLook';
 import { chapterMarks, setMarks, type BibleMark } from '@/lib/bibleMarks';
 import { markChapterRead, loadRead, onPlanMarked, recentPlanNote } from '@/lib/bibleRead';
@@ -51,7 +52,10 @@ export default function LeerBiblia() {
   const [read, setRead] = useState<Set<string>>(new Set());
   const [note, setNote] = useState<string | null>(recentPlanNote());
 
-  const verses = useMemo(() => chapterText(version, book, chapter), [version, book, chapter]);
+  // La King James se baja de a un libro: cuando llega, el capítulo se arma de nuevo.
+  const bibleReady = useBibleReady([[version.id, book]]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const verses = useMemo(() => chapterText(version, book, chapter), [version, book, chapter, bibleReady]);
   const prev = neighbor(book, chapter, -1);
   const next = neighbor(book, chapter, 1);
   const single = chaptersIn(book) === 1;
@@ -84,7 +88,7 @@ export default function LeerBiblia() {
     return () => { alive = false; };
   }, [fontId]);
   useEffect(() => {
-    setPicked(params.ver ? [Number(params.ver)].filter((n) => n >= 1 && n <= verses.length) : []);
+    setPicked(params.ver ? [Number(params.ver)].filter((n) => n >= 1 && (!verses.length || n <= verses.length)) : []);
     setCopied(false);
     setMarksState({});
     chapterMarks(book, chapter).then(setMarksState).catch(() => undefined);
@@ -197,7 +201,8 @@ export default function LeerBiblia() {
             </Text>
           );
         })}
-        {!picked.length ? <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>Tocá un versículo para resaltarlo, anotarlo, copiarlo o compartirlo.</Text> : null}
+        {!verses.length ? <Text style={{ fontSize: 14, color: look.muted, textAlign: 'center', marginVertical: 24 }}>Cargando el texto…</Text> : null}
+        {!picked.length && verses.length ? <Text style={{ fontSize: 12, color: look.muted, textAlign: 'center', marginTop: 10 }}>Tocá un versículo para resaltarlo, anotarlo, copiarlo o compartirlo.</Text> : null}
         {inPlan ? (
           isRead ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 10 }}>
