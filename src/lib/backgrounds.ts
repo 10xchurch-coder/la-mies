@@ -65,3 +65,5 @@ export function photoUrl(id: string, width: number, height: number, quality = 75
 }
 
 export const DAILY_PHOTO_COUNT = DAILY_PHOTOS.length;
+/** Todas las fotos, para elegir una al armar la imagen de un versículo. */
+export const ALL_PHOTOS: readonly string[] = DAILY_PHOTOS;

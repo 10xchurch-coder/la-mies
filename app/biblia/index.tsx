@@ -73,6 +73,16 @@ export default function Biblia() {
             </Card>
           </Pressable>
         ) : null}
+        <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel="Mis notas y resaltados">
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Feather name="edit-3" size={20} color={colors.blueText} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Mis notas y resaltados</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>Lo que marcaste y guardaste al leer</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.muted} />
+          </Card>
+        </Pressable>
         <SectionTitle>Antiguo Testamento</SectionTitle>
         {books(0, OT_COUNT)}
         <SectionTitle>Nuevo Testamento</SectionTitle>

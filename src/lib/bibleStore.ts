@@ -1,11 +1,11 @@
-// Lo que la Biblia recuerda en el teléfono: dónde quedó la persona y el tamaño de letra que eligió.
+// Lo que la Biblia recuerda en el teléfono: dónde quedó la persona y cómo le gusta leer (letra, tamaño, fondo, espacio).
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEY = 'lamies.biblia';
 
-export type BiblePrefs = { version?: string; book: number; chapter: number; size: number };
-export const DEFAULT_PREFS: BiblePrefs = { book: 42, chapter: 1, size: 18 };
-export const SIZES = [15, 17, 19, 22, 26];
+export type BiblePrefs = { version?: string; book: number; chapter: number; size: number; font?: string; theme?: string; spacing?: string };
+export const DEFAULT_PREFS: BiblePrefs = { book: 42, chapter: 1, size: 19 };
+export const SIZES = [14, 15, 17, 19, 22, 26, 30];
 
 export async function loadBiblePrefs(): Promise<BiblePrefs> {
   try {
@@ -17,6 +17,9 @@ export async function loadBiblePrefs(): Promise<BiblePrefs> {
       book: Number.isInteger(p.book) && p.book! >= 0 && p.book! < 66 ? p.book! : DEFAULT_PREFS.book,
       chapter: Number.isInteger(p.chapter) && p.chapter! >= 1 ? p.chapter! : 1,
       size: typeof p.size === 'number' && SIZES.includes(p.size) ? p.size : DEFAULT_PREFS.size,
+      font: typeof p.font === 'string' ? p.font : undefined,
+      theme: typeof p.theme === 'string' ? p.theme : undefined,
+      spacing: typeof p.spacing === 'string' ? p.spacing : undefined,
     };
   } catch {
     return DEFAULT_PREFS;
