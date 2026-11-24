@@ -61,7 +61,7 @@ export function FeatureSwitches({ off, onChange, disabled, search, showHides, fo
                 {hides(f)}
                 {parts.length && on && !partsOpen ? (
                   <Pressable onPress={() => setOpen([...open, f.key])} accessibilityRole="button" hitSlop={6} style={{ paddingVertical: 6 }}>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Ver sus {parts.length} partes ({partsOn} prendidas) ▾</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Ver sus {parts.length} partes ({partsOn === 1 ? '1 prendida' : `${partsOn} prendidas`}) ▾</Text>
                   </Pressable>
                 ) : null}
                 {parts.length && on && partsOpen ? (
