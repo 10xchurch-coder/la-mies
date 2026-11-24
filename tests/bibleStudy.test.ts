@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { BOOKS } from '../src/lib/biblePlan';
 import { VERSIONS, chapterText, findBook, shareVerses, versionOf } from '../src/lib/bible';
 import { EN_BOOKS, XREFS } from '../src/lib/bibleStudyData';
+import { BIBLE_NOT_INCLUDED, BIBLE_SOURCES } from '../src/lib/bibleSources';
 import {
   NUMBERING_DIFFS, concordance, crossRefs, decodeRef, findBookLoose, fold, makeQuery, numberingDiffers, parseRef, pieces,
-  refLabel, refText, searchBible, searchBook,
+  refLabel, refText, searchBible, searchBibleAsync, searchBook,
 } from '../src/lib/bibleStudy';
 
 const rv = versionOf('rv1909');
@@ -250,4 +251,26 @@ test('refLabel y refText: el texto en la versión elegida, sin fallar si la nume
   for (const [b, c] of NUMBERING_DIFFS) {
     for (let v = 1; v <= chapterText(kjv, b, c).length; v++) for (const r of crossRefs(b, c, v)) { refText(rv, r); refText(kjv, r); }
   }
+});
+
+test('searchBibleAsync da lo mismo que searchBible y se puede cortar', async () => {
+  const q = makeQuery('unigénito')!;
+  const seen: number[] = [];
+  const a = await searchBibleAsync(rv, q, () => true, (n) => seen.push(n));
+  assert.deepEqual(a, searchBible(rv, q));
+  assert.deepEqual(seen.slice(0, 3), [0, 6, 12]);
+  // Si la persona ya pidió otra búsqueda, la vieja no devuelve nada.
+  assert.equal(await searchBibleAsync(rv, q, () => false), null);
+  let calls = 0;
+  assert.equal(await searchBibleAsync(rv, q, () => ++calls < 3), null);
+});
+
+test('"Acerca de los textos" nombra cada versión y cada ayuda con su permiso y su fuente', () => {
+  for (const v of VERSIONS) assert.ok(BIBLE_SOURCES.some((s) => s.version === v.id), v.id);
+  for (const s of BIBLE_SOURCES) assert.ok(s.title && s.what && s.licence && s.detail && s.source, s.title);
+  // La licencia CC BY pide reconocimiento: tiene que estar escrito.
+  for (const s of BIBLE_SOURCES.filter((x) => x.licence.includes('CC BY'))) assert.ok(s.credit && /OpenBible\.info/.test(s.credit));
+  // Nada con derechos reservados entre lo incluido.
+  assert.ok(!BIBLE_SOURCES.some((s) => /1960/.test(s.title)));
+  assert.ok(BIBLE_NOT_INCLUDED.some((s) => /1960/.test(s.title)));
 });

@@ -286,3 +286,26 @@ const DIFF_KEYS = new Set(NUMBERING_DIFFS.map(([b, c]) => `${b}:${c}`));
 export function numberingDiffers(book: number, chapter: number): boolean {
   return DIFF_KEYS.has(`${book}:${chapter}`);
 }
+
+// ---------- Buscar sin trabar la pantalla ----------
+
+/**
+ * Igual que searchBible, pero de a pocos libros y dejando respirar a la pantalla entre tanda y tanda.
+ * `alive` deja cortar una búsqueda vieja cuando la persona ya pidió otra: si devuelve false, se devuelve null.
+ */
+export async function searchBibleAsync(version: BibleVersion, q: Query, alive: () => boolean = () => true, onProgress?: (done: number) => void, batch = 6): Promise<SearchResult | null> {
+  const out: SearchResult = { total: 0, verses: 0, books: [] };
+  for (let b = 0; b < BOOKS.length; b++) {
+    if (b % batch === 0) {
+      await new Promise<void>((r) => setTimeout(r, 0));
+      if (!alive()) return null;
+      onProgress?.(b);
+    }
+    const r = searchBook(version, b, q);
+    if (!r.hits.length) continue;
+    out.books.push(r);
+    out.total += r.count;
+    out.verses += r.hits.length;
+  }
+  return alive() ? out : null;
+}

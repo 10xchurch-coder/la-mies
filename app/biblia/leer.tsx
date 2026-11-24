@@ -2,16 +2,19 @@
 // Arriba a la derecha (los tres puntos) se elige letra, tamaño, fondo y espacio entre líneas; el parlante lo lee en voz alta.
 // Al tocar versículos quedan subrayados con puntitos y abajo se abre la barra: color para resaltar, nota, copiar, compartir y guardar.
 // Lo que se marca va por libro, capítulo y versículo, así se ve igual en cualquier versión. Lo leído se anota solo en el plan de lectura.
+// "Referencias" abre los versículos relacionados con el que se tocó. La versión (español o inglés) se cambia en los tres puntos.
 import React, { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Feather } from '@expo/vector-icons';
+import { BibleRefsSheet } from '@/components/BibleRefsSheet';
+import { BibleVersionChips } from '@/components/BibleVersionChips';
 import { Header } from '@/components/Screen';
 import { Button } from '@/components/ui';
 import { myBiblePlan, type BiblePlanRow } from '@/lib/api';
-import { bookName, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
+import { bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
 import { loadBibleFont } from '@/lib/bibleFonts';
 import { BIBLE_FONTS, BIBLE_THEMES, MARK_COLORS, SPACINGS, fontOf, markBg, spacingOf, themeOf, type BibleFontId, type BibleTheme } from '@/lib/bibleLook';
 import { chapterMarks, setMarks, type BibleMark } from '@/lib/bibleMarks';
@@ -40,6 +43,7 @@ export default function LeerBiblia() {
   const [picked, setPicked] = useState<number[]>([]);
   const [copied, setCopied] = useState(false);
   const [marks, setMarksState] = useState<Record<number, BibleMark>>({});
+  const [refsOpen, setRefsOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [speaking, setSpeaking] = useState(-1);
@@ -167,7 +171,7 @@ export default function LeerBiblia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: look.bg }}>
-      <Header title={single ? bookName(book) : `${bookName(book)} ${chapter}`} subtitle={version.name} back
+      <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={version.name} back
         right={<View style={{ flexDirection: 'row', gap: 8 }}>
           {speakAvailable ? headBtn(speaking >= 0 ? 'square' : 'volume-2', speaking >= 0 ? 'Parar la lectura' : 'Escuchar el capítulo', listen, speaking >= 0) : null}
           {headBtn('more-horizontal', 'Letra, fondo y tamaño', () => setMenu(true))}
@@ -215,6 +219,11 @@ export default function LeerBiblia() {
         <View style={{ paddingTop: 10, paddingHorizontal: 12, paddingBottom: insets.bottom + 8, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.bg, gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }} numberOfLines={1}>{text().split('\n').pop()}</Text>
+            <Pressable onPress={() => setRefsOpen(true)} accessibilityRole="button" accessibilityLabel="Referencias: versículos que hablan de lo mismo"
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 999, backgroundColor: colors.blueSoft }}>
+              <Feather name="link" size={14} color={colors.blueText} />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>Referencias</Text>
+            </Pressable>
             <Pressable onPress={() => { setPicked([]); setCopied(false); }} accessibilityRole="button" accessibilityLabel="Quitar selección" hitSlop={10}>
               <Feather name="x" size={22} color={colors.muted} />
             </Pressable>
@@ -242,6 +251,9 @@ export default function LeerBiblia() {
         </View>
       ) : null}
 
+      <BibleRefsSheet visible={refsOpen} onClose={() => setRefsOpen(false)} version={version} book={book} chapter={chapter} verses={sorted}
+        onOpen={(r) => { setRefsOpen(false); router.push({ pathname: '/biblia/leer', params: { libro: String(r.book), cap: String(r.chapter), v: version.id, ver: String(r.verse) } }); }} />
+
       {/* Letra, tamaño, fondo y espacio entre líneas */}
       <Modal visible={menu} transparent animationType="slide" onRequestClose={() => setMenu(false)}>
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={() => setMenu(false)} accessibilityLabel="Cerrar" />
@@ -250,6 +262,10 @@ export default function LeerBiblia() {
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ flex: 1, fontSize: 18, fontWeight: '800', color: colors.text }}>Cómo querés leer</Text>
               <Pressable onPress={() => setMenu(false)} accessibilityRole="button" accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
+            </View>
+            <View style={{ gap: 8 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>BIBLIA</Text>
+              <BibleVersionChips value={version.id} onChange={(v) => router.replace({ pathname: '/biblia/leer', params: { libro: String(book), cap: String(chapter), v: v.id } })} />
             </View>
             <View style={{ gap: 8 }}>
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>TAMAÑO DE LA LETRA</Text>
