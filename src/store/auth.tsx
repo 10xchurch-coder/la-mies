@@ -9,7 +9,7 @@ import { netState } from '../lib/netFetch';
 import { registerForPush } from '../lib/push';
 import type { Church, Contact, Group, Profile } from '../types';
 import { financeLevelFromPerms, hasRole, rolePerms, type Perm } from '../lib/perms';
-import { isDemoSession } from '../lib/demoCore';
+import { isDemoSession, leaveDemo } from '../lib/demo';
 
 // Quién fue el último en entrar en este teléfono. Si la app se abre sin señal y la sesión no se puede renovar,
 // se sigue como esa persona con lo último guardado; cuando vuelve la señal, la sesión se renueva sola.
@@ -178,7 +178,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut: async () => {
           setViewAsMemberRaw(false);
           // En la demostración se sale solo de este navegador: los demás visitantes usan la misma cuenta de ejemplo.
-          await supabase.auth.signOut(isDemoSession(session) ? { scope: 'local' } : undefined);
+          if (isDemoSession(session)) await leaveDemo();
+          else await supabase.auth.signOut();
         },
       };
     },

@@ -477,6 +477,7 @@ select public.demo_echo(${C}, current_date);
   // ---------------- 08 · informes semanales de los últimos domingos ----------------
   batch('08_informes', `
 set local session_replication_role = origin;
-select public.run_weekly_report(${C}, (${SUN} - 7 * g + time '21:00')::timestamp) from generate_series(1, 6) g;
+-- Con los disparadores normales: deja en "Avisos" el resumen de cada domingo, como le llega a una iglesia real.
+select public.run_weekly_report(${C}, ((${SUN}) - 7 * g + time '21:00')::timestamp) from generate_series(1, 6) g;
 `);
 }
