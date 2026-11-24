@@ -441,7 +441,7 @@ export default function Iglesia() {
                 <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>{b.name}{b.turns ? <Text style={{ fontWeight: '500', color: colors.muted }}>  {tx('· {turns} años', { turns: b.turns })}</Text> : null}</Text>
               </View>
             ))}
-            {bdays.some((b) => !b.is_me) ? (
+            {on('chat') && bdays.some((b) => !b.is_me) ? (
               <Text onPress={() => router.push('/chat' as Href)} style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{tx('Mandale un saludo en el chat de la iglesia →')}</Text>
             ) : null}
           </Card>
@@ -495,7 +495,7 @@ export default function Iglesia() {
             </View>
           </View>
         ) : null}
-        {!on('devocional') ? null : (() => {
+        {!on('plan_lectura') ? null : (() => {
           const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
           const title = !st ? tx('Plan de lectura de la Biblia') : st.today ? tx('Lectura de hoy: {today}', { today: st.today }) : tx('Hoy no hay lectura nueva');
           const hint = !st ? tx('Elegí un plan y la app te dice qué leer cada día')
@@ -513,7 +513,7 @@ export default function Iglesia() {
                 </View>
                 {(() => {
                   const at = st?.today ? parseReading(st.today) : null;
-                  return at ? (
+                  return at && on('biblia') ? (
                     <Pressable onPress={() => router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } })} hitSlop={6}
                       accessibilityRole="button" accessibilityLabel={tx('Leer {today} en la Biblia', { today: st?.today })}
                       style={{ paddingHorizontal: 12, height: 34, borderRadius: 17, backgroundColor: colors.blueSoft, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -527,7 +527,7 @@ export default function Iglesia() {
             </Pressable>
           );
         })()}
-        {!on('devocional') ? null : (
+        {!on('biblia') ? null : (
           <Pressable onPress={() => router.push('/biblia' as Href)} accessibilityRole="button" accessibilityLabel={tx('Biblia. Leé la Biblia en la app, sin internet')}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>

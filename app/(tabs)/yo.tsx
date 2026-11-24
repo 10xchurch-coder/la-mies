@@ -11,6 +11,7 @@ import { pickAndUploadPhoto } from '@/lib/files';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { ROLE_LABEL, STATUS_LABEL } from '@/lib/format';
 import { useAuth } from '@/store/auth';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors } from '@/theme';
 import type { Ministry, UpcomingItem } from '@/types';
 import { UpcomingList } from '@/components/Upcoming';
@@ -21,6 +22,8 @@ type IconName = React.ComponentProps<typeof Feather>['name'];
 export default function Yo() {
   const router = useRouter();
   const { profile, church, group, me, isLeader, refreshProfile } = useAuth();
+  // Lo que la iglesia apagó no aparece en esta lista.
+  const { pathOk } = useFeatures();
   const [mine, setMine] = useState<Ministry[]>([]);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [unread, setUnread] = useState(0);
@@ -81,7 +84,7 @@ export default function Yo() {
           {me ? <Feather name="chevron-right" size={22} color={colors.muted} /> : null}
         </Pressable>
 
-        {mine.length ? (
+        {mine.length && pathOk('/ministerios') ? (
           <>
             <SectionTitle>{tx('Mis ministerios')}</SectionTitle>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -98,6 +101,7 @@ export default function Yo() {
         <SectionTitle>{tx('Lo que me toca')}</SectionTitle>
         <UpcomingList items={upcoming} />
 
+        {pathOk('/dar') ? (
         <Pressable onPress={() => router.push('/dar')} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, borderRadius: 14, backgroundColor: colors.greenSoft, borderWidth: 1.5, borderColor: colors.green }}>
           <Feather name="gift" size={24} color={colors.greenText} />
           <View style={{ flex: 1 }}>
@@ -106,17 +110,18 @@ export default function Yo() {
           </View>
           <Feather name="chevron-right" size={20} color={colors.greenText} />
         </Pressable>
+        ) : null}
 
         <Card style={{ padding: 0 }}>
           <RowLink title={tx('Avisos')} subtitle={unread ? tx('{unread} sin leer', { unread }) : tx('Recordatorios y anuncios')} icon="bell" onPress={() => router.push('/avisos')} />
-          <RowLink title={tx('Devocional y mi racha')} subtitle={tx('Versículo del día, lectura y premios')} icon="book-open" onPress={() => router.push('/devocional')} />
-          <RowLink title={tx('Mi progreso y niveles')} icon="award" onPress={() => router.push('/progreso')} />
-          <RowLink title={tx('Mis notas')} subtitle={tx('Tus apuntes de los estudios')} icon="edit-3" onPress={() => router.push('/notas' as never)} />
-          {certId ? <RowLink title={tx('Mi certificado de bautismo')} subtitle={tx('Verlo, guardarlo o imprimirlo')} icon="droplet" onPress={() => router.push(`/certificado/${certId}` as never)} /> : null}
-          <RowLink title={tx('Mis salidas')} subtitle={tx('Ver, arreglar o terminar una salida')} icon="clock" onPress={() => router.push('/salidas')} />
-          <RowLink title={tx('Mis contactos para seguir')} subtitle={tx('Promesas, visitas y mensajes')} icon="user-check" onPress={() => router.push('/seguimiento')} />
-          <RowLink title={tx('Zonas')} subtitle={tx('Barrios asignados y cuánto falta')} icon="hexagon" onPress={() => router.push('/zonas')} />
-          <RowLink title={tx('Directorio')} subtitle={tx('Elegí si aparecés')} icon="users" onPress={() => router.push('/directorio')} />
+          {pathOk('/devocional') ? <RowLink title={tx('Devocional y mi racha')} subtitle={tx('Versículo del día, lectura y premios')} icon="book-open" onPress={() => router.push('/devocional')} /> : null}
+          {pathOk('/progreso') ? <RowLink title={tx('Mi progreso y niveles')} icon="award" onPress={() => router.push('/progreso')} /> : null}
+          {pathOk('/notas') ? <RowLink title={tx('Mis notas')} subtitle={tx('Tus apuntes de los estudios')} icon="edit-3" onPress={() => router.push('/notas' as never)} /> : null}
+          {certId && pathOk('/certificado') ? <RowLink title={tx('Mi certificado de bautismo')} subtitle={tx('Verlo, guardarlo o imprimirlo')} icon="droplet" onPress={() => router.push(`/certificado/${certId}` as never)} /> : null}
+          {pathOk('/salidas') ? <RowLink title={tx('Mis salidas')} subtitle={tx('Ver, arreglar o terminar una salida')} icon="clock" onPress={() => router.push('/salidas')} /> : null}
+          {pathOk('/seguimiento') ? <RowLink title={tx('Mis contactos para seguir')} subtitle={tx('Promesas, visitas y mensajes')} icon="user-check" onPress={() => router.push('/seguimiento')} /> : null}
+          {pathOk('/zonas') ? <RowLink title={tx('Zonas')} subtitle={tx('Barrios asignados y cuánto falta')} icon="hexagon" onPress={() => router.push('/zonas')} /> : null}
+          {pathOk('/directorio') ? <RowLink title={tx('Directorio')} subtitle={tx('Elegí si aparecés')} icon="users" onPress={() => router.push('/directorio')} /> : null}
           {me ? <RowLink title={tx('Mis datos')} subtitle={tx('Teléfono, dirección, hijos')} icon="user" onPress={() => router.push({ pathname: '/persona/nueva', params: { id: me.id } })} /> : null}
           {isLeader ? <RowLink title={tx('Panel del pastor')} subtitle={tx('Reportes, hermanos y código de la iglesia')} icon="bar-chart-2" onPress={() => router.push('/panel')} /> : null}
           <RowLink title={tx('Seguridad de mi cuenta')} subtitle={tx('Contraseña y verificación en dos pasos')} icon="shield" onPress={() => router.push('/seguridad')} />

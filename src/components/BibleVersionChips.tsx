@@ -1,10 +1,12 @@
 // Para elegir en qué Biblia leer o buscar (hoy: Reina-Valera 1909 en español y King James en inglés).
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { VERSIONS, type BibleVersion } from '@/lib/bible';
+import { allowedVersions, type BibleVersion } from '@/lib/bible';
 import { colors } from '@/theme';
 
 export function BibleVersionChips({ value, onChange }: { value: string; onChange: (v: BibleVersion) => void }) {
+  // Solo las versiones que la iglesia permite. Si hay una sola, no hay nada que elegir.
+  const VERSIONS = allowedVersions();
   if (VERSIONS.length < 2) return null;
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>

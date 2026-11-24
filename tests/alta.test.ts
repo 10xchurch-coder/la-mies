@@ -147,3 +147,33 @@ test('las pantallas nuevas son de la base de la app (no se pueden apagar)', () =
     assert.ok(CORE_ROUTES.some((c) => r === c || r.startsWith(`${c}/`)), r);
   }
 });
+
+import { BASIC_BIG_ON, FULL_OFF, SMALL_OFF, isBig, isSmall } from '../src/lib/alta';
+import { featureOn as fOn } from '../src/lib/features';
+test('los modelos se acomodan al tamaño que la iglesia dijo al anotarse', () => {
+  for (const k of [...BASIC_BIG_ON, ...FULL_OFF, ...SMALL_OFF]) assert.ok(isFeatureKey(k), k);
+  assert.ok(isSmall('1-30') && isSmall('31-80') && !isSmall('81-200') && !isSmall(null));
+  assert.ok(isBig('201-500') && isBig('500+') && !isBig('81-200') && !isBig(undefined));
+  // Iglesia chica + completa: queda apagado lo de eventos grandes y los chips.
+  const small = presetOff('completa', [], '1-30');
+  assert.ok(small.includes('asistencia_chips') && small.includes('evento_puerta') && !small.includes('eventos') && !small.includes('finanzas'));
+  assert.ok(!presetOff('completa', [], '81-200').includes('asistencia_chips'));
+  // Iglesia grande + básico: además se prenden los chicos, las clases y los ministerios.
+  const big = presetOff('basico', [], '500+');
+  assert.ok(!big.includes('ninos') && !big.includes('clases') && !big.includes('ministerios') && big.includes('finanzas'));
+  assert.ok(presetOff('basico', [], '31-80').includes('ninos'));
+  // Sin tamaño (la iglesia no se anotó sola) es como siempre.
+  assert.deepEqual(presetOff('basico', [], null), presetOff('basico'));
+});
+
+test('ningún modelo prende solo las ofrendas por persona, y lo básico deja la Biblia lista para usar', () => {
+  for (const size of [null, '1-30', '81-200', '500+']) {
+    assert.ok(presetOff('basico', [], size).includes('ofrendas_persona'));
+    assert.ok(presetOff('completa', [], size).includes('ofrendas_persona'));
+  }
+  const basic = presetOff('basico');
+  for (const k of ['biblia', 'biblia_buscar', 'biblia_marcas', 'devocional', 'plan_lectura', 'asistencia', 'ausencias'] as const) assert.ok(fOn(basic, k), k);
+  // Ninguna parte queda prendida con su función principal apagada (sería un interruptor que no hace nada).
+  for (const k of BASIC_ON) { const f = FEATURES.find((x) => x.key === k)!; if (f.parent) assert.ok(BASIC_ON.includes(f.parent), k); }
+});
+

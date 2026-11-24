@@ -10,17 +10,22 @@ import * as ImagePicker from 'expo-image-picker';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Empty, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
+import { Button, Card, Empty, Field, Loading, Tag, Toggle } from '@/components/ui';
 import { useChurchLogo } from '@/components/BrandFooter';
 import {
-  helpLinks, joinMessage, NO_FACTS, presetChanges, presetOff, PRESETS, progress, STATE_LABEL, STEPS, stepState, STORE_LINKS,
+  helpLinks, joinMessage, NO_FACTS, presetOff, PRESETS, SIZES, progress, STATE_LABEL, STEPS, stepState, STORE_LINKS,
   type Facts, type PresetKey, type SavedSteps, type Step, type StepKey, type StepState,
 } from '@/lib/alta';
 import { altaState, setStep } from '@/lib/altaData';
-import { listAllServices, listClasses, setFeature } from '@/lib/api';
+import { listAllServices, listClasses } from '@/lib/api';
+import { FeatureSwitches } from '@/components/FeatureSwitches';
+import { BibleChurchSettings } from '@/components/BibleChurchSettings';
+import { VERSIONS, getChurchBible } from '@/lib/bible';
+import { allowedOf, churchDefault } from '@/lib/bibleChurch';
+import { setBible, setFeatures, sizeHint } from '@/lib/funcionesData';
 import { CLASS_IDEAS, cleanTime, missingIdeas, SERVICE_IDEAS, type ClassIdea, type ServiceIdea } from '@/lib/churchSetup';
 import { saveSetup } from '@/lib/churchSetupData';
-import { FEATURES, FEATURE_GROUPS, cleanDisabled, featureOn, type FeatureKey } from '@/lib/features';
+import { FEATURES, cleanDisabled, countOn, featureOn, type FeatureKey } from '@/lib/features';
 import { uploadPicked } from '@/lib/files';
 import { dayName } from '@/lib/format';
 import { churchExtras } from '@/lib/givingData';
@@ -55,6 +60,10 @@ export default function Alta() {
   // Paso 3
   const [off, setOff] = useState<FeatureKey[]>(() => cleanDisabled(church?.disabled_features));
   const [preset, setPreset] = useState<PresetKey | null>(null);
+  // Lo que el pastor va eligiendo en el paso 3: no se guarda hasta que toca "Guardar y seguir".
+  const [draft, setDraft] = useState<FeatureKey[] | null>(null);
+  const [size, setSize] = useState<string | null>(null);
+  const [bible, setBibleDraft] = useState<{ versions: string[]; def: string } | null>(null);
   // Pasos 4 y 6
   const [noList, setNoList] = useState(false);
   const [joinCode, setJoinCode] = useState<string | null>(null);
@@ -78,6 +87,7 @@ export default function Alta() {
     supabase.rpc('church_join_code').then(({ data }) => setJoinCode(typeof data === 'string' ? data : null));
   }, [allowed]);
   useEffect(() => { setOff(cleanDisabled(church?.disabled_features)); }, [church?.disabled_features]);
+  useEffect(() => { if (allowed) sizeHint().then(setSize).catch(() => undefined); }, [allowed]);
 
   const loadLists = useCallback(() => {
     listAllServices().then((s) => { setServices(s); setTimes(Object.fromEntries(s.map((x) => [x.id, x.time]))); }).catch(() => undefined);
@@ -167,27 +177,24 @@ export default function Alta() {
   };
 
   // ---------- Paso 3: funciones ----------
-  const change = async (key: FeatureKey, enabled: boolean) => {
-    const before = off;
-    setOff(enabled ? off.filter((k) => k !== key) : [...off, key]);
-    try {
-      setOff(cleanDisabled(await setFeature(key, enabled)));
-      await refreshProfile();
-    } catch (e) {
-      setOff(before); fail(e);
-    }
-  };
+  // Un modelo es solo un punto de partida: llena los interruptores y el pastor ajusta lo que quiera. Se guarda todo junto, de una vez.
   const applyPreset = (key: PresetKey) => {
     setPreset(key);
-    if (key === 'elijo') return;
-    run(async () => {
-      let last: string[] = off;
-      for (const c of presetChanges(off, presetOff(key))) last = await setFeature(c.key, c.enabled);
-      setOff(cleanDisabled(last));
-      await refreshProfile();
-      await mark('funciones', 'done');
-    });
+    setDraft(presetOff(key, off, size));
+    if (!bible) {
+      const c = getChurchBible();
+      setBibleDraft({ versions: allowedOf(VERSIONS, c).map((v) => v.id as string), def: churchDefault(VERSIONS, c).id as string });
+    }
   };
+  const stage = (key: FeatureKey, enabled: boolean) => setDraft((d) => { const now = d ?? off; return enabled ? now.filter((k) => k !== key) : [...now.filter((k) => k !== key), key]; });
+  const saveFeatures = () => run(async () => {
+    const saved = cleanDisabled(await setFeatures(draft ?? off));
+    setOff(saved);
+    if (bible && featureOn(saved, 'biblia')) await setBible(bible.versions, bible.def);
+    await refreshProfile();
+    setDraft(null);
+    await mark('funciones', 'done');
+  });
 
   // ---------- Paso 6: el código ----------
   const message = joinCode ? joinMessage({ church: church.name, code: joinCode, webUrl: WEB_URL }) : '';
@@ -270,9 +277,11 @@ export default function Alta() {
       );
     }
     if (key === 'funciones') {
+      const now = draft ?? off;
+      const sizeLabel = SIZES.find((x) => x.value === size)?.label;
       return (
         <>
-          <Text style={p}>{tx('Elegí un modelo. Lo apagado no aparece en el menú. No se borra nada y se puede prender después.')}</Text>
+          <Text style={p}>Primero elegí por dónde empezar. Después mirás la lista y cambiás lo que quieras. Lleva dos minutos.</Text>
           {PRESETS.map((x) => (
             <Pressable key={x.key} onPress={() => applyPreset(x.key)} disabled={busy} accessibilityRole="button" accessibilityState={{ selected: preset === x.key }}
               style={{ gap: 4, padding: 12, borderRadius: 12, borderWidth: 2, borderColor: preset === x.key ? colors.green : colors.border, backgroundColor: preset === x.key ? colors.greenSoft : colors.bg }}>
@@ -280,20 +289,20 @@ export default function Alta() {
               <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>{x.hint}</Text>
             </Pressable>
           ))}
-          {preset === 'elijo' ? (
+          {preset ? (
             <>
-              {FEATURE_GROUPS.map((g) => (
-                <View key={g} style={{ gap: 6 }}>
-                  <SectionTitle>{tx(g)}</SectionTitle>
-                  {FEATURES.filter((f) => f.group === g).map((f) => (
-                    <Toggle key={f.key} label={f.label} hint={f.hint} value={featureOn(off, f.key)} onChange={(v) => change(f.key, v)} disabled={busy} />
-                  ))}
-                </View>
-              ))}
-              <Button title={tx('Listo, así está bien')} icon="check" onPress={() => mark('funciones', 'done')} />
+              <View style={{ gap: 4, padding: 12, borderRadius: 12, backgroundColor: colors.amberSoft }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Así queda: {countOn(now)} de {FEATURES.length} prendidas</Text>
+                <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>
+                  Tocá cada interruptor: “quiero usar esto”, “esto no”.{sizeLabel && preset !== 'elijo' ? ` Lo armamos pensando en una iglesia de ${sizeLabel.toLowerCase()} personas.` : ''} Lo apagado no aparece en el menú, no se borra nada y lo cambiás cuando quieras.
+                </Text>
+              </View>
+              <FeatureSwitches off={now} onChange={stage} disabled={busy} foldParts
+                after={(k) => (k === 'biblia' && bible ? <BibleChurchSettings versions={bible.versions} def={bible.def} onChange={(versions, def) => setBibleDraft({ versions, def })} disabled={busy} /> : null)} />
+              <Button title="Guardar y seguir" icon="check" onPress={saveFeatures} loading={busy} />
             </>
           ) : null}
-          <Text style={small}>{tx('Ahora hay {v1} partes prendidas de {n}. Se cambia cuando quieras en Funciones de la iglesia.', { v1: FEATURES.length - off.length, n: FEATURES.length })}</Text>
+          <Text style={small}>Después lo cambiás cuando quieras en Ajustes → Funciones de la iglesia.</Text>
         </>
       );
     }

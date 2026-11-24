@@ -16,6 +16,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Sermon } from '@/types';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.floor(sec || 0));
@@ -139,7 +140,7 @@ function SermonNotes({ sermonId, outline }: { sermonId: string; outline: string 
       ) : null}
       <Field label={tx('Mis notas')} value={notes} onChangeText={(t) => { setNotes(t); queue(answers, t); }} multiline placeholder={tx('Lo que Dios me habló hoy…')} />
       <Text style={{ fontSize: 12, color: saved === 'error' ? colors.red : colors.muted, textAlign: 'right' }}>{saved === 'saving' ? tx('Guardando…') : saved === 'ok' ? tx('Guardado') : saved === 'error' ? tx('No se pudo guardar. Revisá tu conexión y escribí de nuevo.') : tx('Solo vos ves tus apuntes')}</Text>
-      <Text onPress={() => { flush(); router.push('/predica/mis-notas' as Href); }} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center', paddingVertical: 6 }}>{tx('Ver todas mis notas de prédicas')}</Text>
+      <IfOn feature="predica_notas"><Text onPress={() => { flush(); router.push('/predica/mis-notas' as Href); }} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center', paddingVertical: 6 }}>{tx('Ver todas mis notas de prédicas')}</Text></IfOn>
     </>
   );
 }
@@ -206,7 +207,7 @@ export default function PredicaVer() {
         {s.audio_path ? <SectionTitle>{tx('Escuchar')}</SectionTitle> : null}
         {audio ? <AudioPlayer url={audio} /> : s.audio_path ? <Loading /> : null}
         {s.audio_path ? <Button title={tx('Descargar el audio')} icon="download" variant="outline" onPress={download} /> : null}
-        <SermonNotes sermonId={s.id} outline={s.notes_outline ?? null} />
+        <IfOn feature="predica_notas"><SermonNotes sermonId={s.id} outline={s.notes_outline ?? null} /></IfOn>
         {isStaff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Button title={tx('Editar')} variant="outline" small onPress={() => router.push({ pathname: '/predica/nueva', params: { id } })} style={{ flex: 1 }} />

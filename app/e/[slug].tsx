@@ -14,6 +14,8 @@ import { phoneProblem } from '@/lib/phone';
 import { errorMessage } from '@/lib/supabase';
 import { showCode, ticketPayload } from '@/lib/ticket';
 import { tx, txLocale } from '@/lib/i18n';
+import { publicPartOn } from '@/lib/funcionesData';
+import { FeatureOff } from '@/components/FeatureOff';
 
 // Colores propios y fijos (claros): la página la ve gente de afuera, con o sin modo oscuro.
 const C = { bg: '#F6F7F5', card: '#FFFFFF', text: '#17201A', muted: '#5F6B63', line: '#E3E7E2', green: '#1F6B45', greenSoft: '#E3F1E8', violet: '#6D4BC3', violetSoft: '#E9E2F8', amber: '#B26A00', amberSoft: '#FCEFD6', blue: '#2563A8', blueSoft: '#E1ECF8', red: '#B3261E' };
@@ -27,6 +29,9 @@ export default function EventoPublico() {
   const { slug, t } = useLocalSearchParams<{ slug: string; t?: string }>();
   const router = useRouter();
   const [data, setData] = useState<PublicEvent | null | undefined>(undefined);
+  // La iglesia puede apagar los eventos: entonces la página pública avisa en vez de mostrar el evento.
+  const [partOff, setPartOff] = useState(false);
+  useEffect(() => { if (slug) publicPartOn('evento', slug).then((on) => setPartOff(!on)); }, [slug]);
   const [token, setToken] = useState<string | null>(t ?? null);
   const [form, setForm] = useState({ name: '', phone: '', email: '', people: 1, type: null as string | null });
   const [busy, setBusy] = useState(false);
@@ -44,6 +49,7 @@ export default function EventoPublico() {
   useEffect(() => { const i = setInterval(() => load(token), 60000); return () => clearInterval(i); }, [load, token]);
 
   if (data === undefined) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><ActivityIndicator color={C.green} size="large" /></View>;
+  if (partOff) return <FeatureOff publicPage name="Eventos" />;
   if (!data) return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 30, backgroundColor: C.bg }}>
       <Feather name="calendar" size={40} color={C.muted} />

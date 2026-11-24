@@ -13,6 +13,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Group } from '@/types';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 export default function Colectivo() {
   const { profile, church } = useAuth();
@@ -56,8 +57,8 @@ export default function Colectivo() {
       <Screen>
         {groups.length > 1 ? <Choice columns={2} options={groups.map((g) => ({ value: g.id, label: g.name }))} value={group ?? ''} onChange={setGroup} /> : null}
         {group ? (
-          <Button title={tx('Paradas en orden y mapa')} icon="map-pin" variant="outline" small
-            onPress={() => router.push({ pathname: '/colectivo-paradas', params: { ruta: group } } as unknown as Href)} />
+          <IfOn feature="colectivo_paradas"><Button title={tx('Paradas en orden y mapa')} icon="map-pin" variant="outline" small
+            onPress={() => router.push({ pathname: '/colectivo-paradas', params: { ruta: group } } as unknown as Href)} /></IfOn>
         ) : null}
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="truck" title={tx('No hay pasajeros en esta ruta')} text={tx('Agregá abajo a los que viajan en el colectivo. También aparecen los que prometieron venir y pidieron que los busquen.')} /> : (
           <Card style={{ padding: 0 }}>

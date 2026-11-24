@@ -106,12 +106,18 @@ test('tarjeta de visita: dirección del QR y control del nombre', () => {
 });
 
 test('las pantallas nuevas están en su función, con el color de Personas y en el escritorio', () => {
-  for (const p of ['/discipulado', '/discipulado/lecciones', '/decisiones', '/bienvenida', '/tarjeta-visita', '/visita/abc', '/clase-miembros']) {
-    assert.equal(featureOfPath(p), 'discipulado', p);
+  // Cada una tiene su propio interruptor (antes iban todas juntas en "discipulado").
+  const own: Record<string, string> = { '/discipulado': 'discipulado', '/discipulado/lecciones': 'discipulado', '/decisiones': 'decisiones', '/bienvenida': 'bienvenida',
+    '/tarjeta-visita': 'tarjeta_visita', '/visita/abc': 'tarjeta_visita', '/clase-miembros': 'clase_miembros' };
+  for (const p of Object.keys(own)) {
+    assert.equal(featureOfPath(p), own[p], p);
     assert.equal(areaOf(p.split('/').filter(Boolean)), 'amber', p);
   }
   assert.equal(featureOfPath('/certificado/imprimir'), 'bautismos');
   const amber = deskNavFor(['personas.ver_todas']).find((g) => g.tone === 'amber')!;
   for (const to of ['/discipulado', '/decisiones', '/bienvenida', '/tarjeta-visita', '/clase-miembros']) assert.ok(amber.items.some((i) => i.to === to), to);
   assert.equal(deskNavFor(['personas.ver_todas'], ['discipulado']).flatMap((g) => g.items).some((i) => i.to === '/discipulado'), false);
+  // Apagar discipulado ya no se lleva puestas las decisiones ni la tarjeta de visita.
+  assert.equal(deskNavFor(['personas.ver_todas'], ['discipulado']).flatMap((g) => g.items).some((i) => i.to === '/decisiones'), true);
+  assert.equal(deskNavFor(['personas.ver_todas'], ['tarjeta_visita']).flatMap((g) => g.items).some((i) => i.to === '/tarjeta-visita'), false);
 });

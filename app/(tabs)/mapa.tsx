@@ -30,6 +30,7 @@ import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
 import { DEMO_CENTER, isDemoNow } from '@/lib/demo';
 import type { Contact, CoverageRow, HouseRow, MeetingPoint, OutingKind, Profile, RoadRow, Zone } from '@/types';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 /** Un color por compañero para su recorrido. */
 export const TRAIL_COLORS = ['#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488', '#DC2626', '#4D7C0F', '#0369A1'];
@@ -576,12 +577,12 @@ export default function Mapa() {
           <>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button title={outing.active ? tx('Continuar la salida') : tx('Iniciar salida')} icon={outing.active ? 'arrow-right' : 'play'} onPress={start} loading={busy} style={{ flex: 1 }} />
-              <Button title={tx('Capacitación')} icon="compass" variant="outline" onPress={() => router.push('/capacitacion')} />
+              <IfOn feature="biblioteca"><Button title={tx('Capacitación')} icon="compass" variant="outline" onPress={() => router.push('/capacitacion')} /></IfOn>
             </View>
             <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Tu ubicación se comparte con el equipo solo mientras la salida está activa')}</Text>
           </>
         )}
-        {Platform.OS === 'web' ? <Button title={tx('Capacitación para evangelizar')} icon="compass" variant="outline" small onPress={() => router.push('/capacitacion')} /> : null}
+        <IfOn feature="biblioteca">{Platform.OS === 'web' ? <Button title={tx('Capacitación para evangelizar')} icon="compass" variant="outline" small onPress={() => router.push('/capacitacion')} /> : null}</IfOn>
       </View>
 
       <Modal visible={choosing} transparent animationType="fade" onRequestClose={() => setChoosing(false)}>

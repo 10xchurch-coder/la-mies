@@ -14,6 +14,7 @@ import { Header, Screen } from '@/components/Screen';
 import { FamilyCard } from '@/components/FamilyCard';
 import { VerseBadges } from '@/components/VerseBadges';
 import { PersonasPanel } from '@/components/PersonasPanel';
+import { useFeatures } from '@/lib/useFeatures';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag, Toggle } from '@/components/ui';
@@ -155,6 +156,8 @@ export default function PersonaDetalle() {
   const router = useRouter();
   const { id, vinculo, wa: waKind, visita } = useLocalSearchParams<{ id: string; vinculo?: string; wa?: string; visita?: string }>();
   const { profile, church, isStaff, isLeader, can } = useAuth();
+  // Los cuadros de funciones que la iglesia apagó no se ven en la ficha.
+  const { on: fOn } = useFeatures();
   const outing = useOuting();
   const [c, setC] = useState<Contact | null>(null);
   const [children, setChildren] = useState<ContactChild[]>([]);
@@ -475,10 +478,10 @@ export default function PersonaDetalle() {
             </Card>
           ) : null}
 
-          <FamilyCard key={c.id} contactId={c.id} person={{ name: c.name, sex: c.sex, age: displayAge(c) }} canEdit={canEdit} canSetPickup={can('personas.editar')} />
-          <VerseBadges key={`v-${c.id}`} contactId={c.id} />
+          {fOn('hogares') ? <FamilyCard key={c.id} contactId={c.id} person={{ name: c.name, sex: c.sex, age: displayAge(c) }} canEdit={canEdit} canSetPickup={can('personas.editar')} /> : null}
+          {fOn('clase_versiculos') ? <VerseBadges key={`v-${c.id}`} contactId={c.id} /> : null}
 
-          {ministries.length ? (
+          {ministries.length && fOn('ministerios') ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
               {ministries.map((m) => (
                 <Pressable key={m.id} onPress={() => router.push({ pathname: '/ministerio/[id]', params: { id: m.id } })} style={styles.ministry}>
@@ -563,7 +566,7 @@ export default function PersonaDetalle() {
           ) : null}
 
           <PersonasPanel c={c} onChanged={load} />
-          {isLeader ? <DiscipleshipCard c={c} onSave={(patch) => update(patch)} /> : null}
+          {isLeader && fOn('discipulado') ? <DiscipleshipCard c={c} onSave={(patch) => update(patch)} /> : null}
 
           {/* Punto de partida: quien ya venía antes de usar la app no cuenta como "primera vez" ni como "miembro nuevo". */}
           {isStaff ? (
@@ -576,20 +579,20 @@ export default function PersonaDetalle() {
 
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, tx('Fechas guardadas'))} /> : null}
 
-          {can('personas.asistencia') ? (
+          {can('personas.asistencia') && fOn('asistencia_chips') ? (
             <Button title={tx('Darle un chip para la asistencia')} icon="credit-card" variant="outline" small onPress={() => router.push({ pathname: '/chips', params: { persona: c.id, nombre: c.name } } as never)} />
           ) : null}
 
-          {isStaff && c.baptized_on && c.baptized_here !== false ? (
+          {fOn('bautismos') && isStaff && c.baptized_on && c.baptized_here !== false ? (
             <Button title={tx('Certificado de bautismo')} icon="award" variant="outline" small onPress={() => router.push(`/certificado/${c.id}` as never)} />
           ) : null}
 
           {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
             <Card style={{ gap: 10 }}>
               <SectionTitle>{tx('Seguimiento pastoral')}</SectionTitle>
-              {!isMember ? <Button title={tx('Marcar que vino a una reunión')} icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
+              {!isMember && fOn('asistencia') ? <Button title={tx('Marcar que vino a una reunión')} icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {!c.discipleship_since ? <Button title={tx('Empezó discipulado')} variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, tx('Anotado: empezó discipulado'))} style={{ flex: 1 }} /> : null}
+                {!c.discipleship_since && fOn('discipulado') ? <Button title={tx('Empezó discipulado')} variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, tx('Anotado: empezó discipulado'))} style={{ flex: 1 }} /> : null}
                 {!isBaptized ? <Button title={tx('Se bautizó hoy')} variant="outline" small onPress={() => update({ baptized: true, baptized_here: true, baptized_on: isoDate(new Date()) }, tx('Anotado: se bautizó en la iglesia'))} style={{ flex: 1 }} /> : null}
               </View>
             </Card>

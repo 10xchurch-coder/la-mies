@@ -117,10 +117,10 @@ test('las pantallas nuevas tienen su función y su color', () => {
   assert.equal(featureOfPath('/culto'), 'culto');
   assert.equal(featureOfPath('/culto/abc'), 'culto');
   assert.equal(featureOfPath('/preguntas'), 'preguntas');
-  assert.equal(featureOfPath('/oraciones-respondidas'), 'oracion');
-  assert.equal(featureOfPath('/predica/mis-notas'), 'predicas');
-  assert.equal(featureOfPath('/clase/leccion'), 'clases');
-  assert.equal(featureOfPath('/clase/versiculos'), 'clases');
+  assert.equal(featureOfPath('/oraciones-respondidas'), 'oracion_respondidas');
+  assert.equal(featureOfPath('/predica/mis-notas'), 'predica_notas');
+  assert.equal(featureOfPath('/clase/leccion'), 'clase_lecciones');
+  assert.equal(featureOfPath('/clase/versiculos'), 'clase_versiculos');
   assert.equal(areaOf(['culto', '[id]']), 'green');
   assert.equal(areaOf(['preguntas']), 'blue');
   assert.equal(areaOf(['oraciones-respondidas']), 'blue');

@@ -19,6 +19,8 @@ export type Church = {
   absence_recipients?: string[] | null;
   /** Funciones de la app que esta iglesia apagó (ver lib/features). Vacío o ausente: todo prendido. */
   disabled_features?: string[] | null;
+  /** La Biblia de la iglesia: versiones permitidas y la de inicio (ver lib/bibleChurch). Vacío: todas. */
+  bible?: { versions?: string[]; default?: string } | null;
   report_recipients?: string[] | null;
   id: string;
   name: string;

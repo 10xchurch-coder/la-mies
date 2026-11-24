@@ -13,6 +13,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { FinAccountBalance, FinBalance } from '@/types';
 import { tx, txLocale } from '@/lib/i18n';
+import { featureOn } from '@/lib/features';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 export const FUND_ICON: Record<string, IconName> = { general: 'home', missions: 'globe', designated: 'tag', vehicle: 'truck', other: 'folder' };
@@ -145,7 +146,7 @@ export default function Finanzas() {
                 </Pressable>
               ))}
             </Card>
-            {financeLevel >= 3 || can('admin.permisos') ? (
+            {(financeLevel >= 3 || can('admin.permisos')) && featureOn(church?.disabled_features, 'ofrendas_persona') ? (
               <Toggle label={tx('Anotar quién dio cada ingreso')} hint={tx('Apagado: los ingresos se cargan sin nombre.')} value={!!church?.fin_track_donors}
                 onChange={(v) => setFinTrackDonors(v).then(refreshProfile).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />
             ) : null}

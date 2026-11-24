@@ -13,6 +13,7 @@ import {
   discActive, discLesson, discStart, discTeacher, memberClassSet, peopleSettings, personInfo, teacherChoices, type PeopleSettings, type PersonInfo,
 } from '@/lib/personasApi';
 import { errorMessage } from '@/lib/supabase';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
 
@@ -20,6 +21,7 @@ type Person = { id: string; name: string; status: string; baptized_on?: string |
 
 export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => void }) {
   const router = useRouter();
+  const { on: fOn } = useFeatures();
   const [info, setInfo] = useState<PersonInfo | null>(null);
   const [cfg, setCfg] = useState<PeopleSettings | null>(null);
   const [teachers, setTeachers] = useState<{ id: string; name: string; photo_path: string | null }[]>([]);
@@ -68,8 +70,12 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
     ]);
   };
 
+  // Cada cuadro se ve solo si la iglesia usa esa función. Si no usa ninguna, no se dibuja nada.
+  if (!(['discipulado', 'decisiones', 'clase_miembros', 'bienvenida', 'bautismos'] as const).some((k) => fOn(k))) return null;
   return (
     <Card style={{ gap: 12 }}>
+      {fOn('discipulado') ? (
+      <>
       <SectionTitle>{course}</SectionTitle>
       {track ? (
         <View style={{ gap: 4 }}>
@@ -104,9 +110,13 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
       ) : info.can ? (
         <Button title={tx('Empezar discipulado')} icon="book-open" small onPress={() => openPicker('start')} loading={busy} />
       ) : null}
+      </>
+      ) : null}
 
       {info.can ? (
         <>
+          {fOn('decisiones') ? (
+          <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
           <SectionTitle>{tx('Decisiones')}</SectionTitle>
           {info.decisions.map((d) => (
@@ -115,8 +125,10 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
             </Text>
           ))}
           <Button title={tx('Anotar una decisión')} icon="heart" variant="outline" small onPress={() => router.push({ pathname: '/decisiones', params: { persona: c.id } } as unknown as Href)} />
+          </>
+          ) : null}
 
-          {c.status !== 'member' || info.mclass ? (
+          {fOn('clase_miembros') && (c.status !== 'member' || info.mclass) ? (
             <>
               <View style={{ height: 1, backgroundColor: colors.border }} />
               <SectionTitle>{tx('Clase de miembros')}</SectionTitle>
@@ -134,7 +146,7 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
         </>
       ) : null}
 
-      {c.status === 'visitor' ? (
+      {fOn('bienvenida') && c.status === 'visitor' ? (
         <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
           <SectionTitle>{tx('Bienvenida')}</SectionTitle>
@@ -142,7 +154,7 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
         </>
       ) : null}
 
-      {info.staff && ((c.baptized_on && c.baptized_here !== false) || (c.status === 'member' && c.member_since)) ? (
+      {fOn('bautismos') && info.staff && ((c.baptized_on && c.baptized_here !== false) || (c.status === 'member' && c.member_since)) ? (
         <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
           <SectionTitle>{tx('Certificados para imprimir')}</SectionTitle>
