@@ -119,7 +119,11 @@ def main():
         browser = pw.chromium.launch()
         ctx = browser.new_context(viewport={'width': 1400, 'height': 900})
         ctx.route('**/*.supabase.co/**', supabase)
-        ctx.route_web_socket('**/*', lambda ws: ws.close())  # nada de tiempo real contra la base de verdad
+        # Nada de tiempo real contra la base de verdad: el WebSocket de esta página nunca conecta.
+        ctx.add_init_script('''window.WebSocket = class {
+          constructor() { this.readyState = 3; setTimeout(() => { this.onerror && this.onerror(new Event("error")); this.onclose && this.onclose({ code: 1006, reason: "prueba" }); }, 20); }
+          send() {} close() {} addEventListener() {} removeEventListener() {}
+        };''')
         ctx.add_init_script(f"localStorage.setItem('sb-{REF}-auth-token', {json.dumps(json.dumps(SESSION))});")
 
         def watch(page, who):
@@ -129,11 +133,11 @@ def main():
         op = watch(ctx.new_page(), 'operador')
         op.goto(base + '/presentar')
         check('la app real abre el Modo presentación (con sesión de mentira)', wait_text(op, 'Nueva lista del culto', 15000), op.url)
-        op.get_by_text('Culto de prueba').first.click()
+        op.get_by_text('Culto de prueba').first.click(timeout=8000)
         check('abre la lista en el operador', wait_text(op, 'EN PANTALLA'))
         check('sin la tabla del orden del culto, el botón no aparece y nada se rompe', op.get_by_text('Traer el orden del culto').count() == 0)
         with ctx.expect_page() as pop:
-            op.get_by_role('button', name='Abrir pantalla de salida', exact=True).first.click()
+            op.get_by_text('Abrir pantalla de salida', exact=True).first.click()
         out = watch(pop.value, 'salida')
         out.wait_for_load_state()
         check('la salida se abre en /la-mies/presentar/salida (otra ventana, dirección directa)', out.url.rstrip('/').endswith('/la-mies/presentar/salida'), out.url)
@@ -170,7 +174,7 @@ def main():
 
         op.bring_to_front()
         with ctx.expect_page() as pop:
-            op.get_by_role('button', name='Abrir vista de escenario', exact=True).first.click()
+            op.get_by_text('Abrir vista de escenario', exact=True).first.click()
         st = watch(pop.value, 'escenario')
         st.wait_for_load_state()
         check('la vista de escenario abre en /la-mies/presentar/escenario', st.url.rstrip('/').endswith('/la-mies/presentar/escenario'), st.url)

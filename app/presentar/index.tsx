@@ -157,7 +157,11 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const [sel, setSel] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [liveAt, setLiveAt] = useState<{ id: string; slide: number } | null>(null);
+  const [liveAt, setLiveAtState] = useState<{ id: string; slide: number } | null>(null);
+  // También en una referencia: si llegan dos "siguiente" seguidos (tecla rápida, control remoto), el segundo
+  // tiene que partir de donde dejó el primero y no de lo que todavía muestra la pantalla.
+  const liveAtRef = useRef<{ id: string; slide: number } | null>(null);
+  const setLiveAt = (p: { id: string; slide: number } | null) => { liveAtRef.current = p; setLiveAtState(p); };
   const [live, setLive] = useState<LiveState>(BLACK);
   const [paused, setPaused] = useState(false);
   const [status, setStatus] = useState<LinkStatus>('conectando');
@@ -325,8 +329,9 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const move = (dir: 1 | -1) => {
     const list = items ?? [];
     const counts = list.map((i) => slides.get(i.id)?.length ?? 0);
-    const at = liveAt ? list.findIndex((i) => i.id === liveAt.id) : -1;
-    let next = step(counts, at >= 0 && liveAt ? { item: at, slide: liveAt.slide } : null, dir);
+    const cur = liveAtRef.current;
+    const at = cur ? list.findIndex((i) => i.id === cur.id) : -1;
+    let next = step(counts, at >= 0 && cur ? { item: at, slide: cur.slide } : null, dir);
     // Si todavía no hay nada en pantalla, arranca por la parte elegida.
     if (at < 0 && dir === 1) {
       const chosen = list.findIndex((i) => i.id === sel);
@@ -335,11 +340,11 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     if (next) show(list[next.item].id, next.slide);
   };
   const toggleMode = (mode: 'black' | 'logo') => {
-    if (live.mode === mode) {
+    if (liveRef.current.mode === mode) {
       // Tocar de nuevo vuelve a lo que estaba.
       if (lastSlide.current) {
         const stamp = newId();
-        if (liveAt) writePos(setId, { ...liveAt, stamp });
+        if (liveAtRef.current) writePos(setId, { ...liveAtRef.current, stamp });
         push({ ...lastSlide.current, stamp, at: Date.now() });
       }
       return;
