@@ -60,10 +60,15 @@ function fill(text: string, vars: Vars | undefined): string {
  *   t('Guardar')                                -> "Guardar" / "Save"
  *   t('Faltaron {n} personas', { n })           -> "Faltaron 3 personas" / "3 people were absent"
  * Si no hay traducción, devuelve el castellano. Los huecos que no vienen en `vars` quedan como están.
+ * Cuando una palabra quiere decir dos cosas, se le agrega ##contexto: t('Salida##puerta') -> "Salida" / "Exit".
  */
 export function t(es: string, vars?: Vars): string {
-  const found = lang === 'es' ? undefined : dicts[lang]?.[es];
-  const text = found === undefined ? es : found;
+  // "Salida##puerta": la misma palabra con otro sentido en esa pantalla. Lo de después de ## no se muestra nunca.
+  const cut = es.indexOf('##');
+  const base = cut < 0 ? es : es.slice(0, cut);
+  const dict = lang === 'es' ? undefined : dicts[lang];
+  const found = dict === undefined ? undefined : dict[es] ?? (cut < 0 ? undefined : dict[base]);
+  const text = found === undefined ? base : found;
   return vars || found !== undefined ? fill(text, vars) : text;
 }
 

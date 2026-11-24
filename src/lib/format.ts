@@ -1,11 +1,11 @@
 // Fechas, horas y números en castellano rioplatense, sin depender de Intl.
 // Si la app está en inglés (src/lib/i18n.ts), las fechas y los números salen como se escriben en inglés: este es el único lugar que lo decide.
-import { getLang } from './i18n';
+import { getLang, txLocale } from './i18n';
 
 const DAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']; // i18n-skip
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']; // i18n-skip
-const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; // i18n-skip
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']; // i18n-skip
 const en = () => getLang() === 'en';
 /** Un número con decimales: con coma en castellano ("2,3") y con punto en inglés ("2.3"). */
 const dec = (n: number, digits = 1) => (en() ? n.toFixed(digits) : n.toFixed(digits).replace('.', ','));
@@ -113,6 +113,8 @@ export function allGroupsLabel(grouping: string | null | undefined): string {
 }
 /** Artículo que acompaña a la palabra: "la ruta" / "el grupo". */
 export function groupArticle(grouping: string | null | undefined, kind: 'el' | 'mi' | 'tu' | 'todo' = 'el'): string {
+  // En inglés no hay masculino ni femenino: "the route", "my group", "all my group".
+  if (en()) return kind === 'el' ? 'the' : kind === 'mi' ? 'my' : kind === 'tu' ? 'your' : 'all';
   const fem = grouping === 'bus_routes';
   if (kind === 'el') return fem ? 'la' : 'el';
   if (kind === 'todo') return fem ? 'toda' : 'todo';
@@ -259,10 +261,10 @@ export function maskDateOrAge(text: string): string {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
-/** $ 12.345,50 (pesos) o US$ 100 */
+/** $ 12.345,50 (pesos) o US$ 100. En inglés: $ 12,345.50 */
 export function fmtMoney(n: number | string | null | undefined, currency = 'ARS'): string {
   const v = Number(n) || 0;
-  const s = Math.abs(v).toLocaleString('es-AR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
+  const s = Math.abs(v).toLocaleString(txLocale(), { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
   return `${v < 0 ? '−' : ''}${currency === 'USD' ? 'US$' : '$'} ${s}`;
 }
 

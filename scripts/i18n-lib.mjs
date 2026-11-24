@@ -27,7 +27,7 @@ const VISIBLE = new Set(['title', 'label', 'placeholder', 'text', 'subtitle', 'm
 const TECH_PROP = new Set(['key', 'id', 'value', 'kind', 'type', 'icon', 'color', 'tone', 'route', 'href', 'path', 'pathname', 'screen', 'column', 'field', 'table', 'event', 'channel',
   'filter', 'fontFamily', 'fontWeight', 'testID', 'mime', 'mimeType', 'ext', 'format', 'locale', 'lang', 'language', 'slug', 'code', 'perm', 'feature', 'segment', 'schema', 'url', 'uri',
   'redirectTo', 'emailRedirectTo', 'attribution', 'allow', 'border', 'data', 'fileName', 'filename', 'verse', 'ref', 'reference', 'versiculo', 'cita', 'book', 'ios', 'android', 'web', 'default',
-  'method', 'encoding', 'contentType', 'cacheControl', 'credit', 'source', 'licence', 'license', 'style', 'variant', 'status', 'role', 'backgroundColor', 'textAlign', 'rotate', 'transform', 'display_name', 'utf8', 'bucket', 'storage', 'match', 'col', 'cols']);
+  'method', 'encoding', 'contentType', 'cacheControl', 'credit', 'source', 'licence', 'license', 'style', 'variant', 'status', 'role', 'backgroundColor', 'textAlign', 'rotate', 'transform', 'display_name', 'utf8', 'bucket', 'storage', 'match', 'col', 'cols', 'Authorization', 'headers', 'apikey']);
 // Llamadas cuyos argumentos nunca son texto para la gente.
 const TECH_CALL = new Set(['require', 'fetch', 'RegExp', 'openURL', 'canOpenURL', 'log', 'warn', 'error', 'info', 'debug', 'getItem', 'setItem', 'removeItem', 'getItemAsync', 'setItemAsync',
   'startsWith', 'endsWith', 'includes', 'indexOf', 'lastIndexOf', 'split', 'replace', 'replaceAll', 'match', 'test', 'localeCompare', 'padStart', 'padEnd', 'has', 'get', 'delete',
@@ -38,7 +38,7 @@ const TECH_CALL = new Set(['require', 'fetch', 'RegExp', 'openURL', 'canOpenURL'
 // push/replace sí pueden llevar texto (out.push('frase'), text.replace(...)): se miran aparte.
 const ROUTER_ONLY = new Set(['push', 'replace', 'navigate']);
 // Llamadas que siempre muestran lo que reciben.
-const VISIBLE_CALL = new Set(['alert', 'confirm', 'showActions', 'toast', 'say', 'notify', 'setError', 'setErr', 'setMsg', 'setMessage', 'setNote', 'Error', 'confirmDelete', 'prompt']);
+const VISIBLE_CALL = new Set(['alert', 'confirm', 'showActions', 'toast', 'say', 'notify', 'setError', 'setErr', 'setMsg', 'setMessage', 'setNote', 'confirmDelete', 'prompt']);
 // Lo que se llama enseguida al cargar el archivo (no más tarde): lo de adentro cuenta como "fuera de función".
 const EAGER_METHODS = new Set(['map', 'filter', 'reduce', 'forEach', 'flatMap', 'sort', 'find', 'some', 'every', 'fromEntries', 'entries', 'concat', 'from']);
 const COMPARE_CALLS = new Set(['startsWith', 'endsWith', 'includes', 'indexOf', 'has']);
@@ -53,11 +53,13 @@ function cap(s) { return s[0].toUpperCase() + s.slice(1); }
 
 // ---------- ¿Es un texto para la gente? ----------
 const SPANISH = /[áéíóúñ¿¡ÁÉÍÓÚÑ]/;
+const LOWER_WORD = /^[a-záéíóúñü]+$/;
 const LETTERS = /[A-Za-zÁÉÍÓÚÑáéíóúñü]{2}/;
 const BIBLE_REF = /^[1-3]? ?[A-ZÁÉÍÓÚ][a-záéíóúñ]+ \d+(:\d+([-–,]\s?\d+)*)?$/;
 
 /** Cosas que nunca son un texto: direcciones, columnas, estilos, nombres de archivo. */
-function techy(s) {
+function techy(s, shown = false) {
+  if (/^\*\s*,/.test(s)) return true; // columnas de la base
   if (/^[#/.@]/.test(s) && !/\s/.test(s)) return true;
   if (/^(https?|file|mailto|tel|geo|package|data|blob|lamies|exp):/.test(s) || s.includes('://')) return true;
   if (/^[a-z0-9_]+(\([^)]*\))?(\s*,\s*[a-z0-9_:!.*() ]+)+$/.test(s)) return true; // columnas de la base
@@ -68,7 +70,7 @@ function techy(s) {
   if (/<\/?[a-z][a-z0-9]*[\s>]/i.test(s)) return true; // HTML (hojas para imprimir): se revisa a mano
   if (/^[a-z-]+:[^;]+;[a-z-]+:/.test(s) || /\{\s*[a-z-]+:[^}]+\}/.test(s)) return true; // estilos de la web
   if (/^\{\w+\}[/?]/.test(s)) return true;
-  if (BIBLE_REF.test(s)) return true; // "Romanos 6:4" es una cita, no un texto
+  if (!shown && BIBLE_REF.test(s)) return true; // "Romanos 6:4" suelto puede ser un dato; donde seguro se muestra sí se traduce
   if (!/\s/.test(s) && /\.(csv|png|jpe?g|zip|pdf|txt|json|xlsx|webp|mp3|m4a)$/i.test(s)) return true;
   return false;
 }
@@ -78,6 +80,7 @@ export function isHuman(text) {
   const s = text.trim();
   if (s.length < 2 || !LETTERS.test(s) || techy(s)) return false;
   if (WORDS.has(s)) return true;
+  if (LOWER_WORD.test(s)) return false; // "culto", "vacío": puede ser una clave; se decide por el lugar (ver decide)
   if (!/\s/.test(s)) {
     if (/^[a-z0-9_.:-]+$/.test(s) || /^[A-Z0-9_]+$/.test(s)) return false; // claves, constantes
     if (/^[a-z]+[A-Z]/.test(s)) return false; // camelCase
@@ -88,10 +91,13 @@ export function isHuman(text) {
   return SPANISH.test(s) || /[a-záéíóúñ]{3}/.test(s);
 }
 
+/** "persona"/"personas", "vez"/"veces": dos palabras que empiezan igual (singular y plural), no dos claves cualesquiera. */
+const SPANISH_PAIR = (a, b) => !!a && !!b && a !== b && a.slice(0, 2) === b.slice(0, 2) && !/^(true|false)$/.test(a);
+
 /** Regla suelta, para lugares que seguro se muestran (texto de pantalla, title=, Alert). */
 export function isShown(text) {
   const s = text.trim();
-  if (s.length < 2 || !LETTERS.test(s) || techy(s)) return false;
+  if (s.length < 2 || !LETTERS.test(s) || techy(s, true)) return false;
   if (!/\s/.test(s) && /[-_/.:=]/.test(s) && /^[a-z0-9_.:\-/=]+$/.test(s)) return false; // "arrow-left", "no-store"
   if (/^[A-Z0-9_]+$/.test(s) && s.length <= 3) return false; // "OK", "KB"
   return true;
@@ -155,12 +161,27 @@ export function run({ write = false } = {}) {
 
   // Paso A: textos que se usan para comparar pedazos (startsWith, includes) en cualquier archivo.
   const markers = new Set();
+  const comparedAll = new Set();
+  const regexes = [];
+  const regexHit = (s) => regexes.some((re) => re.test(s));
   const sources = files.map((f) => program.getSourceFile(f)).filter(Boolean);
   for (const sf of sources) {
     const visit = (n) => {
       if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && PREFIX_CALLS.has(n.expression.name.text)) {
         const a = n.arguments[0];
         if (a && ts.isStringLiteralLike(a) && a.text.trim().length >= 4 && /[A-ZÁÉÍÓÚÑ\[¿¡]/.test(a.text) && !ts.isArrayLiteralExpression(n.expression.expression)) markers.add(a.text.trim());
+      }
+      const addC = (x) => { if (x && ts.isStringLiteralLike(x) && x.text.trim()) comparedAll.add(x.text); };
+      if (ts.isBinaryExpression(n) && [ts.SyntaxKind.EqualsEqualsEqualsToken, ts.SyntaxKind.ExclamationEqualsEqualsToken, ts.SyntaxKind.EqualsEqualsToken, ts.SyntaxKind.ExclamationEqualsToken].includes(n.operatorToken.kind)) { addC(n.left); addC(n.right); }
+      else if (ts.isCaseClause(n)) addC(n.expression);
+      else if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && COMPARE_CALLS.has(n.expression.name.text)) addC(n.arguments[0]);
+      // Expresiones regulares que buscan una palabra (/cancel/i): un texto que coincida no se puede traducir si después se lo busca así.
+      if (n.kind === ts.SyntaxKind.RegularExpressionLiteral) {
+        const m = n.text.match(/^\/(.*)\/([a-z]*)$/s);
+        // Solo las que miran un mensaje de error: /cancel/i.test(msg), e.message.match(/.../).
+        const call = n.parent && ts.isPropertyAccessExpression(n.parent) && ts.isCallExpression(n.parent.parent) ? n.parent.parent : n.parent && ts.isCallExpression(n.parent) ? n.parent : null;
+        const about = call ? call.getText(sf) : '';
+        if (m && /(msg|message|err\b|error)/i.test(about) && /[A-Za-zÁÉÍÓÚÑáéíóúñ]{5}/.test(m[1].replace(/\\[a-zA-Z]/g, ' ').replace(/\[[^\]]*\]/g, ' ')) && !/^\^?\(?https?/.test(m[1])) { try { regexes.push(new RegExp(m[1], m[2].replace(/[gy]/g, ''))); } catch { /* una expresión que Node no entiende: se ignora */ } }
       }
       ts.forEachChild(n, visit);
     };
@@ -215,6 +236,9 @@ export function run({ write = false } = {}) {
     };
     collect(sf);
 
+    const ctxOf = CONFIG.contexts?.[file] ?? {};
+    /** La clave de un texto: si en este archivo esa palabra quiere decir otra cosa (scripts/i18n-config.json, "contexts"), lleva ##contexto. */
+    const K = (value) => (ctxOf[value] ? `${value}##${ctxOf[value]}` : value);
     const edits = []; // { start, end, text }
     const need = new Set();
     const useKey = (key, holes, already = false) => {
@@ -344,11 +368,15 @@ export function run({ write = false } = {}) {
       if (skipTexts.has(s) || skipTexts.has(value)) return null;
       const pl = opts.pl ?? place(n);
       if (pl.kind === 'no') return null;
-      const human = pl.kind === 'shown' ? isShown(s) : (isHuman(s) || (pl.viaTemplate && isShown(s) && opts.inHumanTemplate));
+      // Una palabra suelta en minúscula ("persona") solo cuenta si está en un lugar que se muestra, o si es una de las dos puntas de un singular/plural.
+      const pair = ts.isConditionalExpression(n.parent) && n.parent.condition !== n && ts.isStringLiteralLike(n.parent.whenTrue) && ts.isStringLiteralLike(n.parent.whenFalse)
+        && LOWER_WORD.test(n.parent.whenTrue.text.trim() || 'x') && LOWER_WORD.test(n.parent.whenFalse.text.trim() || 'x') && SPANISH_PAIR(n.parent.whenTrue.text.trim(), n.parent.whenFalse.text.trim());
+      const human = pl.kind === 'shown' ? isShown(s) : (isHuman(s) || (pair && isShown(s)));
       if (!human) {
-        if (pl.kind === 'maybe' && /^[a-záéíóúñ]{3,}$/.test(s) && !/^(true|false|null|none|auto|left|right|center|row|column|bold|normal|small|large|light|dark)$/.test(s) && (pl.viaTemplate || ts.isReturnStatement(pl.anchor) || ts.isArrowFunction(pl.anchor))) note(n, 'palabra suelta en minúscula (¿texto o clave?)', s);
+        if (pl.kind === 'maybe' && LOWER_WORD.test(s) && SPANISH.test(s)) note(n, 'palabra suelta en minúscula (¿texto o clave?)', s);
         return null;
       }
+      if (pl.kind === 'maybe' && (comparedAll.has(value) || (pl.call === 'Error' && regexHit(s)))) { note(n, 'ese texto se compara en algún archivo (===, case, includes o una expresión regular)', s, [value]); return null; }
       if (insideDb(n)) { note(n, 'va a la base: no se tocó', s); return null; }
       if (literalTyped(n)) { if (isHuman(s)) note(n, 'el tipo es una lista cerrada de valores', s, [value]); return null; }
       const m = hitsMarker(s);
@@ -523,8 +551,8 @@ export function run({ write = false } = {}) {
       if (/[{}]/.test(cooked)) { note(n, 'tiene llaves', cooked); return; }
       if (atModuleLevel(n)) { note(n, 'pantalla armada fuera de una función', cooked); return; }
       const start = n.getFullStart() + lead.length;
-      edits.push({ start, end: start + core.length, text: `{${FN}(${lit(cooked)})}` });
-      need.add(FN); useKey(cooked, []); stats.wrapped++;
+      edits.push({ start, end: start + core.length, text: `{${FN}(${lit(K(cooked))})}` });
+      need.add(FN); useKey(K(cooked), []); stats.wrapped++;
     };
 
     const stringLit = (n) => {
@@ -538,12 +566,12 @@ export function run({ write = false } = {}) {
       if (ts.isArrayLiteralExpression(p) && atModuleLevel(n)) return; // lo decide la lista entera
       const pl = decide(n, n.text);
       if (!pl) return;
-      const src = text.slice(n.getStart(sf), n.getEnd());
+      const src = ctxOf[n.text] ? lit(K(n.text)) : text.slice(n.getStart(sf), n.getEnd());
       if (ts.isJsxAttribute(p)) {
         if (/[\\&]/.test(n.text)) { note(n, 'atributo con \\ o &', n.text); return; }
         if (atModuleLevel(n)) { note(n, 'pantalla armada fuera de una función', n.text); return; }
-        edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `{${FN}(${lit(n.text)})}` });
-        need.add(FN); useKey(n.text, []); stats.wrapped++; return;
+        edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `{${FN}(${lit(K(n.text))})}` });
+        need.add(FN); useKey(K(n.text), []); stats.wrapped++; return;
       }
       if (atModuleLevel(n)) {
         // Fuera de una función solo se puede si es el valor de una propiedad: se vuelve un "get" que traduce al leerla.
@@ -551,12 +579,12 @@ export function run({ write = false } = {}) {
         if (a && pl.direct && a.initializer === n && ts.isObjectLiteralExpression(a.parent) && !underAsConst(n)) {
           const nameSrc = text.slice(a.name.getStart(sf), a.name.getEnd());
           edits.push({ start: a.getStart(sf), end: a.getEnd(), text: `get ${nameSrc}() { return ${FN}(${src}); }` });
-          need.add(FN); useKey(n.text, holesOf(n.text)); stats.getters++; stats.wrapped++; return;
+          need.add(FN); useKey(K(n.text), holesOf(n.text)); stats.getters++; stats.wrapped++; return;
         }
         note(n, 'texto fuera de una función (se crea una sola vez al abrir la app)', n.text, [n.text]); return;
       }
       edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `${FN}(${src})` });
-      need.add(FN); useKey(n.text, holesOf(n.text)); stats.wrapped++;
+      need.add(FN); useKey(K(n.text), holesOf(n.text)); stats.wrapped++;
     };
 
     const template = (n) => {
@@ -569,6 +597,7 @@ export function run({ write = false } = {}) {
       const words = statics.join(' ').replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñü\s]/g, ' ').split(/\s+/).filter((w) => w.length >= 2);
       if (!words.length) return;
       if (techy(statics.join('x').trim()) || /^[\w.-]*$/.test(statics.join('')) || /[=&?]\w*$/.test(n.head.text) && !/\s/.test(n.head.text)) return;
+      if (!/\s/.test(statics.join('')) && /^[\w.:/\-=?&#@]*$/.test(statics.join(''))) return; // `ministry:${id}`, `finance/${a}/${b}`: claves y direcciones
       const probe = statics.join(' … ');
       const ok = pl.kind === 'shown' ? isShown(probe) : (isHuman(probe) && (words.some((w) => w.length >= 3 && /[a-záéíóúñ]/.test(w))));
       if (!ok) return;
