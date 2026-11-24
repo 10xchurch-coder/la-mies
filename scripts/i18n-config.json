@@ -1,0 +1,15 @@
+{
+  "skipFiles": [
+    "src/i18n/",
+    "src/lib/i18n.ts",
+    "src/lib/i18nStore.ts",
+    "src/data/",
+    "src/lib/bibleData.ts",
+    "src/lib/bibleStudyData.ts",
+    "src/lib/bibleStudy.ts",
+    "src/lib/biblePlan.ts",
+    "src/lib/importPeople.ts"
+  ],
+  "skipTexts": { "*": [] },
+  "words": []
+}
