@@ -166,6 +166,7 @@ export default function Iglesia() {
         { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
         { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
         { icon: 'award', label: 'Sorteos', to: '/rifas' as Href, show: true },
+        { icon: 'monitor', label: 'Modo presentación', to: '/presentar' as Href, show: isLeader },
       ],
     },
     {

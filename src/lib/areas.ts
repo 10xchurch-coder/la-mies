@@ -4,7 +4,7 @@ export type AreaTone = 'green' | 'blue' | 'amber' | 'violet' | 'teal' | 'pink';
 
 const BY_SEGMENT: Record<string, AreaTone> = {
   // Reuniones
-  asistencia: 'green', ninos: 'green', eventos: 'green', evento: 'green', vivo: 'green', colectivo: 'green', 'colectivo-vivo': 'green', rifas: 'green', suspender: 'green',
+  asistencia: 'green', ninos: 'green', eventos: 'green', evento: 'green', vivo: 'green', colectivo: 'green', 'colectivo-vivo': 'green', rifas: 'green', suspender: 'green', presentar: 'green',
   // Crecer
   crecimiento: 'blue', oracion: 'blue', predicas: 'blue', predica: 'blue', clases: 'blue', clase: 'blue', canciones: 'blue', musica: 'blue', radio: 'blue',
   devocional: 'blue', 'plan-lectura': 'blue', biblia: 'blue', capacitacion: 'blue', material: 'blue', materiales: 'blue', notas: 'blue', progreso: 'blue', certificado: 'blue',
