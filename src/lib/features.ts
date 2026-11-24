@@ -29,8 +29,8 @@ export const FEATURES: Feature[] = [
     hint: 'Mis contactos para seguir y los avisos de a quién escribir o visitar.',
     routes: ['/seguimiento', '/admin/seguimiento'] },
   { key: 'colectivo', label: 'Colectivo y rutas', group: 'Evangelismo y visitas',
-    hint: 'Las rutas del colectivo, los pasajeros y el colectivo en vivo.',
-    routes: ['/colectivo', '/colectivo-vivo'] },
+    hint: 'Las rutas del colectivo, los pasajeros, las paradas en orden y el colectivo en vivo.',
+    routes: ['/colectivo', '/colectivo-vivo', '/colectivo-paradas'] },
 
   { key: 'asistencia', label: 'Asistencia a las reuniones', group: 'Reuniones y enseñanza',
     hint: 'Tomar asistencia, quiénes faltaron y la fidelidad de cada uno.',

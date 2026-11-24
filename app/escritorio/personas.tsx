@@ -8,7 +8,7 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { DeskButton, DeskPage } from '@/components/desk/DeskShell';
 import { Face } from '@/components/Face';
-import { deleteContact, syncFamilyRoute, listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
+import { deleteContact, householdsByContact, syncFamilyRoute, listGroups, listPeople, peopleEngagement, updateContact } from '@/lib/api';
 import { ageOf, daysSince, filterPeople, sortPeople, toCsv, type PersonFilter, type PersonSort } from '@/lib/desk';
 import { FAITH_LABEL, STATUS_LABEL, fmtDateAR, fmtDateShort, groupWord, maskDateAR, parseDateAR } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
@@ -44,11 +44,13 @@ function Select({ value, options, onChange, label, width }: { value: string; opt
 }
 
 // "min" es el ancho que tiene que tener la tabla para que la columna entre sin apretar a las demás.
-const COLS: { key: PersonSort | 'phone' | 'baptized'; label: string; width?: number; flex?: number; sort?: PersonSort; min?: number }[] = [
+const COLS: { key: PersonSort | 'phone' | 'baptized' | 'family'; label: string; width?: number; flex?: number; sort?: PersonSort; min?: number }[] = [
   { key: 'name', label: 'Nombre', flex: 2.4, sort: 'name' },
   { key: 'status', label: 'Estado', width: 92, sort: 'status' },
   { key: 'group', label: 'Grupo', flex: 1.2, sort: 'group', min: 800 },
   { key: 'phone', label: 'Teléfono', flex: 1.2, min: 520 },
+  // La familia es solo un vínculo: la asistencia de al lado es de cada persona.
+  { key: 'family', label: 'Familia', flex: 1.1, min: 1100 },
   { key: 'age', label: 'Edad', width: 64, sort: 'age', min: 900 },
   { key: 'baptized', label: 'Bautizado', width: 96, min: 1000 },
   { key: 'last', label: 'Última vez', width: 112, sort: 'last' },
@@ -62,6 +64,7 @@ export default function DeskPeople() {
   const [rows, setRows] = useState<Contact[] | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
   const [eng, setEng] = useState<Engagement[]>([]);
+  const [families, setFamilies] = useState<Map<string, { id: string; name: string }>>(new Map());
   const [filter, setFilter] = useState<PersonFilter>({ q: '', status: 'member', group: 'all', extra: 'all' });
   const [sort, setSort] = useState<{ by: PersonSort; dir: 1 | -1 }>({ by: 'name', dir: 1 });
   const [openId, setOpenId] = useState<string | null>(null);
@@ -70,6 +73,7 @@ export default function DeskPeople() {
     listPeople().then(setRows).catch(() => setRows([]));
     listGroups().then(setGroups).catch(() => undefined);
     peopleEngagement(12).then(setEng).catch(() => undefined);
+    householdsByContact().then(setFamilies).catch(() => undefined);
   }, []);
   useFocusEffect(load);
 
@@ -100,8 +104,8 @@ export default function DeskPeople() {
 
   const exportCsv = () => {
     const csv = toCsv(
-      ['Nombre', 'Estado', gw, 'Teléfono', 'Correo', 'Domicilio', 'Nacimiento', 'Edad', 'Bautizado', 'Miembro desde', 'Última vez que vino', 'Asistencia % (12 semanas)'],
-      shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,
+      ['Nombre', 'Estado', gw, 'Familia', 'Teléfono', 'Correo', 'Domicilio', 'Nacimiento', 'Edad', 'Bautizado', 'Miembro desde', 'Última vez que vino', 'Asistencia % (12 semanas)'],
+      shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', families.get(c.id)?.name ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,
         fmtDateAR(c.birthdate), ageOf(c), c.baptized || c.baptized_on ? 'Sí' : 'No', fmtDateAR(c.member_since), fmtDateAR(last.get(c.id) ?? null), pct.has(c.id) ? Math.round(pct.get(c.id)!) : '']),
     );
     if (Platform.OS !== 'web') { downloadText(`personas-${new Date().toISOString().slice(0, 10)}.csv`, csv).catch(() => undefined); return; }
@@ -212,6 +216,7 @@ export default function DeskPeople() {
                   case 'status': return <StatusPill status={c.status} />;
                   case 'group': return <Text style={styles.td} numberOfLines={1}>{groupName.get(c.group_id ?? '') ?? '—'}</Text>;
                   case 'phone': return <Text style={styles.td} numberOfLines={1}>{c.phone ? formatPhone(c.phone) : '—'}</Text>;
+                  case 'family': return <Text style={[styles.td, !families.has(c.id) && { color: colors.muted }]} numberOfLines={1}>{families.get(c.id)?.name ?? '—'}</Text>;
                   case 'age': return <Text style={styles.td}>{ageOf(c) ?? '—'}</Text>;
                   case 'baptized': return c.baptized || c.baptized_on ? <Feather name="check" size={16} color={colors.green} /> : <Text style={[styles.td, { color: colors.muted }]}>No</Text>;
                   case 'last': return (

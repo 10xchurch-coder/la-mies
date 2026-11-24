@@ -4,6 +4,7 @@ import type { PanelDetail } from './outings';
 import type { FollowContext } from './followWhy';
 import { supabase, errorMessage } from './supabase';
 import type { Bbox } from './geo';
+import type { FamilyMember, FamilyRole } from './families';
 import type {
   Cancellation,
   OutingRow, SessionSummary, HouseRow, Zone, ZoneProgress, FollowupRow, PipelineRow, ChurchEvent, PrayerRow, Announcement, SuggestionRow, DirectoryRow, Missionary, MissionaryReport, PastorMessage, PastorThreadRow, WeeklyReport,
@@ -1190,4 +1191,119 @@ export async function finCategoryUsage(): Promise<Record<string, number>> {
   const out: Record<string, number> = {};
   for (const r of rows) out[r.category_id] = (out[r.category_id] ?? 0) + 1;
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Familias (migración 0075). Una familia es solo un vínculo entre personas:
+// la asistencia y el seguimiento siguen siendo de cada uno.
+// ---------------------------------------------------------------------------
+
+/** La familia de una persona (vacío si no está en ninguna). */
+export async function householdFamily(contactId: string): Promise<FamilyMember[]> {
+  return (ok(await supabase.rpc('household_family', { p_contact: contactId })) as FamilyMember[] | null) ?? [];
+}
+
+/**
+ * Pone a una persona en una familia. Con `household` va a esa familia; sin `household` y con `newName` se crea una.
+ * Si ya estaba en esa familia, le cambia el lugar. Devuelve el id de la familia.
+ * `canPickup` ("puede retirar a los chicos") solo lo cambia el pastor o la secretaría.
+ */
+export async function saveHouseholdMember(contactId: string, opts: { household?: string | null; newName?: string | null; role: FamilyRole; canPickup?: boolean | null }): Promise<string> {
+  return ok(await supabase.rpc('household_save_member', {
+    p_contact: contactId, p_household: opts.household ?? null, p_new_name: opts.newName ?? null, p_role: opts.role, p_can_pickup: opts.canPickup ?? null,
+  })) as string;
+}
+
+/** Saca a una persona de su familia. Si la familia queda sin nadie, se borra. */
+export async function removeHouseholdMember(contactId: string, householdId: string): Promise<void> {
+  const { data, error } = await supabase.from('household_members').delete().eq('contact_id', contactId).select('contact_id');
+  if (error) throw new Error(errorMessage(error));
+  if (!data || data.length === 0) throw new Error('No podés sacar a esta persona de la familia.');
+  // Solo se borra si quedó vacía (lo decide la base). Si no se puede, no pasa nada.
+  await supabase.from('households').delete().eq('id', householdId);
+}
+
+export async function renameHousehold(householdId: string, name: string): Promise<void> {
+  ok(await supabase.rpc('household_rename', { p_household: householdId, p_name: name }));
+}
+
+export type HouseholdHit = { id: string; name: string; members: string | null; can_manage: boolean };
+/** Busca familias por su nombre o por el nombre de alguno de los suyos. */
+export async function searchHouseholds(q: string): Promise<HouseholdHit[]> {
+  return (ok(await supabase.rpc('household_search', { p_q: q })) as HouseholdHit[] | null) ?? [];
+}
+
+/** De qué familia es cada persona que puedo ver (para la columna "Familia" de las listas). */
+export async function householdsByContact(): Promise<Map<string, { id: string; name: string; role: FamilyRole }>> {
+  const { data, error } = await supabase.from('household_members').select('contact_id, household_id, role, households(name)').limit(5000);
+  const out = new Map<string, { id: string; name: string; role: FamilyRole }>();
+  if (error) return out;
+  for (const r of (data ?? []) as unknown as { contact_id: string; household_id: string; role: FamilyRole; households: { name: string } | { name: string }[] | null }[]) {
+    const h = Array.isArray(r.households) ? r.households[0] : r.households;
+    if (h?.name) out.set(r.contact_id, { id: r.household_id, name: h.name, role: r.role });
+  }
+  return out;
+}
+
+/** Directorio: de qué familia es cada hermano que eligió aparecer (por el id de su cuenta). */
+export async function directoryFamilies(): Promise<Map<string, { id: string; name: string }>> {
+  const { data, error } = await supabase.rpc('directory_families');
+  const out = new Map<string, { id: string; name: string }>();
+  if (error) return out;
+  for (const r of (data ?? []) as { profile_id: string; household_id: string; household_name: string }[]) out.set(r.profile_id, { id: r.household_id, name: r.household_name });
+  return out;
+}
+
+export type PickupAdult = { child_id: string; contact_id: string; name: string; role: FamilyRole; photo_path: string | null };
+/** Entrada de los chicos: los grandes de la familia de cada chico marcados "puede retirar". */
+export async function childPickupAdults(childIds: string[]): Promise<PickupAdult[]> {
+  if (!childIds.length) return [];
+  const { data, error } = await supabase.rpc('child_pickup_adults', { p_children: childIds });
+  return error ? [] : ((data ?? []) as PickupAdult[]);
+}
+
+// ---------------------------------------------------------------------------
+// Paradas del colectivo (migración 0075): a quién pasa a buscar cada ruta, en orden.
+// ---------------------------------------------------------------------------
+export type BusStopRow = {
+  id: string; pos: number; contact_id: string | null; household_id: string | null;
+  /** El nombre de la persona o de la familia. */
+  title: string;
+  /** Si es una familia: los nombres de los suyos. */
+  people: string | null;
+  photo_path: string | null; address: string | null; lat: number | null; lng: number | null;
+  /** true: el lugar se marcó a mano para esta parada. false: es la casa de la persona. */
+  own_place: boolean;
+  /** En el viaje de ahora: cuándo se le avisó y cuándo pasó el colectivo. */
+  notified_at: string | null; reached_at: string | null;
+  picked: boolean;
+  /** A cuántas personas con cuenta les llega el aviso. 0: a nadie (no tienen la app). */
+  will_notify: number;
+};
+export async function busStops(group: string): Promise<BusStopRow[]> {
+  return (ok(await supabase.rpc('bus_stops_list', { p_group: group })) as BusStopRow[] | null) ?? [];
+}
+/** Las paradas que el chofer salteó en el viaje de ahora ("hoy no viene"). */
+export async function busStopsSkipped(group: string): Promise<string[]> {
+  const { data, error } = await supabase.rpc('bus_stops_skipped', { p_group: group });
+  return error ? [] : ((data ?? []) as string[]);
+}
+export async function addBusStop(group: string, target: { contact?: string; household?: string }): Promise<string> {
+  return ok(await supabase.rpc('bus_stop_add', { p_group: group, p_contact: target.contact ?? null, p_household: target.household ?? null })) as string;
+}
+/** El lugar propio de la parada. Con lat y lng en null vuelve a usar la casa de la persona. */
+export async function setBusStopPlace(stop: string, lat: number | null, lng: number | null, address: string | null): Promise<void> {
+  ok(await supabase.rpc('bus_stop_set_place', { p_stop: stop, p_lat: lat, p_lng: lng, p_address: address }));
+}
+export async function reorderBusStops(group: string, ids: string[]): Promise<void> {
+  ok(await supabase.rpc('bus_stops_reorder', { p_group: group, p_ids: ids }));
+}
+export async function removeBusStop(stop: string): Promise<void> {
+  const { data, error } = await supabase.from('bus_stops').delete().eq('id', stop).select('id');
+  if (error) throw new Error(errorMessage(error));
+  if (!data || data.length === 0) throw new Error('No podés cambiar las paradas de esta ruta.');
+}
+/** "Hoy no viene": saltea la parada en el viaje de ahora (o lo deshace). */
+export async function skipBusStop(stop: string, skip: boolean): Promise<void> {
+  ok(await supabase.rpc('bus_stop_skip', { p_stop: stop, p_skip: skip }));
 }

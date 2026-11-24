@@ -1,6 +1,7 @@
 // Colectivo en vivo: el jefe de la ruta (o el chofer elegido) toca "Salimos" y los de la ruta ven el colectivo en el mapa.
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Platform, StyleSheet, Text, View } from 'react-native';
+import { useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { MapView, Marker, Polyline } from '@/components/map';
 import { Header, Screen } from '@/components/Screen';
@@ -40,6 +41,7 @@ function regionFor(trail: { latitude: number; longitude: number }[], lat: number
 
 export default function ColectivoVivo() {
   const { isStaff } = useAuth();
+  const router = useRouter();
   const [routes, setRoutes] = useState<Route[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -173,6 +175,10 @@ export default function ColectivoVivo() {
                 </>
               ) : live ? (
                 <Text style={{ fontSize: 13, color: colors.muted }}>Esperando la ubicación del colectivo…</Text>
+              ) : null}
+              {r.can_drive ? (
+                <Button title="Paradas en orden y aviso de 10 minutos" icon="map-pin" variant="ghost" small
+                  onPress={() => router.push({ pathname: '/colectivo-paradas', params: { ruta: r.group_id } } as unknown as Href)} />
               ) : null}
               {r.can_drive && Platform.OS !== 'web' ? (
                 live && r.mine ? (

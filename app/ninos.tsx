@@ -7,7 +7,8 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Button, Card, Choice, Field, Loading, SectionTitle, Tag } from '@/components/ui';
-import { checkInChild, checkOutChild, checkinsToday, searchPeople, type CheckinRow } from '@/lib/api';
+import { checkInChild, checkOutChild, checkinsToday, childPickupAdults, searchPeople, type CheckinRow, type PickupAdult } from '@/lib/api';
+import { roleLabel } from '@/lib/families';
 import { fmtTime } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
@@ -23,8 +24,19 @@ export default function Ninos() {
   const [lastCode, setLastCode] = useState<{ name: string; code: string } | null>(null);
   const [outCode, setOutCode] = useState('');
   const t = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Los grandes de la familia de cada chico que pueden retirarlo (se cargan en la ficha, en "Familia").
+  const [pickup, setPickup] = useState<Record<string, PickupAdult[]>>({});
 
-  const load = useCallback(() => { checkinsToday().then(setRows).catch((e) => { setRows([]); Alert.alert('No se pudo', errorMessage(e)); }); }, []);
+  const load = useCallback(() => {
+    checkinsToday().then((list) => {
+      setRows(list);
+      childPickupAdults(list.filter((r) => !r.out_at).map((r) => r.child_id)).then((adults) => {
+        const by: Record<string, PickupAdult[]> = {};
+        for (const a of adults) (by[a.child_id] ??= []).push(a);
+        setPickup(by);
+      });
+    }).catch((e) => { setRows([]); Alert.alert('No se pudo', errorMessage(e)); });
+  }, []);
   useFocusEffect(load);
 
   const onQ = (v: string) => {
@@ -93,6 +105,7 @@ export default function Ninos() {
             style={{ flex: 1, height: 52, borderRadius: 12, borderWidth: 1, borderColor: colors.input, paddingHorizontal: 16, fontSize: 24, fontWeight: '800', letterSpacing: 6, color: colors.text }} />
           <Button title="Entregar" icon="check" onPress={checkOut} />
         </View>
+        <Text style={{ fontSize: 12, color: colors.muted }}>El código manda siempre. En la lista de abajo ves qué grandes de su familia pueden retirar a cada chico.</Text>
 
         <SectionTitle>Hoy</SectionTitle>
         {rows === null ? <Loading /> : (
@@ -103,6 +116,11 @@ export default function Ninos() {
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}{r.age != null ? ` (${r.age})` : ''}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>{r.room} · entró {fmtTime(r.in_at)}{r.brought_by ? ` · lo trajo ${r.brought_by}` : ''}{r.out_at ? ` · salió ${fmtTime(r.out_at)}` : ''}</Text>
+                  {!r.out_at && pickup[r.child_id]?.length ? (
+                    <Text style={{ fontSize: 12, color: colors.greenText, fontWeight: '700' }}>
+                      Puede retirar: {pickup[r.child_id].map((a) => `${a.name} (${roleLabel(a.role).toLowerCase()})`).join(', ')}
+                    </Text>
+                  ) : null}
                 </View>
                 {r.out_at ? <Feather name="check" size={18} color={colors.green} /> : <Tag text={r.code} tone="amber" />}
               </View>
