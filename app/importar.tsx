@@ -144,6 +144,7 @@ export default function Importar() {
               {'\n'}Solo hace falta el nombre; el celular es lo más importante, porque con él la app reconoce a cada persona cuando crea su cuenta.
             </Text>
             <Button title="Elegir archivo" icon="upload" onPress={pick} />
+            <Button title="Probar el importador nuevo: más fácil, y se puede deshacer" variant="ghost" small onPress={() => router.push('/admin/importar' as never)} />
             {msg ? <Text style={{ color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 }}>{msg}</Text> : null}
           </Card>
         ) : (
