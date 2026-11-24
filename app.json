@@ -116,6 +116,14 @@
           "nfcPermission": "La Mies usa el lector NFC para leer y grabar las credenciales con chip en la puerta de un evento.",
           "includeNdefEntitlement": false
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "La Mies guarda en tus fotos las imágenes de versículos que hacés.",
+          "savePhotosPermission": "La Mies guarda en tus fotos las imágenes de versículos que hacés.",
+          "isAccessMediaLocationEnabled": false
+        }
       ]
     ],
     "experiments": {
