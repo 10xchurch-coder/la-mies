@@ -48,6 +48,8 @@ Todos los días a las 5:10 de la mañana (hora de Argentina) la base corre sola 
 - deja siempre un evento próximo a futuro (cuando pasa, lo corre seis semanas);
 - le pone el candado a las tablas nuevas que se hayan agregado a la app.
 
+Las visitas, los contactos y las veredas recorridas que se van sumando caen siempre dentro de esa zona del centro, sobre calles reales.
+
 Para correrla a mano (SQL Editor de Supabase): `select public.demo_tick();`
 
 ## Cómo apagarla y volver a prenderla
@@ -74,7 +76,7 @@ select public.demo_new_entry_key();
 
 ## Cómo cargar todo de nuevo en una base nueva
 
-1. Aplicar la migración `supabase/migrations/0085_demo.sql`.
+1. Tener cargadas las calles de Posadas (`scripts/import-roads.mjs`) y aplicar las migraciones `0085_demo.sql` y `0086_demo_posadas.sql`.
 2. `node scripts/demo-seed.mjs` (escribe los archivos en `supabase/seed/demo/`; siempre salen iguales).
 3. Pegar y correr en el SQL Editor, en orden, `01_…sql` hasta `08_…sql`.
 4. Correr `supabase/tests/demo_test.sql`: tiene que terminar con `ROLLBACK_OK` y sin fugas (no deja nada guardado).
@@ -93,7 +95,12 @@ Las fechas se calculan el día que se carga, así que sirve cualquier día.
 
 ## Para tener en cuenta
 
-- El mapa de la iglesia de ejemplo está en un pueblo inventado ("Arroyo Manso"), dibujado en un lugar del mapa donde no hay ciudad.
-  Las calles pintadas y los puntos de las casas son inventados.
+- **El mapa está en el centro de Posadas** (unas 12 x 11 cuadras entre Av. Corrientes y 25 de Mayo, y entre Tucumán y Av. Roque Pérez),
+  sobre las calles de verdad, para que se vea un mapa real. Las personas y sus direcciones son inventadas: cada casa se sortea sobre una vereda
+  ("Bolívar 1555" no es la casa de nadie de la iglesia) y nunca cae a menos de 15 metros del punto de una persona de una iglesia real.
+- En el mapa hay zonas muy recorridas, zonas recorridas a medias y zonas sin tocar, para que se vean los colores.
+  Las paradas del colectivo están en esquinas reales.
+- En la base, la ciudad de la iglesia de ejemplo dice "Ciudad de ejemplo" (no "Posadas"), para que nadie la confunda con una iglesia real de Posadas.
+- Quedaron guardadas 18 calles inventadas del primer mapa (lejos, en La Pampa). No se usan ni se ven; no se borraron porque acá no se borra nada.
 - Las fotos están vacías (nadie tiene foto) y las prédicas no tienen video.
 - "Entrada de los chicos", "Inactivos", "Sorteos" y "Colectivo en vivo" se ven vacías: son cosas que pasan en el momento.

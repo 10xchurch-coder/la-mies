@@ -6,7 +6,7 @@ create or replace function public.demo_p(n integer) returns uuid language sql im
 revoke all on function public.demo_c() from public, anon, authenticated;
 revoke all on function public.demo_p(integer) from public, anon, authenticated;
 insert into public.churches (id, name, city, country, timezone, grouping, tracking_since, giving, inactive_months, fin_track_donors, certificate_pastor, absence_dow, absence_hour, reminder_dow, reminder_hour, created_at)
-values (demo_c(), 'Iglesia Bautista Esperanza', 'Arroyo Manso', 'AR', 'America/Argentina/Buenos_Aires', 'bus_routes', current_date - 430,
+values (demo_c(), 'Iglesia Bautista Esperanza', 'Ciudad de ejemplo', 'AR', 'America/Argentina/Buenos_Aires', 'bus_routes', current_date - 430,
   '{"titular":"Iglesia Bautista Esperanza (ejemplo)","banco":"Banco de ejemplo","alias":"ESTO.ES.UN.EJEMPLO","nota":"Datos de ejemplo. No es una cuenta real."}'::jsonb,
   null, true, 'Ricardo Villalba', 0, 21, 1, 9, now() - interval '520 days')
 on conflict (id) do nothing;
@@ -50,4 +50,6 @@ from (values (1, demo_p(1), 'admin', 'Ricardo Villalba', 'Pastor', null),
   (14, demo_p(14), 'member', 'Julián Vera', null, null)) v(n, id, role, name, title, fin)
 on conflict (id) do nothing;
 select public.demo_new_entry_key();
+-- La zona de ejemplo: las calles reales del centro de Posadas que ya están en la tabla roads (hay que tenerlas cargadas).
+do $z$ begin if public.demo_build_area() < 300 then raise exception 'Faltan las calles del centro de Posadas en la tabla roads (correr scripts/import-roads.mjs)'; end if; end $z$;
 commit;

@@ -140,8 +140,8 @@ export default function Mapa() {
   // Al entrar: centrar en mi ubicación y cargar la zona.
   useEffect(() => {
     (async () => {
-      // En la demostración el mapa abre en el pueblo inventado de la iglesia de ejemplo (no pide la ubicación).
-      if (isDemoNow()) { const r = regionAround(DEMO_CENTER, 520); setRegion(r); loadArea(r); return; }
+      // En la demostración el mapa abre en el centro de Posadas, donde está ubicada la iglesia de ejemplo (no pide la ubicación).
+      if (isDemoNow()) { const r = regionAround(DEMO_CENTER, 650); setRegion(r); loadArea(r); return; }
       try {
         const perm = await Location.requestForegroundPermissionsAsync();
         if (perm.status === 'granted') {

@@ -137,7 +137,7 @@ begin
       'my_profile()', 'my_permissions()', 'daily_for(null)', 'reading_streak()', 'my_upcoming(21)', 'today_birthdays()', 'upcoming_birthdays(30)', 'people_engagement(12)',
       format('weekend_absences(%L)', sun - 1), format('attendance_sheet(%L, %L)', sun, s1), 'church_report(now() - interval ''30 days'', now())', 'pipeline_report(6)',
       'team_totals(''month'')', 'scoreboard(''month'')', 'prayer_list()', 'directory_list()', 'directory_families()', 'bus_live_routes()', format('bus_stops_list(%L)', g1),
-      format('route_riders(%L)', g1), 'coverage_in_bbox(-37.46, -66.61, -37.44, -66.59)', 'roads_in_bbox(-37.46, -66.61, -37.44, -66.59)', 'fin_monthly(6)',
+      format('route_riders(%L)', g1), 'coverage_in_bbox(-27.3750, -55.9035, -27.3600, -55.8865)', 'roads_in_bbox(-27.3750, -55.9035, -27.3600, -55.8865)', 'fin_monthly(6)',
       'fin_by_category(current_date - 30, current_date)', 'fin_account_balances(current_date)', 'fin_balances(null, null)', 'personas_care_list()', 'personas_disc_list()',
       'personas_mclass_list()', 'personas_decisions_recent()', 'list_outings(60, null)', 'dm_inbox()', 'pastor_inbox()', 'church_chat_list(null, 50)',
       format('ministry_chat_list(%L, null, 50)', m2), 'reading_board()', 'my_follow_ups()', 'my_followups()', 'suggestions_list()', 'culto_questions_list()', 'culto_answered_prayers()',

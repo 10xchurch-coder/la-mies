@@ -1,18 +1,6 @@
--- 03_calles_clases_ministerios_finanzas · datos de ejemplo (generado por scripts/demo-seed.mjs; no editar a mano)
+-- 03_clases_ministerios_finanzas · datos de ejemplo (generado por scripts/demo-seed.mjs; no editar a mano)
 begin;
 set local session_replication_role = replica;
-insert into public.roads (id, name, highway, city, coords, min_lat, min_lng, max_lat, max_lng)
-select 8800000000001 + x.i, n.name, case when x.i in (4, 13) then 'tertiary' else 'residential' end, 'Iglesia de ejemplo', co.j,
-  least(a.lat, b.lat), least(a.lng, b.lng), greatest(a.lat, b.lat), greatest(a.lng, b.lng)
-from unnest(array['Los Ceibos', 'Las Acacias', 'El Jacarandá', 'Los Lapachos', 'Av. de la Esperanza', 'Los Aromos', 'Las Magnolias', 'El Timbó', 'Los Tilos', 'Los Zorzales', 'Las Calandrias', 'El Hornero', 'Los Teros', 'Av. del Arroyo', 'Las Golondrinas', 'El Benteveo', 'Los Cardenales', 'Las Torcazas']) with ordinality n(name, ord)
-cross join lateral (select (n.ord - 1)::int as i) x
-cross join lateral (select case when x.i < 9 then -37.45 + (x.i - 4) * 0.001 else -37.45 - 4 * 0.001 end as lat,
-                           case when x.i < 9 then -66.6 - 4 * 0.00126 else -66.6 + (x.i - 13) * 0.00126 end as lng) a
-cross join lateral (select case when x.i < 9 then a.lat else -37.45 + 4 * 0.001 end as lat,
-                           case when x.i < 9 then -66.6 + 4 * 0.00126 else a.lng end as lng) b
-cross join lateral (select jsonb_agg(jsonb_build_array(round((a.lat + (b.lat - a.lat) * s / 8.0)::numeric, 6), round((a.lng + (b.lng - a.lng) * s / 8.0)::numeric, 6)) order by s) as j
-                    from generate_series(0, 8) s) co
-on conflict (id) do nothing;
 insert into public.classes (id, church_id, name, age_min, age_max, days, sort_order) values
   (demo_id('k1'), demo_c(), 'Cuna', 0, 3, '{sun}', 10), (demo_id('k2'), demo_c(), 'Párvulos', 4, 6, '{sun}', 20), (demo_id('k3'), demo_c(), 'Primarios', 7, 9, '{sun}', 30),
   (demo_id('k4'), demo_c(), 'Intermedios', 10, 12, '{sun}', 40), (demo_id('k5'), demo_c(), 'Adolescentes', 13, 17, '{sun}', 50)

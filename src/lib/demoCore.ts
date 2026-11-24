@@ -13,8 +13,8 @@ export const DEMO_SIGNUP_ROUTE = '/empezar';
 export const DEMO_CONTACT_EMAIL = 'info@iglesiavictoria.com';
 export const DEMO_CONTACT_URL = `mailto:${DEMO_CONTACT_EMAIL}?subject=${encodeURIComponent('Quiero La Mies para mi iglesia')}`;
 
-/** El centro del pueblo inventado de la iglesia de ejemplo (para que el mapa abra ahí). */
-export const DEMO_CENTER = { lat: -37.45, lng: -66.6 };
+/** El centro de la zona de la iglesia de ejemplo: el centro de Posadas, cerca de la plaza 9 de Julio (para que el mapa abra ahí). */
+export const DEMO_CENTER = { lat: -27.367, lng: -55.8955 };
 
 export type DemoView = 'pastor' | 'miembro';
 

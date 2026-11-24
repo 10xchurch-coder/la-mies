@@ -55,13 +55,15 @@ insert into public.memory_verse_done (verse_id, contact_id, church_id, learned_o
 select v.id, s.contact_id, demo_c(), current_date - (7 + demo_h('ml' || v.id::text || s.contact_id::text) % 120), demo_p(9)
 from public.memory_verses v join public.class_students s on s.class_id = v.class_id
 where v.church_id = demo_c() and demo_h('mv' || v.id::text || s.contact_id::text) < 560 on conflict do nothing;
-insert into public.zones (id, church_id, name, color, polygon, assigned, note, created_by) values
-  (demo_id('z1'), demo_c(), 'Barrio Norte', '#2F8F5B', '[[-37.4458,-66.6052],[-37.4458,-66.5998],[-37.4498,-66.5998],[-37.4498,-66.6052]]'::jsonb, array[demo_p(8), demo_p(6)], 'Empezar por Los Tilos.', demo_p(8)),
-  (demo_id('z2'), demo_c(), 'Barrio Sur', '#C2410C', '[[-37.4502,-66.6002],[-37.4502,-66.5948],[-37.4542,-66.5948],[-37.4542,-66.6002]]'::jsonb, array[demo_p(7), demo_p(14)], null, demo_p(8))
+insert into public.zones (id, church_id, name, color, polygon, assigned, note, created_by, created_at) values
+  (demo_id('z1'), demo_c(), 'Barrio Norte', '#2F8F5B', '[]'::jsonb, array[demo_p(8), demo_p(6)], null, demo_p(8), now() - interval '75 days'),
+  (demo_id('z2'), demo_c(), 'Barrio Sur', '#C2410C', '[]'::jsonb, array[demo_p(7), demo_p(14)], null, demo_p(8), now() - interval '75 days')
 on conflict (id) do nothing;
 insert into public.bus_stops (id, church_id, group_id, household_id, sort_order, address, lat, lng, created_by)
 select demo_id('bs' || x.hid::text), demo_c(), x.gid, x.hid, row_number() over (partition by x.gid order by x.lng), x.address, x.lat, x.lng, demo_p(6)
 from (select distinct hm.household_id as hid, ct.group_id as gid, ct.address, ct.lat, ct.lng
       from public.contacts ct join public.household_members hm on hm.contact_id = ct.id where ct.church_id = demo_c() and ct.bus_rider) x
 on conflict do nothing;
+-- Las paradas a la esquina más cercana, en orden de recorrido, y las zonas con sus bordes sobre calles reales.
+select public.demo_place_all(demo_c());
 commit;

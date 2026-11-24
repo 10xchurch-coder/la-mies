@@ -1,63 +1,63 @@
 -- 02_familias_y_personas · datos de ejemplo (generado por scripts/demo-seed.mjs; no editar a mano)
 begin;
 set local session_replication_role = replica;
-create temp table t_h (hk text, name text, addr text, lat float8, lng float8, hp int, grp int) on commit drop;
+create temp table t_h (hk text, name text, hp int) on commit drop;
 insert into t_h values
-('1','Familia Villalba','Los Lapachos 859',-37.45113,-66.595462,930,2),
-('2','Familia Benítez','Las Calandrias 621',-37.448787,-66.603944,760,1),
-('3','Familia Quiroga','Los Ceibos 769',-37.45413,-66.596593,750,2),
-('4','Familia Acosta','Av. de la Esperanza 434',-37.44987,-66.600818,890,1),
-('5','Familia Sosa','Los Tilos 533',-37.44613,-66.59957,930,1),
-('6','Familia Maidana','Los Zorzales 816',-37.446827,-66.604876,760,1),
-('7','Familia Ojeda','El Jacarandá 179',-37.45213,-66.604019,850,2),
-('8','Familia Giménez','Las Calandrias 777',-37.447212,-66.603944,920,1),
-('9','Familia Cabrera','Av. de la Esperanza 120',-37.44987,-66.604778,910,1),
-('10','Familia Romero','Los Ceibos 325',-37.45413,-66.602196,880,2),
-('11','Familia Paz','El Benteveo 327',-37.451722,-66.597644,960,2),
-('12','Familia Ledesma','El Timbó 369',-37.44713,-66.601621,920,1),
-('13','Familia Figueroa','El Hornero 445',-37.450533,-66.602684,920,2),
-('14','Familia Vera','Los Zorzales 424',-37.450758,-66.604876,910,2),
-('15','Familia Ramírez','Av. del Arroyo 535',-37.449647,-66.600164,940,1),
-('16','Familia Correa','El Timbó 846',-37.44687,-66.595612,790,1),
-('17','Familia Castillo','Los Cardenales 160',-37.453374,-66.596056,960,2),
-('18','Familia Gutiérrez','El Timbó 114',-37.44687,-66.604863,940,1),
-('19','Familia Córdoba','El Hornero 157',-37.453413,-66.602684,920,2),
-('20','Familia Ruiz','Los Cardenales 123',-37.453761,-66.596384,870,2),
-('21','Familia Vega','El Timbó 542',-37.44687,-66.599456,940,1),
-('22','Familia González','Los Teros 242',-37.452554,-66.601096,900,2),
-('23','Familia Arias','Av. de la Esperanza 426',-37.44987,-66.600915,820,1),
-('24','Familia Rodríguez','El Timbó 740',-37.44687,-66.596952,880,1),
-('25','Familia Godoy','Los Aromos 362',-37.44887,-66.601709,850,1),
-('26','Familia Molina','Las Torcazas 847',-37.44652,-66.595124,850,1),
-('27','Familia Coronel','Las Acacias 851',-37.45313,-66.595576,940,2),
-('28','Familia Pérez','Av. del Arroyo 368',-37.451287,-66.599836,970,2),
-('29','Familia Castro','Los Aromos 854',-37.44887,-66.595506,740,1),
-('30','Familia Sánchez','Av. de la Esperanza 727',-37.45013,-66.597136,820,2),
-('31','Familia Muñoz','El Jacarandá 366',-37.45187,-66.601653,790,2),
-('32','Familia Ríos','Las Torcazas 648',-37.448492,-66.594796,920,1),
-('33','Familia Flores','Los Teros 238',-37.45261,-66.601096,820,2),
-('34','Familia Morales','Los Zorzales 725',-37.447747,-66.605204,890,1),
-('35','Familia Herrera','Los Lapachos 337',-37.45113,-66.60204,780,2),
-('36','Familia Ponce','Las Magnolias 638',-37.44787,-66.598249,900,1),
-('37','Familia Gómez','Av. de la Esperanza 652',-37.44987,-66.598055,930,1),
-('38','Familia Cáceres','Las Magnolias 373',-37.44813,-66.601584,860,1),
-('39','Familia Bravo','Las Calandrias 116',-37.45384,-66.603616,960,2),
-('40','Familia Cardozo','Las Torcazas 779',-37.447191,-66.595124,840,1),
-('41','Familia Vargas','Las Calandrias 369',-37.451287,-66.603944,580,2),
-('42','Familia Álvarez','Los Tilos 131',-37.44613,-66.604649,500,1),
-('43','Familia Torres','Av. del Arroyo 614',-37.448861,-66.599836,430,1),
-('44','Familia López','Los Lapachos 567',-37.45113,-66.599123,440,2),
-('45','Familia Juárez','Las Golondrinas 742',-37.447562,-66.598576,420,1),
-('46','Familia Peralta','Las Acacias 739',-37.45313,-66.596978,460,2),
-('47','Familia Luna','Los Aromos 872',-37.44887,-66.595286,580,1),
-('48','Familia Núñez','El Hornero 470',-37.45027,-66.602356,530,2),
-('49','Familia Ortiz','Av. del Arroyo 264',-37.45233,-66.599836,630,2),
-('50','Familia García','Las Calandrias 566',-37.449307,-66.603616,670,1),
-('51','Familia Rojas','Av. de la Esperanza 440',-37.44987,-66.600729,600,1),
-('52','Familia Maldonado','Los Zorzales 120',-37.453794,-66.604876,600,2),
-('53','Familia Aguirre','El Benteveo 237',-37.452626,-66.597644,600,2),
-('54','Familia Ferreyra','Las Torcazas 816',-37.446841,-66.594796,600,1),
-('55','Familia Fernández','Los Cardenales 274',-37.452232,-66.596056,600,2);
+('1','Familia Villalba',930),
+('2','Familia Benítez',760),
+('3','Familia Quiroga',750),
+('4','Familia Acosta',890),
+('5','Familia Sosa',930),
+('6','Familia Maidana',760),
+('7','Familia Ojeda',850),
+('8','Familia Giménez',920),
+('9','Familia Cabrera',910),
+('10','Familia Romero',880),
+('11','Familia Paz',960),
+('12','Familia Ledesma',920),
+('13','Familia Figueroa',920),
+('14','Familia Vera',910),
+('15','Familia Ramírez',940),
+('16','Familia Correa',790),
+('17','Familia Castillo',960),
+('18','Familia Gutiérrez',940),
+('19','Familia Córdoba',920),
+('20','Familia Ruiz',870),
+('21','Familia Vega',940),
+('22','Familia González',900),
+('23','Familia Arias',820),
+('24','Familia Rodríguez',880),
+('25','Familia Godoy',850),
+('26','Familia Molina',850),
+('27','Familia Coronel',940),
+('28','Familia Pérez',970),
+('29','Familia Castro',740),
+('30','Familia Sánchez',820),
+('31','Familia Muñoz',790),
+('32','Familia Ríos',920),
+('33','Familia Flores',820),
+('34','Familia Morales',890),
+('35','Familia Herrera',780),
+('36','Familia Ponce',900),
+('37','Familia Gómez',930),
+('38','Familia Cáceres',860),
+('39','Familia Bravo',960),
+('40','Familia Cardozo',840),
+('41','Familia Vargas',580),
+('42','Familia Álvarez',500),
+('43','Familia Torres',430),
+('44','Familia López',440),
+('45','Familia Juárez',420),
+('46','Familia Peralta',460),
+('47','Familia Luna',580),
+('48','Familia Núñez',530),
+('49','Familia Ortiz',630),
+('50','Familia García',670),
+('51','Familia Rojas',600),
+('52','Familia Maldonado',600),
+('53','Familia Aguirre',600),
+('54','Familia Ferreyra',600),
+('55','Familia Fernández',600);
 create temp table t_p (k text, hk text, name text, sex text, age_d int, marital text, st text, since_d int, created_d int, role text, prof int, bus boolean, bapt int, saved int, p int, stop_w int) on commit drop;
 insert into t_p values
 ('1','1','Ricardo Villalba','m',17789,'married','member',1250,520,'padre',1,false,-1,0,930,0),
@@ -226,12 +226,12 @@ insert into t_p values
 ('164','55','Mariano Fernández','m',13670,'single','visitor',0,3,'otro',0,false,0,0,990,0);
 insert into public.households (id, church_id, name, created_by, created_at)
 select demo_id('h' || hk), demo_c(), name, demo_p(3), now() - interval '380 days' from t_h on conflict (id) do nothing;
-insert into public.contacts (id, church_id, created_by, created_at, updated_at, name, age, sex, marital, phone, lat, lng, address, interest, status, member_since, birthdate,
-  group_id, profile_id, baptized, baptized_here, baptized_on, saved_on, bus_rider, pickup_time, share_mode, baseline, gospel_presented)
+insert into public.contacts (id, church_id, created_by, created_at, updated_at, name, age, sex, marital, phone, interest, status, member_since, birthdate,
+  profile_id, baptized, baptized_here, baptized_on, saved_on, bus_rider, pickup_time, share_mode, baseline, gospel_presented)
 select demo_id('c' || p.k), demo_c(), demo_p(3), (current_date - p.created_d) + time '11:00', now(), p.name, p.age_d / 365, p.sex, p.marital,
-  case when p.age_d >= 14 * 365 then '+54 9 1005 55-' || lpad(p.k, 4, '0') end, h.lat, h.lng, h.addr, 'very', p.st,
+  case when p.age_d >= 14 * 365 then '+54 9 1005 55-' || lpad(p.k, 4, '0') end, 'very', p.st,
   case when p.since_d > 0 and p.age_d >= 12 * 365 then current_date - least(p.since_d, p.age_d - 9 * 365) end, current_date - p.age_d,
-  demo_id('g' || h.grp), case when p.prof > 0 then demo_p(p.prof) end,
+  case when p.prof > 0 then demo_p(p.prof) end,
   p.bapt <> 0, p.bapt > 0, case when p.bapt > 0 then current_date - p.bapt end, case when p.saved > 0 then current_date - p.saved end,
   p.bus, case when p.bus then '09:' || lpad((10 + demo_h('bt' || p.hk) % 40)::text, 2, '0') end, 'group',
   case when p.created_d >= 430 then case p.st when 'member' then 'member' else 'person' end end, true
@@ -239,8 +239,7 @@ from t_p p join t_h h using (hk) on conflict (id) do nothing;
 update public.contacts c set spouse_id = demo_id('c' || o.k)
 from t_p p join t_p o on o.hk = p.hk and o.k <> p.k and o.marital = 'married'
 where p.marital = 'married' and c.id = demo_id('c' || p.k) and c.spouse_id is null;
-update public.profiles pr set phone = c.phone, home_lat = c.lat, home_lng = c.lng, home_address = c.address
-from public.contacts c where c.profile_id = pr.id and c.church_id = demo_c() and pr.phone is null;
+update public.profiles pr set phone = c.phone from public.contacts c where c.profile_id = pr.id and c.church_id = demo_c() and pr.phone is null;
 insert into public.household_members (household_id, contact_id, role, can_pickup)
 select demo_id('h' || hk), demo_id('c' || k), role, age_d >= 18 * 365 from t_p on conflict do nothing;
 insert into public.contact_children (id, contact_id, name, age, birthdate, child_contact_id)
@@ -249,4 +248,6 @@ from t_p a join t_p k on k.hk = a.hk and k.role in ('hijo', 'hija') where a.role
 insert into public.demo_plan (contact_id, church_id, hk, p, hp, stop_on)
 select demo_id('c' || p.k), demo_c(), p.hk, p.p, h.hp, case when p.stop_w > 0 then current_date - p.stop_w * 7 end
 from t_p p join t_h h using (hk) on conflict (contact_id) do nothing;
+-- Cada familia a su lugar: una vereda de una calle real del centro (ver demo_place_all en la migración 0086).
+select public.demo_place_all(demo_c());
 commit;

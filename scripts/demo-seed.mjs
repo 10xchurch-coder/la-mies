@@ -8,7 +8,8 @@
 // - Las tablas chicas (personas, familias…) van como inserts; la historia larga (más de un año de asistencia,
 //   ofrendas, clases) va como "insert … select" que la base calcula con un azar que también es fijo (demo_h).
 // - Cada archivo es una transacción y se puede volver a correr: usa ids fijos (demo_id) y "on conflict do nothing".
-// - Se cargan en orden, como dueño de la base (SQL Editor de Supabase). Necesitan la migración 0085.
+// - Se cargan en orden, como dueño de la base (SQL Editor de Supabase). Necesitan las migraciones 0085 y 0086
+//   y las calles de Posadas en la tabla roads.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,11 +39,8 @@ const q = (s) => (s == null ? 'null' : `'${String(s).replace(/'/g, "''")}'`);
 const C = 'demo_c()';
 const P = (n) => `demo_p(${n})`;
 
-// El pueblo inventado: una cuadrícula de 9 x 9 calles en un lugar sin nada alrededor.
-const TOWN = { lat: -37.45, lng: -66.6, dLat: 0.001, dLng: 0.00126 };
-const EW = ['Los Ceibos', 'Las Acacias', 'El Jacarandá', 'Los Lapachos', 'Av. de la Esperanza', 'Los Aromos', 'Las Magnolias', 'El Timbó', 'Los Tilos'];
-const NS = ['Los Zorzales', 'Las Calandrias', 'El Hornero', 'Los Teros', 'Av. del Arroyo', 'Las Golondrinas', 'El Benteveo', 'Los Cardenales', 'Las Torcazas'];
-const ROAD0 = 8800000000001;
+// Los lugares (calles, casas, paradas, zonas) no se inventan acá: la base los pone sobre las calles reales del centro de Posadas
+// (migración 0086: demo_build_area, demo_place, demo_place_all).
 
 // ---------- nombres (comunes en Argentina; se mezclan al azar) ----------
 const MEN = ['Juan', 'Carlos', 'José', 'Luis', 'Miguel', 'Jorge', 'Roberto', 'Sergio', 'Marcelo', 'Diego', 'Martín', 'Alejandro', 'Fernando', 'Ramón', 'Oscar', 'Raúl', 'Walter', 'Néstor', 'Claudio', 'Fabián', 'Gabriel', 'Javier', 'Nicolás', 'Lucas', 'Facundo', 'Agustín', 'Franco', 'Emanuel', 'Ezequiel', 'Santiago', 'Joaquín', 'Bruno', 'Lautaro', 'Ignacio', 'Gonzalo', 'Maximiliano', 'Cristian', 'Ariel', 'Rodrigo', 'Mariano'];
@@ -86,25 +84,18 @@ function freshLast() {
 const houses = [];
 const people = [];
 let pk = 0;
-function place() {
-  // una casa sobre una calle de la cuadrícula: calle, cuadra, a qué altura y de qué lado
-  const road = int(0, 17), seg = int(0, 7), t = 0.12 + rnd() * 0.76, side = chance(0.5) ? 1 : -1;
-  const along = (seg - 4 + t), off = side * 0.00013;
-  const ew = road < 9;
-  const lat = ew ? TOWN.lat + (road - 4) * TOWN.dLat + off : TOWN.lat + along * TOWN.dLat;
-  const lng = ew ? TOWN.lng + along * TOWN.dLng : TOWN.lng + (road - 13) * TOWN.dLng + off * 1.26;
-  const num = (seg + 1) * 100 + Math.round(t * 48) * 2 + (side > 0 ? 0 : 1);
-  return { addr: `${ew ? EW[road] : NS[road - 9]} ${num}`, lat: +lat.toFixed(6), lng: +lng.toFixed(6), north: lat > TOWN.lat };
-}
+// Antes acá se sorteaba un lugar en un pueblo inventado. Ahora el lugar lo pone la base sobre calles reales,
+// pero se siguen tirando los mismos cuatro números al azar para que las personas salgan iguales a las ya cargadas.
+const skipPlace = () => { int(0, 17); int(0, 7); rnd(); chance(0.5); };
 /** kind: 'm' familia de miembros · 'a' vienen seguido pero no son miembros · 'n' visitas nuevas */
 function addHouse(kind, last, build, longTime = false) {
   const hk = String(houses.length + 1);
-  const pl = place();
+  skipPlace();
   const old = longTime || (kind === 'm' ? chance(0.68) : false);
   // hace cuántos días empezaron a venir
   const created = old ? 520 : kind === 'm' ? int(9, 58) * 7 : kind === 'a' ? int(5, 50) * 7 : int(0, 4) * 7 + 3;
   const hp = kind === 'm' ? int(74, 97) * 10 : kind === 'a' ? int(38, 70) * 10 : 600;
-  const h = { hk, name: `Familia ${last}`, ...pl, hp, kind, created, grp: pl.north ? 1 : 2 };
+  const h = { hk, name: `Familia ${last}`, hp, kind, created };
   houses.push(h);
   build((o) => {
     const age = o.age;
@@ -209,7 +200,7 @@ create or replace function public.demo_p(n integer) returns uuid language sql im
 revoke all on function public.demo_c() from public, anon, authenticated;
 revoke all on function public.demo_p(integer) from public, anon, authenticated;
 insert into public.churches (id, name, city, country, timezone, grouping, tracking_since, giving, inactive_months, fin_track_donors, certificate_pastor, absence_dow, absence_hour, reminder_dow, reminder_hour, created_at)
-values (${C}, 'Iglesia Bautista Esperanza', 'Arroyo Manso', 'AR', 'America/Argentina/Buenos_Aires', 'bus_routes', ${D(430)},
+values (${C}, 'Iglesia Bautista Esperanza', 'Ciudad de ejemplo', 'AR', 'America/Argentina/Buenos_Aires', 'bus_routes', ${D(430)},
   '{"titular":"Iglesia Bautista Esperanza (ejemplo)","banco":"Banco de ejemplo","alias":"ESTO.ES.UN.EJEMPLO","nota":"Datos de ejemplo. No es una cuenta real."}'::jsonb,
   null, true, 'Ricardo Villalba', 0, 21, 1, 9, now() - interval '520 days')
 on conflict (id) do nothing;
@@ -240,13 +231,15 @@ select v.id, ${C}, case v.n when 6 then demo_id('g1') when 7 then demo_id('g2') 
 from (values ${ACCOUNTS.map((a) => `(${a.n}, ${P(a.n)}, ${q(a.role)}, ${q(a.name)}, ${q(a.title)}, ${q(a.fin ?? null)})`).join(',\n  ')}) v(n, id, role, name, title, fin)
 on conflict (id) do nothing;
 select public.demo_new_entry_key();
+-- La zona de ejemplo: las calles reales del centro de Posadas que ya están en la tabla roads (hay que tenerlas cargadas).
+do $z$ begin if public.demo_build_area() < 300 then raise exception 'Faltan las calles del centro de Posadas en la tabla roads (correr scripts/import-roads.mjs)'; end if; end $z$;
 `);
 
 // 02 · familias y personas
-const hRows = houses.map((h) => `(${q(h.hk)},${q(h.name)},${q(h.addr)},${h.lat},${h.lng},${h.hp},${h.grp})`);
+const hRows = houses.map((h) => `(${q(h.hk)},${q(h.name)},${h.hp})`);
 const pRows = people.map((p) => `(${q(p.k)},${q(p.hk)},${q(p.name)},${q(p.sex)},${p.ageD},${q(p.marital)},${q(p.st)},${p.sinceD},${p.createdD},${q(p.role)},${p.prof},${p.bus},${p.bapt},${p.saved},${p.p},${p.stop})`);
 batch('02_familias_y_personas', `
-create temp table t_h (hk text, name text, addr text, lat float8, lng float8, hp int, grp int) on commit drop;
+create temp table t_h (hk text, name text, hp int) on commit drop;
 insert into t_h values
 ${hRows.join(',\n')};
 create temp table t_p (k text, hk text, name text, sex text, age_d int, marital text, st text, since_d int, created_d int, role text, prof int, bus boolean, bapt int, saved int, p int, stop_w int) on commit drop;
@@ -254,12 +247,12 @@ insert into t_p values
 ${pRows.join(',\n')};
 insert into public.households (id, church_id, name, created_by, created_at)
 select demo_id('h' || hk), ${C}, name, ${P(3)}, now() - interval '380 days' from t_h on conflict (id) do nothing;
-insert into public.contacts (id, church_id, created_by, created_at, updated_at, name, age, sex, marital, phone, lat, lng, address, interest, status, member_since, birthdate,
-  group_id, profile_id, baptized, baptized_here, baptized_on, saved_on, bus_rider, pickup_time, share_mode, baseline, gospel_presented)
+insert into public.contacts (id, church_id, created_by, created_at, updated_at, name, age, sex, marital, phone, interest, status, member_since, birthdate,
+  profile_id, baptized, baptized_here, baptized_on, saved_on, bus_rider, pickup_time, share_mode, baseline, gospel_presented)
 select demo_id('c' || p.k), ${C}, ${P(3)}, (current_date - p.created_d) + time '11:00', now(), p.name, p.age_d / 365, p.sex, p.marital,
-  case when p.age_d >= 14 * 365 then '+54 9 1005 55-' || lpad(p.k, 4, '0') end, h.lat, h.lng, h.addr, 'very', p.st,
+  case when p.age_d >= 14 * 365 then '+54 9 1005 55-' || lpad(p.k, 4, '0') end, 'very', p.st,
   case when p.since_d > 0 and p.age_d >= 12 * 365 then current_date - least(p.since_d, p.age_d - 9 * 365) end, current_date - p.age_d,
-  demo_id('g' || h.grp), case when p.prof > 0 then demo_p(p.prof) end,
+  case when p.prof > 0 then demo_p(p.prof) end,
   p.bapt <> 0, p.bapt > 0, case when p.bapt > 0 then current_date - p.bapt end, case when p.saved > 0 then current_date - p.saved end,
   p.bus, case when p.bus then '09:' || lpad((10 + demo_h('bt' || p.hk) % 40)::text, 2, '0') end, 'group',
   case when p.created_d >= 430 then case p.st when 'member' then 'member' else 'person' end end, true
@@ -267,8 +260,7 @@ from t_p p join t_h h using (hk) on conflict (id) do nothing;
 update public.contacts c set spouse_id = demo_id('c' || o.k)
 from t_p p join t_p o on o.hk = p.hk and o.k <> p.k and o.marital = 'married'
 where p.marital = 'married' and c.id = demo_id('c' || p.k) and c.spouse_id is null;
-update public.profiles pr set phone = c.phone, home_lat = c.lat, home_lng = c.lng, home_address = c.address
-from public.contacts c where c.profile_id = pr.id and c.church_id = ${C} and pr.phone is null;
+update public.profiles pr set phone = c.phone from public.contacts c where c.profile_id = pr.id and c.church_id = ${C} and pr.phone is null;
 insert into public.household_members (household_id, contact_id, role, can_pickup)
 select demo_id('h' || hk), demo_id('c' || k), role, age_d >= 18 * 365 from t_p on conflict do nothing;
 insert into public.contact_children (id, contact_id, name, age, birthdate, child_contact_id)
@@ -277,11 +269,13 @@ from t_p a join t_p k on k.hk = a.hk and k.role in ('hijo', 'hija') where a.role
 insert into public.demo_plan (contact_id, church_id, hk, p, hp, stop_on)
 select demo_id('c' || p.k), ${C}, p.hk, p.p, h.hp, case when p.stop_w > 0 then current_date - p.stop_w * 7 end
 from t_p p join t_h h using (hk) on conflict (contact_id) do nothing;
+-- Cada familia a su lugar: una vereda de una calle real del centro (ver demo_place_all en la migración 0086).
+select public.demo_place_all(${C});
 `);
 
 // Las demás partes están en demo-seed-partes.mjs (historia, clases, ministerios, eventos, finanzas, mapa, devocionales).
 const { addParts } = await import('./demo-seed-partes.mjs');
-addParts({ houses, people, batch, q, C, P, D, int, pick, chance, ACCOUNTS, TOWN, ROAD0, EW, NS });
+addParts({ houses, people, batch, q, C, P, D, int, pick, chance, ACCOUNTS });
 
 mkdirSync(OUT, { recursive: true });
 for (const f of files) writeFileSync(join(OUT, `${f.name}.sql`), f.sql);
