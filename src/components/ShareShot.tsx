@@ -41,8 +41,8 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logoOk, fonts]);
 
-  // Sombra corta y firme: una sombra ancha deja un halo que hace ver la letra borrosa.
-  const shadow = { textShadowColor: 'rgba(0,0,0,0.55)', textShadowRadius: 1.5 * k, textShadowOffset: { width: 0, height: 0.75 * k } };
+  // Letra limpia, sin sombra: la sombra hacía ver los bordes borrosos. El fondo se oscurece un poco más para que se lea bien.
+  const shadow = {};
   // Con letra propia no se pide "negrita" aparte: cada archivo ya trae su grosor (pedirla la engrosa mal y la deja borrosa).
   const verseFont = fonts ? { fontFamily: kind === 'verse' ? VERSE_FONT : VERSE_FONT_BOLD } : { fontWeight: (kind === 'verse' ? '700' : '800') as '700' | '800' };
   const titleFont = fonts ? { fontFamily: TITLE_FONT } : { fontWeight: '800' as const };
@@ -55,7 +55,7 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
   return (
     <View pointerEvents="none" style={{ position: 'absolute', left: 0, top: 0, width: W, height: H, opacity: 1 }}>
       <View ref={ref} collapsable={false} style={{ width: W, height: H, overflow: 'hidden', backgroundColor: '#1F3B2C', paddingHorizontal: 28 * k, paddingTop: 64 * k, paddingBottom: 72 * k, justifyContent: 'space-between' }}>
-        <DayBackground background={item.background} date={item.on_date} width={PX_W / 2} height={PX_H / 2} dim={kind === 'phrase' ? 'normal' : 'normal'} />
+        <DayBackground background={item.background} date={item.on_date} width={PX_W / 2} height={PX_H / 2} dim="share" />
         <View style={{ gap: 6 * k }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 * k }}>
             <Feather name={kind === 'verse' ? 'sun' : 'feather'} size={13 * k} color="rgba(255,255,255,0.85)" />

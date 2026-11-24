@@ -88,13 +88,13 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   }
   // Oscurecer un poco para que el texto blanco se lea sobre cualquier foto.
   const shade = ctx.createLinearGradient(0, 0, 0, h);
-  shade.addColorStop(0, 'rgba(0,0,0,0.38)'); shade.addColorStop(0.5, 'rgba(0,0,0,0.22)'); shade.addColorStop(1, 'rgba(0,0,0,0.55)');
+  shade.addColorStop(0, 'rgba(0,0,0,0.48)'); shade.addColorStop(0.5, 'rgba(0,0,0,0.36)'); shade.addColorStop(1, 'rgba(0,0,0,0.62)');
   ctx.fillStyle = shade; ctx.fillRect(0, 0, w, h);
 
   const PAD = 28;
   const maxW = w - PAD * 2;
-  // Sombra corta: una sombra ancha deja un halo que hace ver la letra borrosa.
-  const shadow = (blur: number, a: number) => { ctx.shadowColor = `rgba(0,0,0,${a})`; ctx.shadowBlur = Math.min(blur, 1.5) * K; ctx.shadowOffsetY = 0.75 * K; };
+  // Letra limpia, sin sombra: la sombra hacía ver los bordes borrosos. El fondo va un poco más oscuro para que se lea bien.
+  const shadow = (_blur: number, _a: number) => { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; };
   const noShadow = () => { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; };
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';

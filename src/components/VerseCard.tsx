@@ -20,7 +20,7 @@ export const BACKGROUND_NAMES = Object.keys(BACKGROUNDS);
 
 /** El fondo del día: foto automática, un color elegido o una foto subida por la iglesia. Ocupa todo el lugar. */
 export function DayBackground({ background, date, width = 1080, height = 1920, dim = 'normal' }: {
-  background: string | null | undefined; date: string; width?: number; height?: number; dim?: 'normal' | 'strong';
+  background: string | null | undefined; date: string; width?: number; height?: number; dim?: 'normal' | 'strong' | 'share';
 }) {
   const bg = background && BACKGROUNDS[background];
   // "u:<id>" = una foto de Unsplash elegida para ese versículo; "auto" = la foto que toca ese día.
@@ -37,7 +37,7 @@ export function DayBackground({ background, date, width = 1080, height = 1920, d
       ) : null}
       {/* Oscurecer un poco para que el texto blanco se lea sobre cualquier foto. */}
       <LinearGradient
-        colors={dim === 'strong' ? ['rgba(0,0,0,0.55)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.7)'] : ['rgba(0,0,0,0.38)', 'rgba(0,0,0,0.22)', 'rgba(0,0,0,0.55)']}
+        colors={dim === 'share' ? ['rgba(0,0,0,0.48)', 'rgba(0,0,0,0.36)', 'rgba(0,0,0,0.62)'] : dim === 'strong' ? ['rgba(0,0,0,0.55)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.7)'] : ['rgba(0,0,0,0.38)', 'rgba(0,0,0,0.22)', 'rgba(0,0,0,0.55)']}
         start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill}
       />
     </>
