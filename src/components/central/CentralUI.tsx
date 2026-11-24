@@ -7,6 +7,7 @@ import { Tag } from '@/components/ui';
 import { PRIVACY, STATE_INFO, stateOf, type CentralChurch, type Change } from '@/lib/central';
 import { errorMessage } from '@/lib/supabase';
 import { colors, themed, toneOf, type Tone } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -28,8 +29,8 @@ export function LoadError({ text, onRetry }: { text: string; onRetry: () => void
   return (
     <View style={styles.error}>
       <Feather name="alert-circle" size={18} color={colors.redText} />
-      <Text style={{ flex: 1, fontSize: 14, color: colors.redText }}>{`No se pudo cargar. ${text}`}</Text>
-      <Pressable accessibilityRole="button" onPress={onRetry} style={{ padding: 6 }}><Text style={{ fontSize: 13, fontWeight: '800', color: colors.redText }}>Probar de nuevo</Text></Pressable>
+      <Text style={{ flex: 1, fontSize: 14, color: colors.redText }}>{tx('No se pudo cargar. {text}', { text })}</Text>
+      <Pressable accessibilityRole="button" onPress={onRetry} style={{ padding: 6 }}><Text style={{ fontSize: 13, fontWeight: '800', color: colors.redText }}>{tx('Probar de nuevo')}</Text></Pressable>
     </View>
   );
 }
@@ -90,11 +91,11 @@ export function Bars({ title, data, tone = 'green', height = 84 }: { title: stri
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={styles.axis}>{shortWeek(data[0].week)}</Text>
-            <Text style={styles.axis}>{`más alto: ${max}`}</Text>
+            <Text style={styles.axis}>{tx('más alto: {max}', { max })}</Text>
             <Text style={styles.axis}>{shortWeek(last.week)}</Text>
           </View>
         </>
-      ) : <Text style={{ fontSize: 13, color: colors.muted, paddingVertical: 20 }}>Todavía no hay semanas guardadas.</Text>}
+      ) : <Text style={{ fontSize: 13, color: colors.muted, paddingVertical: 20 }}>{tx('Todavía no hay semanas guardadas.')}</Text>}
     </View>
   );
 }
@@ -128,18 +129,18 @@ export function PrivacyBox({ startOpen = false }: { startOpen?: boolean }) {
     <View style={styles.privacy}>
       <Pressable accessibilityRole="button" accessibilityState={{ expanded: open }} onPress={() => setOpen((v) => !v)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Feather name="lock" size={16} color={colors.blueText} />
-        <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.blueText }}>{PRIVACY.title}</Text>
-        <Text style={{ fontSize: 12, color: colors.blueText }}>{open ? 'Cerrar' : 'Las personas y la plata de cada iglesia no se ven. Ver más'}</Text>
+        <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.blueText }}>{tx(PRIVACY.title)}</Text>
+        <Text style={{ fontSize: 12, color: colors.blueText }}>{open ? tx('Cerrar') : tx('Las personas y la plata de cada iglesia no se ven. Ver más')}</Text>
         <Feather name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.blueText} />
       </Pressable>
       {open ? (
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18, marginTop: 10 }}>
           <View style={{ flex: 1, minWidth: 260, gap: 5 }}>
-            <Text style={styles.privacyHead}>SÍ VEMOS</Text>
+            <Text style={styles.privacyHead}>{tx('SÍ VEMOS')}</Text>
             {PRIVACY.yes.map((t) => <Text key={t} style={styles.privacyLine}>{`✓ ${t}`}</Text>)}
           </View>
           <View style={{ flex: 1, minWidth: 260, gap: 5 }}>
-            <Text style={styles.privacyHead}>NUNCA VEMOS</Text>
+            <Text style={styles.privacyHead}>{tx('NUNCA VEMOS')}</Text>
             {PRIVACY.no.map((t) => <Text key={t} style={styles.privacyLine}>{`✕ ${t}`}</Text>)}
           </View>
         </View>

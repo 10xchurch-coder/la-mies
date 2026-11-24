@@ -15,6 +15,7 @@ import { fmtDayYear } from '@/lib/format';
 import { printHtml } from '@/lib/givingData';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const BY_CHURCH: MetricKey[] = ['accounts', 'people', 'attendance', 'first_time', 'baptisms', 'outings', 'gospel', 'active_users', 'help_requests'];
 const label = (k: MetricKey) => METRICS.find((m) => m.key === k)?.label ?? k;
@@ -36,7 +37,7 @@ export default function CentralReports() {
     const church = scope === 'all' ? null : data.churches.find((c) => c.id === scope) ?? null;
     const weeks = church ? data.weeks.filter((w) => w.church_id === church.id) : sumByWeek(data.weeks);
     const report = buildReport(weeks, period);
-    const title = church ? church.name : 'Toda la red';
+    const title = church ? church.name : tx('Toda la red');
     const byChurch = church ? [] : data.churches.map((c) => {
       const t = totalsOf(data.weeks.filter((w) => w.church_id === c.id), period.from, period.to);
       return { id: c.id, name: c.name, values: BY_CHURCH.map((k) => t[k]) };
@@ -44,42 +45,42 @@ export default function CentralReports() {
     return { church, report, title, byChurch };
   }, [data, scope, period]);
 
-  if (error && !data) return <DeskPage title="Informes"><LoadError text={error} onRetry={reload} /></DeskPage>;
-  if (!data || !view) return <DeskPage title="Informes"><Loading /></DeskPage>;
+  if (error && !data) return <DeskPage title={tx('Informes')}><LoadError text={error} onRetry={reload} /></DeskPage>;
+  if (!data || !view) return <DeskPage title={tx('Informes')}><Loading /></DeskPage>;
 
   const print = () => printHtml(`${view.title} - ${period.label}`, reportHtml({
     title: view.title, period, rows: view.report.rows, services: view.church ? view.report.cur.services : undefined,
     byChurch: view.byChurch, byChurchCols: BY_CHURCH.map(label), printedOn: fmtDayYear(new Date()),
-  })).catch((e) => Alert.alert('No se pudo imprimir', errorMessage(e)));
+  })).catch((e) => Alert.alert(tx('No se pudo imprimir'), errorMessage(e)));
   const csv = () => downloadText(`informe-${fileSlug(view.title)}-${period.from}.csv`, reportCsv(view.title, period, view.report.rows)).catch(() => undefined);
   const csvChurches = () => downloadText(`iglesias-${period.from}.csv`, churchesCsv(period, data.churches, data.weeks)).catch(() => undefined);
 
   return (
-    <DeskPage title="Informes" subtitle="De toda la red o de una iglesia: por semana, por mes o por año."
+    <DeskPage title={tx('Informes')} subtitle={tx('De toda la red o de una iglesia: por semana, por mes o por año.')}
       actions={<>
-        <DeskButton label="Bajar planilla (CSV)" icon="download" onPress={csv} />
-        {!view.church ? <DeskButton label="Planilla por iglesia" icon="grid" onPress={csvChurches} /> : null}
-        <DeskButton label="Imprimir" icon="printer" primary onPress={print} />
+        <DeskButton label={tx('Bajar planilla (CSV)')} icon="download" onPress={csv} />
+        {!view.church ? <DeskButton label={tx('Planilla por iglesia')} icon="grid" onPress={csvChurches} /> : null}
+        <DeskButton label={tx('Imprimir')} icon="printer" primary onPress={print} />
       </>}>
       <View style={{ gap: 10 }}>
-        <Chips value={scope} onChange={setScope} options={[{ value: 'all', label: 'Toda la red' }, ...data.churches.map((c) => ({ value: c.id, label: c.name }))]} />
+        <Chips value={scope} onChange={setScope} options={[{ value: 'all', label: tx('Toda la red') }, ...data.churches.map((c) => ({ value: c.id, label: c.name }))]} />
         <PeriodPicker kind={kind} anchor={anchor} onChange={(k, a) => { setKind(k); setAnchor(a); }} />
       </View>
 
       {view.report.cur.weeks === 0 ? (
-        <Text style={{ fontSize: 14, color: colors.muted }}>No hay semanas guardadas en este período.</Text>
+        <Text style={{ fontSize: 14, color: colors.muted }}>{tx('No hay semanas guardadas en este período.')}</Text>
       ) : (
         <Text style={{ fontSize: 12, color: colors.muted }}>
-          {`${view.report.cur.weeks} ${view.report.cur.weeks === 1 ? 'semana' : 'semanas'} en el período. La asistencia y los que usaron la app son el promedio por semana; cuentas y fichas, lo que había al final; lo demás se suma. Una semana cuenta para el mes en que cae su lunes.`}
+          {tx('{weeks} {pl} en el período. La asistencia y los que usaron la app son el promedio por semana; cuentas y fichas, lo que había al final; lo demás se suma. Una semana cuenta para el mes en que cae su lunes.', { weeks: view.report.cur.weeks, pl: view.report.cur.weeks === 1 ? tx('semana') : tx('semanas') })}
         </Text>
       )}
       <ReportTable rows={view.report.rows} period={period} services={view.church ? view.report.cur.services : undefined} />
 
       {!view.church ? (
-        <Panel title="Por iglesia" hint={period.label}>
+        <Panel title={tx('Por iglesia')} hint={period.label}>
           <View style={[T.table, { borderWidth: 0 }]}>
             <View style={T.thead}>
-              <Text style={[T.th, { flex: 2.2 }]}>Iglesia</Text>
+              <Text style={[T.th, { flex: 2.2 }]}>{tx('Iglesia')}</Text>
               {BY_CHURCH.map((k) => <Text key={k} style={[T.th, { flex: 1, textAlign: 'right' }]} numberOfLines={2}>{label(k).replace(' (promedio por semana)', '').replace(' (por semana)', '')}</Text>)}
             </View>
             {view.byChurch.map((c) => (
@@ -92,7 +93,7 @@ export default function CentralReports() {
         </Panel>
       ) : null}
       <Text style={{ fontSize: 12, color: colors.muted }}>
-        {`Estos informes tienen solo cantidades: no incluyen datos de personas ni de dinero.${data.demo ? ` La iglesia de ejemplo "${data.demo.name}" no cuenta.` : ''} Además, todos los lunes a la mañana le llega al dueño de la red un aviso con el resumen de la semana.`}
+        {tx('Estos informes tienen solo cantidades: no incluyen datos de personas ni de dinero.{v1} Además, todos los lunes a la mañana le llega al dueño de la red un aviso con el resumen de la semana.', { v1: data.demo ? tx(' La iglesia de ejemplo "{name}" no cuenta.', { name: data.demo.name }) : '' })}
       </Text>
     </DeskPage>
   );

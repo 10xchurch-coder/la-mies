@@ -5,6 +5,7 @@
 // REGLA DE PRIVACIDAD: Central muestra datos de la iglesia y cantidades. Nunca personas de otra iglesia ni su plata.
 import { progress, cleanFacts, type Facts, type SavedSteps } from './alta';
 import { toCsv } from './desk';
+import { tx, txList } from './i18n';
 
 export type CentralRole = 'owner' | 'staff' | null;
 
@@ -36,7 +37,7 @@ export function cleanChurch(raw: unknown): CentralChurch {
   const str = (k: string) => (typeof r[k] === 'string' && r[k] ? (r[k] as string) : null);
   const status = str('status');
   return {
-    id: String(r.id ?? ''), name: str('name') ?? 'Iglesia', city: str('city'), province: str('province'), country: str('country'), timezone: str('timezone'),
+    id: String(r.id ?? ''), name: str('name') ?? tx('Iglesia'), city: str('city'), province: str('province'), country: str('country'), timezone: str('timezone'),
     created_at: str('created_at') ?? new Date(0).toISOString(),
     is_host: r.is_host === true, selfserve: r.selfserve === true,
     status: status === 'pending' || status === 'reviewed' || status === 'suspended' ? status : 'invited',
@@ -72,29 +73,29 @@ export type MetricHow = 'sum' | 'avg' | 'last';
 export type Metric = { key: MetricKey; label: string; how: MetricHow; group: 'Gente' | 'Reuniones' | 'Decisiones' | 'Evangelismo' | 'Uso de la app' | 'Soporte'; goodUp?: boolean };
 
 export const METRICS: Metric[] = [
-  { key: 'accounts', label: 'Cuentas', how: 'last', group: 'Gente', goodUp: true },
-  { key: 'people', label: 'Fichas de personas', how: 'last', group: 'Gente', goodUp: true },
-  { key: 'new_people', label: 'Fichas nuevas', how: 'sum', group: 'Gente', goodUp: true },
-  { key: 'attendance', label: 'Asistencia', how: 'avg', group: 'Reuniones', goodUp: true },
-  { key: 'visitors', label: 'Visitas', how: 'avg', group: 'Reuniones', goodUp: true },
-  { key: 'first_time', label: 'Vinieron por primera vez', how: 'sum', group: 'Reuniones', goodUp: true },
-  { key: 'class_present', label: 'Presentes en las clases', how: 'avg', group: 'Reuniones', goodUp: true },
-  { key: 'events', label: 'Eventos', how: 'sum', group: 'Reuniones', goodUp: true },
-  { key: 'event_regs', label: 'Inscripciones a eventos', how: 'sum', group: 'Reuniones', goodUp: true },
-  { key: 'saved', label: 'Salvos', how: 'sum', group: 'Decisiones', goodUp: true },
-  { key: 'baptisms', label: 'Bautismos', how: 'sum', group: 'Decisiones', goodUp: true },
-  { key: 'new_members', label: 'Miembros nuevos', how: 'sum', group: 'Decisiones', goodUp: true },
-  { key: 'decisions', label: 'Decisiones anotadas', how: 'sum', group: 'Decisiones', goodUp: true },
-  { key: 'outings', label: 'Salidas a evangelizar', how: 'sum', group: 'Evangelismo', goodUp: true },
-  { key: 'people_out', label: 'Salieron (promedio por semana)', how: 'avg', group: 'Evangelismo', goodUp: true },
-  { key: 'houses', label: 'Casas', how: 'sum', group: 'Evangelismo', goodUp: true },
-  { key: 'contacts_met', label: 'Contactos', how: 'sum', group: 'Evangelismo', goodUp: true },
-  { key: 'gospel', label: 'Oyeron el evangelio', how: 'sum', group: 'Evangelismo', goodUp: true },
-  { key: 'active_users', label: 'Usaron la app (por semana)', how: 'avg', group: 'Uso de la app', goodUp: true },
-  { key: 'devo_reads', label: 'Lecturas de la Biblia', how: 'sum', group: 'Uso de la app', goodUp: true },
-  { key: 'devo_likes', label: 'Me gusta en el devocional', how: 'sum', group: 'Uso de la app', goodUp: true },
-  { key: 'errors', label: 'Errores de la app', how: 'sum', group: 'Soporte', goodUp: false },
-  { key: 'help_requests', label: 'Pedidos de ayuda', how: 'sum', group: 'Soporte' },
+  { key: 'accounts', get label() { return tx('Cuentas'); }, how: 'last', group: 'Gente', goodUp: true },
+  { key: 'people', get label() { return tx('Fichas de personas'); }, how: 'last', group: 'Gente', goodUp: true },
+  { key: 'new_people', get label() { return tx('Fichas nuevas'); }, how: 'sum', group: 'Gente', goodUp: true },
+  { key: 'attendance', get label() { return tx('Asistencia'); }, how: 'avg', group: 'Reuniones', goodUp: true },
+  { key: 'visitors', get label() { return tx('Visitas'); }, how: 'avg', group: 'Reuniones', goodUp: true },
+  { key: 'first_time', get label() { return tx('Vinieron por primera vez'); }, how: 'sum', group: 'Reuniones', goodUp: true },
+  { key: 'class_present', get label() { return tx('Presentes en las clases'); }, how: 'avg', group: 'Reuniones', goodUp: true },
+  { key: 'events', get label() { return tx('Eventos'); }, how: 'sum', group: 'Reuniones', goodUp: true },
+  { key: 'event_regs', get label() { return tx('Inscripciones a eventos'); }, how: 'sum', group: 'Reuniones', goodUp: true },
+  { key: 'saved', get label() { return tx('Salvos'); }, how: 'sum', group: 'Decisiones', goodUp: true },
+  { key: 'baptisms', get label() { return tx('Bautismos'); }, how: 'sum', group: 'Decisiones', goodUp: true },
+  { key: 'new_members', get label() { return tx('Miembros nuevos'); }, how: 'sum', group: 'Decisiones', goodUp: true },
+  { key: 'decisions', get label() { return tx('Decisiones anotadas'); }, how: 'sum', group: 'Decisiones', goodUp: true },
+  { key: 'outings', get label() { return tx('Salidas a evangelizar'); }, how: 'sum', group: 'Evangelismo', goodUp: true },
+  { key: 'people_out', get label() { return tx('Salieron (promedio por semana)'); }, how: 'avg', group: 'Evangelismo', goodUp: true },
+  { key: 'houses', get label() { return tx('Casas'); }, how: 'sum', group: 'Evangelismo', goodUp: true },
+  { key: 'contacts_met', get label() { return tx('Contactos'); }, how: 'sum', group: 'Evangelismo', goodUp: true },
+  { key: 'gospel', get label() { return tx('Oyeron el evangelio'); }, how: 'sum', group: 'Evangelismo', goodUp: true },
+  { key: 'active_users', get label() { return tx('Usaron la app (por semana)'); }, how: 'avg', group: 'Uso de la app', goodUp: true },
+  { key: 'devo_reads', get label() { return tx('Lecturas de la Biblia'); }, how: 'sum', group: 'Uso de la app', goodUp: true },
+  { key: 'devo_likes', get label() { return tx('Me gusta en el devocional'); }, how: 'sum', group: 'Uso de la app', goodUp: true },
+  { key: 'errors', get label() { return tx('Errores de la app'); }, how: 'sum', group: 'Soporte', goodUp: false },
+  { key: 'help_requests', get label() { return tx('Pedidos de ayuda'); }, how: 'sum', group: 'Soporte' },
 ];
 export const METRIC_GROUPS = ['Gente', 'Reuniones', 'Decisiones', 'Evangelismo', 'Uso de la app', 'Soporte'] as const;
 const HOW = new Map(METRICS.map((m) => [m.key, m.how]));
@@ -115,7 +116,7 @@ export type PeriodKind = 'week' | 'month' | 'year';
 /** Un período y el anterior para comparar. Una semana cuenta para el mes (o el año) en que cae su lunes. */
 export type Period = { kind: PeriodKind; from: string; to: string; prevFrom: string; prevTo: string; label: string; prevLabel: string };
 
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 const short = (s: string) => { const d = at(s); return `${d.getDate()}/${d.getMonth() + 1}`; };
 
 export function periodOf(kind: PeriodKind, anchor: string): Period {
@@ -123,16 +124,16 @@ export function periodOf(kind: PeriodKind, anchor: string): Period {
   if (kind === 'week') {
     const from = mondayIso(anchor); const to = addDaysIso(from, 6);
     const prevFrom = addDaysIso(from, -7);
-    return { kind, from, to, prevFrom, prevTo: addDaysIso(from, -1), label: `Semana del ${short(from)} al ${short(to)}`, prevLabel: `semana del ${short(prevFrom)}` };
+    return { kind, from, to, prevFrom, prevTo: addDaysIso(from, -1), label: tx('Semana del {short} al {short2}', { short: short(from), short2: short(to) }), prevLabel: tx('semana del {short}', { short: short(prevFrom) }) };
   }
   if (kind === 'month') {
     const y = d.getFullYear(); const m = d.getMonth();
     const from = iso(new Date(y, m, 1, 12)); const to = iso(new Date(y, m + 1, 0, 12));
     const pf = new Date(y, m - 1, 1, 12);
-    return { kind, from, to, prevFrom: iso(pf), prevTo: iso(new Date(y, m, 0, 12)), label: `${MONTHS[m]} de ${y}`, prevLabel: `${MONTHS[pf.getMonth()]} de ${pf.getFullYear()}` };
+    return { kind, from, to, prevFrom: iso(pf), prevTo: iso(new Date(y, m, 0, 12)), label: tx('{MONTHS} de {y}', { MONTHS: MONTHS[m], y }), prevLabel: `${MONTHS[pf.getMonth()]} de ${pf.getFullYear()}` };
   }
   const y = d.getFullYear();
-  return { kind, from: `${y}-01-01`, to: `${y}-12-31`, prevFrom: `${y - 1}-01-01`, prevTo: `${y - 1}-12-31`, label: `Año ${y}`, prevLabel: `año ${y - 1}` };
+  return { kind, from: `${y}-01-01`, to: `${y}-12-31`, prevFrom: `${y - 1}-01-01`, prevTo: `${y - 1}-12-31`, label: tx('Año {y}', { y }), prevLabel: tx('año {v1}', { v1: y - 1 }) };
 }
 
 /** Moverse al período anterior (-1) o al siguiente (+1). */
@@ -192,7 +193,7 @@ export function change(cur: number, prev: number | null | undefined, hasPrev = t
   if (prev === null || prev === undefined || !hasPrev) return null;
   const diff = cur - prev;
   const pct = prev > 0 ? Math.round((diff / prev) * 100) : null;
-  if (diff === 0) return { diff, pct: 0, dir: 'same', text: 'igual' };
+  if (diff === 0) return { diff, pct: 0, dir: 'same', text: tx('igual') };
   const sign = diff > 0 ? '+' : '−';
   return { diff, pct, dir: diff > 0 ? 'up' : 'down', text: `${sign}${Math.abs(diff)}${pct !== null ? ` (${sign}${Math.abs(pct)}%)` : ''}` };
 }
@@ -212,7 +213,7 @@ export function buildReport(weeks: CentralWeek[], p: Period): { rows: ReportRow[
 
 /** El informe como planilla (CSV para Excel): una fila por número. */
 export function reportCsv(title: string, p: Period, rows: ReportRow[]): string {
-  return toCsv(['Informe', 'Período', 'Grupo', 'Dato', 'Valor', 'Período anterior', 'Cambio'],
+  return toCsv([tx('Informe'), tx('Período'), tx('Grupo'), tx('Dato'), tx('Valor'), tx('Período anterior'), tx('Cambio')],
     rows.map((r) => [title, p.label, r.group, r.label, r.value, r.prev, r.change ? r.change.text : '']));
 }
 
@@ -220,7 +221,7 @@ export function reportCsv(title: string, p: Period, rows: ReportRow[]): string {
 export function churchesCsv(p: Period, churches: CentralChurch[], weeks: CentralWeek[]): string {
   const cols: MetricKey[] = ['accounts', 'people', 'attendance', 'visitors', 'first_time', 'baptisms', 'saved', 'outings', 'houses', 'gospel', 'active_users', 'errors', 'help_requests'];
   const label = (k: MetricKey) => METRICS.find((m) => m.key === k)?.label ?? k;
-  return toCsv(['Iglesia', 'Ciudad', 'Período', ...cols.map(label)], churches.map((c) => {
+  return toCsv([tx('Iglesia'), tx('Ciudad'), tx('Período'), ...cols.map(label)], churches.map((c) => {
     const t = totalsOf(weeks.filter((w) => w.church_id === c.id), p.from, p.to);
     return [c.name, c.city, p.label, ...cols.map((k) => t[k])];
   }));
@@ -235,11 +236,11 @@ export function series(weeks: CentralWeek[], key: MetricKey, n: number, until?: 
 // ---------- Estado y atención ----------
 export type ChurchState = 'suspended' | 'no_pastor' | 'setup' | 'quiet' | 'ok';
 export const STATE_INFO: Record<ChurchState, { label: string; tone: 'red' | 'amber' | 'blue' | 'gray' | 'green' }> = {
-  suspended: { label: 'Suspendida', tone: 'red' },
-  no_pastor: { label: 'Sin pastor todavía', tone: 'amber' },
-  setup: { label: 'Primeros pasos', tone: 'blue' },
-  quiet: { label: 'Sin movimiento', tone: 'gray' },
-  ok: { label: 'En marcha', tone: 'green' },
+  suspended: { get label() { return tx('Suspendida'); }, tone: 'red' },
+  no_pastor: { get label() { return tx('Sin pastor todavía'); }, tone: 'amber' },
+  setup: { get label() { return tx('Primeros pasos'); }, tone: 'blue' },
+  quiet: { get label() { return tx('Sin movimiento'); }, tone: 'gray' },
+  ok: { get label() { return tx('En marcha'); }, tone: 'green' },
 };
 
 const DAY = 86400000;
@@ -275,18 +276,18 @@ export type Attention = { key: AttentionKey; text: string; tone: 'red' | 'amber'
 export function attentionOf(c: CentralChurch, now = new Date()): Attention[] {
   const out: Attention[] = [];
   if (c.status === 'suspended') return out;
-  if (c.open_help > 0) out.push({ key: 'help', tone: 'red', text: c.open_help === 1 ? 'Tiene un pedido de ayuda sin resolver' : `Tiene ${c.open_help} pedidos de ayuda sin resolver` });
+  if (c.open_help > 0) out.push({ key: 'help', tone: 'red', text: c.open_help === 1 ? tx('Tiene un pedido de ayuda sin resolver') : tx('Tiene {open_help} pedidos de ayuda sin resolver', { open_help: c.open_help }) });
   const helpDays = daysAgo(c.import_help_at, now);
-  if (helpDays !== null && helpDays < 30) out.push({ key: 'import', tone: 'blue', text: 'Pide que le carguen la lista de personas' });
-  if (c.status === 'pending') out.push({ key: 'review', tone: 'amber', text: 'Se anotó sola y todavía no la revisaron' });
+  if (helpDays !== null && helpDays < 30) out.push({ key: 'import', tone: 'blue', text: tx('Pide que le carguen la lista de personas') });
+  if (c.status === 'pending') out.push({ key: 'review', tone: 'amber', text: tx('Se anotó sola y todavía no la revisaron') });
   const age = daysAgo(c.created_at, now) ?? 0;
-  if (!c.pastors && age >= STUCK_DAYS) out.push({ key: 'no_pastor', tone: 'amber', text: `Hace ${age} días que no tiene pastor en la app` });
-  else if (inSetup(c) && age >= STUCK_DAYS) out.push({ key: 'stuck', tone: 'amber', text: `Hace ${age} días que está con los primeros pasos (${progress(c.steps, c.facts).label})` });
+  if (!c.pastors && age >= STUCK_DAYS) out.push({ key: 'no_pastor', tone: 'amber', text: tx('Hace {age} días que no tiene pastor en la app', { age }) });
+  else if (inSetup(c) && age >= STUCK_DAYS) out.push({ key: 'stuck', tone: 'amber', text: tx('Hace {age} días que está con los primeros pasos ({label})', { age, label: progress(c.steps, c.facts).label }) });
   const quiet = daysAgo(c.last_activity, now);
   if (c.pastors > 0 && age >= QUIET_DAYS && (quiet === null || quiet >= QUIET_DAYS)) {
-    out.push({ key: 'quiet', tone: 'amber', text: quiet === null ? 'Nunca tuvo movimiento' : `Hace ${quiet} días que nadie usa la app` });
+    out.push({ key: 'quiet', tone: 'amber', text: quiet === null ? tx('Nunca tuvo movimiento') : tx('Hace {quiet} días que nadie usa la app', { quiet }) });
   }
-  if (errorSpike(c.errors_7, c.errors_prev_7)) out.push({ key: 'errors', tone: 'red', text: `${c.errors_7} errores de la app en 7 días (antes ${c.errors_prev_7})` });
+  if (errorSpike(c.errors_7, c.errors_prev_7)) out.push({ key: 'errors', tone: 'red', text: tx('{errors_7} errores de la app en 7 días (antes {errors_prev_7})', { errors_7: c.errors_7, errors_prev_7: c.errors_prev_7 }) });
   return out;
 }
 
@@ -345,37 +346,37 @@ export function lastWeekAttendance(weeks: CentralWeek[], today = new Date()): Ma
 // ---------- Pedidos de ayuda e ideas ----------
 export type HelpStatus = 'open' | 'progress' | 'done';
 export const HELP_STATUS: Record<HelpStatus, { label: string; tone: 'red' | 'amber' | 'green' }> = {
-  open: { label: 'Abierto', tone: 'red' },
-  progress: { label: 'En curso', tone: 'amber' },
-  done: { label: 'Resuelto', tone: 'green' },
+  open: { get label() { return tx('Abierto'); }, tone: 'red' },
+  progress: { get label() { return tx('En curso'); }, tone: 'amber' },
+  done: { get label() { return tx('Resuelto'); }, tone: 'green' },
 };
 export type IdeaStatus = 'new' | 'seen' | 'planned' | 'done' | 'no';
 export const IDEA_STATUS: Record<IdeaStatus, { label: string; tone: 'red' | 'amber' | 'green' | 'blue' | 'gray' }> = {
-  new: { label: 'Nueva', tone: 'red' },
-  seen: { label: 'Leída', tone: 'gray' },
-  planned: { label: 'La vamos a hacer', tone: 'blue' },
-  done: { label: 'Hecha', tone: 'green' },
-  no: { label: 'Por ahora no', tone: 'amber' },
+  new: { get label() { return tx('Nueva'); }, tone: 'red' },
+  seen: { get label() { return tx('Leída'); }, tone: 'gray' },
+  planned: { get label() { return tx('La vamos a hacer'); }, tone: 'blue' },
+  done: { get label() { return tx('Hecha'); }, tone: 'green' },
+  no: { get label() { return tx('Por ahora no'); }, tone: 'amber' },
 };
 export const NOTE_KINDS: { value: string; label: string; icon: string }[] = [
-  { value: 'nota', label: 'Nota', icon: 'edit-3' },
-  { value: 'llamada', label: 'Llamada', icon: 'phone' },
-  { value: 'whatsapp', label: 'WhatsApp', icon: 'message-circle' },
-  { value: 'correo', label: 'Correo', icon: 'mail' },
-  { value: 'visita', label: 'Visita', icon: 'map-pin' },
-  { value: 'reunion', label: 'Reunión', icon: 'users' },
+  { value: 'nota', get label() { return tx('Nota'); }, icon: 'edit-3' },
+  { value: 'llamada', get label() { return tx('Llamada'); }, icon: 'phone' },
+  { value: 'whatsapp', get label() { return tx('WhatsApp'); }, icon: 'message-circle' },
+  { value: 'correo', get label() { return tx('Correo'); }, icon: 'mail' },
+  { value: 'visita', get label() { return tx('Visita'); }, icon: 'map-pin' },
+  { value: 'reunion', get label() { return tx('Reunión'); }, icon: 'users' },
 ];
 
 /** El enlace para responderle por WhatsApp a quien pidió ayuda (null si no dejó un número que sirva). */
 export function replyWhatsApp(phone: string | null | undefined, church: string, step?: string | null): string | null {
   const digits = (phone ?? '').replace(/\D/g, '');
   if (digits.length < 8) return null;
-  const text = `Hola, te escribo del equipo de La Mies por tu pedido de ayuda${step ? ` (${step})` : ''} de ${church}.`;
+  const text = tx('Hola, te escribo del equipo de La Mies por tu pedido de ayuda{v1} de {church}.', { v1: step ? ` (${step})` : '', church });
   return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
 }
 export function replyMail(email: string | null | undefined, step?: string | null): string | null {
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return null;
-  return `mailto:${email}?subject=${encodeURIComponent(`Ayuda con La Mies${step ? `: ${step}` : ''}`)}`;
+  return `mailto:${email}?subject=${encodeURIComponent(tx('Ayuda con La Mies{v1}', { v1: step ? `: ${step}` : '' }))}`;
 }
 
 /** La regla de privacidad, para mostrarla en Central. */
@@ -422,6 +423,6 @@ th{font-size:12px;color:#444}.n{text-align:right;white-space:nowrap}.foot{margin
 </style></head><body>
 <h1>${esc(o.title)}</h1><p class="sub">${esc(o.period.label)} · La Mies Central</p>
 ${groups}${services}${churches}
-<p class="foot">Este informe tiene solo cantidades. No incluye datos de personas ni de dinero.${o.printedOn ? ` Impreso el ${esc(o.printedOn)}.` : ''}</p>
+<p class="foot">Este informe tiene solo cantidades. No incluye datos de personas ni de dinero.${o.printedOn ? tx(' Impreso el {esc}.', { esc: esc(o.printedOn) }) : ''}</p>
 </body></html>`;
 }

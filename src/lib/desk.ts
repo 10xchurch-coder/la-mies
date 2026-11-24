@@ -25,15 +25,15 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'inicio', get label() { return tx('Inicio'); }, icon: 'home', to: '/escritorio', perms: [] },
   ] },
   // Solo para el equipo de La Mies (la iglesia que hospeda la app). Las demás iglesias no lo ven ni lo pueden apagar.
-  { title: 'La Mies Central', tone: 'pink', items: [
-    { key: 'central', label: 'Resumen de la red', icon: 'globe', to: '/central', perms: [], when: 'central' },
-    { key: 'central-iglesias', label: 'Iglesias', icon: 'home', to: '/central/iglesias', perms: [], when: 'central' },
-    { key: 'central-ayuda', label: 'Pedidos de ayuda', icon: 'life-buoy', to: '/central/ayuda', perms: [], when: 'central' },
-    { key: 'central-ideas', label: 'Ideas para La Mies', icon: 'zap', to: '/central/ideas', perms: [], when: 'central' },
-    { key: 'central-errores', label: 'Errores de la app', icon: 'alert-triangle', to: '/central/errores', perms: [], when: 'central' },
-    { key: 'central-informes', label: 'Informes de la red', icon: 'bar-chart', to: '/central/informes', perms: [], when: 'central' },
-    { key: 'central-equipo', label: 'Equipo de La Mies', icon: 'shield', to: '/central/equipo', perms: [], when: 'central' },
-    { key: 'red', label: 'Crear iglesias e invitar pastores', icon: 'plus-circle', to: '/admin/red', perms: [], when: 'net' },
+  { get title() { return tx('La Mies Central'); }, tone: 'pink', items: [
+    { key: 'central', get label() { return tx('Resumen de la red'); }, icon: 'globe', to: '/central', perms: [], when: 'central' },
+    { key: 'central-iglesias', get label() { return tx('Iglesias'); }, icon: 'home', to: '/central/iglesias', perms: [], when: 'central' },
+    { key: 'central-ayuda', get label() { return tx('Pedidos de ayuda'); }, icon: 'life-buoy', to: '/central/ayuda', perms: [], when: 'central' },
+    { key: 'central-ideas', get label() { return tx('Ideas para La Mies'); }, icon: 'zap', to: '/central/ideas', perms: [], when: 'central' },
+    { key: 'central-errores', get label() { return tx('Errores de la app'); }, icon: 'alert-triangle', to: '/central/errores', perms: [], when: 'central' },
+    { key: 'central-informes', get label() { return tx('Informes de la red'); }, icon: 'bar-chart', to: '/central/informes', perms: [], when: 'central' },
+    { key: 'central-equipo', get label() { return tx('Equipo de La Mies'); }, icon: 'shield', to: '/central/equipo', perms: [], when: 'central' },
+    { key: 'red', get label() { return tx('Crear iglesias e invitar pastores'); }, icon: 'plus-circle', to: '/admin/red', perms: [], when: 'net' },
   ] },
   { get title() { return tx('Reuniones'); }, tone: 'green', items: [
     { key: 'asistencia', get label() { return tx('Tomar asistencia'); }, icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
@@ -90,7 +90,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'reglas', get label() { return tx('Seguimiento y mensajes'); }, icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
     { key: 'importar', get label() { return tx('Importar personas'); }, icon: 'upload', to: '/importar', perms: ['personas.editar'] },
     { key: 'copia', get label() { return tx('Copia de todos los datos'); }, icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
-    { key: 'ayuda-lamies', label: 'Pedir ayuda a La Mies', icon: 'life-buoy', to: '/admin/ayuda', perms: ['admin.iglesia', 'admin.permisos'] },
+    { key: 'ayuda-lamies', get label() { return tx('Pedir ayuda a La Mies'); }, icon: 'life-buoy', to: '/admin/ayuda', perms: ['admin.iglesia', 'admin.permisos'] },
     { key: 'ajustes', get label() { return tx('Ajustes'); }, icon: 'settings', to: '/ajustes', perms: [] },
   ] },
 ];

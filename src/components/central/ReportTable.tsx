@@ -4,6 +4,7 @@ import { Text, View } from 'react-native';
 import { ChangeText, tableStyles as T } from '@/components/central/CentralUI';
 import { METRIC_GROUPS, type Period, type ReportRow, type ServiceCount } from '@/lib/central';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function ReportTable({ rows, period, services }: { rows: ReportRow[]; period: Period; services?: ServiceCount[] }) {
   return (
@@ -14,10 +15,10 @@ export function ReportTable({ rows, period, services }: { rows: ReportRow[]; per
         return (
           <View key={g} style={T.table}>
             <View style={T.thead}>
-              <Text style={[T.th, { flex: 2.2 }]}>{g}</Text>
-              <Text style={[T.th, { flex: 1, textAlign: 'right' }]} numberOfLines={1}>{period.kind === 'week' ? 'Esta semana' : period.kind === 'month' ? 'Este mes' : 'Este año'}</Text>
-              <Text style={[T.th, { flex: 1, textAlign: 'right' }]} numberOfLines={1}>Antes</Text>
-              <Text style={[T.th, { flex: 1.3, textAlign: 'right' }]} numberOfLines={1}>Cambio</Text>
+              <Text style={[T.th, { flex: 2.2 }]}>{tx(g)}</Text>
+              <Text style={[T.th, { flex: 1, textAlign: 'right' }]} numberOfLines={1}>{period.kind === 'week' ? tx('Esta semana') : period.kind === 'month' ? tx('Este mes') : tx('Este año')}</Text>
+              <Text style={[T.th, { flex: 1, textAlign: 'right' }]} numberOfLines={1}>{tx('Antes')}</Text>
+              <Text style={[T.th, { flex: 1.3, textAlign: 'right' }]} numberOfLines={1}>{tx('Cambio')}</Text>
             </View>
             {list.map((r) => (
               <View key={r.key} style={T.row}>
@@ -33,8 +34,8 @@ export function ReportTable({ rows, period, services }: { rows: ReportRow[]; per
       {services?.length ? (
         <View style={T.table}>
           <View style={T.thead}>
-            <Text style={[T.th, { flex: 3 }]}>Asistencia por reunión</Text>
-            <Text style={[T.th, { flex: 1, textAlign: 'right' }]}>Total del período</Text>
+            <Text style={[T.th, { flex: 3 }]}>{tx('Asistencia por reunión')}</Text>
+            <Text style={[T.th, { flex: 1, textAlign: 'right' }]}>{tx('Total del período')}</Text>
           </View>
           {services.map((s) => (
             <View key={s.name} style={T.row}>

@@ -180,7 +180,7 @@ export default function Empezar() {
               <Text style={styles.linkText}>{tx('Ya tengo cuenta: entrar')}</Text>
             </Pressable>
           ) : null}
-          <Pressable onPress={() => { logHelp({ step: 'Anotar mi iglesia', screen: '/empezar', church: f.church.trim() || null }); Linking.openURL(help.whatsapp ?? help.mailto).catch(() => undefined); }} accessibilityRole="button" style={styles.link}>
+          <Pressable onPress={() => { logHelp({ step: tx('Anotar mi iglesia'), screen: '/empezar', church: f.church.trim() || null }); Linking.openURL(help.whatsapp ?? help.mailto).catch(() => undefined); }} accessibilityRole="button" style={styles.link}>
             <Text style={styles.linkText}>{tx('Necesito ayuda')}</Text>
           </Pressable>
           <Text style={styles.small}>{help.email}</Text>

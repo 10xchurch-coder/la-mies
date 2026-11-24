@@ -40,7 +40,7 @@ export default function ImportarAyuda() {
   if (asked === undefined) return <Loading />;
 
   const h = helpLinks({ church: church?.name, step: tx('Quiero que me carguen la lista de personas') });
-  const write = () => { logHelp({ step: 'Quiero que me carguen la lista de personas', screen: '/admin/importar-ayuda' }); Linking.openURL(h.whatsapp ?? h.mailto).catch(() => Alert.alert(tx('Escribinos'), h.email)); };
+  const write = () => { logHelp({ step: tx('Quiero que me carguen la lista de personas'), screen: '/admin/importar-ayuda' }); Linking.openURL(h.whatsapp ?? h.mailto).catch(() => Alert.alert(tx('Escribinos'), h.email)); };
   const ask = async (on: boolean) => {
     setBusy(true);
     try {

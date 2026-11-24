@@ -13,6 +13,7 @@ import { fmtDayYear } from '@/lib/format';
 import { useLayout } from '@/lib/layout';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function CentralHome() {
   const router = useRouter();
@@ -36,11 +37,11 @@ export default function CentralHome() {
 
   const refresh = async () => {
     setRefreshing(true);
-    try { await centralRefresh(4); reload(); } catch (e) { Alert.alert('No se pudo actualizar', errorMessage(e)); } finally { setRefreshing(false); }
+    try { await centralRefresh(4); reload(); } catch (e) { Alert.alert(tx('No se pudo actualizar'), errorMessage(e)); } finally { setRefreshing(false); }
   };
 
-  if (error && !data) return <DeskPage title="La Mies Central" subtitle="Todas las iglesias de la red"><LoadError text={error} onRetry={reload} /></DeskPage>;
-  if (!data || !view) return <DeskPage title="La Mies Central" subtitle="Todas las iglesias de la red"><Loading /></DeskPage>;
+  if (error && !data) return <DeskPage title={tx('La Mies Central')} subtitle={tx('Todas las iglesias de la red')}><LoadError text={error} onRetry={reload} /></DeskPage>;
+  if (!data || !view) return <DeskPage title={tx('La Mies Central')} subtitle={tx('Todas las iglesias de la red')}><Loading /></DeskPage>;
 
   const n = data.churches.length;
   const sum = (f: (c: CentralChurch) => number) => data.churches.reduce((a, c) => a + f(c), 0);
@@ -50,27 +51,27 @@ export default function CentralHome() {
 
   return (
     <DeskPage
-      title="La Mies Central"
-      subtitle={`${n} ${n === 1 ? 'iglesia' : 'iglesias'} en la red${data.computed_at ? ` · números actualizados el ${fmtDayYear(data.computed_at)}` : ''}`}
+      title={tx('La Mies Central')}
+      subtitle={tx('{n} {pl} en la red{v1}', { n, pl: n === 1 ? tx('iglesia') : tx('iglesias'), v1: data.computed_at ? tx(' · números actualizados el {fmtDayYear}', { fmtDayYear: fmtDayYear(data.computed_at) }) : '' })}
       actions={<>
-        <DeskButton label={refreshing ? 'Actualizando…' : 'Actualizar ahora'} icon="refresh-cw" onPress={refresh} disabled={refreshing} />
-        <DeskButton label="Informes" icon="bar-chart" primary onPress={() => go('/central/informes')} />
+        <DeskButton label={refreshing ? tx('Actualizando…') : tx('Actualizar ahora')} icon="refresh-cw" onPress={refresh} disabled={refreshing} />
+        <DeskButton label={tx('Informes')} icon="bar-chart" primary onPress={() => go('/central/informes')} />
       </>}
     >
       <PrivacyBox />
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-        <Kpi basis={basis} icon="home" tone="pink" label="Iglesias" value={n} hint={view.fresh.length ? `${view.fresh.length} ${view.fresh.length === 1 ? 'nueva' : 'nuevas'} en 30 días` : 'Ninguna nueva en 30 días'} onPress={() => go('/central/iglesias')} />
-        <Kpi basis={basis} icon="alert-circle" tone="amber" label="Necesitan atención" value={view.attention.length} hint="Sin movimiento, trabadas, con pedidos o con errores" />
-        <Kpi basis={basis} icon="life-buoy" tone="red" label="Pedidos de ayuda sin resolver" value={data.help_open} onPress={() => go('/central/ayuda')} />
-        <Kpi basis={basis} icon="zap" tone="violet" label="Ideas nuevas" value={data.ideas_new} onPress={() => go('/central/ideas')} />
-        <Kpi basis={basis} icon="users" tone="green" label="Asistencia de la semana pasada" value={view.cur?.attendance ?? 0} change={change(view.cur?.attendance ?? 0, view.prev?.attendance, !!view.prev)} good={view.cur && view.prev ? view.cur.attendance >= view.prev.attendance : null} hint="Todas las iglesias sumadas" />
-        <Kpi basis={basis} icon="key" tone="blue" label="Cuentas" value={sum((c) => c.facts.accounts)} hint={`${sum((c) => c.facts.people)} fichas de personas`} />
-        <Kpi basis={basis} icon="smartphone" tone="teal" label="Usaron la app en 7 días" value={sum((c) => c.active_7)} hint={`${sum((c) => c.active_30)} en 30 días`} />
-        <Kpi basis={basis} icon="alert-triangle" tone={errors7 ? 'red' : 'green'} label="Errores de la app en 7 días" value={errors7} onPress={() => go('/central/errores')} />
+        <Kpi basis={basis} icon="home" tone="pink" label={tx('Iglesias')} value={n} hint={view.fresh.length ? tx('{n} {pl} en 30 días', { n: view.fresh.length, pl: view.fresh.length === 1 ? tx('nueva') : tx('nuevas') }) : tx('Ninguna nueva en 30 días')} onPress={() => go('/central/iglesias')} />
+        <Kpi basis={basis} icon="alert-circle" tone="amber" label={tx('Necesitan atención')} value={view.attention.length} hint={tx('Sin movimiento, trabadas, con pedidos o con errores')} />
+        <Kpi basis={basis} icon="life-buoy" tone="red" label={tx('Pedidos de ayuda sin resolver')} value={data.help_open} onPress={() => go('/central/ayuda')} />
+        <Kpi basis={basis} icon="zap" tone="violet" label={tx('Ideas nuevas')} value={data.ideas_new} onPress={() => go('/central/ideas')} />
+        <Kpi basis={basis} icon="users" tone="green" label={tx('Asistencia de la semana pasada')} value={view.cur?.attendance ?? 0} change={change(view.cur?.attendance ?? 0, view.prev?.attendance, !!view.prev)} good={view.cur && view.prev ? view.cur.attendance >= view.prev.attendance : null} hint={tx('Todas las iglesias sumadas')} />
+        <Kpi basis={basis} icon="key" tone="blue" label={tx('Cuentas')} value={sum((c) => c.facts.accounts)} hint={tx('{sum} fichas de personas', { sum: sum((c) => c.facts.people) })} />
+        <Kpi basis={basis} icon="smartphone" tone="teal" label={tx('Usaron la app en 7 días')} value={sum((c) => c.active_7)} hint={tx('{sum} en 30 días', { sum: sum((c) => c.active_30) })} />
+        <Kpi basis={basis} icon="alert-triangle" tone={errors7 ? 'red' : 'green'} label={tx('Errores de la app en 7 días')} value={errors7} onPress={() => go('/central/errores')} />
       </View>
 
-      <Panel title={`Necesitan atención · ${view.attention.length}`} hint="Tocá una iglesia para abrir su ficha." action="Ver todas las iglesias" onAction={() => go('/central/iglesias')}>
+      <Panel title={tx('Necesitan atención · {n}', { n: view.attention.length })} hint={tx('Tocá una iglesia para abrir su ficha.')} action={tx('Ver todas las iglesias')} onAction={() => go('/central/iglesias')}>
         {view.attention.length ? view.attention.map(({ c, why }) => (
           <Pressable key={c.id} accessibilityRole="link" onPress={() => go(`/central/iglesia/${c.id}`)}
             style={(s) => [{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.border }, (s as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
@@ -86,30 +87,30 @@ export default function CentralHome() {
             </View>
             <Feather name="chevron-right" size={18} color={colors.gray} />
           </Pressable>
-        )) : <Text style={{ fontSize: 14, color: colors.muted }}>Ninguna. Todas las iglesias vienen bien.</Text>}
+        )) : <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Ninguna. Todas las iglesias vienen bien.')}</Text>}
       </Panel>
 
-      <Panel title="Cómo crece la red" hint="Semana por semana. La barra oscura es la última semana.">
+      <Panel title={tx('Cómo crece la red')} hint={tx('Semana por semana. La barra oscura es la última semana.')}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24 }}>
-          <Bars title="Iglesias en la red" tone="pink" data={view.growth} />
-          <Bars title="Asistencia (todas las iglesias)" tone="green" data={series(view.net, 'attendance', 16, view.closed)} />
-          <Bars title="Cuentas" tone="blue" data={series(view.net, 'accounts', 16)} />
-          <Bars title="Usaron la app" tone="teal" data={series(view.net, 'active_users', 16)} />
+          <Bars title={tx('Iglesias en la red')} tone="pink" data={view.growth} />
+          <Bars title={tx('Asistencia (todas las iglesias)')} tone="green" data={series(view.net, 'attendance', 16, view.closed)} />
+          <Bars title={tx('Cuentas')} tone="blue" data={series(view.net, 'accounts', 16)} />
+          <Bars title={tx('Usaron la app')} tone="teal" data={series(view.net, 'active_users', 16)} />
         </View>
       </Panel>
 
-      <Panel title="Iglesias nuevas" hint="Las que entraron en los últimos 30 días.">
+      <Panel title={tx('Iglesias nuevas')} hint={tx('Las que entraron en los últimos 30 días.')}>
         {view.fresh.length ? view.fresh.map((c) => (
           <Pressable key={c.id} accessibilityRole="link" onPress={() => go(`/central/iglesia/${c.id}`)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 7, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={1}>{c.name}</Text>
-            <Text style={{ fontSize: 13, color: colors.muted }}>{[c.city, `entró el ${fmtDayYear(c.created_at)}`].filter(Boolean).join(' · ')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>{[c.city, tx('entró el {fmtDayYear}', { fmtDayYear: fmtDayYear(c.created_at) })].filter(Boolean).join(' · ')}</Text>
             <StateChip church={c} />
           </Pressable>
-        )) : <Text style={{ fontSize: 14, color: colors.muted }}>No entró ninguna iglesia en estos 30 días.</Text>}
+        )) : <Text style={{ fontSize: 14, color: colors.muted }}>{tx('No entró ninguna iglesia en estos 30 días.')}</Text>}
       </Panel>
 
       {data.demo ? (
-        <Text style={{ fontSize: 12, color: colors.muted }}>{`Aparte: la iglesia de ejemplo "${data.demo.name}" (demostración) no figura en las listas ni cuenta en ningún total.`}</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Aparte: la iglesia de ejemplo "{name}" (demostración) no figura en las listas ni cuenta en ningún total.', { name: data.demo.name })}</Text>
       ) : null}
     </DeskPage>
   );

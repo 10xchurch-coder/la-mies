@@ -250,9 +250,9 @@ export default function Iglesia() {
         { icon: 'eye', label: tx('Ver como miembro'), to: '/miembro-vista' as Href, show: can('admin.permisos') },
         { icon: 'download', label: tx('Copia de todos los datos'), to: '/admin/copia' as Href, show: can('admin.permisos') },
         { icon: 'flag', label: tx('Primeros pasos'), to: '/admin/alta' as Href, show: extras.is_new && can('admin.iglesia') },
-        { icon: 'life-buoy', label: 'Pedir ayuda a La Mies', to: '/admin/ayuda' as Href, show: can('admin.iglesia') || can('admin.permisos') },
+        { icon: 'life-buoy', label: tx('Pedir ayuda a La Mies'), to: '/admin/ayuda' as Href, show: can('admin.iglesia') || can('admin.permisos') },
         { icon: 'globe', label: tx('Iglesias de la red'), to: '/admin/red' as Href, show: !!profile?.is_network_admin },
-        { icon: 'grid', label: 'La Mies Central', to: '/central' as Href, show: !!centralRole },
+        { icon: 'grid', label: tx('La Mies Central'), to: '/central' as Href, show: !!centralRole },
       ],
     },
   ];
