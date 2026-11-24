@@ -1,16 +1,19 @@
-# Mosaicos del mapa de una zona chica, para las fotos del manual y del folleto. Quedan como archivo adjunto de la corrida.
+# Mosaicos del mapa de una zona chica, para las fotos del manual y del folleto. Quedan en la rama "mosaicos" (no en la app).
 name: Mosaicos para capturas
 on:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   mosaicos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/demo_mosaicos.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mosaicos
-          path: mosaicos
+      - run: |
+          git config user.name "la-mies-bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout --orphan mosaicos
+          git rm -rfq --cached .
+          git add -f mosaicos
+          git commit -qm "Mosaicos para capturas"
+          git push -f origin mosaicos
