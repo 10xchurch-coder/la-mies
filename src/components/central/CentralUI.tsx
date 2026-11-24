@@ -137,11 +137,11 @@ export function PrivacyBox({ startOpen = false }: { startOpen?: boolean }) {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 18, marginTop: 10 }}>
           <View style={{ flex: 1, minWidth: 260, gap: 5 }}>
             <Text style={styles.privacyHead}>{tx('SÍ VEMOS')}</Text>
-            {PRIVACY.yes.map((t) => <Text key={t} style={styles.privacyLine}>{`✓ ${t}`}</Text>)}
+            {PRIVACY.yes.map((t) => <Text key={t} style={styles.privacyLine}>{`✓ ${tx(t)}`}</Text>)}
           </View>
           <View style={{ flex: 1, minWidth: 260, gap: 5 }}>
             <Text style={styles.privacyHead}>{tx('NUNCA VEMOS')}</Text>
-            {PRIVACY.no.map((t) => <Text key={t} style={styles.privacyLine}>{`✕ ${t}`}</Text>)}
+            {PRIVACY.no.map((t) => <Text key={t} style={styles.privacyLine}>{`✕ ${tx(t)}`}</Text>)}
           </View>
         </View>
       ) : null}

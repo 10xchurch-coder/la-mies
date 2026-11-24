@@ -31,7 +31,7 @@ export function dayWords(d: Date, now: Date): string {
 
 /** Cuándo es, tal como va en la diapositiva: "Sábado 28 de noviembre · 19:00 h", "Del 28 de noviembre al 2 de diciembre". */
 export function whenWords(start: Date, end: Date | null, allDay: boolean, now: Date): string {
-  if (end && dayDiff(end, start) >= 1) return `Del ${dayMonth(start)} al ${dayMonth(end)}`;
+  if (end && dayDiff(end, start) >= 1) return tx('Del {a} al {b}', { a: dayMonth(start), b: dayMonth(end) });
   return allDay ? dayWords(start, now) : `${dayWords(start, now)} · ${hhmm(start)} h`;
 }
 

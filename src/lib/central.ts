@@ -214,7 +214,7 @@ export function buildReport(weeks: CentralWeek[], p: Period): { rows: ReportRow[
 /** El informe como planilla (CSV para Excel): una fila por número. */
 export function reportCsv(title: string, p: Period, rows: ReportRow[]): string {
   return toCsv([tx('Informe'), tx('Período'), tx('Grupo'), tx('Dato'), tx('Valor'), tx('Período anterior'), tx('Cambio')],
-    rows.map((r) => [title, p.label, r.group, r.label, r.value, r.prev, r.change ? r.change.text : '']));
+    rows.map((r) => [title, p.label, tx(r.group), r.label, r.value, r.prev, r.change ? r.change.text : '']));
 }
 
 /** Una planilla con una fila por iglesia para el período (los números principales). */

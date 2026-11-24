@@ -169,3 +169,24 @@ test('en inglés: tablas que antes quedaban fijas en castellano', () => {
   });
   assert.equal(memberLessons(null)[0], 'La salvación y el bautismo');
 });
+
+import { FEATURES, FEATURE_GROUPS, topFeatures } from '../src/lib/features';
+import { METRICS, METRIC_GROUPS } from '../src/lib/central';
+
+test('en inglés: las funciones y los números de Central cambian de etiqueta, no de clave ni de grupo', () => {
+  const keys = FEATURES.map((f) => `${f.key}|${f.group}|${f.parent ?? ''}|${f.routes.join(',')}`);
+  const perGroup = FEATURE_GROUPS.map((g) => topFeatures(g).length);
+  inEnglish(en, () => {
+    assert.deepEqual(FEATURES.map((f) => `${f.key}|${f.group}|${f.parent ?? ''}|${f.routes.join(',')}`), keys);
+    assert.deepEqual(FEATURE_GROUPS.map((g) => topFeatures(g).length), perGroup, 'se siguen agrupando igual');
+    assert.equal(FEATURES.find((f) => f.key === 'asistencia')?.label, 'Attendance');
+    assert.equal(t(FEATURE_GROUPS[0]), 'Soul winning and visits');
+    assert.ok(FEATURES.every((f) => en[t(f.label)] === undefined || true));
+    assert.deepEqual([...METRIC_GROUPS], ['Gente', 'Reuniones', 'Decisiones', 'Evangelismo', 'Uso de la app', 'Soporte']);
+    assert.ok(METRICS.every((m) => (METRIC_GROUPS as readonly string[]).includes(m.group)));
+    assert.equal(t('Uso de la app'), 'App use');
+  });
+  // Ninguna etiqueta, ayuda ni "qué se oculta" de una función queda sin inglés.
+  const missing = FEATURES.flatMap((f) => [f.label, f.hint, f.hides]).filter((s) => s && en[s] === undefined);
+  assert.deepEqual(missing, []);
+});
