@@ -7,6 +7,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
+import { CareMarks } from '@/components/CareMarks';
 import { Button, Card, Empty, Field, Loading, Tag } from '@/components/ui';
 import { absenceMessaged, weekendAbsences, completeFollowUp, followContext, listServices, myFirstVisitTasks, myFollowups, setFollowNote, updateContact, type FirstVisitTask, type FollowUpOutcome } from '@/lib/api';
 import { whyHere, type FollowContext } from '@/lib/followWhy';
@@ -201,6 +202,7 @@ export default function Seguimiento() {
                     </View>
                   </Pressable>
                   {about(v.contact_id, false, false)}
+                  <CareMarks id={v.contact_id} />
                   {(() => {
                     const done = (t: FirstVisitTask, outcome: FollowUpOutcome) =>
                       completeFollowUp(t.id, outcome).then(() => { setTasks((cur) => cur.filter((x) => x.id !== t.id)); if (outcome === 'unreachable') reloadTasks(); }).catch(() => undefined);
@@ -277,6 +279,7 @@ export default function Seguimiento() {
                 {r.promise_day ? <Tag text={`Prometió ${PROMISE_LABEL[r.promise_day] ?? ''}`} tone="amber" /> : r.interest ? <Tag text={INTEREST_LABEL[r.interest] ?? r.interest} tone={r.interest === 'very' ? 'green' : 'gray'} /> : null}
               </Pressable>
               {about(r.id, !!r.promise_day)}
+              <CareMarks id={r.id} />
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Small icon="message-circle" label="WhatsApp" disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
                 <Small icon="check-square" label={stale ? 'Visité' : 'Visitado'} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />

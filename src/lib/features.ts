@@ -5,6 +5,7 @@
 
 export type FeatureKey =
   | 'evangelismo' | 'seguimiento' | 'colectivo'
+  | 'discipulado'
   | 'asistencia' | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
   | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
@@ -28,6 +29,9 @@ export const FEATURES: Feature[] = [
   { key: 'seguimiento', label: 'Seguimiento de visitas', group: 'Evangelismo y visitas',
     hint: 'Mis contactos para seguir y los avisos de a quién escribir o visitar.',
     routes: ['/seguimiento', '/admin/seguimiento'] },
+  { key: 'discipulado', label: 'Discipulado, decisiones y visitas nuevas', group: 'Evangelismo y visitas',
+    hint: 'Quién discipula a quién y por qué lección va, las decisiones, la clase de miembros, el regalo de bienvenida y la tarjeta de visita por QR.',
+    routes: ['/discipulado', '/decisiones', '/bienvenida', '/tarjeta-visita', '/visita', '/clase-miembros'] },
   { key: 'colectivo', label: 'Colectivo y rutas', group: 'Evangelismo y visitas',
     hint: 'Las rutas del colectivo, los pasajeros, las paradas en orden y el colectivo en vivo.',
     routes: ['/colectivo', '/colectivo-vivo', '/colectivo-paradas'] },
