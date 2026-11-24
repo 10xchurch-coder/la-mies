@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><title>promo</title>
+<script>
+// Entrega las imágenes de promoción a la página que abrió esta (para subirlas a las tiendas).
+addEventListener('message', async (e) => {
+  if (!e.data || e.data.type !== 'promo') return;
+  for (const n of e.data.names) { const b = await (await fetch(n)).arrayBuffer(); e.source.postMessage({ type: 'promo-file', name: n, buf: b }, e.origin, [b]); }
+  e.source.postMessage({ type: 'promo-done' }, e.origin);
+});
+if (opener) opener.postMessage({ type: 'promo-ready' }, '*'); if (parent !== window) parent.postMessage({ type: 'promo-ready' }, '*');
+</script>
