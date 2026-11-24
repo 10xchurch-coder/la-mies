@@ -163,18 +163,15 @@ export default function Seguimiento() {
           }} />
         ) : null}
         {absent && absent.some(Boolean) ? (
-          <Pressable onPress={() => router.push('/ausencias')} accessibilityRole="button">
-            <Card style={{ gap: 6 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>Faltaron el último fin de semana</Text>
+          <Card style={{ gap: 6 }}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Faltaron el último fin de semana</Text>
+            {[['Faltaron este fin de semana', 'escribirles que los extrañamos'], ['Faltaron 2 semanas seguidas', 'coordinar una visita'], ['Faltaron 3 semanas o más', 'orar, escribirles y visitarlos']].map(([t, what], i) => absent[i] ? (
+              <Pressable key={t} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: String(i + 1) } })} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.border }}>
+                <Text style={{ flex: 1, fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{absent[i]}</Text> {t.toLowerCase()}: {what}</Text>
                 <Feather name="chevron-right" size={18} color={colors.muted} />
-              </View>
-              {[['Faltaron este fin de semana', 'escribirles que los extrañamos'], ['Faltaron 2 semanas seguidas', 'coordinar una visita'], ['Faltaron 3 semanas o más', 'orar, escribirles y visitarlos']].map(([t, what], i) => absent[i] ? (
-                <Text key={t} style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{absent[i]}</Text> {t.toLowerCase()}: {what}</Text>
-              ) : null)}
-              <Text style={{ fontSize: 12, color: colors.green, fontWeight: '700' }}>Tocá acá para mandarles el mensaje</Text>
-            </Card>
-          </Pressable>
+              </Pressable>
+            ) : null)}
+          </Card>
         ) : null}
         {tasks.length ? (
           <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>

@@ -178,6 +178,7 @@ export default function Iglesia() {
         { icon: 'music', label: 'Cancionero', to: '/canciones' as Href, show: true },
         { icon: 'headphones', label: 'Música', to: '/musica' as Href, show: true },
         { icon: 'radio', label: 'Radio', to: '/radio' as Href, show: true },
+        { icon: 'edit-3', label: 'Escribir devocionales', to: '/admin/devocionales', show: isStaff },
       ],
     },
     {
@@ -223,7 +224,6 @@ export default function Iglesia() {
       tiles: [
         { icon: 'dollar-sign', label: 'Finanzas', to: '/finanzas' as Href, show: financeLevel >= 1 },
         { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
-        { icon: 'edit-3', label: 'Devocionales', to: '/admin/devocionales', show: isStaff },
         { icon: 'key', label: 'Roles y permisos', to: '/admin/roles', show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
         { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },

@@ -264,8 +264,8 @@ export default function DeskHome() {
             })() : null}
             {(seesPeople || seesPanel) && on('asistencia') && absentRest.length ? (
               <>
-                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text="faltaron este fin de semana: escribirles" onPress={() => router.push('/ausencias')} /> : null}
-                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text="faltaron 2 semanas seguidas: coordinar visita" onPress={() => router.push('/ausencias')} /> : null}
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text="faltaron este fin de semana: escribirles" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '1' } })} /> : null}
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text="faltaron 2 semanas seguidas: coordinar visita" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '2' } })} /> : null}
               </>
             ) : null}
             {on('seguimiento') && tasks.length ? (
@@ -288,7 +288,7 @@ export default function DeskHome() {
                 <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText }}>Borrar estos recordatorios</Text>
               </Pressable>
             ) : null}
-            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push('/ausencias')} /> : null}
+            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '3' } })} /> : null}
             {isPastor ? <Todo icon="mail" n={pmUnread} text="mensajes privados sin leer" onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
             {moderates ? <Todo icon="message-square" n={newSuggestions} text="sugerencias sin leer" onPress={() => router.push('/sugerencias')} /> : null}
             {on('cumples') ? <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text="cumpleaños en los próximos 7 días" onPress={() => router.push('/cumples' as Href)} /> : null}

@@ -3,10 +3,11 @@
 //   1 semana  → "te extrañamos, ¿cómo estás?, ¿podemos orar por algo?"
 //   2 semanas → coordinar una visita
 //   3 o más   → "recién oré por vos" + recordatorio de visitarlo
-// Al tocar el WhatsApp, la persona sale de la lista (queda abajo, en "Ya les escribiste", por si hay que volver atrás).
+// Cada grupo va en su propia página (pestañas arriba). Al tocar el WhatsApp o "Quitar", la persona sale de la lista
+// (queda abajo, en "Ya atendidos", por si hay que volver atrás).
 // "Elegir varios" arma una fila de mensajes: WhatsApp se abre para uno, se manda, y al volver se abre el siguiente.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Platform, Pressable, Text, View } from 'react-native';
+import { Alert, AppState, Platform, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
@@ -31,9 +32,11 @@ const SECTIONS: { weeks: number; title: string; hint: string; kind: MessageKind;
 
 export default function Ausencias() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ fecha?: string }>();
+  const params = useLocalSearchParams<{ fecha?: string; semanas?: string }>();
   const { isStaff, profile, church } = useAuth();
   const [sat, setSat] = useState(params.fecha ?? lastSaturday());
+  // Qué página se ve: 1 semana, 2 semanas o 3 o más. Si no se pidió una, se abre la primera que tenga gente.
+  const [tab, setTab] = useState<number | null>(params.semanas ? Math.max(1, Math.min(3, Number(params.semanas) || 1)) : null);
   const [rows, setRows] = useState<AbsenceRow[] | null>(null);
   const [services, setServices] = useState<ChurchService[]>([]);
   const saturdays = Array.from({ length: 8 }, (_, i) => isoDate(addDays(parseDate(lastSaturday()), -7 * i)));
@@ -72,9 +75,20 @@ export default function Ausencias() {
     mark(r.contact_id, true);
   };
 
-  const pending = (rows ?? []).filter((r) => !sent.has(r.contact_id));
-  const done = (rows ?? []).filter((r) => sent.has(r.contact_id));
+  const allPending = (rows ?? []).filter((r) => !sent.has(r.contact_id));
+  const countOf = (w: number) => allPending.filter((r) => section(r).weeks === w).length;
+  const weeks = tab ?? (SECTIONS.find((x) => countOf(x.weeks))?.weeks ?? 1);
+  const pending = allPending.filter((r) => section(r).weeks === weeks);
+  const done = (rows ?? []).filter((r) => sent.has(r.contact_id) && section(r).weeks === weeks);
   const canPick = pending.filter((r) => r.phone);
+  /** Saca a todos los de esta página sin escribirles (por ejemplo, los niños o los que no tienen WhatsApp). */
+  const removeAll = () => {
+    const list = [...pending];
+    const go = () => list.forEach((r) => mark(r.contact_id, true));
+    const text = `Salen de esta lista ${list.length} ${list.length === 1 ? 'persona' : 'personas'}. No se borran de la iglesia y no se les manda nada. Quedan abajo, en "Ya atendidos", por si querés volver atrás.`;
+    if (Platform.OS === 'web') { if (typeof window !== 'undefined' && window.confirm(text)) go(); return; }
+    Alert.alert('¿Quitar a todos de esta lista?', text, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Quitar a todos', style: 'destructive', onPress: go }]);
+  };
   const toggle = (id: string) => setPicked((old) => { const next = new Set(old); if (next.has(id)) next.delete(id); else next.add(id); return next; });
 
   const start = () => {
@@ -110,6 +124,18 @@ export default function Ausencias() {
       <Header title="Faltaron" subtitle={`Fin de semana del ${fmtDateShort(sat)} y ${fmtDateShort(isoDate(addDays(parseDate(sat), 1)))}`} back />
       <Screen>
         <DateChips dates={saturdays.includes(sat) ? saturdays : [sat, ...saturdays]} value={sat} onChange={setSat} format={(d) => `Finde ${fmtDateShort(d)}`} />
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {SECTIONS.map((x) => {
+            const on = x.weeks === weeks;
+            return (
+              <Pressable key={x.weeks} onPress={() => { setTab(x.weeks); setPicking(false); setPicked(new Set()); }} accessibilityRole="tab" accessibilityState={{ selected: on }}
+                style={{ flex: 1, alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4, borderRadius: 12, borderWidth: 1.5, borderColor: on ? colors.amber : colors.border, backgroundColor: on ? colors.amberSoft : colors.bg }}>
+                <Text style={{ fontSize: 20, fontWeight: '900', color: on ? colors.amberText : colors.text }}>{rows ? countOf(x.weeks) : '–'}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: on ? colors.amberText : colors.muted, textAlign: 'center' }}>{x.weeks === 1 ? '1 semana' : x.weeks === 2 ? '2 semanas' : '3 o más'}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
         {rows?.length ? (
           <Button title="Descargar la lista para visitar" icon="download" variant="outline" small onPress={() => {
             const list = [...rows].sort((a, b) => (b.weeks_missed ?? 1) - (a.weeks_missed ?? 1) || a.name.localeCompare(b.name));
@@ -119,7 +145,7 @@ export default function Ausencias() {
           }} />
         ) : null}
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-          {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono y con tu nombre. Al escribirle a alguien, sale de la lista.
+          {isStaff || church?.absence_recipients?.includes(profile?.id ?? '') ? 'Miembros y visitas que no fueron marcados presentes el sábado ni el domingo.' : 'La gente de tu ruta que no fue marcada presente el sábado ni el domingo.'} El WhatsApp sale desde tu teléfono. Al escribirle a alguien, o al tocar “Quitar”, sale de la lista.
         </Text>
 
         {queue ? (
@@ -153,9 +179,9 @@ export default function Ausencias() {
         ) : null}
 
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="check-circle" title="No faltó nadie" text="¡Gloria a Dios!" />
-          : !pending.length ? <Empty icon="check-circle" title="Ya les escribiste a todos" text="No queda nadie en la lista de este fin de semana." /> : null}
-        {SECTIONS.map((sec) => {
-          const list = pending.filter((r) => section(r) === sec);
+          : !pending.length ? <Empty icon="check-circle" title="No queda nadie en esta lista" text={allPending.length ? 'Mirá las otras listas de arriba.' : 'Ya atendiste a todos los de este fin de semana.'} /> : null}
+        {SECTIONS.filter((sec) => sec.weeks === weeks).map((sec) => {
+          const list = pending;
           if (!list.length) return null;
           return (
             <View key={sec.weeks} style={{ gap: 8 }}>
@@ -183,11 +209,18 @@ export default function Ausencias() {
                       <View style={{ flexDirection: 'row', gap: 8 }}>
                         <Btn icon="message-circle" label={sec.weeks === 3 ? 'Oré por vos' : sec.weeks === 2 ? 'Coordinar visita' : 'Lo extrañamos'} disabled={!r.phone} onPress={() => write(r)} />
                         <Btn icon="check-square" label="Visité" onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id, visita: '1' } })} />
+                        <Btn icon="x" label="Quitar" gray onPress={() => mark(r.contact_id, true)} />
                       </View>
                     )}
                   </View>
                 );
               })}
+              {list.length > 1 && !picking ? (
+                <Pressable onPress={removeAll} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 42, borderRadius: 10, borderWidth: 1, borderColor: colors.border }}>
+                  <Feather name="x" size={16} color={colors.muted} />
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>Quitar a todos los de esta lista ({list.length})</Text>
+                </Pressable>
+              ) : null}
             </View>
           );
         })}
@@ -196,7 +229,7 @@ export default function Ausencias() {
           <View style={{ gap: 8 }}>
             <Pressable onPress={() => setShowSent(!showSent)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6 }}>
               <Feather name="check-circle" size={16} color={colors.greenText} />
-              <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText }}>Ya les escribiste · {done.length}</Text>
+              <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText }}>Ya atendidos · {done.length}</Text>
               <Feather name={showSent ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
             </Pressable>
             {showSent ? done.map((r) => (
@@ -215,11 +248,11 @@ export default function Ausencias() {
   );
 }
 
-function Btn({ icon, label, onPress, disabled }: { icon: React.ComponentProps<typeof Feather>['name']; label: string; onPress: () => void; disabled?: boolean }) {
+function Btn({ icon, label, onPress, disabled, gray }: { icon: React.ComponentProps<typeof Feather>['name']; label: string; onPress: () => void; disabled?: boolean; gray?: boolean }) {
   return (
-    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 40, borderRadius: 10, backgroundColor: colors.greenSoft, opacity: disabled ? 0.4 : 1 }}>
-      <Feather name={icon} size={15} color={colors.greenText} />
-      <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }} numberOfLines={1}>{label}</Text>
+    <Pressable onPress={onPress} disabled={disabled} accessibilityRole="button" style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 40, borderRadius: 10, backgroundColor: gray ? colors.bgSoft : colors.greenSoft, opacity: disabled ? 0.4 : 1 }}>
+      <Feather name={icon} size={15} color={gray ? colors.muted : colors.greenText} />
+      <Text style={{ fontSize: 12, fontWeight: '800', color: gray ? colors.muted : colors.greenText }} numberOfLines={1}>{label}</Text>
     </Pressable>
   );
 }

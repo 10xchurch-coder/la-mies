@@ -67,11 +67,12 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
           <T style={{ color: '#FFFFFF', fontSize: size * k, lineHeight: size * 1.45 * k, ...verseFont, ...shadow }}>{text}</T>
           {kind === 'phrase' ? <T style={{ color: 'rgba(255,255,255,0.95)', fontSize: 16 * k, ...titleFont, ...shadow }}>{item.reference}</T> : null}
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 12 * k, maxWidth: '100%' }}>
-          {logo ? <Image source={{ uri: logo }} style={{ width: 40 * k, height: 44 * k }} contentFit="contain" cachePolicy="memory-disk" onLoad={() => setLogoOk(true)} onError={() => setLogoOk(true)} /> : null}
+        {/* Abajo, chico y discreto: el logo y el nombre de la iglesia. Lo que tiene que llamar la atención es el versículo. */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 8 * k, maxWidth: '100%', opacity: 0.92 }}>
+          {logo ? <Image source={{ uri: logo }} style={{ width: 24 * k, height: 26 * k }} contentFit="contain" cachePolicy="memory-disk" onLoad={() => setLogoOk(true)} onError={() => setLogoOk(true)} /> : null}
           <View style={{ flexShrink: 1 }}>
-            <T numberOfLines={2} style={{ color: '#FFFFFF', fontSize: 18 * k, ...nameFont, ...shadow }}>{church?.name ?? 'La Mies'}</T>
-            <T style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12.5 * k, fontWeight: '600', marginTop: 2 * k, ...shadow }}>App La Mies · RV1960</T>
+            <T numberOfLines={1} style={{ color: '#FFFFFF', fontSize: 12.5 * k, ...nameFont }}>{church?.name ?? 'La Mies'}</T>
+            <T style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9.5 * k, fontWeight: '600', marginTop: 1 * k }}>App La Mies · RV1960</T>
           </View>
         </View>
       </View>

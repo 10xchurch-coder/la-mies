@@ -12,19 +12,23 @@ const BY_SEGMENT: Record<string, AreaTone> = {
   chat: 'violet', directorio: 'violet', ministerios: 'violet', ministerio: 'violet', anuncios: 'violet', misioneros: 'violet', dar: 'violet', sugerencias: 'violet',
   mensajes: 'violet', 'pastor-hilo': 'violet', 'pastor-bandeja': 'violet', avisos: 'violet',
   // Personas y seguimiento
-  seguimiento: 'amber', ausencias: 'amber', inactivos: 'amber', cumples: 'amber', fidelidad: 'amber', persona: 'amber', contacto: 'amber', personas: 'amber', importar: 'amber',
+  seguimiento: 'amber', ausencias: 'amber', inactivos: 'amber', cumples: 'amber', fidelidad: 'amber', persona: 'amber', contacto: 'amber', personas: 'amber',
   // Informes y evangelismo
   reporte: 'teal', 'progreso-iglesia': 'teal', panel: 'teal', equipo: 'teal', salidas: 'teal', salida: 'teal', 'salida-chat': 'teal', salieron: 'teal', informes: 'teal',
-  zonas: 'teal', zona: 'teal', vereda: 'teal', mapa: 'teal', tablero: 'teal', resumen: 'teal',
+  zonas: 'teal', zona: 'teal', vereda: 'teal', mapa: 'teal', tablero: 'teal', resumen: 'teal', recortar: 'teal', ubicacion: 'teal',
   // Administración
-  finanzas: 'pink', admin: 'pink', 'miembro-vista': 'pink',
+  finanzas: 'pink', admin: 'pink', 'miembro-vista': 'pink', importar: 'pink', ajustes: 'pink', seguridad: 'pink',
 };
 const ADMIN_PEOPLE = new Set(['miembros', 'miembro', 'inactivos']);
+// Pantallas que viven en /admin pero son de "Crecer" (así figuran en el menú).
+const ADMIN_GROW = new Set(['devocionales', 'musica', 'radio']);
 
 /** El color del área de una pantalla, por los pedazos de su ruta ("(tabs)", "t-chat"...). */
 export function areaOf(segments: string[]): AreaTone {
   const s = segments.filter((x) => !x.startsWith('('));
   const first = (s[0] ?? '').replace(/^t-/, '');
   if (first === 'admin' && ADMIN_PEOPLE.has(s[1] ?? '')) return 'amber';
+  if (first === 'admin' && ADMIN_GROW.has(s[1] ?? '')) return 'blue';
+  if (first === 'escritorio' && s[1] === 'personas') return 'amber';
   return BY_SEGMENT[first] ?? 'green';
 }

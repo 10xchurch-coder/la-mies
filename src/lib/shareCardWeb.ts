@@ -145,14 +145,14 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
 
   // Abajo: el logo de la iglesia con su nombre al lado y, debajo y más chico, "App La Mies".
   const logo = input.logoUrl ? await loadImage(input.logoUrl) : null;
-  const LH = 44, GAP = 12; // alto del logo y espacio hasta el nombre
+  const LH = 26, GAP = 8; // alto del logo y espacio hasta el nombre
   const LW = logo ? Math.min(LH, (logo.width / logo.height) * LH) : 0;
-  ctx.font = F(800, 18, VERSE_FONT_BOLD);
+  ctx.font = F(800, 12.5, VERSE_FONT_BOLD);
   const nameMax = maxW - (logo ? LW + GAP : 0);
   const nameW = Math.min(ctx.measureText(input.churchName).width, nameMax);
   const rowW = (logo ? LW + GAP : 0) + nameW;
   const x0 = (w - rowW) / 2;
-  const rowY = h - 70;
+  const rowY = h - 62;
   if (logo) {
     // El logo va solo, sin círculo. Un resplandor claro muy suave lo despega de los fondos oscuros.
     ctx.save();
@@ -164,8 +164,8 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   const nameX = x0 + (logo ? LW + GAP : 0);
   ctx.textAlign = 'left'; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.6);
   ctx.fillText(input.churchName, nameX, rowY - 1, nameMax);
-  ctx.font = `600 12.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.9)';
-  ctx.fillText('App La Mies · RV1960', nameX, rowY + 16);
+  ctx.font = `600 9.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText('App La Mies · RV1960', nameX, rowY + 11);
   noShadow();
 
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.98));
