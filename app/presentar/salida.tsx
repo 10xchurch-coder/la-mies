@@ -11,6 +11,7 @@ import { Loading } from '@/components/ui';
 import { BLACK, isNewer, type LiveState, type RemoteCommand } from '@/lib/present';
 import { keepScreenOn } from '@/lib/presentAwake';
 import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
+import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 
 const isWeb = Platform.OS === 'web' && typeof document !== 'undefined';
@@ -26,7 +27,9 @@ function toggleFull() {
 }
 
 export default function Salida() {
-  const { church, isLeader } = useAuth();
+  const { church, perms, profile } = useAuth();
+  // La pantalla la puede mostrar cualquiera de la iglesia; manejarla desde acá (teclado, toques), solo quien tiene el permiso.
+  const isLeader = canPresent(perms, profile);
   const router = useRouter();
   const linkRef = useRef<PresentLink | null>(null);
   const { width, height } = useWindowDimensions();

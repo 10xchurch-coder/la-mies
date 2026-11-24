@@ -21,6 +21,7 @@ import {
 import { getServicePlanEntries, listServicePlans, loadAnnouncementCards, type ServicePlanRow } from '@/lib/presentData';
 import { planToItems } from '@/lib/presentExtras';
 import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
+import { canPresent } from '@/lib/perms';
 import { searchKey } from '@/lib/songs';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -44,14 +45,14 @@ function openOutput(which: 'salida' | 'escenario' = 'salida') {
 }
 
 export default function Presentar() {
-  const { church, isLeader } = useAuth();
+  const { church, perms, profile } = useAuth();
   const [setId, setSetId] = useState<string | null>(null);
   if (!church) return <Loading />;
-  if (!isLeader) {
+  if (!canPresent(perms, profile)) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <Header title="Modo presentación" back />
-        <Empty icon="lock" title="Solo para líderes" text="Si tenés que manejar la pantalla, pedile permiso al pastor." />
+        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
       </View>
     );
   }

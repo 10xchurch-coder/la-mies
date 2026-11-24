@@ -547,6 +547,11 @@ def main():
         mem.keyboard.press('ArrowRight')
         mem.wait_for_timeout(500)
         check('...pero su teclado no maneja la presentación', 'Primera estrofa' in shown(mem))
+        for path, title in (('/presentar/', 'Modo presentación'), ('/presentar/control/', 'Control remoto'), ('/presentar/escenario/', 'Vista de escenario')):
+            mem.goto(base + path + '?miembro=1')
+            check(f'sin el permiso, "{title}" queda cerrado y dice que el pastor lo puede dar', wait_text(mem, 'Necesitás permiso') and 'El pastor te puede dar el permiso' in mem.inner_text('body'), mem.inner_text('body')[:120])
+        rt = mem.evaluate('window.__rt')
+        check('...y sin el permiso no se conecta a nada', rt['opened'] == 0, json.dumps(rt))
         ctx.close()
 
         # ------------------------------------------------------------------ 13. Como en una tablet (sin ventanas)

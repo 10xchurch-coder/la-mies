@@ -7,11 +7,14 @@ import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PresentSlide } from '@/components/PresentSlide';
 import { useChurchLogo } from '@/components/BrandFooter';
-import { Loading } from '@/components/ui';
+import { Empty, Loading } from '@/components/ui';
 import { BLACK, fitFont, isNewer, type LiveState } from '@/lib/present';
 import { keepScreenOn } from '@/lib/presentAwake';
 import { openPresentLink, type LinkStatus } from '@/lib/presentSync';
+import { Header } from '@/components/Screen';
+import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
+import { colors } from '@/theme';
 
 const isWeb = Platform.OS === 'web' && typeof document !== 'undefined';
 const FRESH_MS = 6 * 60 * 60 * 1000;
@@ -29,7 +32,8 @@ function useClock(): string {
 }
 
 export default function Escenario() {
-  const { church } = useAuth();
+  const { church, perms, profile } = useAuth();
+  const allowed = canPresent(perms, profile);
   const router = useRouter();
   const { width, height } = useWindowDimensions();
   const logo = useChurchLogo();
@@ -44,7 +48,7 @@ export default function Escenario() {
   const churchId = church?.id;
 
   useEffect(() => {
-    if (!churchId) return;
+    if (!churchId || !allowed) return;
     const take = (s: LiveState, sameClock: boolean) => {
       if (!isNewer(liveRef.current, s)) return;
       liveRef.current = s;
@@ -56,9 +60,9 @@ export default function Escenario() {
     const last = link.lastLocal();
     if (last && Date.now() - last.at < FRESH_MS) take(last, true);
     return () => link.close();
-  }, [churchId]);
+  }, [churchId, allowed]);
 
-  useEffect(() => keepScreenOn('lamies-escenario'), []);
+  useEffect(() => (allowed ? keepScreenOn('lamies-escenario') : undefined), [allowed]);
 
   useEffect(() => {
     if (!bar) return;
@@ -67,7 +71,7 @@ export default function Escenario() {
   }, [bar, got]);
 
   useEffect(() => {
-    if (!isWeb) return;
+    if (!isWeb || !allowed) return;
     const title = document.title;
     document.title = 'Vista de escenario';
     const prevBg = document.body.style.backgroundColor;
@@ -86,9 +90,17 @@ export default function Escenario() {
       document.removeEventListener('visibilitychange', keepOn);
       lock?.release?.().catch(() => undefined);
     };
-  }, []);
+  }, [allowed]);
 
   if (!church) return <View style={{ flex: 1, backgroundColor: '#000' }}><Loading /></View>;
+  if (!allowed) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <Header title="Vista de escenario" back />
+        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
+      </View>
+    );
+  }
 
   const goFull = () => {
     if (!isWeb) return;

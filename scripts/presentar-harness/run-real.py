@@ -77,7 +77,7 @@ def supabase(route):
     if path == '/rest/v1/rpc/my_profile':
         return ok({'id': 'u1', 'church_id': 'c1', 'display_name': 'Persona de Prueba', 'role': 'pastor', 'roles': ['pastor'], 'group_id': None, 'rules_accepted_at': '2026-01-01T00:00:00Z'})
     if path == '/rest/v1/rpc/my_permissions':
-        return ok(['personas.ver_todas', 'inf.panel'])
+        return ok(['personas.ver_todas', 'inf.panel', 'presentar.usar'])
     if path == '/rest/v1/churches':
         return ok({'id': 'c1', 'name': 'Iglesia de Prueba', 'disabled_features': [], 'logo_path': None})
     if path == '/rest/v1/present_sets':

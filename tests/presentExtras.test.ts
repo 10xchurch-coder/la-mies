@@ -4,6 +4,8 @@ import { VERSIONS } from '../src/lib/bible';
 import { autoNext, autoOf, cleanItems, cleanLive, itemSlides, newItem, stageOf, type Slide } from '../src/lib/present';
 import { announcementCards, dayWords, matchSong, planToItems, whenWords } from '../src/lib/presentExtras';
 import { cleanItems as cleanPlanItems } from '../src/lib/servicePlan';
+import { ALL_PERMS, canPresent, rolePerms } from '../src/lib/perms';
+import { deskNavFor } from '../src/lib/desk';
 
 const rv = VERSIONS[0];
 // Martes 24 de noviembre de 2026, 10 de la mañana (hora del aparato).
@@ -165,4 +167,22 @@ test('orden del culto: canciones del Cancionero, lecturas y lo demás', () => {
   assert.ok(items[11].type === 'sermon' && items[11].outline === 'Sin citas');
   assert.equal(new Set(items.map((i) => i.id)).size, items.length);
   assert.deepEqual(planToItems([], songs), []);
+});
+
+test('permiso del Modo presentación: el pastor siempre, los demás solo si se lo dan', () => {
+  assert.ok(ALL_PERMS.includes('presentar.usar'));
+  // Con su rol lo traen solo el pastor y el administrador de la app.
+  for (const r of ['admin', 'app_admin']) assert.ok(rolePerms(r).includes('presentar.usar'), r);
+  for (const r of ['assistant_pastor', 'secretary', 'deacon', 'captain', 'evangelism', 'member']) assert.ok(!rolePerms(r).includes('presentar.usar'), r);
+  assert.equal(canPresent([], { role: 'member' }), false);
+  assert.equal(canPresent(['personas.ver_todas', 'inf.panel'], { role: 'captain', extra_roles: ['deacon'] }), false);
+  assert.equal(canPresent(['presentar.usar'], { role: 'member' }), true);
+  // El pastor entra aunque la base todavía no conozca el permiso nuevo.
+  assert.equal(canPresent([], { role: 'admin' }), true);
+  assert.equal(canPresent([], { role: 'member', extra_roles: ['app_admin'] }), true);
+  assert.equal(canPresent([], null), false);
+  // En el menú de la computadora aparece solo con el permiso.
+  const has = (perms: string[]) => deskNavFor(perms).some((g) => g.items.some((i) => i.key === 'presentar'));
+  assert.equal(has(['personas.ver_todas', 'inf.panel']), false);
+  assert.equal(has(['presentar.usar']), true);
 });
