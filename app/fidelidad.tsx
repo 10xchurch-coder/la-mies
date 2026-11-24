@@ -12,6 +12,7 @@ import { FAITH_LABEL, fmtDateOnly } from '@/lib/format';
 import { colors } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { Contact, Engagement, FaithCategory } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type View_ = 'faith' | 'journey';
 const ORDER: FaithCategory[] = ['fiel', 'constante', 'frecuente', 'ocasional', 'esporadico', 'inactivo', 'sin_asistencia', 'nuevo'];
@@ -82,24 +83,24 @@ export default function Fidelidad() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Fidelidad y camino" subtitle="Quién se está alejando y a quién promover" back />
+      <Header title={tx('Fidelidad y camino')} subtitle={tx('Quién se está alejando y a quién promover')} back />
       <View style={{ paddingHorizontal: 16, gap: 10, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
-        <Segmented options={[{ value: 'faith', label: 'Fidelidad' }, { value: 'journey', label: 'Camino' }]} value={mode} onChange={setMode} />
+        <Segmented options={[{ value: 'faith', label: tx('Fidelidad') }, { value: 'journey', label: tx('Camino') }]} value={mode} onChange={setMode} />
         {mode === 'faith' ? (
           <>
-            <Choice options={[{ value: '4', label: '1 mes' }, { value: '12', label: '3 meses' }, { value: '26', label: '6 meses' }]} value={weeks} onChange={setWeeks} />
+            <Choice options={[{ value: '4', label: tx('1 mes') }, { value: '12', label: tx('3 meses') }, { value: '26', label: tx('6 meses') }]} value={weeks} onChange={setWeeks} />
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-              <Pressable onPress={() => setCat('all')}><Tag text={`Todos ${rows?.length ?? ''}`} tone={cat === 'all' ? 'green' : 'gray'} /></Pressable>
+              <Pressable onPress={() => setCat('all')}><Tag text={tx('Todos {n}', { n: rows?.length ?? '' })} tone={cat === 'all' ? 'green' : 'gray'} /></Pressable>
               {ORDER.filter((k) => counts.get(k)).map((k) => (
                 <Pressable key={k} onPress={() => setCat(k)} style={{ opacity: cat === 'all' || cat === k ? 1 : 0.5 }}>
                   <Tag text={`${FAITH_LABEL[k].label} ${counts.get(k)}`} tone={FAITH_LABEL[k].tone} />
                 </Pressable>
               ))}
             </View>
-            {cat !== 'all' ? <Text style={{ fontSize: 12, color: colors.muted }}>{FAITH_LABEL[cat].label}: {FAITH_LABEL[cat].hint} de los cultos principales.</Text> : null}
+            {cat !== 'all' ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('{label}: {hint} de los cultos principales.', { label: FAITH_LABEL[cat].label, hint: FAITH_LABEL[cat].hint })}</Text> : null}
           </>
         ) : (
-          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Tocá una etapa para ver quiénes llegaron hasta ahí y todavía no dieron el paso siguiente.</Text>
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Tocá una etapa para ver quiénes llegaron hasta ahí y todavía no dieron el paso siguiente.')}</Text>
         )}
       </View>
 
@@ -112,14 +113,14 @@ export default function Fidelidad() {
             numColumns={cols}
             columnWrapperStyle={cols > 1 ? { gap: 8 } : undefined}
             contentContainerStyle={{ padding: 16, gap: 8, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}
-            ListEmptyComponent={<Empty icon="users" title="Todavía no hay asistencias" text="Cuando se tome asistencia en los cultos, acá aparece la fidelidad de cada uno." />}
+            ListEmptyComponent={<Empty icon="users" title={tx('Todavía no hay asistencias')} text={tx('Cuando se tome asistencia en los cultos, acá aparece la fidelidad de cada uno.')} />}
             renderItem={({ item: r }) => (
               <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } })} style={{ flex: 1, maxWidth: cols > 1 ? '49.5%' : '100%', flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
                 <Face name={r.name} path={r.photo_path} size={44} />
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    {r.possible ? `${r.attended} de ${r.possible} cultos` : 'Recién agregado'}{r.last_attended ? ` · última vez ${fmtDateOnly(r.last_attended)}` : ''}
+                    {r.possible ? tx('{attended} de {possible} cultos', { attended: r.attended, possible: r.possible }) : tx('Recién agregado')}{r.last_attended ? tx(' · última vez {fmtDateOnly}', { fmtDateOnly: fmtDateOnly(r.last_attended) }) : ''}
                   </Text>
                 </View>
                 <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -144,7 +145,7 @@ export default function Fidelidad() {
                 return (
                   <Pressable key={s.key} onPress={() => setStage(s.key)} style={{ gap: 4, padding: 8, borderRadius: 10, backgroundColor: on ? colors.greenSoft : 'transparent' }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                      <Text style={{ fontSize: 13, fontWeight: on ? '800' : '600', color: colors.text }}>{i + 1}. {s.label}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: on ? '800' : '600', color: colors.text }}>{i + 1}. {tx(s.label)}</Text>
                       <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>{n}</Text>
                     </View>
                     <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.bgSoft }}>
@@ -154,7 +155,7 @@ export default function Fidelidad() {
                 );
               })}
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, marginTop: 8 }}>
-                {STAGES[stageIdx].label.toUpperCase()}{stageIdx < STAGES.length - 1 ? ` · TODAVÍA NO: ${STAGES[stageIdx + 1].label.toUpperCase()}` : ''} ({listStage.length})
+                {STAGES[stageIdx].label.toUpperCase()}{stageIdx < STAGES.length - 1 ? tx(' · TODAVÍA NO: {label}', { label: STAGES[stageIdx + 1].label.toUpperCase() }) : ''} ({listStage.length})
               </Text>
             </View>
           }

@@ -1,6 +1,7 @@
 // Lo que la persona marca en su Biblia: resaltados de color, notas y versículos guardados.
 // Va por libro, capítulo y versículo (no por versión): se ve igual en cualquier versión.
 import { supabase } from './supabase';
+import { tx } from './i18n';
 
 export type BibleMark = { book: number; chapter: number; verse: number; color: string | null; note: string | null; saved: boolean; updated_at?: string };
 
@@ -24,7 +25,7 @@ export async function setMarks(book: number, chapter: number, current: Record<nu
   }
   const { data } = await supabase.auth.getUser();
   const me = data.user?.id;
-  if (!me) throw new Error('Sin sesión');
+  if (!me) throw new Error(tx('Sin sesión'));
   if (up.length) {
     const r = await supabase.from('bible_marks').upsert(up.map((m) => ({ profile_id: me, book: m.book, chapter: m.chapter, verse: m.verse, color: m.color, note: m.note, saved: m.saved, updated_at: new Date().toISOString() })), { onConflict: 'profile_id,book,chapter,verse' });
     if (r.error) throw r.error;

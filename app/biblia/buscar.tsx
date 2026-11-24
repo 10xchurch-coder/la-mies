@@ -13,6 +13,7 @@ import { bookNameIn, chaptersIn, versionOf, type BibleVersion } from '@/lib/bibl
 import { makeQuery, parseRef, searchBibleAsync, type Query, type SearchResult } from '@/lib/bibleStudy';
 import { loadBiblePrefs, saveBiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function BuscarBiblia() {
   const router = useRouter();
@@ -66,32 +67,32 @@ export default function BuscarBiblia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Buscar en la Biblia" subtitle={version.name} back />
+      <Header title={tx('Buscar en la Biblia')} subtitle={version.name} back />
       <Screen>
         <View style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 12 }}>
             <Feather name="search" size={19} color={colors.muted} />
             <TextInput value={text} onChangeText={setText} onSubmitEditing={() => search()} returnKeyType="search" autoFocus={!params.q} autoCorrect={false} autoCapitalize="none"
-              placeholder={en ? 'Una palabra, una frase o “John 3:16”' : 'Una palabra, una frase o “Juan 3:16”'} placeholderTextColor={colors.muted} accessibilityLabel="Qué querés buscar"
+              placeholder={en ? tx('Una palabra, una frase o “John 3:16”') : tx('Una palabra, una frase o “Juan 3:16”')} placeholderTextColor={colors.muted} accessibilityLabel={tx('Qué querés buscar')}
               style={{ flex: 1, fontSize: 17, color: colors.text, paddingVertical: 12 }} />
-            {text ? <Pressable onPress={() => { setText(''); setFound(null); setNothing(false); run.current++; setBusy(false); }} accessibilityRole="button" accessibilityLabel="Borrar" hitSlop={10}><Feather name="x" size={20} color={colors.muted} /></Pressable> : null}
+            {text ? <Pressable onPress={() => { setText(''); setFound(null); setNothing(false); run.current++; setBusy(false); }} accessibilityRole="button" accessibilityLabel={tx('Borrar')} hitSlop={10}><Feather name="x" size={20} color={colors.muted} /></Pressable> : null}
           </View>
           <BibleVersionChips value={version.id} onChange={changeVersion} />
           {words > 1 ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {chip('Todas las palabras', !phrase, () => changeMode(false))}
-              {chip('La frase exacta', phrase, () => changeMode(true))}
+              {chip(tx('Todas las palabras'), !phrase, () => changeMode(false))}
+              {chip(tx('La frase exacta'), phrase, () => changeMode(true))}
             </View>
           ) : null}
-          <Button title="Buscar" icon="search" onPress={() => search()} disabled={!words} loading={busy} />
+          <Button title={tx('Buscar')} icon="search" onPress={() => search()} disabled={!words} loading={busy} />
         </View>
 
         {place ? (
-          <Pressable onPress={() => openPlace(place.book, place.chapter, place.verse)} accessibilityRole="button" accessibilityLabel={`Ir a ${placeLabel}`}>
+          <Pressable onPress={() => openPlace(place.book, place.chapter, place.verse)} accessibilityRole="button" accessibilityLabel={tx('Ir a {placeLabel}', { placeLabel })}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.blueSoft }}>
               <Feather name="book-open" size={22} color={colors.blueText} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.blueText }}>IR A</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.blueText }}>{tx('IR A')}</Text>
                 <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{placeLabel}</Text>
               </View>
               <Feather name="chevron-right" size={20} color={colors.blueText} />
@@ -101,17 +102,17 @@ export default function BuscarBiblia() {
 
         {busy && !found ? <ActivityIndicator color={colors.blue} style={{ marginTop: 12 }} /> : null}
         {nothing && !busy ? (
-          <Empty icon="search" title="No se encontró nada" text={en
-            ? 'Revisá cómo está escrito. Estás buscando en la Biblia en inglés.'
-            : 'Revisá cómo está escrito, o probá con menos palabras. Esta Biblia es de 1909 y usa algunas palabras antiguas.'} />
+          <Empty icon="search" title={tx('No se encontró nada')} text={en
+            ? tx('Revisá cómo está escrito. Estás buscando en la Biblia en inglés.')
+            : tx('Revisá cómo está escrito, o probá con menos palabras. Esta Biblia es de 1909 y usa algunas palabras antiguas.')} />
         ) : null}
         {found && found.result.verses ? (
           <>
             <View style={{ gap: 2 }}>
               <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>
-                {found.result.verses === 1 ? '1 versículo' : `${found.result.verses} versículos`} en {found.result.books.length === 1 ? '1 libro' : `${found.result.books.length} libros`}
+                {found.result.verses === 1 ? tx('1 versículo') : tx('{verses} versículos', { verses: found.result.verses })} {tx('en')} {found.result.books.length === 1 ? tx('1 libro') : tx('{n} libros', { n: found.result.books.length })}
               </Text>
-              <Text style={{ fontSize: 13, color: colors.muted }}>Tocá un libro para ver sus versículos. Tocá la cita para abrir el capítulo, o una palabra para ver dónde más aparece.</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Tocá un libro para ver sus versículos. Tocá la cita para abrir el capítulo, o una palabra para ver dónde más aparece.')}</Text>
             </View>
             <BibleHits version={version} books={found.result.books} query={found.query} unit="versículos"
               onOpen={(book, h) => openPlace(book, h.chapter, h.verse)}
@@ -120,7 +121,7 @@ export default function BuscarBiblia() {
         ) : null}
         {!found && !busy && !place && !nothing ? (
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-            No hace falta poner tildes ni mayúsculas. Para ir a un versículo, escribí la cita: {en ? '“John 3:16” o “Ps 23”' : '“Juan 3:16”, “Sal 23” o “1 Co 13”'}.
+            {tx('No hace falta poner tildes ni mayúsculas. Para ir a un versículo, escribí la cita: {pl}.', { pl: en ? tx('“John 3:16” o “Ps 23”') : tx('“Juan 3:16”, “Sal 23” o “1 Co 13”') })}
           </Text>
         ) : null}
       </Screen>

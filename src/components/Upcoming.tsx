@@ -6,10 +6,11 @@ import { Feather } from '@expo/vector-icons';
 import { fmtDateShort } from '../lib/format';
 import { colors, themed } from '../theme';
 import type { UpcomingItem } from '../types';
+import { tx } from '@/lib/i18n';
 
 export function UpcomingList({ items }: { items: UpcomingItem[] }) {
   const router = useRouter();
-  if (!items.length) return <Text style={{ fontSize: 13, color: colors.muted }}>No tenés turnos ni clases en las próximas semanas.</Text>;
+  if (!items.length) return <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No tenés turnos ni clases en las próximas semanas.')}</Text>;
   return (
     <View style={{ gap: 8 }}>
       {items.map((u) => {
@@ -25,7 +26,7 @@ export function UpcomingList({ items }: { items: UpcomingItem[] }) {
             </View>
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>
-                {u.kind === 'duty' ? `Turno: ${u.title}` : u.kind === 'class' ? `Das la clase ${u.title}` : `Ayudás en ${u.title}`}
+                {u.kind === 'duty' ? tx('Turno: {title}', { title: u.title }) : u.kind === 'class' ? tx('Das la clase {title}', { title: u.title }) : tx('Ayudás en {title}', { title: u.title })}
               </Text>
               <Text style={{ fontSize: 13, color: colors.text }}>{u.detail}</Text>
             </View>

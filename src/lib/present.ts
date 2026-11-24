@@ -3,6 +3,7 @@
 import { bookName, chapterText, chaptersIn, findBook, type BibleVersion } from './bible';
 import { lyricBlocks } from './songs';
 import { parseOutline, refLabel } from './sermonOutline';
+import { tx } from './i18n';
 
 /** Un archivo que subió la iglesia (foto, video o música) en el depósito "present". */
 export type MediaRef = { path: string; name: string };
@@ -58,16 +59,16 @@ export type SermonItem = Base & { type: 'sermon'; outline: string; version: stri
 export type PresentItem = CountdownItem | SongItem | PassageItem | ImageItem | VideoItem | MusicItem | TextItem | NoticeItem | AnnouncementsItem | SermonItem;
 
 export const ITEM_TYPES: { type: PresentItemType; label: string; icon: string }[] = [
-  { type: 'song', label: 'Canción', icon: 'music' },
-  { type: 'passage', label: 'Pasaje bíblico', icon: 'book-open' },
-  { type: 'countdown', label: 'Cuenta regresiva', icon: 'clock' },
-  { type: 'image', label: 'Foto', icon: 'image' },
-  { type: 'video', label: 'Video', icon: 'film' },
-  { type: 'music', label: 'Música', icon: 'headphones' },
-  { type: 'text', label: 'Texto libre', icon: 'type' },
-  { type: 'notice', label: 'Anuncio', icon: 'volume-2' },
-  { type: 'announcements', label: 'Anuncios de la app', icon: 'bell' },
-  { type: 'sermon', label: 'Prédica (bosquejo)', icon: 'align-left' },
+  { type: 'song', get label() { return tx('Canción'); }, icon: 'music' },
+  { type: 'passage', get label() { return tx('Pasaje bíblico'); }, icon: 'book-open' },
+  { type: 'countdown', get label() { return tx('Cuenta regresiva'); }, icon: 'clock' },
+  { type: 'image', get label() { return tx('Foto'); }, icon: 'image' },
+  { type: 'video', get label() { return tx('Video'); }, icon: 'film' },
+  { type: 'music', get label() { return tx('Música'); }, icon: 'headphones' },
+  { type: 'text', get label() { return tx('Texto libre'); }, icon: 'type' },
+  { type: 'notice', get label() { return tx('Anuncio'); }, icon: 'volume-2' },
+  { type: 'announcements', get label() { return tx('Anuncios de la app'); }, icon: 'bell' },
+  { type: 'sermon', get label() { return tx('Prédica (bosquejo)'); }, icon: 'align-left' },
 ];
 export const typeInfo = (t: PresentItemType) => ITEM_TYPES.find((x) => x.type === t) ?? ITEM_TYPES[0];
 
@@ -91,16 +92,16 @@ export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 export function newItem(type: PresentItemType): PresentItem {
   const id = newId();
   switch (type) {
-    case 'countdown': return { id, type, title: 'Cuenta regresiva', minutes: 5, message: 'Ya empezamos' };
-    case 'song': return { id, type, title: 'Canción', songId: null, lyrics: '', auto: false, secs: 15, speed: 1, audio: null };
+    case 'countdown': return { id, type, title: tx('Cuenta regresiva'), minutes: 5, message: tx('Ya empezamos') };
+    case 'song': return { id, type, title: tx('Canción'), songId: null, lyrics: '', auto: false, secs: 15, speed: 1, audio: null };
     case 'passage': return { id, type, title: '', ref: '', version: 'rv1909', perSlide: 1 };
-    case 'image': return { id, type, title: 'Foto', media: null };
-    case 'video': return { id, type, title: 'Video', media: null };
-    case 'music': return { id, type, title: 'Música', media: null };
-    case 'text': return { id, type, title: 'Texto', body: '' };
-    case 'notice': return { id, type, title: 'Anuncio', body: '' };
-    case 'announcements': return { id, type, title: 'Anuncios', secs: 10, days: 7, ahead: 14, anns: true, events: true, weekly: false, cards: [], loadedAt: 0 };
-    case 'sermon': return { id, type, title: 'Prédica', outline: '', version: 'rv1909', perSlide: 1 };
+    case 'image': return { id, type, title: tx('Foto'), media: null };
+    case 'video': return { id, type, title: tx('Video'), media: null };
+    case 'music': return { id, type, title: tx('Música'), media: null };
+    case 'text': return { id, type, title: tx('Texto'), body: '' };
+    case 'notice': return { id, type, title: tx('Anuncio'), body: '' };
+    case 'announcements': return { id, type, title: tx('Anuncios'), secs: 10, days: 7, ahead: 14, anns: true, events: true, weekly: false, cards: [], loadedAt: 0 };
+    case 'sermon': return { id, type, title: tx('Prédica'), outline: '', version: 'rv1909', perSlide: 1 };
   }
 }
 
@@ -285,9 +286,9 @@ export function itemSlides(item: PresentItem, version: BibleVersion): Slide[] {
 
 /** El nombre que se ve en la lista. */
 export function itemTitle(item: PresentItem): string {
-  if (item.type === 'passage') return item.ref.trim() || 'Pasaje bíblico';
-  if (item.type === 'countdown') return `Cuenta regresiva · ${item.minutes} min`;
-  if (item.type === 'sermon') return parseOutline(item.outline).title || item.title.trim() || 'Prédica';
+  if (item.type === 'passage') return item.ref.trim() || tx('Pasaje bíblico');
+  if (item.type === 'countdown') return tx('Cuenta regresiva · {minutes} min', { minutes: item.minutes });
+  if (item.type === 'sermon') return parseOutline(item.outline).title || item.title.trim() || tx('Prédica');
   return item.title.trim() || typeInfo(item.type).label;
 }
 
@@ -402,9 +403,9 @@ export function slideWords(s: Slide): { text: string; label: string | null } {
   switch (s.kind) {
     case 'text': return { text: s.text, label: s.label ?? s.head ?? s.footer };
     case 'notice': return { text: [s.title, s.body].filter(Boolean).join('\n'), label: null };
-    case 'countdown': return { text: `Cuenta regresiva · ${s.minutes} min`, label: null };
-    case 'image': return { text: `Foto: ${s.media.name}`, label: null };
-    case 'video': return { text: `Video: ${s.media.name}`, label: null };
+    case 'countdown': return { text: tx('Cuenta regresiva · {minutes} min', { minutes: s.minutes }), label: null };
+    case 'image': return { text: tx('Foto: {name}', { name: s.media.name }), label: null };
+    case 'video': return { text: tx('Video: {name}', { name: s.media.name }), label: null };
   }
 }
 

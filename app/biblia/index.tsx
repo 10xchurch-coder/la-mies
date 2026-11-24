@@ -11,6 +11,7 @@ import { OT_COUNT, bookNameIn, chaptersIn, versionOf, type BibleVersion } from '
 import { BOOKS } from '@/lib/biblePlan';
 import { DEFAULT_PREFS, loadBiblePrefs, saveBiblePrefs, type BiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Biblia() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function Biblia() {
     const one = chaptersIn(i) === 1;
     return (
       <View key={i}>
-        <Pressable onPress={() => (one ? go(i, 1) : setOpen(isOpen ? null : i))} accessibilityRole="button" accessibilityLabel={`${bookName(i)}, ${chaptersIn(i)} ${one ? 'capítulo' : 'capítulos'}`}
+        <Pressable onPress={() => (one ? go(i, 1) : setOpen(isOpen ? null : i))} accessibilityRole="button" accessibilityLabel={`${bookName(i)}, ${chaptersIn(i)} ${one ? tx('capítulo') : tx('capítulos')}`}
           style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 10 }}>
           <Text style={{ flex: 1, fontSize: 16, fontWeight: '700', color: colors.text }}>{bookName(i)}</Text>
           <Text style={{ fontSize: 13, color: colors.muted }}>{chaptersIn(i)}</Text>
@@ -64,48 +65,48 @@ export default function Biblia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Biblia" subtitle={version.name} back />
+      <Header title={tx('Biblia')} subtitle={version.name} back />
       <Screen>
         {saved ? (
-          <Pressable onPress={() => go(prefs.book, prefs.chapter)} accessibilityRole="button" accessibilityLabel={`Seguir leyendo: ${bookName(prefs.book)} ${prefs.chapter}`}>
+          <Pressable onPress={() => go(prefs.book, prefs.chapter)} accessibilityRole="button" accessibilityLabel={tx('Seguir leyendo: {bookName} {chapter}', { bookName: bookName(prefs.book), chapter: prefs.chapter })}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.blueSoft }}>
               <Feather name="book-open" size={22} color={colors.blueText} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.blueText }}>SEGUIR LEYENDO</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 0.6, color: colors.blueText }}>{tx('SEGUIR LEYENDO')}</Text>
                 <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{bookName(prefs.book)}{BOOKS[prefs.book][1] === 1 ? '' : ` ${prefs.chapter}`}</Text>
               </View>
               <Feather name="chevron-right" size={20} color={colors.blueText} />
             </Card>
           </Pressable>
         ) : null}
-        <Pressable onPress={() => router.push({ pathname: '/biblia/buscar', params: { v: version.id } })} accessibilityRole="button" accessibilityLabel="Buscar en la Biblia">
+        <Pressable onPress={() => router.push({ pathname: '/biblia/buscar', params: { v: version.id } })} accessibilityRole="button" accessibilityLabel={tx('Buscar en la Biblia')}>
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="search" size={20} color={colors.blueText} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Buscar en la Biblia</Text>
-              <Text style={{ fontSize: 13, color: colors.muted }}>Una palabra, una frase o una cita como “{bookName(42)} 3:16”</Text>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Buscar en la Biblia')}</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Una palabra, una frase o una cita como “{bookName} 3:16”', { bookName: bookName(42) })}</Text>
             </View>
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Card>
         </Pressable>
-        <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel="Mis notas y resaltados">
+        <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel={tx('Mis notas y resaltados')}>
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="edit-3" size={20} color={colors.blueText} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Mis notas y resaltados</Text>
-              <Text style={{ fontSize: 13, color: colors.muted }}>Lo que marcaste y guardaste al leer</Text>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Mis notas y resaltados')}</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Lo que marcaste y guardaste al leer')}</Text>
             </View>
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Card>
         </Pressable>
         <BibleVersionChips value={version.id} onChange={pickVersion} />
-        <SectionTitle>Antiguo Testamento</SectionTitle>
+        <SectionTitle>{tx('Antiguo Testamento')}</SectionTitle>
         {books(0, OT_COUNT)}
-        <SectionTitle>Nuevo Testamento</SectionTitle>
+        <SectionTitle>{tx('Nuevo Testamento')}</SectionTitle>
         {books(OT_COUNT, BOOKS.length)}
-        <Pressable onPress={() => router.push('/biblia/textos')} accessibilityRole="button" accessibilityLabel="Acerca de los textos: de dónde sale cada Biblia" hitSlop={8}>
+        <Pressable onPress={() => router.push('/biblia/textos')} accessibilityRole="button" accessibilityLabel={tx('Acerca de los textos: de dónde sale cada Biblia')} hitSlop={8}>
           <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{version.notice}</Text>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.blueText, textAlign: 'center', marginTop: 4 }}>Acerca de los textos</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.blueText, textAlign: 'center', marginTop: 4 }}>{tx('Acerca de los textos')}</Text>
         </Pressable>
       </Screen>
     </View>

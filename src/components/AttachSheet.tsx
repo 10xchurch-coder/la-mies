@@ -4,6 +4,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, themed } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export type AttachItem = { key: string; label: string; icon: React.ComponentProps<typeof Feather>['name']; color: string; onPress: () => void };
 
@@ -11,7 +12,7 @@ export function AttachSheet({ visible, items, onClose }: { visible: boolean; ite
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.shade} onPress={onClose} accessibilityLabel="Cerrar">
+      <Pressable style={styles.shade} onPress={onClose} accessibilityLabel={tx('Cerrar')}>
         <Pressable onPress={() => undefined} style={[styles.sheet, { paddingBottom: insets.bottom + 18 }]}>
           <View style={styles.grab} />
           <View style={styles.grid}>

@@ -1,10 +1,11 @@
 // La imagen de un versículo que arma la persona: forma, letra, tamaño, color, y cómo se ve la foto de fondo.
 // Sin nada de la app, para poder probarse sola.
+import { tx } from './i18n';
 export type ArtShape = '1x1' | '3x4' | '9x16';
 export const ART_SHAPES: { id: ArtShape; label: string; w: number; h: number }[] = [
-  { id: '1x1', label: 'Cuadrada', w: 1440, h: 1440 },
-  { id: '3x4', label: 'Vertical', w: 1440, h: 1920 },
-  { id: '9x16', label: 'Para estados', w: 1440, h: 2560 },
+  { id: '1x1', get label() { return tx('Cuadrada'); }, w: 1440, h: 1440 },
+  { id: '3x4', get label() { return tx('Vertical'); }, w: 1440, h: 1920 },
+  { id: '9x16', get label() { return tx('Para estados'); }, w: 1440, h: 2560 },
 ];
 export const shapeOf = (id: string | undefined) => ART_SHAPES.find((s) => s.id === id) ?? ART_SHAPES[0];
 

@@ -11,12 +11,13 @@ import { KIND_LABEL, isRadio, sortLinks } from '@/lib/links';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchLink } from '@/types';
+import { tx } from '@/lib/i18n';
 
 function Stream({ link }: { link: ChurchLink }) {
   // El reproductor se crea recién cuando la persona toca "Escuchar", para no gastar datos antes.
   const [on, setOn] = useState(false);
   return on ? <Playing link={link} onStop={() => setOn(false)} /> : (
-    <Button title="Escuchar" icon="play" onPress={() => setOn(true)} />
+    <Button title={tx('Escuchar')} icon="play" onPress={() => setOn(true)} />
   );
 }
 
@@ -26,10 +27,10 @@ function Playing({ link, onStop }: { link: ChurchLink; onStop: () => void }) {
   useEffect(() => { try { player.play(); } catch { /* sin señal */ } return () => { try { player.pause(); } catch { /* ya cerrado */ } }; }, [player]);
   return (
     <View style={{ gap: 8 }}>
-      <Button title={st.playing ? 'Pausar' : 'Seguir escuchando'} icon={st.playing ? 'pause' : 'play'}
-        onPress={() => { try { st.playing ? player.pause() : player.play(); } catch { Alert.alert('No se pudo', 'Revisá tu conexión.'); } }} />
-      <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{st.isBuffering ? 'Conectando…' : st.playing ? 'Sonando en vivo' : 'En pausa'}</Text>
-      <Button title="Cerrar" variant="ghost" small onPress={onStop} />
+      <Button title={st.playing ? tx('Pausar') : tx('Seguir escuchando')} icon={st.playing ? 'pause' : 'play'}
+        onPress={() => { try { st.playing ? player.pause() : player.play(); } catch { Alert.alert(tx('No se pudo'), tx('Revisá tu conexión.')); } }} />
+      <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{st.isBuffering ? tx('Conectando…') : st.playing ? tx('Sonando en vivo') : tx('En pausa')}</Text>
+      <Button title={tx('Cerrar')} variant="ghost" small onPress={onStop} />
     </View>
   );
 }
@@ -43,11 +44,11 @@ export default function Radio() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Radio" subtitle="Escuchá la radio de la iglesia" back />
+      <Header title={tx('Radio')} subtitle={tx('Escuchá la radio de la iglesia')} back />
       <Screen>
-        {can('com.anuncios') ? <Button title="Editar la radio" icon="edit-2" variant="outline" onPress={() => router.push('/admin/radio' as Href)} /> : null}
+        {can('com.anuncios') ? <Button title={tx('Editar la radio')} icon="edit-2" variant="outline" onPress={() => router.push('/admin/radio' as Href)} /> : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="radio" title="La radio todavía no está lista" text="Cuando esté al aire, la vas a poder escuchar desde acá." />
+          <Empty icon="radio" title={tx('La radio todavía no está lista')} text={tx('Cuando esté al aire, la vas a poder escuchar desde acá.')} />
         ) : rows.map((l) => (
           <Card key={l.id} style={{ gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -62,7 +63,7 @@ export default function Radio() {
             {l.kind === 'radio_stream' && l.url ? <Stream link={l} /> : null}
             {l.kind !== 'radio_stream' && l.url ? (
               <Pressable accessibilityRole="link" onPress={() => Linking.openURL(l.url as string).catch(() => undefined)}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green }}>Abrir →</Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green }}>{tx('Abrir →')}</Text>
               </Pressable>
             ) : null}
           </Card>

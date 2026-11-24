@@ -5,6 +5,7 @@ import { demoBlocked } from './demo';
 import { supabase } from './supabase';
 import { downloadText } from './download';
 import { backupName, backupPlan, backupReadme, nextRange, rowsToCsv, zipFiles, type BackupResult, type BackupTable } from './backup';
+import { tx, txLocale } from './i18n';
 
 export type BackupProgress = { index: number; total: number; title: string; rows: number };
 type Row = Record<string, unknown>;
@@ -24,7 +25,7 @@ async function readAll(t: BackupTable, churchId: string, onRows: (n: number) => 
     out.push(...rows);
     last = rows.length;
     onRows(out.length);
-    if (out.length > 500000) throw new Error('Demasiadas filas');
+    if (out.length > 500000) throw new Error(tx('Demasiadas filas'));
   }
   // Por las dudas: si la tabla tiene la columna de la iglesia, no sale nada que no sea de esta iglesia.
   return out.filter((r) => !('church_id' in r) || r.church_id === churchId);
@@ -32,7 +33,7 @@ async function readAll(t: BackupTable, churchId: string, onRows: (n: number) => 
 
 /** Baja un archivo que no es texto (el ZIP). */
 async function downloadBytes(fileName: string, bytes: Uint8Array, mime: string): Promise<void> {
-  if (demoBlocked('Bajar la copia de los datos')) return;
+  if (demoBlocked(tx('Bajar la copia de los datos'))) return;
   if (Platform.OS === 'web') {
     const url = URL.createObjectURL(new Blob([bytes as unknown as BlobPart], { type: mime }));
     const a = document.createElement('a');
@@ -76,11 +77,11 @@ export async function runBackup(o: { churchId: string; churchName: string; who: 
   const day = new Date().toISOString().slice(0, 10);
   const base = backupName(o.churchName, day);
   const files = [
-    { name: 'LEEME.txt', text: backupReadme({ church: o.churchName, when: new Date().toLocaleString('es-AR'), who: o.who, results, finance: o.finance }) },
+    { name: 'LEEME.txt', text: backupReadme({ church: o.churchName, when: new Date().toLocaleString(txLocale()), who: o.who, results, finance: o.finance }) },
     ...data.filter((d) => !d.error).map((d) => ({ name: `${d.t.file}.csv`, text: rowsToCsv(d.rows, d.t.table === 'contacts' ? undefined : names) })),
   ];
   const total = results.reduce((a, r) => a + r.rows, 0);
-  o.onProgress({ index: plan.length, total: plan.length, title: 'Armando el archivo', rows: total });
+  o.onProgress({ index: plan.length, total: plan.length, title: tx('Armando el archivo'), rows: total });
   let zipped = true;
   try {
     await downloadBytes(`${base}.zip`, zipFiles(files), 'application/zip');

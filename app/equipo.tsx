@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { Profile, TeamLiveRow, TeamTotals } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Equipo() {
   const router = useRouter();
@@ -81,12 +82,12 @@ export default function Equipo() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
         back
-        title="Evangelismo en vivo"
-        subtitle={live.length ? `${live.length} ${live.length === 1 ? 'hermano' : 'hermanos'} en salida ahora` : 'Nadie está saliendo ahora'}
+        title={tx('Evangelismo en vivo')}
+        subtitle={live.length ? tx('{n} {pl} en salida ahora', { n: live.length, pl: live.length === 1 ? tx('hermano') : tx('hermanos') }) : tx('Nadie está saliendo ahora')}
         right={
           <Pressable onPress={() => router.push('/tablero')} accessibilityRole="button" style={styles.tablero}>
             <Feather name="award" size={16} color={colors.greenText} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>Tablero</Text>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>{tx('Tablero')}</Text>
           </Pressable>
         }
       />
@@ -96,58 +97,58 @@ export default function Equipo() {
             <CoverageMap roads={[]} coverage={[]} live={onMap} trails={trails} region={region} {...mapStyleProps(mapStyle)} onPressLive={(m) => liveMemberActions(m)} />
             <MapTypeButton style={mapStyle} onChange={setMapStyle} top={10} />
             {focus ? (
-              <Pressable onPress={() => setFocus(null)} accessibilityRole="button" accessibilityLabel="Ver a todos en el mapa" style={styles.allBtn}>
+              <Pressable onPress={() => setFocus(null)} accessibilityRole="button" accessibilityLabel={tx('Ver a todos en el mapa')} style={styles.allBtn}>
                 <Feather name="maximize" size={14} color={colors.greenText} />
-                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Ver a todos</Text>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>{tx('Ver a todos')}</Text>
               </Pressable>
             ) : null}
           </View>
         ) : null}
-        <SectionTitle right={live.length ? <Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>● Se actualiza solo</Text> : undefined}>En salida ahora</SectionTitle>
+        <SectionTitle right={live.length ? <Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>{tx('● Se actualiza solo')}</Text> : undefined}>{tx('En salida ahora')}</SectionTitle>
         {live.length ? (
           live.map((r, i) => (
             <Card key={r.user_id} style={styles.liveRow}>
               <Avatar name={r.display_name} color={trails.find((t) => t.id === r.session_id)?.color ?? TRAIL_COLORS[i % TRAIL_COLORS.length]} textColor="#FFFFFF" />
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
-                  {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
+                  {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>{tx('(vos)')}</Text> : null}
                 </Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>
-                  Salió {fmtTime(r.started_at)} · {fmtMinutes((Date.now() - new Date(r.started_at).getTime()) / 60000)} · {r.contacts} contactos · {r.presentations} evangelio · {r.promises} promesas
+                  {tx('Salió {fmtTime} · {fmtMinutes} · {contacts} contactos · {presentations} evangelio · {promises} promesas', { fmtTime: fmtTime(r.started_at), fmtMinutes: fmtMinutes((Date.now() - new Date(r.started_at).getTime()) / 60000), contacts: r.contacts, presentations: r.presentations, promises: r.promises })}
                 </Text>
               </View>
               {r.lat != null && r.lng != null ? (
-                <Pressable onPress={() => setFocus({ lat: r.lat as number, lng: r.lng as number })} accessibilityRole="button" accessibilityLabel={`Ver a ${r.display_name} en el mapa`} style={styles.iconBtn}>
+                <Pressable onPress={() => setFocus({ lat: r.lat as number, lng: r.lng as number })} accessibilityRole="button" accessibilityLabel={tx('Ver a {display_name} en el mapa', { display_name: r.display_name })} style={styles.iconBtn}>
                   <Feather name="crosshair" size={20} color={colors.green} />
                 </Pressable>
               ) : null}
             </Card>
           ))
         ) : (
-          <Empty icon="users" title="Nadie está en salida" text="Cuando alguien toque Iniciar salida, lo ves acá en el mapa, con lo que va haciendo. No hace falta que vos inicies una salida." />
+          <Empty icon="users" title={tx('Nadie está en salida')} text={tx('Cuando alguien toque Iniciar salida, lo ves acá en el mapa, con lo que va haciendo. No hace falta que vos inicies una salida.')} />
         )}
 
-        <SectionTitle right={<Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>● En vivo</Text>}>Salida de hoy · todo el equipo</SectionTitle>
+        <SectionTitle right={<Text style={{ fontSize: 11, fontWeight: '700', color: colors.greenText }}>{tx('● En vivo')}</Text>}>{tx('Salida de hoy · todo el equipo')}</SectionTitle>
         {totals ? (
           <View style={{ gap: 8 }}>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.members} label="Salieron" />
-              <Stat value={fmtMinutes(totals.minutes)} label="Horas (entre todos)" />
-              <Stat value={fmtDistance(Number(totals.km) * 1000)} label="Caminados" />
+              <Stat value={totals.members} label={tx('Salieron')} />
+              <Stat value={fmtMinutes(totals.minutes)} label={tx('Horas (entre todos)')} />
+              <Stat value={fmtDistance(Number(totals.km) * 1000)} label={tx('Caminados')} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.houses ?? '—'} label="Casas" tone="blue" />
-              <Stat value={totals.contacts} label="Contactos" />
+              <Stat value={totals.houses ?? '—'} label={tx('Casas')} tone="blue" />
+              <Stat value={totals.contacts} label={tx('Contactos')} />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.presentations} label="Evangelio presentado" tone="green" />
-              <Stat value={totals.promises} label="Promesas" tone="amber" />
+              <Stat value={totals.presentations} label={tx('Evangelio presentado')} tone="green" />
+              <Stat value={totals.promises} label={tx('Promesas')} tone="amber" />
             </View>
           </View>
         ) : null}
 
-        <SectionTitle right={group ? <Text style={{ fontSize: 12, fontWeight: '600', color: colors.muted }}>{members.find((m) => m.id === (group.captain_id ?? ''))?.display_name ? `Capitán: ${members.find((m) => m.id === group.captain_id)?.display_name}` : ''}</Text> : undefined}>
-          {group ? `Mi ${gw.toLowerCase()} · ${group.name}` : 'Mi iglesia'}
+        <SectionTitle right={group ? <Text style={{ fontSize: 12, fontWeight: '600', color: colors.muted }}>{members.find((m) => m.id === (group.captain_id ?? ''))?.display_name ? tx('Capitán: {display_name}', { display_name: members.find((m) => m.id === group.captain_id)?.display_name }) : ''}</Text> : undefined}>
+          {group ? tx('Mi {gw} · {name}', { gw: gw.toLowerCase(), name: group.name }) : tx('Mi iglesia')}
         </SectionTitle>
         <Card style={{ padding: 0 }}>
           {mine.length ? (
@@ -156,14 +157,14 @@ export default function Equipo() {
                 <Avatar name={m.display_name} size={36} color={colors.bgSoft} textColor={colors.text} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
-                    {m.display_name} {m.role !== 'member' ? <Text style={{ fontSize: 11, color: colors.blueText }}>{m.role === 'admin' ? ' · Administrador' : ' · Capitán'}</Text> : null}
+                    {m.display_name} {m.role !== 'member' ? <Text style={{ fontSize: 11, color: colors.blueText }}>{m.role === 'admin' ? tx(' · Administrador') : tx(' · Capitán')}</Text> : null}
                   </Text>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>{live.some((l) => l.user_id === m.id) ? 'En salida ahora' : m.phone ?? ''}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{live.some((l) => l.user_id === m.id) ? tx('En salida ahora') : m.phone ?? ''}</Text>
                 </View>
               </View>
             ))
           ) : (
-            <Text style={{ padding: 14, color: colors.muted, fontSize: 13 }}>Todavía no hay más hermanos en tu {gw.toLowerCase()}.</Text>
+            <Text style={{ padding: 14, color: colors.muted, fontSize: 13 }}>{tx('Todavía no hay más hermanos en tu {gw}.', { gw: gw.toLowerCase() })}</Text>
           )}
         </Card>
       </Screen>

@@ -8,6 +8,7 @@ import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { File } from 'expo-file-system';
 import { supabase, errorMessage } from './supabase';
 import { cropPhoto } from '@/components/PhotoCropper';
+import { tx } from './i18n';
 
 export type Bucket = 'photos' | 'materials' | 'sermons' | 'finance' | 'chat' | 'missionaries' | 'present';
 export const MAX_FILE_BYTES = 50 * 1024 * 1024; // límite del plan gratuito de Supabase
@@ -59,23 +60,23 @@ async function localCopy(bucket: Bucket, path: string): Promise<string | null> {
  */
 export async function pickAndUploadPhoto(churchId: string, o: { free?: boolean; width?: number; current?: string | null } = {}): Promise<string | null> {
   const source = await new Promise<'camera' | 'library' | 'current' | null>((resolve) => {
-    Alert.alert('Foto', '¿De dónde sacamos la foto?', [
-      { text: 'Sacar foto', onPress: () => resolve('camera') },
-      { text: 'Elegir de la galería', onPress: () => resolve('library') },
-      ...(o.current && !o.free ? [{ text: 'Acomodar la foto actual', onPress: () => resolve('current' as const) }] : []),
-      { text: 'Cancelar', style: 'cancel' as const, onPress: () => resolve(null) },
+    Alert.alert(tx('Foto'), tx('¿De dónde sacamos la foto?'), [
+      { text: tx('Sacar foto'), onPress: () => resolve('camera') },
+      { text: tx('Elegir de la galería'), onPress: () => resolve('library') },
+      ...(o.current && !o.free ? [{ text: tx('Acomodar la foto actual'), onPress: () => resolve('current' as const) }] : []),
+      { text: tx('Cancelar'), style: 'cancel' as const, onPress: () => resolve(null) },
     ]);
   });
   if (!source) return null;
   if (source === 'current') {
     const uri = o.current ? await localCopy('photos', o.current) : null;
-    if (!uri) { Alert.alert('No se pudo abrir la foto actual'); return null; }
+    if (!uri) { Alert.alert(tx('No se pudo abrir la foto actual')); return null; }
     const done = await cropAndShrink(uri, 0, 0, o.width ?? 640);
     return done ? upload('photos', churchId, done, 'foto.jpg', 'image/jpeg') : null;
   }
   const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
-    Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
+    Alert.alert(tx('Sin permiso'), source === 'camera' ? tx('Activá el permiso de cámara en Ajustes del teléfono.') : tx('Activá el permiso de fotos en Ajustes del teléfono.'));
     return null;
   }
   const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: o.free ? 0.85 : 0.9 };
@@ -101,7 +102,7 @@ export async function pickDocument(kind: 'audio' | 'any'): Promise<PickedFile | 
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
   if (a.size && a.size > MAX_FILE_BYTES) {
-    Alert.alert('Archivo muy grande', 'El máximo es 50 MB. Para audios largos, exportalo en MP3 a 64 kbps (una hora pesa unos 28 MB).');
+    Alert.alert(tx('Archivo muy grande'), tx('El máximo es 50 MB. Para audios largos, exportalo en MP3 a 64 kbps (una hora pesa unos 28 MB).'));
     return null;
   }
   return { uri: a.uri, name: a.name, size: a.size ?? null, mimeType: a.mimeType ?? 'application/octet-stream' };
@@ -168,11 +169,11 @@ export type FinPhoto = { path: string; name: string };
 /** Saca o elige la foto del recibo / pantalla del banco (o un PDF) y la sube a finance/<iglesia>/<AAAA-MM>/. */
 export async function pickAndUploadReceipt(churchId: string, month: string, label: string): Promise<FinPhoto | null> {
   const source = await new Promise<'camera' | 'library' | 'file' | null>((resolve) => {
-    Alert.alert(label, '¿De dónde?', [
-      { text: 'Sacar foto', onPress: () => resolve('camera') },
-      { text: 'Elegir de la galería', onPress: () => resolve('library') },
-      { text: 'Archivo (PDF)', onPress: () => resolve('file') },
-      { text: 'Cancelar', style: 'cancel', onPress: () => resolve(null) },
+    Alert.alert(label, tx('¿De dónde?'), [
+      { text: tx('Sacar foto'), onPress: () => resolve('camera') },
+      { text: tx('Elegir de la galería'), onPress: () => resolve('library') },
+      { text: tx('Archivo (PDF)'), onPress: () => resolve('file') },
+      { text: tx('Cancelar'), style: 'cancel', onPress: () => resolve(null) },
     ]);
   });
   if (!source) return null;
@@ -180,7 +181,7 @@ export async function pickAndUploadReceipt(churchId: string, month: string, labe
   if (source === 'file') {
     const f = await pickDocument('any');
     if (!f) return null;
-    if (f.size && f.size > 15 * 1024 * 1024) { Alert.alert('Archivo muy grande', 'El máximo es 15 MB.'); return null; }
+    if (f.size && f.size > 15 * 1024 * 1024) { Alert.alert(tx('Archivo muy grande'), tx('El máximo es 15 MB.')); return null; }
     const path = `${folder}/${randomId()}-${safeName(f.name)}`;
     const body = Platform.OS === 'web' ? await (await fetch(f.uri)).arrayBuffer() : await new File(f.uri).arrayBuffer();
     const { error } = await supabase.storage.from('finance').upload(path, body, { contentType: f.mimeType, upsert: false });
@@ -189,7 +190,7 @@ export async function pickAndUploadReceipt(churchId: string, month: string, labe
   }
   const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
-    Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
+    Alert.alert(tx('Sin permiso'), source === 'camera' ? tx('Activá el permiso de cámara en Ajustes del teléfono.') : tx('Activá el permiso de fotos en Ajustes del teléfono.'));
     return null;
   }
   const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: 0.9 };
@@ -224,7 +225,7 @@ export async function uploadChatVoice(churchId: string, uri: string): Promise<Ch
 export async function pickChatImage(churchId: string, source: 'camera' | 'library'): Promise<ChatAttachment | null> {
   const perm = source === 'camera' ? await ImagePicker.requestCameraPermissionsAsync() : await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!perm.granted) {
-    Alert.alert('Sin permiso', source === 'camera' ? 'Activá el permiso de cámara en Ajustes del teléfono.' : 'Activá el permiso de fotos en Ajustes del teléfono.');
+    Alert.alert(tx('Sin permiso'), source === 'camera' ? tx('Activá el permiso de cámara en Ajustes del teléfono.') : tx('Activá el permiso de fotos en Ajustes del teléfono.'));
     return null;
   }
   const opts: ImagePicker.ImagePickerOptions = { mediaTypes: ['images'], allowsEditing: false, quality: 0.9 };
@@ -233,7 +234,7 @@ export async function pickChatImage(churchId: string, source: 'camera' | 'librar
   const a = res.assets[0];
   const isGif = a.mimeType === 'image/gif' || /\.gif$/i.test(a.fileName ?? a.uri);
   if (isGif) {
-    if (a.fileSize && a.fileSize > CHAT_MAX_BYTES) { Alert.alert('GIF muy grande', 'El máximo es 15 MB.'); return null; }
+    if (a.fileSize && a.fileSize > CHAT_MAX_BYTES) { Alert.alert(tx('GIF muy grande'), tx('El máximo es 15 MB.')); return null; }
     const path = await upload('chat', churchId, a.uri, a.fileName ?? 'animacion.gif', 'image/gif');
     return { path, name: a.fileName ?? 'animacion.gif', size: a.fileSize ?? 0, kind: 'image' };
   }
@@ -254,19 +255,19 @@ export async function pickChatDocument(churchId: string): Promise<ChatAttachment
   });
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
-  if (a.size && a.size > CHAT_MAX_BYTES) { Alert.alert('Archivo muy grande', 'El máximo es 15 MB.'); return null; }
+  if (a.size && a.size > CHAT_MAX_BYTES) { Alert.alert(tx('Archivo muy grande'), tx('El máximo es 15 MB.')); return null; }
   const path = await upload('chat', churchId, a.uri, a.name, a.mimeType ?? 'application/octet-stream');
   return { path, name: a.name, size: a.size ?? 0, kind: 'file' };
 }
 
 // ---------- Misioneros: foto, PDF del informe y fotos del mes ----------
-const BIG = { title: '1 de 2: la foto grande', hint: 'Así se ve arriba en el perfil del misionero.' };
-const CIRCLE = { title: '2 de 2: el círculo', hint: 'Así se ve en la lista. Acercala para que se vean bien las caras.' };
+const BIG = { get title() { return tx('1 de 2: la foto grande'); }, get hint() { return tx('Así se ve arriba en el perfil del misionero.'); } };
+const CIRCLE = { get title() { return tx('2 de 2: el círculo'); }, get hint() { return tx('Así se ve en la lista. Acercala para que se vean bien las caras.'); } };
 
 /** Foto del misionero: primero la grande del perfil, después el círculo de la lista (de la misma foto). */
 export async function pickMissionaryPhoto(churchId: string): Promise<{ photo: string; thumb: string | null } | null> {
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
+  if (!perm.granted) { Alert.alert(tx('Sin permiso'), tx('Activá el permiso de fotos en Ajustes del teléfono.')); return null; }
   const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.9 });
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
@@ -281,8 +282,8 @@ export async function pickMissionaryPhoto(churchId: string): Promise<{ photo: st
 /** Volver a acomodar solo el círculo, a partir de la foto grande que ya está. */
 export async function adjustMissionaryThumb(churchId: string, photoPath: string): Promise<string | null> {
   const uri = await localCopy('missionaries', photoPath);
-  if (!uri) { Alert.alert('No se pudo abrir la foto'); return null; }
-  const small = await cropAndShrink(uri, 0, 0, 400, true, 1, { title: 'El círculo', hint: CIRCLE.hint });
+  if (!uri) { Alert.alert(tx('No se pudo abrir la foto')); return null; }
+  const small = await cropAndShrink(uri, 0, 0, 400, true, 1, { title: tx('El círculo'), hint: CIRCLE.hint });
   return small ? upload('missionaries', churchId, small, 'misionero-circulo.jpg', 'image/jpeg') : null;
 }
 
@@ -291,7 +292,7 @@ export async function pickMissionaryPdf(churchId: string): Promise<{ path: strin
   const res = await DocumentPicker.getDocumentAsync({ type: ['application/pdf'], copyToCacheDirectory: true, multiple: false });
   if (res.canceled || !res.assets?.[0]) return null;
   const a = res.assets[0];
-  if (a.size && a.size > 25 * 1024 * 1024) { Alert.alert('Archivo muy grande', 'El PDF pesa más de 25 MB. Probá achicarlo antes de subirlo.'); return null; }
+  if (a.size && a.size > 25 * 1024 * 1024) { Alert.alert(tx('Archivo muy grande'), tx('El PDF pesa más de 25 MB. Probá achicarlo antes de subirlo.')); return null; }
   const path = await upload('missionaries', churchId, a.uri, a.name, 'application/pdf');
   return { path, name: a.name };
 }
@@ -300,7 +301,7 @@ export async function pickMissionaryPdf(churchId: string): Promise<{ path: strin
 export async function pickMissionaryPhotos(churchId: string, max: number): Promise<string[]> {
   if (max <= 0) return [];
   const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return []; }
+  if (!perm.granted) { Alert.alert(tx('Sin permiso'), tx('Activá el permiso de fotos en Ajustes del teléfono.')); return []; }
   const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsMultipleSelection: true, selectionLimit: max, quality: 0.9 });
   if (res.canceled || !res.assets?.length) return [];
   const out: string[] = [];
@@ -329,11 +330,11 @@ const PRESENT_TEXT = {
 /** Elige una foto, un video o un audio (hasta 50 MB) y lo sube al depósito de la presentación. Null si canceló. */
 export async function pickPresentMedia(churchId: string, kind: 'image' | 'video' | 'audio'): Promise<{ path: string; name: string } | null> {
   const t = PRESENT_TEXT[kind];
-  const tooBig = () => Alert.alert('Archivo muy grande', `${t.word} pesa más de 50 MB. Probá con uno más corto o más liviano.`);
+  const tooBig = () => Alert.alert(tx('Archivo muy grande'), tx('{word} pesa más de 50 MB. Probá con uno más corto o más liviano.', { word: tx(t.word) }));
   // En el teléfono o la tablet, las fotos y los videos salen de la galería.
   if (Platform.OS !== 'web' && kind !== 'audio') {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { Alert.alert('Sin permiso', 'Activá el permiso de fotos en Ajustes del teléfono.'); return null; }
+    if (!perm.granted) { Alert.alert(tx('Sin permiso'), tx('Activá el permiso de fotos en Ajustes del teléfono.')); return null; }
     const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: [kind === 'image' ? 'images' : 'videos'], allowsEditing: false, quality: 0.9 });
     if (res.canceled || !res.assets?.[0]) return null;
     const a = res.assets[0];
@@ -352,7 +353,7 @@ export async function pickPresentMedia(churchId: string, kind: 'image' | 'video'
   const a = res.assets[0];
   if (a.size && a.size > MAX_FILE_BYTES) { tooBig(); return null; }
   const mime = a.mimeType ?? '';
-  if (!mime.startsWith(`${kind}/`)) { Alert.alert('Ese archivo no sirve', kind === 'image' ? 'Elegí una foto.' : kind === 'video' ? 'Elegí un video (MP4 anda en todos lados).' : 'Elegí un audio (MP3 anda en todos lados).'); return null; }
+  if (!mime.startsWith(`${kind}/`)) { Alert.alert(tx('Ese archivo no sirve'), kind === 'image' ? tx('Elegí una foto.') : kind === 'video' ? tx('Elegí un video (MP4 anda en todos lados).') : tx('Elegí un audio (MP3 anda en todos lados).')); return null; }
   return { path: await upload('present', churchId, a.uri, a.name, mime), name: a.name };
 }
 

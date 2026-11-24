@@ -10,6 +10,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { PastorMessage } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function PastorHilo() {
   const { profile } = useAuth();
@@ -45,27 +46,27 @@ export default function PastorHilo() {
       setBody('');
       load();
     } catch (e) {
-      Alert.alert('No se pudo enviar', errorMessage(e));
+      Alert.alert(tx('No se pudo enviar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
   };
 
-  const title = isPastor ? name || 'Mensajes' : 'Escribile al pastor';
+  const title = isPastor ? name || tx('Mensajes') : tx('Escribile al pastor');
   let lastDay = '';
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={title} subtitle={isPastor ? 'Conversación privada' : 'Solo el pastor lee esto'} back />
+      <Header title={title} subtitle={isPastor ? tx('Conversación privada') : tx('Solo el pastor lee esto')} back />
       <Screen>
         {!isPastor ? (
           <Card style={{ backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
             <Text style={{ fontSize: 13, color: colors.greenText, lineHeight: 19 }}>
-              Lo que escribas acá le llega solo al pastor. No lo ve nadie más: ni la secretaría ni los demás hermanos.
+              {tx('Lo que escribas acá le llega solo al pastor. No lo ve nadie más: ni la secretaría ni los demás hermanos.')}
             </Text>
           </Card>
         ) : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="message-circle" title={isPastor && !target ? 'Elegí una conversación' : 'Todavía no hay mensajes'} text={isPastor ? undefined : 'Escribí lo que quieras contarle o preguntarle al pastor.'} />
+          <Empty icon="message-circle" title={isPastor && !target ? tx('Elegí una conversación') : tx('Todavía no hay mensajes')} text={isPastor ? undefined : tx('Escribí lo que quieras contarle o preguntarle al pastor.')} />
         ) : null}
         {(rows ?? []).map((m) => {
           const day = fmtRelativeDay(m.created_at);
@@ -85,8 +86,8 @@ export default function PastorHilo() {
         })}
         {!isPastor || target ? (
           <Card style={{ gap: 10 }}>
-            <Field label={isPastor ? 'Tu respuesta' : 'Tu mensaje'} value={body} onChangeText={setBody} multiline maxLength={2000} placeholder="Escribí acá…" />
-            <Button title="Enviar" icon="send" onPress={send} loading={busy} disabled={!body.trim()} />
+            <Field label={isPastor ? tx('Tu respuesta') : tx('Tu mensaje')} value={body} onChangeText={setBody} multiline maxLength={2000} placeholder={tx('Escribí acá…')} />
+            <Button title={tx('Enviar')} icon="send" onPress={send} loading={busy} disabled={!body.trim()} />
           </Card>
         ) : null}
       </Screen>

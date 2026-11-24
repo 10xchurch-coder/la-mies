@@ -9,13 +9,14 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Giving } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const FIELDS: { key: keyof Giving; label: string; hint?: string }[] = [
-  { key: 'alias', label: 'Alias' },
-  { key: 'cbu', label: 'CBU / CVU' },
-  { key: 'titular', label: 'Titular' },
-  { key: 'cuit', label: 'CUIT' },
-  { key: 'banco', label: 'Banco' },
+  { key: 'alias', get label() { return tx('Alias'); } },
+  { key: 'cbu', get label() { return tx('CBU / CVU'); } },
+  { key: 'titular', get label() { return tx('Titular'); } },
+  { key: 'cuit', get label() { return tx('CUIT'); } },
+  { key: 'banco', get label() { return tx('Banco'); } },
 ];
 
 export default function Dar() {
@@ -39,7 +40,7 @@ export default function Dar() {
     const clean = Object.fromEntries(Object.entries(form).map(([k, v]) => [k, (v ?? '').trim()]).filter(([, v]) => v));
     const { error } = await supabase.from('churches').update({ giving: clean }).eq('id', church.id);
     setBusy(false);
-    if (error) Alert.alert('No se pudo guardar', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo guardar'), errorMessage(error));
     else {
       await refreshProfile();
       setEditing(false);
@@ -48,21 +49,21 @@ export default function Dar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Ofrendar" subtitle={church?.name} back />
+      <Header title={tx('Ofrendar')} subtitle={church?.name} back />
       <Screen>
         {editing ? (
           <>
             {FIELDS.map((f) => (
               <Field key={f.key} label={f.label} value={form[f.key] ?? ''} onChangeText={(t) => setForm({ ...form, [f.key]: t })} autoCapitalize={f.key === 'titular' || f.key === 'banco' ? 'words' : 'none'} />
             ))}
-            <Field label="Nota" hint="(opcional, ej: poné tu nombre en la referencia)" value={form.nota ?? ''} onChangeText={(t) => setForm({ ...form, nota: t })} multiline />
-            <Button title="Guardar" onPress={save} loading={busy} />
-            <Button title="Cancelar" variant="ghost" onPress={() => setEditing(false)} />
+            <Field label={tx('Nota')} hint={tx('(opcional, ej: poné tu nombre en la referencia)')} value={form.nota ?? ''} onChangeText={(t) => setForm({ ...form, nota: t })} multiline />
+            <Button title={tx('Guardar')} onPress={save} loading={busy} />
+            <Button title={tx('Cancelar')} variant="ghost" onPress={() => setEditing(false)} />
           </>
         ) : has ? (
           <>
             <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }}>
-              Podés ofrendar por transferencia. Tocá un dato para copiarlo y pegalo en la app de tu banco o billetera.
+              {tx('Podés ofrendar por transferencia. Tocá un dato para copiarlo y pegalo en la app de tu banco o billetera.')}
             </Text>
             <Card style={{ padding: 0 }}>
               {FIELDS.filter((f) => g[f.key]).map((f, i, arr) => {
@@ -77,12 +78,12 @@ export default function Dar() {
                 );
                 if (!copyable) return <View key={f.key} style={[rowStyle, { backgroundColor: colors.bg }]}>{value}</View>;
                 return (
-                  <Pressable key={f.key} onPress={() => copy(f.key, g[f.key] as string)} accessibilityRole="button" accessibilityLabel={`Copiar ${f.label}`}
+                  <Pressable key={f.key} onPress={() => copy(f.key, g[f.key] as string)} accessibilityRole="button" accessibilityLabel={tx('Copiar {label}', { label: f.label })}
                     style={({ pressed }) => [rowStyle, { backgroundColor: pressed ? colors.bgSoft : colors.bg }]}>
                     {value}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: 999, backgroundColor: copied === f.key ? colors.green : colors.greenSoft }}>
                       <Feather name={copied === f.key ? 'check' : 'copy'} size={16} color={copied === f.key ? '#FFF' : colors.greenText} />
-                      <Text style={{ fontSize: 13, fontWeight: '800', color: copied === f.key ? '#FFF' : colors.greenText }}>{copied === f.key ? 'Copiado' : 'Copiar'}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: copied === f.key ? '#FFF' : colors.greenText }}>{copied === f.key ? tx('Copiado') : tx('Copiar')}</Text>
                     </View>
                   </Pressable>
                 );
@@ -90,13 +91,13 @@ export default function Dar() {
             </Card>
             {g.nota ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{g.nota}</Text> : null}
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19, fontStyle: 'italic' }}>
-              “Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.” 2 Corintios 9:7
+              {tx('“Cada uno dé como propuso en su corazón: no con tristeza, ni por necesidad, porque Dios ama al dador alegre.” 2 Corintios 9:7')}
             </Text>
           </>
         ) : (
-          <Empty icon="gift" title="Todavía no están los datos" text={isStaff ? 'Tocá Cargar datos para poner el alias y el CBU de la iglesia.' : 'El pastor o la secretaría los van a cargar pronto.'} />
+          <Empty icon="gift" title={tx('Todavía no están los datos')} text={isStaff ? tx('Tocá Cargar datos para poner el alias y el CBU de la iglesia.') : tx('El pastor o la secretaría los van a cargar pronto.')} />
         )}
-        {isStaff && !editing ? <Button title={has ? 'Cambiar datos' : 'Cargar datos'} variant="outline" icon="edit-2" onPress={() => { setForm(church?.giving ?? {}); setEditing(true); }} /> : null}
+        {isStaff && !editing ? <Button title={has ? tx('Cambiar datos') : tx('Cargar datos')} variant="outline" icon="edit-2" onPress={() => { setForm(church?.giving ?? {}); setEditing(true); }} /> : null}
       </Screen>
     </View>
   );

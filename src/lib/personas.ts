@@ -5,6 +5,7 @@
 // ---------- Lecciones ----------
 
 /** Nombre del curso de discipulado si la iglesia no escribió el suyo. */
+import { tx } from './i18n';
 export const DEFAULT_COURSE = 'Discipulado';
 /** Lecciones de la clase de miembros si la iglesia no escribió las suyas (son 4: la base cuenta lo mismo). */
 export const DEFAULT_MEMBER_LESSONS = ['La salvación y el bautismo', 'Qué es la iglesia', 'Lo que creemos', 'Cómo vivimos y servimos'];
@@ -14,7 +15,7 @@ export const MAX_LESSONS = 20;
 /** Los nombres de las lecciones del curso: los que guardó la iglesia y, donde falta, "Lección 3". Siempre `total` nombres. */
 export function lessonNames(saved: readonly (string | null | undefined)[] | null | undefined, total: number): string[] {
   const n = Math.max(0, Math.min(MAX_LESSONS, Math.floor(total) || 0));
-  return Array.from({ length: n }, (_, i) => (saved?.[i] ?? '').trim() || `Lección ${i + 1}`);
+  return Array.from({ length: n }, (_, i) => (saved?.[i] ?? '').trim() || tx('Lección {v1}', { v1: i + 1 }));
 }
 
 /** Las lecciones de la clase de miembros: las de la iglesia o las de siempre. */
@@ -26,11 +27,11 @@ export function memberLessons(saved: readonly (string | null | undefined)[] | nu
 /** Lo que se escribió en la pantalla de lecciones, listo para guardar. Devuelve el problema si hay uno. */
 export function cleanLessons(names: readonly string[]): { ok: true; names: string[] } | { ok: false; problem: string } {
   const list = names.map((s) => s.trim());
-  if (!list.length) return { ok: false, problem: 'Tiene que haber al menos una lección.' };
-  if (list.length > MAX_LESSONS) return { ok: false, problem: `Pueden ser hasta ${MAX_LESSONS} lecciones.` };
+  if (!list.length) return { ok: false, problem: tx('Tiene que haber al menos una lección.') };
+  if (list.length > MAX_LESSONS) return { ok: false, problem: tx('Pueden ser hasta {MAX_LESSONS} lecciones.', { MAX_LESSONS }) };
   const empty = list.findIndex((s) => !s);
-  if (empty >= 0) return { ok: false, problem: `A la lección ${empty + 1} le falta el nombre.` };
-  if (list.some((s) => s.length > 80)) return { ok: false, problem: 'Cada nombre puede tener hasta 80 letras.' };
+  if (empty >= 0) return { ok: false, problem: tx('A la lección {v1} le falta el nombre.', { v1: empty + 1 }) };
+  if (list.some((s) => s.length > 80)) return { ok: false, problem: tx('Cada nombre puede tener hasta 80 letras.') };
   return { ok: true, names: list };
 }
 
@@ -71,10 +72,10 @@ export function isStale(lastMet: string | null | undefined, startedOn: string | 
 
 /** "hoy", "ayer", "hace 5 días". */
 export function agoText(days: number | null): string {
-  if (days === null) return 'todavía no';
+  if (days === null) return tx('todavía no');
   if (days === 0) return 'hoy';
-  if (days === 1) return 'ayer';
-  return `hace ${days} días`;
+  if (days === 1) return tx('ayer');
+  return tx('hace {days} días', { days });
 }
 
 export type DiscRow = {
@@ -99,7 +100,7 @@ export function sortDisciples<T extends Pick<DiscRow, 'name' | 'last_met' | 'sta
 export type DecisionKind = 'saved' | 'baptized' | 'member' | 'rededicated';
 export const DECISION_KINDS: DecisionKind[] = ['saved', 'baptized', 'member', 'rededicated'];
 export const DECISION_LABEL: Record<DecisionKind, string> = {
-  saved: 'Fue salvo', baptized: 'Se bautizó', member: 'Se hizo miembro', rededicated: 'Se reconcilió con Dios',
+  get saved() { return tx('Fue salvo'); }, get baptized() { return tx('Se bautizó'); }, get member() { return tx('Se hizo miembro'); }, get rededicated() { return tx('Se reconcilió con Dios'); },
 };
 
 /** Lo que devuelve la base al anotar una decisión: cómo quedó la persona. */
@@ -173,9 +174,9 @@ export function visitUrl(base: string, token: string): string {
 /** ¿Qué le falta al nombre? (null si está bien). Los mismos controles que hace la base. */
 export function nameProblem(name: string): string | null {
   const s = name.trim().replace(/\s+/g, ' ');
-  if (s.length < 3 || !/\p{L}{2}/u.test(s)) return 'Escribí tu nombre y apellido.';
-  if (s.length > 80) return 'El nombre es muy largo.';
-  if (/https?:|www\.|[<>@]/i.test(s)) return 'Escribí solo tu nombre y apellido.';
+  if (s.length < 3 || !/\p{L}{2}/u.test(s)) return tx('Escribí tu nombre y apellido.');
+  if (s.length > 80) return tx('El nombre es muy largo.');
+  if (/https?:|www\.|[<>@]/i.test(s)) return tx('Escribí solo tu nombre y apellido.');
   return null;
 }
 

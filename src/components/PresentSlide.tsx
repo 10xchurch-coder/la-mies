@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Image, Platform, Pressable, Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { clock, fitFont, type LiveSlide, type LiveState } from '@/lib/present';
+import { tx } from '@/lib/i18n';
 
 type Props = {
   live: LiveState;
@@ -78,7 +79,7 @@ function WebVideo({ slide }: { slide: Extract<LiveSlide, { kind: 'video' }> }) {
       {muted ? (
         <Pressable onPress={unmute} accessibilityRole="button" style={{ position: 'absolute', left: 0, right: 0, bottom: 24, alignItems: 'center' }}>
           <Text style={{ color: '#000', backgroundColor: '#FFD54A', fontSize: 18, fontWeight: '800', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10, overflow: 'hidden' }}>
-            Tocá acá para prender el sonido
+            {tx('Tocá acá para prender el sonido')}
           </Text>
         </Pressable>
       ) : null}
@@ -105,7 +106,7 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
         {logoUrl ? (
           <Image source={{ uri: logoUrl }} style={{ width: width * 0.5, height: height * 0.5 }} resizeMode="contain" />
         ) : (
-          <Text style={{ color: WHITE, fontSize: fitFont(churchName || 'La Mies', width * 0.8, height * 0.5, height / 7), fontWeight: '800', textAlign: 'center' }}>{churchName || 'La Mies'}</Text>
+          <Text style={{ color: WHITE, fontSize: fitFont(churchName || tx('La Mies'), width * 0.8, height * 0.5, height / 7), fontWeight: '800', textAlign: 'center' }}>{churchName || tx('La Mies')}</Text>
         )}
       </View>
     );
@@ -115,13 +116,13 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
     return <View style={box}><Image source={{ uri: s.url }} style={{ width, height }} resizeMode="contain" /></View>;
   }
   if (s.kind === 'video') {
-    if (!output) return <View style={box}><Note icon="film" text={s.playing ? 'Video en pantalla' : 'Video en pausa'} height={height} /></View>;
+    if (!output) return <View style={box}><Note icon="film" text={s.playing ? tx('Video en pantalla') : tx('Video en pausa')} height={height} /></View>;
     // En la tablet y el teléfono la app todavía no puede reproducir videos: se avisa claro, sin asustar a la iglesia.
     if (Platform.OS !== 'web') {
       return (
         <View style={box}>
           <Note icon="film" big height={height}
-            text={'Acá va un video.\nEn la tablet o el teléfono todavía no se pueden ver.\nPara mostrarlo, abrí la pantalla de salida en una computadora (en el navegador).'} />
+            text={tx('Acá va un video.\nEn la tablet o el teléfono todavía no se pueden ver.\nPara mostrarlo, abrí la pantalla de salida en una computadora (en el navegador).')} />
         </View>
       );
     }

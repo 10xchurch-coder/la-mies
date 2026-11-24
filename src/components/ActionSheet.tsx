@@ -5,6 +5,7 @@ import { ActionSheetIOS, Modal, Platform, Pressable, ScrollView, Text, View } fr
 import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export type SheetAction = { text: string; onPress?: () => void; icon?: React.ComponentProps<typeof Feather>['name']; destructive?: boolean; hint?: string };
 type Req = { title: string; message?: string; actions: SheetAction[] };
@@ -63,7 +64,7 @@ export function ActionSheetHost() {
               </Pressable>
             ))}
             <Pressable accessibilityRole="button" onPress={close} style={{ paddingVertical: 14, alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border }}>
-              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.muted }}>Cancelar</Text>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: colors.muted }}>{tx('Cancelar')}</Text>
             </Pressable>
           </ScrollView>
         </Pressable>

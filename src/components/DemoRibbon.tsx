@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/store/auth';
 import { DEMO_CONTACT_URL, DEMO_MESSAGE, DEMO_SIGNUP_ROUTE, demoViewOfSession, enterDemo, isDemoSession, leaveDemo, onDemoFlash, type DemoView } from '@/lib/demo';
+import { tx } from '@/lib/i18n';
 
 /** ¿Ya existe la página para empezar? Se mira al armar la app; si todavía no está, el botón abre un correo. */
 function signupExists(): boolean {
@@ -67,9 +68,9 @@ export function DemoRibbon() {
   if (small) {
     return (
       <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, styles.holder, { paddingBottom: lift, alignItems: 'flex-end', paddingRight: 10 }]}>
-        <Pressable onPress={() => setSmall(false)} accessibilityRole="button" accessibilityLabel="Mostrar la cinta de la demostración" style={styles.pill}>
+        <Pressable onPress={() => setSmall(false)} accessibilityRole="button" accessibilityLabel={tx('Mostrar la cinta de la demostración')} style={styles.pill}>
           <Feather name="eye" size={15} color="#FFF" />
-          <Text style={styles.pillText}>Iglesia de ejemplo</Text>
+          <Text style={styles.pillText}>{tx('Iglesia de ejemplo')}</Text>
         </Pressable>
       </View>
     );
@@ -79,8 +80,8 @@ export function DemoRibbon() {
       <View style={[styles.card, flash && styles.cardFlash, { maxWidth: narrow ? width - 16 : 640 }]} accessibilityRole="summary">
         <View style={styles.row}>
           <Feather name={flash ? 'lock' : 'eye'} size={16} color="#FFF" />
-          <Text style={styles.title} numberOfLines={2}>{flash ? DEMO_MESSAGE : 'Estás viendo una iglesia de ejemplo'}</Text>
-          <Pressable onPress={() => setSmall(true)} accessibilityRole="button" accessibilityLabel="Achicar" hitSlop={10} style={styles.x}>
+          <Text style={styles.title} numberOfLines={2}>{flash ? tx(DEMO_MESSAGE) : tx('Estás viendo una iglesia de ejemplo')}</Text>
+          <Pressable onPress={() => setSmall(true)} accessibilityRole="button" accessibilityLabel={tx('Achicar')} hitSlop={10} style={styles.x}>
             <Feather name="chevron-down" size={18} color="#FFF" />
           </Pressable>
         </View>
@@ -90,16 +91,16 @@ export function DemoRibbon() {
               <Pressable key={v} onPress={() => switchTo(v)} accessibilityRole="button" accessibilityState={{ selected: view === v }}
                 style={[styles.opt, view === v && styles.optOn]}>
                 {busy === v ? <ActivityIndicator size="small" color="#FFF" /> : (
-                  <Text style={[styles.optText, view === v && styles.optTextOn]}>{v === 'pastor' ? 'Ver como pastor' : 'Ver como miembro'}</Text>
+                  <Text style={[styles.optText, view === v && styles.optTextOn]}>{v === 'pastor' ? tx('Ver como pastor') : tx('Ver como miembro')}</Text>
                 )}
               </Pressable>
             ))}
           </View>
           <Pressable onPress={want} accessibilityRole="link" style={({ pressed }) => [styles.cta, pressed && { opacity: 0.9 }]}>
-            <Text style={styles.ctaText}>Quiero La Mies para mi iglesia</Text>
+            <Text style={styles.ctaText}>{tx('Quiero La Mies para mi iglesia')}</Text>
           </Pressable>
           {Platform.OS === 'web' ? null : (
-            <Pressable onPress={leave} accessibilityRole="button" hitSlop={8}><Text style={styles.leave}>Salir</Text></Pressable>
+            <Pressable onPress={leave} accessibilityRole="button" hitSlop={8}><Text style={styles.leave}>{tx('Salir')}</Text></Pressable>
           )}
         </View>
       </View>

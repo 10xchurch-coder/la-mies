@@ -5,11 +5,12 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Face } from './Face';
 import { colors } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export type PickItem = { id: string; title: string; subtitle?: string; photo?: string | null; face?: boolean };
 
 export function PickerModal({
-  visible, title, items, onPick, onClose, allowNone, noneLabel = 'Nadie / quitar',
+  visible, title, items, onPick, onClose, allowNone, noneLabel = tx('Nadie / quitar'),
 }: {
   visible: boolean;
   title: string;
@@ -32,13 +33,13 @@ export function PickerModal({
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, gap: 8 }}>
           <Text style={{ flex: 1, fontSize: 20, fontWeight: '800', color: colors.text }}>{title}</Text>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" style={{ padding: 10 }}>
+          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tx('Cerrar')} style={{ padding: 10 }}>
             <Feather name="x" size={24} color={colors.text} />
           </Pressable>
         </View>
         <View style={{ margin: 16, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, borderRadius: 12, backgroundColor: colors.bgSoft, paddingHorizontal: 12 }}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 16, color: colors.text }} autoCorrect={false} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 16, color: colors.text }} autoCorrect={false} />
         </View>
         <FlatList
           data={shown}
@@ -50,7 +51,7 @@ export function PickerModal({
               <Text style={{ fontSize: 15, fontWeight: '600', color: colors.red }}>{noneLabel}</Text>
             </Pressable>
           ) : undefined}
-          ListEmptyComponent={<Text style={{ padding: 24, textAlign: 'center', color: colors.muted }}>No hay resultados</Text>}
+          ListEmptyComponent={<Text style={{ padding: 24, textAlign: 'center', color: colors.muted }}>{tx('No hay resultados')}</Text>}
           renderItem={({ item }) => (
             <Pressable
               onPress={() => onPick(item.id)}

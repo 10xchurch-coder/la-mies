@@ -12,6 +12,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Group } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Colectivo() {
   const { profile, church } = useAuth();
@@ -31,11 +32,11 @@ export default function Colectivo() {
   const toggle = async (r: RiderRow) => {
     if (!group) return;
     setRows((rs) => (rs ?? []).map((x) => (x.contact_id === r.contact_id ? { ...x, picked: !x.picked } : x)));
-    try { await setPicked(r.contact_id, group, !r.picked); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); load(); }
+    try { await setPicked(r.contact_id, group, !r.picked); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); load(); }
   };
   const notify = (r: RiderRow, mins: number) => {
     if (!r.phone) return;
-    const msg = `Hola ${r.name.split(' ')[0]}, el colectivo de la ${church?.name ?? 'iglesia'} pasa por tu casa en ${mins} minutos. ¡Te esperamos!`;
+    const msg = tx('Hola {split}, el colectivo de la {name} pasa por tu casa en {mins} minutos. ¡Te esperamos!', { split: r.name.split(' ')[0], name: church?.name ?? 'iglesia', mins });
     Linking.openURL(`https://wa.me/${whatsappNumber(r.phone)}?text=${encodeURIComponent(msg)}`);
   };
   const onQ = (v: string) => {
@@ -45,20 +46,20 @@ export default function Colectivo() {
     t.current = setTimeout(() => searchPeople(v.trim()).then((r) => setSugg(r.slice(0, 6))).catch(() => setSugg([])), 250);
   };
   const add = async (id: string) => {
-    try { await setBusRider(id, true); setQ(''); setSugg([]); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+    try { await setBusRider(id, true); setQ(''); setSugg([]); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); }
   };
 
   const picked = (rows ?? []).filter((r) => r.picked).length;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Colectivo" subtitle={rows ? `${picked} de ${rows.length} subieron hoy` : undefined} back />
+      <Header title={tx('Colectivo')} subtitle={rows ? tx('{picked} de {n} subieron hoy', { picked, n: rows.length }) : undefined} back />
       <Screen>
         {groups.length > 1 ? <Choice columns={2} options={groups.map((g) => ({ value: g.id, label: g.name }))} value={group ?? ''} onChange={setGroup} /> : null}
         {group ? (
-          <Button title="Paradas en orden y mapa" icon="map-pin" variant="outline" small
+          <Button title={tx('Paradas en orden y mapa')} icon="map-pin" variant="outline" small
             onPress={() => router.push({ pathname: '/colectivo-paradas', params: { ruta: group } } as unknown as Href)} />
         ) : null}
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="truck" title="No hay pasajeros en esta ruta" text="Agregá abajo a los que viajan en el colectivo. También aparecen los que prometieron venir y pidieron que los busquen." /> : (
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="truck" title={tx('No hay pasajeros en esta ruta')} text={tx('Agregá abajo a los que viajan en el colectivo. También aparecen los que prometieron venir y pidieron que los busquen.')} /> : (
           <Card style={{ padding: 0 }}>
             {rows.map((r, i) => (
               <View key={r.contact_id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
@@ -69,28 +70,28 @@ export default function Colectivo() {
                 <Face name={r.name} path={r.photo_path} size={36} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}</Text>
-                  <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{[r.pickup_time, r.address].filter(Boolean).join(' · ') || 'Sin dirección'}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{[r.pickup_time, r.address].filter(Boolean).join(' · ') || tx('Sin dirección')}</Text>
                 </View>
                 {r.phone ? (
-                  <Pressable onPress={() => notify(r, 10)} accessibilityRole="button" accessibilityLabel={`Avisar a ${r.name}`} style={{ paddingHorizontal: 10, height: 34, borderRadius: 17, backgroundColor: colors.greenSoft, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Pressable onPress={() => notify(r, 10)} accessibilityRole="button" accessibilityLabel={tx('Avisar a {name}', { name: r.name })} style={{ paddingHorizontal: 10, height: 34, borderRadius: 17, backgroundColor: colors.greenSoft, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                     <Feather name="message-circle" size={14} color={colors.green} />
-                    <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green }}>10 min</Text>
+                    <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green }}>{tx('10 min')}</Text>
                   </Pressable>
                 ) : null}
               </View>
             ))}
           </Card>
         )}
-        <SectionTitle>Agregar un pasajero</SectionTitle>
-        <Field label="Nombre" value={q} onChangeText={onQ} placeholder="Buscar por nombre" autoCapitalize="words" />
+        <SectionTitle>{tx('Agregar un pasajero')}</SectionTitle>
+        <Field label={tx('Nombre')} value={q} onChangeText={onQ} placeholder={tx('Buscar por nombre')} autoCapitalize="words" />
         {sugg.map((p) => (
           <Pressable key={p.id} onPress={() => add(p.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }}>
             <Face name={p.name} path={p.photo_path} size={30} />
             <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{p.name}</Text>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Agregar</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>{tx('Agregar')}</Text>
           </Pressable>
         ))}
-        <Text style={{ fontSize: 12, color: colors.muted }}>El pasajero tiene que estar en esta ruta (en su ficha). El aviso por WhatsApp sale desde tu teléfono. El aviso de 10 minutos a la app sale solo: armalo en “Paradas en orden y mapa”.</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>{tx('El pasajero tiene que estar en esta ruta (en su ficha). El aviso por WhatsApp sale desde tu teléfono. El aviso de 10 minutos a la app sale solo: armalo en “Paradas en orden y mapa”.')}</Text>
       </Screen>
     </View>
   );

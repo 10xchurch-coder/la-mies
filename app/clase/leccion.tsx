@@ -12,6 +12,7 @@ import { fmtDateShort } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Leccion() {
   const router = useRouter();
@@ -53,12 +54,12 @@ export default function Leccion() {
 
   const save = async () => {
     const url = link.trim();
-    if (url && !/^https?:\/\//i.test(url)) { Alert.alert('Revisá el enlace', 'Tiene que empezar con https://'); return; }
+    if (url && !/^https?:\/\//i.test(url)) { Alert.alert(tx('Revisá el enlace'), 'Tiene que empezar con https://'); return; }
     setBusy(true);
     try {
       let path = file.path; let name = file.name;
       if (picked) {
-        if (!church?.id) throw new Error('Sin iglesia');
+        if (!church?.id) throw new Error(tx('Sin iglesia'));
         path = await uploadPicked('materials', church.id, picked);
         name = picked.name;
       }
@@ -66,7 +67,7 @@ export default function Leccion() {
       setEdit(false);
       load();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -75,36 +76,36 @@ export default function Leccion() {
   const openFile = async (download: boolean) => {
     if (!lesson?.file_path) return;
     const url = download ? await downloadUrl('materials', lesson.file_path, lesson.file_name) : await signedUrl('materials', lesson.file_path);
-    if (url) Linking.openURL(url); else Alert.alert('No se pudo abrir el archivo');
+    if (url) Linking.openURL(url); else Alert.alert(tx('No se pudo abrir el archivo'));
   };
 
   if (day === undefined) return <Loading />;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Lección del día" subtitle={[className, date ? fmtDateShort(date) : ''].filter(Boolean).join(' · ')} back />
+      <Header title={tx('Lección del día')} subtitle={[className, date ? fmtDateShort(date) : ''].filter(Boolean).join(' · ')} back />
       <Screen>
         {edit ? (
           <>
-            <Field label="Título de la lección" value={title} onChangeText={setTitle} placeholder="David y Goliat" />
-            <Field label="Texto para enseñar" hint="(opcional)" value={body} onChangeText={setBody} multiline placeholder={'El pasaje, la historia, las preguntas y la actividad.\nEscribilo para que otro maestro lo pueda dar si vos no podés ir.'} />
-            <Field label="Enlace" hint="(opcional: un video o una página)" value={link} onChangeText={setLink} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://…" />
+            <Field label={tx('Título de la lección')} value={title} onChangeText={setTitle} placeholder={tx('David y Goliat')} />
+            <Field label={tx('Texto para enseñar')} hint={tx('(opcional)')} value={body} onChangeText={setBody} multiline placeholder={tx('El pasaje, la historia, las preguntas y la actividad.\nEscribilo para que otro maestro lo pueda dar si vos no podés ir.')} />
+            <Field label={tx('Enlace')} hint={tx('(opcional: un video o una página)')} value={link} onChangeText={setLink} autoCapitalize="none" autoCorrect={false} keyboardType="url" placeholder="https://…" />
             <Card style={{ gap: 8 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{picked?.name ?? file.name ?? 'Sin archivo'}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{picked?.name ?? file.name ?? tx('Sin archivo')}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title={picked || file.path ? 'Cambiar el archivo' : 'Subir un archivo'} icon="paperclip" variant="outline" small style={{ flex: 1 }} onPress={() => pickDocument('any').then((f) => { if (f) setPicked(f); })} />
-                {picked || file.path ? <Button title="Quitar" variant="ghost" small onPress={() => { setPicked(null); setFile({ path: null, name: null }); }} /> : null}
+                <Button title={picked || file.path ? tx('Cambiar el archivo') : tx('Subir un archivo')} icon="paperclip" variant="outline" small style={{ flex: 1 }} onPress={() => pickDocument('any').then((f) => { if (f) setPicked(f); })} />
+                {picked || file.path ? <Button title={tx('Quitar')} variant="ghost" small onPress={() => { setPicked(null); setFile({ path: null, name: null }); }} /> : null}
               </View>
             </Card>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cancelar" variant="ghost" onPress={() => setEdit(false)} style={{ flex: 1 }} />
-              <Button title="Guardar" onPress={save} loading={busy} disabled={title.trim().length < 2} style={{ flex: 2 }} />
+              <Button title={tx('Cancelar')} variant="ghost" onPress={() => setEdit(false)} style={{ flex: 1 }} />
+              <Button title={tx('Guardar')} onPress={save} loading={busy} disabled={title.trim().length < 2} style={{ flex: 2 }} />
             </View>
           </>
         ) : (
           <>
             {day?.note ? (
               <Card style={{ gap: 4, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
-                <Text style={{ fontSize: 12, fontWeight: '900', color: colors.blueText }}>NOTA PARA EL MAESTRO</Text>
+                <Text style={{ fontSize: 12, fontWeight: '900', color: colors.blueText }}>{tx('NOTA PARA EL MAESTRO')}</Text>
                 <Text style={{ fontSize: 15, color: colors.text, lineHeight: 21 }}>{day.note}</Text>
               </Card>
             ) : null}
@@ -114,21 +115,21 @@ export default function Leccion() {
                 {!own ? <Text style={{ fontSize: 13, color: colors.muted }}>{lesson.series}</Text> : null}
                 {lesson.file_path ? (
                   <Card style={{ gap: 10 }}>
-                    <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{lesson.file_name ?? 'Archivo'}</Text>
+                    <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{lesson.file_name ?? tx('Archivo')}</Text>
                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                      <Button title="Abrir" icon="eye" small onPress={() => openFile(false)} style={{ flex: 1 }} />
-                      <Button title="Descargar" icon="download" variant="outline" small onPress={() => openFile(true)} style={{ flex: 1 }} />
+                      <Button title={tx('Abrir')} icon="eye" small onPress={() => openFile(false)} style={{ flex: 1 }} />
+                      <Button title={tx('Descargar')} icon="download" variant="outline" small onPress={() => openFile(true)} style={{ flex: 1 }} />
                     </View>
                   </Card>
                 ) : null}
-                {lesson.link_url ? <Button title="Abrir el enlace" icon="external-link" variant="outline" onPress={() => Linking.openURL(lesson.link_url as string)} /> : null}
+                {lesson.link_url ? <Button title={tx('Abrir el enlace')} icon="external-link" variant="outline" onPress={() => Linking.openURL(lesson.link_url as string)} /> : null}
                 {lesson.body ? <Text selectable style={{ fontSize: 17, lineHeight: 27, color: colors.text }}>{lesson.body}</Text> : null}
-                {!own ? <Button title="Abrir el capítulo completo" icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/material/[id]', params: { id: lesson.id } } as unknown as Href)} /> : null}
+                {!own ? <Button title={tx('Abrir el capítulo completo')} icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/material/[id]', params: { id: lesson.id } } as unknown as Href)} /> : null}
               </>
             ) : (
-              <Text style={{ fontSize: 15, color: colors.muted, lineHeight: 22 }}>Todavía no hay lección para este día.{canEdit ? '' : ' Pedile al maestro de la clase o a un líder que la cargue.'}</Text>
+              <Text style={{ fontSize: 15, color: colors.muted, lineHeight: 22 }}>{tx('Todavía no hay lección para este día.{pl}', { pl: canEdit ? '' : tx(' Pedile al maestro de la clase o a un líder que la cargue.') })}</Text>
             )}
-            {canEdit ? <Button title={own ? 'Cambiar la lección' : lesson ? 'Escribir otra lección para este día' : 'Cargar la lección'} icon="edit-3" variant={lesson ? 'outline' : 'primary'} onPress={startEdit} /> : null}
+            {canEdit ? <Button title={own ? tx('Cambiar la lección') : lesson ? tx('Escribir otra lección para este día') : tx('Cargar la lección')} icon="edit-3" variant={lesson ? 'outline' : 'primary'} onPress={startEdit} /> : null}
           </>
         )}
       </Screen>

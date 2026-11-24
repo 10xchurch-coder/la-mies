@@ -27,6 +27,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Song } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 const isWeb = Platform.OS === 'web' && typeof window !== 'undefined';
@@ -38,7 +39,7 @@ function openOutput(which: 'salida' | 'escenario' = 'salida') {
     // La app en la web vive dentro de una carpeta (/la-mies): hay que sumarla a la dirección.
     const base = (process.env.EXPO_BASE_URL ?? '').replace(/\/$/, '');
     const w = window.open(`${base}/presentar/${which}`, `lamies-${which}`, 'popup=yes,width=1280,height=720');
-    if (!w) Alert.alert('El navegador no dejó abrir la ventana', 'Permití las ventanas emergentes para esta página y probá de nuevo.');
+    if (!w) Alert.alert(tx('El navegador no dejó abrir la ventana'), tx('Permití las ventanas emergentes para esta página y probá de nuevo.'));
     return;
   }
   router.push(`/presentar/${which}` as Href);
@@ -51,8 +52,8 @@ export default function Presentar() {
   if (!canPresent(perms, profile)) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Modo presentación" back />
-        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
+        <Header title={tx('Modo presentación')} back />
+        <Empty icon="lock" title={tx('Necesitás permiso')} text={tx('El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos.')} />
       </View>
     );
   }
@@ -72,39 +73,39 @@ function Sets({ onOpen }: { onOpen: (id: string) => void }) {
   useEffect(load, [load]);
 
   const create = async () => {
-    const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+    const today = new Date().toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
     setBusy(true);
-    try { onOpen(await createPresentSet(name.trim() || `Culto del ${today}`)); }
-    catch (e) { Alert.alert('No se pudo crear la lista', errorMessage(e)); }
+    try { onOpen(await createPresentSet(name.trim() || tx('Culto del {today}', { today }))); }
+    catch (e) { Alert.alert(tx('No se pudo crear la lista'), errorMessage(e)); }
     finally { setBusy(false); }
   };
   const remove = (id: string, label: string) => {
-    Alert.alert('¿Borrar esta lista?', `"${label}" se borra con sus fotos, videos y audios. Las canciones del Cancionero no se tocan.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: async () => {
+    Alert.alert(tx('¿Borrar esta lista?'), tx('"{label}" se borra con sus fotos, videos y audios. Las canciones del Cancionero no se tocan.', { label }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: async () => {
         try {
           const full = await getPresentSet(id);
           const media = cleanItems(full?.items).flatMap(mediaOf);
           await deletePresentSet(id);
           removePresentFiles(media.map((m) => m.path));
           load();
-        } catch (e) { Alert.alert('No se pudo borrar', errorMessage(e)); }
+        } catch (e) { Alert.alert(tx('No se pudo borrar'), errorMessage(e)); }
       } },
     ]);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Modo presentación" subtitle="Letras, Biblia, fotos y videos en el proyector" back />
+      <Header title={tx('Modo presentación')} subtitle={tx('Letras, Biblia, fotos y videos en el proyector')} back />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16, width: '100%', maxWidth: 720, alignSelf: 'center' }} keyboardShouldPersistTaps="handled">
         <Card style={{ gap: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Nueva lista del culto</Text>
-          <Field label="Nombre" hint="(opcional)" value={name} onChangeText={setName} placeholder="Culto del domingo" />
-          <Button title="Crear lista" icon="plus" onPress={create} loading={busy} />
+          <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Nueva lista del culto')}</Text>
+          <Field label={tx('Nombre')} hint={tx('(opcional)')} value={name} onChangeText={setName} placeholder={tx('Culto del domingo')} />
+          <Button title={tx('Crear lista')} icon="plus" onPress={create} loading={busy} />
         </Card>
 
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="monitor" title="Todavía no hay listas" text="Creá una lista y sumale canciones, pasajes, fotos y videos. Después abrí la pantalla de salida y llevala al proyector." />
+          <Empty icon="monitor" title={tx('Todavía no hay listas')} text={tx('Creá una lista y sumale canciones, pasajes, fotos y videos. Después abrí la pantalla de salida y llevala al proyector.')} />
         ) : (
           <Card style={{ padding: 0 }}>
             {rows.map((r, i) => (
@@ -115,11 +116,11 @@ function Sets({ onOpen }: { onOpen: (id: string) => void }) {
                   </View>
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.name}</Text>
-                    <Text style={{ fontSize: 12, color: colors.muted }}>Último cambio: {new Date(r.updated_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}</Text>
+                    <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Último cambio: {toLocaleDateString}', { toLocaleDateString: new Date(r.updated_at).toLocaleDateString(txLocale(), { day: 'numeric', month: 'long' }) })}</Text>
                   </View>
                   <Feather name="chevron-right" size={20} color={colors.muted} />
                 </Pressable>
-                <Pressable onPress={() => remove(r.id, r.name)} accessibilityRole="button" accessibilityLabel="Borrar lista" style={{ padding: 14 }}>
+                <Pressable onPress={() => remove(r.id, r.name)} accessibilityRole="button" accessibilityLabel={tx('Borrar lista')} style={{ padding: 14 }}>
                   <Feather name="trash-2" size={18} color={colors.red} />
                 </Pressable>
               </View>
@@ -128,13 +129,13 @@ function Sets({ onOpen }: { onOpen: (id: string) => void }) {
         )}
 
         <Card style={{ gap: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Usar este aparato para otra cosa</Text>
+          <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Usar este aparato para otra cosa')}</Text>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-            Una persona maneja la lista desde un aparato. Otro aparato puede ser la pantalla (conectado al proyector o a la tele), la vista de escenario (para los que cantan y el que predica: muestra lo que sigue y la hora) o un control para pasar las diapositivas desde el teléfono.
+            {tx('Una persona maneja la lista desde un aparato. Otro aparato puede ser la pantalla (conectado al proyector o a la tele), la vista de escenario (para los que cantan y el que predica: muestra lo que sigue y la hora) o un control para pasar las diapositivas desde el teléfono.')}
           </Text>
-          <Button title="Ser la pantalla de salida" icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
-          <Button title="Ser la vista de escenario" icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
-          <Button title="Ser el control remoto" icon="smartphone" variant="outline" onPress={() => router.push('/presentar/control' as Href)} />
+          <Button title={tx('Ser la pantalla de salida')} icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
+          <Button title={tx('Ser la vista de escenario')} icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
+          <Button title={tx('Ser el control remoto')} icon="smartphone" variant="outline" onPress={() => router.push('/presentar/control' as Href)} />
         </Card>
       </ScrollView>
     </View>
@@ -253,7 +254,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       if (same && quiet) return;
       patch(id, { cards, loadedAt: Date.now() } as Partial<PresentItem>);
     } catch (e) {
-      if (!quiet && alive.current) Alert.alert('No se pudieron traer los anuncios', errorMessage(e));
+      if (!quiet && alive.current) Alert.alert(tx('No se pudieron traer los anuncios'), errorMessage(e));
     } finally { if (alive.current && !quiet && cardsReq.current[id] === mine) setRefreshing(null); }
   };
 
@@ -308,7 +309,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     if (s.kind === 'image' || s.kind === 'video') {
       const url = await presentUrl(s.media.path).catch(() => null);
       if (mine !== req.current) return;
-      if (!url) { Alert.alert('No se pudo abrir el archivo', 'Revisá la conexión y probá de nuevo.'); return; }
+      if (!url) { Alert.alert(tx('No se pudo abrir el archivo'), tx('Revisá la conexión y probá de nuevo.')); return; }
       out = s.kind === 'image' ? { kind: 'image', url } : { kind: 'video', url, playing: true, startedAt: Date.now() };
     } else if (s.kind === 'countdown') {
       out = { kind: 'countdown', endsAt: Date.now() + s.minutes * 60000, message: s.message };
@@ -410,13 +411,13 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const playSound = async (id: string, media: MediaRef) => {
     stopSound();
     const url = await presentUrl(media.path).catch(() => null);
-    if (!url) { Alert.alert('No se pudo abrir el audio', 'Revisá la conexión y probá de nuevo.'); return; }
+    if (!url) { Alert.alert(tx('No se pudo abrir el audio'), tx('Revisá la conexión y probá de nuevo.')); return; }
     try {
       const p = createAudioPlayer({ uri: url });
       player.current = p;
       p.play();
       setSound({ id, name: media.name, playing: true });
-    } catch { Alert.alert('No se pudo reproducir el audio'); }
+    } catch { Alert.alert(tx('No se pudo reproducir el audio')); }
   };
   const toggleSound = () => {
     const p = player.current;
@@ -447,7 +448,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       const entries = await getServicePlanEntries(plan.id);
       if (!alive.current) return;
       const fresh = entries ? planToItems(entries, songs ?? []) : [];
-      if (!fresh.length) { Alert.alert('Ese orden del culto está vacío', 'Cargale las partes y probá de nuevo.'); return; }
+      if (!fresh.length) { Alert.alert(tx('Ese orden del culto está vacío'), tx('Cargale las partes y probá de nuevo.')); return; }
       change([...itemsRef.current, ...fresh]);
       setSel(fresh[0].id);
       setEdit(false);
@@ -455,15 +456,15 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       fresh.filter((i) => i.type === 'announcements').forEach((i) => refreshCards(i.id, true));
       const noLyrics = fresh.filter((i) => i.type === 'song' && !i.songId).length;
       Alert.alert(
-        fresh.length === 1 ? 'Se sumó 1 parte' : `Se sumaron ${fresh.length} partes`,
-        noLyrics ? `${noLyrics === 1 ? 'Hay 1 canción que no encontré' : `Hay ${noLyrics} canciones que no encontré`} en el Cancionero. Tocala y elegila a mano.` : 'Revisá la lista antes de empezar.',
+        fresh.length === 1 ? tx('Se sumó 1 parte') : tx('Se sumaron {n} partes', { n: fresh.length }),
+        noLyrics ? tx('{v1} en el Cancionero. Tocala y elegila a mano.', { v1: noLyrics === 1 ? tx('Hay 1 canción que no encontré') : tx('Hay {noLyrics} canciones que no encontré', { noLyrics }) }) : tx('Revisá la lista antes de empezar.'),
       );
     } finally { if (alive.current) setPlanBusy(false); }
   };
   const removeItem = (it: PresentItem) => {
-    Alert.alert('¿Quitar de la lista?', itemTitle(it), [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Quitar', style: 'destructive', onPress: () => {
+    Alert.alert(tx('¿Quitar de la lista?'), itemTitle(it), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Quitar'), style: 'destructive', onPress: () => {
         const list = itemsRef.current.filter((i) => i.id !== it.id);
         change(list);
         removePresentFiles(mediaOf(it).map((m) => m.path));
@@ -486,9 +487,9 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   if (missing) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Modo presentación" back />
-        <Empty icon="alert-circle" title="No se pudo abrir la lista" text="Revisá la conexión y probá de nuevo." />
-        <View style={{ padding: 16 }}><Button title="Volver a las listas" variant="outline" onPress={onClose} /></View>
+        <Header title={tx('Modo presentación')} back />
+        <Empty icon="alert-circle" title={tx('No se pudo abrir la lista')} text={tx('Revisá la conexión y probá de nuevo.')} />
+        <View style={{ padding: 16 }}><Button title={tx('Volver a las listas')} variant="outline" onPress={onClose} /></View>
       </View>
     );
   }
@@ -502,51 +503,51 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     <Card style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: LIVE_RED }} />
-        <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>EN PANTALLA</Text>
+        <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>{tx('EN PANTALLA')}</Text>
         <Text style={{ fontSize: 12, color: status === 'conectado' ? colors.greenText : colors.muted }}>
-          {status === 'conectado' ? 'Otros aparatos: conectado' : status === 'conectando' ? 'Conectando…' : 'Otros aparatos: sin conexión'}
+          {status === 'conectado' ? tx('Otros aparatos: conectado') : status === 'conectando' ? tx('Conectando…') : tx('Otros aparatos: sin conexión')}
         </Text>
       </View>
       <View style={{ alignSelf: 'center', borderRadius: 8, overflow: 'hidden', borderWidth: 2, borderColor: LIVE_RED }}>
         <PresentSlide live={live} width={previewW} height={Math.round((previewW * 9) / 16)} logoUrl={logo} churchName={churchName} />
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title="Anterior" icon="arrow-left" variant="outline" onPress={() => move(-1)} style={{ flex: 1 }} />
-        <Button title="Siguiente" icon="arrow-right" onPress={() => move(1)} style={{ flex: 1.4 }} />
+        <Button title={tx('Anterior')} icon="arrow-left" variant="outline" onPress={() => move(-1)} style={{ flex: 1 }} />
+        <Button title={tx('Siguiente')} icon="arrow-right" onPress={() => move(1)} style={{ flex: 1.4 }} />
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title="Negro" icon="square" variant={live.mode === 'black' ? 'primary' : 'outline'} onPress={() => toggleMode('black')} style={{ flex: 1 }} />
-        <Button title="Logo" icon="home" variant={live.mode === 'logo' ? 'primary' : 'outline'} onPress={() => toggleMode('logo')} style={{ flex: 1 }} />
+        <Button title={tx('Negro')} icon="square" variant={live.mode === 'black' ? 'primary' : 'outline'} onPress={() => toggleMode('black')} style={{ flex: 1 }} />
+        <Button title={tx('Logo')} icon="home" variant={live.mode === 'logo' ? 'primary' : 'outline'} onPress={() => toggleMode('logo')} style={{ flex: 1 }} />
       </View>
       {auto ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ flex: 1, fontSize: 13, color: colors.muted }}>
-            {paused ? (autoLoop ? 'Los anuncios están en pausa.' : 'La letra está en pausa.')
-              : `${autoLoop ? 'Los anuncios pasan solos' : 'La letra pasa sola'} cada ${Math.round(autoWait / 100) / 10} segundos.`}
+            {paused ? (autoLoop ? tx('Los anuncios están en pausa.') : tx('La letra está en pausa.'))
+              : tx('{pl} cada {v1} segundos.', { pl: autoLoop ? tx('Los anuncios pasan solos') : tx('La letra pasa sola'), v1: Math.round(autoWait / 100) / 10 })}
           </Text>
-          <Button small title={paused ? 'Seguir' : 'Pausar'} icon={paused ? 'play' : 'pause'} variant="outline" onPress={() => setPaused((p) => !p)} />
+          <Button small title={paused ? tx('Seguir##reproducir') : tx('Pausar')} icon={paused ? 'play' : 'pause'} variant="outline" onPress={() => setPaused((p) => !p)} />
         </View>
       ) : null}
       {live.mode === 'slide' && live.slide?.kind === 'video' ? (
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button small title={live.slide.playing ? 'Pausar video' : 'Seguir video'} icon={live.slide.playing ? 'pause' : 'play'} variant="outline" onPress={() => setVideo({ playing: !(live.slide as { playing: boolean }).playing })} style={{ flex: 1 }} />
-          <Button small title="Desde el principio" icon="rotate-ccw" variant="outline" onPress={() => setVideo({ playing: true, restart: true })} style={{ flex: 1 }} />
+          <Button small title={live.slide.playing ? tx('Pausar video') : tx('Seguir video')} icon={live.slide.playing ? 'pause' : 'play'} variant="outline" onPress={() => setVideo({ playing: !(live.slide as { playing: boolean }).playing })} style={{ flex: 1 }} />
+          <Button small title={tx('Desde el principio')} icon="rotate-ccw" variant="outline" onPress={() => setVideo({ playing: true, restart: true })} style={{ flex: 1 }} />
         </View>
       ) : null}
       {sound ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10, borderRadius: 10, backgroundColor: colors.greenSoft }}>
           <Feather name="volume-2" size={18} color={colors.greenText} />
-          <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: colors.greenText }} numberOfLines={1}>{sound.playing ? 'Sonando' : 'En pausa'}: {sound.name}</Text>
-          <Button small title={sound.playing ? 'Pausar' : 'Seguir'} variant="outline" onPress={toggleSound} />
-          <Button small title="Parar" variant="danger" onPress={stopSound} />
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: colors.greenText }} numberOfLines={1}>{sound.playing ? tx('Sonando') : tx('En pausa')}: {sound.name}</Text>
+          <Button small title={sound.playing ? tx('Pausar') : tx('Seguir##reproducir')} variant="outline" onPress={toggleSound} />
+          <Button small title={tx('Parar')} variant="danger" onPress={stopSound} />
         </View>
       ) : null}
-      <Button title="Abrir pantalla de salida" icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
-      <Button title="Abrir vista de escenario" icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
+      <Button title={tx('Abrir pantalla de salida')} icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
+      <Button title={tx('Abrir vista de escenario')} icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
       <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
         {isWeb
-          ? 'Se abre otra ventana: llevala al proyector y poné pantalla completa. Teclado: flechas o espacio para pasar, B para negro, L para el logo. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.'
-          : 'En este aparato la pantalla ocupa todo: tocá la derecha para pasar y la izquierda para volver. Para manejar desde acá y mostrar en otro aparato, abrí la pantalla de salida en el otro. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.'}
+          ? tx('Se abre otra ventana: llevala al proyector y poné pantalla completa. Teclado: flechas o espacio para pasar, B para negro, L para el logo. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.')
+          : tx('En este aparato la pantalla ocupa todo: tocá la derecha para pasar y la izquierda para volver. Para manejar desde acá y mostrar en otro aparato, abrí la pantalla de salida en el otro. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.')}
       </Text>
     </Card>
   );
@@ -555,14 +556,14 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const playlist = (
     <Card style={{ gap: 10 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Volver a las listas" style={{ padding: 4 }}>
+        <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tx('Volver a las listas')} style={{ padding: 4 }}>
           <Feather name="chevron-left" size={22} color={colors.green} />
         </Pressable>
-        <TextInput value={name} onChangeText={rename} placeholder="Nombre de la lista" placeholderTextColor="#8B918C" accessibilityLabel="Nombre de la lista"
+        <TextInput value={name} onChangeText={rename} placeholder={tx('Nombre de la lista')} placeholderTextColor="#8B918C" accessibilityLabel={tx('Nombre de la lista')}
           style={{ flex: 1, fontSize: 17, fontWeight: '800', color: colors.text, paddingVertical: 6 }} />
-        <Text style={{ fontSize: 11, color: saving === 'error' ? colors.red : colors.muted }}>{saving === 'ok' ? 'Guardado' : saving === 'saving' ? 'Guardando…' : 'No se guardó'}</Text>
+        <Text style={{ fontSize: 11, color: saving === 'error' ? colors.red : colors.muted }}>{saving === 'ok' ? tx('Guardado') : saving === 'saving' ? tx('Guardando…') : tx('No se guardó')}</Text>
       </View>
-      {!items.length ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>La lista está vacía. Tocá "Agregar" y elegí qué querés mostrar.</Text> : null}
+      {!items.length ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{tx('La lista está vacía. Tocá "Agregar" y elegí qué querés mostrar.')}</Text> : null}
       {items.map((it, i) => {
         const on = it.id === sel;
         const isLive = liveAt?.id === it.id && live.mode === 'slide';
@@ -576,13 +577,13 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
               <Text style={{ fontSize: 11, color: colors.muted }}>{typeInfo(it.type).label}</Text>
             </View>
             {sound?.id === it.id ? <Feather name="volume-2" size={16} color={colors.green} /> : null}
-            {isLive ? <Tag text="En pantalla" tone="red" /> : null}
+            {isLive ? <Tag text={tx('En pantalla')} tone="red" /> : null}
           </Pressable>
         );
       })}
       {adding ? (
         <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>¿Qué querés agregar?</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>{tx('¿Qué querés agregar?')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {ITEM_TYPES.map((t) => (
               <Pressable key={t.type} onPress={() => add(t.type)} accessibilityRole="button"
@@ -592,14 +593,14 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
               </Pressable>
             ))}
           </View>
-          <Button small title="Cancelar" variant="ghost" onPress={() => setAdding(false)} />
+          <Button small title={tx('Cancelar')} variant="ghost" onPress={() => setAdding(false)} />
         </View>
-      ) : <Button title="Agregar" icon="plus" variant="outline" onPress={() => setAdding(true)} />}
+      ) : <Button title={tx('Agregar')} icon="plus" variant="outline" onPress={() => setAdding(true)} />}
       {plans !== null && !adding ? (
         planOpen ? (
           <View style={{ gap: 8 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>¿De qué día?</Text>
-            {!plans.length ? <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>Todavía no hay un orden del culto cargado para estos días.</Text> : null}
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>{tx('¿De qué día?')}</Text>
+            {!plans.length ? <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>{tx('Todavía no hay un orden del culto cargado para estos días.')}</Text> : null}
             {plans.map((p) => (
               <Pressable key={p.id} onPress={() => { if (!planBusy) importPlan(p); }} accessibilityRole="button"
                 style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, backgroundColor: colors.bgSoft, opacity: planBusy ? 0.5 : 1 }}>
@@ -607,10 +608,10 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
                 <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={2}>{planDay(p.service_date)}{p.title ? ` · ${p.title}` : ''}</Text>
               </Pressable>
             ))}
-            <Button small title="Cancelar" variant="ghost" onPress={() => setPlanOpen(false)} />
+            <Button small title={tx('Cancelar')} variant="ghost" onPress={() => setPlanOpen(false)} />
           </View>
         ) : (
-          <Button title="Traer el orden del culto" icon="download" variant="outline"
+          <Button title={tx('Traer el orden del culto')} icon="download" variant="outline"
             onPress={() => { setPlanOpen(true); listServicePlans(churchId).then((p) => { if (alive.current && p) setPlans(p); }).catch(() => undefined); }} />
         )
       ) : null}
@@ -624,10 +625,10 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     <Card style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <Text style={{ flex: 1, fontSize: 17, fontWeight: '800', color: colors.text }} numberOfLines={2}>{itemTitle(selected)}</Text>
-        <Pressable onPress={() => shift(selected.id, -1)} accessibilityRole="button" accessibilityLabel="Subir en la lista" style={{ padding: 8 }}><Feather name="arrow-up" size={18} color={colors.muted} /></Pressable>
-        <Pressable onPress={() => shift(selected.id, 1)} accessibilityRole="button" accessibilityLabel="Bajar en la lista" style={{ padding: 8 }}><Feather name="arrow-down" size={18} color={colors.muted} /></Pressable>
-        <Pressable onPress={() => removeItem(selected)} accessibilityRole="button" accessibilityLabel="Quitar de la lista" style={{ padding: 8 }}><Feather name="trash-2" size={18} color={colors.red} /></Pressable>
-        <Button small title={edit ? 'Listo' : 'Cambiar'} icon={edit ? 'check' : 'edit-2'} variant={edit ? 'primary' : 'outline'} onPress={() => setEdit((e) => !e)} />
+        <Pressable onPress={() => shift(selected.id, -1)} accessibilityRole="button" accessibilityLabel={tx('Subir en la lista')} style={{ padding: 8 }}><Feather name="arrow-up" size={18} color={colors.muted} /></Pressable>
+        <Pressable onPress={() => shift(selected.id, 1)} accessibilityRole="button" accessibilityLabel={tx('Bajar en la lista')} style={{ padding: 8 }}><Feather name="arrow-down" size={18} color={colors.muted} /></Pressable>
+        <Pressable onPress={() => removeItem(selected)} accessibilityRole="button" accessibilityLabel={tx('Quitar de la lista')} style={{ padding: 8 }}><Feather name="trash-2" size={18} color={colors.red} /></Pressable>
+        <Button small title={edit ? tx('Listo') : tx('Cambiar')} icon={edit ? 'check' : 'edit-2'} variant={edit ? 'primary' : 'outline'} onPress={() => setEdit((e) => !e)} />
       </View>
 
       {edit ? <Editor item={selected} songs={songs} churchId={churchId} patch={(p) => patch(selected.id, p)} slideCount={list.length}
@@ -635,27 +636,26 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
 
       {selected.type === 'announcements' ? (
         <View style={{ gap: 6 }}>
-          {list.length ? <Button title="Empezar los anuncios" icon="play" onPress={() => show(selected.id, 0)} /> : null}
+          {list.length ? <Button title={tx('Empezar los anuncios')} icon="play" onPress={() => show(selected.id, 0)} /> : null}
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
             {list.length
-              ? `Pasan solos cada ${selected.secs} segundos y dan vueltas hasta que pasás a otra parte de la lista. ${cardsWhen(selected)}`
-              : refreshing === selected.id ? 'Buscando los anuncios…' : 'No hay anuncios para toda la iglesia ni eventos en estos días. Tocá "Cambiar" para elegir más días.'}
+              ? tx('Pasan solos cada {secs} segundos y dan vueltas hasta que pasás a otra parte de la lista. {cardsWhen}', { secs: selected.secs, cardsWhen: cardsWhen(selected) })
+              : refreshing === selected.id ? tx('Buscando los anuncios…') : tx('No hay anuncios para toda la iglesia ni eventos en estos días. Tocá "Cambiar" para elegir más días.')}
           </Text>
         </View>
       ) : null}
       {selected.type === 'video' && selected.media && !isWeb ? (
         <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19, padding: 10, borderRadius: 10, backgroundColor: colors.bgSoft }}>
-          Los videos se ven solo cuando la pantalla de salida está abierta en una computadora (en el navegador). En una tablet o un teléfono todavía no se pueden mostrar. Lo demás (letras, Biblia, fotos, cuenta regresiva y música) anda en todos los aparatos.
+          {tx('Los videos se ven solo cuando la pantalla de salida está abierta en una computadora (en el navegador). En una tablet o un teléfono todavía no se pueden mostrar. Lo demás (letras, Biblia, fotos, cuenta regresiva y música) anda en todos los aparatos.')}
         </Text>
       ) : null}
 
       {selected.type === 'song' && list.length ? (
         <View style={{ gap: 6 }}>
-          <Button title={selected.audio ? 'Empezar la canción con la pista' : 'Empezar la canción'} icon="play"
+          <Button title={selected.audio ? tx('Empezar la canción con la pista') : tx('Empezar la canción')} icon="play"
             onPress={() => { show(selected.id, 0); if (selected.audio) playSound(selected.id, selected.audio); }} />
           <Text style={{ fontSize: 12, color: colors.muted }}>
-            {selected.auto ? `La letra pasa sola cada ${Math.round(autoMs(selected.secs, selected.speed) / 100) / 10} segundos. ` : 'Vos pasás la letra con "Siguiente". '}
-            Para cambiar esto tocá "Cambiar".
+            {tx('{v1}Para cambiar esto tocá "Cambiar".', { v1: selected.auto ? tx('La letra pasa sola cada {v1} segundos. ', { v1: Math.round(autoMs(selected.secs, selected.speed) / 100) / 10 }) : tx('Vos pasás la letra con "Siguiente". ') })}
           </Text>
         </View>
       ) : null}
@@ -667,14 +667,14 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
             <View style={{ flexDirection: 'row', gap: 8 }}>
               {sound?.id === selected.id ? (
                 <>
-                  <Button title={sound.playing ? 'Pausar' : 'Seguir'} icon={sound.playing ? 'pause' : 'play'} onPress={toggleSound} style={{ flex: 1 }} />
-                  <Button title="Parar" icon="square" variant="danger" onPress={stopSound} style={{ flex: 1 }} />
+                  <Button title={sound.playing ? tx('Pausar') : tx('Seguir##reproducir')} icon={sound.playing ? 'pause' : 'play'} onPress={toggleSound} style={{ flex: 1 }} />
+                  <Button title={tx('Parar')} icon="square" variant="danger" onPress={stopSound} style={{ flex: 1 }} />
                 </>
-              ) : <Button title="Reproducir" icon="play" onPress={() => playSound(selected.id, selected.media!)} style={{ flex: 1 }} />}
+              ) : <Button title={tx('Reproducir')} icon="play" onPress={() => playSound(selected.id, selected.media!)} style={{ flex: 1 }} />}
             </View>
-            <Text style={{ fontSize: 12, color: colors.muted }}>La música suena en este aparato. La pantalla queda como está.</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{tx('La música suena en este aparato. La pantalla queda como está.')}</Text>
           </View>
-        ) : !edit ? <Text style={{ fontSize: 14, color: colors.muted }}>Todavía no subiste el audio. Tocá "Cambiar".</Text> : null
+        ) : !edit ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Todavía no subiste el audio. Tocá "Cambiar".')}</Text> : null
       ) : null}
 
       {selected.type !== 'music' ? (
@@ -683,31 +683,31 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
             {list.map((s, i) => {
               const isLive = liveAt?.id === selected.id && liveAt.slide === i && live.mode === 'slide';
               return (
-                <Pressable key={i} onPress={() => show(selected.id, i)} accessibilityRole="button" accessibilityLabel={`Mostrar diapositiva ${i + 1}`} style={{ gap: 4 }}>
+                <Pressable key={i} onPress={() => show(selected.id, i)} accessibilityRole="button" accessibilityLabel={tx('Mostrar diapositiva {v1}', { v1: i + 1 })} style={{ gap: 4 }}>
                   <View style={{ borderRadius: 8, overflow: 'hidden', borderWidth: 3, borderColor: isLive ? LIVE_RED : colors.border }}>
                     <Thumb slide={s} width={thumbW} />
                   </View>
                   <Text style={{ fontSize: 11, fontWeight: '700', color: isLive ? LIVE_RED : colors.muted, width: thumbW }} numberOfLines={1}>
-                    {i + 1}{s.kind === 'text' && s.label ? ` · ${s.label}` : ''}{isLive ? ' · EN PANTALLA' : ''}
+                    {i + 1}{s.kind === 'text' && s.label ? ` · ${s.label}` : ''}{isLive ? tx(' · EN PANTALLA') : ''}
                   </Text>
                 </Pressable>
               );
             })}
           </View>
-        ) : !edit && selected.type !== 'announcements' ? <Text style={{ fontSize: 14, color: colors.muted }}>Esta parte todavía no tiene nada para mostrar. Tocá "Cambiar".</Text> : null
+        ) : !edit && selected.type !== 'announcements' ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Esta parte todavía no tiene nada para mostrar. Tocá "Cambiar".')}</Text> : null
       ) : null}
-      {list.length ? <Text style={{ fontSize: 12, color: colors.muted }}>Tocá una diapositiva para mandarla a la pantalla.</Text> : null}
+      {list.length ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá una diapositiva para mandarla a la pantalla.')}</Text> : null}
     </Card>
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bgPage }}>
-      <Header title="Modo presentación" subtitle={name || 'Lista del culto'} back />
+      <Header title={tx('Modo presentación')} subtitle={name || tx('Lista del culto')} back />
       {wide ? (
         <View style={{ flex: 1, flexDirection: 'row', gap: 14, paddingHorizontal: 14, paddingBottom: 14 }}>
           <ScrollView style={{ width: 300, flexGrow: 0 }} contentContainerStyle={{ gap: 12 }} keyboardShouldPersistTaps="handled">{playlist}</ScrollView>
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 12 }} keyboardShouldPersistTaps="handled">
-            {detail ?? <Empty icon="monitor" title="Elegí una parte de la lista" text="A la izquierda está la lista del culto. Agregá una canción o un pasaje para empezar." />}
+            {detail ?? <Empty icon="monitor" title={tx('Elegí una parte de la lista')} text={tx('A la izquierda está la lista del culto. Agregá una canción o un pasaje para empezar.')} />}
           </ScrollView>
           <ScrollView style={{ width: 360, flexGrow: 0 }} contentContainerStyle={{ gap: 12 }} keyboardShouldPersistTaps="handled">{livePanel}</ScrollView>
         </View>
@@ -736,7 +736,7 @@ function cardsWhen(item: AnnouncementsItem): string {
   const d = new Date(item.loadedAt);
   const today = new Date().toDateString() === d.toDateString();
   const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
-  return `Actualizado ${today ? 'hoy' : `el ${d.getDate()}/${d.getMonth() + 1}`} a las ${time}.`;
+  return tx('Actualizado {v1} a las {time}.', { v1: today ? 'hoy' : `el ${d.getDate()}/${d.getMonth() + 1}`, time });
 }
 
 // En la computadora se recuerda en qué diapositiva de la lista se estaba, por si se recarga la página en medio del culto.
@@ -766,8 +766,8 @@ function Thumb({ slide, width }: { slide: Slide; width: number }) {
   }, [path]);
   const s: LiveSlide =
     slide.kind === 'countdown' ? { kind: 'text', text: clock(slide.minutes * 60), label: null, footer: slide.message || null }
-    : slide.kind === 'image' ? (url ? { kind: 'image', url } : { kind: 'text', text: 'Foto', label: null, footer: slide.media.name })
-    : slide.kind === 'video' ? { kind: 'text', text: 'Video', label: null, footer: slide.media.name }
+    : slide.kind === 'image' ? (url ? { kind: 'image', url } : { kind: 'text', text: tx('Foto'), label: null, footer: slide.media.name })
+    : slide.kind === 'video' ? { kind: 'text', text: tx('Video'), label: null, footer: slide.media.name }
     : slide;
   return <PresentSlide live={{ v: 1, mode: 'slide', slide: s, stamp: 'mini', at: 0 }} width={width} height={Math.round((width * 9) / 16)} />;
 }
@@ -782,9 +782,9 @@ function Stepper({ label, value, text, onChange, min, max, by = 1 }: { label: st
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{label}</Text>
-      {btn('minus', value - by, `Menos: ${label}`)}
+      {btn('minus', value - by, tx('Menos: {label}', { label }))}
       <Text style={{ minWidth: 76, fontSize: 15, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{text}</Text>
-      {btn('plus', value + by, `Más: ${label}`)}
+      {btn('plus', value + by, tx('Más: {label}', { label }))}
     </View>
   );
 }
@@ -814,17 +814,17 @@ function MediaField({ kind, media, churchId, onChange }: { kind: 'image' | 'vide
     try {
       const m = await pickPresentMedia(churchId, kind);
       if (m) { if (media) removePresentFiles([media.path]); onChange(m); }
-    } catch (e) { Alert.alert('No se pudo subir', errorMessage(e)); } finally { setBusy(false); }
+    } catch (e) { Alert.alert(tx('No se pudo subir'), errorMessage(e)); } finally { setBusy(false); }
   };
   return (
     <View style={{ gap: 8 }}>
-      {media ? <Text style={{ fontSize: 14, color: colors.text }}>Archivo: <Text style={{ fontWeight: '700' }}>{media.name}</Text></Text> : null}
+      {media ? <Text style={{ fontSize: 14, color: colors.text }}>{tx('Archivo:')} <Text style={{ fontWeight: '700' }}>{media.name}</Text></Text> : null}
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title={busy ? 'Subiendo…' : media ? `Cambiar ${word}` : `Subir ${word}`} icon="upload" variant={media ? 'outline' : 'primary'} onPress={pick} loading={busy} style={{ flex: 1 }} />
-        {media ? <Button title="Quitar" variant="danger" onPress={() => { removePresentFiles([media.path]); onChange(null); }} /> : null}
+        <Button title={busy ? tx('Subiendo…') : media ? tx('Cambiar {word}', { word }) : tx('Subir {word}', { word })} icon="upload" variant={media ? 'outline' : 'primary'} onPress={pick} loading={busy} style={{ flex: 1 }} />
+        {media ? <Button title={tx('Quitar')} variant="danger" onPress={() => { removePresentFiles([media.path]); onChange(null); }} /> : null}
       </View>
       <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-        Hasta 50 MB.{kind === 'video' ? ' Usá videos en MP4. El video se ve y se escucha solo cuando la pantalla de salida está abierta en una computadora (en el navegador); en una tablet o un teléfono todavía no.' : kind === 'audio' ? ' Usá MP3. Subí solo música que tu iglesia puede usar.' : ''}
+        {tx('Hasta 50 MB.{v1}', { v1: kind === 'video' ? tx(' Usá videos en MP4. El video se ve y se escucha solo cuando la pantalla de salida está abierta en una computadora (en el navegador); en una tablet o un teléfono todavía no.') : kind === 'audio' ? tx(' Usá MP3. Subí solo música que tu iglesia puede usar.') : '' })}
       </Text>
     </View>
   );
@@ -841,8 +841,8 @@ function SongPicker({ songs, onPick }: { songs: Song[] | null; onPick: (s: Song)
   if (!songs.length) {
     return (
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>El Cancionero está vacío. Primero cargá ahí las canciones con su letra.</Text>
-        <Button title="Ir al Cancionero" icon="music" variant="outline" onPress={() => router.push('/canciones' as Href)} />
+        <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{tx('El Cancionero está vacío. Primero cargá ahí las canciones con su letra.')}</Text>
+        <Button title={tx('Ir al Cancionero')} icon="music" variant="outline" onPress={() => router.push('/canciones' as Href)} />
       </View>
     );
   }
@@ -850,9 +850,9 @@ function SongPicker({ songs, onPick }: { songs: Song[] | null; onPick: (s: Song)
     <View style={{ gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: colors.bgSoft }}>
         <Feather name="search" size={18} color={colors.muted} />
-        <TextInput value={q} onChangeText={setQ} placeholder="Buscar en el Cancionero" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
+        <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar en el Cancionero')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
       </View>
-      {!shown.length ? <Text style={{ fontSize: 14, color: colors.muted }}>No encontré ninguna con eso.</Text> : null}
+      {!shown.length ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('No encontré ninguna con eso.')}</Text> : null}
       {shown.map((s) => (
         <Pressable key={s.id} onPress={() => onPick(s)} accessibilityRole="button"
           style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 10, borderWidth: 1, borderColor: colors.border }}>
@@ -879,29 +879,29 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
       if (!item.songId || choosing) {
         return (
           <View style={box}>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Elegí la canción</Text>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Elegí la canción')}</Text>
             <SongPicker songs={songs} onPick={(s) => { patch({ songId: s.id, title: s.title, lyrics: s.lyrics } as Partial<PresentItem>); setChoosing(false); }} />
-            {choosing ? <Button small title="Cancelar" variant="ghost" onPress={() => setChoosing(false)} /> : null}
+            {choosing ? <Button small title={tx('Cancelar')} variant="ghost" onPress={() => setChoosing(false)} /> : null}
           </View>
         );
       }
       return (
         <View style={box}>
-          <Button small title="Elegir otra canción" icon="repeat" variant="outline" onPress={() => setChoosing(true)} />
-          <Field label="Letra para la pantalla" value={item.lyrics} onChangeText={(lyrics) => patch({ lyrics } as Partial<PresentItem>)} multiline style={{ minHeight: 220 }} />
+          <Button small title={tx('Elegir otra canción')} icon="repeat" variant="outline" onPress={() => setChoosing(true)} />
+          <Field label={tx('Letra para la pantalla')} value={item.lyrics} onChangeText={(lyrics) => patch({ lyrics } as Partial<PresentItem>)} multiline style={{ minHeight: 220 }} />
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-            Cada estrofa es una diapositiva: dejá una línea vacía entre una y otra. Lo que cambies acá es solo para esta lista; el Cancionero queda igual.
+            {tx('Cada estrofa es una diapositiva: dejá una línea vacía entre una y otra. Lo que cambies acá es solo para esta lista; el Cancionero queda igual.')}
           </Text>
-          <Toggle label="Avance automático" hint="La letra pasa sola, sin tocar nada." value={item.auto} onChange={(auto) => patch({ auto } as Partial<PresentItem>)} />
+          <Toggle label={tx('Avance automático')} hint={tx('La letra pasa sola, sin tocar nada.')} value={item.auto} onChange={(auto) => patch({ auto } as Partial<PresentItem>)} />
           {item.auto ? (
             <>
-              <Stepper label="Tiempo por diapositiva" value={item.secs} text={`${item.secs} seg`} min={SECS_MIN} max={SECS_MAX} onChange={(secs) => patch({ secs } as Partial<PresentItem>)} />
-              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Velocidad</Text>
-              <Chips options={SPEEDS.map((v) => ({ value: v, label: v === 1 ? 'Normal' : `${v}x` }))} value={item.speed} onChange={(speed) => patch({ speed } as Partial<PresentItem>)} />
-              <Text style={{ fontSize: 12, color: colors.muted }}>Así, cada diapositiva queda {Math.round(autoMs(item.secs, item.speed) / 100) / 10} segundos.</Text>
+              <Stepper label={tx('Tiempo por diapositiva')} value={item.secs} text={tx('{secs} seg', { secs: item.secs })} min={SECS_MIN} max={SECS_MAX} onChange={(secs) => patch({ secs } as Partial<PresentItem>)} />
+              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Velocidad')}</Text>
+              <Chips options={SPEEDS.map((v) => ({ value: v, label: v === 1 ? tx('Normal') : `${v}x` }))} value={item.speed} onChange={(speed) => patch({ speed } as Partial<PresentItem>)} />
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Así, cada diapositiva queda {v1} segundos.', { v1: Math.round(autoMs(item.secs, item.speed) / 100) / 10 })}</Text>
             </>
           ) : null}
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Pista para cantar <Text style={{ color: colors.muted, fontWeight: '500' }}>(opcional)</Text></Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Pista para cantar')} <Text style={{ color: colors.muted, fontWeight: '500' }}>{tx('(opcional)')}</Text></Text>
           <MediaField kind="audio" media={item.audio} churchId={churchId} onChange={(audio) => patch({ audio } as Partial<PresentItem>)} />
         </View>
       );
@@ -910,23 +910,23 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
       const ok = !!parsePassage(item.ref) && slideCount > 0;
       return (
         <View style={box}>
-          <Field label="Cita" value={item.ref} onChangeText={(ref) => patch({ ref } as Partial<PresentItem>)} placeholder="Juan 3:16-18" autoCorrect={false} />
-          {item.ref.trim() && !ok ? <Text style={{ fontSize: 13, color: colors.red }}>No encontré ese pasaje. Escribilo así: Juan 3:16-18</Text> : null}
-          {ok ? <Text style={{ fontSize: 13, color: colors.greenText }}>{slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'}</Text> : null}
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Versículos en cada diapositiva</Text>
+          <Field label={tx('Cita')} value={item.ref} onChangeText={(ref) => patch({ ref } as Partial<PresentItem>)} placeholder={tx('Juan 3:16-18')} autoCorrect={false} />
+          {item.ref.trim() && !ok ? <Text style={{ fontSize: 13, color: colors.red }}>{tx('No encontré ese pasaje. Escribilo así: Juan 3:16-18')}</Text> : null}
+          {ok ? <Text style={{ fontSize: 13, color: colors.greenText }}>{slideCount} {slideCount === 1 ? tx('diapositiva') : tx('diapositivas')}</Text> : null}
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Versículos en cada diapositiva')}</Text>
           <Chips options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))} value={item.perSlide} onChange={(perSlide) => patch({ perSlide } as Partial<PresentItem>)} />
           {VERSIONS.length > 1 ? (
             <Chips options={VERSIONS.map((v) => ({ value: v.id as string, label: v.short }))} value={item.version} onChange={(version) => patch({ version } as Partial<PresentItem>)} />
-          ) : <Text style={{ fontSize: 12, color: colors.muted }}>Texto: {VERSIONS[0].name}, la Biblia que trae la app.</Text>}
+          ) : <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Texto: {name}, la Biblia que trae la app.', { name: VERSIONS[0].name })}</Text>}
         </View>
       );
     }
     case 'countdown':
       return (
         <View style={box}>
-          <Stepper label="Minutos" value={item.minutes} text={`${item.minutes} min`} min={1} max={180} onChange={(minutes) => patch({ minutes } as Partial<PresentItem>)} />
-          <Field label="Mensaje" hint="(se ve abajo del reloj y queda al llegar a cero)" value={item.message} onChangeText={(message) => patch({ message } as Partial<PresentItem>)} placeholder="Ya empezamos" />
-          <Text style={{ fontSize: 12, color: colors.muted }}>El reloj arranca cuando mandás la diapositiva a la pantalla.</Text>
+          <Stepper label={tx('Minutos')} value={item.minutes} text={tx('{minutes} min', { minutes: item.minutes })} min={1} max={180} onChange={(minutes) => patch({ minutes } as Partial<PresentItem>)} />
+          <Field label={tx('Mensaje')} hint={tx('(se ve abajo del reloj y queda al llegar a cero)')} value={item.message} onChangeText={(message) => patch({ message } as Partial<PresentItem>)} placeholder={tx('Ya empezamos')} />
+          <Text style={{ fontSize: 12, color: colors.muted }}>{tx('El reloj arranca cuando mandás la diapositiva a la pantalla.')}</Text>
         </View>
       );
     case 'image':
@@ -934,7 +934,7 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
     case 'music':
       return (
         <View style={box}>
-          <Field label="Nombre en la lista" value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} />
+          <Field label={tx('Nombre en la lista')} value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} />
           <MediaField kind={item.type === 'music' ? 'audio' : item.type} media={item.media} churchId={churchId}
             onChange={(media) => patch({ media, ...(media && (!item.title.trim() || item.title === typeInfo(item.type).label) ? { title: media.name.replace(/\.[A-Za-z0-9]+$/, '') } : {}) } as Partial<PresentItem>)} />
         </View>
@@ -942,16 +942,16 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
     case 'text':
       return (
         <View style={box}>
-          <Field label="Nombre en la lista" value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} />
-          <Field label="Texto" value={item.body} onChangeText={(body) => patch({ body } as Partial<PresentItem>)} multiline style={{ minHeight: 180 }} />
-          <Text style={{ fontSize: 12, color: colors.muted }}>Dejá una línea vacía para pasar a otra diapositiva.</Text>
+          <Field label={tx('Nombre en la lista')} value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} />
+          <Field label={tx('Texto')} value={item.body} onChangeText={(body) => patch({ body } as Partial<PresentItem>)} multiline style={{ minHeight: 180 }} />
+          <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Dejá una línea vacía para pasar a otra diapositiva.')}</Text>
         </View>
       );
     case 'notice':
       return (
         <View style={box}>
-          <Field label="Título" value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} placeholder="Reunión de jóvenes" />
-          <Field label="Detalle" value={item.body} onChangeText={(body) => patch({ body } as Partial<PresentItem>)} multiline placeholder="Sábado a las 19 en la iglesia" />
+          <Field label={tx('Título')} value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} placeholder={tx('Reunión de jóvenes')} />
+          <Field label={tx('Detalle')} value={item.body} onChangeText={(body) => patch({ body } as Partial<PresentItem>)} multiline placeholder={tx('Sábado a las 19 en la iglesia')} />
         </View>
       );
     case 'announcements': {
@@ -960,21 +960,21 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
       return (
         <View style={box}>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-            La app arma sola una diapositiva por cada anuncio y por cada evento del calendario. Sirve para dejar pasando antes del culto.
+            {tx('La app arma sola una diapositiva por cada anuncio y por cada evento del calendario. Sirve para dejar pasando antes del culto.')}
           </Text>
-          <Toggle label="Anuncios" hint="Solo los que se mandaron a toda la iglesia." value={item.anns} onChange={(anns) => set({ anns })} />
-          {item.anns ? <Stepper label="De los últimos" value={item.days} text={item.days === 1 ? '1 día' : `${item.days} días`} min={1} max={60} onChange={(days) => set({ days })} /> : null}
-          <Toggle label="Eventos del calendario" hint="Los que vienen." value={item.events} onChange={(events) => set({ events })} />
+          <Toggle label={tx('Anuncios')} hint={tx('Solo los que se mandaron a toda la iglesia.')} value={item.anns} onChange={(anns) => set({ anns })} />
+          {item.anns ? <Stepper label={tx('De los últimos')} value={item.days} text={item.days === 1 ? tx('1 día') : tx('{days} días', { days: item.days })} min={1} max={60} onChange={(days) => set({ days })} /> : null}
+          <Toggle label={tx('Eventos del calendario')} hint={tx('Los que vienen.')} value={item.events} onChange={(events) => set({ events })} />
           {item.events ? (
             <>
-              <Stepper label="De los próximos" value={item.ahead} text={item.ahead === 1 ? '1 día' : `${item.ahead} días`} min={1} max={90} onChange={(ahead) => set({ ahead })} />
-              <Toggle label="Reuniones de todas las semanas" hint="Las que cargaste como reunión semanal en el calendario." value={item.weekly} onChange={(weekly) => set({ weekly })} />
+              <Stepper label={tx('De los próximos')} value={item.ahead} text={item.ahead === 1 ? tx('1 día') : tx('{ahead} días', { ahead: item.ahead })} min={1} max={90} onChange={(ahead) => set({ ahead })} />
+              <Toggle label={tx('Reuniones de todas las semanas')} hint={tx('Las que cargaste como reunión semanal en el calendario.')} value={item.weekly} onChange={(weekly) => set({ weekly })} />
             </>
           ) : null}
-          <Stepper label="Tiempo por diapositiva" value={item.secs} text={`${item.secs} seg`} min={SECS_MIN} max={SECS_MAX} onChange={(secs) => patch({ secs } as Partial<PresentItem>)} />
-          <Button small title={refreshing ? 'Buscando…' : 'Actualizar ahora'} icon="refresh-cw" variant="outline" onPress={refresh} loading={refreshing} />
+          <Stepper label={tx('Tiempo por diapositiva')} value={item.secs} text={tx('{secs} seg', { secs: item.secs })} min={SECS_MIN} max={SECS_MAX} onChange={(secs) => patch({ secs } as Partial<PresentItem>)} />
+          <Button small title={refreshing ? tx('Buscando…') : tx('Actualizar ahora')} icon="refresh-cw" variant="outline" onPress={refresh} loading={refreshing} />
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-            {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'}. {cardsWhen(item)} Se actualizan solas cada vez que abrís esta lista.
+            {tx('{slideCount} {pl}. {cardsWhen} Se actualizan solas cada vez que abrís esta lista.', { slideCount, pl: slideCount === 1 ? tx('diapositiva') : tx('diapositivas'), cardsWhen: cardsWhen(item) })}
           </Text>
         </View>
       );
@@ -982,15 +982,15 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
     case 'sermon':
       return (
         <View style={box}>
-          <Field label="Bosquejo" value={item.outline} onChangeText={(outline) => patch({ outline } as Partial<PresentItem>)} multiline style={{ minHeight: 260 }} autoCorrect={false}
-            placeholder={'El amor de Dios\n1. Dios ama a todos (Juan 3:16)\n- Nadie queda afuera\n2. Dios lo demostró (Romanos 5:8)\n1 Juan 4:9-10'} />
+          <Field label={tx('Bosquejo')} value={item.outline} onChangeText={(outline) => patch({ outline } as Partial<PresentItem>)} multiline style={{ minHeight: 260 }} autoCorrect={false}
+            placeholder={tx('El amor de Dios\n1. Dios ama a todos (Juan 3:16)\n- Nadie queda afuera\n2. Dios lo demostró (Romanos 5:8)\n1 Juan 4:9-10')} />
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-            Pegá el bosquejo. La primera línea es el título. Cada línea es una diapositiva; las que empiezan con guion (-) llevan arriba el punto al que pertenecen. Las citas (Juan 3:16-18, Ro 5:8; 1 Jn 1:9) se abren solas con el texto de la Biblia de la app. Dejá solo lo que querés que se vea.
+            {tx('Pegá el bosquejo. La primera línea es el título. Cada línea es una diapositiva; las que empiezan con guion (-) llevan arriba el punto al que pertenecen. Las citas (Juan 3:16-18, Ro 5:8; 1 Jn 1:9) se abren solas con el texto de la Biblia de la app. Dejá solo lo que querés que se vea.')}
           </Text>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Versículos en cada diapositiva</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Versículos en cada diapositiva')}</Text>
           <Chips options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))} value={item.perSlide} onChange={(perSlide) => patch({ perSlide } as Partial<PresentItem>)} />
           <Text style={{ fontSize: 12, color: colors.muted }}>
-            {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'} · Texto: {versionOf(item.version).name}, la Biblia que trae la app.
+            {tx('{slideCount} {pl} · Texto: {name}, la Biblia que trae la app.', { slideCount, pl: slideCount === 1 ? tx('diapositiva') : tx('diapositivas'), name: versionOf(item.version).name })}
           </Text>
         </View>
       );

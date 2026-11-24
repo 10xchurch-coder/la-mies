@@ -10,6 +10,7 @@ import { useChurchLogo } from './BrandFooter';
 import { useAuth } from '../store/auth';
 import type { DailyContent } from '../types';
 import { TITLE_FONT, VERSE_FONT, VERSE_FONT_BOLD, loadShareFonts } from '../lib/shareFonts';
+import { tx } from '@/lib/i18n';
 
 const PX_W = 1440;
 const PX_H = 2560;
@@ -59,7 +60,7 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
         <View style={{ gap: 6 * k }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 * k }}>
             <Feather name={kind === 'verse' ? 'sun' : 'feather'} size={13 * k} color="rgba(255,255,255,0.85)" />
-            <T style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 * k, fontWeight: '700', letterSpacing: 1.2 * k, textTransform: 'uppercase' }}>{kind === 'verse' ? 'Versículo del día' : 'Para pensar hoy'}</T>
+            <T style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11 * k, fontWeight: '700', letterSpacing: 1.2 * k, textTransform: 'uppercase' }}>{kind === 'verse' ? tx('Versículo del día') : tx('Para pensar hoy')}</T>
           </View>
           {kind === 'verse' ? <T style={{ color: '#FFFFFF', fontSize: 25 * k, ...titleFont, ...shadow }}>{item.reference}</T> : null}
         </View>
@@ -71,8 +72,8 @@ export function ShareShot({ item, kind, onReady }: { item: DailyContent; kind: S
         <View style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 8 * k, maxWidth: '100%', opacity: 0.92 }}>
           {logo ? <Image source={{ uri: logo }} style={{ width: 24 * k, height: 26 * k }} contentFit="contain" cachePolicy="memory-disk" onLoad={() => setLogoOk(true)} onError={() => setLogoOk(true)} /> : null}
           <View style={{ flexShrink: 1 }}>
-            <T numberOfLines={1} style={{ color: '#FFFFFF', fontSize: 12.5 * k, ...nameFont }}>{church?.name ?? 'La Mies'}</T>
-            <T style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9.5 * k, fontWeight: '600', marginTop: 1 * k }}>App La Mies · RV1960</T>
+            <T numberOfLines={1} style={{ color: '#FFFFFF', fontSize: 12.5 * k, ...nameFont }}>{church?.name ?? tx('La Mies')}</T>
+            <T style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9.5 * k, fontWeight: '600', marginTop: 1 * k }}>{tx('App La Mies · RV1960')}</T>
           </View>
         </View>
       </View>

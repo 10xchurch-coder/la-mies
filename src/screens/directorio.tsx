@@ -14,6 +14,7 @@ import { pathOn } from '@/lib/features';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { DirectoryRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Directorio() {
   const { profile, church, refreshProfile } = useAuth();
@@ -54,19 +55,19 @@ export default function Directorio() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Directorio" subtitle="Hermanos que quieren estar en contacto" back />
+      <Header title={tx('Directorio')} subtitle={tx('Hermanos que quieren estar en contacto')} back />
       <Screen>
         <Card style={{ paddingVertical: 4 }}>
-          <Toggle label="Aparecer en el directorio" hint="Tu nombre, foto y teléfono los ven los hermanos de la iglesia" value={visible} onChange={toggle} />
+          <Toggle label={tx('Aparecer en el directorio')} hint={tx('Tu nombre, foto y teléfono los ven los hermanos de la iglesia')} value={visible} onChange={toggle} />
         </Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 46, borderRadius: 12, backgroundColor: colors.bgSoft, paddingHorizontal: 12 }}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar" placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 16, color: colors.text }} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar')} placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 16, color: colors.text }} />
         </View>
         {families.size ? (
-          <Segmented options={[{ value: 'abc', label: 'Por nombre' }, { value: 'familia', label: 'Por familia' }]} value={view} onChange={setView} />
+          <Segmented options={[{ value: 'abc', label: tx('Por nombre') }, { value: 'familia', label: tx('Por familia') }]} value={view} onChange={setView} />
         ) : null}
-        {rows === null ? <Loading /> : !shown.length ? <Empty icon="users" title="Todavía no hay nadie" text="Cuando los hermanos elijan aparecer, los ves acá." /> : null}
+        {rows === null ? <Loading /> : !shown.length ? <Empty icon="users" title={tx('Todavía no hay nadie')} text={tx('Cuando los hermanos elijan aparecer, los ves acá.')} /> : null}
         {groups.map((g) => (
           <React.Fragment key={g.key}>
             {g.title ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.violetText, marginTop: 6 }}>{g.title}</Text> : null}
@@ -79,16 +80,16 @@ export default function Directorio() {
                   {view === 'abc' && families.get(r.id) ? <Text style={{ fontSize: 12, color: colors.muted }}>{families.get(r.id)?.name}</Text> : null}
                 </View>
                 {r.id !== profile?.id && dmOn ? (
-                  <Pressable onPress={() => router.push({ pathname: '/mensajes/[id]', params: { id: r.id, name: r.display_name } } as unknown as Href)} style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel={`Mandarle un mensaje a ${r.display_name}`}>
+                  <Pressable onPress={() => router.push({ pathname: '/mensajes/[id]', params: { id: r.id, name: r.display_name } } as unknown as Href)} style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel={tx('Mandarle un mensaje a {display_name}', { display_name: r.display_name })}>
                     <Feather name="send" size={20} color={colors.violet} />
                   </Pressable>
                 ) : null}
                 {r.phone ? (
                   <>
-                    <Pressable onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} style={{ padding: 8 }} accessibilityLabel={`Llamar a ${r.display_name}`}>
+                    <Pressable onPress={() => Linking.openURL(`tel:${telDigits(r.phone)}`)} style={{ padding: 8 }} accessibilityLabel={tx('Llamar a {display_name}', { display_name: r.display_name })}>
                       <Feather name="phone" size={20} color={colors.green} />
                     </Pressable>
-                    <Pressable onPress={() => Linking.openURL(`https://wa.me/${whatsappNumber(r.phone as string)}`)} style={{ padding: 8 }} accessibilityLabel={`WhatsApp a ${r.display_name}`}>
+                    <Pressable onPress={() => Linking.openURL(`https://wa.me/${whatsappNumber(r.phone as string)}`)} style={{ padding: 8 }} accessibilityLabel={tx('WhatsApp a {display_name}', { display_name: r.display_name })}>
                       <Feather name="message-circle" size={20} color={colors.green} />
                     </Pressable>
                   </>

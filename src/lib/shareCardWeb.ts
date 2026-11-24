@@ -3,6 +3,7 @@
 // "Versículo del día" y la cita arriba, el versículo grande al medio y abajo el logo de la iglesia con su nombre y "App La Mies".
 import { BACKGROUNDS } from './backgroundColors';
 import { chosenPhotoId, dailyPhotoId, photoUrl } from './backgrounds';
+import { tx } from './i18n';
 
 export type CardKind = 'verse' | 'phrase' | 'devotional';
 export type CardInput = {
@@ -165,10 +166,10 @@ export async function renderCardPng(input: CardInput): Promise<Blob> {
   ctx.textAlign = 'left'; ctx.fillStyle = '#FFFFFF'; shadow(3, 0.6);
   ctx.fillText(input.churchName, nameX, rowY - 1, nameMax);
   ctx.font = `600 9.5px ${FONT}`; ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText('App La Mies · RV1960', nameX, rowY + 11);
+  ctx.fillText(tx('App La Mies · RV1960'), nameX, rowY + 11);
   noShadow();
 
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.98));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(tx('No se pudo armar la imagen')))), 'image/jpeg', 0.98));
 }
 
 /** Comparte varias imágenes juntas (versículo, frase y devocional). Si el teléfono no deja, las baja una por una. */

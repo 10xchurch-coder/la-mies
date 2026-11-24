@@ -20,20 +20,21 @@ import { colors } from '@/theme';
 import { downloadText } from '@/lib/download';
 import { toCsv } from '@/lib/desk';
 import type { ChurchService, FollowupRow } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 const TASK_LABEL: Record<string, string> = {
-  call: 'Vino por primera vez: escribirle',
-  write2: 'Vino por segunda vez: escribirle',
-  visit: 'Visitarlo en su casa',
-  absent_visit: 'Está faltando: visitarlo',
+  get call() { return tx('Vino por primera vez: escribirle'); },
+  get write2() { return tx('Vino por segunda vez: escribirle'); },
+  get visit() { return tx('Visitarlo en su casa'); },
+  get absent_visit() { return tx('Está faltando: visitarlo'); },
 };
 
 // Los grupos de "Para hacer esta semana", en este orden. Cada persona va al grupo de su paso más urgente.
 const GROUPS: { key: string; title: string; hint: string; kinds: string[] }[] = [
-  { key: 'first', title: 'Vinieron por primera vez', hint: 'Mandales el mensaje de bienvenida. Al tocar WhatsApp, salen de la lista.', kinds: ['call'] },
-  { key: 'again', title: 'Volvieron otra semana', hint: 'Escribiles y coordiná una visita a su casa.', kinds: ['write2'] },
-  { key: 'visit', title: 'Para visitar en su casa', hint: 'Cuando los visites, tocá “Ya lo visité”.', kinds: ['visit'] },
-  { key: 'absent', title: 'Faltaron 2 semanas: visitarlos', hint: 'Pasá a verlos esta semana. Cuando los visites, tocá “Ya lo visité”.', kinds: ['absent_visit'] },
+  { key: 'first', get title() { return tx('Vinieron por primera vez'); }, get hint() { return tx('Mandales el mensaje de bienvenida. Al tocar WhatsApp, salen de la lista.'); }, kinds: ['call'] },
+  { key: 'again', get title() { return tx('Volvieron otra semana'); }, get hint() { return tx('Escribiles y coordiná una visita a su casa.'); }, kinds: ['write2'] },
+  { key: 'visit', get title() { return tx('Para visitar en su casa'); }, get hint() { return tx('Cuando los visites, tocá “Ya lo visité”.'); }, kinds: ['visit'] },
+  { key: 'absent', get title() { return tx('Faltaron 2 semanas: visitarlos'); }, get hint() { return tx('Pasá a verlos esta semana. Cuando los visites, tocá “Ya lo visité”.'); }, kinds: ['absent_visit'] },
 ];
 const groupOf = (kinds: string[]) => GROUPS.find((g) => g.kinds.some((k) => kinds.includes(k))) ?? GROUPS[2];
 
@@ -58,7 +59,7 @@ export default function Seguimiento() {
     const note = noteText.trim();
     setFollowNote(id, note)
       .then(() => { setCtx((c) => (c[id] ? { ...c, [id]: { ...c[id], note: note || null } } : c)); setNoteFor(null); })
-      .catch((e) => Alert.alert('No se guardó la nota', errorMessage(e)));
+      .catch((e) => Alert.alert(tx('No se guardó la nota'), errorMessage(e)));
   };
   /** Debajo del nombre: por qué está en la lista, qué hacer y la nota. */
   const about = (id: string, promised = false, todo = true) => {
@@ -69,20 +70,20 @@ export default function Seguimiento() {
       <View style={{ gap: 6 }}>
         <View style={{ flexDirection: 'row' }}><Tag text={w.tag} tone={w.tone} /></View>
         <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}>{w.origin}</Text>
-        {todo ? <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}><Text style={{ fontWeight: '800' }}>Qué hacer: </Text>{w.todo}</Text> : null}
-        {c.last_note ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Última visita: “{c.last_note}”</Text> : null}
+        {todo ? <Text style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}><Text style={{ fontWeight: '800' }}>{tx('Qué hacer:')} </Text>{w.todo}</Text> : null}
+        {c.last_note ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Última visita: “{last_note}”', { last_note: c.last_note })}</Text> : null}
         {noteFor === id ? (
           <View style={{ gap: 8 }}>
-            <Field label="Nota" value={noteText} onChangeText={setNoteText} placeholder="Ej: vino con su hermana, vive cerca de la plaza" multiline autoFocus />
+            <Field label={tx('Nota')} value={noteText} onChangeText={setNoteText} placeholder={tx('Ej: vino con su hermana, vive cerca de la plaza')} multiline autoFocus />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Small icon="check" label="Guardar nota" onPress={() => saveNote(id)} />
-              <Small icon="x" label="Cancelar" onPress={() => setNoteFor(null)} />
+              <Small icon="check" label={tx('Guardar nota')} onPress={() => saveNote(id)} />
+              <Small icon="x" label={tx('Cancelar')} onPress={() => setNoteFor(null)} />
             </View>
           </View>
         ) : (
           <Pressable onPress={() => { setNoteFor(id); setNoteText(c.note ?? ''); }} accessibilityRole="button" style={{ flexDirection: 'row', gap: 8, padding: 8, borderRadius: 10, backgroundColor: c.note ? colors.amberSoft : colors.bgSoft }}>
             <Feather name={c.note ? 'file-text' : 'edit-3'} size={15} color={c.note ? colors.amberText : colors.muted} style={{ marginTop: 1 }} />
-            <Text style={{ flex: 1, fontSize: 13, lineHeight: 18, color: c.note ? colors.amberText : colors.muted, fontWeight: c.note ? '600' : '400' }}>{c.note ?? 'Agregar una nota'}</Text>
+            <Text style={{ flex: 1, fontSize: 13, lineHeight: 18, color: c.note ? colors.amberText : colors.muted, fontWeight: c.note ? '600' : '400' }}>{c.note ?? tx('Agregar una nota')}</Text>
           </Pressable>
         )}
       </View>
@@ -133,7 +134,7 @@ export default function Seguimiento() {
     }
     setClearing(false);
     reloadTasks();
-    if (failed) Alert.alert('Quedaron algunos', `${failed} no se pudieron borrar. Probá de nuevo con señal.`);
+    if (failed) Alert.alert(tx('Quedaron algunos'), tx('{failed} no se pudieron borrar. Probá de nuevo con señal.', { failed }));
   };
   const clearAll = () => {
     // "De la semana pasada" = los que vencían antes de este lunes.
@@ -142,10 +143,10 @@ export default function Seguimiento() {
     const people = (list: FirstVisitTask[]) => new Set(list.map((t) => t.contact_id)).size;
     const nAll = people(tasks), nOld = people(old);
     const buttons: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
-    if (nOld && nOld < nAll) buttons.push({ text: `Solo los de antes de esta semana (${nOld})`, style: 'destructive', onPress: () => clearTasks(old) });
-    buttons.push({ text: `Todos (${nAll})`, style: 'destructive', onPress: () => clearTasks([...tasks]) });
-    buttons.push({ text: 'Cancelar', style: 'cancel' });
-    Alert.alert('¿Borrar recordatorios?', 'Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.', buttons);
+    if (nOld && nOld < nAll) buttons.push({ text: tx('Solo los de antes de esta semana ({nOld})', { nOld }), style: 'destructive', onPress: () => clearTasks(old) });
+    buttons.push({ text: tx('Todos ({nAll})', { nAll }), style: 'destructive', onPress: () => clearTasks([...tasks]) });
+    buttons.push({ text: tx('Cancelar'), style: 'cancel' });
+    Alert.alert(tx('¿Borrar recordatorios?'), tx('Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.'), buttons);
   };
 
   const week = Date.now() - 7 * 86400000;
@@ -153,20 +154,20 @@ export default function Seguimiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mis contactos para seguir" subtitle={rows ? `${rows.length} personas · ${pending.length} sin contacto esta semana` : undefined} back />
+      <Header title={tx('Mis contactos para seguir')} subtitle={rows ? tx('{n} personas · {n2} sin contacto esta semana', { n: rows.length, n2: pending.length }) : undefined} back />
       <Screen>
         {tasks.length || rows?.length ? (
-          <Button title="Descargar la lista para visitar" icon="download" variant="outline" small onPress={() => {
-            const due = (t: FirstVisitTask) => (t.overdue ? 'atrasado' : new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }));
-            const taskRows = visitors.map((v) => [v.name, v.phone ? formatPhone(v.phone) : '', v.tasks.map((t) => TASK_LABEL[t.kind] ?? 'Seguir').join(' + '), v.tasks.map(due).join(' / '), '', ctx[v.contact_id]?.note ?? '']);
-            const contactRows = (rows ?? []).map((r) => [r.name, r.phone ? formatPhone(r.phone) : '', r.promise_day ? `Prometió venir ${PROMISE_LABEL[r.promise_day] ?? ''}` : 'Seguir / visitar', r.last_visit ? `último contacto ${fmtDateShort(r.last_visit)}` : 'sin visitas todavía', r.address_hint ?? '', ctx[r.id]?.note ?? '']);
-            downloadText(`para-visitar-${new Date().toISOString().slice(0, 10)}.csv`, toCsv(['Nombre', 'Teléfono', 'Qué hacer', 'Cuándo', 'Dirección', 'Nota'], [...taskRows, ...contactRows])).catch(() => undefined);
+          <Button title={tx('Descargar la lista para visitar')} icon="download" variant="outline" small onPress={() => {
+            const due = (t: FirstVisitTask) => (t.overdue ? 'atrasado' : new Date(t.due_at).toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' }));
+            const taskRows = visitors.map((v) => [v.name, v.phone ? formatPhone(v.phone) : '', v.tasks.map((t) => TASK_LABEL[t.kind] ?? tx('Seguir##seguimiento')).join(' + '), v.tasks.map(due).join(' / '), '', ctx[v.contact_id]?.note ?? '']);
+            const contactRows = (rows ?? []).map((r) => [r.name, r.phone ? formatPhone(r.phone) : '', r.promise_day ? tx('Prometió venir {PROMISE_LABEL}', { PROMISE_LABEL: PROMISE_LABEL[r.promise_day] ?? '' }) : tx('Seguir / visitar'), r.last_visit ? tx('último contacto {fmtDateShort}', { fmtDateShort: fmtDateShort(r.last_visit) }) : tx('sin visitas todavía'), r.address_hint ?? '', ctx[r.id]?.note ?? '']);
+            downloadText(`para-visitar-${new Date().toISOString().slice(0, 10)}.csv`, toCsv([tx('Nombre'), tx('Teléfono'), tx('Qué hacer'), tx('Cuándo'), tx('Dirección'), tx('Nota')], [...taskRows, ...contactRows])).catch(() => undefined);
           }} />
         ) : null}
         {absent && absent.some(Boolean) ? (
           <Card style={{ gap: 6 }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Faltaron el último fin de semana</Text>
-            {[['Faltaron este fin de semana', 'escribirles que los extrañamos'], ['Faltaron 2 semanas seguidas', 'coordinar una visita'], ['Faltaron 3 semanas o más', 'orar, escribirles y visitarlos']].map(([t, what], i) => absent[i] ? (
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Faltaron el último fin de semana')}</Text>
+            {[[tx('Faltaron este fin de semana'), tx('escribirles que los extrañamos')], [tx('Faltaron 2 semanas seguidas'), tx('coordinar una visita')], [tx('Faltaron 3 semanas o más'), 'orar, escribirles y visitarlos']].map(([t, what], i) => absent[i] ? (
               <Pressable key={t} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: String(i + 1) } })} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.border }}>
                 <Text style={{ flex: 1, fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{absent[i]}</Text> {t.toLowerCase()}: {what}</Text>
                 <Feather name="chevron-right" size={18} color={colors.muted} />
@@ -176,8 +177,8 @@ export default function Seguimiento() {
         ) : null}
         {tasks.length ? (
           <Card style={{ gap: 8, borderColor: colors.amber, borderWidth: 1.5, backgroundColor: colors.amberSoft }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Para hacer esta semana</Text>
-            <Text style={{ fontSize: 12, color: colors.amberText }}>El botón de WhatsApp abre el mensaje ya escrito y saca a la persona de la lista. Las visitas a la casa salen cuando tocás “Ya lo visité”.</Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>{tx('Para hacer esta semana')}</Text>
+            <Text style={{ fontSize: 12, color: colors.amberText }}>{tx('El botón de WhatsApp abre el mensaje ya escrito y saca a la persona de la lista. Las visitas a la casa salen cuando tocás “Ya lo visité”.')}</Text>
             {GROUPS.map((g) => ({ g, people: visitors.filter((v) => groupOf(v.tasks.map((t) => t.kind)).key === g.key) })).filter((x) => x.people.length).map(({ g, people }) => (
             <View key={g.key} style={{ gap: 8, marginTop: 6 }}>
               <View style={{ paddingTop: 8, borderTopWidth: 2, borderTopColor: colors.amber }}>
@@ -196,7 +197,7 @@ export default function Seguimiento() {
                       <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{v.name}</Text>
                       {v.tasks.map((t) => (
                         <Text key={t.id} style={{ fontSize: 12, color: t.overdue ? colors.red : colors.muted }}>
-                          {!v.phone && (t.kind === 'call' || t.kind === 'write2') ? `${t.kind === 'call' ? 'Vino por primera vez' : 'Vino por segunda vez'}: conseguir su teléfono o hablarle` : TASK_LABEL[t.kind] ?? 'Seguir'} {t.overdue ? '· atrasado' : `antes del ${new Date(t.due_at).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric' })}`}
+                          {!v.phone && (t.kind === 'call' || t.kind === 'write2') ? tx('{pl}: conseguir su teléfono o hablarle', { pl: t.kind === 'call' ? tx('Vino por primera vez') : tx('Vino por segunda vez') }) : TASK_LABEL[t.kind] ?? tx('Seguir##seguimiento')} {t.overdue ? tx('· atrasado') : tx('antes del {toLocaleDateString}', { toLocaleDateString: new Date(t.due_at).toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric' }) })}
                         </Text>
                       ))}
                     </View>
@@ -212,27 +213,27 @@ export default function Seguimiento() {
                     if (!v.phone && writes.length) {
                       return (
                         <View style={{ gap: 8 }}>
-                          <Text style={{ fontSize: 12, color: colors.amberText }}>No tiene teléfono cargado. Conseguilo, o hablale en persona.</Text>
+                          <Text style={{ fontSize: 12, color: colors.amberText }}>{tx('No tiene teléfono cargado. Conseguilo, o hablale en persona.')}</Text>
                           {addPhone === v.contact_id ? (
                             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-                              <PhoneField label="Teléfono" value={phoneText} onChangeText={setPhoneText} style={{ flex: 1 }} autoFocus />
-                              <Small icon="check" label="Guardar" disabled={!phoneText.trim() || !!phoneProblem(phoneText)} onPress={() => {
+                              <PhoneField label={tx('Teléfono')} value={phoneText} onChangeText={setPhoneText} style={{ flex: 1 }} autoFocus />
+                              <Small icon="check" label={tx('Guardar')} disabled={!phoneText.trim() || !!phoneProblem(phoneText)} onPress={() => {
                                 const phone = formatPhone(phoneText);
                                 updateContact(v.contact_id, { phone }).then(() => { setTasks((cur) => cur.map((x) => (x.contact_id === v.contact_id ? { ...x, phone } : x))); setAddPhone(null); setPhoneText(''); }).catch(() => undefined);
                               }} />
                             </View>
                           ) : (
                             <View style={{ flexDirection: 'row', gap: 8 }}>
-                              <Small icon="phone" label="Agregar teléfono" onPress={() => { setAddPhone(v.contact_id); setPhoneText(''); }} />
+                              <Small icon="phone" label={tx('Agregar teléfono')} onPress={() => { setAddPhone(v.contact_id); setPhoneText(''); }} />
                             </View>
                           )}
                           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                            <Small icon="user-check" label="Le hablé en persona" onPress={() => writes.forEach((t) => done(t, 'in_person'))} />
-                            <Small icon="user-x" label="No lo pude contactar" onPress={() => writes.forEach((t) => done(t, 'unreachable'))} />
+                            <Small icon="user-check" label={tx('Le hablé en persona')} onPress={() => writes.forEach((t) => done(t, 'in_person'))} />
+                            <Small icon="user-x" label={tx('No lo pude contactar')} onPress={() => writes.forEach((t) => done(t, 'unreachable'))} />
                           </View>
                           {visits.length ? (
                             <View style={{ flexDirection: 'row', gap: 8 }}>
-                              <Small icon="check" label="Ya lo visité" onPress={() => visits.forEach((t) => done(t, 'visited'))} />
+                              <Small icon="check" label={tx('Ya lo visité')} onPress={() => visits.forEach((t) => done(t, 'visited'))} />
                             </View>
                           ) : null}
                         </View>
@@ -241,13 +242,13 @@ export default function Seguimiento() {
                     return (
                       <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         {writes.length ? (
-                          <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                          <Small icon="message-circle" label={tx('WhatsApp')} disabled={!v.phone}
                             onPress={() => { openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services })); writes.forEach((t) => done(t, 'wrote')); }} />
                         ) : (
-                          <Small icon="message-circle" label="WhatsApp" disabled={!v.phone}
+                          <Small icon="message-circle" label={tx('WhatsApp')} disabled={!v.phone}
                             onPress={() => openWhatsApp(v.phone, messageText(msg, { to: v.name, from: profile?.display_name, church: church?.name, services }))} />
                         )}
-                        {visits.length ? <Small icon="check" label="Ya lo visité" onPress={() => visits.forEach((t) => done(t, 'visited'))} /> : null}
+                        {visits.length ? <Small icon="check" label={tx('Ya lo visité')} onPress={() => visits.forEach((t) => done(t, 'visited'))} /> : null}
                       </View>
                     );
                   })()}
@@ -259,11 +260,11 @@ export default function Seguimiento() {
             <Pressable onPress={clearAll} disabled={clearing} accessibilityRole="button"
               style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 42, marginTop: 4, borderRadius: 10, borderWidth: 1, borderColor: colors.amberText, opacity: clearing ? 0.5 : 1 }}>
               <Feather name="trash-2" size={16} color={colors.amberText} />
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{clearing ? 'Borrando…' : `Borrar recordatorios (${visitors.length})`}</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{clearing ? tx('Borrando…') : tx('Borrar recordatorios ({n})', { n: visitors.length })}</Text>
             </Pressable>
           </Card>
         ) : null}
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title="No tenés contactos para seguir" text="Los contactos que anotás en las salidas (o que te asignan) aparecen acá." /> : null}
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title={tx('No tenés contactos para seguir')} text={tx('Los contactos que anotás en las salidas (o que te asignan) aparecen acá.')} /> : null}
         {(rows ?? []).map((r) => {
           const stale = !r.last_visit || new Date(r.last_visit).getTime() < week;
           return (
@@ -273,16 +274,16 @@ export default function Seguimiento() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{r.name}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>
-                    {r.last_visit ? `Último contacto: ${fmtRelativeDay(r.last_visit)}` : 'Sin visitas todavía'}{r.address_hint ? ` · ${r.address_hint}` : ''}
+                    {r.last_visit ? tx('Último contacto: {fmtRelativeDay}', { fmtRelativeDay: fmtRelativeDay(r.last_visit) }) : tx('Sin visitas todavía')}{r.address_hint ? ` · ${r.address_hint}` : ''}
                   </Text>
                 </View>
-                {r.promise_day ? <Tag text={`Prometió ${PROMISE_LABEL[r.promise_day] ?? ''}`} tone="amber" /> : r.interest ? <Tag text={INTEREST_LABEL[r.interest] ?? r.interest} tone={r.interest === 'very' ? 'green' : 'gray'} /> : null}
+                {r.promise_day ? <Tag text={tx('Prometió {PROMISE_LABEL}', { PROMISE_LABEL: PROMISE_LABEL[r.promise_day] ?? '' })} tone="amber" /> : r.interest ? <Tag text={INTEREST_LABEL[r.interest] ?? r.interest} tone={r.interest === 'very' ? 'green' : 'gray'} /> : null}
               </Pressable>
               {about(r.id, !!r.promise_day)}
               <CareMarks id={r.id} />
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Small icon="message-circle" label="WhatsApp" disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
-                <Small icon="check-square" label={stale ? 'Visité' : 'Visitado'} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />
+                <Small icon="message-circle" label={tx('WhatsApp')} disabled={!r.phone} onPress={() => chooseWhatsApp(r.phone, { to: r.name, from: profile?.display_name, church: church?.name, promiseDay: r.promise_day, services }, r.promise_day ? ['promise', 'followup', 'visit'] : ['followup', 'visit', 'promise'])} />
+                <Small icon="check-square" label={stale ? tx('Visité') : tx('Visitado')} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.id, visita: '1' } })} />
               </View>
             </Card>
           );

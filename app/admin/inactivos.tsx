@@ -9,6 +9,7 @@ import { MONTH_CHOICES, monthsLabel, parseMonths } from '@/lib/inactive';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function InactivosAjustes() {
   const { can, church, refreshProfile } = useAuth();
@@ -27,47 +28,47 @@ export default function InactivosAjustes() {
     return () => clearTimeout(t);
   }, [months]);
 
-  if (!can('admin.permisos')) return <Empty icon="lock" title="Solo el pastor o el administrador de la app" />;
+  if (!can('admin.permisos')) return <Empty icon="lock" title={tx('Solo el pastor o el administrador de la app')} />;
 
   const save = async () => {
-    if (pick === 'other' && !months) { Alert.alert('Cantidad no válida', 'Escribí una cantidad de meses entre 1 y 120.'); return; }
+    if (pick === 'other' && !months) { Alert.alert(tx('Cantidad no válida'), tx('Escribí una cantidad de meses entre 1 y 120.')); return; }
     setBusy(true);
     try {
       await setInactiveMonths(months);
       await refreshProfile();
       if (months && preview) {
-        Alert.alert('Guardado', `${preview} ${preview === 1 ? 'persona pasa' : 'personas pasan'} a inactivos. ¿Moverlas ahora o esperar a la revisión automática (dentro de la próxima hora)?`, [
-          { text: 'Esperar', style: 'cancel', onPress: () => router.back() },
-          { text: 'Mover ahora', onPress: async () => { try { const n = await inactiveSweepNow(); Alert.alert('Listo', `${n} ${n === 1 ? 'persona pasó' : 'personas pasaron'} a inactivos.`); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } router.back(); } },
+        Alert.alert(tx('Guardado'), tx('{preview} {pl} a inactivos. ¿Moverlas ahora o esperar a la revisión automática (dentro de la próxima hora)?', { preview, pl: preview === 1 ? tx('persona pasa') : tx('personas pasan') }), [
+          { text: tx('Esperar'), style: 'cancel', onPress: () => router.back() },
+          { text: tx('Mover ahora'), onPress: async () => { try { const n = await inactiveSweepNow(); Alert.alert(tx('Listo'), tx('{n} {pl} a inactivos.', { n, pl: n === 1 ? tx('persona pasó') : tx('personas pasaron') })); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } router.back(); } },
         ]);
       } else router.back();
-    } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
+    } catch (e) { Alert.alert(tx('No se pudo guardar'), errorMessage(e)); } finally { setBusy(false); }
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Inactivos" subtitle="Sacar de miembros a los que no vienen" back />
+      <Header title={tx('Inactivos')} subtitle={tx('Sacar de miembros a los que no vienen')} back />
       <Screen>
         <Card style={{ gap: 10 }}>
           <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-            Un miembro que no viene en este tiempo sale de la lista de miembros y pasa a <Text style={{ fontWeight: '800' }}>Inactivos</Text>. No se borra nada: queda con sus datos y su teléfono. Si vuelve y se le toma asistencia, vuelve solo a miembros.
+            {tx('Un miembro que no viene en este tiempo sale de la lista de miembros y pasa a')} <Text style={{ fontWeight: '800' }}>{tx('Inactivos')}</Text>{tx('. No se borra nada: queda con sus datos y su teléfono. Si vuelve y se le toma asistencia, vuelve solo a miembros.')}
           </Text>
-          <SectionTitle>Pasa a inactivos después de</SectionTitle>
+          <SectionTitle>{tx('Pasa a inactivos después de')}</SectionTitle>
           <Choice
-            options={[{ value: 'off', label: 'Apagado' }, ...MONTH_CHOICES.map((m) => ({ value: String(m), label: monthsLabel(m) })), { value: 'other', label: 'Otra cantidad' }]}
+            options={[{ value: 'off', label: tx('Apagado') }, ...MONTH_CHOICES.map((m) => ({ value: String(m), label: monthsLabel(m) })), { value: 'other', label: tx('Otra cantidad') }]}
             value={pick} onChange={setPick} />
-          {pick === 'other' ? <Field label="Cantidad de meses" value={other} onChangeText={setOther} keyboardType="number-pad" placeholder="Ejemplo: 4" /> : null}
+          {pick === 'other' ? <Field label={tx('Cantidad de meses')} value={other} onChangeText={setOther} keyboardType="number-pad" placeholder={tx('Ejemplo: 4')} /> : null}
           {months ? (
             <Text style={{ fontSize: 13, color: colors.muted }}>
-              {preview === null ? 'Contando…' : preview === 0 ? `Hoy nadie lleva ${monthsLabel(months)} sin venir.` : `Hoy ${preview} ${preview === 1 ? 'miembro lleva' : 'miembros llevan'} ${monthsLabel(months)} o más sin venir.`}
+              {preview === null ? tx('Contando…') : preview === 0 ? tx('Hoy nadie lleva {monthsLabel} sin venir.', { monthsLabel: monthsLabel(months) }) : tx('Hoy {preview} {pl} {monthsLabel} o más sin venir.', { preview, pl: preview === 1 ? tx('miembro lleva') : tx('miembros llevan'), monthsLabel: monthsLabel(months) })}
             </Text>
           ) : null}
           <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-            Cuenta el culto, las clases, el colectivo y la entrada de los chicos. El tiempo se empieza a contar desde que la iglesia toma asistencia en la app, así que nadie pasa solo antes de tiempo. No se mueve solo a quien tiene un cargo, ni a quien marques como “nunca moverlo solo” en su ficha.
+            {tx('Cuenta el culto, las clases, el colectivo y la entrada de los chicos. El tiempo se empieza a contar desde que la iglesia toma asistencia en la app, así que nadie pasa solo antes de tiempo. No se mueve solo a quien tiene un cargo, ni a quien marques como “nunca moverlo solo” en su ficha.')}
           </Text>
-          <Button title="Guardar" onPress={save} loading={busy} />
+          <Button title={tx('Guardar')} onPress={save} loading={busy} />
         </Card>
-        <Button title="Ver la lista de inactivos" icon="user-x" variant="outline" onPress={() => router.push('/inactivos' as Href)} />
+        <Button title={tx('Ver la lista de inactivos')} icon="user-x" variant="outline" onPress={() => router.push('/inactivos' as Href)} />
       </Screen>
     </View>
   );

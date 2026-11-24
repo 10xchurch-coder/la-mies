@@ -4,6 +4,7 @@
 //   sumando parada por parada en el orden de la ruta.
 // Sin nada de la base ni de la pantalla, para poder probarse solo.
 import { haversine, type LatLng } from './geo';
+import { tx } from './i18n';
 
 export const ROAD_FACTOR = 1.4;
 export const BUS_KMH = 25;
@@ -85,8 +86,8 @@ export function stopsToNotify(bus: LatLng, stops: StopLike[]): string[] {
 export function etaLabel(minutes: number | undefined | null): string {
   if (minutes == null || !Number.isFinite(minutes)) return '';
   const m = Math.round(minutes);
-  if (m <= 1) return 'llega en 1 minuto';
-  return `llega en unos ${m} minutos`;
+  if (m <= 1) return tx('llega en 1 minuto');
+  return tx('llega en unos {m} minutos', { m });
 }
 
 /** El pedazo de mapa donde entran todos los puntos (con un poco de margen), y nunca más cerca que ~1 km. */

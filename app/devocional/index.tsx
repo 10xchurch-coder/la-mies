@@ -33,6 +33,7 @@ import { useKeyboardHeight } from '@/lib/keyboard';
 import { colors, themed } from '@/theme';
 import type { DailyComment, DailyContent, DailySocial, ReadingStreak } from '@/types';
 import { moderate } from '@/lib/moderation';
+import { tx } from '@/lib/i18n';
 
 type Slide = 'verse' | 'phrase' | 'reading' | 'full';
 
@@ -65,8 +66,8 @@ function plain(text: string): string {
 }
 
 function dayLabel(date: string, today: string): string {
-  if (date === today) return 'Hoy';
-  if (date === isoDate(addDays(new Date(`${today}T12:00:00`), -1))) return 'Ayer';
+  if (date === today) return tx('Hoy');
+  if (date === isoDate(addDays(new Date(`${today}T12:00:00`), -1))) return tx('Ayer');
   return fmtDateShort(date);
 }
 
@@ -113,8 +114,8 @@ export default function Devocional() {
 
   useEffect(() => {
     if (streak?.read_today && streak.current > 0 && [7, 30, 365].includes(streak.current) && date === today) {
-      const label = streak.current === 7 ? 'una semana' : streak.current === 30 ? 'un mes' : 'un año';
-      Alert.alert('¡Felicitaciones!', `Llevás ${label} seguida leyendo la Palabra cada día. Seguí así.`);
+      const label = streak.current === 7 ? tx('una semana') : streak.current === 30 ? tx('un mes') : tx('un año');
+      Alert.alert(tx('¡Felicitaciones!'), tx('Llevás {label} seguida leyendo la Palabra cada día. Seguí así.', { label: tx(label) }));
     }
   }, [streak?.current, streak?.read_today]);
 
@@ -133,7 +134,7 @@ export default function Devocional() {
     for (const kind of ['verse', ...(item.message ? ['phrase'] : []), ...(item.devotional ? ['devotional'] : [])] as CardKind[]) {
       const key = cardKeyOf(kind);
       if (!key || cards.current[key]) continue;
-      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, devotional: item.devotional ? plain(item.devotional) : null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? 'La Mies', logoUrl, uploadedUrl: uploaded });
+      const p = renderCardPng({ kind, reference: item.reference, verse: item.verse, message: item.message ?? null, devotional: item.devotional ? plain(item.devotional) : null, background: bg ?? null, onDate: item.on_date, churchName: church?.name ?? tx('La Mies'), logoUrl, uploadedUrl: uploaded });
       p.catch(() => { delete cards.current[key]; });
       cards.current[key] = p;
     }
@@ -151,7 +152,7 @@ export default function Devocional() {
     setDate(d);
   };
 
-  const churchName = church?.name ?? 'La Mies';
+  const churchName = church?.name ?? tx('La Mies');
   const verseText = item ? `"${item.verse}"\n${item.reference} (RV1960)` : '';
   const fullText = item
     ? [
@@ -181,7 +182,7 @@ export default function Devocional() {
         const site = church?.website ? (/^https?:/.test(church.website) ? church.website : `https://${church.website}`) : WEB_URL;
         const blob = await cards.current[key];
         const r = await shareCardBlob(blob, `${churchName} · ${site}`, `${kind === 'phrase' ? 'frase' : 'versiculo'}-${item.on_date}.png`);
-        if (r === 'downloaded') Alert.alert('Imagen guardada', 'Quedó guardada en tu teléfono (en Descargas o en Archivos). Ahora podés mandarla por WhatsApp o subirla a tus estados.');
+        if (r === 'downloaded') Alert.alert(tx('Imagen guardada'), tx('Quedó guardada en tu teléfono (en Descargas o en Archivos). Ahora podés mandarla por WhatsApp o subirla a tus estados.'));
         return;
       } catch { /* si falla, se comparte el texto */ }
     }
@@ -206,11 +207,11 @@ export default function Devocional() {
         : false;
       if (!ok) {
         const r = await shareText(fallback);
-        if (r === 'copied') Alert.alert('Texto copiado', 'Quedó copiado para pegarlo donde quieras. Para compartirlo como imagen, usá la app del teléfono.');
+        if (r === 'copied') Alert.alert(tx('Texto copiado'), tx('Quedó copiado para pegarlo donde quieras. Para compartirlo como imagen, usá la app del teléfono.'));
       }
     } catch (e) {
       setShot(null);
-      Alert.alert('No se pudo compartir', errorMessage(e));
+      Alert.alert(tx('No se pudo compartir'), errorMessage(e));
     }
   };
 
@@ -221,7 +222,7 @@ export default function Devocional() {
     if (Platform.OS === 'web') { setTimeout(() => setTextShare(text), 350); return; }
     // En el iPhone el menú de compartir no abre si la hoja de abajo todavía se está cerrando: hay que esperar a que termine.
     await new Promise((r) => setTimeout(r, 700));
-    if ((await tryShareText(text, 'Devocional')) === 'failed') setTextShare(text);
+    if ((await tryShareText(text, tx('Devocional'))) === 'failed') setTextShare(text);
   };
 
   // En la app de Android: los tres juntos en texto. En la web (iPhone) lo resuelve la misma hoja de compartir, con imágenes.
@@ -253,7 +254,7 @@ export default function Devocional() {
       await setDailyLike(item.on_date, next);
     } catch (e) {
       setSocial(social);
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     }
   };
 
@@ -272,13 +273,13 @@ export default function Devocional() {
         <StatusBar style="light" />
         <Feather name={failed ? 'wifi-off' : 'book-open'} size={40} color="#FFF" />
         <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '800', textAlign: 'center' }}>
-          {failed ? 'No se pudo cargar el devocional' : 'Todavía no hay versículo para este día'}
+          {failed ? tx('No se pudo cargar el devocional') : tx('Todavía no hay versículo para este día')}
         </Text>
         <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 14, textAlign: 'center', lineHeight: 20 }}>
-          {failed ? 'Revisá la conexión y probá de nuevo. Si sigue igual, cerrá la app y volvé a abrirla.' : isStaff ? 'Cargalo desde Iglesia → Devocionales.' : 'El pastor o la secretaría lo van a cargar.'}
+          {failed ? tx('Revisá la conexión y probá de nuevo. Si sigue igual, cerrá la app y volvé a abrirla.') : isStaff ? tx('Cargalo desde Iglesia → Devocionales.') : tx('El pastor o la secretaría lo van a cargar.')}
         </Text>
-        {failed ? <Button title="Reintentar" icon="refresh-cw" onPress={() => load(date)} /> : null}
-        <Button title="Cerrar" variant="outline" onPress={() => router.back()} />
+        {failed ? <Button title={tx('Reintentar')} icon="refresh-cw" onPress={() => load(date)} /> : null}
+        <Button title={tx('Cerrar')} variant="outline" onPress={() => router.back()} />
       </View>
     );
   }
@@ -295,7 +296,7 @@ export default function Devocional() {
         <View pointerEvents="none" style={{ position: 'absolute', zIndex: 20, top: 0, bottom: 0, left: 0, right: 0, alignItems: 'center', justifyContent: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 18, paddingVertical: 12, borderRadius: 14, backgroundColor: 'rgba(0,0,0,0.75)' }}>
             <ActivityIndicator color="#FFF" />
-            <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700' }}>Preparando la imagen…</Text>
+            <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '700' }}>{tx('Preparando la imagen…')}</Text>
           </View>
         </View>
       ) : null}
@@ -320,7 +321,7 @@ export default function Devocional() {
               ) : s === 'phrase' ? (
                 <View ref={(r) => { slideRefs.current.phrase = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
                   <DayBackground background={item.background} date={item.on_date} width={W} height={H} />
-                  <Text style={styles.slideLabel}>Para pensar hoy</Text>
+                  <Text style={styles.slideLabel}>{tx('Para pensar hoy')}</Text>
                   <View style={{ flex: 1, justifyContent: 'center', gap: 18 }}>
                     <Text style={styles.phrase}>{item.message}</Text>
                     <Text style={styles.slideRef}>{item.reference}</Text>
@@ -330,7 +331,7 @@ export default function Devocional() {
               ) : s === 'reading' ? (
                 <View ref={(r) => { slideRefs.current.reading = r; }} collapsable={false} style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom }]}>
                   <DayBackground background={item.background} date={item.on_date} width={W} height={H} dim="strong" />
-                  <Text style={styles.slideLabel}>Lectura de hoy · {item.reference}</Text>
+                  <Text style={styles.slideLabel}>{tx('Lectura de hoy · {reference}', { reference: item.reference })}</Text>
                   <ScrollView style={{ flex: 1, marginVertical: 14 }} contentContainerStyle={{ gap: 14, flexGrow: 1, justifyContent: 'center' }} nestedScrollEnabled>
                     <Paragraphs text={item.devotional as string} size={18} color="#FFFFFF" headingColor="#FFFFFF" />
                   </ScrollView>
@@ -340,13 +341,13 @@ export default function Devocional() {
                 <View style={[styles.slide, { paddingTop: padTop, paddingBottom: padBottom, alignItems: 'center', justifyContent: 'center', gap: 14 }]}>
                   <DayBackground background={item.background} date={item.on_date} width={W} height={H} dim="strong" />
                   <Feather name="book-open" size={50} color="#FFFFFF" />
-                  <Text style={styles.fullTitle}>Devocional completo</Text>
+                  <Text style={styles.fullTitle}>{tx('Devocional completo')}</Text>
                   <Text style={styles.fullText}>
-                    La lectura de hoy, {item.study ? 'el estudio de 5 a 10 minutos ' : ''}y una oración para terminar. Para leer con calma y compartir.
+                    {tx('La lectura de hoy, {pl}y una oración para terminar. Para leer con calma y compartir.', { pl: item.study ? tx('el estudio de 5 a 10 minutos ') : '' })}
                   </Text>
                   <Pressable onPress={() => setSheet('reader')} style={styles.readBtn} accessibilityRole="button">
                     <Feather name="maximize-2" size={17} color="#1F6B45" />
-                    <Text style={{ color: '#1F6B45', fontWeight: '800', fontSize: 16 }}>Leer ahora</Text>
+                    <Text style={{ color: '#1F6B45', fontWeight: '800', fontSize: 16 }}>{tx('Leer ahora')}</Text>
                   </Pressable>
                 </View>
               )}
@@ -357,9 +358,9 @@ export default function Devocional() {
         {/* Tocar a los costados también pasa de página (como los estados de WhatsApp). */}
         {slides.length > 1 ? (
           <>
-            <Pressable onPress={() => page > 0 && goTo(page - 1)} accessibilityRole="button" accessibilityLabel="Página anterior"
+            <Pressable onPress={() => page > 0 && goTo(page - 1)} accessibilityRole="button" accessibilityLabel={tx('Página anterior')}
               style={{ position: 'absolute', left: 0, top: padTop, bottom: padBottom, width: W * (slides[page] === 'reading' ? 0.16 : 0.26) }} />
-            <Pressable onPress={() => page < slides.length - 1 && goTo(page + 1)} accessibilityRole="button" accessibilityLabel="Página siguiente"
+            <Pressable onPress={() => page < slides.length - 1 && goTo(page + 1)} accessibilityRole="button" accessibilityLabel={tx('Página siguiente')}
               style={{ position: 'absolute', right: 0, top: padTop, bottom: padBottom, width: W * (slides[page] === 'reading' ? 0.16 : 0.26) }} />
           </>
         ) : null}
@@ -368,25 +369,25 @@ export default function Devocional() {
         <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
           <View style={{ flexDirection: 'row', gap: 4 }}>
             {slides.map((s, i) => (
-              <Pressable key={s} onPress={() => goTo(i)} style={{ flex: 1, paddingVertical: 6 }} accessibilityLabel={`Ir a la parte ${i + 1}`}>
+              <Pressable key={s} onPress={() => goTo(i)} style={{ flex: 1, paddingVertical: 6 }} accessibilityLabel={tx('Ir a la parte {v1}', { v1: i + 1 })}>
                 <View style={[styles.seg, i <= page && styles.segOn]} />
               </Pressable>
             ))}
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Pressable onPress={() => router.back()} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel="Cerrar">
+            <Pressable onPress={() => router.back()} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel={tx('Cerrar')}>
               <Feather name="x" size={22} color="#FFF" />
             </Pressable>
             <View style={{ flex: 1 }}>
               <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '800' }} numberOfLines={1}>{dayLabel(item.on_date, today)}</Text>
-              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }} numberOfLines={1}>Devocional · {churchName}</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }} numberOfLines={1}>{tx('Devocional · {churchName}', { churchName })}</Text>
             </View>
             {isStaff ? (
-              <Pressable onPress={() => router.push('/admin/devocionales')} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel="Cargar devocionales">
+              <Pressable onPress={() => router.push('/admin/devocionales')} style={styles.roundBtn} accessibilityRole="button" accessibilityLabel={tx('Cargar devocionales')}>
                 <Feather name="edit-3" size={18} color="#FFF" />
               </Pressable>
             ) : null}
-            <Pressable onPress={() => setSheet('streak')} style={styles.streakChip} accessibilityRole="button" accessibilityLabel="Mi racha">
+            <Pressable onPress={() => setSheet('streak')} style={styles.streakChip} accessibilityRole="button" accessibilityLabel={tx('Mi racha')}>
               <Feather name="zap" size={15} color="#FFD54A" />
               <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>{streak?.current ?? 0}</Text>
             </Pressable>
@@ -395,14 +396,14 @@ export default function Devocional() {
 
         {/* Abajo: compartir, comentarios, corazón y días anteriores. */}
         <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 14 }]}>
-          <Action icon={<Feather name="share-2" size={24} color="#FFF" />} label="Compartir" onPress={() => setSheet('share')} />
-          <Action icon={<Feather name="message-circle" size={24} color="#FFF" />} label={social.comments ? String(social.comments) : 'Comentar'} onPress={() => setSheet('comments')} />
+          <Action icon={<Feather name="share-2" size={24} color="#FFF" />} label={tx('Compartir')} onPress={() => setSheet('share')} />
+          <Action icon={<Feather name="message-circle" size={24} color="#FFF" />} label={social.comments ? String(social.comments) : tx('Comentar')} onPress={() => setSheet('comments')} />
           <Action
             icon={<Ionicons name={social.liked ? 'heart' : 'heart-outline'} size={26} color={social.liked ? '#FF5A6E' : '#FFF'} />}
-            label={social.likes ? String(social.likes) : 'Me gusta'}
+            label={social.likes ? String(social.likes) : tx('Me gusta')}
             onPress={toggleLike}
           />
-          <Action icon={<Feather name="calendar" size={24} color="#FFF" />} label="Días anteriores" onPress={() => setSheet('days')} />
+          <Action icon={<Feather name="calendar" size={24} color="#FFF" />} label={tx('Días anteriores')} onPress={() => setSheet('days')} />
         </View>
       </View>
 
@@ -443,24 +444,24 @@ function TextShareSheet({ text, onClose }: { text: string | null; onClose: () =>
   );
   return (
     <Modal visible={!!text} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={tx('Cerrar')} />
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, padding: 18, gap: 6 }]}>
-        <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Compartir</Text>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Compartir')}</Text>
         <Text style={{ fontSize: 13, color: colors.muted, marginBottom: 6 }} numberOfLines={4}>{text ?? ''}</Text>
-        {row(<Ionicons name="logo-whatsapp" size={22} color={colors.greenText} />, 'Enviar por WhatsApp', 'Elegís a quién mandárselo', () => {
+        {row(<Ionicons name="logo-whatsapp" size={22} color={colors.greenText} />, tx('Enviar por WhatsApp'), tx('Elegís a quién mandárselo'), () => {
           Linking.openURL(`https://wa.me/?text=${encodeURIComponent(text ?? '')}`).catch(() => undefined);
           onClose();
         })}
-        {row(<Feather name="copy" size={20} color={colors.greenText} />, 'Copiar el texto', 'Para pegarlo donde quieras', () => {
-          Clipboard.setStringAsync(text ?? '').then(() => Alert.alert('Copiado', 'Quedó copiado para pegarlo donde quieras.')).catch(() => Alert.alert('No se pudo copiar', 'Probá con el botón de WhatsApp.'));
+        {row(<Feather name="copy" size={20} color={colors.greenText} />, tx('Copiar el texto'), tx('Para pegarlo donde quieras'), () => {
+          Clipboard.setStringAsync(text ?? '').then(() => Alert.alert(tx('Copiado'), tx('Quedó copiado para pegarlo donde quieras.'))).catch(() => Alert.alert(tx('No se pudo copiar'), tx('Probá con el botón de WhatsApp.')));
           onClose();
         })}
         {Platform.OS === 'web' && typeof (globalThis.navigator as { share?: unknown } | undefined)?.share === 'function'
-          ? row(<Feather name="share" size={20} color={colors.greenText} />, 'Otra app', 'Abre el menú de compartir del teléfono', () => {
+          ? row(<Feather name="share" size={20} color={colors.greenText} />, tx('Otra app'), tx('Abre el menú de compartir del teléfono'), () => {
             const t = text ?? '';
             onClose();
             (globalThis.navigator as Navigator).share({ text: t }).catch((e: { name?: string; message?: string }) => {
-              if (e?.name !== 'AbortError') Alert.alert('El teléfono no abrió su menú', `Usá WhatsApp o Copiar el texto. (${e?.name ?? 'error'})`);
+              if (e?.name !== 'AbortError') Alert.alert(tx('El teléfono no abrió su menú'), tx('Usá WhatsApp o Copiar el texto. ({name})', { name: e?.name ?? tx('error') }));
             });
           })
           : null}
@@ -484,18 +485,18 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onDevo, onThree, threeFi
     // En la app del teléfono: se elige cuál mandar (el teléfono comparte una imagen por vez).
     if (!threeFiles) { setThree({ files: [], note: '' }); return; }
     setThree({ files: null, note: '' });
-    threeFiles().then((files) => setThree({ files, note: '' })).catch((e) => setThree({ files: [], note: `No se pudieron armar las imágenes (${errorMessage(e)}).` }));
+    threeFiles().then((files) => setThree({ files, note: '' })).catch((e) => setThree({ files: [], note: tx('No se pudieron armar las imágenes ({errorMessage}).', { errorMessage: errorMessage(e) }) }));
   };
   const say = (note: string) => setThree((t) => (t ? { ...t, note } : t));
   const share = (files: File[], all: boolean) => {
     const nav = globalThis.navigator as Navigator & { canShare?: (d: unknown) => boolean };
     if (!nav?.share || (nav.canShare && !nav.canShare({ files }))) {
-      say(all ? 'Este teléfono no deja compartir las tres juntas. Compartilas de a una con los botones de abajo, o guardalas.' : 'Este teléfono no deja compartir la imagen. Tocá "Guardar las imágenes".');
+      say(all ? tx('Este teléfono no deja compartir las tres juntas. Compartilas de a una con los botones de abajo, o guardalas.') : tx('Este teléfono no deja compartir la imagen. Tocá "Guardar las imágenes".'));
       return;
     }
-    nav.share({ files }).then(() => say('¡Listo!')).catch((e: { name?: string }) => {
-      if (e?.name === 'AbortError') say(all ? 'No se compartió. Si el menú no se abrió, compartilas de a una con los botones de abajo.' : 'No se compartió.');
-      else say(`El teléfono no abrió su menú (${e?.name ?? 'error'}). ${all ? 'Compartilas de a una con los botones de abajo, o guardalas.' : 'Tocá "Guardar las imágenes".'}`);
+    nav.share({ files }).then(() => say(tx('¡Listo!'))).catch((e: { name?: string }) => {
+      if (e?.name === 'AbortError') say(all ? tx('No se compartió. Si el menú no se abrió, compartilas de a una con los botones de abajo.') : tx('No se compartió.'));
+      else say(tx('El teléfono no abrió su menú ({name}). {pl}', { name: e?.name ?? tx('error'), pl: all ? tx('Compartilas de a una con los botones de abajo, o guardalas.') : tx('Tocá "Guardar las imágenes".') }));
     });
   };
   const save = (files: File[]) => {
@@ -505,54 +506,54 @@ function ShareSheet({ visible, item, onVerse, onPhrase, onDevo, onThree, threeFi
       a.download = f.name;
       document.body.appendChild(a); a.click(); a.remove();
     }
-    say('Quedaron guardadas en tu teléfono (en Descargas o en Archivos).');
+    say(tx('Quedaron guardadas en tu teléfono (en Descargas o en Archivos).'));
   };
-  const names = ['El versículo', 'La frase', 'El devocional'];
+  const names = [tx('El versículo'), tx('La frase'), tx('El devocional')];
   const options: { key: string; icon: React.ComponentProps<typeof Feather>['name']; title: string; hint: string; onPress: () => void; show: boolean }[] = [
-    { key: 'verse', icon: 'image', title: 'Solo el versículo', hint: 'Una imagen con el versículo, lista para WhatsApp o tus estados', onPress: onVerse, show: true },
-    { key: 'three', icon: 'layers', title: 'Versículo, frase y devocional corto', hint: threeFiles ? 'Tres imágenes, listas para WhatsApp' : 'Como imágenes o los tres en texto', onPress: openThree, show: !!(item.message || item.devotional) },
-    { key: 'phrase', icon: 'message-square', title: 'Solo la frase del día', hint: 'Una imagen con la frase', onPress: onPhrase, show: !!item.message },
-    { key: 'full', icon: 'book-open', title: 'El devocional completo', hint: 'Con el estudio y la oración, en texto', onPress: onFull, show: !!(item.study || item.prayer) },
+    { key: 'verse', icon: 'image', title: tx('Solo el versículo'), hint: tx('Una imagen con el versículo, lista para WhatsApp o tus estados'), onPress: onVerse, show: true },
+    { key: 'three', icon: 'layers', title: tx('Versículo, frase y devocional corto'), hint: threeFiles ? tx('Tres imágenes, listas para WhatsApp') : tx('Como imágenes o los tres en texto'), onPress: openThree, show: !!(item.message || item.devotional) },
+    { key: 'phrase', icon: 'message-square', title: tx('Solo la frase del día'), hint: tx('Una imagen con la frase'), onPress: onPhrase, show: !!item.message },
+    { key: 'full', icon: 'book-open', title: tx('El devocional completo'), hint: tx('Con el estudio y la oración, en texto'), onPress: onFull, show: !!(item.study || item.prayer) },
   ];
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Cerrar" />
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={tx('Cerrar')} />
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 16, padding: 18, gap: 6 }]}>
         {three ? (
           <View style={{ gap: 10 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Pressable onPress={() => setThree(null)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Volver"><Feather name="chevron-left" size={24} color={colors.text} /></Pressable>
-              <Text style={{ flex: 1, fontSize: 18, fontWeight: '800', color: colors.text }}>Versículo, frase y devocional</Text>
+              <Pressable onPress={() => setThree(null)} hitSlop={10} accessibilityRole="button" accessibilityLabel={tx('Volver')}><Feather name="chevron-left" size={24} color={colors.text} /></Pressable>
+              <Text style={{ flex: 1, fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Versículo, frase y devocional')}</Text>
             </View>
             {three.files === null ? (
-              <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 14 }}>Armando las imágenes…</Text>
+              <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 14 }}>{tx('Armando las imágenes…')}</Text>
             ) : !threeFiles ? (
               <>
-                <Text style={{ fontSize: 13, color: colors.muted }}>Tocá cada una para mandarla como imagen:</Text>
+                <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Tocá cada una para mandarla como imagen:')}</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Button title="El versículo" variant="outline" small onPress={onVerse} style={{ flex: 1 }} />
-                  {item.message ? <Button title="La frase" variant="outline" small onPress={onPhrase} style={{ flex: 1 }} /> : null}
-                  {item.devotional ? <Button title="El devocional" variant="outline" small onPress={onDevo} style={{ flex: 1 }} /> : null}
+                  <Button title={tx('El versículo')} variant="outline" small onPress={onVerse} style={{ flex: 1 }} />
+                  {item.message ? <Button title={tx('La frase')} variant="outline" small onPress={onPhrase} style={{ flex: 1 }} /> : null}
+                  {item.devotional ? <Button title={tx('El devocional')} variant="outline" small onPress={onDevo} style={{ flex: 1 }} /> : null}
                 </View>
-                <Button title="Mandar los tres juntos en texto" variant="ghost" small icon="align-left" onPress={onThree} />
+                <Button title={tx('Mandar los tres juntos en texto')} variant="ghost" small icon="align-left" onPress={onThree} />
               </>
             ) : three.files.length === 0 ? null : (
               <>
-                <Button title={`Compartir las ${three.files.length} juntas`} icon="share" onPress={() => share(three.files as File[], true)} />
-                <Text style={{ fontSize: 13, color: colors.muted }}>O de a una:</Text>
+                <Button title={tx('Compartir las {n} juntas', { n: three.files.length })} icon="share" onPress={() => share(three.files as File[], true)} />
+                <Text style={{ fontSize: 13, color: colors.muted }}>{tx('O de a una:')}</Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   {three.files.map((f, i) => (
-                    <Button key={f.name} title={names[Number(f.name[0]) - 1] ?? `Imagen ${i + 1}`} variant="outline" small onPress={() => share([f], false)} style={{ flex: 1 }} />
+                    <Button key={f.name} title={names[Number(f.name[0]) - 1] ?? tx('Imagen {v1}', { v1: i + 1 })} variant="outline" small onPress={() => share([f], false)} style={{ flex: 1 }} />
                   ))}
                 </View>
-                <Button title="Guardar las imágenes en el teléfono" variant="ghost" small icon="download" onPress={() => save(three.files as File[])} />
+                <Button title={tx('Guardar las imágenes en el teléfono')} variant="ghost" small icon="download" onPress={() => save(three.files as File[])} />
               </>
             )}
             {three.note ? <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{three.note}</Text> : null}
           </View>
         ) : (
           <>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, marginBottom: 6 }}>¿Qué querés compartir?</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, marginBottom: 6 }}>{tx('¿Qué querés compartir?')}</Text>
             {options.filter((o) => o.show).map((o) => (
               <Pressable key={o.key} onPress={o.onPress} accessibilityRole="button" accessibilityLabel={o.title}
                 style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 12, paddingHorizontal: 10, borderRadius: 12 }, pressed && { backgroundColor: colors.bgSoft }]}>
@@ -583,31 +584,31 @@ function ReaderSheet({ visible, item, label, social, onShare, onComments, onClos
       <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
         <StatusBar style="auto" />
         <View style={styles.readerBar}>
-          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Cerrar">
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={tx('Cerrar')}>
             <Feather name="x" size={22} color={colors.text} />
           </Pressable>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1 }}>Devocional completo</Text>
+            <Text style={{ fontSize: 12, fontWeight: '800', color: colors.green, textTransform: 'uppercase', letterSpacing: 1 }}>{tx('Devocional completo')}</Text>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{item.reference} · {label}</Text>
           </View>
-          <Pressable onPress={onShare} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Compartir el devocional completo">
+          <Pressable onPress={onShare} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel={tx('Compartir el devocional completo')}>
             <Feather name="share-2" size={20} color={colors.green} />
           </Pressable>
         </View>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14, maxWidth: 680, width: '100%', alignSelf: 'center' }}>
           <View style={styles.readerVerse}>
             <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontWeight: '600', fontStyle: 'italic' }}>{item.verse}</Text>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} · RV1960</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green, marginTop: 8 }}>{item.reference} {tx('· RV1960')}</Text>
           </View>
           {item.devotional ? (
             <>
-              <Text style={styles.readerSection}>Lectura de hoy</Text>
+              <Text style={styles.readerSection}>{tx('Lectura de hoy')}</Text>
               <Paragraphs text={item.devotional} size={17} />
             </>
           ) : null}
           {item.study ? (
             <>
-              <Text style={styles.readerSection}>Estudio</Text>
+              <Text style={styles.readerSection}>{tx('Estudio')}</Text>
               <Paragraphs text={item.study} size={17} />
             </>
           ) : null}
@@ -615,14 +616,14 @@ function ReaderSheet({ visible, item, label, social, onShare, onComments, onClos
             <View style={styles.prayer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Feather name="heart" size={16} color={colors.greenText} />
-                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText, textTransform: 'uppercase', letterSpacing: 1 }}>Oración</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText, textTransform: 'uppercase', letterSpacing: 1 }}>{tx('Oración')}</Text>
               </View>
               <Text style={{ fontSize: 17, lineHeight: 27, color: colors.text, fontStyle: 'italic' }}>{item.prayer}</Text>
             </View>
           ) : null}
-          <Button title="Compartir el devocional completo" icon="share-2" onPress={onShare} />
-          <Button title={social.comments ? `Comentarios del día (${social.comments})` : 'Comentar con la iglesia'} icon="message-circle" variant="outline" onPress={onComments} />
-          <Button title="Terminé de leer" variant="ghost" icon="check" onPress={onClose} />
+          <Button title={tx('Compartir el devocional completo')} icon="share-2" onPress={onShare} />
+          <Button title={social.comments ? tx('Comentarios del día ({comments})', { comments: social.comments }) : tx('Comentar con la iglesia')} icon="message-circle" variant="outline" onPress={onComments} />
+          <Button title={tx('Terminé de leer')} variant="ghost" icon="check" onPress={onClose} />
         </ScrollView>
       </View>
     </Modal>
@@ -670,7 +671,7 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
       setText('');
       load();
     } catch (e) {
-      Alert.alert('No se envió', errorMessage(e));
+      Alert.alert(tx('No se envió'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -678,9 +679,9 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
 
   const remove = (c: DailyComment) => {
     if (!c.mine && !isStaff) return;
-    Alert.alert('Borrar comentario', '¿Borrar este comentario?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => deleteDailyComment(c.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+    Alert.alert(tx('Borrar comentario'), tx('¿Borrar este comentario?'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: () => deleteDailyComment(c.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
     ]);
   };
 
@@ -690,18 +691,18 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
       <View style={[styles.sheet, { paddingBottom: kb ? 10 : insets.bottom + 10, marginBottom: kb, height: kb ? '62%' : '78%' }]}>
         <View style={styles.sheetHead}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.sheetTitle}>Comentarios del día{rows?.length ? ` · ${rows.length}` : ''}</Text>
-            <Text style={{ fontSize: 12, color: colors.muted }}>{open ? 'Lo ve toda la iglesia. Se puede comentar hasta la medianoche.' : 'Este día ya cerró: se puede leer lo que comentaron.'}</Text>
+            <Text style={styles.sheetTitle}>{tx('Comentarios del día{v1}', { v1: rows?.length ? ` · ${rows.length}` : '' })}</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{open ? tx('Lo ve toda la iglesia. Se puede comentar hasta la medianoche.') : tx('Este día ya cerró: se puede leer lo que comentaron.')}</Text>
           </View>
-          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Cerrar"><Feather name="x" size={20} color={colors.text} /></Pressable>
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel={tx('Cerrar')}><Feather name="x" size={20} color={colors.text} /></Pressable>
         </View>
         {rows === null ? (
           <ActivityIndicator style={{ marginTop: 30 }} color={colors.green} />
         ) : !rows.length ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24 }}>
             <Feather name="message-circle" size={34} color={colors.muted} />
-            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{open ? 'Sé el primero en comentar' : 'Nadie comentó este día'}</Text>
-            {open ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>¿Qué te habló Dios hoy con este pasaje?</Text> : null}
+            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{open ? tx('Sé el primero en comentar') : tx('Nadie comentó este día')}</Text>
+            {open ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('¿Qué te habló Dios hoy con este pasaje?')}</Text> : null}
           </View>
         ) : (
           <FlatList
@@ -717,8 +718,8 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
                   </Text>
                   <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{c.body}</Text>
                   <View style={{ flexDirection: 'row', gap: 14, marginTop: 2 }}>
-                    {c.mine || isStaff ? <Text onPress={() => remove(c)} style={{ fontSize: 11, color: colors.muted }}>Borrar</Text> : null}
-                    {!c.mine ? <Text onPress={() => moderate({ kind: 'comment', targetId: c.id, authorId: c.user_id, authorName: c.name, excerpt: c.body, onChange: load })} style={{ fontSize: 11, color: colors.muted }}>Denunciar o bloquear</Text> : null}
+                    {c.mine || isStaff ? <Text onPress={() => remove(c)} style={{ fontSize: 11, color: colors.muted }}>{tx('Borrar')}</Text> : null}
+                    {!c.mine ? <Text onPress={() => moderate({ kind: 'comment', targetId: c.id, authorId: c.user_id, authorName: c.name, excerpt: c.body, onChange: load })} style={{ fontSize: 11, color: colors.muted }}>{tx('Denunciar o bloquear')}</Text> : null}
                   </View>
                 </View>
               </Pressable>
@@ -727,9 +728,9 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
         )}
         {open ? (
           <View style={styles.inputRow}>
-            <TextInput value={text} onChangeText={setText} placeholder="Escribí un comentario…" placeholderTextColor="#8B918C" multiline maxLength={1000}
+            <TextInput value={text} onChangeText={setText} placeholder={tx('Escribí un comentario…')} placeholderTextColor="#8B918C" multiline maxLength={1000}
               style={styles.input} />
-            <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityLabel="Enviar">
+            <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityLabel={tx('Enviar')}>
               {busy ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
             </Pressable>
           </View>
@@ -754,10 +755,10 @@ function DaysSheet({ visible, current, today, onPick, onClose }: { visible: bool
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 10, height: '80%' }]}>
         <View style={styles.sheetHead}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.sheetTitle}>Días anteriores</Text>
-            <Text style={{ fontSize: 12, color: colors.muted }}>El último mes. Tocá uno para volver a leerlo o compartirlo.</Text>
+            <Text style={styles.sheetTitle}>{tx('Días anteriores')}</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{tx('El último mes. Tocá uno para volver a leerlo o compartirlo.')}</Text>
           </View>
-          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel="Cerrar"><Feather name="x" size={20} color={colors.text} /></Pressable>
+          <Pressable onPress={onClose} style={styles.closeBtn} accessibilityLabel={tx('Cerrar')}><Feather name="x" size={20} color={colors.text} /></Pressable>
         </View>
         {rows === null ? <ActivityIndicator style={{ marginTop: 30 }} color={colors.green} /> : (
           <FlatList
@@ -785,7 +786,7 @@ function DaysSheet({ visible, current, today, onPick, onClose }: { visible: bool
 // ---------- Mi racha ----------
 function StreakSheet({ visible, streak, onClose, onBoard }: { visible: boolean; streak: ReadingStreak | null; onClose: () => void; onBoard: () => void }) {
   const insets = useSafeAreaInsets();
-  const rewards = streak?.rewards ?? [{ days: 7, label: 'Una semana', earned: false }, { days: 30, label: 'Un mes', earned: false }, { days: 365, label: 'Un año', earned: false }];
+  const rewards = streak?.rewards ?? [{ days: 7, label: tx('Una semana'), earned: false }, { days: 30, label: tx('Un mes'), earned: false }, { days: 365, label: tx('Un año'), earned: false }];
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
@@ -793,8 +794,8 @@ function StreakSheet({ visible, streak, onClose, onBoard }: { visible: boolean; 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
           <View style={styles.flame}><Feather name="zap" size={26} color={streak?.current ? '#FFF' : colors.muted} /></View>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 24, fontWeight: '800', color: colors.text }}>{streak?.current ?? 0} {streak?.current === 1 ? 'día' : 'días'} seguidos</Text>
-            <Text style={{ fontSize: 13, color: colors.muted }}>Mejor racha: {streak?.best ?? 0} · Total leídos: {streak?.total ?? 0}</Text>
+            <Text style={{ fontSize: 24, fontWeight: '800', color: colors.text }}>{streak?.current ?? 0} {streak?.current === 1 ? tx('día') : tx('días')} {tx('seguidos')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Mejor racha: {best} · Total leídos: {total}', { best: streak?.best ?? 0, total: streak?.total ?? 0 })}</Text>
           </View>
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -802,14 +803,14 @@ function StreakSheet({ visible, streak, onClose, onBoard }: { visible: boolean; 
             <View key={r.days} style={[styles.reward, r.earned && styles.rewardOn]}>
               <Feather name={r.earned ? 'award' : 'lock'} size={20} color={r.earned ? '#FFF' : colors.muted} />
               <Text style={{ fontSize: 12, fontWeight: '800', color: r.earned ? '#FFF' : colors.muted, textAlign: 'center' }}>{r.label}</Text>
-              <Text style={{ fontSize: 10, color: r.earned ? 'rgba(255,255,255,0.9)' : colors.muted }}>{r.days} días</Text>
+              <Text style={{ fontSize: 10, color: r.earned ? 'rgba(255,255,255,0.9)' : colors.muted }}>{r.days} {tx('días')}</Text>
             </View>
           ))}
         </View>
         <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-          La racha cuenta cada día que abrís el devocional de hoy. Si un día no lo abrís, vuelve a cero, pero la mejor racha y los premios quedan.
+          {tx('La racha cuenta cada día que abrís el devocional de hoy. Si un día no lo abrís, vuelve a cero, pero la mejor racha y los premios quedan.')}
         </Text>
-        <Button title="Ver los lectores de la iglesia" variant="outline" icon="users" onPress={onBoard} />
+        <Button title={tx('Ver los lectores de la iglesia')} variant="outline" icon="users" onPress={onBoard} />
       </View>
     </Modal>
   );

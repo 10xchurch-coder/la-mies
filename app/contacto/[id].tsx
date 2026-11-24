@@ -33,6 +33,7 @@ import { colors, themed } from '@/theme';
 import type {
   Attendance, Cancellation, ChurchService, Contact, ContactChild, ContactVisit, FaithCategory, Group, JourneyStep, Ministry, PersonStatus, Profile,
 } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 /** Fidelidad de las últimas 12 semanas, contando solo las reuniones principales (sin las fechas en que no hubo). */
 function faithOf(c: Contact, atts: Attendance[], services: ChurchService[], offs: Cancellation[] = []): { cat: FaithCategory; attended: number; possible: number } {
@@ -84,7 +85,7 @@ function DiscipleshipCard({ c, onSave }: { c: Contact; onSave: (patch: Partial<C
   };
   return (
     <Card style={{ gap: 12 }}>
-      <SectionTitle>Discipulado</SectionTitle>
+      <SectionTitle>{tx('Discipulado')}</SectionTitle>
       {parts.map(([part, total]) => {
         const p = partProgress(c.discipleship, part, total);
         return (
@@ -92,14 +93,14 @@ function DiscipleshipCard({ c, onSave }: { c: Contact; onSave: (patch: Partial<C
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.text }}>{PART_TITLE[part]}</Text>
               <Text style={{ fontSize: 13, fontWeight: '700', color: p.complete ? colors.greenText : colors.muted }}>
-                {p.complete ? `Completo${p.completedOn ? ` · ${fmtDateOnly(p.completedOn)}` : ''}` : `${p.done} de ${p.total}`}
+                {p.complete ? `Completo${p.completedOn ? ` · ${fmtDateOnly(p.completedOn)}` : ''}` : tx('{done} de {total}', { done: p.done, total: p.total })}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {Array.from({ length: total }, (_, i) => i + 1).map((n) => {
                 const on = !!c.discipleship?.[part]?.[String(n)];
                 return (
-                  <Pressable key={n} onPress={() => tap(part, n)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${PART_TITLE[part]}, clase ${n}: ${on ? 'completada' : 'sin hacer'}`} hitSlop={4}
+                  <Pressable key={n} onPress={() => tap(part, n)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${PART_TITLE[part]}, clase ${n}: ${on ? tx('completada') : tx('sin hacer')}`} hitSlop={4}
                     style={{ width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : 'transparent' }}>
                     <Text style={{ fontSize: 14, fontWeight: '800', color: on ? '#FFFFFF' : colors.muted }}>{n}</Text>
                   </Pressable>
@@ -109,7 +110,7 @@ function DiscipleshipCard({ c, onSave }: { c: Contact; onSave: (patch: Partial<C
           </View>
         );
       })}
-      <Text style={{ fontSize: 12, color: colors.muted }}>Tocá el número de cada clase cuando la complete.</Text>
+      <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá el número de cada clase cuando la complete.')}</Text>
     </Card>
   );
 }
@@ -119,11 +120,11 @@ function DatesEditor({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contac
   const [bap, setBap] = useState(toDmy(c.baptized_on));
   const [mem, setMem] = useState(toDmy(c.member_since));
   const [busy, setBusy] = useState(false);
-  if (!open) return <Button title="Corregir fechas (bautismo, miembro)" icon="calendar" variant="ghost" small onPress={() => setOpen(true)} />;
+  if (!open) return <Button title={tx('Corregir fechas (bautismo, miembro)')} icon="calendar" variant="ghost" small onPress={() => setOpen(true)} />;
   const save = async () => {
     const b = fromDmy(bap), m = fromDmy(mem);
     if (b === undefined || m === undefined) {
-      Alert.alert('Revisá las fechas', 'Escribilas así: 15/03/2024. Dejá vacío si no corresponde.');
+      Alert.alert(tx('Revisá las fechas'), tx('Escribilas así: 15/03/2024. Dejá vacío si no corresponde.'));
       return;
     }
     setBusy(true);
@@ -138,13 +139,13 @@ function DatesEditor({ c, onSave }: { c: Contact; onSave: (patch: Partial<Contac
   };
   return (
     <Card style={{ gap: 10 }}>
-      <SectionTitle>Fechas</SectionTitle>
-      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Así el progreso de la iglesia muestra cada cosa en el mes que pasó. Formato: 15/03/2024.</Text>
-      <Field label="Se bautizó" value={bap} onChangeText={setBap} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" />
-      {c.status === 'member' ? <Field label="Miembro desde" value={mem} onChangeText={setMem} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" /> : null}
+      <SectionTitle>{tx('Fechas')}</SectionTitle>
+      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Así el progreso de la iglesia muestra cada cosa en el mes que pasó. Formato: 15/03/2024.')}</Text>
+      <Field label={tx('Se bautizó')} value={bap} onChangeText={setBap} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" />
+      {c.status === 'member' ? <Field label={tx('Miembro desde')} value={mem} onChangeText={setMem} placeholder="dd/mm/aaaa" keyboardType="numbers-and-punctuation" /> : null}
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button title="Cancelar" variant="ghost" small onPress={() => setOpen(false)} style={{ flex: 1 }} />
-        <Button title="Guardar fechas" small onPress={save} loading={busy} style={{ flex: 2 }} />
+        <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setOpen(false)} style={{ flex: 1 }} />
+        <Button title={tx('Guardar fechas')} small onPress={save} loading={busy} style={{ flex: 2 }} />
       </View>
     </Card>
   );
@@ -229,7 +230,7 @@ export default function PersonaDetalle() {
       if (done) Alert.alert(done);
       load();
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     }
   };
 
@@ -239,7 +240,7 @@ export default function PersonaDetalle() {
       const path = await pickAndUploadPhoto(church.id, { current: c?.photo_path });
       if (path) await update({ photo_path: path });
     } catch (e) {
-      Alert.alert('No se pudo subir la foto', errorMessage(e));
+      Alert.alert(tx('No se pudo subir la foto'), errorMessage(e));
     }
   };
 
@@ -254,7 +255,7 @@ export default function PersonaDetalle() {
     });
     setBusy(false);
     if (error) {
-      Alert.alert('No se pudo guardar', errorMessage(error));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(error));
       return;
     }
     const patch: Partial<Contact> = {};
@@ -276,12 +277,12 @@ export default function PersonaDetalle() {
       const date = isoDate(addDays(today, -back));
       return { s, date };
     }).sort((a, b) => b.date.localeCompare(a.date));
-    Alert.alert('¿A qué reunión vino?', c?.name, [
+    Alert.alert(tx('¿A qué reunión vino?'), c?.name, [
       ...opts.slice(0, 4).map(({ s, date }) => ({
         text: `${s.name} · ${fmtDateShort(date)}`,
-        onPress: () => setAttendance(id, date, s.id, true).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))),
+        onPress: () => setAttendance(id, date, s.id, true).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))),
       })),
-      { text: 'Cancelar', style: 'cancel' as const },
+      { text: tx('Cancelar'), style: 'cancel' as const },
     ]);
   };
 
@@ -299,9 +300,9 @@ export default function PersonaDetalle() {
     waShown.current = true;
     const kind = (['promise', 'visit', 'followup', 'missed1', 'missed2', 'missed3'].includes(waKind) ? waKind : 'followup') as MessageKind;
     const ctx = { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services };
-    showActions(c.name, kind === 'promise' ? 'Hoy prometió venir a la iglesia.' : kind === 'visit' ? 'Prometió venir y no vino.' : undefined, [
-      { text: 'Mandarle un WhatsApp', icon: 'message-circle', hint: messageText(kind, ctx).slice(0, 90) + '…', onPress: () => openWhatsApp(c.phone, messageText(kind, ctx)) },
-      { text: 'Ver su ficha', icon: 'user' },
+    showActions(c.name, kind === 'promise' ? tx('Hoy prometió venir a la iglesia.') : kind === 'visit' ? tx('Prometió venir y no vino.') : undefined, [
+      { text: tx('Mandarle un WhatsApp'), icon: 'message-circle', hint: messageText(kind, ctx).slice(0, 90) + '…', onPress: () => openWhatsApp(c.phone, messageText(kind, ctx)) },
+      { text: tx('Ver su ficha'), icon: 'user' },
     ]);
   }, [c, waKind]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -309,8 +310,8 @@ export default function PersonaDetalle() {
   if (!c) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Persona" back />
-        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>Esta persona no está disponible para vos.</Text>
+        <Header title={tx('Persona')} back />
+        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>{tx('Esta persona no está disponible para vos.')}</Text>
       </View>
     );
   }
@@ -319,7 +320,7 @@ export default function PersonaDetalle() {
   const hasMap = c.lat != null && c.lng != null;
   const directions = hasMap
     ? `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}&travelmode=walking`
-    : c.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${c.address}, ${church?.city ?? 'Posadas'}`)}` : null;
+    : c.address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${c.address}, ${church?.city ?? tx('Posadas')}`)}` : null;
   const followUp = people.find((p) => p.id === c.follow_up_user_id);
   const group = groups.find((g) => g.id === c.group_id);
   const gw = groupWord(church?.grouping);
@@ -329,27 +330,27 @@ export default function PersonaDetalle() {
   // Filas de la ficha corta según quién es. Miembro: teléfono, ruta si tiene, bautismo solo si falta.
   // Contacto: además discipulado, bautismo, seguimiento. Visita: además cuántas veces vino y fidelidad.
   const rows: { k: string; v: string; right?: React.ReactNode }[] = [];
-  rows.push({ k: 'Teléfono', v: c.phone ? formatPhone(c.phone) : 'Sin teléfono' });
+  rows.push({ k: tx('Teléfono'), v: c.phone ? formatPhone(c.phone) : tx('Sin teléfono') });
   if (!isMember || group) {
-    rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || hasRole(profile, 'captain') ? <Small label="Cambiar" onPress={() => setPicker('group')} /> : undefined });
+    rows.push({ k: gw, v: group?.name ?? `Sin ${gw.toLowerCase()}`, right: isStaff || hasRole(profile, 'captain') ? <Small label={tx('Cambiar')} onPress={() => setPicker('group')} /> : undefined });
   }
   if (c.status === 'contact') {
-    rows.push({ k: 'Prometió venir', v: c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? ` · pasar a buscar${c.pickup_time ? ` ${c.pickup_time}` : ''}` : ''}` : 'Todavía no' });
+    rows.push({ k: tx('Prometió venir'), v: c.promise_day ? `${PROMISE_LABEL[c.promise_day]}${c.pickup ? tx(' · pasar a buscar{v1}', { v1: c.pickup_time ? ` ${c.pickup_time}` : '' }) : ''}` : tx('Todavía no') });
   }
-  if (!isMember) rows.push({ k: 'Discipulado', v: c.discipleship_since ? `Desde ${fmtDateOnly(c.discipleship_since)}` : 'Todavía no' });
+  if (!isMember) rows.push({ k: tx('Discipulado'), v: c.discipleship_since ? tx('Desde {fmtDateOnly}', { fmtDateOnly: fmtDateOnly(c.discipleship_since) }) : tx('Todavía no') });
   if (!isMember || !isBaptized) {
-    rows.push({ k: 'Bautismo', v: isBaptized ? (c.baptized_on && c.baptized_here !== false ? fmtDateOnly(c.baptized_on) : 'Sí') : 'Todavía no (después de creer en Cristo)' });
+    rows.push({ k: tx('Bautismo'), v: isBaptized ? (c.baptized_on && c.baptized_here !== false ? fmtDateOnly(c.baptized_on) : tx('Sí')) : tx('Todavía no (después de creer en Cristo)') });
   }
-  if (isMember && c.member_since) rows.push({ k: 'Miembro desde', v: fmtDateOnly(c.member_since) });
+  if (isMember && c.member_since) rows.push({ k: tx('Miembro desde'), v: fmtDateOnly(c.member_since) });
   if (c.dni && !isMember) rows.push({ k: 'DNI', v: c.dni });
   if (isVisitor) {
-    rows.push({ k: 'Vino a la iglesia', v: attendances.length ? `${attendances.length} ${attendances.length === 1 ? 'vez' : 'veces'} · última ${fmtDateOnly(attendances[0].attended_on)}` : 'Todavía no' });
-    if (faith && isLeader) rows.push({ k: 'Fidelidad (12 semanas)', v: faith.possible ? `${faith.attended} de ${faith.possible} cultos · ${FAITH_LABEL[faith.cat].label}` : 'Recién agregada' });
+    rows.push({ k: tx('Vino a la iglesia'), v: attendances.length ? tx('{n} {pl} · última {fmtDateOnly}', { n: attendances.length, pl: attendances.length === 1 ? tx('vez') : 'veces', fmtDateOnly: fmtDateOnly(attendances[0].attended_on) }) : tx('Todavía no') });
+    if (faith && isLeader) rows.push({ k: tx('Fidelidad (12 semanas)'), v: faith.possible ? tx('{attended} de {possible} cultos · {label}', { attended: faith.attended, possible: faith.possible, label: FAITH_LABEL[faith.cat].label }) : tx('Recién agregada') });
   }
   if (!isMember) {
-    rows.push({ k: 'Seguimiento', v: followUp?.display_name ?? (c.follow_up_user_id ? 'Asignado' : 'Sin asignar'), right: canEdit ? <Small label="Cambiar" onPress={() => setPicker('followup')} /> : undefined });
+    rows.push({ k: tx('Seguimiento'), v: followUp?.display_name ?? (c.follow_up_user_id ? tx('Asignado') : tx('Sin asignar')), right: canEdit ? <Small label={tx('Cambiar')} onPress={() => setPicker('followup')} /> : undefined });
   }
-  const nameOf = (uid: string) => (uid === profile?.id ? 'Vos' : people.find((p) => p.id === uid)?.display_name ?? 'Un hermano');
+  const nameOf = (uid: string) => (uid === profile?.id ? tx('Vos') : people.find((p) => p.id === uid)?.display_name ?? tx('Un hermano'));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -359,7 +360,7 @@ export default function PersonaDetalle() {
         right={canEdit ? (
           <Pressable onPress={() => router.push({ pathname: '/persona/nueva', params: { id: c.id } })} accessibilityRole="button" style={styles.editBtn}>
             <Feather name="edit-2" size={16} color={colors.green} />
-            <Text style={{ color: colors.green, fontWeight: '800' }}>Editar</Text>
+            <Text style={{ color: colors.green, fontWeight: '800' }}>{tx('Editar')}</Text>
           </Pressable>
         ) : undefined}
       />
@@ -381,20 +382,20 @@ export default function PersonaDetalle() {
               busy={unlinking}
               onConfirm={() => setReview(false)}
               onUnlink={() => Alert.alert(
-                'No es esta persona',
-                `La cuenta de la app se separa de la ficha de ${c.name} y queda con una ficha propia.`,
+                tx('No es esta persona'),
+                tx('La cuenta de la app se separa de la ficha de {name} y queda con una ficha propia.', { name: c.name }),
                 [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Separar', style: 'destructive', onPress: async () => {
+                  { text: tx('Cancelar'), style: 'cancel' },
+                  { text: tx('Separar'), style: 'destructive', onPress: async () => {
                     setUnlinking(true);
                     try {
                       const { error } = await supabase.rpc('unlink_account', { p_contact: c.id });
                       if (error) throw error;
                       setReview(false);
                       setC({ ...c, profile_id: null });
-                      Alert.alert('Listo', 'Se separaron. Si después encontrás su ficha correcta, unila desde Editar → Cuenta en la app.');
+                      Alert.alert(tx('Listo'), tx('Se separaron. Si después encontrás su ficha correcta, unila desde Editar → Cuenta en la app.'));
                     } catch (e) {
-                      Alert.alert('No se pudo', errorMessage(e));
+                      Alert.alert(tx('No se pudo'), errorMessage(e));
                     } finally {
                       setUnlinking(false);
                     }
@@ -408,7 +409,7 @@ export default function PersonaDetalle() {
             <View style={{ flex: 1, gap: 5 }}>
               <Text style={{ fontSize: 24, fontWeight: '800', letterSpacing: -0.4, color: colors.text }}>{c.name}</Text>
               <Text style={{ fontSize: 14, color: colors.muted }}>
-                {[displayAge(c) != null ? `${displayAge(c)} años` : null, c.marital ? MARITAL_LABEL[c.marital] : null, c.address ?? c.address_hint].filter(Boolean).join(' · ')}
+                {[displayAge(c) != null ? tx('{displayAge} años', { displayAge: displayAge(c) }) : null, c.marital ? MARITAL_LABEL[c.marital] : null, c.address ?? c.address_hint].filter(Boolean).join(' · ')}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 <Tag text={STATUS_LABEL[c.status]} tone={c.status === 'member' ? 'green' : c.status === 'visitor' ? 'blue' : 'gray'} />
@@ -420,14 +421,14 @@ export default function PersonaDetalle() {
           {spouse || c.spouse_name ? (
             <Pressable disabled={!spouse} onPress={() => spouse && router.push({ pathname: '/contacto/[id]', params: { id: spouse.id } })}>
               <Text style={{ fontSize: 13, color: colors.text }}>
-                <Text style={{ fontWeight: '700' }}>{c.marital === 'partner' ? 'Pareja: ' : 'Cónyuge: '}</Text>
+                <Text style={{ fontWeight: '700' }}>{c.marital === 'partner' ? tx('Pareja: ') : tx('Cónyuge: ')}</Text>
                 <Text style={spouse ? { color: colors.green, fontWeight: '700' } : undefined}>{spouse?.name ?? c.spouse_name}</Text>
               </Text>
             </Pressable>
           ) : null}
           {children.length ? (
             <Text style={{ fontSize: 13, color: colors.text }}>
-              <Text style={{ fontWeight: '700' }}>{children.length === 1 ? 'Hijo: ' : 'Hijos: '}</Text>
+              <Text style={{ fontWeight: '700' }}>{children.length === 1 ? tx('Hijo: ') : tx('Hijos: ')}</Text>
               {children.map((k, i) => {
                 const a = displayAge(k);
                 const label = `${k.name}${a != null ? ` (${a})` : ''}`;
@@ -444,7 +445,7 @@ export default function PersonaDetalle() {
           ) : null}
           {parents.length ? (
             <Text style={{ fontSize: 13, color: colors.text }}>
-              <Text style={{ fontWeight: '700' }}>{parents.length === 1 ? 'Papá/mamá: ' : 'Padres: '}</Text>
+              <Text style={{ fontWeight: '700' }}>{parents.length === 1 ? tx('Papá/mamá: ') : tx('Padres: ')}</Text>
               {parents.map((x, i) => (
                 <Text key={x.id}>{i ? ', ' : ''}<Text onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: x.id } })} style={{ color: colors.green, fontWeight: '700' }}>{x.name}</Text></Text>
               ))}
@@ -452,24 +453,24 @@ export default function PersonaDetalle() {
           ) : null}
 
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Action icon="phone" label="Llamar" disabled={!c.phone} onPress={() => Linking.openURL(`tel:${telDigits(c.phone)}`)} />
-            <Action icon="message-circle" label="WhatsApp" disabled={!wa} onPress={() => chooseWhatsApp(c.phone, { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services })} />
-            <Action icon="check-square" label="Visité" onPress={() => setAdding(true)} />
-            <Action icon="navigation" label="Cómo llegar" disabled={!directions} onPress={() => directions && Linking.openURL(directions)} />
+            <Action icon="phone" label={tx('Llamar')} disabled={!c.phone} onPress={() => Linking.openURL(`tel:${telDigits(c.phone)}`)} />
+            <Action icon="message-circle" label={tx('WhatsApp')} disabled={!wa} onPress={() => chooseWhatsApp(c.phone, { to: c.name, from: profile?.display_name, church: church?.name, promiseDay: c.promise_day, services })} />
+            <Action icon="check-square" label={tx('Visité')} onPress={() => setAdding(true)} />
+            <Action icon="navigation" label={tx('Cómo llegar')} disabled={!directions} onPress={() => directions && Linking.openURL(directions)} />
           </View>
           {adding ? (
             <Card style={{ gap: 12 }}>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Visita de hoy</Text>
-              <Field label="¿Cómo te fue? (nota)" value={note} onChangeText={setNote} multiline autoFocus />
+              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Visita de hoy')}</Text>
+              <Field label={tx('¿Cómo te fue? (nota)')} value={note} onChangeText={setNote} multiline autoFocus />
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>¿Le presentaste el evangelio?</Text>
-                <Segmented style={{ width: 130 }} options={[{ value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }]} value={gospel} onChange={setGospel} />
+                <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('¿Le presentaste el evangelio?')}</Text>
+                <Segmented style={{ width: 130 }} options={[{ value: 'yes', label: tx('Sí') }, { value: 'no', label: tx('No') }]} value={gospel} onChange={setGospel} />
               </View>
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>¿Se comprometió a venir?</Text>
-              <Choice columns={3} options={[{ value: 'none', label: 'No' }, { value: 'sat', label: 'Sábado' }, { value: 'sun', label: 'Domingo' }]} value={promise} onChange={setPromise} />
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>{tx('¿Se comprometió a venir?')}</Text>
+              <Choice columns={3} options={[{ value: 'none', label: tx('No') }, { value: 'sat', label: tx('Sábado') }, { value: 'sun', label: tx('Domingo') }]} value={promise} onChange={setPromise} />
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
-                <Button title="Guardar visita" small onPress={addVisit} loading={busy} style={{ flex: 2 }} />
+                <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
+                <Button title={tx('Guardar visita')} small onPress={addVisit} loading={busy} style={{ flex: 2 }} />
               </View>
             </Card>
           ) : null}
@@ -494,43 +495,43 @@ export default function PersonaDetalle() {
           </Card>
           {canEdit && isMember ? (
             <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -6 }}>
-              Miembro desde, discipulado, bautismo, seguimiento y cuenta en la app se ven y se cambian en <Text style={{ fontWeight: '700' }}>Editar</Text>.
+              {tx('Miembro desde, discipulado, bautismo, seguimiento y cuenta en la app se ven y se cambian en')} <Text style={{ fontWeight: '700' }}>{tx('Editar')}</Text>.
             </Text>
           ) : null}
 
           {isStaff ? (
             <Card style={{ gap: 10 }}>
-              <SectionTitle>Estado en la iglesia</SectionTitle>
+              <SectionTitle>{tx('Estado en la iglesia')}</SectionTitle>
               <Choice
                 columns={3}
-                options={[{ value: 'contact', label: 'Contacto' }, { value: 'visitor', label: 'Visita' }, { value: 'member', label: 'Miembro' }]}
+                options={[{ value: 'contact', label: tx('Contacto') }, { value: 'visitor', label: tx('Visita') }, { value: 'member', label: tx('Miembro') }]}
                 value={c.status}
                 onChange={(v) => setStatus(v as PersonStatus)}
               />
-              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Solo la secretaría y el pastor marcan miembros. Los miembros aparecen para todos en Personas y en el reporte de ausencias.</Text>
+              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Solo la secretaría y el pastor marcan miembros. Los miembros aparecen para todos en Personas y en el reporte de ausencias.')}</Text>
               {c.status === 'inactive' ? (
                 <>
-                  <Text style={{ fontSize: 13, color: colors.text }}>Está en <Text style={{ fontWeight: '800' }}>Inactivos</Text>{c.inactive_since ? ` desde el ${new Date(c.inactive_since).toLocaleDateString('es-AR')}` : ''}. Si viene y se le toma asistencia, vuelve solo.</Text>
-                  <Button title={`Volver a ${STATUS_LABEL[c.inactive_prev ?? 'member'].toLowerCase()}s`} icon="user-check" variant="outline" small
-                    onPress={() => setContactInactive(c.id, false).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+                  <Text style={{ fontSize: 13, color: colors.text }}>{tx('Está en')} <Text style={{ fontWeight: '800' }}>{tx('Inactivos')}</Text>{c.inactive_since ? tx(' desde el {toLocaleDateString}', { toLocaleDateString: new Date(c.inactive_since).toLocaleDateString(txLocale()) }) : ''}{tx('. Si viene y se le toma asistencia, vuelve solo.')}</Text>
+                  <Button title={tx('Volver a {STATUS_LABEL}s', { STATUS_LABEL: STATUS_LABEL[c.inactive_prev ?? 'member'].toLowerCase() })} icon="user-check" variant="outline" small
+                    onPress={() => setContactInactive(c.id, false).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />
                 </>
               ) : (
-                <Button title="Pasar a inactivos" icon="user-x" variant="ghost" small
-                  onPress={() => Alert.alert('¿Pasar a inactivos?', `${c.name} sale de ${STATUS_LABEL[c.status].toLowerCase()}s y queda en la lista de inactivos con todos sus datos.`, [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { text: 'Pasar', onPress: () => setContactInactive(c.id, true).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+                <Button title={tx('Pasar a inactivos')} icon="user-x" variant="ghost" small
+                  onPress={() => Alert.alert(tx('¿Pasar a inactivos?'), tx('{name} sale de {STATUS_LABEL}s y queda en la lista de inactivos con todos sus datos.', { name: c.name, STATUS_LABEL: STATUS_LABEL[c.status].toLowerCase() }), [
+                    { text: tx('Cancelar'), style: 'cancel' },
+                    { text: tx('Pasar'), onPress: () => setContactInactive(c.id, true).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
                   ])} />
               )}
               {c.status === 'member' ? (
-                <Toggle label="Nunca moverlo solo a inactivos" hint="Para quien no puede venir por un tiempo (enfermedad, viaje, misión)." value={!!c.inactive_exempt}
-                  onChange={(v) => setInactiveExempt(c.id, v).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+                <Toggle label={tx('Nunca moverlo solo a inactivos')} hint={tx('Para quien no puede venir por un tiempo (enfermedad, viaje, misión).')} value={!!c.inactive_exempt}
+                  onChange={(v) => setInactiveExempt(c.id, v).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />
               ) : null}
             </Card>
           ) : null}
 
           {isStaff ? (
             <Button
-              title="Unir con otra ficha de la misma persona"
+              title={tx('Unir con otra ficha de la misma persona')}
               icon="git-merge"
               variant="ghost"
               small
@@ -540,21 +541,21 @@ export default function PersonaDetalle() {
 
           {isStaff && can('personas.editar') ? (
             <Button
-              title="Borrar esta persona"
+              title={tx('Borrar esta persona')}
               icon="trash-2"
               variant="ghost"
               small
               onPress={() => {
                 if (c.profile_id) {
-                  Alert.alert('Tiene cuenta en la app', 'Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.');
+                  Alert.alert(tx('Tiene cuenta en la app'), tx('Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.'));
                   return;
                 }
                 Alert.alert(
-                  `¿Borrar a ${c.name}?`,
-                  'Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.',
+                  tx('¿Borrar a {name}?', { name: c.name }),
+                  tx('Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.'),
                   [
-                    { text: 'Cancelar', style: 'cancel' },
-                    { text: 'Borrar', style: 'destructive', onPress: () => { deleteContact(c.id).then(() => router.back()).catch((e) => Alert.alert('No se pudo borrar', errorMessage(e))); } },
+                    { text: tx('Cancelar'), style: 'cancel' },
+                    { text: tx('Borrar'), style: 'destructive', onPress: () => { deleteContact(c.id).then(() => router.back()).catch((e) => Alert.alert(tx('No se pudo borrar'), errorMessage(e))); } },
                   ],
                 );
               }}
@@ -568,35 +569,35 @@ export default function PersonaDetalle() {
           {isStaff ? (
             <Button
               small variant="ghost" icon={c.baseline ? 'user-plus' : 'flag'}
-              title={c.baseline ? 'Ya estaba en la iglesia al empezar · contar como nuevo' : 'Marcar: ya estaba en la iglesia antes de la app'}
-              onPress={() => update({ baseline: c.baseline ? null : c.status === 'member' ? 'member' : 'person' }, c.baseline ? 'Ahora cuenta como nuevo' : 'Listo: no cuenta como primera vez ni como miembro nuevo')}
+              title={c.baseline ? tx('Ya estaba en la iglesia al empezar · contar como nuevo') : tx('Marcar: ya estaba en la iglesia antes de la app')}
+              onPress={() => update({ baseline: c.baseline ? null : c.status === 'member' ? 'member' : 'person' }, c.baseline ? tx('Ahora cuenta como nuevo') : tx('Listo: no cuenta como primera vez ni como miembro nuevo'))}
             />
           ) : null}
 
-          {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
+          {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, tx('Fechas guardadas'))} /> : null}
 
           {can('personas.asistencia') ? (
-            <Button title="Darle un chip para la asistencia" icon="credit-card" variant="outline" small onPress={() => router.push({ pathname: '/chips', params: { persona: c.id, nombre: c.name } } as never)} />
+            <Button title={tx('Darle un chip para la asistencia')} icon="credit-card" variant="outline" small onPress={() => router.push({ pathname: '/chips', params: { persona: c.id, nombre: c.name } } as never)} />
           ) : null}
 
           {isStaff && c.baptized_on && c.baptized_here !== false ? (
-            <Button title="Certificado de bautismo" icon="award" variant="outline" small onPress={() => router.push(`/certificado/${c.id}` as never)} />
+            <Button title={tx('Certificado de bautismo')} icon="award" variant="outline" small onPress={() => router.push(`/certificado/${c.id}` as never)} />
           ) : null}
 
           {isLeader && (!isMember || !c.discipleship_since || !isBaptized) ? (
             <Card style={{ gap: 10 }}>
-              <SectionTitle>Seguimiento pastoral</SectionTitle>
-              {!isMember ? <Button title="Marcar que vino a una reunión" icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
+              <SectionTitle>{tx('Seguimiento pastoral')}</SectionTitle>
+              {!isMember ? <Button title={tx('Marcar que vino a una reunión')} icon="check-circle" variant="outline" small onPress={markAttendance} /> : null}
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {!c.discipleship_since ? <Button title="Empezó discipulado" variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, 'Anotado: empezó discipulado')} style={{ flex: 1 }} /> : null}
-                {!isBaptized ? <Button title="Se bautizó hoy" variant="outline" small onPress={() => update({ baptized: true, baptized_here: true, baptized_on: isoDate(new Date()) }, 'Anotado: se bautizó en la iglesia')} style={{ flex: 1 }} /> : null}
+                {!c.discipleship_since ? <Button title={tx('Empezó discipulado')} variant="outline" small onPress={() => update({ discipleship_since: isoDate(new Date()) }, tx('Anotado: empezó discipulado'))} style={{ flex: 1 }} /> : null}
+                {!isBaptized ? <Button title={tx('Se bautizó hoy')} variant="outline" small onPress={() => update({ baptized: true, baptized_here: true, baptized_on: isoDate(new Date()) }, tx('Anotado: se bautizó en la iglesia'))} style={{ flex: 1 }} /> : null}
               </View>
             </Card>
           ) : null}
 
           {journey.length ? (
             <>
-              <SectionTitle>Su camino</SectionTitle>
+              <SectionTitle>{tx('Su camino')}</SectionTitle>
               <View style={{ gap: 0 }}>
                 {journey.map((j, i) => (
                   <View key={`${j.step}-${i}`} style={{ flexDirection: 'row', gap: 12 }}>
@@ -614,16 +615,16 @@ export default function PersonaDetalle() {
             </>
           ) : null}
 
-          <SectionTitle>Historial</SectionTitle>
+          <SectionTitle>{tx('Historial')}</SectionTitle>
           {visits.map((v) => (
             <View key={v.id} style={{ flexDirection: 'row', gap: 12 }}>
               <Avatar name={nameOf(v.user_id)} size={32} />
               <View style={{ flex: 1, gap: 3 }}>
                 <Text style={{ fontSize: 12, fontWeight: '600', color: colors.muted }}>
                   {nameOf(v.user_id)} · {fmtDay(v.visited_at)} · {fmtTime(v.visited_at)}
-                  {v.gospel_presented ? ' · evangelio' : ''}{v.promise_day ? ` · prometió ${PROMISE_LABEL[v.promise_day]}` : ''}
+                  {v.gospel_presented ? tx(' · evangelio') : ''}{v.promise_day ? tx(' · prometió {PROMISE_LABEL}', { PROMISE_LABEL: PROMISE_LABEL[v.promise_day] }) : ''}
                 </Text>
-                <Text style={{ fontSize: 14, lineHeight: 20, color: colors.text }}>{v.note ?? 'Sin notas'}</Text>
+                <Text style={{ fontSize: 14, lineHeight: 20, color: colors.text }}>{v.note ?? tx('Sin notas')}</Text>
               </View>
             </View>
           ))}
@@ -633,21 +634,21 @@ export default function PersonaDetalle() {
                 <Feather name="home" size={16} color={colors.blueText} />
               </View>
               <Text style={{ fontSize: 13, color: colors.text }}>
-                {services.find((s) => s.id === a.service_id)?.name ?? 'Vino a la iglesia'} · {dayName(new Date(`${a.attended_on}T12:00:00`).getDay())} {fmtDateOnly(a.attended_on)}
+                {services.find((s) => s.id === a.service_id)?.name ?? tx('Vino a la iglesia')} · {dayName(new Date(`${a.attended_on}T12:00:00`).getDay())} {fmtDateOnly(a.attended_on)}
               </Text>
             </View>
           ))}
-          {!visits.length && !attendances.length ? <Text style={{ color: colors.muted, fontSize: 13 }}>Todavía no hay nada anotado.</Text> : null}
+          {!visits.length && !attendances.length ? <Text style={{ color: colors.muted, fontSize: 13 }}>{tx('Todavía no hay nada anotado.')}</Text> : null}
 
           {!adding ? (
-            <Button title="Registrar visita" icon="plus" onPress={() => setAdding(true)} />
+            <Button title={tx('Registrar visita')} icon="plus" onPress={() => setAdding(true)} />
           ) : null}
         </View>
       </Screen>
 
       <PickerModal
         visible={picker === 'followup'}
-        title="¿Quién hace el seguimiento?"
+        title={tx('¿Quién hace el seguimiento?')}
         items={people.map((p) => ({ id: p.id, title: p.display_name }))}
         allowNone
         onClose={() => setPicker(null)}
@@ -658,37 +659,37 @@ export default function PersonaDetalle() {
       />
       <PickerModal
         visible={picker === 'merge'}
-        title="¿Con qué ficha la unimos?"
-        items={mergeList.map((p) => ({ id: p.id, title: p.name, subtitle: [p.profile_id ? 'Tiene cuenta en la app' : null, p.phone].filter(Boolean).join(' · ') || undefined, photo: p.photo_path }))}
+        title={tx('¿Con qué ficha la unimos?')}
+        items={mergeList.map((p) => ({ id: p.id, title: p.name, subtitle: [p.profile_id ? tx('Tiene cuenta en la app') : null, p.phone].filter(Boolean).join(' · ') || undefined, photo: p.photo_path }))}
         onClose={() => setPicker(null)}
         onPick={(otherId) => {
           setPicker(null);
           const other = mergeList.find((x) => x.id === otherId);
           if (!other) return;
           if (c.profile_id && other.profile_id) {
-            Alert.alert('No se pueden unir', 'Las dos fichas tienen su propia cuenta en la app, así que son dos personas distintas.');
+            Alert.alert(tx('No se pueden unir'), tx('Las dos fichas tienen su propia cuenta en la app, así que son dos personas distintas.'));
             return;
           }
           // Queda la ficha que tiene cuenta en la app (si alguna la tiene); si no, la que estás mirando.
           const keep = other.profile_id && !c.profile_id ? other : c;
           const drop = keep.id === c.id ? other : c;
           const run = (name: string | null) => mergeContacts(keep.id, drop.id, name)
-            .then((id) => { Alert.alert('Listo', 'Quedó una sola ficha con todo junto.'); router.replace({ pathname: '/contacto/[id]', params: { id } }); })
-            .catch((e) => Alert.alert('No se pudo unir', e instanceof Error ? e.message : 'Probá de nuevo'));
+            .then((id) => { Alert.alert(tx('Listo'), tx('Quedó una sola ficha con todo junto.')); router.replace({ pathname: '/contacto/[id]', params: { id } }); })
+            .catch((e) => Alert.alert(tx('No se pudo unir'), e instanceof Error ? e.message : tx('Probá de nuevo')));
           const names = keep.name.trim() === drop.name.trim() ? [keep.name] : [keep.name, drop.name];
           Alert.alert(
-            'Unir fichas',
-            `«${c.name}» y «${other.name}» van a quedar como una sola persona: asistencias, clases, visitas, ministerios e hijos se juntan. ¿Qué nombre dejamos?`,
-            [...names.map((n) => ({ text: n, onPress: () => { run(n); } })), { text: 'Cancelar', style: 'cancel' as const }],
+            tx('Unir fichas'),
+            tx('«{name}» y «{name2}» van a quedar como una sola persona: asistencias, clases, visitas, ministerios e hijos se juntan. ¿Qué nombre dejamos?', { name: c.name, name2: other.name }),
+            [...names.map((n) => ({ text: n, onPress: () => { run(n); } })), { text: tx('Cancelar'), style: 'cancel' as const }],
           );
         }}
       />
       <PickerModal
         visible={picker === 'group'}
-        title={`Elegí ${groupArticle(church?.grouping)} ${gw.toLowerCase()}`}
+        title={tx('Elegí {groupArticle} {gw}', { groupArticle: groupArticle(church?.grouping), gw: gw.toLowerCase() })}
         items={groups.map((g) => ({ id: g.id, title: g.name, face: false }))}
         allowNone
-        noneLabel={`Sin ${gw.toLowerCase()}`}
+        noneLabel={tx('Sin {gw}', { gw: gw.toLowerCase() })}
         onClose={() => setPicker(null)}
         onPick={(gid) => {
           setPicker(null);
@@ -696,7 +697,7 @@ export default function PersonaDetalle() {
           updateContact(id, { group_id: gid })
             .then(() => (gid && church?.grouping === 'bus_routes' ? syncFamilyRoute(id, before) : undefined))
             .then(() => load())
-            .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+            .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
         }}
       />
     </View>
@@ -753,15 +754,15 @@ function LinkReview({ contactName, profileId, linkedName, onName, busy, onConfir
     <View style={{ backgroundColor: colors.greenSoft, borderRadius: 14, padding: 14, gap: 10, borderWidth: 1, borderColor: colors.border }}>
       <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
         <Feather name="link" size={18} color={colors.green} />
-        <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>¿Es la misma persona?</Text>
+        <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('¿Es la misma persona?')}</Text>
       </View>
       <Text style={{ fontSize: 14, lineHeight: 20, color: colors.text }}>
-        La cuenta de la app de <Text style={{ fontWeight: '800' }}>{linkedName ?? '…'}</Text> se unió sola a la ficha de{' '}
-        <Text style={{ fontWeight: '800' }}>{contactName}</Text> porque tienen el mismo celular. Si es la misma persona, no hay que hacer nada más.
+        {tx('La cuenta de la app de')} <Text style={{ fontWeight: '800' }}>{linkedName ?? '…'}</Text> {tx('se unió sola a la ficha de')}{' '}
+        <Text style={{ fontWeight: '800' }}>{contactName}</Text> {tx('porque tienen el mismo celular. Si es la misma persona, no hay que hacer nada más.')}
       </Text>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <View style={{ flex: 1 }}><Button title="Sí, es la misma" icon="check" onPress={onConfirm} /></View>
-        <View style={{ flex: 1 }}><Button title="No es" variant="outline" onPress={onUnlink} loading={busy} /></View>
+        <View style={{ flex: 1 }}><Button title={tx('Sí, es la misma')} icon="check" onPress={onConfirm} /></View>
+        <View style={{ flex: 1 }}><Button title={tx('No es')} variant="outline" onPress={onUnlink} loading={busy} /></View>
       </View>
     </View>
   );

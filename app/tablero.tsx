@@ -10,6 +10,7 @@ import { POINTS } from '@/lib/levels';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { ScoreRow, TeamTotals } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Period = 'day' | 'week' | 'month';
 
@@ -38,7 +39,7 @@ export default function Tablero() {
   const groups = useMemo(() => {
     const m = new Map<string, number>();
     for (const r of rows) {
-      const k = r.group_name ?? 'Sin grupo';
+      const k = r.group_name ?? tx('Sin grupo');
       m.set(k, (m.get(k) ?? 0) + r.points);
     }
     return [...m.entries()].sort((a, b) => b[1] - a[1]);
@@ -48,21 +49,21 @@ export default function Tablero() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Tablero" subtitle="Se actualiza en vivo" back />
+      <Header title={tx('Tablero')} subtitle={tx('Se actualiza en vivo')} back />
       <Screen>
-        <Segmented options={[{ value: 'day', label: 'Hoy' }, { value: 'week', label: 'Semana' }, { value: 'month', label: 'Mes' }]} value={period} onChange={setPeriod} />
+        <Segmented options={[{ value: 'day', label: tx('Hoy') }, { value: 'week', label: tx('Semana') }, { value: 'month', label: tx('Mes') }]} value={period} onChange={setPeriod} />
 
         {totals ? (
           <View style={{ gap: 8 }}>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.contacts} label="Contactos" />
-              <Stat value={totals.presentations} label="Evangelio" tone="green" />
-              <Stat value={totals.promises} label="Promesas" tone="amber" />
+              <Stat value={totals.contacts} label={tx('Contactos')} />
+              <Stat value={totals.presentations} label={tx('Evangelio')} tone="green" />
+              <Stat value={totals.promises} label={tx('Promesas')} tone="amber" />
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={totals.members} label="Salieron" />
-              <Stat value={fmtDistance(Number(totals.km) * 1000)} label="Caminados" />
-              <Stat value={totals.houses ?? '—'} label="Casas" tone="blue" />
+              <Stat value={totals.members} label={tx('Salieron')} />
+              <Stat value={fmtDistance(Number(totals.km) * 1000)} label={tx('Caminados')} />
+              <Stat value={totals.houses ?? '—'} label={tx('Casas')} tone="blue" />
             </View>
           </View>
         ) : null}
@@ -77,14 +78,14 @@ export default function Tablero() {
                   <View style={{ flex: 1, height: 26, borderRadius: 6, backgroundColor: colors.border, overflow: 'hidden' }}>
                     <View style={{ width: `${Math.max(4, (pts / maxGroup) * 100)}%`, height: '100%', borderRadius: 6, backgroundColor: palette[i % palette.length] }} />
                   </View>
-                  <Text style={{ width: 56, textAlign: 'right', fontSize: 14, fontWeight: '800', color: colors.text }}>{pts} pts</Text>
+                  <Text style={{ width: 56, textAlign: 'right', fontSize: 14, fontWeight: '800', color: colors.text }}>{pts} {tx('pts')}</Text>
                 </View>
               ))}
             </View>
           </>
         ) : null}
 
-        <SectionTitle>Ranking</SectionTitle>
+        <SectionTitle>{tx('Ranking')}</SectionTitle>
         <Card style={{ padding: 0 }}>
           {rows.length ? (
             rows.map((r, i) => (
@@ -93,21 +94,21 @@ export default function Tablero() {
                 <Avatar name={r.display_name} size={36} color={i === 0 ? colors.amber : colors.green} textColor="#FFFFFF" />
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>
-                    {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>(vos)</Text> : null}
+                    {r.display_name} {r.user_id === session?.user.id ? <Text style={{ color: colors.muted, fontWeight: '500' }}>{tx('(vos)')}</Text> : null}
                   </Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    {r.presentations} con el evangelio · {r.promises} promesas
+                    {tx('{presentations} con el evangelio · {promises} promesas', { presentations: r.presentations, promises: r.promises })}
                   </Text>
                 </View>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.points}</Text>
               </View>
             ))
           ) : (
-            <Empty icon="award" title="Todavía no hay puntos" text="Los puntos aparecen cuando se cargan presentaciones y promesas." />
+            <Empty icon="award" title={tx('Todavía no hay puntos')} text={tx('Los puntos aparecen cuando se cargan presentaciones y promesas.')} />
           )}
         </Card>
         <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 17 }}>
-          Puntos: presentación {POINTS.presentation} · promesa {POINTS.promise} · vino a la iglesia {POINTS.came}. Las cuadras caminadas no suman. Bautismos y discipulado se cuentan pero no dan puntos.
+          {tx('Puntos: presentación {presentation} · promesa {promise} · vino a la iglesia {came}. Las cuadras caminadas no suman. Bautismos y discipulado se cuentan pero no dan puntos.', { presentation: POINTS.presentation, promise: POINTS.promise, came: POINTS.came })}
         </Text>
       </Screen>
     </View>

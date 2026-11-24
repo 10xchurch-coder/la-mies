@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveBiblePlanDone, type BiblePlanRow } from '@/lib/api';
 import { chapterKey, daysCompletedBy } from '@/lib/bible';
 import { planReadings } from '@/lib/biblePlan';
+import { tx } from './i18n';
 
 const KEY = 'lamies.biblia.leidos';
 type Store = { plan: string; started_on: string; read: string[] };
@@ -48,7 +49,7 @@ export async function markChapterRead(row: BiblePlanRow, book: number, chapter: 
   const done = [...row.done, ...newly];
   if (newly.length) {
     await saveBiblePlanDone(done);
-    last = { text: `✓ Marcado en tu plan: ${planReadings(row.plan)[newly[newly.length - 1]]}`, at: Date.now() };
+    last = { text: tx('✓ Marcado en tu plan: {planReadings}', { planReadings: planReadings(row.plan)[newly[newly.length - 1]] }), at: Date.now() };
     listeners.forEach((fn) => fn(last!.text));
   }
   return { read, done, newly };

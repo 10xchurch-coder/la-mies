@@ -29,6 +29,7 @@ import { useKeyboardHeight } from '@/lib/keyboard';
 import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
 import { DEMO_CENTER, isDemoNow } from '@/lib/demo';
 import type { Contact, CoverageRow, HouseRow, MeetingPoint, OutingKind, Profile, RoadRow, Zone } from '@/types';
+import { tx } from '@/lib/i18n';
 
 /** Un color por compañero para su recorrido. */
 export const TRAIL_COLORS = ['#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488', '#DC2626', '#4D7C0F', '#0369A1'];
@@ -176,7 +177,7 @@ export default function Mapa() {
       setRegion(r);
       loadArea(r);
     } else {
-      Alert.alert('Todavía no sé dónde estás', 'Revisá que la ubicación esté prendida y que le hayas dado permiso a La Mies.');
+      Alert.alert(tx('Todavía no sé dónde estás'), tx('Revisá que la ubicación esté prendida y que le hayas dado permiso a La Mies.'));
     }
   };
 
@@ -223,14 +224,14 @@ export default function Mapa() {
       for (const h of houses) { const d = haversine(p, h); if (d <= Math.max(6, tol / 2) && (!hb || d < hb.d)) hb = { h, d }; }
       if (hb) {
         const h = hb.h;
-        Alert.alert('¿No es una casa?', 'Se saca este punto del mapa y del conteo de casas.', [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Sacar el punto', style: 'destructive', onPress: () => editHouse('hide', h.id).then(() => loadArea(region)).catch((err) => Alert.alert('No se pudo', errorMessage(err))) },
+        Alert.alert(tx('¿No es una casa?'), tx('Se saca este punto del mapa y del conteo de casas.'), [
+          { text: tx('Cancelar'), style: 'cancel' },
+          { text: tx('Sacar el punto'), style: 'destructive', onPress: () => editHouse('hide', h.id).then(() => loadArea(region)).catch((err) => Alert.alert(tx('No se pudo'), errorMessage(err))) },
         ]);
       } else {
-        Alert.alert('Agregar una casa acá', 'Se suma al conteo de casas de la cuadra más cercana.', [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Agregar', onPress: () => editHouse('add', null, p.lat, p.lng).then(() => loadArea(region)).catch((err) => Alert.alert('No se pudo', errorMessage(err))) },
+        Alert.alert(tx('Agregar una casa acá'), tx('Se suma al conteo de casas de la cuadra más cercana.'), [
+          { text: tx('Cancelar'), style: 'cancel' },
+          { text: tx('Agregar'), onPress: () => editHouse('add', null, p.lat, p.lng).then(() => loadArea(region)).catch((err) => Alert.alert(tx('No se pudo'), errorMessage(err))) },
         ]);
       }
       return;
@@ -272,7 +273,7 @@ export default function Mapa() {
     if (!picked) return;
     setSideCoverage(picked.road.id, picked.seg, picked.side, pickKind, true)
       .then(() => loadArea(region)).then(clearPick)
-      .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+      .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
   };
 
   // Marcar a mano: elegir persona, fecha y tipo; después tocar las veredas.
@@ -292,9 +293,9 @@ export default function Mapa() {
       const n = manual.picks.size;
       setManual(null);
       await loadArea(region);
-      Alert.alert('Listo', `Se cargaron ${n} ${n === 1 ? 'vereda' : 'veredas'} a nombre de ${manual.user.name}, el ${fmtDateAR(manual.date)}. Ya cuentan en sus cuadras, metros y casas.`);
+      Alert.alert(tx('Listo'), tx('Se cargaron {n} {pl} a nombre de {name}, el {fmtDateAR}. Ya cuentan en sus cuadras, metros y casas.', { n, pl: n === 1 ? tx('vereda') : tx('veredas'), name: manual.user.name, fmtDateAR: fmtDateAR(manual.date) }));
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -312,21 +313,21 @@ export default function Mapa() {
       setMeetDraft(null);
       currentMeetingPoint().then(setMeet).catch(() => undefined);
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     }
   };
   const directions = (p: { lat: number; lng: number }) => {
     const dest = `${p.lat},${p.lng}`;
-    showActions('Cómo llegar', 'Te lleva caminando hasta el punto de encuentro.', [
-      { text: 'Google Maps', icon: 'navigation' as const, onPress: () => Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=walking`) },
-      ...(Platform.OS === 'ios' ? [{ text: 'Mapas de Apple', icon: 'map' as const, onPress: () => Linking.openURL(`http://maps.apple.com/?daddr=${dest}&dirflg=w`) }] : []),
-      { text: 'Cancelar', icon: 'corner-up-left' as const },
+    showActions(tx('Cómo llegar'), tx('Te lleva caminando hasta el punto de encuentro.'), [
+      { text: tx('Google Maps'), icon: 'navigation' as const, onPress: () => Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${dest}&travelmode=walking`) },
+      ...(Platform.OS === 'ios' ? [{ text: tx('Mapas de Apple'), icon: 'map' as const, onPress: () => Linking.openURL(`http://maps.apple.com/?daddr=${dest}&dirflg=w`) }] : []),
+      { text: tx('Cancelar'), icon: 'corner-up-left' as const },
     ]);
   };
 
   const churchUrl = church?.website || 'https://iglesiavictoria.com';
   const shareChurch = () => {
-    Share.share({ message: `Te invito a conocer la ${church?.name ?? 'iglesia'}: ${churchUrl}` }).catch(() => undefined);
+    Share.share({ message: tx('Te invito a conocer la {name}: {churchUrl}', { name: church?.name ?? tx('iglesia'), churchUrl }) }).catch(() => undefined);
   };
 
   const removeMark = () => {
@@ -334,13 +335,13 @@ export default function Mapa() {
     const go = (session: string | null) =>
       setSideCoverage(picked.road.id, picked.seg, picked.side, selected.kind, false, session)
         .then(() => loadArea(region)).then(clearPick)
-        .catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+        .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
     const who = selected.last_user_name ?? 'alguien';
-    showActions('No se hizo esta vereda', 'Se saca del mapa. Si se recalcula la salida, no vuelve a aparecer.', [
-      ...(selected.last_session_id ? [{ text: `Quitar la de ${who} (${fmtRelativeDay(selected.last_covered_at)})`, icon: 'x' as const, onPress: () => go(selected.last_session_id ?? null) }] : []),
-      ...(isLeader && selected.times > 1 ? [{ text: `Quitar las ${selected.times} veces (nadie la hizo)`, icon: 'trash-2' as const, destructive: true, onPress: () => go(null) }] : []),
-      ...(isLeader && !selected.last_session_id ? [{ text: 'Quitar la marca', icon: 'x' as const, onPress: () => go(null) }] : []),
-      { text: 'Cancelar', icon: 'corner-up-left' as const },
+    showActions(tx('No se hizo esta vereda'), tx('Se saca del mapa. Si se recalcula la salida, no vuelve a aparecer.'), [
+      ...(selected.last_session_id ? [{ text: tx('Quitar la de {who} ({fmtRelativeDay})', { who, fmtRelativeDay: fmtRelativeDay(selected.last_covered_at) }), icon: 'x' as const, onPress: () => go(selected.last_session_id ?? null) }] : []),
+      ...(isLeader && selected.times > 1 ? [{ text: tx('Quitar las {times} veces (nadie la hizo)', { times: selected.times }), icon: 'trash-2' as const, destructive: true, onPress: () => go(null) }] : []),
+      ...(isLeader && !selected.last_session_id ? [{ text: tx('Quitar la marca'), icon: 'x' as const, onPress: () => go(null) }] : []),
+      { text: tx('Cancelar'), icon: 'corner-up-left' as const },
     ]);
   };
 
@@ -361,7 +362,7 @@ export default function Mapa() {
       await outing.start(kind);
       router.push('/salida');
     } catch (e) {
-      Alert.alert('No se pudo empezar', e instanceof Error ? e.message : 'Probá de nuevo');
+      Alert.alert(tx('No se pudo empezar'), e instanceof Error ? e.message : tx('Probá de nuevo'));
     } finally {
       setBusy(false);
     }
@@ -371,18 +372,18 @@ export default function Mapa() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>Mapa</Text>
+          <Text style={styles.title}>{tx('Mapa')}</Text>
           <Text style={styles.subtitle}>
-            {live.filter((m) => !m.me).length > 0 ? `${live.filter((m) => !m.me).length} en salida ahora` : 'Nadie está saliendo ahora'}
+            {live.filter((m) => !m.me).length > 0 ? tx('{n} en salida ahora', { n: live.filter((m) => !m.me).length }) : tx('Nadie está saliendo ahora')}
           </Text>
         </View>
-        <Pressable onPress={() => setSharing(true)} accessibilityRole="button" accessibilityLabel="Compartir la iglesia" style={styles.teamBtn}>
+        <Pressable onPress={() => setSharing(true)} accessibilityRole="button" accessibilityLabel={tx('Compartir la iglesia')} style={styles.teamBtn}>
           <Feather name="share-2" size={18} color={colors.greenText} />
-          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Iglesia</Text>
+          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>{tx('Iglesia')}</Text>
         </Pressable>
-        <Pressable onPress={() => router.push('/equipo')} accessibilityRole="button" accessibilityLabel="Equipo en vivo y tablero" style={styles.teamBtn}>
+        <Pressable onPress={() => router.push('/equipo')} accessibilityRole="button" accessibilityLabel={tx('Equipo en vivo y tablero')} style={styles.teamBtn}>
           <Feather name="users" size={18} color={colors.greenText} />
-          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Equipo</Text>
+          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>{tx('Equipo')}</Text>
         </Pressable>
       </View>
 
@@ -416,7 +417,7 @@ export default function Mapa() {
             return <Polyline key={`m-${k.road_id}:${k.seg}:${k.side}`} coordinates={[{ latitude: a.lat, longitude: a.lng }, { latitude: b.lat, longitude: b.lng }]} strokeColor="#7C3AED" strokeWidth={7} lineCap="round" />;
           }) : null}
           {meet ? (
-            <Marker coordinate={{ latitude: meet.lat, longitude: meet.lng }} pinColor="#7C3AED" title={`Encuentro ${fmtTime(meet.meet_at)}`} onPress={() => setMeetOpen(true)} anchor={{ x: 0.5, y: 1 }} tracksViewChanges={false}>
+            <Marker coordinate={{ latitude: meet.lat, longitude: meet.lng }} pinColor="#7C3AED" title={tx('Encuentro {fmtTime}', { fmtTime: fmtTime(meet.meet_at) })} onPress={() => setMeetOpen(true)} anchor={{ x: 0.5, y: 1 }} tracksViewChanges={false}>
               {Platform.OS === 'web' ? undefined : (
                 <View style={{ alignItems: 'center' }}>
                   <View style={styles.meetBadge}><Feather name="flag" size={14} color="#FFF" /><Text style={{ color: '#FFF', fontWeight: '800', fontSize: 12 }}>{fmtTime(meet.meet_at)}</Text></View>
@@ -431,89 +432,89 @@ export default function Mapa() {
           <View style={styles.popup}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>
-                {selectedInfo.road?.name ?? 'Calle sin nombre'} · vereda {selectedInfo.name ?? '?'}{selected ? ` · ${KIND_LABEL[selected.kind]}` : ''}
+                {tx('{name} · vereda {name2}{v1}', { name: selectedInfo.road?.name ?? tx('Calle sin nombre'), name2: selectedInfo.name ?? '?', v1: selected ? ` · ${KIND_LABEL[selected.kind]}` : '' })}
               </Text>
-              <Pressable onPress={clearPick} accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+              <Pressable onPress={clearPick} accessibilityLabel={tx('Cerrar')} hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
             </View>
             {selected ? (
               <>
                 <Text style={{ fontSize: 12, fontWeight: '600', color: colors.grayText }}>
-                  {selected.team_names && selected.team_names.includes('+') ? selected.team_names : selected.last_user_name ?? 'Alguien'} · {fmtRelativeDay(selected.last_covered_at)} {fmtTime(selected.last_covered_at)} · {selected.times} {selected.times === 1 ? 'vez' : 'veces'}{!selected.last_session_id ? ' · marcada a mano' : ''}
+                  {selected.team_names && selected.team_names.includes('+') ? selected.team_names : selected.last_user_name ?? tx('Alguien')} · {fmtRelativeDay(selected.last_covered_at)} {fmtTime(selected.last_covered_at)} · {selected.times} {selected.times === 1 ? tx('vez') : tx('veces')}{!selected.last_session_id ? tx(' · marcada a mano') : ''}
                 </Text>
                 <Text style={{ fontSize: 11, color: colors.muted }}>{fmtDayYear(selected.last_covered_at)}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginTop: 4 }}>
                   <Text onPress={() => router.push({ pathname: '/vereda', params: { road: String(selected.road_id), seg: String(selected.seg), side: String(selected.side), kind: selected.kind, name: selectedInfo.road?.name ?? '', sideName: selectedInfo.name ?? '' } })}
-                    style={styles.popLink}>Historial</Text>
+                    style={styles.popLink}>{tx('Historial')}</Text>
                   {selected.last_session_id && (isLeader || selected.last_user_id === session?.user.id) ? (
-                    <Text onPress={() => router.push(`/recortar?session=${selected.last_session_id}` as never)} style={styles.popLink}>Ver la salida</Text>
+                    <Text onPress={() => router.push(`/recortar?session=${selected.last_session_id}` as never)} style={styles.popLink}>{tx('Ver la salida')}</Text>
                   ) : null}
-                  {canRemove ? <Text onPress={removeMark} style={[styles.popLink, { color: colors.red }]}>No se hizo</Text> : null}
+                  {canRemove ? <Text onPress={removeMark} style={[styles.popLink, { color: colors.red }]}>{tx('No se hizo')}</Text> : null}
                 </View>
               </>
             ) : (
               <>
-                <Text style={{ fontSize: 12, color: colors.muted }}>Sin marcar{layer === 'all' ? '' : ` en ${KIND_LABEL[pickKind].toLowerCase()}`}.</Text>
-                <Text onPress={markDone} style={[styles.popLink, { marginTop: 4 }]}>Marcar como hecha ({KIND_LABEL[pickKind].toLowerCase()})</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Sin marcar{v1}.', { v1: layer === 'all' ? '' : tx(' en {KIND_LABEL}', { KIND_LABEL: KIND_LABEL[pickKind].toLowerCase() }) })}</Text>
+                <Text onPress={markDone} style={[styles.popLink, { marginTop: 4 }]}>{tx('Marcar como hecha ({KIND_LABEL})', { KIND_LABEL: KIND_LABEL[pickKind].toLowerCase() })}</Text>
               </>
             )}
           </View>
         ) : pickedTrail ? (
           <View style={styles.popup}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>Recorrido de {pickedTrail.name} (ahora)</Text>
-              <Pressable onPress={clearPick} accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+              <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>{tx('Recorrido de {name} (ahora)', { name: pickedTrail.name })}</Text>
+              <Pressable onPress={clearPick} accessibilityLabel={tx('Cerrar')} hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
             </View>
-            {isLeader ? <Text onPress={() => router.push(`/recortar?session=${pickedTrail.id}` as never)} style={styles.popLink}>Ver o arreglar la salida</Text> : null}
+            {isLeader ? <Text onPress={() => router.push(`/recortar?session=${pickedTrail.id}` as never)} style={styles.popLink}>{tx('Ver o arreglar la salida')}</Text> : null}
           </View>
         ) : manual ? (
           <View style={[styles.popup, { borderWidth: 2, borderColor: '#7C3AED' }]}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: '#5B21B6' }}>Marcando a mano · {manual.user.name} · {fmtDateAR(manual.date)} · {KIND_LABEL[manual.kind]}</Text>
-            <Text style={{ fontSize: 12, color: colors.text }}>Tocá cada vereda que hizo (se pinta violeta). Tocala de nuevo para sacarla. {manual.picks.size ? `${manual.picks.size} elegidas.` : ''}</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: '#5B21B6' }}>{tx('Marcando a mano · {name} · {fmtDateAR} · {KIND_LABEL}', { name: manual.user.name, fmtDateAR: fmtDateAR(manual.date), KIND_LABEL: KIND_LABEL[manual.kind] })}</Text>
+            <Text style={{ fontSize: 12, color: colors.text }}>{tx('Tocá cada vereda que hizo (se pinta violeta). Tocala de nuevo para sacarla. {v1}', { v1: manual.picks.size ? tx('{n} elegidas.', { n: manual.picks.size }) : '' })}</Text>
             <View style={{ flexDirection: 'row', gap: 16 }}>
-              <Text onPress={saveManual} style={styles.popLink}>{manual.picks.size ? `Guardar ${manual.picks.size}` : 'Listo'}</Text>
-              <Text onPress={() => setManual(null)} style={[styles.popLink, { color: colors.muted }]}>Cancelar</Text>
+              <Text onPress={saveManual} style={styles.popLink}>{manual.picks.size ? tx('Guardar {n}', { n: manual.picks.size }) : tx('Listo')}</Text>
+              <Text onPress={() => setManual(null)} style={[styles.popLink, { color: colors.muted }]}>{tx('Cancelar')}</Text>
             </View>
           </View>
         ) : houseEdit ? (
           <View style={[styles.popup, { backgroundColor: colors.amberSoft }]}>
-            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>Corrigiendo casas</Text>
-            <Text style={{ fontSize: 12, color: colors.text }}>{houses.length ? 'Tocá un punto que no es casa para sacarlo, o un lugar sin punto para agregar una casa.' : 'Acercate más al mapa para ver los puntos de las casas.'}</Text>
-            <Text onPress={() => setHouseEdit(false)} style={styles.popLink}>Listo</Text>
+            <Text style={{ fontSize: 13, fontWeight: '800', color: colors.amberText }}>{tx('Corrigiendo casas')}</Text>
+            <Text style={{ fontSize: 12, color: colors.text }}>{houses.length ? tx('Tocá un punto que no es casa para sacarlo, o un lugar sin punto para agregar una casa.') : tx('Acercate más al mapa para ver los puntos de las casas.')}</Text>
+            <Text onPress={() => setHouseEdit(false)} style={styles.popLink}>{tx('Listo')}</Text>
           </View>
         ) : null}
 
         <MapTypeButton style={mapStyle} onChange={setMapStyle} top={picked || pickedTrail || houseEdit || manual ? 130 : 12} />
 
-        <Pressable onPress={centerOnMe} accessibilityRole="button" accessibilityLabel="Ir a donde estoy"
+        <Pressable onPress={centerOnMe} accessibilityRole="button" accessibilityLabel={tx('Ir a donde estoy')}
           style={[styles.locateBtn, { top: (picked || pickedTrail || houseEdit || manual ? 130 : 12) + 54 }]}>
           <Feather name="navigation" size={20} color={my.pos ? '#1A73E8' : colors.muted} />
         </Pressable>
 
         {/* Barra chica abajo: capas y opciones en un menú, para que el mapa quede libre. */}
         <View style={styles.toolbar}>
-          <Pressable onPress={() => setMenu(true)} accessibilityRole="button" accessibilityLabel="Capas y opciones del mapa" style={styles.toolBtn}>
+          <Pressable onPress={() => setMenu(true)} accessibilityRole="button" accessibilityLabel={tx('Capas y opciones del mapa')} style={styles.toolBtn}>
             <Feather name="layers" size={16} color={colors.text} />
-            <Text style={styles.toolText}>{layer === 'all' ? 'Todo' : KIND_LABEL[layer]}</Text>
+            <Text style={styles.toolText}>{layer === 'all' ? tx('Todo') : KIND_LABEL[layer]}</Text>
           </Pressable>
           {staleMonths ? (
             <Pressable onPress={() => setStaleMonths(0)} accessibilityRole="button" style={[styles.toolBtn, { backgroundColor: '#D64545' }]}>
-              <Text style={[styles.toolText, { color: '#FFF' }]}>Sin visitar {staleMonths} m</Text>
+              <Text style={[styles.toolText, { color: '#FFF' }]}>{tx('Sin visitar {staleMonths} m', { staleMonths })}</Text>
               <Feather name="x" size={14} color="#FFF" />
             </Pressable>
           ) : null}
-          <Pressable onPress={() => setLegend((v) => !v)} accessibilityRole="button" accessibilityLabel="Qué significan los colores" style={[styles.toolBtn, { paddingHorizontal: 10 }]}>
+          <Pressable onPress={() => setLegend((v) => !v)} accessibilityRole="button" accessibilityLabel={tx('Qué significan los colores')} style={[styles.toolBtn, { paddingHorizontal: 10 }]}>
             <Feather name={legend ? 'x' : 'help-circle'} size={16} color={colors.text} />
           </Pressable>
           {outing.active && !meet ? (
             <View style={[styles.toolBtn, { backgroundColor: '#EDE9FE' }]}>
               <Feather name="flag" size={14} color="#5B21B6" />
-              <Text style={[styles.toolText, { color: '#5B21B6' }]}>Mantené apretado para marcar encuentro</Text>
+              <Text style={[styles.toolText, { color: '#5B21B6' }]}>{tx('Mantené apretado para marcar encuentro')}</Text>
             </View>
           ) : null}
           {meet ? (
             <Pressable onPress={() => setMeetOpen(true)} accessibilityRole="button" style={[styles.toolBtn, { backgroundColor: '#7C3AED' }]}>
               <Feather name="flag" size={14} color="#FFF" />
-              <Text style={[styles.toolText, { color: '#FFF' }]}>Encuentro {fmtTime(meet.meet_at)}</Text>
+              <Text style={[styles.toolText, { color: '#FFF' }]}>{tx('Encuentro {fmtTime}', { fmtTime: fmtTime(meet.meet_at) })}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -522,14 +523,14 @@ export default function Mapa() {
             {houses.length ? (
               <View style={styles.legendRow}>
                 <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.green }} />
-                <Text style={styles.legendText}>Casa visitada</Text>
+                <Text style={styles.legendText}>{tx('Casa visitada')}</Text>
                 <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: '#8A9490', marginLeft: 6 }} />
-                <Text style={styles.legendText}>Sin visitar</Text>
+                <Text style={styles.legendText}>{tx('Sin visitar')}</Text>
               </View>
             ) : null}
             {layer !== 'flyers' ? (
               <>
-                {layer === 'all' ? <Text style={styles.legendHead}>Evangelismo</Text> : null}
+                {layer === 'all' ? <Text style={styles.legendHead}>{tx('Evangelismo')}</Text> : null}
                 {COVERAGE_LEGEND.map((l) => (
                   <View key={`s${l.label}`} style={styles.legendRow}>
                     <View style={{ width: 22, height: 4, borderRadius: 2, backgroundColor: l.color }} />
@@ -540,7 +541,7 @@ export default function Mapa() {
             ) : null}
             {layer !== 'soulwinning' ? (
               <>
-                {layer === 'all' ? <Text style={styles.legendHead}>Volantes</Text> : null}
+                {layer === 'all' ? <Text style={styles.legendHead}>{tx('Volantes')}</Text> : null}
                 {FLYERS_LEGEND.map((l) => (
                   <View key={`f${l.label}`} style={styles.legendRow}>
                     <View style={{ width: 22, height: 4, borderRadius: 2, backgroundColor: l.color }} />
@@ -549,7 +550,7 @@ export default function Mapa() {
                 ))}
               </>
             ) : null}
-            <Text style={[styles.legendText, { color: colors.muted, fontWeight: '500', maxWidth: 220 }]}>Tocá una vereda para ver quién pasó y cuándo.</Text>
+            <Text style={[styles.legendText, { color: colors.muted, fontWeight: '500', maxWidth: 220 }]}>{tx('Tocá una vereda para ver quién pasó y cuándo.')}</Text>
           </View>
         ) : null}
       </View>
@@ -558,9 +559,9 @@ export default function Mapa() {
         <View style={styles.notice}>
           <Feather name="alert-triangle" size={20} color={colors.amberText} />
           <Text style={{ flex: 1, fontSize: 13, color: colors.amberText, lineHeight: 18 }}>
-            Tu última salida se cortó sola a las {fmtTime(outing.autoStop.cutoff)} porque parecía que ibas en un vehículo. Si no fue así, podés arreglarla en Yo → Mis salidas.
+            {tx('Tu última salida se cortó sola a las {fmtTime} porque parecía que ibas en un vehículo. Si no fue así, podés arreglarla en Yo → Mis salidas.', { fmtTime: fmtTime(outing.autoStop.cutoff) })}
           </Text>
-          <Pressable onPress={outing.dismissAutoStop} accessibilityRole="button" accessibilityLabel="Cerrar aviso" style={{ padding: 6 }}>
+          <Pressable onPress={outing.dismissAutoStop} accessibilityRole="button" accessibilityLabel={tx('Cerrar aviso')} style={{ padding: 6 }}>
             <Feather name="x" size={18} color={colors.amberText} />
           </Pressable>
         </View>
@@ -569,40 +570,40 @@ export default function Mapa() {
       <View style={styles.cta}>
         {Platform.OS === 'web' ? (
           <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 18 }}>
-            Las salidas se inician desde el teléfono (acá se ve el mapa y el equipo en vivo).
+            {tx('Las salidas se inician desde el teléfono (acá se ve el mapa y el equipo en vivo).')}
           </Text>
         ) : (
           <>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title={outing.active ? 'Continuar la salida' : 'Iniciar salida'} icon={outing.active ? 'arrow-right' : 'play'} onPress={start} loading={busy} style={{ flex: 1 }} />
-              <Button title="Capacitación" icon="compass" variant="outline" onPress={() => router.push('/capacitacion')} />
+              <Button title={outing.active ? tx('Continuar la salida') : tx('Iniciar salida')} icon={outing.active ? 'arrow-right' : 'play'} onPress={start} loading={busy} style={{ flex: 1 }} />
+              <Button title={tx('Capacitación')} icon="compass" variant="outline" onPress={() => router.push('/capacitacion')} />
             </View>
-            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Tu ubicación se comparte con el equipo solo mientras la salida está activa</Text>
+            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Tu ubicación se comparte con el equipo solo mientras la salida está activa')}</Text>
           </>
         )}
-        {Platform.OS === 'web' ? <Button title="Capacitación para evangelizar" icon="compass" variant="outline" small onPress={() => router.push('/capacitacion')} /> : null}
+        {Platform.OS === 'web' ? <Button title={tx('Capacitación para evangelizar')} icon="compass" variant="outline" small onPress={() => router.push('/capacitacion')} /> : null}
       </View>
 
       <Modal visible={choosing} transparent animationType="fade" onRequestClose={() => setChoosing(false)}>
         <Pressable style={styles.backdrop} onPress={() => setChoosing(false)}>
           <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]} onPress={() => undefined}>
-            <Text style={{ fontSize: 20, fontWeight: '800', color: colors.text }}>¿Qué salida es?</Text>
-            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Cada una queda en su propio mapa, con sus propios colores.</Text>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: colors.text }}>{tx('¿Qué salida es?')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>{tx('Cada una queda en su propio mapa, con sus propios colores.')}</Text>
             <Pressable onPress={() => begin('soulwinning')} accessibilityRole="button" style={[styles.kindBtn, { borderColor: colors.green, backgroundColor: colors.greenSoft }]}>
               <Feather name="book-open" size={26} color={colors.greenText} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 17, fontWeight: '800', color: colors.greenText }}>Evangelismo</Text>
-                <Text style={{ fontSize: 13, color: colors.greenText }}>Tocar puertas y presentar el evangelio</Text>
+                <Text style={{ fontSize: 17, fontWeight: '800', color: colors.greenText }}>{tx('Evangelismo')}</Text>
+                <Text style={{ fontSize: 13, color: colors.greenText }}>{tx('Tocar puertas y presentar el evangelio')}</Text>
               </View>
             </Pressable>
             <Pressable onPress={() => begin('flyers')} accessibilityRole="button" style={[styles.kindBtn, { borderColor: colors.orange, backgroundColor: colors.amberSoft }]}>
               <Feather name="file-text" size={26} color={colors.amberText} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 17, fontWeight: '800', color: colors.amberText }}>Volantes</Text>
-                <Text style={{ fontSize: 13, color: colors.amberText }}>Repartir invitaciones casa por casa</Text>
+                <Text style={{ fontSize: 17, fontWeight: '800', color: colors.amberText }}>{tx('Volantes')}</Text>
+                <Text style={{ fontSize: 13, color: colors.amberText }}>{tx('Repartir invitaciones casa por casa')}</Text>
               </View>
             </Pressable>
-            <Button title="Cancelar" variant="ghost" onPress={() => setChoosing(false)} />
+            <Button title={tx('Cancelar')} variant="ghost" onPress={() => setChoosing(false)} />
           </Pressable>
         </Pressable>
       </Modal>
@@ -611,55 +612,55 @@ export default function Mapa() {
       <Modal visible={menu} transparent animationType="slide" onRequestClose={() => setMenu(false)}>
         <Pressable style={styles.backdrop} onPress={() => setMenu(false)}>
           <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]} onPress={() => undefined}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Mapa</Text>
-            <Text style={styles.sheetHead}>Qué mostrar</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Mapa')}</Text>
+            <Text style={styles.sheetHead}>{tx('Qué mostrar')}</Text>
             <View style={{ flexDirection: 'row', gap: 6 }}>
               {(['all', 'soulwinning', 'flyers'] as Layer[]).map((l) => (
                 <Pressable key={l} onPress={() => setLayer(l)} accessibilityRole="button" accessibilityState={{ selected: layer === l }} style={[styles.chip, layer === l && styles.chipOn]}>
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: layer === l ? '#FFF' : colors.text }}>{l === 'all' ? 'Todo' : KIND_LABEL[l]}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: layer === l ? '#FFF' : colors.text }}>{l === 'all' ? tx('Todo') : KIND_LABEL[l]}</Text>
                 </Pressable>
               ))}
             </View>
-            <Text style={styles.sheetHead}>Ver sin visitar (en rojo)</Text>
+            <Text style={styles.sheetHead}>{tx('Ver sin visitar (en rojo)')}</Text>
             <View style={{ flexDirection: 'row', gap: 6 }}>
               {STALE_STEPS.map((m) => (
                 <Pressable key={m} onPress={() => setStaleMonths(m)} accessibilityRole="button" style={[styles.chip, staleMonths === m && (m ? { backgroundColor: '#D64545' } : styles.chipOn)]}>
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: staleMonths === m ? '#FFF' : colors.text }}>{m ? `${m} meses` : 'No'}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: staleMonths === m ? '#FFF' : colors.text }}>{m ? tx('{m} meses', { m }) : tx('No')}</Text>
                 </Pressable>
               ))}
             </View>
-            <Text style={styles.sheetHead}>Herramientas</Text>
+            <Text style={styles.sheetHead}>{tx('Herramientas')}</Text>
             <Pressable onPress={openManual} accessibilityRole="button" style={styles.menuRow}>
               <Feather name="edit-3" size={20} color="#7C3AED" />
               <View style={{ flex: 1 }}>
-                <Text style={styles.menuTitle}>Marcar calles a mano</Text>
-                <Text style={styles.menuSub}>{canOthers ? 'Para quien se olvidó el teléfono o le falló el GPS. Elegís la persona, el día y las veredas.' : 'Si no grabaste una salida (últimos 7 días), marcá las veredas que hiciste.'}</Text>
+                <Text style={styles.menuTitle}>{tx('Marcar calles a mano')}</Text>
+                <Text style={styles.menuSub}>{canOthers ? tx('Para quien se olvidó el teléfono o le falló el GPS. Elegís la persona, el día y las veredas.') : tx('Si no grabaste una salida (últimos 7 días), marcá las veredas que hiciste.')}</Text>
               </View>
             </Pressable>
             {can('evang.corregir') ? (
               <Pressable onPress={() => { setMenu(false); clearPick(); setManual(null); setHouseEdit(true); }} accessibilityRole="button" style={styles.menuRow}>
                 <Feather name="home" size={20} color={colors.amberText} />
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.menuTitle}>Corregir casas</Text>
-                  <Text style={styles.menuSub}>Sacar puntos que no son casas o agregar las que faltan.</Text>
+                  <Text style={styles.menuTitle}>{tx('Corregir casas')}</Text>
+                  <Text style={styles.menuSub}>{tx('Sacar puntos que no son casas o agregar las que faltan.')}</Text>
                 </View>
               </Pressable>
             ) : null}
             <Pressable onPress={() => { setMenu(false); setSharing(true); }} accessibilityRole="button" style={styles.menuRow}>
               <Feather name="share-2" size={20} color={colors.green} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.menuTitle}>Compartir la iglesia</Text>
-                <Text style={styles.menuSub}>Mandá la página de la iglesia o mostrá el código QR.</Text>
+                <Text style={styles.menuTitle}>{tx('Compartir la iglesia')}</Text>
+                <Text style={styles.menuSub}>{tx('Mandá la página de la iglesia o mostrá el código QR.')}</Text>
               </View>
             </Pressable>
             <View style={[styles.menuRow, { opacity: 0.85 }]}>
               <Feather name="flag" size={20} color="#7C3AED" />
               <View style={{ flex: 1 }}>
-                <Text style={styles.menuTitle}>Punto de encuentro</Text>
-                <Text style={styles.menuSub}>Durante una salida, mantené apretado un lugar del mapa y elegí la hora. Les llega a todos los que están afuera.</Text>
+                <Text style={styles.menuTitle}>{tx('Punto de encuentro')}</Text>
+                <Text style={styles.menuSub}>{tx('Durante una salida, mantené apretado un lugar del mapa y elegí la hora. Les llega a todos los que están afuera.')}</Text>
               </View>
             </View>
-            <Button title="Cerrar" variant="ghost" onPress={() => setMenu(false)} />
+            <Button title={tx('Cerrar')} variant="ghost" onPress={() => setMenu(false)} />
           </Pressable>
         </Pressable>
       </Modal>
@@ -668,38 +669,38 @@ export default function Mapa() {
       <Modal visible={!!manualSetup} transparent animationType="slide" onRequestClose={() => setManualSetup(null)}>
         <Pressable style={styles.backdrop} onPress={() => setManualSetup(null)}>
           <Pressable style={[styles.sheet, { paddingBottom: kb ? 16 : insets.bottom + 16, marginBottom: kb, maxHeight: kb ? '60%' : '85%' }]} onPress={() => undefined}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Marcar calles a mano</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Marcar calles a mano')}</Text>
             {manualSetup ? (
               <>
                 {canOthers ? (
                   <>
-                    <Text style={styles.sheetHead}>¿Quién las hizo?</Text>
+                    <Text style={styles.sheetHead}>{tx('¿Quién las hizo?')}</Text>
                     <ScrollView style={{ maxHeight: 180 }} contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                       {[{ id: session?.user.id ?? '', display_name: profile?.display_name ?? 'Yo' } as Profile, ...people.filter((x) => x.id !== session?.user.id)].map((x) => (
                         <Pressable key={x.id} onPress={() => setManualSetup({ ...manualSetup, user: { id: x.id, name: x.display_name } })} style={[styles.chip, manualSetup.user.id === x.id && styles.chipOn]}>
-                          <Text style={{ fontSize: 13, fontWeight: '700', color: manualSetup.user.id === x.id ? '#FFF' : colors.text }}>{x.id === session?.user.id ? 'Yo' : x.display_name}</Text>
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: manualSetup.user.id === x.id ? '#FFF' : colors.text }}>{x.id === session?.user.id ? tx('Yo') : x.display_name}</Text>
                         </Pressable>
                       ))}
                     </ScrollView>
                   </>
                 ) : null}
-                <Text style={styles.sheetHead}>¿Qué día?</Text>
+                <Text style={styles.sheetHead}>{tx('¿Qué día?')}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                   {[0, 1, 2, 3, 4, 5, 6].map((n) => {
                     const d = isoDate(addDays(new Date(), -n));
                     return (
                       <Pressable key={d} onPress={() => setManualSetup({ ...manualSetup, date: d })} style={[styles.chip, manualSetup.date === d && styles.chipOn]}>
-                        <Text style={{ fontSize: 13, fontWeight: '700', color: manualSetup.date === d ? '#FFF' : colors.text }}>{n === 0 ? 'Hoy' : n === 1 ? 'Ayer' : fmtDateAR(d).slice(0, 5)}</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: manualSetup.date === d ? '#FFF' : colors.text }}>{n === 0 ? tx('Hoy') : n === 1 ? tx('Ayer') : fmtDateAR(d).slice(0, 5)}</Text>
                       </Pressable>
                     );
                   })}
                 </View>
                 {canOthers ? (
-                  <TextInput placeholder="Otra fecha (DD/MM/AAAA)" placeholderTextColor={colors.muted} keyboardType="numbers-and-punctuation"
+                  <TextInput placeholder={tx('Otra fecha (DD/MM/AAAA)')} placeholderTextColor={colors.muted} keyboardType="numbers-and-punctuation"
                     onChangeText={(t) => { const d = parseDateAR(t); if (d) setManualSetup({ ...manualSetup, date: d }); }}
                     style={{ height: 44, borderRadius: 10, borderWidth: 1, borderColor: colors.input, paddingHorizontal: 12, fontSize: 15, color: colors.text }} />
                 ) : null}
-                <Text style={styles.sheetHead}>¿Qué salida fue?</Text>
+                <Text style={styles.sheetHead}>{tx('¿Qué salida fue?')}</Text>
                 <View style={{ flexDirection: 'row', gap: 6 }}>
                   {(['soulwinning', 'flyers'] as OutingKind[]).map((k) => (
                     <Pressable key={k} onPress={() => setManualSetup({ ...manualSetup, kind: k })} style={[styles.chip, manualSetup.kind === k && styles.chipOn]}>
@@ -707,8 +708,8 @@ export default function Mapa() {
                     </Pressable>
                   ))}
                 </View>
-                <Button title="Empezar a tocar veredas" icon="edit-3" onPress={() => { setManual({ ...manualSetup, picks: new Map() }); setManualSetup(null); }} />
-                <Button title="Cancelar" variant="ghost" onPress={() => setManualSetup(null)} />
+                <Button title={tx('Empezar a tocar veredas')} icon="edit-3" onPress={() => { setManual({ ...manualSetup, picks: new Map() }); setManualSetup(null); }} />
+                <Button title={tx('Cancelar')} variant="ghost" onPress={() => setManualSetup(null)} />
               </>
             ) : null}
           </Pressable>
@@ -719,14 +720,14 @@ export default function Mapa() {
       <Modal visible={sharing} transparent animationType="fade" onRequestClose={() => setSharing(false)}>
         <Pressable style={[styles.backdrop, { justifyContent: 'center', padding: 24 }]} onPress={() => setSharing(false)}>
           <Pressable style={{ backgroundColor: colors.bg, borderRadius: 20, padding: 20, gap: 12, alignItems: 'center' }} onPress={() => undefined}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{church?.name ?? 'La iglesia'}</Text>
-            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>Que lo escanee con la cámara del teléfono, o mandáselo.</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{church?.name ?? tx('La iglesia')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('Que lo escanee con la cámara del teléfono, o mandáselo.')}</Text>
             <View style={{ padding: 12, backgroundColor: '#FFFFFF', borderRadius: 12 }}>
               <QRCode value={churchUrl} size={200} />
             </View>
             <Text style={{ fontSize: 14, fontWeight: '700', color: colors.green }}>{churchUrl.replace(/^https?:\/\//, '')}</Text>
-            <Button title="Mandar el link" icon="send" onPress={shareChurch} style={{ alignSelf: 'stretch' }} />
-            <Button title="Cerrar" variant="ghost" onPress={() => setSharing(false)} style={{ alignSelf: 'stretch' }} />
+            <Button title={tx('Mandar el link')} icon="send" onPress={shareChurch} style={{ alignSelf: 'stretch' }} />
+            <Button title={tx('Cerrar')} variant="ghost" onPress={() => setSharing(false)} style={{ alignSelf: 'stretch' }} />
           </Pressable>
         </Pressable>
       </Modal>
@@ -735,8 +736,8 @@ export default function Mapa() {
       <Modal visible={!!meetDraft} transparent animationType="slide" onRequestClose={() => setMeetDraft(null)}>
         <Pressable style={styles.backdrop} onPress={() => setMeetDraft(null)}>
           <Pressable style={[styles.sheet, { paddingBottom: kb ? 16 : insets.bottom + 16, marginBottom: kb }]} onPress={() => undefined}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Punto de encuentro</Text>
-            <Text style={{ fontSize: 13, color: colors.muted }}>Les avisamos a todos los que están en salida. ¿En cuánto se juntan?</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Punto de encuentro')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Les avisamos a todos los que están en salida. ¿En cuánto se juntan?')}</Text>
             {meetDraft ? (
               <>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
@@ -746,10 +747,10 @@ export default function Mapa() {
                     </Pressable>
                   ))}
                 </View>
-                <TextInput value={meetDraft.note} onChangeText={(t) => setMeetDraft({ ...meetDraft, note: t })} placeholder="Ej.: en la esquina del kiosco" placeholderTextColor={colors.muted}
+                <TextInput value={meetDraft.note} onChangeText={(t) => setMeetDraft({ ...meetDraft, note: t })} placeholder={tx('Ej.: en la esquina del kiosco')} placeholderTextColor={colors.muted}
                   style={{ height: 44, borderRadius: 10, borderWidth: 1, borderColor: colors.input, paddingHorizontal: 12, fontSize: 15, color: colors.text }} />
-                <Button title="Marcar y avisar" icon="flag" onPress={saveMeet} />
-                <Button title="Cancelar" variant="ghost" onPress={() => setMeetDraft(null)} />
+                <Button title={tx('Marcar y avisar')} icon="flag" onPress={saveMeet} />
+                <Button title={tx('Cancelar')} variant="ghost" onPress={() => setMeetDraft(null)} />
               </>
             ) : null}
           </Pressable>
@@ -762,12 +763,12 @@ export default function Mapa() {
           <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 16 }]} onPress={() => undefined}>
             {meet ? (
               <>
-                <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Encuentro a las {fmtTime(meet.meet_at)}</Text>
+                <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Encuentro a las {fmtTime}', { fmtTime: fmtTime(meet.meet_at) })}</Text>
                 {meet.note ? <Text style={{ fontSize: 15, color: colors.text }}>{meet.note}</Text> : null}
-                <Button title="Cómo llegar" icon="navigation" onPress={() => directions(meet)} />
-                <Button title="Ver en el mapa" icon="map-pin" variant="outline" onPress={() => { setMeetOpen(false); setRegion(regionAround({ lat: meet.lat, lng: meet.lng }, 250)); }} />
+                <Button title={tx('Cómo llegar')} icon="navigation" onPress={() => directions(meet)} />
+                <Button title={tx('Ver en el mapa')} icon="map-pin" variant="outline" onPress={() => { setMeetOpen(false); setRegion(regionAround({ lat: meet.lat, lng: meet.lng }, 250)); }} />
                 {meet.created_by === session?.user.id || can('evang.ver_salidas') ? (
-                  <Button title="Sacar el punto" variant="ghost" onPress={() => { clearMeetingPoint(meet.id).then(() => { setMeet(null); setMeetOpen(false); }).catch((e) => Alert.alert('No se pudo', errorMessage(e))); }} />
+                  <Button title={tx('Sacar el punto')} variant="ghost" onPress={() => { clearMeetingPoint(meet.id).then(() => { setMeet(null); setMeetOpen(false); }).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))); }} />
                 ) : null}
               </>
             ) : null}

@@ -10,6 +10,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtBytes } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function NuevoMaterial() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function NuevoMaterial() {
 
   const save = async () => {
     if (!series.trim() || !title.trim() || !church) {
-      Alert.alert('Faltan datos', 'Poné el nombre del libro o serie y el título del capítulo.');
+      Alert.alert(tx('Faltan datos'), tx('Poné el nombre del libro o serie y el título del capítulo.'));
       return;
     }
     setBusy(true);
@@ -54,7 +55,7 @@ export default function NuevoMaterial() {
       if (error) throw error;
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -62,22 +63,22 @@ export default function NuevoMaterial() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title={params.id ? 'Editar material' : 'Cargar material'} back />
+      <Header title={params.id ? tx('Editar material') : tx('Cargar material')} back />
       <Screen>
-        <Field label="Libro o serie" placeholder="Ej: Vida de Jesús para niños" value={series} onChangeText={setSeries} />
+        <Field label={tx('Libro o serie')} placeholder={tx('Ej: Vida de Jesús para niños')} value={series} onChangeText={setSeries} />
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Field label="N°" keyboardType="number-pad" value={order} onChangeText={(t) => setOrder(t.replace(/\D/g, ''))} style={{ width: 70 }} />
-          <Field label="Título del capítulo" placeholder="Ej: El nacimiento de Jesús" value={title} onChangeText={setTitle} style={{ flex: 1 }} />
+          <Field label={tx('Título del capítulo')} placeholder={tx('Ej: El nacimiento de Jesús')} value={title} onChangeText={setTitle} style={{ flex: 1 }} />
         </View>
-        <Field label="Texto" hint="(opcional: pegá acá la lección)" value={body} onChangeText={setBody} multiline />
+        <Field label={tx('Texto')} hint={tx('(opcional: pegá acá la lección)')} value={body} onChangeText={setBody} multiline />
         <Card style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Archivo</Text>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Archivo')}</Text>
           <Text style={{ fontSize: 13, color: colors.muted }}>
-            {file ? `${file.name} ${fmtBytes(file.size)}` : existingFile ? `Actual: ${existingFile}` : 'PDF, Word, imagen o audio · hasta 50 MB'}
+            {file ? `${file.name} ${fmtBytes(file.size)}` : existingFile ? tx('Actual: {existingFile}', { existingFile }) : tx('PDF, Word, imagen o audio · hasta 50 MB')}
           </Text>
-          <Button title={file || existingFile ? 'Cambiar archivo' : 'Elegir archivo'} icon="paperclip" variant="outline" small onPress={() => pickDocument('any').then((f) => f && setFile(f))} />
+          <Button title={file || existingFile ? tx('Cambiar archivo') : tx('Elegir archivo')} icon="paperclip" variant="outline" small onPress={() => pickDocument('any').then((f) => f && setFile(f))} />
         </Card>
-        <Button title="Guardar" onPress={save} loading={busy} />
+        <Button title={tx('Guardar')} onPress={save} loading={busy} />
       </Screen>
     </KeyboardAvoidingView>
   );

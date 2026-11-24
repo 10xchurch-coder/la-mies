@@ -8,6 +8,7 @@ import { mapsUrl } from '../lib/geoLink';
 import { fmtTime } from '../lib/format';
 import type { ChatMessage } from '../lib/chat';
 import { colors, themed } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export function LocationBubble({ m, onStop }: { m: ChatMessage; onStop: () => void }) {
   const [, tick] = useState(0);
@@ -25,7 +26,7 @@ export function LocationBubble({ m, onStop }: { m: ChatMessage; onStop: () => vo
   const open = () => Linking.openURL(mapsUrl(m.lat as number, m.lng as number, m.body || undefined)).catch(() => undefined);
   return (
     <View style={styles.wrap}>
-      <Pressable onPress={open} accessibilityRole="button" accessibilityLabel="Abrir la ubicación en el mapa" style={styles.map}>
+      <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={tx('Abrir la ubicación en el mapa')} style={styles.map}>
         {mapAvailable ? (
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <MapView style={StyleSheet.absoluteFill} initialRegion={regionAround({ lat: m.lat, lng: m.lng }, 220)} region={regionAround({ lat: m.lat, lng: m.lng }, 220)}
@@ -39,18 +40,18 @@ export function LocationBubble({ m, onStop }: { m: ChatMessage; onStop: () => vo
             <Text style={styles.coords}>{m.lat.toFixed(5)}, {m.lng.toFixed(5)}</Text>
           </View>
         )}
-        {active ? <View style={styles.liveTag}><View style={styles.dot} /><Text style={styles.liveText}>EN VIVO</Text></View> : null}
+        {active ? <View style={styles.liveTag}><View style={styles.dot} /><Text style={styles.liveText}>{tx('EN VIVO')}</Text></View> : null}
       </Pressable>
       {m.body ? <Text style={styles.label}>{m.body}</Text> : null}
       {live ? (
         <Text style={styles.sub}>
-          {active ? `Ubicación en tiempo real · faltan ${left} min` : 'La ubicación en tiempo real terminó'}
-          {m.live_updated_at ? ` · actualizada ${fmtTime(m.live_updated_at)}` : ''}
+          {active ? tx('Ubicación en tiempo real · faltan {left} min', { left }) : tx('La ubicación en tiempo real terminó')}
+          {m.live_updated_at ? tx(' · actualizada {fmtTime}', { fmtTime: fmtTime(m.live_updated_at) }) : ''}
         </Text>
-      ) : <Text style={styles.sub}>Ubicación</Text>}
+      ) : <Text style={styles.sub}>{tx('Ubicación')}</Text>}
       <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
-        <Pressable onPress={open} accessibilityRole="button"><Text style={styles.link}>Abrir en el mapa</Text></Pressable>
-        {active && m.mine ? <Pressable onPress={onStop} accessibilityRole="button"><Text style={[styles.link, { color: colors.red }]}>Dejar de compartir</Text></Pressable> : null}
+        <Pressable onPress={open} accessibilityRole="button"><Text style={styles.link}>{tx('Abrir en el mapa')}</Text></Pressable>
+        {active && m.mine ? <Pressable onPress={onStop} accessibilityRole="button"><Text style={[styles.link, { color: colors.red }]}>{tx('Dejar de compartir')}</Text></Pressable> : null}
       </View>
     </View>
   );

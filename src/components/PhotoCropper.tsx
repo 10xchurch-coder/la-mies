@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Modal, PanResponder, Platform, Pressable, Text, View, useWindowDimensions } from 'react-native';
 import { colors } from '@/theme';
 import { clampOffset, cropRect, zoomAround, type Crop } from '@/lib/crop';
+import { tx } from '@/lib/i18n';
 
 type Req = { uri: string; width: number; height: number; round: boolean; aspect: number; title?: string; hint?: string; resolve: (c: Crop | null) => void };
 let open: ((r: Req) => void) | null = null;
@@ -100,10 +101,10 @@ function Cropper({ req, onDone }: { req: Req; onDone: (c: Crop | null) => void }
   return (
     <Modal visible transparent animationType="fade" onRequestClose={() => onDone(null)}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.94)', alignItems: 'center', justifyContent: 'center', padding: 20, gap: 16 }}>
-        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>{req.title ?? 'Acomodá la foto'}</Text>
+        <Text style={{ color: '#fff', fontSize: 18, fontWeight: '800' }}>{req.title ?? tx('Acomodá la foto')}</Text>
         {req.hint ? <Text style={{ color: '#fff', fontSize: 15, textAlign: 'center' }}>{req.hint}</Text> : null}
         <Text style={{ color: 'rgba(255,255,255,0.75)', fontSize: 14, textAlign: 'center' }}>
-          {Platform.OS === 'web' ? 'Arrastrala para moverla. Con la ruedita o los botones la acercás y alejás.' : 'Arrastrala con el dedo para moverla. Pellizcá o usá los botones para acercar y alejar.'}
+          {Platform.OS === 'web' ? tx('Arrastrala para moverla. Con la ruedita o los botones la acercás y alejás.') : tx('Arrastrala con el dedo para moverla. Pellizcá o usá los botones para acercar y alejar.')}
         </Text>
         <View ref={frame as never} {...pan.panHandlers}
           style={{ width: F, height: FH, overflow: 'hidden', borderRadius: req.round ? F / 2 : 16, backgroundColor: '#222',
@@ -117,7 +118,7 @@ function Cropper({ req, onDone }: { req: Req; onDone: (c: Crop | null) => void }
         </View>
         <View style={{ flexDirection: 'row', gap: 10, width: F }}>
           {btn('Cancelar', () => onDone(null))}
-          {btn('Usar esta foto', () => onDone(cropRect(off, s, F, req.width, req.height, FH)), true)}
+          {btn(tx('Usar esta foto'), () => onDone(cropRect(off, s, F, req.width, req.height, FH)), true)}
         </View>
       </View>
     </Modal>

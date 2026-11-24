@@ -1,26 +1,27 @@
 // Fotos automáticas de los eventos según el tema (fotos libres de Unsplash).
 // Si el evento tiene una foto o flyer subido, se usa esa.
 import { photoUrl } from './backgrounds';
+import { tx } from './i18n';
 
 export const EVENT_IMAGES: { key: string; label: string; id: string }[] = [
-  { key: 'culto', label: 'Culto', id: 'photo-1438232992991-995b7058bbb3' },
-  { key: 'santa_cena', label: 'Santa Cena', id: 'photo-1531627467965-e9c3dd19209c' },
-  { key: 'bautismo', label: 'Bautismo', id: 'photo-1646063436480-80b8180877ca' },
-  { key: 'futbol', label: 'Fútbol', id: 'photo-1575361204480-aadea25e6e68' },
-  { key: 'asado', label: 'Asado', id: 'photo-1599487488170-d11ec9c172f0' },
-  { key: 'comida', label: 'Comida', id: 'photo-1528605248644-14dd04022da1' },
-  { key: 'feria', label: 'Feria', id: 'photo-1784897390386-ed76ed8f79d6' },
-  { key: 'hombres', label: 'Hombres', id: 'photo-1759355642149-17dabf29a07b' },
-  { key: 'mujeres', label: 'Mujeres', id: 'photo-1590650046871-92c887180603' },
-  { key: 'jovenes', label: 'Jóvenes', id: 'photo-1511632765486-a01980e01a18' },
-  { key: 'ninos', label: 'Niños', id: 'photo-1606092195730-5d7b9af1efc5' },
-  { key: 'oracion', label: 'Oración', id: 'photo-1437603568260-1950d3ca6eab' },
-  { key: 'estudio', label: 'Estudio bíblico', id: 'photo-1509021436665-8f07dbf5bf1d' },
-  { key: 'musica', label: 'Música', id: 'photo-1525201548942-d8732f6617a0' },
-  { key: 'evangelismo', label: 'Evangelismo', id: 'photo-1627927518258-b67557570840' },
-  { key: 'conferencia', label: 'Conferencia', id: 'photo-1540575467063-178a50c2df87' },
-  { key: 'campamento', label: 'Campamento', id: 'photo-1504280390367-361c6d9f38f4' },
-  { key: 'aniversario', label: 'Aniversario', id: 'photo-1530103862676-de8c9debad1d' },
+  { key: 'culto', get label() { return tx('Culto'); }, id: 'photo-1438232992991-995b7058bbb3' },
+  { key: 'santa_cena', get label() { return tx('Santa Cena'); }, id: 'photo-1531627467965-e9c3dd19209c' },
+  { key: 'bautismo', get label() { return tx('Bautismo'); }, id: 'photo-1646063436480-80b8180877ca' },
+  { key: 'futbol', get label() { return tx('Fútbol'); }, id: 'photo-1575361204480-aadea25e6e68' },
+  { key: 'asado', get label() { return tx('Asado'); }, id: 'photo-1599487488170-d11ec9c172f0' },
+  { key: 'comida', get label() { return tx('Comida'); }, id: 'photo-1528605248644-14dd04022da1' },
+  { key: 'feria', get label() { return tx('Feria'); }, id: 'photo-1784897390386-ed76ed8f79d6' },
+  { key: 'hombres', get label() { return tx('Hombres'); }, id: 'photo-1759355642149-17dabf29a07b' },
+  { key: 'mujeres', get label() { return tx('Mujeres'); }, id: 'photo-1590650046871-92c887180603' },
+  { key: 'jovenes', get label() { return tx('Jóvenes'); }, id: 'photo-1511632765486-a01980e01a18' },
+  { key: 'ninos', get label() { return tx('Niños'); }, id: 'photo-1606092195730-5d7b9af1efc5' },
+  { key: 'oracion', get label() { return tx('Oración'); }, id: 'photo-1437603568260-1950d3ca6eab' },
+  { key: 'estudio', get label() { return tx('Estudio bíblico'); }, id: 'photo-1509021436665-8f07dbf5bf1d' },
+  { key: 'musica', get label() { return tx('Música'); }, id: 'photo-1525201548942-d8732f6617a0' },
+  { key: 'evangelismo', get label() { return tx('Evangelismo'); }, id: 'photo-1627927518258-b67557570840' },
+  { key: 'conferencia', get label() { return tx('Conferencia'); }, id: 'photo-1540575467063-178a50c2df87' },
+  { key: 'campamento', get label() { return tx('Campamento'); }, id: 'photo-1504280390367-361c6d9f38f4' },
+  { key: 'aniversario', get label() { return tx('Aniversario'); }, id: 'photo-1530103862676-de8c9debad1d' },
 ];
 
 const RULES: [RegExp, string][] = [

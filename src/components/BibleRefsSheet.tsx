@@ -9,6 +9,7 @@ import type { BibleVersion } from '@/lib/bible';
 import { useBibleReady } from '@/lib/bibleReady';
 import { crossRefs, ensureRefs, numberingDiffers, refLabel, refText, type Ref } from '@/lib/bibleStudy';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const STEP = 20;
 
@@ -45,20 +46,20 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} accessibilityLabel="Cerrar" />
+      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} accessibilityLabel={tx('Cerrar')} />
       <View style={{ backgroundColor: colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '82%' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingTop: 16, paddingBottom: 8, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>Referencias</Text>
-            <Text style={{ fontSize: 13, color: colors.muted }}>{total ? 'Otros versículos que hablan de lo mismo. Tocá uno para abrirlo.' : 'Versículos que hablan de lo mismo'}</Text>
+            <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{tx('Referencias')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>{total ? tx('Otros versículos que hablan de lo mismo. Tocá uno para abrirlo.') : tx('Versículos que hablan de lo mismo')}</Text>
           </View>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
+          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tx('Cerrar')} hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
         </View>
         <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 18, gap: 10, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
           {loading ? <ActivityIndicator color={colors.blue} style={{ marginVertical: 24 }} /> : null}
-          {!total && !loading ? <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>No hay referencias para {verses.length > 1 ? 'estos versículos' : 'este versículo'}.</Text> : null}
+          {!total && !loading ? <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>{tx('No hay referencias para {pl}.', { pl: verses.length > 1 ? tx('estos versículos') : tx('este versículo') })}</Text> : null}
           {total && version.id !== 'kjv' && numberingDiffers(book, chapter) ? (
-            <Text style={{ fontSize: 12, color: colors.muted }}>En este capítulo los números de versículo no son iguales en todas las Biblias. Alguna referencia puede caer un versículo antes o después.</Text>
+            <Text style={{ fontSize: 12, color: colors.muted }}>{tx('En este capítulo los números de versículo no son iguales en todas las Biblias. Alguna referencia puede caer un versículo antes o después.')}</Text>
           ) : null}
           {groups.map((g) => {
             if (!g.refs.length || left <= 0) return null;
@@ -78,7 +79,7 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
                         <Feather name="chevron-right" size={18} color={colors.muted} />
                       </View>
                       <Text style={{ fontSize: 15, lineHeight: 21, color: text ? colors.text : colors.muted }} numberOfLines={5}>
-                        {text || (version.load && !version.books[r.book]().length ? 'Cargando…' : 'En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.')}
+                        {text || (version.load && !version.books[r.book]().length ? tx('Cargando…') : tx('En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.'))}
                       </Text>
                     </Pressable>
                   );
@@ -86,8 +87,8 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
               </View>
             );
           })}
-          {total > shown ? <Button title={`Ver más (${total - shown})`} variant="outline" icon="chevron-down" onPress={() => setShown(shown + STEP * 2)} /> : null}
-          {total ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Referencias cruzadas: OpenBible.info, licencia CC BY.</Text> : null}
+          {total > shown ? <Button title={tx('Ver más ({v1})', { v1: total - shown })} variant="outline" icon="chevron-down" onPress={() => setShown(shown + STEP * 2)} /> : null}
+          {total ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Referencias cruzadas: OpenBible.info, licencia CC BY.')}</Text> : null}
         </ScrollView>
       </View>
     </Modal>

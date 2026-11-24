@@ -1,17 +1,18 @@
 // Enlaces de la iglesia: música (Spotify, YouTube Music) y radio. Lógica sola, sin pantalla ni base, para poder probarla.
 
+import { tx } from './i18n';
 export type LinkKind = 'spotify' | 'youtube_music' | 'music_other' | 'radio_fm' | 'radio_stream' | 'radio_other';
 
 export const MUSIC_KINDS: LinkKind[] = ['spotify', 'youtube_music', 'music_other'];
 export const RADIO_KINDS: LinkKind[] = ['radio_fm', 'radio_stream', 'radio_other'];
 
 export const KIND_LABEL: Record<LinkKind, string> = {
-  spotify: 'Spotify',
-  youtube_music: 'YouTube Music',
-  music_other: 'Otra lista',
-  radio_fm: 'Radio FM',
-  radio_stream: 'Radio por internet (para escuchar en la app)',
-  radio_other: 'Otro enlace de la radio',
+  get spotify() { return tx('Spotify'); },
+  get youtube_music() { return tx('YouTube Music'); },
+  get music_other() { return tx('Otra lista'); },
+  get radio_fm() { return tx('Radio FM'); },
+  get radio_stream() { return tx('Radio por internet (para escuchar en la app)'); },
+  get radio_other() { return tx('Otro enlace de la radio'); },
 };
 
 /** Deja una dirección lista para abrir: agrega https:// si falta y rechaza lo que no es una página web. */

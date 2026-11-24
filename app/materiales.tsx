@@ -9,6 +9,7 @@ import { classTeachers, listMaterials } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Material } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Materiales() {
   const router = useRouter();
@@ -33,25 +34,25 @@ export default function Materiales() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
-        title="Material"
-        subtitle="Libros, series y apuntes para las clases"
+        title={tx('Material')}
+        subtitle={tx('Libros, series y apuntes para las clases')}
         back
         right={canAdd ? (
-          <Pressable onPress={() => router.push('/material/nuevo')} accessibilityRole="button" accessibilityLabel="Subir material" style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable onPress={() => router.push('/material/nuevo')} accessibilityRole="button" accessibilityLabel={tx('Subir material')} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
             <Feather name="plus" size={22} color="#FFF" />
           </Pressable>
         ) : undefined}
       />
       <Screen>
         {rows && !rows.length ? (
-          <Empty icon="book" title="Todavía no hay material" text={canAdd ? 'Tocá + para cargar el primer capítulo de un libro o serie. Podés pegar el texto y/o adjuntar un PDF.' : 'Los maestros y la secretaría pueden cargarlo.'} />
+          <Empty icon="book" title={tx('Todavía no hay material')} text={canAdd ? tx('Tocá + para cargar el primer capítulo de un libro o serie. Podés pegar el texto y/o adjuntar un PDF.') : tx('Los maestros y la secretaría pueden cargarlo.')} />
         ) : null}
         {series.map(([name, list]) => (
           <View key={name} style={{ gap: 8 }}>
-            <SectionTitle right={canAdd ? <Text onPress={() => router.push({ pathname: '/material/nuevo', params: { series: name, order: String((list[list.length - 1]?.chapter_order ?? 0) + 1) } })} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>+ Capítulo</Text> : undefined}>{name}</SectionTitle>
+            <SectionTitle right={canAdd ? <Text onPress={() => router.push({ pathname: '/material/nuevo', params: { series: name, order: String((list[list.length - 1]?.chapter_order ?? 0) + 1) } })} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>{tx('+ Capítulo')}</Text> : undefined}>{name}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {list.map((m) => (
-                <RowLink key={m.id} icon={m.file_path ? 'file-text' : 'book-open'} title={m.title} subtitle={m.file_name ?? (m.body ? 'Texto para leer' : undefined)} onPress={() => router.push({ pathname: '/material/[id]', params: { id: m.id } })} />
+                <RowLink key={m.id} icon={m.file_path ? 'file-text' : 'book-open'} title={m.title} subtitle={m.file_name ?? (m.body ? tx('Texto para leer') : undefined)} onPress={() => router.push({ pathname: '/material/[id]', params: { id: m.id } })} />
               ))}
             </Card>
           </View>

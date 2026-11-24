@@ -1,6 +1,6 @@
 // Fechas, horas y números en castellano rioplatense, sin depender de Intl.
 // Si la app está en inglés (src/lib/i18n.ts), las fechas y los números salen como se escriben en inglés: este es el único lugar que lo decide.
-import { getLang, txLocale } from './i18n';
+import { getLang, txLocale, tx, txList } from './i18n';
 
 const DAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']; // i18n-skip
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']; // i18n-skip
@@ -42,17 +42,17 @@ export function fmtRelativeDay(d: Date | string | number): string {
   if (isSameDay(x, now)) return 'hoy';
   const y = new Date(now);
   y.setDate(now.getDate() - 1);
-  if (isSameDay(x, y)) return 'ayer';
+  if (isSameDay(x, y)) return tx('ayer');
   return fmtDay(x);
 }
 
 /** "1 h 40 min" / "42 min" */
 export function fmtMinutes(min: number): string {
   const m = Math.max(0, Math.round(min));
-  if (m < 60) return `${m} min`;
+  if (m < 60) return tx('{m} min', { m });
   const h = Math.floor(m / 60);
   const r = m % 60;
-  return r ? `${h} h ${r} min` : `${h} h`;
+  return r ? tx('{h} h {r} min', { h, r }) : `${h} h`;
 }
 
 /** "00:42:15" */
@@ -86,30 +86,30 @@ export function whatsappNumber(phone: string): string {
 }
 
 export const INTEREST_LABEL: Record<string, string> = {
-  very: 'Muy interesado',
-  some: 'Interesado',
-  little: 'Poco interés',
-  none: 'No volver',
+  get very() { return tx('Muy interesado'); },
+  get some() { return tx('Interesado'); },
+  get little() { return tx('Poco interés'); },
+  get none() { return tx('No volver'); },
 };
 
 export const MARITAL_LABEL: Record<string, string> = {
   single: 'Soltero/a',
   married: 'Casado/a',
-  partner: 'En pareja',
+  get partner() { return tx('En pareja'); },
   widowed: 'Viudo/a',
   separated: 'Separado/a',
   divorced: 'Divorciado/a',
 };
 
-export const PROMISE_LABEL: Record<string, string> = { sat: 'sábado', sun: 'domingo' };
+export const PROMISE_LABEL: Record<string, string> = { get sat() { return tx('sábado'); }, sun: 'domingo' };
 
 export function groupWord(grouping: string | null | undefined, plural = false): string {
-  if (grouping === 'bus_routes') return plural ? 'Rutas' : 'Ruta';
-  return plural ? 'Grupos' : 'Grupo';
+  if (grouping === 'bus_routes') return plural ? tx('Rutas') : tx('Ruta');
+  return plural ? tx('Grupos') : tx('Grupo');
 }
 /** "Todas las rutas" / "Todos los grupos". */
 export function allGroupsLabel(grouping: string | null | undefined): string {
-  return grouping === 'bus_routes' ? 'Todas las rutas' : 'Todos los grupos';
+  return grouping === 'bus_routes' ? tx('Todas las rutas') : tx('Todos los grupos');
 }
 /** Artículo que acompaña a la palabra: "la ruta" / "el grupo". */
 export function groupArticle(grouping: string | null | undefined, kind: 'el' | 'mi' | 'tu' | 'todo' = 'el'): string {
@@ -122,7 +122,7 @@ export function groupArticle(grouping: string | null | undefined, kind: 'el' | '
 }
 
 // ---------- Parte 2 ----------
-const DAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const DAY_NAMES = txList(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']);
 export const dayName = (dow: number) => DAY_NAMES[dow] ?? '';
 
 /** Fecha local como "YYYY-MM-DD" (como la guarda la base). */
@@ -166,30 +166,30 @@ export function lastSaturday(from = new Date()): string {
 }
 
 export const ROLE_LABEL: Record<string, string> = {
-  member: 'Miembro',
-  captain: 'Jefe de ruta',
-  evangelism: 'Coordinador de evangelismo',
-  deacon: 'Diácono',
-  secretary: 'Secretaría',
-  assistant_pastor: 'Pastor asistente',
-  app_admin: 'Administrador de la app',
-  admin: 'Pastor',
+  get member() { return tx('Miembro'); },
+  get captain() { return tx('Jefe de ruta'); },
+  get evangelism() { return tx('Coordinador de evangelismo'); },
+  get deacon() { return tx('Diácono'); },
+  get secretary() { return tx('Secretaría'); },
+  get assistant_pastor() { return tx('Pastor asistente'); },
+  get app_admin() { return tx('Administrador de la app'); },
+  get admin() { return tx('Pastor'); },
 };
 
-export const STATUS_LABEL: Record<string, string> = { contact: 'Contacto', visitor: 'Visita', member: 'Miembro', inactive: 'Inactivo' };
+export const STATUS_LABEL: Record<string, string> = { get contact() { return tx('Contacto'); }, get visitor() { return tx('Visita'); }, get member() { return tx('Miembro'); }, get inactive() { return tx('Inactivo'); } };
 
 export const FAITH_LABEL: Record<string, { label: string; hint: string; tone: 'green' | 'blue' | 'amber' | 'gray' | 'red' }> = {
-  fiel: { label: 'Nunca falta', hint: '95% o más', tone: 'green' },
-  constante: { label: 'Casi siempre', hint: '80 a 95%', tone: 'green' },
-  frecuente: { label: 'Seguido', hint: 'la mitad o más', tone: 'blue' },
-  ocasional: { label: 'A veces', hint: 'como una vez por mes', tone: 'amber' },
-  esporadico: { label: 'Muy de vez en cuando', hint: 'menos de una vez por mes', tone: 'red' },
-  inactivo: { label: 'Dejó de venir', hint: 'no vino en este período', tone: 'red' },
-  sin_asistencia: { label: 'Nunca vino', hint: 'todavía sin asistencia', tone: 'gray' },
-  nuevo: { label: 'Nuevo', hint: 'recién agregado', tone: 'gray' },
+  fiel: { get label() { return tx('Nunca falta'); }, get hint() { return tx('95% o más'); }, tone: 'green' },
+  constante: { get label() { return tx('Casi siempre'); }, hint: '80 a 95%', tone: 'green' },
+  frecuente: { get label() { return tx('Seguido'); }, get hint() { return tx('la mitad o más'); }, tone: 'blue' },
+  ocasional: { get label() { return tx('A veces'); }, get hint() { return tx('como una vez por mes'); }, tone: 'amber' },
+  esporadico: { get label() { return tx('Muy de vez en cuando'); }, get hint() { return tx('menos de una vez por mes'); }, tone: 'red' },
+  inactivo: { get label() { return tx('Dejó de venir'); }, get hint() { return tx('no vino en este período'); }, tone: 'red' },
+  sin_asistencia: { get label() { return tx('Nunca vino'); }, get hint() { return tx('todavía sin asistencia'); }, tone: 'gray' },
+  nuevo: { get label() { return tx('Nuevo'); }, get hint() { return tx('recién agregado'); }, tone: 'gray' },
 };
 
-export const KIND_LABEL: Record<string, string> = { soulwinning: 'Evangelismo', flyers: 'Volantes' };
+export const KIND_LABEL: Record<string, string> = { get soulwinning() { return tx('Evangelismo'); }, get flyers() { return tx('Volantes'); } };
 
 /** Saca el id de un link de YouTube (youtu.be/x, watch?v=x, live/x, shorts/x). */
 export function youtubeId(url: string | null | undefined): string | null {

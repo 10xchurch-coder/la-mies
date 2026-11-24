@@ -11,6 +11,7 @@ import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Factor = { id: string; friendly_name?: string | null; status: string; created_at: string };
 type Enrolling = { id: string; secret: string; uri: string };
@@ -49,7 +50,7 @@ export default function Seguridad() {
       setEnrolling({ id: data.id, secret: data.totp.secret, uri: data.totp.uri });
       setCode('');
     } catch (e) {
-      Alert.alert('No se pudo activar', errorMessage(e));
+      Alert.alert(tx('No se pudo activar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -64,9 +65,9 @@ export default function Seguridad() {
       setEnrolling(null);
       setCode('');
       await load();
-      Alert.alert('Listo', 'La verificación en dos pasos quedó activada. Cada vez que entres, además de la contraseña te vamos a pedir el código de la app.');
+      Alert.alert(tx('Listo'), tx('La verificación en dos pasos quedó activada. Cada vez que entres, además de la contraseña te vamos a pedir el código de la app.'));
     } catch (e) {
-      Alert.alert('Código incorrecto', errorMessage(e));
+      Alert.alert(tx('Código incorrecto'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -79,13 +80,13 @@ export default function Seguridad() {
   };
 
   const removeFactor = (f: Factor) =>
-    Alert.alert('Desactivar', '¿Quitar la verificación en dos pasos? Tu cuenta queda protegida solo por la contraseña.', [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('Desactivar'), tx('¿Quitar la verificación en dos pasos? Tu cuenta queda protegida solo por la contraseña.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Quitar', style: 'destructive',
+        text: tx('Quitar'), style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.auth.mfa.unenroll({ factorId: f.id });
-          if (error) Alert.alert('No se pudo', errorMessage(error));
+          if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
           await load();
         },
       },
@@ -94,25 +95,25 @@ export default function Seguridad() {
   const changePassword = async () => {
     const c = checkPassword(pw, [profile?.display_name ?? '', session?.user.email?.split('@')[0] ?? '']);
     if (!c.ok) {
-      Alert.alert('Contraseña débil', c.problems.join('\n'));
+      Alert.alert(tx('Contraseña débil'), c.problems.join('\n'));
       return;
     }
     if (await leakedCount(pw)) {
-      Alert.alert('Contraseña filtrada', LEAKED_MSG);
+      Alert.alert(tx('Contraseña filtrada'), tx(LEAKED_MSG));
       return;
     }
     if (pw !== pw2) {
-      Alert.alert('No coinciden', 'Las dos contraseñas tienen que ser iguales.');
+      Alert.alert(tx('No coinciden'), tx('Las dos contraseñas tienen que ser iguales.'));
       return;
     }
     setPwBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setPwBusy(false);
-    if (error) Alert.alert('No se pudo cambiar', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo cambiar'), errorMessage(error));
     else {
       setPw('');
       setPw2('');
-      Alert.alert('Listo', 'Tu contraseña cambió. Si la app está abierta en otro teléfono, va a pedir entrar de nuevo.');
+      Alert.alert(tx('Listo'), tx('Tu contraseña cambió. Si la app está abierta en otro teléfono, va a pedir entrar de nuevo.'));
     }
   };
 
@@ -120,16 +121,16 @@ export default function Seguridad() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Seguridad de mi cuenta" subtitle={session?.user.email ?? undefined} back />
+      <Header title={tx('Seguridad de mi cuenta')} subtitle={session?.user.email ?? undefined} back />
       <Screen>
-        <SectionTitle right={<Tag text={has2fa ? 'Activada' : 'Desactivada'} tone={has2fa ? 'green' : 'amber'} />}>Verificación en dos pasos</SectionTitle>
+        <SectionTitle right={<Tag text={has2fa ? tx('Activada') : tx('Desactivada')} tone={has2fa ? 'green' : 'amber'} />}>{tx('Verificación en dos pasos')}</SectionTitle>
         {enrolling ? (
           <Card style={{ gap: 14 }}>
             <Text style={styles.p}>
-              <Text style={{ fontWeight: '800' }}>1.</Text> Instalá una app de autenticación si no tenés: <Text style={{ fontWeight: '700' }}>Google Authenticator</Text> (gratis, en la tienda de apps).
+              <Text style={{ fontWeight: '800' }}>1.</Text> {tx('Instalá una app de autenticación si no tenés:')} <Text style={{ fontWeight: '700' }}>{tx('Google Authenticator')}</Text> {tx('(gratis, en la tienda de apps).')}
             </Text>
             <Text style={styles.p}>
-              <Text style={{ fontWeight: '800' }}>2.</Text> En esa app tocá <Text style={{ fontWeight: '700' }}>+</Text> y {Platform.OS === 'web' ? 'escaneá este código con la cámara' : 'elegí "Ingresar clave de configuración" y pegá la clave de abajo (o escaneá el código desde otra pantalla)'}.
+              <Text style={{ fontWeight: '800' }}>2.</Text> {tx('En esa app tocá')} <Text style={{ fontWeight: '700' }}>+</Text> y {Platform.OS === 'web' ? tx('escaneá este código con la cámara') : tx('elegí "Ingresar clave de configuración" y pegá la clave de abajo (o escaneá el código desde otra pantalla)')}.
             </Text>
             {Qr ? (
               <View style={{ alignItems: 'center', padding: 12, backgroundColor: '#FFF', borderRadius: 12, alignSelf: 'center' }}>
@@ -137,18 +138,18 @@ export default function Seguridad() {
               </View>
             ) : null}
             <View style={{ gap: 6 }}>
-              <Text style={{ fontSize: 12, color: colors.muted }}>Clave de configuración</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Clave de configuración')}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text selectable style={{ flex: 1, fontSize: 15, fontWeight: '700', letterSpacing: 1, color: colors.text }}>{enrolling.secret.replace(/(.{4})/g, '$1 ').trim()}</Text>
-                <Button title="Copiar" small variant="outline" icon="copy" onPress={() => Clipboard.setStringAsync(enrolling.secret)} />
+                <Button title={tx('Copiar')} small variant="outline" icon="copy" onPress={() => Clipboard.setStringAsync(enrolling.secret)} />
               </View>
             </View>
             <Text style={styles.p}>
-              <Text style={{ fontWeight: '800' }}>3.</Text> Escribí acá el código de 6 números que muestra la app.
+              <Text style={{ fontWeight: '800' }}>3.</Text> {tx('Escribí acá el código de 6 números que muestra la app.')}
             </Text>
-            <Field label="Código" keyboardType="number-pad" autoComplete="one-time-code" value={code} onChangeText={setCode} maxLength={6} />
-            <Button title="Activar" onPress={confirmEnroll} loading={busy} disabled={code.replace(/\D/g, '').length !== 6} />
-            <Button title="Cancelar" variant="ghost" onPress={cancelEnroll} />
+            <Field label={tx('Código')} keyboardType="number-pad" autoComplete="one-time-code" value={code} onChangeText={setCode} maxLength={6} />
+            <Button title={tx('Activar')} onPress={confirmEnroll} loading={busy} disabled={code.replace(/\D/g, '').length !== 6} />
+            <Button title={tx('Cancelar')} variant="ghost" onPress={cancelEnroll} />
           </Card>
         ) : (
           <Card style={{ gap: 12 }}>
@@ -156,34 +157,34 @@ export default function Seguridad() {
               <Feather name="shield" size={24} color={has2fa ? colors.green : colors.amberText} />
               <Text style={[styles.p, { flex: 1 }]}>
                 {has2fa
-                  ? 'Para entrar a tu cuenta hace falta la contraseña y el código de tu app de autenticación. Aunque alguien sepa tu contraseña, no puede entrar.'
-                  : 'Agrega un segundo candado: además de la contraseña, un código de 6 números que cambia cada 30 segundos en tu teléfono.'}
-                {isStaff && !has2fa ? ' Como ves los datos de toda la iglesia, te recomendamos activarla.' : ''}
+                  ? tx('Para entrar a tu cuenta hace falta la contraseña y el código de tu app de autenticación. Aunque alguien sepa tu contraseña, no puede entrar.')
+                  : tx('Agrega un segundo candado: además de la contraseña, un código de 6 números que cambia cada 30 segundos en tu teléfono.')}
+                {isStaff && !has2fa ? tx(' Como ves los datos de toda la iglesia, te recomendamos activarla.') : ''}
               </Text>
             </View>
             {factors.map((f) => (
               <View key={f.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
                 <Feather name="smartphone" size={18} color={colors.green} />
-                <Text style={{ flex: 1, fontSize: 14, color: colors.text }}>{f.friendly_name || 'App de autenticación'}</Text>
-                <Button title="Quitar" small variant="danger" onPress={() => removeFactor(f)} />
+                <Text style={{ flex: 1, fontSize: 14, color: colors.text }}>{f.friendly_name || tx('App de autenticación')}</Text>
+                <Button title={tx('Quitar')} small variant="danger" onPress={() => removeFactor(f)} />
               </View>
             ))}
-            {!has2fa ? <Button title="Activar verificación en dos pasos" icon="shield" onPress={startEnroll} loading={busy} /> : null}
+            {!has2fa ? <Button title={tx('Activar verificación en dos pasos')} icon="shield" onPress={startEnroll} loading={busy} /> : null}
           </Card>
         )}
 
-        <SectionTitle>Cambiar contraseña</SectionTitle>
+        <SectionTitle>{tx('Cambiar contraseña')}</SectionTitle>
         <Card style={{ gap: 12 }}>
-          <PasswordField label="Contraseña nueva" value={pw} onChangeText={setPw} personal={[profile?.display_name ?? '', session?.user.email?.split('@')[0] ?? '']} />
-          <PasswordField label="Repetila" value={pw2} onChangeText={setPw2} isNew={false} />
-          <Button title="Cambiar contraseña" variant="outline" onPress={changePassword} loading={pwBusy} disabled={!pw || !pw2} />
+          <PasswordField label={tx('Contraseña nueva')} value={pw} onChangeText={setPw} personal={[profile?.display_name ?? '', session?.user.email?.split('@')[0] ?? '']} />
+          <PasswordField label={tx('Repetila')} value={pw2} onChangeText={setPw2} isNew={false} />
+          <Button title={tx('Cambiar contraseña')} variant="outline" onPress={changePassword} loading={pwBusy} disabled={!pw || !pw2} />
         </Card>
 
-        <SectionTitle>Consejos</SectionTitle>
+        <SectionTitle>{tx('Consejos')}</SectionTitle>
         <Card style={{ gap: 8 }}>
-          <Text style={styles.p}>• Usá una contraseña que no uses en ningún otro lado.</Text>
-          <Text style={styles.p}>• Nunca la compartas por WhatsApp ni se la digas a nadie, ni siquiera a alguien que diga ser de la iglesia o de La Mies.</Text>
-          <Text style={styles.p}>• Si perdés el teléfono, cambiá la contraseña desde otro aparato y avisale al pastor para que cierre tu sesión.</Text>
+          <Text style={styles.p}>{tx('• Usá una contraseña que no uses en ningún otro lado.')}</Text>
+          <Text style={styles.p}>{tx('• Nunca la compartas por WhatsApp ni se la digas a nadie, ni siquiera a alguien que diga ser de la iglesia o de La Mies.')}</Text>
+          <Text style={styles.p}>{tx('• Si perdés el teléfono, cambiá la contraseña desde otro aparato y avisale al pastor para que cierre tu sesión.')}</Text>
         </Card>
       </Screen>
     </View>

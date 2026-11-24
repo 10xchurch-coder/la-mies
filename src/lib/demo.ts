@@ -9,6 +9,7 @@ import { supabase } from './supabase';
 import {
   DEMO_MESSAGE_LONG, DEMO_TITLE, failedRequestIsDemoBlock, isDemoError, isDemoSession, isOutboundContactUrl, looksLikeDemoBlock, type DemoView,
 } from './demoCore';
+import { tx } from './i18n';
 
 export * from './demoCore';
 
@@ -30,9 +31,9 @@ export function onDemoFlash(cb: () => void): () => void {
 }
 
 /** Para poner antes de algo que la demostración no hace (bajar una lista, exportar). Devuelve true si lo frenó. */
-export function demoBlocked(what = 'Esto'): boolean {
+export function demoBlocked(what = tx('Esto')): boolean {
   if (!demoOn) return false;
-  Alert.alert(DEMO_TITLE, `${what} no se hace en la demostración: los datos son de ejemplo. En tu iglesia sí vas a poder.`);
+  Alert.alert(tx(DEMO_TITLE), tx('{what} no se hace en la demostración: los datos son de ejemplo. En tu iglesia sí vas a poder.', { what }));
   return true;
 }
 
@@ -48,11 +49,11 @@ function rememberDemo(on: boolean) {
 /** Entra a la iglesia de ejemplo. El visitante no escribe ni ve ninguna contraseña: la base le dice a la app con qué cuenta entrar. */
 export async function enterDemo(view: DemoView): Promise<{ ok: true } | { ok: false; off: boolean; message: string }> {
   const { data, error } = await supabase.rpc('demo_entry', { p_view: view });
-  if (error) return { ok: false, off: false, message: 'No pudimos abrir la demostración. Revisá tu conexión y probá de nuevo.' };
+  if (error) return { ok: false, off: false, message: tx('No pudimos abrir la demostración. Revisá tu conexión y probá de nuevo.') };
   const d = data as { email?: string; key?: string } | null;
-  if (!d?.email || !d.key) return { ok: false, off: true, message: 'La demostración no está disponible en este momento.' };
+  if (!d?.email || !d.key) return { ok: false, off: true, message: tx('La demostración no está disponible en este momento.') };
   const { error: e2 } = await supabase.auth.signInWithPassword({ email: d.email, password: d.key });
-  if (e2) return { ok: false, off: false, message: 'No pudimos abrir la demostración. Probá de nuevo en un rato.' };
+  if (e2) return { ok: false, off: false, message: tx('No pudimos abrir la demostración. Probá de nuevo en un rato.') };
   rememberDemo(true);
   return { ok: true };
 }
@@ -110,7 +111,7 @@ export function installDemo(): void {
   // 3) WhatsApp, llamadas y mensajes: en la demostración no se abren (los teléfonos son inventados).
   const L = Linking as unknown as { openURL: (url: string) => Promise<unknown> };
   const baseOpen = L.openURL.bind(Linking);
-  const explain = () => Alert.alert(DEMO_TITLE, 'Acá se abriría WhatsApp, el teléfono o el correo con el mensaje listo. En la demostración no se manda nada: las personas son inventadas.');
+  const explain = () => Alert.alert(tx(DEMO_TITLE), tx('Acá se abriría WhatsApp, el teléfono o el correo con el mensaje listo. En la demostración no se manda nada: las personas son inventadas.'));
   L.openURL = async (url: string) => {
     if (demoOn && isOutboundContactUrl(url)) { explain(); return true; }
     return baseOpen(url);

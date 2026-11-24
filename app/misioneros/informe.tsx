@@ -13,6 +13,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { MissionaryReport } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const MAX_PHOTOS = 30;
 
@@ -54,7 +55,7 @@ export default function InformeMisionero() {
 
   const run = async (f: () => Promise<void>) => {
     setUploading(true);
-    try { await f(); } catch (e) { Alert.alert('No se pudo subir', errorMessage(e)); } finally { setUploading(false); }
+    try { await f(); } catch (e) { Alert.alert(tx('No se pudo subir'), errorMessage(e)); } finally { setUploading(false); }
   };
   const choosePdf = () => church && run(async () => {
     const p = await pickMissionaryPdf(church.id);
@@ -75,7 +76,7 @@ export default function InformeMisionero() {
       await removeMissionaryFiles([...old, ...fresh].filter((p) => !keep.has(p)));
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -89,45 +90,45 @@ export default function InformeMisionero() {
   const empty = !pdf && !photos.length && !summary.trim();
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Informe del mes" subtitle={name || undefined} back />
+      <Header title={tx('Informe del mes')} subtitle={name || undefined} back />
       <Screen>
-        {!isStaff ? <Empty icon="lock" title="Solo el pastor y la secretaría" /> : (
+        {!isStaff ? <Empty icon="lock" title={tx('Solo el pastor y la secretaría')} /> : (
           <>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>¿De qué mes es?</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>{tx('¿De qué mes es?')}</Text>
               <DateChips dates={months} value={month} onChange={setMonth} format={monthLabel} />
-              {existing ? <Text style={{ fontSize: 12, color: colors.amberText }}>Ya hay un informe de este mes. Lo que guardes lo reemplaza.</Text> : null}
+              {existing ? <Text style={{ fontSize: 12, color: colors.amberText }}>{tx('Ya hay un informe de este mes. Lo que guardes lo reemplaza.')}</Text> : null}
             </Card>
             <Card style={{ gap: 12 }}>
-              <Field label="Título (opcional)" value={title} onChangeText={setTitle} maxLength={160} placeholder="Por ejemplo: Un mes de bautismos" />
-              <Field label="Resumen corto (opcional)" value={summary} onChangeText={setSummary} multiline maxLength={4000} hint="Unas líneas para que lean antes de abrir el PDF." />
+              <Field label={tx('Título (opcional)')} value={title} onChangeText={setTitle} maxLength={160} placeholder={tx('Por ejemplo: Un mes de bautismos')} />
+              <Field label={tx('Resumen corto (opcional)')} value={summary} onChangeText={setSummary} multiline maxLength={4000} hint={tx('Unas líneas para que lean antes de abrir el PDF.')} />
             </Card>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Informe en PDF</Text>
-              {pdf ? <Text style={{ fontSize: 13, color: colors.greenText }}>✔ {pdf.name}</Text> : <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no elegiste el PDF.</Text>}
+              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Informe en PDF')}</Text>
+              {pdf ? <Text style={{ fontSize: 13, color: colors.greenText }}>✔ {pdf.name}</Text> : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Todavía no elegiste el PDF.')}</Text>}
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title={pdf ? 'Cambiar PDF' : 'Elegir PDF'} icon="file-text" variant="outline" small style={{ flex: 1 }} onPress={choosePdf} disabled={uploading} />
-                {pdf ? <Button title="Sacar" variant="ghost" small style={{ flex: 1 }} onPress={() => setPdf(null)} /> : null}
+                <Button title={pdf ? tx('Cambiar PDF') : tx('Elegir PDF')} icon="file-text" variant="outline" small style={{ flex: 1 }} onPress={choosePdf} disabled={uploading} />
+                {pdf ? <Button title={tx('Sacar')} variant="ghost" small style={{ flex: 1 }} onPress={() => setPdf(null)} /> : null}
               </View>
             </Card>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Fotos ({photos.length})</Text>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Fotos ({n})', { n: photos.length })}</Text>
               {photos.length ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                   {photos.map((p) => (
                     <View key={p}>
                       <SignedImage bucket="missionaries" path={p} style={{ width: 96, height: 96, borderRadius: 10 }} />
-                      <Button title="Sacar" variant="ghost" small onPress={() => setPhotos((l) => l.filter((x) => x !== p))} />
+                      <Button title={tx('Sacar')} variant="ghost" small onPress={() => setPhotos((l) => l.filter((x) => x !== p))} />
                     </View>
                   ))}
                 </View>
               ) : null}
-              <Button title={uploading ? 'Subiendo…' : 'Agregar fotos'} icon="image" variant="outline" small onPress={addPhotos} disabled={uploading || photos.length >= MAX_PHOTOS} />
+              <Button title={uploading ? tx('Subiendo…') : tx('Agregar fotos')} icon="image" variant="outline" small onPress={addPhotos} disabled={uploading || photos.length >= MAX_PHOTOS} />
             </Card>
-            {!existing ? <Toggle label="Avisar a toda la iglesia" hint="Les llega una notificación de que hay un informe nuevo." value={announce} onChange={setAnnounce} /> : null}
+            {!existing ? <Toggle label={tx('Avisar a toda la iglesia')} hint={tx('Les llega una notificación de que hay un informe nuevo.')} value={announce} onChange={setAnnounce} /> : null}
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cancelar" variant="outline" style={{ flex: 1 }} onPress={cancel} disabled={busy} />
-              <Button title="Guardar informe" icon="check" style={{ flex: 2 }} onPress={save} loading={busy} disabled={uploading || empty} />
+              <Button title={tx('Cancelar')} variant="outline" style={{ flex: 1 }} onPress={cancel} disabled={busy} />
+              <Button title={tx('Guardar informe')} icon="check" style={{ flex: 2 }} onPress={save} loading={busy} disabled={uploading || empty} />
             </View>
           </>
         )}

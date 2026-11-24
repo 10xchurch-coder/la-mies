@@ -15,68 +15,69 @@ export type DeskTone = 'green' | 'blue' | 'amber' | 'violet' | 'teal' | 'pink';
 export type DeskGroup = { title: string; tone: DeskTone; items: DeskItem[] };
 
 import { pathOn, type Disabled } from './features';
+import { tx } from './i18n';
 
 // Las mismas áreas y colores que el menú del teléfono, para que todo se encuentre en el mismo lugar.
 export const DESK_NAV: DeskGroup[] = [
-  { title: 'Resumen', tone: 'green', items: [
-    { key: 'inicio', label: 'Inicio', icon: 'home', to: '/escritorio', perms: [] },
+  { get title() { return tx('Resumen'); }, tone: 'green', items: [
+    { key: 'inicio', get label() { return tx('Inicio'); }, icon: 'home', to: '/escritorio', perms: [] },
   ] },
-  { title: 'Reuniones', tone: 'green', items: [
-    { key: 'asistencia', label: 'Tomar asistencia', icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
-    { key: 'hoy', label: 'Asistencia del día', icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
-    { key: 'calendario', label: 'Calendario', icon: 'calendar', to: '/eventos', perms: [] },
-    { key: 'rifas', label: 'Sorteos', icon: 'award', to: '/rifas', perms: [] },
-    { key: 'presentar', label: 'Modo presentación', icon: 'monitor', to: '/presentar', perms: ['presentar.usar'] },
-    { key: 'culto', label: 'Orden del culto', icon: 'list', to: '/culto', perms: ['personas.ver_todas', 'inf.panel'] },
+  { get title() { return tx('Reuniones'); }, tone: 'green', items: [
+    { key: 'asistencia', get label() { return tx('Tomar asistencia'); }, icon: 'check-square', to: '/asistencia', perms: ['personas.asistencia'] },
+    { key: 'hoy', get label() { return tx('Asistencia del día'); }, icon: 'eye', to: '/escritorio/asistencia', perms: ['personas.asistencia', 'personas.ver_todas', 'inf.panel'] },
+    { key: 'calendario', get label() { return tx('Calendario'); }, icon: 'calendar', to: '/eventos', perms: [] },
+    { key: 'rifas', get label() { return tx('Sorteos'); }, icon: 'award', to: '/rifas', perms: [] },
+    { key: 'presentar', get label() { return tx('Modo presentación'); }, icon: 'monitor', to: '/presentar', perms: ['presentar.usar'] },
+    { key: 'culto', get label() { return tx('Orden del culto'); }, icon: 'list', to: '/culto', perms: ['personas.ver_todas', 'inf.panel'] },
   ] },
-  { title: 'Personas y seguimiento', tone: 'amber', items: [
-    { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
-    { key: 'seguimiento', label: 'Para seguir', icon: 'user-check', to: '/seguimiento', perms: [] },
-    { key: 'discipulado', label: 'Discipulado', icon: 'book-open', to: '/discipulado', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'decisiones', label: 'Decisiones', icon: 'heart', to: '/decisiones', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'bienvenida', label: 'Visitas nuevas', icon: 'gift', to: '/bienvenida', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'tarjeta-visita', label: 'Tarjeta de visita (QR)', icon: 'grid', to: '/tarjeta-visita', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'clase-miembros', label: 'Clase de miembros', icon: 'award', to: '/clase-miembros', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'ausencias', label: 'Faltaron', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'inactivos', label: 'Inactivos', icon: 'user-minus', to: '/inactivos', perms: ['personas.ver_todas', 'personas.editar'] },
-    { key: 'fidelidad', label: 'Fidelidad', icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },
-    { key: 'cumples', label: 'Cumpleaños', icon: 'gift', to: '/cumples', perms: [] },
+  { get title() { return tx('Personas y seguimiento'); }, tone: 'amber', items: [
+    { key: 'personas', get label() { return tx('Personas'); }, icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
+    { key: 'seguimiento', get label() { return tx('Para seguir'); }, icon: 'user-check', to: '/seguimiento', perms: [] },
+    { key: 'discipulado', get label() { return tx('Discipulado'); }, icon: 'book-open', to: '/discipulado', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'decisiones', get label() { return tx('Decisiones'); }, icon: 'heart', to: '/decisiones', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'bienvenida', get label() { return tx('Visitas nuevas'); }, icon: 'gift', to: '/bienvenida', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'tarjeta-visita', get label() { return tx('Tarjeta de visita (QR)'); }, icon: 'grid', to: '/tarjeta-visita', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'clase-miembros', get label() { return tx('Clase de miembros'); }, icon: 'award', to: '/clase-miembros', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'ausencias', get label() { return tx('Faltaron'); }, icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'inactivos', get label() { return tx('Inactivos'); }, icon: 'user-minus', to: '/inactivos', perms: ['personas.ver_todas', 'personas.editar'] },
+    { key: 'fidelidad', get label() { return tx('Fidelidad'); }, icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'cumples', get label() { return tx('Cumpleaños'); }, icon: 'gift', to: '/cumples', perms: [] },
   ] },
-  { title: 'Crecer', tone: 'blue', items: [
-    { key: 'clases', label: 'Clases', icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
-    { key: 'devocionales', label: 'Devocionales', icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
-    { key: 'cancionero', label: 'Cancionero', icon: 'music', to: '/canciones', perms: [] },
-    { key: 'preguntas', label: 'Preguntas', icon: 'help-circle', to: '/preguntas', perms: ['com.moderar'] },
-    { key: 'musica', label: 'Música', icon: 'headphones', to: '/musica', perms: [] },
-    { key: 'radio', label: 'Radio', icon: 'radio', to: '/radio', perms: [] },
+  { get title() { return tx('Crecer'); }, tone: 'blue', items: [
+    { key: 'clases', get label() { return tx('Clases'); }, icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
+    { key: 'devocionales', get label() { return tx('Devocionales'); }, icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
+    { key: 'cancionero', get label() { return tx('Cancionero'); }, icon: 'music', to: '/canciones', perms: [] },
+    { key: 'preguntas', get label() { return tx('Preguntas'); }, icon: 'help-circle', to: '/preguntas', perms: ['com.moderar'] },
+    { key: 'musica', get label() { return tx('Música'); }, icon: 'headphones', to: '/musica', perms: [] },
+    { key: 'radio', get label() { return tx('Radio'); }, icon: 'radio', to: '/radio', perms: [] },
   ] },
-  { title: 'Comunidad', tone: 'violet', items: [
-    { key: 'anuncios', label: 'Anuncios', icon: 'bell', to: '/anuncios', perms: ['com.anuncios'] },
-    { key: 'ministerios', label: 'Ministerios', icon: 'layers', to: '/ministerios', perms: ['ens.ver', 'ens.editar'] },
-    { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
-    { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
-    { key: 'mensajes', label: 'Mensajes', icon: 'mail', to: '/mensajes', perms: [] },
-    { key: 'ubicacion-familia', label: 'Ubicación en familia', icon: 'map-pin', to: '/familia-ubicacion', perms: [] },
+  { get title() { return tx('Comunidad'); }, tone: 'violet', items: [
+    { key: 'anuncios', get label() { return tx('Anuncios'); }, icon: 'bell', to: '/anuncios', perms: ['com.anuncios'] },
+    { key: 'ministerios', get label() { return tx('Ministerios'); }, icon: 'layers', to: '/ministerios', perms: ['ens.ver', 'ens.editar'] },
+    { key: 'misioneros', get label() { return tx('Misioneros'); }, icon: 'globe', to: '/misioneros', perms: [] },
+    { key: 'sugerencias', get label() { return tx('Sugerencias'); }, icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
+    { key: 'mensajes', get label() { return tx('Mensajes'); }, icon: 'mail', to: '/mensajes', perms: [] },
+    { key: 'ubicacion-familia', get label() { return tx('Ubicación en familia'); }, icon: 'map-pin', to: '/familia-ubicacion', perms: [] },
   ] },
-  { title: 'Informes y evangelismo', tone: 'teal', items: [
-    { key: 'reporte', label: 'Informe semanal', icon: 'file-text', to: '/reporte', perms: ['inf.panel'] },
-    { key: 'progreso', label: 'Progreso de la iglesia', icon: 'trending-up', to: '/progreso-iglesia', perms: ['inf.panel'] },
-    { key: 'vivo', label: 'Evangelismo en vivo', icon: 'map-pin', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
-    { key: 'panel', label: 'Panel de salidas', icon: 'bar-chart-2', to: '/panel', perms: ['inf.panel'] },
-    { key: 'salieron', label: 'Quiénes salieron', icon: 'user-check', to: '/salieron', perms: ['inf.panel', 'personas.asistencia'] },
-    { key: 'salidas', label: 'Salidas', icon: 'map', to: '/salidas', perms: ['evang.ver_salidas'] },
-    { key: 'zonas', label: 'Zonas', icon: 'grid', to: '/zonas', perms: ['evang.zonas'] },
+  { get title() { return tx('Informes y evangelismo'); }, tone: 'teal', items: [
+    { key: 'reporte', get label() { return tx('Informe semanal'); }, icon: 'file-text', to: '/reporte', perms: ['inf.panel'] },
+    { key: 'progreso', get label() { return tx('Progreso de la iglesia'); }, icon: 'trending-up', to: '/progreso-iglesia', perms: ['inf.panel'] },
+    { key: 'vivo', get label() { return tx('Evangelismo en vivo'); }, icon: 'map-pin', to: '/equipo', perms: ['inf.panel', 'evang.ver_salidas'] },
+    { key: 'panel', get label() { return tx('Panel de salidas'); }, icon: 'bar-chart-2', to: '/panel', perms: ['inf.panel'] },
+    { key: 'salieron', get label() { return tx('Quiénes salieron'); }, icon: 'user-check', to: '/salieron', perms: ['inf.panel', 'personas.asistencia'] },
+    { key: 'salidas', get label() { return tx('Salidas'); }, icon: 'map', to: '/salidas', perms: ['evang.ver_salidas'] },
+    { key: 'zonas', get label() { return tx('Zonas'); }, icon: 'grid', to: '/zonas', perms: ['evang.zonas'] },
   ] },
-  { title: 'Administración', tone: 'pink', items: [
-    { key: 'finanzas', label: 'Finanzas', icon: 'dollar-sign', to: '/finanzas', perms: ['fin.ver'] },
-    { key: 'ofrendas', label: 'Ofrendas por persona', icon: 'gift', to: '/finanzas/ofrendas', perms: ['fin.ver'] },
-    { key: 'cuentas', label: 'Cuentas', icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
-    { key: 'roles', label: 'Roles y permisos', icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
-    { key: 'funciones', label: 'Funciones de la iglesia', icon: 'toggle-right', to: '/admin/funciones', perms: ['admin.permisos'] },
-    { key: 'reglas', label: 'Seguimiento y mensajes', icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
-    { key: 'importar', label: 'Importar personas', icon: 'upload', to: '/importar', perms: ['personas.editar'] },
-    { key: 'copia', label: 'Copia de todos los datos', icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
-    { key: 'ajustes', label: 'Ajustes', icon: 'settings', to: '/ajustes', perms: [] },
+  { get title() { return tx('Administración'); }, tone: 'pink', items: [
+    { key: 'finanzas', get label() { return tx('Finanzas'); }, icon: 'dollar-sign', to: '/finanzas', perms: ['fin.ver'] },
+    { key: 'ofrendas', get label() { return tx('Ofrendas por persona'); }, icon: 'gift', to: '/finanzas/ofrendas', perms: ['fin.ver'] },
+    { key: 'cuentas', get label() { return tx('Cuentas'); }, icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
+    { key: 'roles', get label() { return tx('Roles y permisos'); }, icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
+    { key: 'funciones', get label() { return tx('Funciones de la iglesia'); }, icon: 'toggle-right', to: '/admin/funciones', perms: ['admin.permisos'] },
+    { key: 'reglas', get label() { return tx('Seguimiento y mensajes'); }, icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
+    { key: 'importar', get label() { return tx('Importar personas'); }, icon: 'upload', to: '/importar', perms: ['personas.editar'] },
+    { key: 'copia', get label() { return tx('Copia de todos los datos'); }, icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
+    { key: 'ajustes', get label() { return tx('Ajustes'); }, icon: 'settings', to: '/ajustes', perms: [] },
   ] },
 ];
 
@@ -188,7 +189,7 @@ export function toCsv(header: string[], rows: (string | number | null | undefine
 export function delta(now: number, before: number | null | undefined): { text: string; dir: 'up' | 'down' | 'same' } | null {
   if (before === null || before === undefined) return null;
   const d = now - before;
-  if (d === 0) return { text: 'igual', dir: 'same' };
+  if (d === 0) return { text: tx('igual'), dir: 'same' };
   return { text: `${d > 0 ? '+' : '−'}${Math.abs(d)}`, dir: d > 0 ? 'up' : 'down' };
 }
 

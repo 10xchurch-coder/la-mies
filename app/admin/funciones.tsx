@@ -9,6 +9,7 @@ import { FEATURES, FEATURE_GROUPS, cleanDisabled, featureOn, type FeatureKey } f
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Funciones() {
   const { church, can, refreshProfile } = useAuth();
@@ -25,7 +26,7 @@ export default function Funciones() {
       await refreshProfile();
     } catch (e) {
       setOff(before);
-      Alert.alert('No se pudo cambiar', errorMessage(e));
+      Alert.alert(tx('No se pudo cambiar'), errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -37,7 +38,7 @@ export default function Funciones() {
       setOff([]);
       await refreshProfile();
     } catch (e) {
-      Alert.alert('No se pudo cambiar', errorMessage(e));
+      Alert.alert(tx('No se pudo cambiar'), errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -45,24 +46,24 @@ export default function Funciones() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Funciones de la iglesia" subtitle="Prendé solo lo que tu iglesia usa" back />
+      <Header title={tx('Funciones de la iglesia')} subtitle={tx('Prendé solo lo que tu iglesia usa')} back />
       <Screen>
-        {!can('admin.permisos') ? <Empty icon="lock" title="Solo el pastor o el administrador de la app" /> : (
+        {!can('admin.permisos') ? <Empty icon="lock" title={tx('Solo el pastor o el administrador de la app')} /> : (
           <>
             <Card style={{ backgroundColor: colors.greenSoft, borderColor: colors.greenSoft, gap: 6 }}>
               <Text style={{ fontSize: 14, color: colors.greenText, lineHeight: 20 }}>
-                Cada iglesia es distinta. Lo que apagues deja de verse para todos: no aparece en el menú ni en la barra de abajo, y nadie lo puede abrir.
+                {tx('Cada iglesia es distinta. Lo que apagues deja de verse para todos: no aparece en el menú ni en la barra de abajo, y nadie lo puede abrir.')}
               </Text>
               <Text style={{ fontSize: 14, color: colors.greenText, lineHeight: 20 }}>
-                No se borra nada. Si lo volvés a prender, todo está como estaba.
+                {tx('No se borra nada. Si lo volvés a prender, todo está como estaba.')}
               </Text>
             </Card>
             {off.length ? (
-              <Button title={busy === 'todo' ? 'Prendiendo…' : `Prender todo (${off.length} apagada${off.length > 1 ? 's' : ''})`} icon="refresh-cw" variant="outline" small onPress={allOn} disabled={!!busy} />
+              <Button title={busy === 'todo' ? tx('Prendiendo…') : tx('Prender todo ({n} apagada{pl})', { n: off.length, pl: off.length > 1 ? 's' : '' })} icon="refresh-cw" variant="outline" small onPress={allOn} disabled={!!busy} />
             ) : null}
             {FEATURE_GROUPS.map((g) => (
               <View key={g} style={{ gap: 8 }}>
-                <SectionTitle>{g}</SectionTitle>
+                <SectionTitle>{tx(g)}</SectionTitle>
                 {FEATURES.filter((f) => f.group === g).map((f) => (
                   <Card key={f.key} style={{ padding: 12 }}>
                     <Toggle label={f.label} hint={f.hint} value={featureOn(off, f.key)} onChange={(v) => change(f.key, v)} disabled={!!busy} />
@@ -71,7 +72,7 @@ export default function Funciones() {
               </View>
             ))}
             <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-              Las personas, las cuentas, los roles y los ajustes siempre están. Los avisos automáticos de afuera de la app (por ejemplo el informe del lunes) no cambian con esto.
+              {tx('Las personas, las cuentas, los roles y los ajustes siempre están. Los avisos automáticos de afuera de la app (por ejemplo el informe del lunes) no cambian con esto.')}
             </Text>
           </>
         )}

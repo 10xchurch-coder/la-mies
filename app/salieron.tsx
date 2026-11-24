@@ -14,6 +14,7 @@ import { errorMessage } from '@/lib/supabase';
 import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
+import { tx } from '@/lib/i18n';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -42,7 +43,7 @@ export default function Salieron() {
       const s = await outingSheet(date);
       if (!busy.current) { setRows(s.rows); setNoCard(Math.max(0, s.total - s.rows.filter((r) => r.marked || r.via_app).length)); }
     } catch (e) {
-      Alert.alert('No se pudo cargar', errorMessage(e));
+      Alert.alert(tx('No se pudo cargar'), errorMessage(e));
       setRows([]);
     }
   }, [date]);
@@ -66,7 +67,7 @@ export default function Salieron() {
       await setOutingAttendance(r.contact_id, date, next);
     } catch (e) {
       setRows((rs) => rs?.map((x) => (x.contact_id === r.contact_id ? { ...x, marked: !next } : x)) ?? null);
-      Alert.alert('No se guardó', errorMessage(e));
+      Alert.alert(tx('No se guardó'), errorMessage(e));
     } finally {
       busy.current -= 1;
     }
@@ -83,24 +84,24 @@ export default function Salieron() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Quiénes salieron" subtitle={`Evangelismo · ${date === today ? 'hoy' : fmtDateShort(date)}`} back />
+      <Header title={tx('Quiénes salieron')} subtitle={tx('Evangelismo · {v1}', { v1: date === today ? tx('hoy') : fmtDateShort(date) })} back />
       <View style={styles.filters}>
-        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === today ? 'Hoy' : fmtDateShort(d))} />
+        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === today ? tx('Hoy') : fmtDateShort(d))} />
         <View style={styles.counter}>
           <Text style={{ fontSize: 28, fontWeight: '800', color: colors.greenText }}>{total}</Text>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>{total === 1 ? 'salió a evangelizar' : 'salieron a evangelizar'}</Text>
-            {withApp ? <Text style={{ fontSize: 11, color: colors.greenText }}>{withApp} con la app, {total - withApp} marcados a mano</Text> : null}
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.greenText }}>{total === 1 ? tx('salió a evangelizar') : tx('salieron a evangelizar')}</Text>
+            {withApp ? <Text style={{ fontSize: 11, color: colors.greenText }}>{tx('{withApp} con la app, {v1} marcados a mano', { withApp, v1: total - withApp })}</Text> : null}
           </View>
           <Pressable onPress={() => setOnlyOut(!onlyOut)} style={[styles.filter, onlyOut && { backgroundColor: colors.green }]}>
-            <Text style={{ fontSize: 12, fontWeight: '800', color: onlyOut ? '#FFF' : colors.greenText }}>{onlyOut ? 'Ver todos' : 'Solo los que salieron'}</Text>
+            <Text style={{ fontSize: 12, fontWeight: '800', color: onlyOut ? '#FFF' : colors.greenText }}>{onlyOut ? tx('Ver todos') : tx('Solo los que salieron')}</Text>
           </Pressable>
         </View>
         <View style={styles.search}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
         </View>
-        <Text style={{ fontSize: 12, color: colors.muted }}>Tocá a cada hermano que salió. Los que usaron la app ya aparecen marcados. Esto no cuenta como asistencia a los cultos.</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá a cada hermano que salió. Los que usaron la app ya aparecen marcados. Esto no cuenta como asistencia a los cultos.')}</Text>
       </View>
       {rows === null ? (
         <Loading />
@@ -112,7 +113,7 @@ export default function Salieron() {
           numColumns={cols}
           contentContainerStyle={styles.list}
           columnWrapperStyle={{ gap: 8 }}
-          ListEmptyComponent={<Empty icon="users" title="No hay nadie en la lista" text="Aparecen los miembros y los que asisten seguido." />}
+          ListEmptyComponent={<Empty icon="users" title={tx('No hay nadie en la lista')} text={tx('Aparecen los miembros y los que asisten seguido.')} />}
           renderItem={({ item: r }) => {
             const on = went(r);
             return (
@@ -126,7 +127,7 @@ export default function Salieron() {
                   ) : null}
                 </View>
                 <Text numberOfLines={2} style={{ fontSize: 12, fontWeight: on ? '800' : '600', color: colors.text, textAlign: 'center' }}>{r.name}</Text>
-                {r.via_app ? <Text style={{ fontSize: 10, fontWeight: '700', color: colors.greenText }}>Con la app</Text>
+                {r.via_app ? <Text style={{ fontSize: 10, fontWeight: '700', color: colors.greenText }}>{tx('Con la app')}</Text>
                   : r.status !== 'member' ? <Text style={{ fontSize: 10, color: colors.muted }}>{STATUS_LABEL[r.status]}</Text> : null}
               </Pressable>
             );

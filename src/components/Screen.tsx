@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, themed, toneOf } from '../theme';
 import { areaOf } from '../lib/areas';
 import { CONTENT_MAX_WIDTH } from '../lib/layout';
+import { tx } from '@/lib/i18n';
 
 export function Header({ title, subtitle, back, right }: { title: string; subtitle?: string; back?: boolean; right?: React.ReactNode }) {
   const router = useRouter();
@@ -22,7 +23,7 @@ export function Header({ title, subtitle, back, right }: { title: string; subtit
     <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
       <View style={styles.headerInner}>
       {back ? (
-        <Pressable accessibilityRole="button" accessibilityLabel="Volver" onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/iglesia'))} style={[styles.back, { backgroundColor: tone.soft }]}>
+        <Pressable accessibilityRole="button" accessibilityLabel={tx('Volver')} onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/iglesia'))} style={[styles.back, { backgroundColor: tone.soft }]}>
           <Feather name="arrow-left" size={22} color={tone.text} />
         </Pressable>
       ) : null}

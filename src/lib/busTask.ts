@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
+import { tx } from './i18n';
 
 export const BUS_TASK = 'lamies-colectivo';
 const KEY = 'lamies.bus.run';
@@ -61,11 +62,11 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(BUS_TASK)) {
 function disclosure(): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(
-      'Ubicación del colectivo',
-      'La Mies recopila la ubicación de este teléfono para que los hermanos de la ruta vean dónde está el colectivo en el mapa, incluso con la app cerrada o la pantalla apagada. Solo se usa mientras el colectivo está en camino y se detiene cuando tocás "Llegamos". En el siguiente aviso elegí "Permitir todo el tiempo".',
+      tx('Ubicación del colectivo'),
+      tx('La Mies recopila la ubicación de este teléfono para que los hermanos de la ruta vean dónde está el colectivo en el mapa, incluso con la app cerrada o la pantalla apagada. Solo se usa mientras el colectivo está en camino y se detiene cuando tocás "Llegamos". En el siguiente aviso elegí "Permitir todo el tiempo".'),
       [
-        { text: 'Ahora no', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Continuar', onPress: () => resolve(true) },
+        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
+        { text: tx('Continuar'), onPress: () => resolve(true) },
       ],
       { cancelable: false },
     );
@@ -74,7 +75,7 @@ function disclosure(): Promise<boolean> {
 
 /** "Salimos": avisa a los de la ruta y empieza a mandar la ubicación. */
 export async function startBus(groupId: string, name: string): Promise<void> {
-  if (Platform.OS === 'web') throw new Error('El colectivo en vivo se prende desde el teléfono.');
+  if (Platform.OS === 'web') throw new Error(tx('El colectivo en vivo se prende desde el teléfono.'));
   const fg = await Location.requestForegroundPermissionsAsync();
   if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para mostrar el colectivo.');
   const already = await Location.getBackgroundPermissionsAsync();
@@ -93,8 +94,8 @@ export async function startBus(groupId: string, name: string): Promise<void> {
     activityType: Location.ActivityType.AutomotiveNavigation,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
-      notificationTitle: 'La Mies · colectivo en camino',
-      notificationBody: `Los hermanos de ${name} ven dónde está el colectivo. Tocá "Llegamos" al terminar.`,
+      notificationTitle: tx('La Mies · colectivo en camino'),
+      notificationBody: tx('Los hermanos de {name} ven dónde está el colectivo. Tocá "Llegamos" al terminar.', { name }),
       notificationColor: '#1F6B45',
     },
   });

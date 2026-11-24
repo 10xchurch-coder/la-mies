@@ -11,6 +11,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateShort, upcomingDates } from '@/lib/format';
 import { colors } from '@/theme';
 import type { ChurchService, Contact, Duty, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function TurnoMinisterio() {
   const router = useRouter();
@@ -64,7 +65,7 @@ export default function TurnoMinisterio() {
 
   const save = async () => {
     if (!who || !task.trim() || !date) {
-      Alert.alert('Faltan datos', 'Elegí la fecha, la persona y la tarea.');
+      Alert.alert(tx('Faltan datos'), tx('Elegí la fecha, la persona y la tarea.'));
       return;
     }
     setBusy(true);
@@ -89,7 +90,7 @@ export default function TurnoMinisterio() {
       }
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -107,36 +108,36 @@ export default function TurnoMinisterio() {
     .sort((a, b) => Number(inMinistry.has(b.id)) - Number(inMinistry.has(a.id)) || Number(b.status === 'member') - Number(a.status === 'member') || a.name.localeCompare(b.name))
     .map((c) => ({
       id: c.id, title: c.name, photo: c.photo_path,
-      subtitle: [inMinistry.has(c.id) ? 'Del ministerio' : null, c.profile_id ? null : 'sin la app'].filter(Boolean).join(' · ') || undefined,
+      subtitle: [inMinistry.has(c.id) ? tx('Del ministerio') : null, c.profile_id ? null : tx('sin la app')].filter(Boolean).join(' · ') || undefined,
     }));
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={duty ? 'Cambiar turno' : 'Nuevo turno'} back />
+      <Header title={duty ? tx('Cambiar turno') : tx('Nuevo turno')} back />
       <Screen>
-        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fecha</Text>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>{tx('Fecha')}</Text>
         <DateChips dates={dates} value={date} onChange={setDate} format={fmtDateShort} />
         <Card style={{ padding: 0 }}>
           <RowLink
             icon="user"
-            title={whoName ?? 'Elegir persona'}
-            subtitle={!who ? 'Del ministerio o de la iglesia' : whoHasApp ? 'Usa la app: le llega el aviso el lunes' : 'No usa la app: avisale vos'}
+            title={whoName ?? tx('Elegir persona')}
+            subtitle={!who ? tx('Del ministerio o de la iglesia') : whoHasApp ? tx('Usa la app: le llega el aviso el lunes') : tx('No usa la app: avisale vos')}
             onPress={() => setPicker(true)}
           />
         </Card>
-        <Field label="Tarea" placeholder="Ej: recepción en la puerta, café, limpiar baños" value={task} onChangeText={setTask} />
-        <Field label="Hora de llegada" hint="(opcional)" placeholder="Ej: 18:00" value={arrive} onChangeText={setArrive} />
-        <Field label="Nota" hint="(opcional)" value={note} onChangeText={setNote} multiline />
+        <Field label={tx('Tarea')} placeholder={tx('Ej: recepción en la puerta, café, limpiar baños')} value={task} onChangeText={setTask} />
+        <Field label={tx('Hora de llegada')} hint={tx('(opcional)')} placeholder={tx('Ej: 18:00')} value={arrive} onChangeText={setArrive} />
+        <Field label={tx('Nota')} hint={tx('(opcional)')} value={note} onChangeText={setNote} multiline />
         {!duty ? (
           <View style={{ gap: 6 }}>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Repetir las semanas siguientes</Text>
-            <DateChips dates={['1', '2', '4', '8']} value={String(repeat)} onChange={(v) => setRepeat(Number(v))} format={(v) => (v === '1' ? 'Solo esta vez' : `${v} semanas`)} />
+            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>{tx('Repetir las semanas siguientes')}</Text>
+            <DateChips dates={['1', '2', '4', '8']} value={String(repeat)} onChange={(v) => setRepeat(Number(v))} format={(v) => (v === '1' ? tx('Solo esta vez') : tx('{v1} semanas', { v1: v }))} />
           </View>
         ) : null}
-        <Button title="Guardar turno" onPress={save} loading={busy} />
-        {duty ? <Button title="Borrar turno" variant="danger" onPress={remove} /> : null}
+        <Button title={tx('Guardar turno')} onPress={save} loading={busy} />
+        {duty ? <Button title={tx('Borrar turno')} variant="danger" onPress={remove} /> : null}
       </Screen>
-      <PickerModal visible={picker} title="¿Quién?" items={items} onClose={() => setPicker(false)}
+      <PickerModal visible={picker} title={tx('¿Quién?')} items={items} onClose={() => setPicker(false)}
         onPick={(v) => { setPicker(false); if (v) setWho({ contact: v }); }} />
     </View>
   );

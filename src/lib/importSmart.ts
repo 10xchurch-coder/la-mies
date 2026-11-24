@@ -3,15 +3,16 @@
 // Sin nada de la base ni de la pantalla, para poder probarse solo. Usa las reglas de celular de la app (lib/phone).
 import { parseDate } from './importPeople';
 import { formatPhone, phoneProblem } from './phone';
+import { tx } from './i18n';
 
 export type SmartField =
   | 'name' | 'lastname' | 'phone' | 'email' | 'address' | 'barrio' | 'birthdate' | 'sex' | 'marital'
   | 'baptized_on' | 'baptized' | 'member' | 'family' | 'skip';
 
 export const SMART_LABELS: Record<SmartField, string> = {
-  name: 'Nombre', lastname: 'Apellido', phone: 'Celular', email: 'Correo', address: 'Dirección', barrio: 'Barrio',
-  birthdate: 'Fecha de nacimiento', sex: 'Sexo', marital: 'Estado civil', baptized_on: 'Fecha de bautismo',
-  baptized: '¿Bautizado? (sí o no)', member: '¿Miembro? (sí o no)', family: 'Familia', skip: 'No usar',
+  get name() { return tx('Nombre'); }, get lastname() { return tx('Apellido'); }, get phone() { return tx('Celular'); }, get email() { return tx('Correo'); }, get address() { return tx('Dirección'); }, get barrio() { return tx('Barrio'); },
+  get birthdate() { return tx('Fecha de nacimiento'); }, get sex() { return tx('Sexo'); }, get marital() { return tx('Estado civil'); }, get baptized_on() { return tx('Fecha de bautismo'); },
+  get baptized() { return tx('¿Bautizado? (sí o no)'); }, get member() { return tx('¿Miembro? (sí o no)'); }, get family() { return tx('Familia'); }, get skip() { return tx('No usar'); },
 };
 export const SMART_OPTIONS = (Object.keys(SMART_LABELS) as SmartField[]).map((v) => ({ value: v, label: SMART_LABELS[v] }));
 
@@ -146,7 +147,7 @@ export function analyzeTable(table: string[][]): ParsedTable {
   const h = findHeaderRow(clean);
   const data = h >= 0 ? clean.slice(h + 1) : clean;
   const width = Math.max(0, ...clean.map((r) => r.length));
-  const headers = Array.from({ length: width }, (_, i) => (h >= 0 ? clean[h][i] ?? '' : '') || `Columna ${i + 1}`);
+  const headers = Array.from({ length: width }, (_, i) => (h >= 0 ? clean[h][i] ?? '' : '') || tx('Columna {v1}', { v1: i + 1 }));
   return { headers, data, fields: mapColumns(h >= 0 ? clean[h] : [], data), hasHeader: h >= 0, skippedTop: Math.max(h, 0) };
 }
 export const analyzeText = (text: string): ParsedTable => analyzeTable(parseDelimited(text));
@@ -155,7 +156,7 @@ export const analyzeText = (text: string): ParsedTable => analyzeTable(parseDeli
 export function yesNo(v: unknown): boolean | undefined {
   const n = norm(v);
   if (['si', 's', 'yes', 'y', 'x', '1', 'true', 'verdadero', 'bautizado', 'bautizada', 'miembro', 'activo', 'activa'].includes(n)) return true;
-  if (['no', 'n', '0', 'false', 'falso', 'visita', 'visitante', 'no miembro', 'simpatizante'].includes(n)) return false;
+  if (['no', 'n', '0', 'false', 'falso', 'visita', 'visitante', tx('no miembro'), 'simpatizante'].includes(n)) return false;
   return undefined;
 }
 const sexOf = (v: string) => { const n = norm(v); return ['m', 'masculino', 'hombre', 'varon', 'male', 'h'].includes(n) ? 'm' : ['f', 'femenino', 'mujer', 'female'].includes(n) ? 'f' : undefined; };
@@ -185,10 +186,10 @@ export function checkPhone(raw: string, country = 'AR'): { phone?: string; probl
   const t = raw.trim();
   if (!t) return {};
   if (country !== 'AR' && !t.startsWith('+54')) {
-    return t.replace(/\D/g, '').length >= 8 ? { phone: t } : { problem: `El celular «${t}» está incompleto: se carga sin celular.` };
+    return t.replace(/\D/g, '').length >= 8 ? { phone: t } : { problem: tx('El celular «{t}» está incompleto: se carga sin celular.', { t }) };
   }
   const bad = phoneProblem(t);
-  if (bad) return { problem: `El celular «${t}» no se entiende (${bad.replace(/\.$/, '')}): se carga sin celular.` };
+  if (bad) return { problem: tx('El celular «{t}» no se entiende ({replace}): se carga sin celular.', { t, replace: bad.replace(/\.$/, '') }) };
   return { phone: formatPhone(t) };
 }
 
@@ -200,16 +201,16 @@ export function buildSmartRows(data: string[][], fields: SmartField[], o: { coun
     fields.forEach((f, i) => { if (f !== 'skip') { const x = String(r[i] ?? '').trim(); if (x) v[f] = v[f] ? `${v[f]} ${x}` : x; } });
     const problems: Problem[] = [];
     const name = [v.name, v.lastname].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
-    if (!name) problems.push({ kind: 'no_name', text: 'Falta el nombre: esta fila no se carga.' });
-    else if (name.length > 120) problems.push({ kind: 'no_name', text: 'El nombre es demasiado largo: esta fila no se carga.' });
+    if (!name) problems.push({ kind: 'no_name', text: tx('Falta el nombre: esta fila no se carga.') });
+    else if (name.length > 120) problems.push({ kind: 'no_name', text: tx('El nombre es demasiado largo: esta fila no se carga.') });
     const ph = v.phone ? checkPhone(v.phone, o.country) : {};
     if (ph.problem) problems.push({ kind: 'bad_phone', text: ph.problem });
     let email = v.email?.toLowerCase();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { problems.push({ kind: 'bad_email', text: `El correo «${email}» está mal escrito: se carga sin correo.` }); email = undefined; }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { problems.push({ kind: 'bad_email', text: tx('El correo «{email}» está mal escrito: se carga sin correo.', { email }) }); email = undefined; }
     const birthdate = parseDate(v.birthdate);
-    if (v.birthdate && !birthdate) problems.push({ kind: 'bad_date', text: `La fecha de nacimiento «${v.birthdate}» no se entiende: se carga sin fecha.` });
+    if (v.birthdate && !birthdate) problems.push({ kind: 'bad_date', text: tx('La fecha de nacimiento «{birthdate}» no se entiende: se carga sin fecha.', { birthdate: v.birthdate }) });
     const baptized_on = parseDate(v.baptized_on);
-    if (v.baptized_on && !baptized_on) problems.push({ kind: 'bad_date', text: `La fecha de bautismo «${v.baptized_on}» no se entiende: se carga sin esa fecha.` });
+    if (v.baptized_on && !baptized_on) problems.push({ kind: 'bad_date', text: tx('La fecha de bautismo «{baptized_on}» no se entiende: se carga sin esa fecha.', { baptized_on: v.baptized_on }) });
     const address = [v.address, v.barrio ? `B° ${v.barrio.replace(/^b[°ºo]?\.?\s+/i, '')}` : ''].filter(Boolean).join(', ') || undefined;
     rows.push({
       line: (o.firstLine ?? 1) + idx, name, phone: ph.phone, email, address, birthdate, baptized_on,
@@ -237,7 +238,7 @@ export function markFileDuplicates(rows: SmartRow[]): SmartRow[] {
     const seen = pk ? byPhone : byName;
     const first = seen.get(key);
     if (first !== undefined) {
-      return { ...r, problems: [...r.problems.filter((p) => p.kind !== 'dup_file'), { kind: 'dup_file' as const, text: pk ? `Mismo celular que la fila ${first}: está repetida en el archivo y no se carga.` : `Mismo nombre que la fila ${first} (y sin celular): está repetida en el archivo y no se carga.` }] };
+      return { ...r, problems: [...r.problems.filter((p) => p.kind !== 'dup_file'), { kind: 'dup_file' as const, text: pk ? tx('Mismo celular que la fila {first}: está repetida en el archivo y no se carga.', { first }) : tx('Mismo nombre que la fila {first} (y sin celular): está repetida en el archivo y no se carga.', { first }) }] };
     }
     seen.set(key, r.line);
     return r;
@@ -260,11 +261,11 @@ export function rowsToSend(rows: SmartRow[]): { send: SendRow[]; lines: number[]
 
 export type ServerCode = 'new' | 'dup_phone' | 'dup_name' | 'dup_file' | 'bad';
 export const SERVER_TEXT: Record<ServerCode, string> = {
-  new: 'Nueva',
-  dup_phone: 'Ya está en la iglesia (mismo celular)',
-  dup_name: 'Ya está en la iglesia (mismo nombre)',
-  dup_file: 'Repetida en el archivo',
-  bad: 'No se puede cargar',
+  get new() { return tx('Nueva'); },
+  get dup_phone() { return tx('Ya está en la iglesia (mismo celular)'); },
+  get dup_name() { return tx('Ya está en la iglesia (mismo nombre)'); },
+  get dup_file() { return tx('Repetida en el archivo'); },
+  get bad() { return tx('No se puede cargar'); },
 };
 
 export type Counts = { total: number; ready: number; noName: number; fileDups: number; warnings: number };

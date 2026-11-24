@@ -4,6 +4,7 @@
 // No importa nada de la app para poder probarse sola.
 
 /** Código de área que se agrega cuando el número viene sin él. */
+import { tx } from './i18n';
 export const DEFAULT_AREA = '3764';
 
 /** Las 10 cifras nacionales (código de área + número) o null si no se puede entender. */
@@ -69,13 +70,13 @@ export function isForeign(text: string | null | undefined): boolean {
 /** Qué tiene de malo el número (o null si está bien). Vacío está bien salvo que sea obligatorio. */
 export function phoneProblem(text: string | null | undefined, required = false): string | null {
   const t = (text ?? '').trim();
-  if (!t) return required ? 'Escribí el número de celular.' : null;
-  if (isForeign(t)) return t.replace(/\D/g, '').length >= 8 ? null : 'Al número de otro país le faltan cifras.';
+  if (!t) return required ? tx('Escribí el número de celular.') : null;
+  if (isForeign(t)) return t.replace(/\D/g, '').length >= 8 ? null : tx('Al número de otro país le faltan cifras.');
   const d = typedDigits(t);
-  if (!/^[123]/.test(d)) return 'Empezá por el código de área (por ejemplo 376).';
+  if (!/^[123]/.test(d)) return tx('Empezá por el código de área (por ejemplo 376).');
   if (d.length < 10) {
     const n = 10 - d.length;
-    return `Le ${n === 1 ? 'falta 1 número' : `faltan ${n} números`}. Con el código de área son 10 (por ejemplo 376 412-3456).`;
+    return tx('Le {v1}. Con el código de área son 10 (por ejemplo 376 412-3456).', { v1: n === 1 ? tx('falta 1 número') : tx('faltan {n} números', { n }) });
   }
   return null;
 }

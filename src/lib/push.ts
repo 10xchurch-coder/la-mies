@@ -4,13 +4,14 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
 import { supabase } from './supabase';
+import { tx } from './i18n';
 
 export async function registerForPush(userId: string): Promise<void> {
   if (Platform.OS === 'web') return; // los avisos en la web se ven en Yo → Avisos
   try {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync('default', {
-        name: 'Avisos de la iglesia',
+        name: tx('Avisos de la iglesia'),
         importance: Notifications.AndroidImportance.HIGH,
       });
     }

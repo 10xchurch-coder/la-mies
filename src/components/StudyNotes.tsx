@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { Card } from './ui';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export type NoteKind = 'article' | 'training' | 'material';
 
@@ -44,15 +45,15 @@ export function StudyNotes({ kind, refId, title }: { kind: NoteKind; refId: stri
     <Card style={{ gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Feather name="edit-3" size={18} color={colors.green} />
-        <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>Mis notas</Text>
+        <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Mis notas')}</Text>
         <Text style={{ fontSize: 12, color: state === 'error' ? colors.red : colors.muted }}>
-          {state === 'saving' ? 'Guardando…' : state === 'saved' ? 'Guardado ✓' : state === 'error' ? 'No se pudo guardar' : 'Solo las ves vos'}
+          {state === 'saving' ? tx('Guardando…') : state === 'saved' ? tx('Guardado ✓') : state === 'error' ? tx('No se pudo guardar') : tx('Solo las ves vos')}
         </Text>
       </View>
       <TextInput
         value={text} onChangeText={change} onBlur={() => { if (timer.current) clearTimeout(timer.current); save(text); }}
-        multiline placeholder="Escribí lo que aprendiste, preguntas, a quién se lo vas a contar…" placeholderTextColor={colors.muted}
-        maxLength={8000} accessibilityLabel="Mis notas de este estudio"
+        multiline placeholder={tx('Escribí lo que aprendiste, preguntas, a quién se lo vas a contar…')} placeholderTextColor={colors.muted}
+        maxLength={8000} accessibilityLabel={tx('Mis notas de este estudio')}
         style={{ minHeight: 110, borderWidth: 1.5, borderColor: colors.input, borderRadius: 12, padding: 12, fontSize: 15, lineHeight: 22, color: colors.text, textAlignVertical: 'top' }}
       />
     </Card>

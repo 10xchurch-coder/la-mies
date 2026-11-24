@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { File } from 'expo-file-system';
 import * as XLSX from 'xlsx';
 import { parseDelimited, TEMPLATE_HEADERS, TEMPLATE_ROWS } from './importSmart';
+import { tx } from './i18n';
 
 // Una fecha de Excel viene como Date; se pasa a AAAA-MM-DD sin correrla un día por la zona horaria.
 const cellText = (v: unknown): string => {
@@ -38,6 +39,6 @@ export function downloadTemplateXlsx(): void {
   const ws = XLSX.utils.aoa_to_sheet([TEMPLATE_HEADERS, ...TEMPLATE_ROWS]);
   ws['!cols'] = TEMPLATE_HEADERS.map((h) => ({ wch: Math.max(14, h.length + 4) }));
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Personas');
+  XLSX.utils.book_append_sheet(wb, ws, tx('Personas'));
   XLSX.writeFile(wb, 'planilla-modelo-la-mies.xlsx');
 }

@@ -14,10 +14,11 @@ import { downloadView, downloadText } from '@/lib/download';
 import { toCsv } from '@/lib/desk';
 import type { FinBalance, FinByCategory, FinMonthly } from '@/types';
 import { monthTitle } from './movimientos';
+import { tx, txLocale } from '@/lib/i18n';
 
 type Month = { month: string; income: number; expense: number; net: number };
 
-const short = (m: string) => new Date(`${m.slice(0, 7)}-15T12:00:00`).toLocaleDateString('es-AR', { month: 'short', year: '2-digit' }).replace('.', '');
+const short = (m: string) => new Date(`${m.slice(0, 7)}-15T12:00:00`).toLocaleDateString(txLocale(), { month: 'short', year: '2-digit' }).replace('.', '');
 const compact = (v: number) => (Math.abs(v) >= 1e6 ? `${(v / 1e6).toFixed(1).replace('.', ',')}M` : Math.abs(v) >= 1e3 ? `${Math.round(v / 1e3)}k` : String(Math.round(v)));
 
 function Chart({ data, sel, onSel }: { data: Month[]; sel: string; onSel: (m: string) => void }) {
@@ -27,7 +28,7 @@ function Chart({ data, sel, onSel }: { data: Month[]; sel: string; onSel: (m: st
       {data.map((d) => {
         const on = d.month.slice(0, 7) === sel;
         return (
-          <Pressable key={d.month} onPress={() => onSel(d.month.slice(0, 7))} accessibilityRole="button" accessibilityLabel={`${short(d.month)}: entró ${fmtMoney(d.income)}, salió ${fmtMoney(d.expense)}`}
+          <Pressable key={d.month} onPress={() => onSel(d.month.slice(0, 7))} accessibilityRole="button" accessibilityLabel={tx('{short}: entró {fmtMoney}, salió {fmtMoney2}', { short: short(d.month), fmtMoney: fmtMoney(d.income), fmtMoney2: fmtMoney(d.expense) })}
             style={{ alignItems: 'center', gap: 4, padding: 3, borderRadius: 8, backgroundColor: on ? colors.bgSoft : 'transparent' }}>
             <Text style={{ fontSize: 10, fontWeight: '700', color: d.net >= 0 ? colors.greenText : colors.red }}>{d.income || d.expense ? compact(d.net) : ''}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 150 }}>
@@ -51,19 +52,19 @@ function pointers(months: Month[], sel: string, balances: FinBalance[], cats: Fi
   const prev = months.slice(Math.max(0, i - 3), i).filter((m) => m.income || m.expense);
   const avg = (k: 'income' | 'expense') => (prev.length ? prev.reduce((a, m) => a + m[k], 0) / prev.length : 0);
   const ai = avg('income'), ae = avg('expense');
-  if (cur.expense > cur.income && cur.income > 0) out.push(`Este mes salió más de lo que entró (${fmtMoney(cur.expense - cur.income)} de diferencia). Revisá qué gasto fue extraordinario y si se puede repartir en varios meses.`);
-  if (ai && cur.income < ai * 0.8) out.push(`Los ingresos bajaron ${Math.round((1 - cur.income / ai) * 100)}% contra el promedio de los 3 meses anteriores (${fmtMoney(ai)}).`);
-  if (ai && cur.income > ai * 1.2) out.push(`Los ingresos subieron ${Math.round((cur.income / ai - 1) * 100)}% contra el promedio. Buen momento para separar algo para reserva o para Misiones.`);
-  if (ae && cur.expense > ae * 1.25) out.push(`Los gastos subieron ${Math.round((cur.expense / ae - 1) * 100)}% contra el promedio (${fmtMoney(ae)}).`);
+  if (cur.expense > cur.income && cur.income > 0) out.push(tx('Este mes salió más de lo que entró ({fmtMoney} de diferencia). Revisá qué gasto fue extraordinario y si se puede repartir en varios meses.', { fmtMoney: fmtMoney(cur.expense - cur.income) }));
+  if (ai && cur.income < ai * 0.8) out.push(tx('Los ingresos bajaron {round}% contra el promedio de los 3 meses anteriores ({fmtMoney}).', { round: Math.round((1 - cur.income / ai) * 100), fmtMoney: fmtMoney(ai) }));
+  if (ai && cur.income > ai * 1.2) out.push(tx('Los ingresos subieron {round}% contra el promedio. Buen momento para separar algo para reserva o para Misiones.', { round: Math.round((cur.income / ai - 1) * 100) }));
+  if (ae && cur.expense > ae * 1.25) out.push(tx('Los gastos subieron {round}% contra el promedio ({fmtMoney}).', { round: Math.round((cur.expense / ae - 1) * 100), fmtMoney: fmtMoney(ae) }));
   const outs = cats.filter((c) => c.direction === 'out');
   const totalOut = outs.reduce((a, c) => a + c.total, 0);
   const top = outs[0];
-  if (top && totalOut && top.total / totalOut > 0.5 && outs.length > 1) out.push(`"${top.category}" fue ${Math.round((top.total / totalOut) * 100)}% de los gastos del mes.`);
-  for (const b of balances) if (b.closing < 0) out.push(`El fondo ${b.fund} quedó en negativo (${fmtMoney(b.closing)}). Hay que cubrirlo con un pase desde otro fondo o revisar si falta cargar un ingreso.`);
+  if (top && totalOut && top.total / totalOut > 0.5 && outs.length > 1) out.push(tx('"{category}" fue {round}% de los gastos del mes.', { category: top.category, round: Math.round((top.total / totalOut) * 100) }));
+  for (const b of balances) if (b.closing < 0) out.push(tx('El fondo {fund} quedó en negativo ({fmtMoney}). Hay que cubrirlo con un pase desde otro fondo o revisar si falta cargar un ingreso.', { fund: b.fund, fmtMoney: fmtMoney(b.closing) }));
   const gen = balances.find((b) => b.kind === 'general');
-  if (gen && ae > 0 && gen.closing >= 0 && gen.closing < ae) out.push(`El fondo General tiene menos de un mes de gastos de reserva. Una meta sana es tener al menos 2 o 3 meses.`);
+  if (gen && ae > 0 && gen.closing >= 0 && gen.closing < ae) out.push(tx(`El fondo General tiene menos de un mes de gastos de reserva. Una meta sana es tener al menos 2 o 3 meses.`));
   const mis = months.slice(Math.max(0, i - 2), i + 1);
-  if (!out.length && mis.length) out.push('Todo dentro de lo normal este mes.');
+  if (!out.length && mis.length) out.push(tx('Todo dentro de lo normal este mes.'));
   return out;
 }
 
@@ -115,35 +116,35 @@ export default function FinInforme() {
 
   const share = () => {
     const lines = [
-      `Finanzas · ${church?.name ?? ''} · ${monthTitle(sel)}`,
+      tx('Finanzas · {name} · {monthTitle}', { name: church?.name ?? '', monthTitle: monthTitle(sel) }),
       '',
-      `Entró: ${fmtMoney(cur?.income ?? 0)}`,
-      `Salió: ${fmtMoney(cur?.expense ?? 0)}`,
-      `Resultado: ${fmtMoney(cur?.net ?? 0)}`,
+      tx('Entró: {fmtMoney}', { fmtMoney: fmtMoney(cur?.income ?? 0) }),
+      tx('Salió: {fmtMoney}', { fmtMoney: fmtMoney(cur?.expense ?? 0) }),
+      tx('Resultado: {fmtMoney}', { fmtMoney: fmtMoney(cur?.net ?? 0) }),
       '',
       'SALDOS AL CIERRE',
       ...bal.map((b) => `${b.fund}: ${fmtMoney(b.closing, b.currency)}`),
       '',
-      'INGRESOS POR CATEGORÍA',
+      tx('INGRESOS POR CATEGORÍA'),
       ...inCats.map((c) => `${c.category} (${c.fund}): ${fmtMoney(c.total)}`),
       '',
-      'GASTOS POR CATEGORÍA',
+      tx('GASTOS POR CATEGORÍA'),
       ...outCats.map((c) => `${c.category} (${c.fund}): ${fmtMoney(c.total)}`),
       '',
       'PARA MIRAR',
       ...tips.map((t) => `• ${t}`),
     ];
-    shareText(lines.join('\n'), 'Informe de finanzas');
+    shareText(lines.join('\n'), tx('Informe de finanzas'));
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Informe de finanzas" subtitle={monthTitle(sel)} back />
+      <Header title={tx('Informe de finanzas')} subtitle={monthTitle(sel)} back />
       <Screen>
         <View ref={shot} collapsable={false} style={{ gap: 16, backgroundColor: colors.bg, paddingVertical: 4 }}>
-        <Segmented options={[{ value: '12', label: 'Último año' }, { value: 'all', label: 'Toda la historia' }]} value={range} onChange={setRange} />
+        <Segmented options={[{ value: '12', label: tx('Último año') }, { value: 'all', label: tx('Toda la historia') }]} value={range} onChange={setRange} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
-          {[[null, 'Todos los fondos'] as [string | null, string], ...funds].map(([id, name]) => (
+          {[[null, tx('Todos los fondos')] as [string | null, string], ...funds].map(([id, name]) => (
             <Pressable key={id ?? 'all'} onPress={() => setFund(id)} accessibilityRole="button"
               style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, justifyContent: 'center', backgroundColor: fund === id ? colors.green : colors.bgSoft }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: fund === id ? '#FFF' : colors.text }}>{name}</Text>
@@ -155,32 +156,32 @@ export default function FinInforme() {
             <Card style={{ paddingHorizontal: 8, gap: 6 }}>
               <Chart data={months} sel={sel} onSel={setSel} />
               <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16 }}>
-                <Text style={{ fontSize: 12, color: colors.greenText }}>■ Entró</Text>
-                <Text style={{ fontSize: 12, color: colors.red }}>■ Salió</Text>
-                <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un mes para ver el detalle</Text>
+                <Text style={{ fontSize: 12, color: colors.greenText }}>{tx('■ Entró')}</Text>
+                <Text style={{ fontSize: 12, color: colors.red }}>{tx('■ Salió')}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá un mes para ver el detalle')}</Text>
               </View>
             </Card>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{range === 'all' ? 'Entró en total' : 'Entró en el año'}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.greenText }}>{fmtMoney(totIn)}</Text></Card>
-              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{range === 'all' ? 'Salió en total' : 'Salió en el año'}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.red }}>{fmtMoney(totOut)}</Text></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{range === 'all' ? tx('Entró en total') : tx('Entró en el año')}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.greenText }}>{fmtMoney(totIn)}</Text></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{range === 'all' ? tx('Salió en total') : tx('Salió en el año')}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.red }}>{fmtMoney(totOut)}</Text></Card>
             </View>
 
             <SectionTitle>{monthTitle(sel)}</SectionTitle>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>Entró</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.greenText }}>{fmtMoney(cur?.income ?? 0)}</Text></Card>
-              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>Salió</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.red }}>{fmtMoney(cur?.expense ?? 0)}</Text></Card>
-              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>Resultado</Text><Text style={{ fontSize: 16, fontWeight: '800', color: (cur?.net ?? 0) >= 0 ? colors.text : colors.red }}>{fmtMoney(cur?.net ?? 0)}</Text></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{tx('Entró##plata')}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.greenText }}>{fmtMoney(cur?.income ?? 0)}</Text></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{tx('Salió##plata')}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: colors.red }}>{fmtMoney(cur?.expense ?? 0)}</Text></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 11, color: colors.muted }}>{tx('Resultado')}</Text><Text style={{ fontSize: 16, fontWeight: '800', color: (cur?.net ?? 0) >= 0 ? colors.text : colors.red }}>{fmtMoney(cur?.net ?? 0)}</Text></Card>
             </View>
 
             <Card style={{ gap: 8, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Feather name="info" size={16} color={colors.blueText} />
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>Para mirar</Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{tx('Para mirar')}</Text>
               </View>
               {tips.map((t, i) => <Text key={i} style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>• {t}</Text>)}
             </Card>
 
-            {([['Ingresos por categoría', inCats, colors.greenText], ['Gastos por categoría', outCats, colors.red]] as const).map(([t, list, color]) => list.length ? (
+            {([[tx('Ingresos por categoría'), inCats, colors.greenText], [tx('Gastos por categoría'), outCats, colors.red]] as const).map(([t, list, color]) => list.length ? (
               <View key={t} style={{ gap: 8 }}>
                 <SectionTitle>{t}</SectionTitle>
                 <Card style={{ padding: 0 }}>
@@ -202,7 +203,7 @@ export default function FinInforme() {
               </View>
             ) : null)}
 
-            <SectionTitle>{`Saldos al cierre de ${monthTitle(sel).toLowerCase()}`}</SectionTitle>
+            <SectionTitle>{tx('Saldos al cierre de {monthTitle}', { monthTitle: monthTitle(sel).toLowerCase() })}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {(fund ? bal.filter((b) => b.fund_id === fund) : bal).map((b, i, arr) => (
                 <View key={b.fund_id} style={{ flexDirection: 'row', padding: 12, borderBottomWidth: i < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border }}>
@@ -211,16 +212,16 @@ export default function FinInforme() {
                 </View>
               ))}
             </Card>
-            <Button title="Compartir el informe del mes" icon="share-2" variant="outline" onPress={share} />
+            <Button title={tx('Compartir el informe del mes')} icon="share-2" variant="outline" onPress={share} />
           </>
         )}
         </View>
-        <Button title="Descargar" icon="download" variant="outline" onPress={() => downloadView(shot.current, `Informe de finanzas ${monthTitle(sel)}`).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
-        <Button title="Descargar para Excel" icon="file-text" variant="ghost" onPress={() => downloadText(`finanzas-${sel}.csv`, toCsv(['Tipo', 'Categoría', 'Fondo', 'Monto'], [
-          ...inCats.map((c) => ['Ingreso', c.category, c.fund, c.total]),
-          ...outCats.map((c) => ['Gasto', c.category, c.fund, c.total]),
-          ...(fund ? bal.filter((b) => b.fund_id === fund) : bal).map((b) => ['Saldo al cierre', '', b.fund, b.closing]),
-        ])).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
+        <Button title={tx('Descargar')} icon="download" variant="outline" onPress={() => downloadView(shot.current, `Informe de finanzas ${monthTitle(sel)}`).catch((e) => Alert.alert(tx('No se pudo descargar'), String((e as Error)?.message ?? e)))} />
+        <Button title={tx('Descargar para Excel')} icon="file-text" variant="ghost" onPress={() => downloadText(`finanzas-${sel}.csv`, toCsv([tx('Tipo'), tx('Categoría'), tx('Fondo'), tx('Monto')], [
+          ...inCats.map((c) => [tx('Ingreso'), c.category, c.fund, c.total]),
+          ...outCats.map((c) => [tx('Gasto'), c.category, c.fund, c.total]),
+          ...(fund ? bal.filter((b) => b.fund_id === fund) : bal).map((b) => [tx('Saldo al cierre'), '', b.fund, b.closing]),
+        ])).catch((e) => Alert.alert(tx('No se pudo descargar'), String((e as Error)?.message ?? e)))} />
       </Screen>
     </View>
   );

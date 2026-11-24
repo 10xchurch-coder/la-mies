@@ -1,6 +1,7 @@
 // Mensajes privados entre dos hermanos de la iglesia. Solo los ven los dos.
 import { supabase } from './supabase';
 import type { ChatAttachment } from './files';
+import { tx } from './i18n';
 
 export type DmMessage = {
   id: string; body: string; kind: 'text' | 'image' | 'file'; attachment_path: string | null; attachment_name: string | null; attachment_size: number | null;
@@ -35,7 +36,7 @@ export const dmReportResolve = (id: string) => rpc<void>('dm_report_resolve', { 
 
 /** Lo que se muestra en la lista como último mensaje. */
 export function dmPreview(r: Pick<DmThreadRow, 'last_body' | 'last_kind' | 'last_name'>): string {
-  if (r.last_kind === 'image') return `📷 Foto${r.last_body ? ` · ${r.last_body}` : ''}`;
-  if (r.last_kind === 'file') return /^voz-/i.test(r.last_name ?? '') ? '🎤 Mensaje de voz' : `📄 ${r.last_name ?? 'Documento'}`;
+  if (r.last_kind === 'image') return tx('📷 Foto{v1}', { v1: r.last_body ? ` · ${r.last_body}` : '' });
+  if (r.last_kind === 'file') return /^voz-/i.test(r.last_name ?? '') ? tx('🎤 Mensaje de voz') : `📄 ${r.last_name ?? tx('Documento')}`;
   return r.last_body;
 }

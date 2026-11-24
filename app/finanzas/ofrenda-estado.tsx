@@ -10,6 +10,7 @@ import { churchExtras, givingFunds, listGiving, type GivingFund } from '@/lib/gi
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function OfrendaEstado() {
   const { persona, anio } = useLocalSearchParams<{ persona?: string; anio?: string }>();
@@ -32,24 +33,24 @@ export default function OfrendaEstado() {
   const statement = useMemo(() => {
     const fundName = new Map(funds.map((f) => [f.id, f.name]));
     return buildStatement((rows ?? []).filter((r) => !r.voided_at).map((r) => ({
-      on_date: r.on_date, amount: r.amount, currency: r.currency, method: r.method, fund: fundName.get(r.fund_id) ?? 'Fondo', note: r.note,
+      on_date: r.on_date, amount: r.amount, currency: r.currency, method: r.method, fund: fundName.get(r.fund_id) ?? tx('Fondo'), note: r.note,
     })), year);
   }, [rows, funds, year]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Ofrendas del año" subtitle={name || undefined} back />
+      <Header title={tx('Ofrendas del año')} subtitle={name || undefined} back />
       <Screen>
-        {financeLevel < 1 ? <Empty icon="lock" title="Solo para quien lleva las finanzas" /> : !persona ? <Empty title="Falta elegir a la persona" /> : (
+        {financeLevel < 1 ? <Empty icon="lock" title={tx('Solo para quien lleva las finanzas')} /> : !persona ? <Empty title={tx('Falta elegir a la persona')} /> : (
           <>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Button title="Anterior" icon="chevron-left" variant="outline" small onPress={() => setYear(year - 1)} style={{ flex: 1 }} />
+              <Button title={tx('Anterior')} icon="chevron-left" variant="outline" small onPress={() => setYear(year - 1)} style={{ flex: 1 }} />
               <Text style={{ fontSize: 20, fontWeight: '800', color: colors.text, minWidth: 64, textAlign: 'center' }}>{year}</Text>
-              <Button title="Siguiente" variant="outline" small disabled={year >= new Date().getFullYear()} onPress={() => setYear(year + 1)} style={{ flex: 1 }} />
+              <Button title={tx('Siguiente')} variant="outline" small disabled={year >= new Date().getFullYear()} onPress={() => setYear(year + 1)} style={{ flex: 1 }} />
             </View>
             {error ? <Text style={{ color: colors.red, fontSize: 13 }}>{error}</Text> : null}
             {rows === null ? <Loading /> : (
-              <GivingStatementView statement={statement} person={name || 'Persona'} church={church?.name ?? 'Iglesia'} motto={motto} city={church?.city} />
+              <GivingStatementView statement={statement} person={name || tx('Persona')} church={church?.name ?? tx('Iglesia')} motto={motto} city={church?.city} />
             )}
           </>
         )}

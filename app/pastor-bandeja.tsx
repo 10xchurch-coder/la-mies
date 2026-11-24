@@ -10,6 +10,7 @@ import { fmtRelativeDay } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { PastorThreadRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function PastorBandeja() {
   const { profile } = useAuth();
@@ -22,21 +23,21 @@ export default function PastorBandeja() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mensajes privados" subtitle="Lo que te escriben los hermanos" back />
+      <Header title={tx('Mensajes privados')} subtitle={tx('Lo que te escriben los hermanos')} back />
       <Screen>
-        {!isPastor ? <Empty icon="lock" title="Solo para el pastor" text="Estos mensajes los lee únicamente el pastor." /> : rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="message-circle" title="Todavía no hay mensajes" text="Cuando un hermano te escriba desde “Escribile al pastor”, va a aparecer acá." />
+        {!isPastor ? <Empty icon="lock" title={tx('Solo para el pastor')} text={tx('Estos mensajes los lee únicamente el pastor.')} /> : rows === null ? <Loading /> : !rows.length ? (
+          <Empty icon="message-circle" title={tx('Todavía no hay mensajes')} text={tx('Cuando un hermano te escriba desde “Escribile al pastor”, va a aparecer acá.')} />
         ) : rows.map((r) => (
           <Pressable key={r.member_id} accessibilityRole="button" onPress={() => router.push({ pathname: '/pastor-hilo', params: { member: r.member_id, name: r.name } } as unknown as Href)}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 }}>
               <Face name={r.name} path={r.photo_path} size={44} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={{ fontSize: 15, fontWeight: r.unread ? '800' : '600', color: colors.text }}>{r.name}</Text>
-                <Text numberOfLines={1} style={{ fontSize: 13, color: r.unread ? colors.text : colors.muted }}>{r.last_mine ? 'Vos: ' : ''}{r.last_body}</Text>
+                <Text numberOfLines={1} style={{ fontSize: 13, color: r.unread ? colors.text : colors.muted }}>{r.last_mine ? tx('Vos: ') : ''}{r.last_body}</Text>
               </View>
               <View style={{ alignItems: 'flex-end', gap: 4 }}>
                 <Text style={{ fontSize: 11, color: colors.muted }}>{fmtRelativeDay(r.last_at)}</Text>
-                {r.unread ? <Tag text={`${r.unread} sin leer`} tone="blue" /> : null}
+                {r.unread ? <Tag text={tx('{unread} sin leer', { unread: r.unread })} tone="blue" /> : null}
               </View>
             </Card>
           </Pressable>

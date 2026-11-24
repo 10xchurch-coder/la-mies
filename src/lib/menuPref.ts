@@ -2,6 +2,7 @@
 // Favoritos arriba, el orden de los botones dentro de cada grupo, el orden de los grupos y si el menú va arriba o abajo.
 import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { tx } from './i18n';
 
 export type MenuPref = {
   fav: string[];                    // botones fijados arriba, en orden
@@ -70,5 +71,5 @@ export function layout<T extends { show: boolean }>(
     title: g.title,
     tiles: sortBy(g.tiles.filter((t) => !favKeys.has(keyOf(t))), keyOf, pref.order[g.title]),
   }));
-  return fav.length ? [{ title: FAV, tiles: fav }, ...rest] : rest;
+  return fav.length ? [{ title: tx(FAV), tiles: fav }, ...rest] : rest;
 }

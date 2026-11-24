@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { colors, themed } from '../theme';
 import { Button } from './ui';
 import { supabase } from '../lib/supabase';
+import { tx } from '@/lib/i18n';
 
 export const APP_VERSION = `${Constants.expoConfig?.version ?? '?'} (${Constants.expoConfig?.android?.versionCode ?? Constants.expoConfig?.ios?.buildNumber ?? '?'})`;
 
@@ -65,22 +66,22 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
       return (
         <View style={styles.wrap}>
           <Feather name="refresh-cw" size={36} color={colors.green} />
-          <Text style={styles.title}>Hay una versión nueva</Text>
-          <Text style={styles.text}>La app se actualizó mientras la tenías abierta. Tocá para cargar la versión nueva.</Text>
-          <Button title="Actualizar" onPress={() => window.location.reload()} />
+          <Text style={styles.title}>{tx('Hay una versión nueva')}</Text>
+          <Text style={styles.text}>{tx('La app se actualizó mientras la tenías abierta. Tocá para cargar la versión nueva.')}</Text>
+          <Button title={tx('Actualizar')} onPress={() => window.location.reload()} />
         </View>
       );
     }
     return (
       <View style={styles.wrap}>
         <Feather name="alert-triangle" size={40} color={colors.amberText} />
-        <Text style={styles.title}>Algo salió mal</Text>
-        <Text style={styles.text}>La app tuvo un error. Ya quedó anotado para que lo arreglemos. Tocá "Reintentar"; si vuelve a pasar, cerrá la app y abrila de nuevo.</Text>
-        <Button title="Reintentar" onPress={() => this.setState({ error: null })} />
+        <Text style={styles.title}>{tx('Algo salió mal')}</Text>
+        <Text style={styles.text}>{tx('La app tuvo un error. Ya quedó anotado para que lo arreglemos. Tocá "Reintentar"; si vuelve a pasar, cerrá la app y abrila de nuevo.')}</Text>
+        <Button title={tx('Reintentar')} onPress={() => this.setState({ error: null })} />
         <ScrollView style={styles.box}>
           <Text selectable style={styles.mono}>{e.message}</Text>
         </ScrollView>
-        <Text style={styles.ver}>La Mies {APP_VERSION}</Text>
+        <Text style={styles.ver}>{tx('La Mies {APP_VERSION}', { APP_VERSION })}</Text>
       </View>
     );
   }

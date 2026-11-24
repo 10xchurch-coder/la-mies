@@ -17,6 +17,7 @@ import { fmtRelativeDay, fmtTime } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const REASONS = ['Es ofensivo o me falta el respeto', 'Me incomoda o me asusta', 'Pide plata o es un engaño', 'Otra cosa'];
 
@@ -25,7 +26,7 @@ function DmImage({ path, onOpen }: { path: string; onOpen: (url: string) => void
   useEffect(() => { signedUrl('chat', path).then(setUrl).catch(() => setUrl(null)); }, [path]);
   if (!url) return <View style={styles.imgBox}><ActivityIndicator color={colors.violet} /></View>;
   return (
-    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel="Ver la foto">
+    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto')}>
       <Image source={{ uri: url }} style={styles.img} contentFit="cover" />
     </Pressable>
   );
@@ -62,10 +63,10 @@ export default function Conversacion() {
     dmPeople().then((p) => { const o = p.find((x) => x.id === id); if (o) setOther({ name: o.name, blocked: o.i_blocked }); }).catch(() => undefined);
   }, [id]);
 
-  const title = other?.name ?? name ?? 'Mensajes';
+  const title = other?.name ?? name ?? tx('Mensajes');
   const guard = async (fn: () => Promise<unknown>) => {
     setBusy(true);
-    try { await fn(); load(); } catch (e) { Alert.alert('No se envió', errorMessage(e)); } finally { setBusy(false); }
+    try { await fn(); load(); } catch (e) { Alert.alert(tx('No se envió'), errorMessage(e)); } finally { setBusy(false); }
   };
   const send = () => {
     const t = text.trim();
@@ -84,42 +85,42 @@ export default function Conversacion() {
   const attachItems = (): AttachItem[] => {
     const cid = church?.id ?? '';
     return [
-      { key: 'cam', label: 'Cámara', icon: 'camera', color: '#E0457B', onPress: () => sendFile(() => pickChatImage(cid, 'camera')) },
-      { key: 'photo', label: 'Foto', icon: 'image', color: '#8E5BD9', onPress: () => sendFile(() => pickChatImage(cid, 'library')) },
-      { key: 'doc', label: 'Documento', icon: 'file-text', color: '#3F6FD8', onPress: () => sendFile(() => pickChatDocument(cid)) },
+      { key: 'cam', label: tx('Cámara'), icon: 'camera', color: '#E0457B', onPress: () => sendFile(() => pickChatImage(cid, 'camera')) },
+      { key: 'photo', label: tx('Foto'), icon: 'image', color: '#8E5BD9', onPress: () => sendFile(() => pickChatImage(cid, 'library')) },
+      { key: 'doc', label: tx('Documento'), icon: 'file-text', color: '#3F6FD8', onPress: () => sendFile(() => pickChatDocument(cid)) },
     ];
   };
 
   const openFile = async (m: DmMessage) => {
     const url = await downloadUrl('chat', m.attachment_path as string, m.attachment_name).catch(() => null);
-    if (!url) return Alert.alert('No se pudo abrir', 'Probá de nuevo cuando tengas señal.');
-    Linking.openURL(url).catch(() => Alert.alert('No se pudo abrir', 'No hay una aplicación para abrir este archivo.'));
+    if (!url) return Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo cuando tengas señal.'));
+    Linking.openURL(url).catch(() => Alert.alert(tx('No se pudo abrir'), tx('No hay una aplicación para abrir este archivo.')));
   };
 
   const setBlocked = (on: boolean) => {
     if (!id) return;
-    dmBlock(id, on).then(() => setOther((o) => (o ? { ...o, blocked: on } : o))).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+    dmBlock(id, on).then(() => setOther((o) => (o ? { ...o, blocked: on } : o))).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
   };
   const blockMenu = () => showActions(title, undefined, [
     other?.blocked
-      ? { text: 'Desbloquear', icon: 'unlock' as const, onPress: () => setBlocked(false) }
-      : { text: 'Bloquear', icon: 'slash' as const, destructive: true, onPress: () => Alert.alert(`¿Bloquear a ${title}?`, 'Ninguno de los dos va a poder escribirle al otro. Lo podés desbloquear cuando quieras.', [
-        { text: 'Cancelar', style: 'cancel' }, { text: 'Bloquear', style: 'destructive', onPress: () => setBlocked(true) },
+      ? { text: tx('Desbloquear'), icon: 'unlock' as const, onPress: () => setBlocked(false) }
+      : { text: tx('Bloquear'), icon: 'slash' as const, destructive: true, onPress: () => Alert.alert(tx('¿Bloquear a {title}?', { title }), tx('Ninguno de los dos va a poder escribirle al otro. Lo podés desbloquear cuando quieras.'), [
+        { text: tx('Cancelar'), style: 'cancel' }, { text: tx('Bloquear'), style: 'destructive', onPress: () => setBlocked(true) },
       ]) },
-    { text: 'Cancelar', icon: 'x' as const },
+    { text: tx('Cancelar'), icon: 'x' as const },
   ]);
-  const report = (m: DmMessage) => showActions('¿Por qué lo denunciás?', 'Le llega al pastor con una copia del mensaje.', [
-    ...REASONS.map((r) => ({ text: r, icon: 'flag' as const, onPress: () => dmReport(m.id, r)
-      .then(() => Alert.alert('Denuncia enviada', 'El pastor la va a revisar. Si no querés que te escriba más, también lo podés bloquear.'))
-      .catch((e) => Alert.alert('No se pudo', errorMessage(e))) })),
-    { text: 'Cancelar', icon: 'x' as const },
+  const report = (m: DmMessage) => showActions(tx('¿Por qué lo denunciás?'), tx('Le llega al pastor con una copia del mensaje.'), [
+    ...REASONS.map((r) => ({ text: tx(r), icon: 'flag' as const, onPress: () => dmReport(m.id, r)
+      .then(() => Alert.alert(tx('Denuncia enviada'), tx('El pastor la va a revisar. Si no querés que te escriba más, también lo podés bloquear.')))
+      .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) })),
+    { text: tx('Cancelar'), icon: 'x' as const },
   ]);
-  const onLong = (m: DmMessage) => showActions('Mensaje', undefined, [
-    ...(m.body ? [{ text: 'Copiar', icon: 'copy' as const, onPress: () => { Clipboard.setStringAsync(m.body).catch(() => undefined); } }] : []),
+  const onLong = (m: DmMessage) => showActions(tx('Mensaje'), undefined, [
+    ...(m.body ? [{ text: tx('Copiar'), icon: 'copy' as const, onPress: () => { Clipboard.setStringAsync(m.body).catch(() => undefined); } }] : []),
     ...(m.mine
-      ? [{ text: 'Borrar para los dos', icon: 'trash-2' as const, destructive: true, onPress: () => dmDelete(m.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) }]
-      : [{ text: 'Denunciar', icon: 'flag' as const, destructive: true, onPress: () => report(m) }]),
-    { text: 'Cancelar', icon: 'x' as const },
+      ? [{ text: tx('Borrar para los dos'), icon: 'trash-2' as const, destructive: true, onPress: () => dmDelete(m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) }]
+      : [{ text: tx('Denunciar'), icon: 'flag' as const, destructive: true, onPress: () => report(m) }]),
+    { text: tx('Cancelar'), icon: 'x' as const },
   ]);
 
   const data = rows ? [...rows].reverse() : [];
@@ -131,12 +132,12 @@ export default function Conversacion() {
       <View style={{ gap: 4, marginBottom: 6 }}>
         {showDay ? <Text style={styles.day}>{day}</Text> : null}
         <View style={{ alignItems: m.mine ? 'flex-end' : 'flex-start' }}>
-          <Pressable onLongPress={() => onLong(m)} delayLongPress={300} accessibilityHint="Mantené apretado para más opciones" style={[styles.bubble, m.mine ? styles.mine : styles.theirs]}>
+          <Pressable onLongPress={() => onLong(m)} delayLongPress={300} accessibilityHint={tx('Mantené apretado para más opciones')} style={[styles.bubble, m.mine ? styles.mine : styles.theirs]}>
             {m.kind === 'image' && m.attachment_path ? <DmImage path={m.attachment_path} onOpen={setViewer} /> : null}
             {m.kind === 'file' && m.attachment_path && isVoice(m.attachment_name) ? <VoiceBubble path={m.attachment_path} /> : m.kind === 'file' ? (
-              <Pressable onPress={() => openFile(m)} onLongPress={() => onLong(m)} style={styles.file} accessibilityRole="button" accessibilityLabel={`Abrir ${m.attachment_name ?? 'el documento'}`}>
+              <Pressable onPress={() => openFile(m)} onLongPress={() => onLong(m)} style={styles.file} accessibilityRole="button" accessibilityLabel={tx('Abrir {attachment_name}', { attachment_name: m.attachment_name ?? tx('el documento') })}>
                 <Feather name="file-text" size={24} color={colors.violet} />
-                <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? 'Documento'}</Text>
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? tx('Documento')}</Text>
               </Pressable>
             ) : null}
             {m.body ? <Text selectable={Platform.OS === 'web'} style={styles.body}>{m.body}</Text> : null}
@@ -152,40 +153,40 @@ export default function Conversacion() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={title} subtitle="Conversación privada · solo la ven ustedes dos" back
-        right={<Pressable onPress={blockMenu} hitSlop={10} accessibilityRole="button" accessibilityLabel="Más opciones" style={{ padding: 8 }}><Feather name="more-vertical" size={22} color={colors.text} /></Pressable>} />
+      <Header title={title} subtitle={tx('Conversación privada · solo la ven ustedes dos')} back
+        right={<Pressable onPress={blockMenu} hitSlop={10} accessibilityRole="button" accessibilityLabel={tx('Más opciones')} style={{ padding: 8 }}><Feather name="more-vertical" size={22} color={colors.text} /></Pressable>} />
       <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bgSoft }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {rows === null ? <ActivityIndicator style={{ marginTop: 40, flex: 1 }} color={colors.violet} /> : !rows.length ? (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 24 }}>
             <Feather name="message-circle" size={38} color={colors.muted} />
-            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>Todavía no se escribieron</Text>
-            <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>Mandale un saludo a {title}.</Text>
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{tx('Todavía no se escribieron')}</Text>
+            <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>{tx('Mandale un saludo a {title}.', { title })}</Text>
           </View>
         ) : (
           <FlatList inverted data={data} keyExtractor={(m) => m.id} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled" />
         )}
         {other?.blocked ? (
           <View style={{ padding: 14, paddingBottom: 14 + insets.bottom, gap: 8, alignItems: 'center', backgroundColor: colors.bg }}>
-            <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>Bloqueaste a {title}. No se pueden escribir.</Text>
-            <Text onPress={() => setBlocked(false)} style={{ fontSize: 14, fontWeight: '800', color: colors.violet }}>Desbloquear</Text>
+            <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>{tx('Bloqueaste a {title}. No se pueden escribir.', { title })}</Text>
+            <Text onPress={() => setBlocked(false)} style={{ fontSize: 14, fontWeight: '800', color: colors.violet }}>{tx('Desbloquear')}</Text>
           </View>
         ) : (
           <View style={[styles.inputRow, { paddingBottom: 8 + insets.bottom }]}>
             {recording ? <View style={styles.inputLine}><VoiceRecorder onSend={sendVoice} onCancel={() => setRecording(false)} /></View> : (
               <View style={styles.inputLine}>
                 <View style={styles.pill}>
-                  <Pressable onPress={() => setAttach(true)} style={styles.plus} accessibilityRole="button" accessibilityLabel="Adjuntar una foto o un documento">
+                  <Pressable onPress={() => setAttach(true)} style={styles.plus} accessibilityRole="button" accessibilityLabel={tx('Adjuntar una foto o un documento')}>
                     <Feather name="plus" size={24} color={colors.muted} />
                   </Pressable>
-                  <TextInput value={text} onChangeText={setText} placeholder="Escribí un mensaje…" placeholderTextColor={colors.muted} multiline maxLength={4000}
-                    accessibilityLabel="Mensaje" style={styles.input} />
+                  <TextInput value={text} onChangeText={setText} placeholder={tx('Escribí un mensaje…')} placeholderTextColor={colors.muted} multiline maxLength={4000}
+                    accessibilityLabel={tx('Mensaje')} style={styles.input} />
                 </View>
                 {voiceAvailable && !text.trim() && !busy ? (
-                  <Pressable onPress={() => setRecording(true)} style={styles.sendBtn} accessibilityRole="button" accessibilityLabel="Grabar un mensaje de voz">
+                  <Pressable onPress={() => setRecording(true)} style={styles.sendBtn} accessibilityRole="button" accessibilityLabel={tx('Grabar un mensaje de voz')}>
                     <Feather name="mic" size={20} color="#FFF" />
                   </Pressable>
                 ) : (
-                  <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, (busy || !text.trim()) && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel="Enviar">
+                  <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, (busy || !text.trim()) && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel={tx('Enviar')}>
                     {busy ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
                   </Pressable>
                 )}
@@ -196,7 +197,7 @@ export default function Conversacion() {
       </KeyboardAvoidingView>
       <AttachSheet visible={attach} items={attachItems().map((i) => ({ ...i, onPress: () => { setAttach(false); i.onPress(); } }))} onClose={() => setAttach(false)} />
       <Modal visible={!!viewer} transparent animationType="fade" onRequestClose={() => setViewer(null)}>
-        <Pressable style={styles.viewer} onPress={() => setViewer(null)} accessibilityLabel="Cerrar la foto">
+        <Pressable style={styles.viewer} onPress={() => setViewer(null)} accessibilityLabel={tx('Cerrar la foto')}>
           {viewer ? <Image source={{ uri: viewer }} style={{ flex: 1 }} contentFit="contain" /> : null}
         </Pressable>
       </Modal>

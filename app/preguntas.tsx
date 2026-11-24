@@ -11,6 +11,7 @@ import { fmtRelativeDay } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Preguntas() {
   const { can } = useAuth();
@@ -33,10 +34,10 @@ export default function Preguntas() {
       await askQuestion(body.trim(), anon);
       setBody('');
       load();
-      Alert.alert('¡Gracias!', anon ? 'Tu pregunta le llegó al pastor, sin tu nombre. Cuando la responda para todos, la vas a ver acá abajo.' : 'Tu pregunta le llegó al pastor.');
+      Alert.alert(tx('¡Gracias!'), anon ? tx('Tu pregunta le llegó al pastor, sin tu nombre. Cuando la responda para todos, la vas a ver acá abajo.') : tx('Tu pregunta le llegó al pastor.'));
       setAnon(false);
     } catch (e) {
-      Alert.alert('No se pudo enviar', errorMessage(e));
+      Alert.alert(tx('No se pudo enviar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -49,15 +50,15 @@ export default function Preguntas() {
       setReplyFor(null); setReply('');
       load();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
   };
 
-  const remove = (q: QuestionRow) => Alert.alert('Borrar la pregunta', '¿Seguro?', [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Borrar', style: 'destructive', onPress: () => removeQuestion(q.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+  const remove = (q: QuestionRow) => Alert.alert(tx('Borrar la pregunta'), tx('¿Seguro?'), [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Borrar'), style: 'destructive', onPress: () => removeQuestion(q.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
   ]);
 
   const all = rows ?? [];
@@ -69,48 +70,48 @@ export default function Preguntas() {
     <Card key={q.id} style={{ gap: 8, padding: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>
-          {q.mine ? 'Vos' : q.author ?? (pastor && q.anonymous ? 'Sin nombre' : 'Un hermano')} · <Text style={{ fontWeight: '500', color: colors.muted }}>{fmtRelativeDay(q.created_at)}</Text>
+          {q.mine ? tx('Vos') : q.author ?? (pastor && q.anonymous ? tx('Sin nombre') : tx('Un hermano'))} · <Text style={{ fontWeight: '500', color: colors.muted }}>{fmtRelativeDay(q.created_at)}</Text>
         </Text>
-        <Tag text={q.status === 'answered' ? 'Respondida' : 'Esperando'} tone={q.status === 'answered' ? 'green' : 'amber'} />
+        <Tag text={q.status === 'answered' ? tx('Respondida') : tx('Esperando')} tone={q.status === 'answered' ? 'green' : 'amber'} />
       </View>
       <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text, lineHeight: 22 }}>{q.body}</Text>
-      {q.answer ? <Text style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>{q.answer}</Text> : q.status === 'answered' ? <Text style={{ fontSize: 13, color: colors.muted }}>El pastor ya la respondió en persona.</Text> : null}
+      {q.answer ? <Text style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>{q.answer}</Text> : q.status === 'answered' ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('El pastor ya la respondió en persona.')}</Text> : null}
       {pastor ? (
         replyFor === q.id ? (
           <View style={{ gap: 8 }}>
-            <Field label="Respuesta para toda la iglesia" hint="(opcional)" value={reply} onChangeText={setReply} multiline maxLength={3000} placeholder="Una respuesta corta, con el versículo…" />
-            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Si escribís una respuesta, toda la iglesia ve la pregunta y la respuesta, sin el nombre de quien preguntó. Si la dejás vacía, solo queda marcada como respondida.</Text>
+            <Field label={tx('Respuesta para toda la iglesia')} hint={tx('(opcional)')} value={reply} onChangeText={setReply} multiline maxLength={3000} placeholder={tx('Una respuesta corta, con el versículo…')} />
+            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Si escribís una respuesta, toda la iglesia ve la pregunta y la respuesta, sin el nombre de quien preguntó. Si la dejás vacía, solo queda marcada como respondida.')}</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cancelar" variant="ghost" small onPress={() => setReplyFor(null)} style={{ flex: 1 }} />
-              <Button title="Guardar" small onPress={() => save(q)} loading={busy} style={{ flex: 2 }} />
+              <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setReplyFor(null)} style={{ flex: 1 }} />
+              <Button title={tx('Guardar')} small onPress={() => save(q)} loading={busy} style={{ flex: 2 }} />
             </View>
           </View>
         ) : (
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Button title={q.status === 'answered' ? 'Cambiar la respuesta' : 'Responder'} small variant="outline" onPress={() => { setReplyFor(q.id); setReply(q.answer ?? ''); }} style={{ flex: 1 }} />
-            {q.status === 'answered' ? <Button title="Volver a “esperando”" small variant="ghost" onPress={() => answerQuestion(q.id, false, null).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} style={{ flex: 1 }} /> : null}
-            <Pressable onPress={() => remove(q)} style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel="Borrar la pregunta"><Feather name="trash-2" size={17} color={colors.muted} /></Pressable>
+            <Button title={q.status === 'answered' ? tx('Cambiar la respuesta') : tx('Responder')} small variant="outline" onPress={() => { setReplyFor(q.id); setReply(q.answer ?? ''); }} style={{ flex: 1 }} />
+            {q.status === 'answered' ? <Button title={tx('Volver a “esperando”')} small variant="ghost" onPress={() => answerQuestion(q.id, false, null).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} style={{ flex: 1 }} /> : null}
+            <Pressable onPress={() => remove(q)} style={{ padding: 8 }} accessibilityRole="button" accessibilityLabel={tx('Borrar la pregunta')}><Feather name="trash-2" size={17} color={colors.muted} /></Pressable>
           </View>
         )
       ) : q.mine && q.status === 'new' ? (
-        <Text onPress={() => remove(q)} style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>Borrar mi pregunta</Text>
+        <Text onPress={() => remove(q)} style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{tx('Borrar mi pregunta')}</Text>
       ) : null}
     </Card>
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Preguntas" subtitle="Preguntá lo que quieras de la Biblia" back />
+      <Header title={tx('Preguntas')} subtitle={tx('Preguntá lo que quieras de la Biblia')} back />
       <Screen>
         <Card style={{ gap: 10 }}>
-          <Field label="Tu pregunta" value={body} onChangeText={setBody} multiline maxLength={1000} placeholder="¿Qué quiere decir…?" />
-          <Toggle label="Enviar sin mi nombre" hint="Nadie va a saber que fuiste vos, ni el pastor. Por eso no te puede contestar en privado." value={anon} onChange={setAnon} />
-          <Button title="Enviar al pastor" icon="send" onPress={send} loading={busy && !replyFor} disabled={body.trim().length < 5} />
+          <Field label={tx('Tu pregunta')} value={body} onChangeText={setBody} multiline maxLength={1000} placeholder={tx('¿Qué quiere decir…?')} />
+          <Toggle label={tx('Enviar sin mi nombre')} hint={tx('Nadie va a saber que fuiste vos, ni el pastor. Por eso no te puede contestar en privado.')} value={anon} onChange={setAnon} />
+          <Button title={tx('Enviar al pastor')} icon="send" onPress={send} loading={busy && !replyFor} disabled={body.trim().length < 5} />
         </Card>
-        {rows === null ? <Loading /> : !all.length ? <Empty icon="help-circle" title="Todavía no hay preguntas" text="Las respuestas del pastor para toda la iglesia aparecen acá." /> : null}
-        {waiting.length ? <SectionTitle>{pastor ? 'Para responder' : 'Mis preguntas'}</SectionTitle> : null}
+        {rows === null ? <Loading /> : !all.length ? <Empty icon="help-circle" title={tx('Todavía no hay preguntas')} text={tx('Las respuestas del pastor para toda la iglesia aparecen acá.')} /> : null}
+        {waiting.length ? <SectionTitle>{pastor ? tx('Para responder') : tx('Mis preguntas')}</SectionTitle> : null}
         {waiting.map(card)}
-        {answered.length ? <SectionTitle>Respuestas</SectionTitle> : null}
+        {answered.length ? <SectionTitle>{tx('Respuestas')}</SectionTitle> : null}
         {answered.map(card)}
       </Screen>
     </View>

@@ -5,12 +5,13 @@ import { Card } from '@/components/ui';
 import { childVerses } from '@/lib/culto';
 import { badgesEarned, progressText, versesLabel } from '@/lib/verses';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function BadgeRow({ count, size = 22 }: { count: number; size?: number }) {
   const earned = badgesEarned(count);
   if (!earned.length) return null;
   return (
-    <View style={{ flexDirection: 'row', gap: 4 }} accessibilityLabel={`Premios: ${earned.map((b) => b.name).join(', ')}`}>
+    <View style={{ flexDirection: 'row', gap: 4 }} accessibilityLabel={tx('Premios: {map}', { map: earned.map((b) => b.name).join(', ') })}>
       {earned.map((b) => <Text key={b.at} style={{ fontSize: size }}>{b.emoji}</Text>)}
     </View>
   );
@@ -27,7 +28,7 @@ export function VerseBadges({ contactId }: { contactId: string }) {
   return (
     <Card style={{ gap: 6 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>Versículos de memoria · {versesLabel(rows.length)}</Text>
+        <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Versículos de memoria · {versesLabel}', { versesLabel: versesLabel(rows.length) })}</Text>
         <BadgeRow count={rows.length} />
       </View>
       <Text style={{ fontSize: 13, color: colors.muted }}>{progressText(rows.length)}</Text>

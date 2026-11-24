@@ -12,9 +12,10 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Announcement, Group, Ministry } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const AUD_LABEL: Record<Announcement['audience'], string> = {
-  all: 'Toda la iglesia', staff: 'Pastor y secretaría', leaders: 'Líderes y capitanes', teachers: 'Maestros', ministry: 'Un ministerio', group: 'Un grupo / ruta',
+  get all() { return tx('Toda la iglesia'); }, get staff() { return tx('Pastor y secretaría'); }, get leaders() { return tx('Líderes y capitanes'); }, get teachers() { return tx('Maestros'); }, get ministry() { return tx('Un ministerio'); }, get group() { return tx('Un grupo / ruta'); },
 };
 
 export default function Anuncios() {
@@ -41,7 +42,7 @@ export default function Anuncios() {
   const send = async () => {
     if (!title.trim() || !body.trim()) return;
     if ((aud === 'ministry' || aud === 'group') && !target) {
-      Alert.alert('Elegí a quién', aud === 'ministry' ? 'Elegí el ministerio.' : 'Elegí el grupo.');
+      Alert.alert(tx('Elegí a quién'), aud === 'ministry' ? tx('Elegí el ministerio.') : tx('Elegí el grupo.'));
       return;
     }
     setBusy(true);
@@ -49,9 +50,9 @@ export default function Anuncios() {
       await sendAnnouncement({ title: title.trim(), body: body.trim(), audience: aud, ministry_id: aud === 'ministry' ? target : null, group_id: aud === 'group' ? target : null });
       setTitle(''); setBody(''); setAud('all'); setTarget(''); setWriting(false);
       load();
-      Alert.alert('Enviado', 'Les llega como aviso al teléfono.');
+      Alert.alert(tx('Enviado'), tx('Les llega como aviso al teléfono.'));
     } catch (e) {
-      Alert.alert('No se pudo enviar', errorMessage(e));
+      Alert.alert(tx('No se pudo enviar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -59,14 +60,14 @@ export default function Anuncios() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Anuncios" back />
+      <Header title={tx('Anuncios')} back />
       <Screen>
         {isLeader ? (
           writing ? (
             <Card style={{ gap: 10 }}>
-              <Field label="Título" value={title} onChangeText={setTitle} placeholder="Ensayo especial el viernes" />
-              <Field label="Mensaje" value={body} onChangeText={setBody} multiline />
-              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>¿Para quién?</Text>
+              <Field label={tx('Título')} value={title} onChangeText={setTitle} placeholder={tx('Ensayo especial el viernes')} />
+              <Field label={tx('Mensaje')} value={body} onChangeText={setBody} multiline />
+              <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>{tx('¿Para quién?')}</Text>
               <Choice columns={2} options={(Object.keys(AUD_LABEL) as Announcement['audience'][]).map((a) => ({ value: a, label: AUD_LABEL[a] }))} value={aud} onChange={(v) => { setAud(v); setTarget(''); }} />
               {aud === 'ministry' || aud === 'group' ? (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -79,29 +80,29 @@ export default function Anuncios() {
                 </View>
               ) : null}
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" onPress={() => setWriting(false)} style={{ flex: 1 }} />
-                <Button title="Enviar" icon="send" onPress={send} loading={busy} disabled={!title.trim() || !body.trim()} style={{ flex: 2 }} />
+                <Button title={tx('Cancelar')} variant="ghost" onPress={() => setWriting(false)} style={{ flex: 1 }} />
+                <Button title={tx('Enviar')} icon="send" onPress={send} loading={busy} disabled={!title.trim() || !body.trim()} style={{ flex: 2 }} />
               </View>
             </Card>
           ) : (
-            <Button title="Nuevo anuncio" icon="plus" onPress={() => setWriting(true)} />
+            <Button title={tx('Nuevo anuncio')} icon="plus" onPress={() => setWriting(true)} />
           )
         ) : null}
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="volume-2" title="No hay anuncios" /> : null}
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="volume-2" title={tx('No hay anuncios')} /> : null}
         {(rows ?? []).map((a) => (
           <Card key={a.id} style={{ gap: 6, padding: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Feather name="volume-2" size={16} color={colors.green} />
               <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }}>{a.title}</Text>
               {isStaff || a.author_id === session?.user.id ? (
-                <Pressable onPress={() => Alert.alert('Borrar anuncio', a.title, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => deleteAnnouncement(a.id).then(load) }])} style={{ padding: 4 }} accessibilityLabel="Borrar">
+                <Pressable onPress={() => Alert.alert(tx('Borrar anuncio'), a.title, [{ text: tx('Cancelar'), style: 'cancel' }, { text: tx('Borrar'), style: 'destructive', onPress: () => deleteAnnouncement(a.id).then(load) }])} style={{ padding: 4 }} accessibilityLabel={tx('Borrar')}>
                   <Feather name="trash-2" size={15} color={colors.muted} />
                 </Pressable>
               ) : null}
             </View>
             <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>{a.body}</Text>
             <Text style={{ fontSize: 11, color: colors.muted }}>
-              {fmtRelativeDay(a.created_at)} {fmtTime(a.created_at)} · {AUD_LABEL[a.audience]}{a.audience === 'ministry' ? ` (${ministries.find((m) => m.id === a.ministry_id)?.name ?? ''})` : a.audience === 'group' ? ` (${groups.find((g) => g.id === a.group_id)?.name ?? ''})` : ''}{isLeader ? ` · llegó a ${a.sent_to}` : ''}
+              {fmtRelativeDay(a.created_at)} {fmtTime(a.created_at)} · {AUD_LABEL[a.audience]}{a.audience === 'ministry' ? ` (${ministries.find((m) => m.id === a.ministry_id)?.name ?? ''})` : a.audience === 'group' ? ` (${groups.find((g) => g.id === a.group_id)?.name ?? ''})` : ''}{isLeader ? tx(' · llegó a {sent_to}', { sent_to: a.sent_to }) : ''}
             </Text>
           </Card>
         ))}

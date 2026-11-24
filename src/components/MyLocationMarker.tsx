@@ -3,6 +3,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Marker } from './map';
 import type { MyLocation } from '../lib/useMyLocation';
+import { tx } from '@/lib/i18n';
 
 const BLUE = '#1A73E8';
 const SIZE = 96; // cuadro donde entran el punto y el abanico
@@ -11,7 +12,7 @@ export function MyLocationMarker({ pos, heading }: { pos: MyLocation | null; hea
   if (!pos) return null;
   return (
     <Marker coordinate={{ latitude: pos.lat, longitude: pos.lng }} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges zIndex={999}>
-      <View style={styles.box} pointerEvents="none" accessibilityLabel="Tu ubicación">
+      <View style={styles.box} pointerEvents="none" accessibilityLabel={tx('Tu ubicación')}>
         {heading !== null ? (
           // El abanico apunta hacia arriba y se gira todo el cuadro según la brújula.
           <View style={[StyleSheet.absoluteFill, { transform: [{ rotate: `${heading}deg` }] }]}>

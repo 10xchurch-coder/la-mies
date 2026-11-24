@@ -12,6 +12,7 @@ import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presen
 import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Control() {
   const { church, perms, profile } = useAuth();
@@ -45,8 +46,8 @@ export default function Control() {
   if (!isLeader) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Control remoto" back />
-        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
+        <Header title={tx('Control remoto')} back />
+        <Empty icon="lock" title={tx('Necesitás permiso')} text={tx('El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos.')} />
       </View>
     );
   }
@@ -64,25 +65,24 @@ export default function Control() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Control remoto" subtitle={status === 'conectado' ? 'Conectado' : status === 'conectando' ? 'Conectando…' : 'Sin conexión'} back />
+      <Header title={tx('Control remoto')} subtitle={status === 'conectado' ? tx('Conectado') : status === 'conectando' ? tx('Conectando…') : tx('Sin conexión')} back />
       <Screen>
         <Card style={{ gap: 10, alignItems: 'center' }}>
-          <Text style={{ alignSelf: 'flex-start', fontSize: 13, fontWeight: '800', color: colors.text }}>EN PANTALLA</Text>
+          <Text style={{ alignSelf: 'flex-start', fontSize: 13, fontWeight: '800', color: colors.text }}>{tx('EN PANTALLA')}</Text>
           <View style={{ borderRadius: 8, overflow: 'hidden' }}>
             <PresentSlide live={live} width={w} height={Math.round((w * 9) / 16)} clockOffset={offset} logoUrl={logo} churchName={church.name} />
           </View>
         </Card>
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          {big('Anterior', 'arrow-left', 'prev', false)}
-          {big('Siguiente', 'arrow-right', 'next', true)}
+          {big(tx('Anterior'), 'arrow-left', 'prev', false)}
+          {big(tx('Siguiente'), 'arrow-right', 'next', true)}
         </View>
         <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Button title="Negro" icon="square" variant="outline" onPress={() => send('black')} style={{ flex: 1 }} />
-          <Button title="Logo" icon="home" variant="outline" onPress={() => send('logo')} style={{ flex: 1 }} />
+          <Button title={tx('Negro')} icon="square" variant="outline" onPress={() => send('black')} style={{ flex: 1 }} />
+          <Button title={tx('Logo')} icon="home" variant="outline" onPress={() => send('logo')} style={{ flex: 1 }} />
         </View>
         <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-          Para que ande, el aparato que maneja la lista tiene que tener abierto el Modo presentación, y los dos tienen que tener internet.
-          {status === 'sin-conexion' ? ' Ahora no hay conexión: revisá el wifi o los datos.' : ''}
+          {tx('Para que ande, el aparato que maneja la lista tiene que tener abierto el Modo presentación, y los dos tienen que tener internet.{pl}', { pl: status === 'sin-conexion' ? tx(' Ahora no hay conexión: revisá el wifi o los datos.') : '' })}
         </Text>
       </Screen>
     </View>

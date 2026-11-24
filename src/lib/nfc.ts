@@ -1,6 +1,7 @@
 // Chips NFC (credenciales, pulseras o tarjetas): se graba la entrada en el chip y en la puerta se apoya el teléfono para leerla.
 // Solo funciona en la app instalada desde la tienda que ya trae el lector (compilación nueva); en la web y en versiones viejas no aparece.
 import { Platform, TurboModuleRegistry } from 'react-native';
+import { tx } from './i18n';
 
 /** ¿Esta app trae el lector de chips? */
 export const nfcBuilt: boolean = Platform.OS !== 'web' && !!TurboModuleRegistry.get('NfcManager');
@@ -10,7 +11,7 @@ let lib: Lib | null = null;
 let started = false;
 
 async function mod(): Promise<Lib> {
-  if (!nfcBuilt) throw new Error('Este teléfono o esta versión de la app no lee chips.');
+  if (!nfcBuilt) throw new Error(tx('Este teléfono o esta versión de la app no lee chips.'));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   if (!lib) lib = require('react-native-nfc-manager') as Lib;
   if (!started) { await lib.default.start(); started = true; }
@@ -31,11 +32,11 @@ export async function nfcState(): Promise<'ok' | 'off' | 'none'> {
 const friendly = (e: unknown): Error => {
   const msg = String((e as { message?: string } | null)?.message ?? e ?? '');
   if (/cancel/i.test(msg) || /UserCancel/i.test(String((e as { constructor?: { name?: string } } | null)?.constructor?.name ?? ''))) return new Error('cancelado');
-  return new Error('No se pudo leer el chip. Apoyalo otra vez contra la parte de arriba del teléfono y no lo muevas.');
+  return new Error(tx('No se pudo leer el chip. Apoyalo otra vez contra la parte de arriba del teléfono y no lo muevas.'));
 };
 
 /** Lee el texto grabado en un chip. Null si el chip está vacío. Tira 'cancelado' si la persona cerró el lector. */
-export async function readChip(message = 'Acercá la credencial a la parte de arriba del teléfono'): Promise<string | null> {
+export async function readChip(message = tx('Acercá la credencial a la parte de arriba del teléfono')): Promise<string | null> {
   const m = await mod();
   const { default: Nfc, NfcTech, Ndef } = m;
   try {
@@ -60,14 +61,14 @@ export async function writeChip(text: string): Promise<void> {
   const m = await mod();
   const { default: Nfc, NfcTech, Ndef } = m;
   try {
-    await Nfc.requestTechnology(NfcTech.Ndef, { alertMessage: 'Acercá el chip a la parte de arriba del teléfono' });
+    await Nfc.requestTechnology(NfcTech.Ndef, { alertMessage: tx('Acercá el chip a la parte de arriba del teléfono') });
     const bytes = Ndef.encodeMessage([Ndef.textRecord(text)]);
     if (!bytes) throw new Error('vacío');
     await Nfc.ndefHandler.writeNdefMessage(bytes);
-    if (Platform.OS === 'ios') await Nfc.setAlertMessageIOS('Listo, chip grabado');
+    if (Platform.OS === 'ios') await Nfc.setAlertMessageIOS(tx('Listo, chip grabado'));
   } catch (e) {
     const f = friendly(e);
-    throw f.message === 'cancelado' ? f : new Error('No se pudo grabar el chip. Puede estar bloqueado o no ser del tipo NTAG. Probá con otro.');
+    throw f.message === 'cancelado' ? f : new Error(tx('No se pudo grabar el chip. Puede estar bloqueado o no ser del tipo NTAG. Probá con otro.'));
   } finally {
     Nfc.cancelTechnologyRequest().catch(() => undefined);
   }

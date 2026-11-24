@@ -1,6 +1,7 @@
 // Salidas de la iglesia: si varios hermanos salen a la misma hora, es UNA salida, no varias.
 // No importa nada de la app para poder probarse sola.
 
+import { tx } from './i18n';
 export type OutingSession = { started_at: string; ended_at: string | null; contacts?: number | null };
 
 /** Cuánto puede pasar entre que termina uno y empieza otro para seguir siendo la misma salida. */
@@ -35,7 +36,7 @@ export type PanelDetail = { visits: PanelVisit[]; came: PanelPerson[]; disciples
 export type PanelItem = { key: string; contact_id: string; name: string; when: string; user_id: string | null };
 
 export const METRIC_LABEL: Record<PanelMetric, string> = {
-  contacts: 'Contactos', presentations: 'Presentaciones', promises: 'Prometieron venir a la iglesia', came: 'Visitaron la iglesia', discipleship: 'Discipulado', baptisms: 'Bautismos',
+  get contacts() { return tx('Contactos'); }, get presentations() { return tx('Presentaciones'); }, get promises() { return tx('Prometieron venir a la iglesia'); }, get came() { return tx('Visitaron la iglesia'); }, get discipleship() { return tx('Discipulado'); }, get baptisms() { return tx('Bautismos'); },
 };
 
 /** La lista detrás de cada número. Con userId, solo lo que cargó ese hermano. */

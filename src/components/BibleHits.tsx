@@ -8,6 +8,7 @@ import { Button, Card } from '@/components/ui';
 import { bookNameIn, chapterText, chaptersIn, type BibleVersion } from '@/lib/bible';
 import { pieces, type BookHits, type Hit, type Query } from '@/lib/bibleStudy';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const STEP = 40;
 
@@ -38,7 +39,7 @@ export function BibleHits({ version, books, query, unit, bars, onOpen, onWord }:
         return (
           <View key={b.book} style={k ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}>
             <Pressable onPress={() => setOpen((o) => ({ ...o, [b.book]: showing ? 0 : STEP }))} accessibilityRole="button" accessibilityState={{ expanded: showing > 0 }}
-              accessibilityLabel={`${name}, ${n} ${unit === 'veces' && n === 1 ? 'vez' : unit === 'versículos' && n === 1 ? 'versículo' : unit}`} style={{ paddingVertical: 12, gap: 6 }}>
+              accessibilityLabel={`${name}, ${n} ${unit === 'veces' && n === 1 ? tx('vez') : unit === 'versículos' && n === 1 ? tx('versículo') : unit}`} style={{ paddingVertical: 12, gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Text style={{ flex: 1, fontSize: 16, fontWeight: '700', color: colors.text }}>{name}</Text>
                 <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{n}</Text>
@@ -57,7 +58,7 @@ export function BibleHits({ version, books, query, unit, bars, onOpen, onWord }:
                   const ref = single ? `${name} ${h.verse}` : `${name} ${h.chapter}:${h.verse}`;
                   return (
                     <View key={`${h.chapter}:${h.verse}`} style={{ gap: 2 }}>
-                      <Pressable onPress={() => onOpen(b.book, h)} accessibilityRole="button" accessibilityLabel={`Abrir ${ref}`} hitSlop={6} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }}>
+                      <Pressable onPress={() => onOpen(b.book, h)} accessibilityRole="button" accessibilityLabel={tx('Abrir {ref}', { ref })} hitSlop={6} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }}>
                         <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{ref}</Text>
                         <Feather name="chevron-right" size={15} color={colors.blueText} />
                       </Pressable>
@@ -69,7 +70,7 @@ export function BibleHits({ version, books, query, unit, bars, onOpen, onWord }:
                     </View>
                   );
                 })}
-                {b.hits.length > showing ? <Button title={`Ver más de ${name} (${b.hits.length - showing})`} variant="ghost" small icon="chevron-down" onPress={() => setOpen((o) => ({ ...o, [b.book]: showing + STEP * 2 }))} /> : null}
+                {b.hits.length > showing ? <Button title={tx('Ver más de {name} ({v1})', { name, v1: b.hits.length - showing })} variant="ghost" small icon="chevron-down" onPress={() => setOpen((o) => ({ ...o, [b.book]: showing + STEP * 2 }))} /> : null}
               </View>
             ) : null}
           </View>

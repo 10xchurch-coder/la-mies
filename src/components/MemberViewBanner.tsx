@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function MemberViewBanner() {
   const { viewAsMember, setViewAsMember } = useAuth();
@@ -19,11 +20,11 @@ export function MemberViewBanner() {
   const lift = (onTabs ? 92 : 16 + insets.bottom) + (outing.active ? 52 : 0);
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: lift }]}>
-      <Pressable onPress={() => { setViewAsMember(false); router.replace('/'); }} accessibilityRole="button" accessibilityLabel="Volver a mi vista"
+      <Pressable onPress={() => { setViewAsMember(false); router.replace('/'); }} accessibilityRole="button" accessibilityLabel={tx('Volver a mi vista')}
         style={({ pressed }) => [styles.pill, pressed && { opacity: 0.9 }]}>
         <Feather name="eye" size={18} color="#FFF" />
-        <Text style={styles.text}>Mirando como miembro</Text>
-        <Text style={styles.back}>Volver a mi vista</Text>
+        <Text style={styles.text}>{tx('Mirando como miembro')}</Text>
+        <Text style={styles.back}>{tx('Volver a mi vista')}</Text>
       </Pressable>
     </View>
   );

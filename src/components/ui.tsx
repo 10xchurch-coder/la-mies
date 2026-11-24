@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors, radius, themed } from '../theme';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -150,7 +151,7 @@ export function Stat({ value, label, tone = 'plain', onPress, active }: { value:
     </>
   );
   if (!onPress) return <View style={box}>{inner}</View>;
-  return <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}. Ver la lista`} onPress={onPress} style={box}>{inner}</Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={tx('{label}: {value}. Ver la lista', { label, value })} onPress={onPress} style={box}>{inner}</Pressable>;
 }
 
 export function Avatar({ name, size = 40, color = colors.greenSoft, textColor = colors.greenText }: { name: string; size?: number; color?: string; textColor?: string }) {

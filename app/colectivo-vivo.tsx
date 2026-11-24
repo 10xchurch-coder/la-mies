@@ -14,6 +14,7 @@ import { fmtTime } from '@/lib/format';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Route = {
   group_id: string; name: string; can_drive: boolean; run_id: string | null; driver_name: string | null; mine: boolean | null;
@@ -23,9 +24,9 @@ type Route = {
 function ago(iso: string | null, now: number): string {
   if (!iso) return '';
   const s = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000));
-  if (s < 60) return 'recién';
+  if (s < 60) return tx('recién');
   const m = Math.round(s / 60);
-  return m === 1 ? 'hace 1 minuto' : `hace ${m} minutos`;
+  return m === 1 ? tx('hace 1 minuto') : tx('hace {m} minutos', { m });
 }
 
 // El mapa se acomoda para que se vea todo el recorrido (con un poco de margen), y nunca más cerca que ~2 km.
@@ -67,7 +68,7 @@ export default function ColectivoVivo() {
     supabase.from('bus_route_drivers').select('group_id, profile_id, profiles:profile_id(display_name)').then(({ data }) => {
       const map: Record<string, { id: string; name: string }[]> = {};
       for (const r of (data ?? []) as unknown as { group_id: string; profile_id: string; profiles: { display_name: string } | null }[]) {
-        (map[r.group_id] ??= []).push({ id: r.profile_id, name: r.profiles?.display_name ?? 'Alguien' });
+        (map[r.group_id] ??= []).push({ id: r.profile_id, name: r.profiles?.display_name ?? tx('Alguien') });
       }
       setDrivers(map);
     });
@@ -90,26 +91,26 @@ export default function ColectivoVivo() {
   }, [routes]);
 
   const start = (r: Route) => {
-    Alert.alert(`Salimos con el colectivo de ${r.name}`, 'Les llega un aviso a los de la ruta y ven el colectivo en el mapa hasta que toques "Llegamos". Dejá el teléfono con batería.', [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('Salimos con el colectivo de {name}', { name: r.name }), tx('Les llega un aviso a los de la ruta y ven el colectivo en el mapa hasta que toques "Llegamos". Dejá el teléfono con batería.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Salimos',
+        text: tx('Salimos'),
         onPress: async () => {
           setBusy(r.group_id);
-          try { await startBus(r.group_id, r.name); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } finally { setBusy(null); }
+          try { await startBus(r.group_id, r.name); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } finally { setBusy(null); }
         },
       },
     ]);
   };
 
   const stop = (r: Route) => {
-    Alert.alert('¿Llegaron?', 'Se deja de mostrar el colectivo en el mapa.', [
-      { text: 'Seguir', style: 'cancel' },
+    Alert.alert(tx('¿Llegaron?'), tx('Se deja de mostrar el colectivo en el mapa.'), [
+      { text: tx('Seguir'), style: 'cancel' },
       {
-        text: 'Llegamos',
+        text: tx('Llegamos'),
         onPress: async () => {
           setBusy(r.group_id);
-          try { await stopBus(r.run_id); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } finally { setBusy(null); }
+          try { await stopBus(r.run_id); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } finally { setBusy(null); }
         },
       },
     ]);
@@ -122,7 +123,7 @@ export default function ColectivoVivo() {
 
   const saveDrivers = async (r: Route, ids: string[]) => {
     const { error } = await supabase.rpc('set_bus_drivers', { p_group: r.group_id, p_profiles: ids });
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     load();
   };
 
@@ -133,12 +134,12 @@ export default function ColectivoVivo() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Colectivo en vivo" subtitle="Dónde está el colectivo de tu ruta" back />
+      <Header title={tx('Colectivo en vivo')} subtitle={tx('Dónde está el colectivo de tu ruta')} back />
       <Screen>
         {routes === null ? null : !routes.length ? (
           <Card style={{ gap: 6 }}>
-            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Todavía no estás en una ruta</Text>
-            <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>Pedile al jefe de tu colectivo que te agregue a la ruta. Así vas a ver el colectivo cuando salga a buscarte.</Text>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Todavía no estás en una ruta')}</Text>
+            <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{tx('Pedile al jefe de tu colectivo que te agregue a la ruta. Así vas a ver el colectivo cuando salga a buscarte.')}</Text>
           </Card>
         ) : routes.map((r) => {
           const live = !!r.run_id;
@@ -154,7 +155,7 @@ export default function ColectivoVivo() {
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{r.name}</Text>
                   <Text style={{ fontSize: 13, color: live ? colors.greenText : colors.muted, fontWeight: live ? '700' : '500' }}>
-                    {live ? `En camino desde las ${fmtTime(r.started_at as string)} · ${r.driver_name ?? ''}` : 'El colectivo no salió todavía'}
+                    {live ? tx('En camino desde las {fmtTime} · {driver_name}', { fmtTime: fmtTime(r.started_at as string), driver_name: r.driver_name ?? '' }) : tx('El colectivo no salió todavía')}
                   </Text>
                 </View>
               </View>
@@ -170,45 +171,45 @@ export default function ColectivoVivo() {
                       </Marker>
                     </MapView>
                   </View>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>Ubicación {ago(r.updated_at, now)} · la línea verde es por donde ya pasó · se actualiza sola</Text>
-                  <Button title="Ver en Google Maps" icon="external-link" variant="ghost" small onPress={() => openMaps(r)} />
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Ubicación {ago} · la línea verde es por donde ya pasó · se actualiza sola', { ago: ago(r.updated_at, now) })}</Text>
+                  <Button title={tx('Ver en Google Maps')} icon="external-link" variant="ghost" small onPress={() => openMaps(r)} />
                 </>
               ) : live ? (
-                <Text style={{ fontSize: 13, color: colors.muted }}>Esperando la ubicación del colectivo…</Text>
+                <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Esperando la ubicación del colectivo…')}</Text>
               ) : null}
               {r.can_drive ? (
-                <Button title="Paradas en orden y aviso de 10 minutos" icon="map-pin" variant="ghost" small
+                <Button title={tx('Paradas en orden y aviso de 10 minutos')} icon="map-pin" variant="ghost" small
                   onPress={() => router.push({ pathname: '/colectivo-paradas', params: { ruta: r.group_id } } as unknown as Href)} />
               ) : null}
               {r.can_drive && Platform.OS !== 'web' ? (
                 live && r.mine ? (
-                  <Button title="Llegamos" icon="square" variant="danger" onPress={() => stop(r)} loading={busy === r.group_id} />
+                  <Button title={tx('Llegamos')} icon="square" variant="danger" onPress={() => stop(r)} loading={busy === r.group_id} />
                 ) : live ? (
-                  <Button title="Terminar la salida del colectivo" variant="ghost" small onPress={() => stop(r)} loading={busy === r.group_id} />
+                  <Button title={tx('Terminar la salida del colectivo')} variant="ghost" small onPress={() => stop(r)} loading={busy === r.group_id} />
                 ) : (
-                  <Button title="Salimos" icon="play" onPress={() => start(r)} loading={busy === r.group_id} />
+                  <Button title={tx('Salimos')} icon="play" onPress={() => start(r)} loading={busy === r.group_id} />
                 )
               ) : null}
               {ownerCanEdit ? (
                 <View style={{ gap: 6, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, paddingTop: 10 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted }}>QUIÉNES PUEDEN PRENDERLO (ADEMÁS DEL JEFE DE LA RUTA)</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted }}>{tx('QUIÉNES PUEDEN PRENDERLO (ADEMÁS DEL JEFE DE LA RUTA)')}</Text>
                   {list.length ? list.map((d) => (
                     <View key={d.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{d.name}</Text>
-                      <Text onPress={() => saveDrivers(r, list.filter((x) => x.id !== d.id).map((x) => x.id))} style={{ fontSize: 13, fontWeight: '700', color: colors.red }}>Quitar</Text>
+                      <Text onPress={() => saveDrivers(r, list.filter((x) => x.id !== d.id).map((x) => x.id))} style={{ fontSize: 13, fontWeight: '700', color: colors.red }}>{tx('Quitar')}</Text>
                     </View>
-                  )) : <Text style={{ fontSize: 13, color: colors.muted }}>Nadie más por ahora.</Text>}
-                  <Text onPress={() => openPicker(r)} style={{ fontSize: 14, fontWeight: '800', color: colors.green }}>+ Agregar a un obrero</Text>
+                  )) : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Nadie más por ahora.')}</Text>}
+                  <Text onPress={() => openPicker(r)} style={{ fontSize: 14, fontWeight: '800', color: colors.green }}>{tx('+ Agregar a un obrero')}</Text>
                 </View>
               ) : null}
             </Card>
           );
         })}
         <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 17 }}>
-          La ubicación del colectivo se comparte solo mientras está en camino. Se apaga al tocar "Llegamos" o sola si el teléfono deja de mandarla.
+          {tx('La ubicación del colectivo se comparte solo mientras está en camino. Se apaga al tocar "Llegamos" o sola si el teléfono deja de mandarla.')}
         </Text>
       </Screen>
-      <PickerModal visible={!!picking} title="¿Quién puede prender el colectivo?" items={people}
+      <PickerModal visible={!!picking} title={tx('¿Quién puede prender el colectivo?')} items={people}
         onClose={() => setPicking(null)}
         onPick={(id) => {
           const r = picking;

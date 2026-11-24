@@ -12,6 +12,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Material } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function MaterialVer() {
   const router = useRouter();
@@ -29,22 +30,22 @@ export default function MaterialVer() {
     if (!m?.file_path) return;
     const url = download ? await downloadUrl('materials', m.file_path, m.file_name) : await signedUrl('materials', m.file_path);
     if (url) Linking.openURL(url);
-    else Alert.alert('No se pudo abrir el archivo');
+    else Alert.alert(tx('No se pudo abrir el archivo'));
   };
 
   const remove = () => {
-    Alert.alert('Borrar material', '¿Seguro? Las clases que lo tenían asignado quedan sin material.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: async () => {
+    Alert.alert(tx('Borrar material'), tx('¿Seguro? Las clases que lo tenían asignado quedan sin material.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: async () => {
         const { error } = await supabase.from('materials').delete().eq('id', id);
-        if (error) Alert.alert('No se pudo', errorMessage(error));
+        if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
         else router.back();
       } },
     ]);
   };
 
   if (m === undefined) return <Loading />;
-  if (!m) return <View style={{ flex: 1 }}><Header title="Material" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
+  if (!m) return <View style={{ flex: 1 }}><Header title={tx('Material')} back /><Text style={{ padding: 24, color: colors.text }}>{tx('No se encontró.')}</Text></View>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -52,20 +53,20 @@ export default function MaterialVer() {
       <Screen>
         {m.file_path ? (
           <Card style={{ gap: 10 }}>
-            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{m.file_name ?? 'Archivo'}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{m.file_name ?? tx('Archivo')}</Text>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Abrir" icon="eye" small onPress={() => open(false)} style={{ flex: 1 }} />
-              <Button title="Descargar" icon="download" variant="outline" small onPress={() => open(true)} style={{ flex: 1 }} />
+              <Button title={tx('Abrir')} icon="eye" small onPress={() => open(false)} style={{ flex: 1 }} />
+              <Button title={tx('Descargar')} icon="download" variant="outline" small onPress={() => open(true)} style={{ flex: 1 }} />
             </View>
           </Card>
         ) : null}
-        {link ? <Button title="Abrir el enlace" icon="external-link" variant="outline" onPress={() => Linking.openURL(link)} /> : null}
+        {link ? <Button title={tx('Abrir el enlace')} icon="external-link" variant="outline" onPress={() => Linking.openURL(link)} /> : null}
         {m.body ? <Text selectable style={{ fontSize: 17, lineHeight: 27, color: colors.text }}>{m.body}</Text> : null}
         <StudyNotes kind="material" refId={String(id)} title={m.title} />
         {isStaff || m.created_by === profile?.id ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Button title="Editar" variant="outline" small onPress={() => router.push({ pathname: '/material/nuevo', params: { id: m.id } })} style={{ flex: 1 }} />
-            <Button title="Borrar" variant="danger" small onPress={remove} style={{ flex: 1 }} />
+            <Button title={tx('Editar')} variant="outline" small onPress={() => router.push({ pathname: '/material/nuevo', params: { id: m.id } })} style={{ flex: 1 }} />
+            <Button title={tx('Borrar')} variant="danger" small onPress={remove} style={{ flex: 1 }} />
           </View>
         ) : null}
       </Screen>

@@ -1,6 +1,7 @@
 // Alta de una iglesia nueva: el código de invitación del pastor, las zonas horarias y los valores de inicio
 // de los primeros pasos. Acá no hay nada de la base ni de la pantalla, para poder probarse solo.
 import type { FeatureKey } from './features';
+import { tx } from './i18n';
 
 /** Las invitaciones de pastor empiezan así. Un código de miembros nunca puede empezar igual (lo cuida la base). */
 export const PASTOR_PREFIX = 'PASTOR-';
@@ -23,11 +24,11 @@ export function inviteFromSearch(search: string | null | undefined): string | nu
 /** El mensaje listo para mandar por WhatsApp. */
 export function inviteMessage(o: { church: string; token: string; link: string; days: number }): string {
   return [
-    `Hola. Te invito a ser el pastor de ${o.church} en la app La Mies.`,
-    `1) Abrí este enlace: ${o.link}`,
-    '2) Tocá "Crear cuenta" y poné tu nombre, tu correo y tu celular.',
-    `3) En "Código de la iglesia" tiene que decir: ${cleanCode(o.token)}`,
-    `La invitación sirve una sola vez y vence en ${o.days} días. No se la pases a nadie.`,
+    tx('Hola. Te invito a ser el pastor de {church} en la app La Mies.', { church: o.church }),
+    tx('1) Abrí este enlace: {link}', { link: o.link }),
+    tx('2) Tocá "Crear cuenta" y poné tu nombre, tu correo y tu celular.'),
+    tx('3) En "Código de la iglesia" tiene que decir: {cleanCode}', { cleanCode: cleanCode(o.token) }),
+    tx('La invitación sirve una sola vez y vence en {days} días. No se la pases a nadie.', { days: o.days }),
   ].join('\n');
 }
 
@@ -35,8 +36,8 @@ export function inviteMessage(o: { church: string; token: string; link: string; 
 export function joinCodeProblem(code: string): string | null {
   const c = cleanCode(code);
   if (!c) return null;
-  if (c.startsWith(PASTOR_PREFIX)) return 'El código no puede empezar con PASTOR-.';
-  if (!/^[A-Z0-9][A-Z0-9-]{5,23}$/.test(c)) return 'Usá de 6 a 24 letras o números. Puede llevar guiones. Sin espacios ni tildes.';
+  if (c.startsWith(PASTOR_PREFIX)) return tx('El código no puede empezar con PASTOR-.');
+  if (!/^[A-Z0-9][A-Z0-9-]{5,23}$/.test(c)) return tx('Usá de 6 a 24 letras o números. Puede llevar guiones. Sin espacios ni tildes.');
   return null;
 }
 
@@ -50,18 +51,18 @@ export function suggestJoinCode(name: string, year = new Date().getFullYear()): 
 }
 
 export const TIMEZONES: { value: string; label: string }[] = [
-  { value: 'America/Argentina/Buenos_Aires', label: 'Argentina' },
-  { value: 'America/Asuncion', label: 'Paraguay' },
-  { value: 'America/Montevideo', label: 'Uruguay' },
-  { value: 'America/Sao_Paulo', label: 'Brasil (Brasilia)' },
-  { value: 'America/Santiago', label: 'Chile' },
-  { value: 'America/La_Paz', label: 'Bolivia' },
-  { value: 'America/Lima', label: 'Perú' },
-  { value: 'America/Bogota', label: 'Colombia' },
-  { value: 'America/Mexico_City', label: 'México (centro)' },
-  { value: 'America/New_York', label: 'EE.UU. (este)' },
-  { value: 'America/Chicago', label: 'EE.UU. (centro)' },
-  { value: 'Europe/Madrid', label: 'España' },
+  { value: 'America/Argentina/Buenos_Aires', get label() { return tx('Argentina'); } },
+  { value: 'America/Asuncion', get label() { return tx('Paraguay'); } },
+  { value: 'America/Montevideo', get label() { return tx('Uruguay'); } },
+  { value: 'America/Sao_Paulo', get label() { return tx('Brasil (Brasilia)'); } },
+  { value: 'America/Santiago', get label() { return tx('Chile'); } },
+  { value: 'America/La_Paz', get label() { return tx('Bolivia'); } },
+  { value: 'America/Lima', get label() { return tx('Perú'); } },
+  { value: 'America/Bogota', get label() { return tx('Colombia'); } },
+  { value: 'America/Mexico_City', get label() { return tx('México (centro)'); } },
+  { value: 'America/New_York', get label() { return tx('EE.UU. (este)'); } },
+  { value: 'America/Chicago', get label() { return tx('EE.UU. (centro)'); } },
+  { value: 'Europe/Madrid', get label() { return tx('España'); } },
 ];
 export const timezoneLabel = (tz: string): string => TIMEZONES.find((t) => t.value === tz)?.label ?? tz;
 
@@ -70,19 +71,19 @@ export const timezoneLabel = (tz: string): string => TIMEZONES.find((t) => t.val
 export type ServiceIdea = { name: string; dow: number; time: string; main: boolean };
 /** Las reuniones de la semana que tiene Victoria. Las dos primeras ya vienen creadas con la iglesia (con otro horario del sábado). */
 export const SERVICE_IDEAS: ServiceIdea[] = [
-  { name: 'Culto del sábado', dow: 6, time: '20:00', main: true },
-  { name: 'Culto del domingo', dow: 0, time: '10:00', main: true },
-  { name: 'Jóvenes', dow: 6, time: '10:00', main: false },
-  { name: 'Oración', dow: 6, time: '18:30', main: false },
-  { name: 'Culto de oración del miércoles', dow: 3, time: '20:00', main: false },
+  { get name() { return tx('Culto del sábado'); }, dow: 6, time: '20:00', main: true },
+  { get name() { return tx('Culto del domingo'); }, dow: 0, time: '10:00', main: true },
+  { get name() { return tx('Jóvenes'); }, dow: 6, time: '10:00', main: false },
+  { get name() { return tx('Oración'); }, dow: 6, time: '18:30', main: false },
+  { get name() { return tx('Culto de oración del miércoles'); }, dow: 3, time: '20:00', main: false },
 ];
 
 export type ClassIdea = { name: string; age_min: number; age_max: number };
 /** Las clases de los chicos que tiene Victoria. */
 export const CLASS_IDEAS: ClassIdea[] = [
-  { name: 'Cuna (0 a 2 años)', age_min: 0, age_max: 2 },
-  { name: 'Niños (2 a 6 años)', age_min: 2, age_max: 6 },
-  { name: 'Niños (6 a 12 años)', age_min: 6, age_max: 12 },
+  { get name() { return tx('Cuna (0 a 2 años)'); }, age_min: 0, age_max: 2 },
+  { get name() { return tx('Niños (2 a 6 años)'); }, age_min: 2, age_max: 6 },
+  { get name() { return tx('Niños (6 a 12 años)'); }, age_min: 6, age_max: 12 },
 ];
 
 /** Lo que Victoria tiene apagado. Para una iglesia nueva sumamos lo que casi nadie usa el primer día. */

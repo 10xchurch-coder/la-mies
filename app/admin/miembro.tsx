@@ -11,6 +11,7 @@ import { useAuth } from '@/store/auth';
 import { FIN_ROLES, ROLES, isTopRole } from '@/lib/perms';
 import { colors } from '@/theme';
 import type { Group, Profile, Role } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Miembro() {
   const router = useRouter();
@@ -44,20 +45,20 @@ export default function Miembro() {
     const { error } = role === p?.role && (group === 'none' ? null : group) === (p?.group_id ?? null) ? { error: null } : await supabase.rpc('set_member_role', { p_user: id, p_role: role, p_group: group === 'none' ? null : group });
     if (!error && takes !== !!p?.takes_attendance) {
       const r = await supabase.rpc('set_takes_attendance', { p_user: id, p_value: takes });
-      if (r.error) Alert.alert('No se pudo guardar el permiso de asistencia', errorMessage(r.error));
+      if (r.error) Alert.alert(tx('No se pudo guardar el permiso de asistencia'), errorMessage(r.error));
     }
     if (!error && title.trim() !== (p?.title ?? '')) {
-      try { await setProfileTitle(id, title.trim()); } catch (e) { Alert.alert('No se pudo guardar el cargo', errorMessage(e)); }
+      try { await setProfileTitle(id, title.trim()); } catch (e) { Alert.alert(tx('No se pudo guardar el cargo'), errorMessage(e)); }
     }
     if (!error && (financeLevel >= 4 || isAdmin) && fin !== (p?.finance_role ?? 'default')) {
-      try { await setFinanceRole(id, fin === 'default' ? null : fin); } catch (e) { Alert.alert('No se pudo guardar el rol de finanzas', errorMessage(e)); }
+      try { await setFinanceRole(id, fin === 'default' ? null : fin); } catch (e) { Alert.alert(tx('No se pudo guardar el rol de finanzas'), errorMessage(e)); }
     }
     // El jefe de ruta recibe el reporte de quiénes de su colectivo faltaron.
     if (!error && role === 'captain' && group !== 'none') {
       await supabase.from('groups').update({ captain_id: id }).eq('id', group);
     }
     setBusy(false);
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     else router.back();
   };
 
@@ -65,8 +66,8 @@ export default function Miembro() {
   if (!p) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Hermano" back />
-        <Text style={{ padding: 24, color: colors.muted }}>No se encontró.</Text>
+        <Header title={tx('Hermano')} back />
+        <Text style={{ padding: 24, color: colors.muted }}>{tx('No se encontró.')}</Text>
       </View>
     );
   }
@@ -78,42 +79,42 @@ export default function Miembro() {
         <View style={{ alignItems: 'center' }}>
           <Avatar name={p.display_name} size={64} color={colors.green} textColor="#FFFFFF" />
         </View>
-        <SectionTitle>Rol</SectionTitle>
+        <SectionTitle>{tx('Rol')}</SectionTitle>
         <Choice
           columns={2}
           options={ROLES.filter((r) => !isTopRole(r.key) || isTopRole(me?.role) || r.key === p.role).map((r) => ({ value: r.key, label: r.label }))}
           value={role}
-          onChange={(v) => isAdmin ? setRole(v as Role) : Alert.alert('Solo el pastor o el administrador de la app dan roles')}
+          onChange={(v) => isAdmin ? setRole(v as Role) : Alert.alert(tx('Solo el pastor o el administrador de la app dan roles'))}
         />
         <Card style={{ gap: 6 }}>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
             <Text style={{ fontWeight: '700' }}>{ROLES.find((r) => r.key === role)?.label}:</Text> {ROLES.find((r) => r.key === role)?.hint}
           </Text>
-          <Button title="Ver y ajustar sus permisos" icon="sliders" variant="ghost" small onPress={() => router.push({ pathname: '/admin/permisos', params: { id: p.id } })} />
+          <Button title={tx('Ver y ajustar sus permisos')} icon="sliders" variant="ghost" small onPress={() => router.push({ pathname: '/admin/permisos', params: { id: p.id } })} />
         </Card>
-        <Field label="Cargo (opcional)" value={title} onChangeText={setTitle} placeholder="Diácono, maestra de niños, tesorero…" hint="Se muestra en el directorio y en su perfil" />
+        <Field label={tx('Cargo (opcional)')} value={title} onChangeText={setTitle} placeholder={tx('Diácono, maestra de niños, tesorero…')} hint={tx('Se muestra en el directorio y en su perfil')} />
         <SectionTitle>{groupWord(church?.grouping)}</SectionTitle>
         <Choice
-          options={[{ value: 'none', label: `Sin ${groupWord(church?.grouping).toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
+          options={[{ value: 'none', label: tx('Sin {groupWord}', { groupWord: groupWord(church?.grouping).toLowerCase() }) }, ...groups.map((g) => ({ value: g.id, label: g.name }))]}
           value={group}
           onChange={setGroup}
         />
-        <SectionTitle>Permisos</SectionTitle>
+        <SectionTitle>{tx('Permisos')}</SectionTitle>
         <Card>
           <Toggle
-            label="Puede tomar asistencia"
-            hint="Para quien recibe en la puerta o ayuda en secretaría. Los jefes de ruta, diáconos, secretaría y pastores ya pueden sin esta marca."
+            label={tx('Puede tomar asistencia')}
+            hint={tx('Para quien recibe en la puerta o ayuda en secretaría. Los jefes de ruta, diáconos, secretaría y pastores ya pueden sin esta marca.')}
             value={takes || ['captain', 'deacon', 'secretary', 'assistant_pastor', 'admin', 'app_admin'].includes(role)}
             onChange={setTakes}
           />
         </Card>
         {financeLevel >= 4 || isAdmin ? (
           <>
-            <SectionTitle>Finanzas</SectionTitle>
+            <SectionTitle>{tx('Finanzas')}</SectionTitle>
             <Choice
               columns={2}
               options={[
-                { value: 'default', label: isTopRole(role) ? 'Según su rol (todo)' : role === 'secretary' ? 'Según su rol (ver y cargar)' : 'Sin acceso' },
+                { value: 'default', label: isTopRole(role) ? tx('Según su rol (todo)') : role === 'secretary' ? tx('Según su rol (ver y cargar)') : tx('Sin acceso') },
                 ...FIN_ROLES.map((f) => ({ value: f.key as string, label: f.label })),
               ]}
               value={fin === 'manager' ? 'treasurer' : fin === 'none' ? 'default' : fin}
@@ -126,7 +127,7 @@ export default function Miembro() {
             </Card>
           </>
         ) : null}
-        <Button title="Guardar" onPress={save} loading={busy} />
+        <Button title={tx('Guardar')} onPress={save} loading={busy} />
       </Screen>
     </View>
   );

@@ -10,17 +10,18 @@ import { setBaseline } from '@/lib/api';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx, txLocale } from '@/lib/i18n';
 
 type NumKey = 'write_hours' | 'visit_after_visits' | 'visit_days' | 'absent_visit_weeks' | 'disc_one_classes' | 'disc_course_classes';
 const NUMBERS: { key: NumKey; title: string; unit: (n: number) => string; step: number; min: number; max: number }[] = [
-  { key: 'write_hours', title: 'Escribirle a quien vino, dentro de', unit: (n) => (n === 1 ? 'hora' : 'horas'), step: 12, min: 12, max: 336 },
-  { key: 'visit_after_visits', title: 'Pedir que lo visiten en su casa después de', unit: (n) => (n === 1 ? 'visita a la iglesia' : 'visitas a la iglesia'), step: 1, min: 1, max: 6 },
-  { key: 'visit_days', title: 'Esa visita hay que hacerla dentro de', unit: (n) => (n === 1 ? 'día' : 'días'), step: 1, min: 1, max: 60 },
-  { key: 'absent_visit_weeks', title: 'Pedir que visiten a quien falta, después de', unit: (n) => (n === 1 ? 'fin de semana sin venir' : 'fines de semana seguidos sin venir'), step: 1, min: 1, max: 8 },
+  { key: 'write_hours', get title() { return tx('Escribirle a quien vino, dentro de'); }, unit: (n) => (n === 1 ? 'hora' : tx('horas')), step: 12, min: 12, max: 336 },
+  { key: 'visit_after_visits', get title() { return tx('Pedir que lo visiten en su casa después de'); }, unit: (n) => (n === 1 ? tx('visita a la iglesia') : tx('visitas a la iglesia')), step: 1, min: 1, max: 6 },
+  { key: 'visit_days', get title() { return tx('Esa visita hay que hacerla dentro de'); }, unit: (n) => (n === 1 ? tx('día') : tx('días')), step: 1, min: 1, max: 60 },
+  { key: 'absent_visit_weeks', get title() { return tx('Pedir que visiten a quien falta, después de'); }, unit: (n) => (n === 1 ? tx('fin de semana sin venir') : tx('fines de semana seguidos sin venir')), step: 1, min: 1, max: 8 },
 ];
 const PROGRAM: typeof NUMBERS = [
-  { key: 'disc_one_classes', title: 'Discipulado personal (uno a uno)', unit: (n) => (n === 1 ? 'clase' : 'clases'), step: 1, min: 0, max: 20 },
-  { key: 'disc_course_classes', title: 'Curso de discipulado (en clase)', unit: (n) => (n === 1 ? 'clase' : 'clases'), step: 1, min: 0, max: 60 },
+  { key: 'disc_one_classes', get title() { return tx('Discipulado personal (uno a uno)'); }, unit: (n) => (n === 1 ? tx('clase') : tx('clases')), step: 1, min: 0, max: 20 },
+  { key: 'disc_course_classes', get title() { return tx('Curso de discipulado (en clase)'); }, unit: (n) => (n === 1 ? tx('clase') : tx('clases')), step: 1, min: 0, max: 60 },
 ];
 const ORDER: FollowupMessageKind[] = ['firstvisit', 'secondvisit', 'missed1', 'missed2', 'missed3', 'promise', 'followup', 'visit'];
 
@@ -30,13 +31,13 @@ export default function FollowupSettings() {
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<FollowupMessageKind | null>(null);
   const dirty = useMemo(() => JSON.stringify(followupOverrides(cfg)) !== JSON.stringify(followupOverrides(mergeFollowup(church?.followup))), [cfg, church?.followup]);
-  const sample = { nombre: 'María', yo: (profile?.display_name ?? 'Pastor').split(' ')[0], iglesia: church?.name ?? 'la iglesia', cuando: 'el domingo a las 10:00', reuniones: 'el sábado a las 20:00 y el domingo a las 10:00' };
+  const sample = { nombre: tx('María'), yo: (profile?.display_name ?? 'Pastor').split(' ')[0], iglesia: church?.name ?? tx('la iglesia'), cuando: tx('el domingo a las 10:00'), reuniones: tx('el sábado a las 20:00 y el domingo a las 10:00') };
 
   if (!can('admin.iglesia')) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Seguimiento y mensajes" back />
-        <Screen><Text style={{ color: colors.muted }}>Solo el pastor o un administrador puede cambiar esto.</Text></Screen>
+        <Header title={tx('Seguimiento y mensajes')} back />
+        <Screen><Text style={{ color: colors.muted }}>{tx('Solo el pastor o un administrador puede cambiar esto.')}</Text></Screen>
       </View>
     );
   }
@@ -48,9 +49,9 @@ export default function FollowupSettings() {
       const { error } = await supabase.from('churches').update({ followup: followupOverrides(cfg) }).eq('id', church.id);
       if (error) throw error;
       await refreshProfile();
-      Alert.alert('Guardado', 'Los cambios ya valen para toda la iglesia.');
+      Alert.alert(tx('Guardado'), tx('Los cambios ya valen para toda la iglesia.'));
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -58,84 +59,84 @@ export default function FollowupSettings() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Seguimiento y mensajes" subtitle="Avisos, punto de partida, discipulado y mensajes" back />
+      <Header title={tx('Seguimiento y mensajes')} subtitle={tx('Avisos, punto de partida, discipulado y mensajes')} back />
       <Screen>
-        <SectionTitle>Cuándo avisar</SectionTitle>
+        <SectionTitle>{tx('Cuándo avisar')}</SectionTitle>
         <Card style={{ gap: 14 }}>
           {NUMBERS.map((n) => (
             <View key={n.key} style={{ gap: 6 }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{n.title}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Step icon="minus" label={`Menos: ${n.title}`} disabled={cfg[n.key] - n.step < n.min} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] - n.step })} />
+                <Step icon="minus" label={tx('Menos: {title}', { title: n.title })} disabled={cfg[n.key] - n.step < n.min} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] - n.step })} />
                 <Text style={{ minWidth: 34, textAlign: 'center', fontSize: 20, fontWeight: '800', color: colors.text }}>{cfg[n.key]}</Text>
-                <Step icon="plus" label={`Más: ${n.title}`} disabled={cfg[n.key] + n.step > n.max} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] + n.step })} />
+                <Step icon="plus" label={tx('Más: {title}', { title: n.title })} disabled={cfg[n.key] + n.step > n.max} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] + n.step })} />
                 <Text style={{ flex: 1, fontSize: 14, color: colors.muted }}>{n.unit(cfg[n.key])}</Text>
               </View>
             </View>
           ))}
         </Card>
 
-        <SectionTitle>Punto de partida</SectionTitle>
+        <SectionTitle>{tx('Punto de partida')}</SectionTitle>
         <Card style={{ gap: 10 }}>
           <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>
-            {church?.tracking_since ? `Desde el ${new Date(`${church.tracking_since}T12:00:00`).toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}` : 'Todavía no está fijado'}
+            {church?.tracking_since ? tx('Desde el {toLocaleDateString}', { toLocaleDateString: new Date(`${church.tracking_since}T12:00:00`).toLocaleDateString(txLocale(), { day: 'numeric', month: 'long', year: 'numeric' }) }) : tx('Todavía no está fijado')}
           </Text>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-            Es el día en que la iglesia empezó a llevar sus números en la app. Los miembros y las personas que ya estaban cargados ese día no cuentan como “primera vez” ni como “miembros nuevos”: el crecimiento se cuenta desde ahí. La fidelidad y las ausencias también arrancan ese día.
+            {tx('Es el día en que la iglesia empezó a llevar sus números en la app. Los miembros y las personas que ya estaban cargados ese día no cuentan como “primera vez” ni como “miembros nuevos”: el crecimiento se cuenta desde ahí. La fidelidad y las ausencias también arrancan ese día.')}
           </Text>
-          <Button title={church?.tracking_since ? 'Fijar de nuevo: empezar a contar desde hoy' : 'Fijar el punto de partida hoy'} variant="outline" small icon="flag" onPress={() => {
-            Alert.alert('Fijar el punto de partida', 'Desde hoy se cuenta el crecimiento. Todos los miembros y las visitas que ya están cargados quedan como “ya estaban”. Hacelo cuando termines de cargar a tu gente. ¿Seguimos?', [
-              { text: 'Cancelar', style: 'cancel' },
-              { text: 'Fijar hoy', onPress: () => { setBaseline().then(() => refreshProfile()).then(() => Alert.alert('Listo', 'El punto de partida quedó fijado en el día de hoy.')).catch((e) => Alert.alert('No se pudo', errorMessage(e))); } },
+          <Button title={church?.tracking_since ? tx('Fijar de nuevo: empezar a contar desde hoy') : tx('Fijar el punto de partida hoy')} variant="outline" small icon="flag" onPress={() => {
+            Alert.alert(tx('Fijar el punto de partida'), tx('Desde hoy se cuenta el crecimiento. Todos los miembros y las visitas que ya están cargados quedan como “ya estaban”. Hacelo cuando termines de cargar a tu gente. ¿Seguimos?'), [
+              { text: tx('Cancelar'), style: 'cancel' },
+              { text: tx('Fijar hoy'), onPress: () => { setBaseline().then(() => refreshProfile()).then(() => Alert.alert(tx('Listo'), tx('El punto de partida quedó fijado en el día de hoy.'))).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))); } },
             ]);
           }} />
         </Card>
 
-        <SectionTitle>Programa de discipulado</SectionTitle>
+        <SectionTitle>{tx('Programa de discipulado')}</SectionTitle>
         <Card style={{ gap: 14 }}>
-          <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>Cuántas clases tiene cada parte. En la ficha de cada persona se tildan las que completó. Poné 0 si no usan esa parte.</Text>
+          <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>{tx('Cuántas clases tiene cada parte. En la ficha de cada persona se tildan las que completó. Poné 0 si no usan esa parte.')}</Text>
           {PROGRAM.map((n) => (
             <View key={n.key} style={{ gap: 6 }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{n.title}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <Step icon="minus" label={`Menos: ${n.title}`} disabled={cfg[n.key] - n.step < n.min} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] - n.step })} />
+                <Step icon="minus" label={tx('Menos: {title}', { title: n.title })} disabled={cfg[n.key] - n.step < n.min} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] - n.step })} />
                 <Text style={{ minWidth: 34, textAlign: 'center', fontSize: 20, fontWeight: '800', color: colors.text }}>{cfg[n.key]}</Text>
-                <Step icon="plus" label={`Más: ${n.title}`} disabled={cfg[n.key] + n.step > n.max} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] + n.step })} />
+                <Step icon="plus" label={tx('Más: {title}', { title: n.title })} disabled={cfg[n.key] + n.step > n.max} onPress={() => setCfg({ ...cfg, [n.key]: cfg[n.key] + n.step })} />
                 <Text style={{ flex: 1, fontSize: 14, color: colors.muted }}>{n.unit(cfg[n.key])}</Text>
               </View>
             </View>
           ))}
         </Card>
 
-        <SectionTitle>Mensajes de WhatsApp</SectionTitle>
+        <SectionTitle>{tx('Mensajes de WhatsApp')}</SectionTitle>
         <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-          Tocá un mensaje para cambiarlo. Podés usar {PLACEHOLDERS.join(', ')}: la app los reemplaza por el nombre de la persona, tu nombre, el nombre de la iglesia, el día y la hora del culto, y todas las reuniones del fin de semana con su hora.
+          {tx('Tocá un mensaje para cambiarlo. Podés usar {PLACEHOLDERS}: la app los reemplaza por el nombre de la persona, tu nombre, el nombre de la iglesia, el día y la hora del culto, y todas las reuniones del fin de semana con su hora.', { PLACEHOLDERS: PLACEHOLDERS.join(', ') })}
         </Text>
         {ORDER.map((k) => {
           const changed = cfg.messages[k].trim() !== DEFAULT_FOLLOWUP.messages[k];
           const isOpen = open === k;
           return (
             <Card key={k} style={{ gap: 8 }}>
-              <Pressable onPress={() => setOpen(isOpen ? null : k)} accessibilityRole="button" accessibilityLabel={`${MESSAGE_TITLE[k]}. ${isOpen ? 'Cerrar' : 'Cambiar el mensaje'}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pressable onPress={() => setOpen(isOpen ? null : k)} accessibilityRole="button" accessibilityLabel={`${MESSAGE_TITLE[k]}. ${isOpen ? tx('Cerrar') : tx('Cambiar el mensaje')}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{MESSAGE_TITLE[k]}{changed ? ' · cambiado' : ''}</Text>
+                  <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{MESSAGE_TITLE[k]}{changed ? tx(' · cambiado') : ''}</Text>
                   {isOpen ? null : <Text style={{ fontSize: 13, color: colors.muted }} numberOfLines={2}>{fillMessage(cfg.messages[k], sample)}</Text>}
                 </View>
                 <Feather name={isOpen ? 'chevron-up' : 'edit-2'} size={17} color={colors.muted} />
               </Pressable>
               {isOpen ? (
                 <>
-                  <Field label="Mensaje" value={cfg.messages[k]} onChangeText={(t) => setCfg({ ...cfg, messages: { ...cfg.messages, [k]: t } })} multiline style={{ minHeight: 120 }} />
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted }}>Así le llega a María:</Text>
+                  <Field label={tx('Mensaje')} value={cfg.messages[k]} onChangeText={(t) => setCfg({ ...cfg, messages: { ...cfg.messages, [k]: t } })} multiline style={{ minHeight: 120 }} />
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted }}>{tx('Así le llega a María:')}</Text>
                   <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>{fillMessage(cfg.messages[k].trim() || DEFAULT_FOLLOWUP.messages[k], sample)}</Text>
-                  {changed ? <Button title="Volver al mensaje original" variant="ghost" small icon="rotate-ccw" onPress={() => setCfg({ ...cfg, messages: { ...cfg.messages, [k]: DEFAULT_FOLLOWUP.messages[k] } })} /> : null}
+                  {changed ? <Button title={tx('Volver al mensaje original')} variant="ghost" small icon="rotate-ccw" onPress={() => setCfg({ ...cfg, messages: { ...cfg.messages, [k]: DEFAULT_FOLLOWUP.messages[k] } })} /> : null}
                 </>
               ) : null}
             </Card>
           );
         })}
 
-        <Button title={busy ? 'Guardando…' : dirty ? 'Guardar los cambios' : 'Sin cambios para guardar'} icon="check" disabled={busy || !dirty} onPress={save} />
+        <Button title={busy ? tx('Guardando…') : dirty ? tx('Guardar los cambios') : tx('Sin cambios para guardar')} icon="check" disabled={busy || !dirty} onPress={save} />
       </Screen>
     </View>
   );

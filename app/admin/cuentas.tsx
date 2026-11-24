@@ -13,6 +13,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { AccountRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -23,32 +24,32 @@ export default function Cuentas() {
 
   const load = useCallback(() => {
     accountsOverview().then(setRows).catch((e) => {
-      Alert.alert('No se pudo cargar', errorMessage(e));
+      Alert.alert(tx('No se pudo cargar'), errorMessage(e));
       setRows([]);
     });
   }, []);
   useFocusEffect(load);
 
   const sendReset = (r: AccountRow) =>
-    Alert.alert('Cambiar contraseña', `Le mandamos a ${r.email} un correo con un link para poner una contraseña nueva. ¿Seguimos?`, [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('Cambiar contraseña'), tx('Le mandamos a {email} un correo con un link para poner una contraseña nueva. ¿Seguimos?', { email: r.email }), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Mandar correo',
+        text: tx('Mandar correo'),
         onPress: async () => {
           const { error } = await supabase.auth.resetPasswordForEmail(r.email, { redirectTo: `${WEB_URL}/recuperar` });
-          Alert.alert(error ? 'No se pudo' : 'Correo enviado', error ? errorMessage(error) : `Decile a ${r.display_name} que revise su correo (también la carpeta de spam) y abra el link.`);
+          Alert.alert(error ? tx('No se pudo') : tx('Correo enviado'), error ? errorMessage(error) : tx('Decile a {display_name} que revise su correo (también la carpeta de spam) y abra el link.', { display_name: r.display_name }));
         },
       },
     ]);
 
   const toggleDisabled = (r: AccountRow) => {
     const off = !r.disabled_at;
-    Alert.alert(off ? 'Desactivar cuenta' : 'Reactivar cuenta',
-      off ? `${r.display_name} no va a poder ver nada de la iglesia hasta que la reactives. Sus datos no se borran.` : `${r.display_name} vuelve a tener acceso normal.`, [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(off ? tx('Desactivar cuenta') : tx('Reactivar cuenta'),
+      off ? tx('{display_name} no va a poder ver nada de la iglesia hasta que la reactives. Sus datos no se borran.', { display_name: r.display_name }) : tx('{display_name} vuelve a tener acceso normal.', { display_name: r.display_name }), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: off ? 'Desactivar' : 'Reactivar', style: off ? 'destructive' : 'default',
-        onPress: () => setAccountDisabled(r.id, off).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))),
+        text: off ? tx('Desactivar') : tx('Reactivar'), style: off ? 'destructive' : 'default',
+        onPress: () => setAccountDisabled(r.id, off).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))),
       },
     ]);
   };
@@ -60,41 +61,40 @@ export default function Cuentas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Cuentas" subtitle={`${rows.length} con cuenta · ${with2fa} con verificación en dos pasos`} back />
+      <Header title={tx('Cuentas')} subtitle={tx('{n} con cuenta · {with2fa} con verificación en dos pasos', { n: rows.length, with2fa })} back />
       <Screen>
         <View style={styles.search}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar por nombre o correo" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar por nombre o correo')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
         </View>
         <Card style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           <Feather name="help-circle" size={20} color={colors.green} />
           <Text style={{ flex: 1, fontSize: 13, color: colors.muted, lineHeight: 18 }}>
-            Si alguien no puede entrar: mandale el correo para cambiar la contraseña. Si perdió el teléfono con la app de autenticación, pedile que entre con el correo nuevo y ahí la vuelva a activar; si no puede, avisá a La Mies.
-            {isAdmin ? ' Desactivar una cuenta la deja sin acceso al instante (por ejemplo, un teléfono robado).' : ''}
+            {tx('Si alguien no puede entrar: mandale el correo para cambiar la contraseña. Si perdió el teléfono con la app de autenticación, pedile que entre con el correo nuevo y ahí la vuelva a activar; si no puede, avisá a La Mies.{pl}', { pl: isAdmin ? tx(' Desactivar una cuenta la deja sin acceso al instante (por ejemplo, un teléfono robado).') : '' })}
           </Text>
         </Card>
         {!shown.length ? (
-          <Empty icon="users" title="No hay cuentas" />
+          <Empty icon="users" title={tx('No hay cuentas')} />
         ) : (
           shown.map((r) => (
             <Card key={r.id} style={{ gap: 10 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.display_name}{r.id === profile?.id ? ' (vos)' : ''}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.display_name}{r.id === profile?.id ? tx(' (vos)') : ''}</Text>
                   <Text style={{ fontSize: 13, color: colors.muted }}>{r.email}</Text>
                 </View>
                 <Tag text={ROLE_LABEL[r.role]} tone={r.role === 'admin' ? 'green' : r.role === 'secretary' || r.role === 'captain' ? 'blue' : 'gray'} />
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                <Tag text={r.has_mfa ? 'Dos pasos: sí' : 'Dos pasos: no'} tone={r.has_mfa ? 'green' : 'amber'} />
-                {r.disabled_at ? <Tag text="Desactivada" tone="red" /> : null}
-                {r.deletion_requested_at ? <Tag text={`Pidió eliminar su cuenta ${fmtRelativeDay(r.deletion_requested_at)}`} tone="red" /> : null}
-                <Tag text={r.last_sign_in ? `Entró ${fmtRelativeDay(r.last_sign_in)}` : 'Nunca entró'} tone="gray" />
+                <Tag text={r.has_mfa ? tx('Dos pasos: sí') : tx('Dos pasos: no')} tone={r.has_mfa ? 'green' : 'amber'} />
+                {r.disabled_at ? <Tag text={tx('Desactivada')} tone="red" /> : null}
+                {r.deletion_requested_at ? <Tag text={tx('Pidió eliminar su cuenta {fmtRelativeDay}', { fmtRelativeDay: fmtRelativeDay(r.deletion_requested_at) })} tone="red" /> : null}
+                <Tag text={r.last_sign_in ? tx('Entró {fmtRelativeDay}', { fmtRelativeDay: fmtRelativeDay(r.last_sign_in) }) : tx('Nunca entró')} tone="gray" />
               </View>
               {r.id !== profile?.id ? (
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Button title="Correo para cambiar contraseña" small variant="outline" icon="mail" onPress={() => sendReset(r)} style={{ flex: 1 }} />
-                  {isAdmin ? <Button title={r.disabled_at ? 'Reactivar' : 'Desactivar'} small variant={r.disabled_at ? 'primary' : 'danger'} onPress={() => toggleDisabled(r)} /> : null}
+                  <Button title={tx('Correo para cambiar contraseña')} small variant="outline" icon="mail" onPress={() => sendReset(r)} style={{ flex: 1 }} />
+                  {isAdmin ? <Button title={r.disabled_at ? tx('Reactivar') : tx('Desactivar')} small variant={r.disabled_at ? 'primary' : 'danger'} onPress={() => toggleDisabled(r)} /> : null}
                 </View>
               ) : null}
             </Card>

@@ -19,6 +19,7 @@ import { ageFrom, fmtDateAR, groupWord, isoDate, maskDateOrAge, parseAgeOrBirthd
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Contact, Group, PersonStatus, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Kid = { id?: string; name: string; when: string; childId?: string | null; photo?: string | null };
 type Suggestion = { id: string; name: string; status: string; photo_path: string | null };
@@ -113,7 +114,7 @@ export default function NuevaPersona() {
       const p = await pickAndUploadPhoto(church.id, { current: photo });
       if (p) setPhoto(p);
     } catch (e) {
-      Alert.alert('No se pudo subir la foto', errorMessage(e));
+      Alert.alert(tx('No se pudo subir la foto'), errorMessage(e));
     }
   };
 
@@ -156,31 +157,31 @@ export default function NuevaPersona() {
   const hasSpouse = marital === 'married' || marital === 'partner';
   const isContact = status === 'contact';
   const parsedWhen = parseAgeOrBirthdate(when);
-  const whenHint = parsedWhen.birthdate ? `(${ageFrom(parsedWhen.birthdate)} años)` : isContact ? '(o la fecha)' : '(o la edad)';
+  const whenHint = parsedWhen.birthdate ? tx('({ageFrom} años)', { ageFrom: ageFrom(parsedWhen.birthdate) }) : isContact ? tx('(o la fecha)') : tx('(o la edad)');
 
   const noPhoneOk = useRef(false);
   const save = async () => {
     if (name.trim().length < 2) {
-      Alert.alert('Falta el nombre');
+      Alert.alert(tx('Falta el nombre'));
       return;
     }
     if (baptized && baptizedHere && baptizedOn.trim() && !parseDateAR(baptizedOn)) {
-      Alert.alert('Fecha del bautismo', 'Escribila como día/mes/año, por ejemplo 15/03/2024.');
+      Alert.alert(tx('Fecha del bautismo'), tx('Escribila como día/mes/año, por ejemplo 15/03/2024.'));
       return;
     }
-    for (const label of [['Miembro desde', memberSince], ['Discipulado desde', discipleshipSince]] as const) {
+    for (const label of [[tx('Miembro desde'), memberSince], [tx('Discipulado desde'), discipleshipSince]] as const) {
       if (label[1].trim() && !parseDateAR(label[1])) {
-        Alert.alert(label[0], 'Escribila como día/mes/año, por ejemplo 15/03/2024.');
+        Alert.alert(tx(label[0]), tx('Escribila como día/mes/año, por ejemplo 15/03/2024.'));
         return;
       }
     }
     const bad = phoneProblem(phone);
-    if (bad) { Alert.alert('Revisá el celular', bad); return; }
+    if (bad) { Alert.alert(tx('Revisá el celular'), bad); return; }
     // Sin teléfono después no hay cómo escribirle: conviene pedirlo ahora.
     if (status === 'visitor' && !phone.trim() && !noPhoneOk.current) {
-      Alert.alert('Falta el teléfono', 'Sin el número no vas a poder escribirle por WhatsApp para agradecerle la visita. Si lo tenés cerca, pedíselo ahora.', [
-        { text: 'Agregar el teléfono', style: 'cancel' },
-        { text: 'Guardar sin teléfono', onPress: () => { noPhoneOk.current = true; save(); } },
+      Alert.alert(tx('Falta el teléfono'), tx('Sin el número no vas a poder escribirle por WhatsApp para agradecerle la visita. Si lo tenés cerca, pedíselo ahora.'), [
+        { text: tx('Agregar el teléfono'), style: 'cancel' },
+        { text: tx('Guardar sin teléfono'), onPress: () => { noPhoneOk.current = true; save(); } },
       ]);
       return;
     }
@@ -239,7 +240,7 @@ export default function NuevaPersona() {
       if (orig) router.back();
       else router.replace({ pathname: '/contacto/[id]', params: { id: contactId as string } });
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -251,52 +252,52 @@ export default function NuevaPersona() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title={orig ? 'Editar persona' : 'Agregar persona'} subtitle={orig ? orig.name : 'Una visita, un miembro o un alumno'} back />
+      <Header title={orig ? tx('Editar persona') : tx('Agregar persona')} subtitle={orig ? orig.name : tx('Una visita, un miembro o un alumno')} back />
       <Screen>
         <View style={{ alignItems: 'center', gap: 6 }}>
           <Face name={name || '?'} path={photo} size={96} editable onPress={choosePhoto} />
-          <Text style={{ fontSize: 12, color: colors.muted }}>Tocá para sacar o elegir una foto y encuadrarla</Text>
+          <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá para sacar o elegir una foto y encuadrarla')}</Text>
         </View>
 
         <View style={{ gap: 6 }}>
-          {label('¿Quién es?')}
+          {label(tx('¿Quién es?'))}
           <Choice
             columns={3}
             options={[
-              { value: 'contact', label: 'Contacto' },
-              { value: 'visitor', label: 'Visita' },
-              ...(isStaff ? [{ value: 'member' as const, label: 'Miembro' }] : []),
+              { value: 'contact', label: tx('Contacto') },
+              { value: 'visitor', label: tx('Visita') },
+              ...(isStaff ? [{ value: 'member' as const, label: tx('Miembro') }] : []),
             ]}
             value={status}
             onChange={setStatus}
           />
-          {!isStaff ? <Text style={{ fontSize: 12, color: colors.muted }}>Para marcar a alguien como miembro, pedíselo a la secretaría o al pastor.</Text> : null}
+          {!isStaff ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Para marcar a alguien como miembro, pedíselo a la secretaría o al pastor.')}</Text> : null}
         </View>
 
-        <Field label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" />
-        <PhoneField label="Celular" hint="(con el código de área)" value={phone} onChangeText={setPhone} />
+        <Field label={tx('Nombre y apellido')} value={name} onChangeText={setName} autoCapitalize="words" />
+        <PhoneField label={tx('Celular')} hint={tx('(con el código de área)')} value={phone} onChangeText={setPhone} />
         <View style={{ flexDirection: 'row', gap: 12 }}>
           <Field
-            label={isContact ? 'Edad' : 'Fecha de nacimiento'}
+            label={isContact ? tx('Edad') : tx('Fecha de nacimiento')}
             hint={whenHint}
             keyboardType="number-pad"
             value={when}
             onChangeText={(t) => setWhen(maskDateOrAge(t))}
-            placeholder={isContact ? 'Ej: 34' : 'DD/MM/AAAA'}
+            placeholder={isContact ? tx('Ej: 34') : tx('DD/MM/AAAA')}
             style={{ flex: 1.3 }}
           />
           <View style={{ flex: 1, gap: 6 }}>
-            {label('Sexo')}
-            <Choice columns={2} options={[{ value: 'm', label: 'Hombre' }, { value: 'f', label: 'Mujer' }]} value={sex} onChange={setSex} />
+            {label(tx('Sexo'))}
+            <Choice columns={2} options={[{ value: 'm', label: tx('Hombre') }, { value: 'f', label: tx('Mujer') }]} value={sex} onChange={setSex} />
           </View>
         </View>
         <View style={{ gap: 6 }}>
-          {label('Estado civil')}
+          {label(tx('Estado civil'))}
           <Choice
             columns={3}
             options={[
-              { value: 'single', label: 'Soltero/a' }, { value: 'married', label: 'Casado/a' }, { value: 'partner', label: 'En pareja' },
-              { value: 'widowed', label: 'Viudo/a' }, { value: 'separated', label: 'Separado/a' }, { value: 'divorced', label: 'Divorciado/a' },
+              { value: 'single', label: tx('Soltero/a') }, { value: 'married', label: tx('Casado/a') }, { value: 'partner', label: tx('En pareja') },
+              { value: 'widowed', label: tx('Viudo/a') }, { value: 'separated', label: tx('Separado/a') }, { value: 'divorced', label: tx('Divorciado/a') },
             ]}
             value={marital}
             onChange={(v) => setMarital(v as Contact['marital'])}
@@ -305,16 +306,16 @@ export default function NuevaPersona() {
         {hasSpouse ? (
           <View style={{ gap: 6 }}>
             <Field
-              label={marital === 'married' ? 'Cónyuge' : 'Pareja'}
-              hint={spouseId ? '(ficha vinculada)' : '(escribí el nombre; si ya está cargado, elegilo)'}
+              label={marital === 'married' ? tx('Cónyuge') : tx('Pareja')}
+              hint={spouseId ? tx('(ficha vinculada)') : tx('(escribí el nombre; si ya está cargado, elegilo)')}
               value={spouseName}
               onChangeText={onSpouseText}
               autoCapitalize="words"
             />
             {spouseId ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Tag text="Vinculado: los hijos se ven en las dos fichas" tone="green" />
-                <Pressable onPress={() => { setSpouseId(null); setSpouseName(''); }} accessibilityLabel="Quitar vínculo"><Text style={{ color: colors.red, fontWeight: '700', fontSize: 12 }}>Quitar</Text></Pressable>
+                <Tag text={tx('Vinculado: los hijos se ven en las dos fichas')} tone="green" />
+                <Pressable onPress={() => { setSpouseId(null); setSpouseName(''); }} accessibilityLabel={tx('Quitar vínculo')}><Text style={{ color: colors.red, fontWeight: '700', fontSize: 12 }}>{tx('Quitar')}</Text></Pressable>
               </View>
             ) : null}
             {suggestions.length ? (
@@ -330,57 +331,57 @@ export default function NuevaPersona() {
             ) : null}
           </View>
         ) : null}
-        <Field label="Dirección" hint="(calle y número, barrio)" value={address} onChangeText={setAddress} />
-        <Field label="Correo" hint="(opcional)" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
-        <Field label="DNI" hint="(opcional)" keyboardType="number-pad" value={dni} onChangeText={(t) => setDni(t.replace(/\D/g, ''))} maxLength={10} />
+        <Field label={tx('Dirección')} hint={tx('(calle y número, barrio)')} value={address} onChangeText={setAddress} />
+        <Field label={tx('Correo')} hint={tx('(opcional)')} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+        <Field label="DNI" hint={tx('(opcional)')} keyboardType="number-pad" value={dni} onChangeText={(t) => setDni(t.replace(/\D/g, ''))} maxLength={10} />
 
         {groups.length ? (
           <View style={{ gap: 6 }}>
             {label(gw)}
-            <Choice options={[{ value: 'none', label: `Sin ${gw.toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]} value={groupId} onChange={setGroupId} />
+            <Choice options={[{ value: 'none', label: tx('Sin {gw}', { gw: gw.toLowerCase() }) }, ...groups.map((g) => ({ value: g.id, label: g.name }))]} value={groupId} onChange={setGroupId} />
           </View>
         ) : null}
 
-        <SectionTitle>Hijos</SectionTitle>
+        <SectionTitle>{tx('Hijos')}</SectionTitle>
         <Card style={{ gap: 10 }}>
           {kids.map((k, i) => (
             <View key={k.id ?? `n${i}`} style={{ gap: 6 }}>
               <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
                 {k.childId ? <View style={{ paddingBottom: 9 }}><Face name={k.name || '?'} path={k.photo ?? null} size={32} /></View> : null}
-                <Field label="Nombre" value={k.name} onChangeText={(t) => onKidText(i, t)} autoCapitalize="words" style={{ flex: 1 }} />
-                <Field label="Nacimiento o edad" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={k.when} onChangeText={(t) => setKids(kids.map((x, j) => (j === i ? { ...x, when: maskDateOrAge(t) } : x)))} style={{ width: 128 }} />
-                <Pressable onPress={() => { setKids(kids.filter((_, j) => j !== i)); setKidSugg(null); }} accessibilityLabel="Quitar" style={{ height: 50, width: 40, alignItems: 'center', justifyContent: 'center' }}>
+                <Field label={tx('Nombre')} value={k.name} onChangeText={(t) => onKidText(i, t)} autoCapitalize="words" style={{ flex: 1 }} />
+                <Field label={tx('Nacimiento o edad')} keyboardType="number-pad" placeholder={tx('DD/MM/AAAA')} value={k.when} onChangeText={(t) => setKids(kids.map((x, j) => (j === i ? { ...x, when: maskDateOrAge(t) } : x)))} style={{ width: 128 }} />
+                <Pressable onPress={() => { setKids(kids.filter((_, j) => j !== i)); setKidSugg(null); }} accessibilityLabel={tx('Quitar')} style={{ height: 50, width: 40, alignItems: 'center', justifyContent: 'center' }}>
                   <Feather name="trash-2" size={20} color={colors.red} />
                 </Pressable>
               </View>
-              {k.childId ? <View style={{ flexDirection: 'row' }}><Tag text="Ficha vinculada" tone="green" /></View>
-                : k.name.trim().length >= 2 && !(kidSugg?.i === i && kidSugg.list.length) ? <Text style={{ fontSize: 12, color: colors.muted }}>Al guardar se le crea su ficha para tomarle asistencia.</Text> : null}
+              {k.childId ? <View style={{ flexDirection: 'row' }}><Tag text={tx('Ficha vinculada')} tone="green" /></View>
+                : k.name.trim().length >= 2 && !(kidSugg?.i === i && kidSugg.list.length) ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Al guardar se le crea su ficha para tomarle asistencia.')}</Text> : null}
               {kidSugg?.i === i && kidSugg.list.length ? (
                 <Card style={{ padding: 0 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, paddingHorizontal: 12, paddingTop: 10 }}>¿Es alguien que ya está cargado?</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: colors.muted, paddingHorizontal: 12, paddingTop: 10 }}>{tx('¿Es alguien que ya está cargado?')}</Text>
                   {kidSugg.list.map((p, n) => (
                     <Pressable key={p.id} onPress={() => pickKid(i, p)} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: n ? 1 : 0, borderTopColor: colors.border }}>
                       <Face name={p.name} path={p.photo_path} size={32} />
                       <Text style={{ flex: 1, fontSize: 15, fontWeight: '600', color: colors.text }}>{p.name}</Text>
-                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Sí, es</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>{tx('Sí, es')}</Text>
                     </Pressable>
                   ))}
                   <Pressable onPress={() => setKidSugg(null)} style={{ padding: 12, borderTopWidth: 1, borderTopColor: colors.border }}>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>No, es otra persona (crear su ficha)</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{tx('No, es otra persona (crear su ficha)')}</Text>
                   </Pressable>
                 </Card>
               ) : null}
             </View>
           ))}
-          <Button title="Agregar hijo" icon="plus" variant="outline" small onPress={() => setKids([...kids, { name: '', when: '' }])} />
-          {spouseId ? <Text style={{ fontSize: 12, color: colors.muted }}>Los hijos son de la familia: se ven y se editan igual desde la ficha del cónyuge.</Text> : null}
+          <Button title={tx('Agregar hijo')} icon="plus" variant="outline" small onPress={() => setKids([...kids, { name: '', when: '' }])} />
+          {spouseId ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Los hijos son de la familia: se ven y se editan igual desde la ficha del cónyuge.')}</Text> : null}
         </Card>
 
-        <SectionTitle>Su camino en la iglesia</SectionTitle>
+        <SectionTitle>{tx('Su camino en la iglesia')}</SectionTitle>
         <Card style={{ gap: 4 }}>
           <Toggle
-            label="Bautizado"
-            hint="Bautismo después de poner la fe en Cristo. El bautismo de bebé o anterior a creer no cuenta."
+            label={tx('Bautizado')}
+            hint={tx('Bautismo después de poner la fe en Cristo. El bautismo de bebé o anterior a creer no cuenta.')}
             value={baptized}
             onChange={setBaptized}
           />
@@ -388,52 +389,52 @@ export default function NuevaPersona() {
             <View style={{ gap: 10, paddingBottom: 6 }}>
               <Choice
                 columns={2}
-                options={[{ value: 'here', label: 'En esta iglesia' }, { value: 'before', label: 'Antes de llegar' }]}
+                options={[{ value: 'here', label: tx('En esta iglesia') }, { value: 'before', label: tx('Antes de llegar') }]}
                 value={baptizedHere ? 'here' : 'before'}
                 onChange={(v) => setBaptizedHere(v === 'here')}
               />
               {baptizedHere ? (
-                <Field label="Fecha del bautismo" hint="(DD/MM/AAAA)" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={baptizedOn} onChangeText={(t) => setBaptizedOn(maskDateOrAge(t))} />
+                <Field label={tx('Fecha del bautismo')} hint={tx('(DD/MM/AAAA)')} keyboardType="number-pad" placeholder={tx('DD/MM/AAAA')} value={baptizedOn} onChangeText={(t) => setBaptizedOn(maskDateOrAge(t))} />
               ) : (
-                <Text style={{ fontSize: 12, color: colors.muted }}>En la ficha va a decir "Bautizado: Sí", sin fecha.</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{tx('En la ficha va a decir "Bautizado: Sí", sin fecha.')}</Text>
               )}
             </View>
           ) : null}
           {isLeader ? (
             <View style={{ gap: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
               {isStaff && status === 'member' ? (
-                <Field label="Miembro desde" hint="(DD/MM/AAAA; vacío = hoy)" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={memberSince} onChangeText={(t) => setMemberSince(maskDateOrAge(t))} />
+                <Field label={tx('Miembro desde')} hint={tx('(DD/MM/AAAA; vacío = hoy)')} keyboardType="number-pad" placeholder={tx('DD/MM/AAAA')} value={memberSince} onChangeText={(t) => setMemberSince(maskDateOrAge(t))} />
               ) : null}
-              <Field label="Discipulado desde" hint="(DD/MM/AAAA; vacío = todavía no)" keyboardType="number-pad" placeholder="DD/MM/AAAA" value={discipleshipSince} onChangeText={(t) => setDiscipleshipSince(maskDateOrAge(t))} />
+              <Field label={tx('Discipulado desde')} hint={tx('(DD/MM/AAAA; vacío = todavía no)')} keyboardType="number-pad" placeholder={tx('DD/MM/AAAA')} value={discipleshipSince} onChangeText={(t) => setDiscipleshipSince(maskDateOrAge(t))} />
               <View style={{ gap: 6 }}>
-                {label('Seguimiento')}
+                {label(tx('Seguimiento'))}
                 <Pressable onPress={() => setPicker('followup')} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 50, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input }}>
                   <Feather name="user-check" size={18} color={colors.green} />
-                  <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{people.find((p) => p.id === followUp)?.display_name ?? 'Sin asignar'}</Text>
+                  <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{people.find((p) => p.id === followUp)?.display_name ?? tx('Sin asignar')}</Text>
                   <Feather name="chevron-down" size={18} color={colors.muted} />
                 </Pressable>
               </View>
               {isStaff ? (
                 <View style={{ gap: 6 }}>
-                  {label('Cuenta en la app')}
+                  {label(tx('Cuenta en la app'))}
                   <Pressable onPress={() => setPicker('link')} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 50, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input }}>
                     <Feather name="smartphone" size={18} color={colors.green} />
-                    <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{people.find((p) => p.id === linkedProfile)?.display_name ?? 'No usa la app'}</Text>
+                    <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{people.find((p) => p.id === linkedProfile)?.display_name ?? tx('No usa la app')}</Text>
                     <Feather name="chevron-down" size={18} color={colors.muted} />
                   </Pressable>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>Vincular la cuenta hace que esta persona vea su propia ficha y reciba los avisos de sus clases y ministerios.</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Vincular la cuenta hace que esta persona vea su propia ficha y reciba los avisos de sus clases y ministerios.')}</Text>
                 </View>
               ) : null}
             </View>
           ) : null}
         </Card>
 
-        <Button title={orig ? 'Guardar cambios' : 'Guardar persona'} onPress={save} loading={busy} />
+        <Button title={orig ? tx('Guardar cambios') : tx('Guardar persona')} onPress={save} loading={busy} />
       </Screen>
 
       <PickerModal
         visible={picker === 'followup'}
-        title="¿Quién hace el seguimiento?"
+        title={tx('¿Quién hace el seguimiento?')}
         items={people.map((p) => ({ id: p.id, title: p.display_name }))}
         allowNone
         onClose={() => setPicker(null)}
@@ -441,7 +442,7 @@ export default function NuevaPersona() {
       />
       <PickerModal
         visible={picker === 'link'}
-        title="¿Cuál es su cuenta en la app?"
+        title={tx('¿Cuál es su cuenta en la app?')}
         items={people.map((p) => ({ id: p.id, title: p.display_name, subtitle: p.phone ?? undefined }))}
         onClose={() => setPicker(null)}
         onPick={(pid) => { setPicker(null); if (pid) setLinkedProfile(pid); }}

@@ -11,27 +11,28 @@ import { shareText } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ProgressRow } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 type Key = keyof Omit<ProgressRow, 'month'>;
 const METRICS: { key: Key; label: string; group: 'iglesia' | 'evangelismo'; sum: boolean; good: 'up' | 'down' }[] = [
-  { key: 'avg_attendance', label: 'Asistencia promedio', group: 'iglesia', sum: false, good: 'up' },
-  { key: 'people', label: 'Personas distintas', group: 'iglesia', sum: false, good: 'up' },
-  { key: 'members', label: 'Miembros', group: 'iglesia', sum: false, good: 'up' },
-  { key: 'first_time', label: 'Primera vez', group: 'iglesia', sum: true, good: 'up' },
-  { key: 'baptisms', label: 'Bautismos', group: 'iglesia', sum: true, good: 'up' },
-  { key: 'new_members', label: 'Miembros nuevos', group: 'iglesia', sum: true, good: 'up' },
-  { key: 'class_present', label: 'Asistencia a clases', group: 'iglesia', sum: true, good: 'up' },
-  { key: 'outings', label: 'Salidas', group: 'evangelismo', sum: true, good: 'up' },
-  { key: 'people_out', label: 'Hermanos que salieron', group: 'evangelismo', sum: false, good: 'up' },
-  { key: 'hours', label: 'Horas', group: 'evangelismo', sum: true, good: 'up' },
-  { key: 'houses', label: 'Casas', group: 'evangelismo', sum: true, good: 'up' },
-  { key: 'contacts', label: 'Contactos', group: 'evangelismo', sum: true, good: 'up' },
-  { key: 'gospel', label: 'Evangelio presentado', group: 'evangelismo', sum: true, good: 'up' },
-  { key: 'promises', label: 'Promesas', group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'avg_attendance', get label() { return tx('Asistencia promedio'); }, group: 'iglesia', sum: false, good: 'up' },
+  { key: 'people', get label() { return tx('Personas distintas'); }, group: 'iglesia', sum: false, good: 'up' },
+  { key: 'members', get label() { return tx('Miembros'); }, group: 'iglesia', sum: false, good: 'up' },
+  { key: 'first_time', get label() { return tx('Primera vez'); }, group: 'iglesia', sum: true, good: 'up' },
+  { key: 'baptisms', get label() { return tx('Bautismos'); }, group: 'iglesia', sum: true, good: 'up' },
+  { key: 'new_members', get label() { return tx('Miembros nuevos'); }, group: 'iglesia', sum: true, good: 'up' },
+  { key: 'class_present', get label() { return tx('Asistencia a clases'); }, group: 'iglesia', sum: true, good: 'up' },
+  { key: 'outings', get label() { return tx('Salidas'); }, group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'people_out', get label() { return tx('Hermanos que salieron'); }, group: 'evangelismo', sum: false, good: 'up' },
+  { key: 'hours', get label() { return tx('Horas'); }, group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'houses', get label() { return tx('Casas'); }, group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'contacts', get label() { return tx('Contactos'); }, group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'gospel', get label() { return tx('Evangelio presentado'); }, group: 'evangelismo', sum: true, good: 'up' },
+  { key: 'promises', get label() { return tx('Promesas'); }, group: 'evangelismo', sum: true, good: 'up' },
 ];
 
 const monthLabel = (m: string, long = false) =>
-  new Date(`${m}T12:00:00`).toLocaleDateString('es-AR', long ? { month: 'long', year: 'numeric' } : { month: 'short', year: '2-digit' }).replace('.', '');
+  new Date(`${m}T12:00:00`).toLocaleDateString(txLocale(), long ? { month: 'long', year: 'numeric' } : { month: 'short', year: '2-digit' }).replace('.', '');
 
 const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ','));
 
@@ -63,7 +64,7 @@ export default function ProgresoIglesia() {
 
   useEffect(() => {
     setRows(null);
-    churchProgress(range === '12' ? 13 : null).then(setRows).catch((e) => { setErr(e instanceof Error ? e.message : 'Error'); setRows([]); });
+    churchProgress(range === '12' ? 13 : null).then(setRows).catch((e) => { setErr(e instanceof Error ? e.message : tx('Error')); setRows([]); });
   }, [range]);
 
   // Último mes completo = el anterior al actual; se compara con el promedio de los 3 anteriores a ese.
@@ -94,21 +95,21 @@ export default function ProgresoIglesia() {
 
   const share = () => {
     if (!rows?.length || !health) return;
-    const lines = health.items.filter((i) => i.v || i.base).map((i) => `${i.label}: ${fmt(i.v)}${i.base ? ` (${i.pct >= 0 ? '+' : ''}${i.pct}% vs. promedio)` : ''}`);
-    shareText(`Progreso de ${church?.name ?? 'la iglesia'} · ${monthLabel(health.month, true)}\n\n${lines.join('\n')}`, 'Progreso de la iglesia');
+    const lines = health.items.filter((i) => i.v || i.base).map((i) => `${i.label}: ${fmt(i.v)}${i.base ? tx(' ({pl}{pct}% vs. promedio)', { pl: i.pct >= 0 ? '+' : '', pct: i.pct }) : ''}`);
+    shareText(tx('Progreso de {name} · {monthLabel}\n\n{lines}', { name: church?.name ?? tx('la iglesia'), monthLabel: monthLabel(health.month, true), lines: lines.join('\n') }), tx('Progreso de la iglesia'));
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Progreso de la iglesia" subtitle="Mes a mes y en toda la historia" back />
+      <Header title={tx('Progreso de la iglesia')} subtitle={tx('Mes a mes y en toda la historia')} back />
       <Screen>
-        <Segmented options={[{ value: '12', label: 'Último año' }, { value: 'all', label: 'Toda la historia' }]} value={range} onChange={setRange} />
-        {rows === null ? <Loading /> : err ? <Text style={{ color: colors.red }}>{err}</Text> : !rows.length ? <Text style={{ color: colors.muted }}>Todavía no hay datos.</Text> : (
+        <Segmented options={[{ value: '12', label: tx('Último año') }, { value: 'all', label: tx('Toda la historia') }]} value={range} onChange={setRange} />
+        {rows === null ? <Loading /> : err ? <Text style={{ color: colors.red }}>{err}</Text> : !rows.length ? <Text style={{ color: colors.muted }}>{tx('Todavía no hay datos.')}</Text> : (
           <>
             {health ? (
               <>
-                <SectionTitle>{`Salud de ${monthLabel(health.month, true)}`}</SectionTitle>
-                <Text style={{ fontSize: 12, color: colors.muted, marginTop: -8 }}>Comparado con el promedio de los 3 meses anteriores.</Text>
+                <SectionTitle>{tx('Salud de {monthLabel}', { monthLabel: monthLabel(health.month, true) })}</SectionTitle>
+                <Text style={{ fontSize: 12, color: colors.muted, marginTop: -8 }}>{tx('Comparado con el promedio de los 3 meses anteriores.')}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {health.items.filter((i) => i.v || i.base).map((i) => {
                     const up = i.pct > 5, down = i.pct < -5;
@@ -144,12 +145,12 @@ export default function ProgresoIglesia() {
             </ScrollView>
             <Card style={{ paddingHorizontal: 8 }}>
               <Bars rows={rows} k={k} />
-              <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center', marginTop: 4 }}>El mes en curso va en naranja (todavía no terminó).</Text>
+              <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center', marginTop: 4 }}>{tx('El mes en curso va en naranja (todavía no terminó).')}</Text>
             </Card>
 
             {totals ? (
               <>
-                <SectionTitle>{range === 'all' ? `Desde ${monthLabel(String(totals.first), true)}` : 'En el último año'}</SectionTitle>
+                <SectionTitle>{range === 'all' ? tx('Desde {monthLabel}', { monthLabel: monthLabel(String(totals.first), true) }) : tx('En el último año')}</SectionTitle>
                 <Card style={{ padding: 0 }}>
                   {METRICS.filter((m) => m.sum).map((m, i, arr) => (
                     <View key={m.key} style={{ flexDirection: 'row', padding: 12, borderBottomWidth: i < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border }}>
@@ -160,7 +161,7 @@ export default function ProgresoIglesia() {
                 </Card>
               </>
             ) : null}
-            <Button title="Compartir el resumen del mes" icon="share-2" variant="outline" onPress={share} />
+            <Button title={tx('Compartir el resumen del mes')} icon="share-2" variant="outline" onPress={share} />
           </>
         )}
       </Screen>

@@ -10,6 +10,7 @@ import { fmtDateShort } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Raffle } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Rifas() {
   const { can } = useAuth();
@@ -17,11 +18,11 @@ export default function Rifas() {
   useFocusEffect(useCallback(() => { listRaffles().then(setRows).catch(() => setRows((o) => o ?? [])); }, []));
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Sorteos" subtitle="Premios para los que están presentes" back />
+      <Header title={tx('Sorteos')} subtitle={tx('Premios para los que están presentes')} back />
       <Screen>
-        {can('cal.editar') ? <Button title="Nuevo sorteo" icon="gift" onPress={() => router.push('/rifas/nueva' as Href)} /> : null}
+        {can('cal.editar') ? <Button title={tx('Nuevo sorteo')} icon="gift" onPress={() => router.push('/rifas/nueva' as Href)} /> : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="gift" title="Todavía no hay sorteos" text={can('cal.editar') ? 'Creá el primero: la app arma la lista con los que estuvieron presentes y saca al azar.' : 'Cuando haya un sorteo, la vas a ver acá.'} />
+          <Empty icon="gift" title={tx('Todavía no hay sorteos')} text={can('cal.editar') ? tx('Creá el primero: la app arma la lista con los que estuvieron presentes y saca al azar.') : tx('Cuando haya un sorteo, la vas a ver acá.')} />
         ) : rows.map((r) => (
           <Pressable key={r.id} accessibilityRole="button" onPress={() => router.push(`/rifas/${r.id}` as Href)}>
             <Card style={{ gap: 4 }}>

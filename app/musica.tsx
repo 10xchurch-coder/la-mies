@@ -10,6 +10,7 @@ import { KIND_LABEL, isMusic, sortLinks } from '@/lib/links';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchLink } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const ICON: Record<string, React.ComponentProps<typeof Feather>['name']> = { spotify: 'music', youtube_music: 'play-circle', music_other: 'headphones' };
 
@@ -19,15 +20,15 @@ export default function Musica() {
   useFocusEffect(useCallback(() => {
     churchLinks().then((all) => setRows(sortLinks(all.filter((l) => isMusic(l.kind))))).catch(() => setRows((o) => o ?? []));
   }, []));
-  const open = (l: ChurchLink) => { if (l.url) Linking.openURL(l.url).catch(() => Alert.alert('No se pudo abrir', 'Probá de nuevo o copiá el enlace.')); };
+  const open = (l: ChurchLink) => { if (l.url) Linking.openURL(l.url).catch(() => Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo o copiá el enlace.'))); };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Música" subtitle="Lo que cantamos y escuchamos en la iglesia" back />
+      <Header title={tx('Música')} subtitle={tx('Lo que cantamos y escuchamos en la iglesia')} back />
       <Screen>
-        {can('com.anuncios') ? <Button title="Editar los enlaces" icon="edit-2" variant="outline" onPress={() => router.push('/admin/musica' as Href)} /> : null}
+        {can('com.anuncios') ? <Button title={tx('Editar los enlaces')} icon="edit-2" variant="outline" onPress={() => router.push('/admin/musica' as Href)} /> : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="music" title="Todavía no hay música" text="Pronto vas a encontrar acá las listas de la iglesia." />
+          <Empty icon="music" title={tx('Todavía no hay música')} text={tx('Pronto vas a encontrar acá las listas de la iglesia.')} />
         ) : rows.map((l) => (
           <Pressable key={l.id} accessibilityRole="link" onPress={() => open(l)}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>

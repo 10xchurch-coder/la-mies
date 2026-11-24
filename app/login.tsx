@@ -9,6 +9,7 @@ import { supabase, errorMessage, supabaseConfigured } from '@/lib/supabase';
 import { WEB_URL } from '@/lib/share';
 import { colors, themed } from '@/theme';
 import { LangSwitch } from '@/components/LangChoice';
+import { tx } from '@/lib/i18n';
 
 export default function Login() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function Login() {
       setBusy(false);
       // El error más común: alguien nuevo escribe su correo acá sin haber creado la cuenta.
       const bad = /invalid login credentials|invalid_credentials/i.test(e.message ?? '');
-      setError(bad ? 'Correo o contraseña incorrectos. Si es tu primera vez, todavía no tenés cuenta: tocá "Crear mi cuenta" acá abajo.' : errorMessage(e));
+      setError(bad ? tx('Correo o contraseña incorrectos. Si es tu primera vez, todavía no tenés cuenta: tocá "Crear mi cuenta" acá abajo.') : errorMessage(e));
       return;
     }
     await finish();
@@ -70,19 +71,19 @@ export default function Login() {
   const reset = async () => {
     if (resetState !== 'idle') return;
     if (!email.trim()) {
-      setError('Escribí tu correo y volvé a tocar "¿Olvidaste tu contraseña?"');
+      setError(tx('Escribí tu correo y volvé a tocar "¿Olvidaste tu contraseña?"'));
       return;
     }
     // Aviso inmediato, antes de esperar al servidor, para que nadie toque dos veces.
     setResetState('sending');
-    setError('Enviando el correo…');
+    setError(tx('Enviando el correo…'));
     const { error: e } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: `${WEB_URL}/recuperar` });
     if (e) {
       setResetState('idle');
       setError(errorMessage(e));
     } else {
       setResetState('sent');
-      setError(`Listo: te mandamos un correo a ${email.trim().toLowerCase()}. Abrí el link que trae (mirá también en spam).`);
+      setError(tx('Listo: te mandamos un correo a {email}. Abrí el link que trae (mirá también en spam).', { email: email.trim().toLowerCase() }));
     }
   };
 
@@ -94,16 +95,16 @@ export default function Login() {
             <View style={styles.logo}>
               <Feather name="shield" size={38} color="#FFFFFF" />
             </View>
-            <Text style={styles.title}>Un paso más</Text>
-            <Text style={[styles.subtitle, { textAlign: 'center' }]}>Abrí tu app de autenticación (Google Authenticator u otra) y escribí el código de 6 números.</Text>
+            <Text style={styles.title}>{tx('Un paso más')}</Text>
+            <Text style={[styles.subtitle, { textAlign: 'center' }]}>{tx('Abrí tu app de autenticación (Google Authenticator u otra) y escribí el código de 6 números.')}</Text>
           </View>
-          <Field label="Código" keyboardType="number-pad" autoComplete="one-time-code" textContentType="oneTimeCode" value={code} onChangeText={setCode} maxLength={6} />
+          <Field label={tx('Código')} keyboardType="number-pad" autoComplete="one-time-code" textContentType="oneTimeCode" value={code} onChangeText={setCode} maxLength={6} />
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button title="Verificar" onPress={verify} loading={busy} disabled={code.replace(/\D/g, '').length !== 6} />
+          <Button title={tx('Verificar')} onPress={verify} loading={busy} disabled={code.replace(/\D/g, '').length !== 6} />
           <Pressable onPress={cancelMfa} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: colors.muted, fontSize: 13 }}>Cancelar</Text>
+            <Text style={{ color: colors.muted, fontSize: 13 }}>{tx('Cancelar')}</Text>
           </Pressable>
-          <Text style={[styles.verse, { fontStyle: 'normal' }]}>¿Perdiste el teléfono con la app de autenticación? Pedile al pastor que te quite la verificación en dos pasos.</Text>
+          <Text style={[styles.verse, { fontStyle: 'normal' }]}>{tx('¿Perdiste el teléfono con la app de autenticación? Pedile al pastor que te quite la verificación en dos pasos.')}</Text>
         </Screen>
       </KeyboardAvoidingView>
     );
@@ -116,33 +117,33 @@ export default function Login() {
           <View style={styles.logo}>
             <Feather name="feather" size={38} color="#FFFFFF" />
           </View>
-          <Text style={styles.title}>La Mies</Text>
-          <Text style={styles.subtitle}>Evangelismo casa por casa</Text>
+          <Text style={styles.title}>{tx('La Mies')}</Text>
+          <Text style={styles.subtitle}>{tx('Evangelismo casa por casa')}</Text>
         </View>
         <LangSwitch />
         {!supabaseConfigured ? (
-          <Text style={styles.warn}>Falta configurar la conexión (archivo .env). Mirá el README.</Text>
+          <Text style={styles.warn}>{tx('Falta configurar la conexión (archivo .env). Mirá el README.')}</Text>
         ) : null}
-        <Field label="Correo" autoCapitalize="none" autoComplete="email" keyboardType="email-address" textContentType="username" value={email} onChangeText={setEmail} />
-        <Field label="Contraseña" secureTextEntry autoComplete="password" textContentType="password" value={password} onChangeText={setPassword} />
+        <Field label={tx('Correo')} autoCapitalize="none" autoComplete="email" keyboardType="email-address" textContentType="username" value={email} onChangeText={setEmail} />
+        <Field label={tx('Contraseña')} secureTextEntry autoComplete="password" textContentType="password" value={password} onChangeText={setPassword} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <Button title="Entrar" onPress={signIn} loading={busy} disabled={!email || !password} />
+        <Button title={tx('Entrar')} onPress={signIn} loading={busy} disabled={!email || !password} />
         <Pressable onPress={reset} disabled={resetState !== 'idle'} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ color: resetState === 'idle' ? colors.green : colors.muted, fontWeight: '600' }}>
-            {resetState === 'sending' ? 'Enviando…' : resetState === 'sent' ? 'Correo enviado ✓' : '¿Olvidaste tu contraseña?'}
+            {resetState === 'sending' ? tx('Enviando…') : resetState === 'sent' ? tx('Correo enviado ✓') : tx('¿Olvidaste tu contraseña?')}
           </Text>
         </Pressable>
         <View style={{ gap: 6, marginTop: 4 }}>
-          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' }}>¿Es tu primera vez?</Text>
-          <Button title="Crear mi cuenta" icon="user-plus" variant="outline" onPress={() => { setSignupDraft(email.trim(), password); router.push('/registro'); }} />
-          <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>Necesitás el código de tu iglesia.</Text>
+          <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' }}>{tx('¿Es tu primera vez?')}</Text>
+          <Button title={tx('Crear mi cuenta')} icon="user-plus" variant="outline" onPress={() => { setSignupDraft(email.trim(), password); router.push('/registro'); }} />
+          <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>{tx('Necesitás el código de tu iglesia.')}</Text>
           <Pressable onPress={() => router.push('/empezar' as never)} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: colors.green, fontWeight: '600', textAlign: 'center' }}>¿Sos pastor y tu iglesia todavía no usa La Mies? Empezá acá</Text>
+            <Text style={{ color: colors.green, fontWeight: '600', textAlign: 'center' }}>{tx('¿Sos pastor y tu iglesia todavía no usa La Mies? Empezá acá')}</Text>
           </Pressable>
         </View>
         <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
-          <Text style={styles.verse}>Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos</Text>
-          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green }}>Mateo 9:37</Text>
+          <Text style={styles.verse}>{tx('Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos')}</Text>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green }}>{tx('Mateo 9:37')}</Text>
         </View>
       </Screen>
     </KeyboardAvoidingView>

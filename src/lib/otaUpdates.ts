@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Alert, AppState, Platform } from 'react-native';
 import * as Updates from 'expo-updates';
+import { tx, txLocale } from './i18n';
 
 let busy = false;
 let lastCheck = 0;
@@ -17,9 +18,9 @@ async function check() {
     if (!r.isAvailable) return;
     const f = await Updates.fetchUpdateAsync();
     if (!f.isNew) return;
-    Alert.alert('Hay una versión nueva de La Mies', 'Ya se descargó. ¿La abrimos ahora?', [
-      { text: 'Más tarde', style: 'cancel' },
-      { text: 'Actualizar', onPress: () => { Updates.reloadAsync().catch(() => undefined); } },
+    Alert.alert(tx('Hay una versión nueva de La Mies'), tx('Ya se descargó. ¿La abrimos ahora?'), [
+      { text: tx('Más tarde'), style: 'cancel' },
+      { text: tx('Actualizar'), onPress: () => { Updates.reloadAsync().catch(() => undefined); } },
     ]);
   } catch {
     // Sin internet o el servidor no respondió: se vuelve a intentar la próxima vez.
@@ -40,5 +41,5 @@ export function useOtaUpdates() {
 /** "actualización del 7/11 21:40" para mostrar en Ajustes. */
 export function updateLabel(): string {
   if (Platform.OS === 'web' || !Updates.isEnabled || Updates.isEmbeddedLaunch || !Updates.createdAt) return 'instalada';
-  return `actualización del ${Updates.createdAt.toLocaleString('es-AR', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+  return tx('actualización del {toLocaleString}', { toLocaleString: Updates.createdAt.toLocaleString(txLocale(), { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }) });
 }

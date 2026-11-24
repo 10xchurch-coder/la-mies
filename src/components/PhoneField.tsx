@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 import { colors, radius, themed } from '@/theme';
 import { formatNational, isForeign, phoneProblem, typedDigits } from '@/lib/phone';
+import { tx } from '@/lib/i18n';
 
 type Props = Omit<TextInputProps, 'value' | 'onChangeText' | 'style'> & {
   label?: string;
@@ -22,7 +23,7 @@ export function phoneInputValue(stored: string | null | undefined): string {
   return formatNational(typedDigits(t));
 }
 
-export function PhoneField({ label = 'Celular', hint, value, onChangeText, required, style, onBlur, ...props }: Props) {
+export function PhoneField({ label = tx('Celular'), hint, value, onChangeText, required, style, onBlur, ...props }: Props) {
   const s = st;
   const [foreign, setForeign] = useState(isForeign(value));
   const [touched, setTouched] = useState(false);
@@ -51,7 +52,7 @@ export function PhoneField({ label = 'Celular', hint, value, onChangeText, requi
       </View>
       {showProblem ? <Text style={{ fontSize: 12, color: colors.redText }}>{problem}</Text> : null}
       <Pressable onPress={() => { setForeign(!foreign); onChangeText(''); }} accessibilityRole="button" hitSlop={6}>
-        <Text style={{ fontSize: 12, color: colors.muted, textDecorationLine: 'underline' }}>{foreign ? 'Es de Argentina' : 'Es de otro país'}</Text>
+        <Text style={{ fontSize: 12, color: colors.muted, textDecorationLine: 'underline' }}>{foreign ? tx('Es de Argentina') : tx('Es de otro país')}</Text>
       </Pressable>
     </View>
   );

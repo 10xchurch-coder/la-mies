@@ -1,6 +1,7 @@
 // Niveles e insignias de "Mi progreso". Los números vienen de my_progress() en la base.
 // Puntos del tablero (igual que en la base): presentación 1 · promesa 3 · vino 10.
 
+import { tx } from './i18n';
 export type Progress = {
   sessions: number;
   minutes: number;
@@ -24,12 +25,12 @@ export type Level = { n: number; name: string; sessions: number; verse: string }
 
 /** 1 Corintios 3:6-8: "Yo planté, Apolos regó; pero el crecimiento lo ha dado Dios." */
 export const LEVELS: Level[] = [
-  { n: 1, name: 'Sembrador', sessions: 1, verse: 'Primera salida' },
-  { n: 2, name: 'Regador', sessions: 5, verse: '5 salidas' },
-  { n: 3, name: 'Segador', sessions: 12, verse: '12 salidas' },
-  { n: 4, name: 'Obrero fiel', sessions: 20, verse: '20 salidas' },
-  { n: 5, name: 'Embajador', sessions: 40, verse: '40 salidas' },
-  { n: 6, name: 'Pescador de hombres', sessions: 80, verse: '80 salidas' },
+  { n: 1, get name() { return tx('Sembrador'); }, sessions: 1, verse: 'Primera salida' },
+  { n: 2, get name() { return tx('Regador'); }, sessions: 5, verse: '5 salidas' },
+  { n: 3, get name() { return tx('Segador'); }, sessions: 12, verse: '12 salidas' },
+  { n: 4, get name() { return tx('Obrero fiel'); }, sessions: 20, verse: '20 salidas' },
+  { n: 5, get name() { return tx('Embajador'); }, sessions: 40, verse: '40 salidas' },
+  { n: 6, get name() { return tx('Pescador de hombres'); }, sessions: 80, verse: '80 salidas' },
 ];
 
 export function levelFor(sessions: number): { current: Level | null; next: Level | null } {
@@ -56,14 +57,14 @@ export function badgesFor(p: Progress): Badge[] {
     progress: have >= need ? undefined : `${Math.min(have, need)} de ${need}`,
   });
   return [
-    b('first', 'Primera salida', 'play', p.sessions, 1),
-    b('pres10', '10 presentaciones', 'book-open', p.presentations, 10),
-    b('promise1', 'Primera promesa', 'calendar', p.promises, 1),
-    b('came1', 'Alguien vino a la iglesia', 'home', p.came, 1),
-    b('streak5', '5 semanas seguidas', 'zap', p.streak_weeks, 5),
-    b('pres50', '50 presentaciones', 'book-open', p.presentations, 50),
-    b('disc1', 'Alguien empezó discipulado', 'users', p.discipleship, 1),
-    b('bapt1', 'Un bautismo', 'droplet', p.baptisms, 1),
-    b('pres100', '100 presentaciones', 'award', p.presentations, 100),
+    b('first', tx('Primera salida'), 'play', p.sessions, 1),
+    b('pres10', tx('10 presentaciones'), 'book-open', p.presentations, 10),
+    b('promise1', tx('Primera promesa'), 'calendar', p.promises, 1),
+    b('came1', tx('Alguien vino a la iglesia'), 'home', p.came, 1),
+    b('streak5', tx('5 semanas seguidas'), 'zap', p.streak_weeks, 5),
+    b('pres50', tx('50 presentaciones'), 'book-open', p.presentations, 50),
+    b('disc1', tx('Alguien empezó discipulado'), 'users', p.discipleship, 1),
+    b('bapt1', tx('Un bautismo'), 'droplet', p.baptisms, 1),
+    b('pres100', tx('100 presentaciones'), 'award', p.presentations, 100),
   ];
 }

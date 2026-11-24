@@ -9,6 +9,7 @@ import { StudyNotes } from '@/components/StudyNotes';
 import { shareText } from '@/lib/share';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function CrecimientoArticulo() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -17,14 +18,14 @@ export default function CrecimientoArticulo() {
     supabase.from('growth_articles').select('title, section, body').eq('slug', slug).limit(1).maybeSingle().then(({ data }) => setA(data ?? null));
   }, [slug]);
   if (a === undefined) return <Loading />;
-  if (!a) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title="Crecimiento" back /><Text style={{ padding: 24, color: colors.muted }}>No se encontró.</Text></View>;
+  if (!a) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title={tx('Crecimiento')} back /><Text style={{ padding: 24, color: colors.muted }}>{tx('No se encontró.')}</Text></View>;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={a.title} subtitle={a.section} back />
       <Screen>
         <Article body={a.body} />
         <StudyNotes kind="article" refId={String(slug)} title={a.title} />
-        <Button title="Compartir" icon="share-2" variant="outline" onPress={() => shareText(`${a.title}\n\n${a.body.replace(/\*\*/g, '').replace(/^#+ /gm, '').replace(/^> /gm, '')}`, a.title)} />
+        <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={() => shareText(`${a.title}\n\n${a.body.replace(/\*\*/g, '').replace(/^#+ /gm, '').replace(/^> /gm, '')}`, a.title)} />
       </Screen>
     </View>
   );

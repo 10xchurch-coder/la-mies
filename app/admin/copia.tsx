@@ -11,6 +11,7 @@ import { runBackup, type BackupProgress, type BackupSummary } from '@/lib/backup
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Copia() {
   const { can, church, profile, financeLevel, viewAsMember } = useAuth();
@@ -26,34 +27,34 @@ export default function Copia() {
     try {
       setDone(await runBackup({ churchId: church.id, churchName: church.name, who: profile.display_name, finance, onProgress: setProgress }));
     } catch (e) {
-      Alert.alert('No se pudo hacer la copia', errorMessage(e));
+      Alert.alert(tx('No se pudo hacer la copia'), errorMessage(e));
     } finally {
       setBusy(false); setProgress(null);
     }
   };
-  const ask = () => Alert.alert('Bajar todos los datos', 'El archivo trae teléfonos, domicilios y datos privados de los hermanos. Guardalo en un lugar seguro.', [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Bajar la copia', onPress: start },
+  const ask = () => Alert.alert(tx('Bajar todos los datos'), tx('El archivo trae teléfonos, domicilios y datos privados de los hermanos. Guardalo en un lugar seguro.'), [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Bajar la copia'), onPress: start },
   ]);
 
   const pct = progress ? Math.round((progress.index / Math.max(progress.total, 1)) * 100) : 0;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Copia de todos los datos" subtitle="Todo lo de tu iglesia, en un archivo" back />
+      <Header title={tx('Copia de todos los datos')} subtitle={tx('Todo lo de tu iglesia, en un archivo')} back />
       <Screen>
-        {!can('admin.permisos') || viewAsMember ? <Empty icon="lock" title="Solo el pastor o el administrador de la app" /> : (
+        {!can('admin.permisos') || viewAsMember ? <Empty icon="lock" title={tx('Solo el pastor o el administrador de la app')} /> : (
           <>
             <Card style={{ backgroundColor: colors.pinkSoft, borderColor: colors.pinkSoft, gap: 6 }}>
               <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-                Los datos son de tu iglesia. Con este botón bajás una copia de todo, en planillas que se abren con Excel.
+                {tx('Los datos son de tu iglesia. Con este botón bajás una copia de todo, en planillas que se abren con Excel.')}
               </Text>
               <Text style={{ fontSize: 14, color: colors.pinkText, lineHeight: 20, fontWeight: '700' }}>
-                Guardala en un lugar seguro: trae datos privados de los hermanos.
+                {tx('Guardala en un lugar seguro: trae datos privados de los hermanos.')}
               </Text>
             </Card>
 
-            <Button title={busy ? 'Bajando…' : 'Bajar la copia'} icon="download" onPress={ask} loading={busy} disabled={!church} />
+            <Button title={busy ? tx('Bajando…') : tx('Bajar la copia')} icon="download" onPress={ask} loading={busy} disabled={!church} />
 
             {progress ? (
               <Card style={{ gap: 8 }}>
@@ -62,7 +63,7 @@ export default function Copia() {
                   <View style={{ width: `${pct}%`, height: 10, backgroundColor: colors.pink }} />
                 </View>
                 <Text style={{ fontSize: 13, color: colors.muted }}>
-                  Paso {Math.min(progress.index + 1, progress.total)} de {progress.total}{progress.rows ? ` · ${progress.rows} filas` : ''}. No cierres esta pantalla.
+                  {tx('Paso {min} de {total}{v1}. No cierres esta pantalla.', { min: Math.min(progress.index + 1, progress.total), total: progress.total, v1: progress.rows ? tx(' · {rows} filas', { rows: progress.rows }) : '' })}
                 </Text>
               </Card>
             ) : null}
@@ -71,28 +72,26 @@ export default function Copia() {
               <Card style={{ gap: 6 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <Feather name="check-circle" size={20} color={colors.green} />
-                  <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>Listo: {done.rows} filas</Text>
+                  <Text style={{ flex: 1, fontSize: 16, fontWeight: '800', color: colors.text }}>{tx('Listo: {rows} filas', { rows: done.rows })}</Text>
                 </View>
                 <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
-                  {done.zipped ? `Se bajó el archivo ${done.fileName}. Adentro hay un LEEME que explica cada planilla.` : 'No se pudo armar un solo archivo, así que se bajaron las planillas de a una.'}
+                  {done.zipped ? tx('Se bajó el archivo {fileName}. Adentro hay un LEEME que explica cada planilla.', { fileName: done.fileName }) : tx('No se pudo armar un solo archivo, así que se bajaron las planillas de a una.')}
                 </Text>
                 {done.results.map((r) => (
                   <View key={r.file} style={{ flexDirection: 'row', gap: 8, paddingVertical: 4 }}>
                     <Text style={{ flex: 1, fontSize: 13, color: r.error ? colors.red : colors.text }}>{r.title}</Text>
-                    <Text style={{ fontSize: 13, color: r.error ? colors.red : colors.muted, fontWeight: '700' }}>{r.error ? 'no se pudo' : r.rows}</Text>
+                    <Text style={{ fontSize: 13, color: r.error ? colors.red : colors.muted, fontWeight: '700' }}>{r.error ? tx('no se pudo') : r.rows}</Text>
                   </View>
                 ))}
               </Card>
             ) : null}
 
-            <SectionTitle>Qué trae</SectionTitle>
+            <SectionTitle>{tx('Qué trae')}</SectionTitle>
             <Card style={{ gap: 4 }}>
               {plan.map((t) => <Text key={t.table} style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>• {t.title}</Text>)}
             </Card>
             <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-              {finance ? 'Trae las finanzas porque tenés permiso de finanzas. ' : 'No trae las finanzas: no tenés permiso de finanzas. '}
-              Trae lo que vos podés ver en la app (por ejemplo, no salen los pedidos de oración privados de otros). No trae fotos ni archivos, solo los datos.
-              Queda anotado en el historial quién bajó la copia y cuándo.
+              {tx('{pl}Trae lo que vos podés ver en la app (por ejemplo, no salen los pedidos de oración privados de otros). No trae fotos ni archivos, solo los datos. Queda anotado en el historial quién bajó la copia y cuándo.', { pl: finance ? tx('Trae las finanzas porque tenés permiso de finanzas. ') : tx('No trae las finanzas: no tenés permiso de finanzas. ') })}
             </Text>
           </>
         )}

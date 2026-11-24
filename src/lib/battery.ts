@@ -6,18 +6,19 @@ import * as Location from 'expo-location';
 import Constants from 'expo-constants';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
+import { tx } from './i18n';
 
 const PKG = Constants.expoConfig?.android?.package ?? 'com.hopeforargentina.lamies';
 
 function ask(): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(
-      'Para que el recorrido no se corte',
-      'Tu teléfono pone a dormir las apps con la pantalla apagada y la salida deja de marcar las calles. ' +
-        'Tocá "Permitir" y en el aviso que sigue elegí "Permitir" para que La Mies pueda seguir en segundo plano (solo usa el GPS durante una salida).',
+      tx('Para que el recorrido no se corte'),
+      tx('Tu teléfono pone a dormir las apps con la pantalla apagada y la salida deja de marcar las calles. ') +
+        tx('Tocá "Permitir" y en el aviso que sigue elegí "Permitir" para que La Mies pueda seguir en segundo plano (solo usa el GPS durante una salida).'),
       [
-        { text: 'Ahora no', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Permitir', onPress: () => resolve(true) },
+        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
+        { text: tx('Permitir'), onPress: () => resolve(true) },
       ],
       { cancelable: false },
     );
@@ -60,12 +61,12 @@ export async function ensureAlwaysLocationIOS(): Promise<void> {
   }
   await new Promise<void>((resolve) => {
     Alert.alert(
-      'Para que el recorrido no se corte',
-      'Con la pantalla apagada el iPhone deja de marcar las calles si la ubicación de La Mies está en "Mientras se usa". ' +
-        'En Ajustes tocá Ubicación y elegí "Siempre" (y dejá activada "Ubicación exacta"). La Mies solo usa el GPS durante una salida.',
+      tx('Para que el recorrido no se corte'),
+      tx('Con la pantalla apagada el iPhone deja de marcar las calles si la ubicación de La Mies está en "Mientras se usa". ') +
+        tx('En Ajustes tocá Ubicación y elegí "Siempre" (y dejá activada "Ubicación exacta"). La Mies solo usa el GPS durante una salida.'),
       [
-        { text: 'Seguir igual', style: 'cancel', onPress: () => resolve() },
-        { text: 'Abrir Ajustes', onPress: () => { Linking.openSettings().catch(() => undefined); resolve(); } },
+        { text: tx('Seguir igual'), style: 'cancel', onPress: () => resolve() },
+        { text: tx('Abrir Ajustes'), onPress: () => { Linking.openSettings().catch(() => undefined); resolve(); } },
       ],
       { cancelable: false },
     );

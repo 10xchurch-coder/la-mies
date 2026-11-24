@@ -3,6 +3,7 @@
 // Todo se lee con los permisos de quien está logueado: la base nunca entrega datos de otra iglesia.
 import * as XLSX from 'xlsx';
 import { toCsv } from './desk';
+import { tx } from './i18n';
 
 export type BackupTable = {
   table: string;
@@ -20,30 +21,30 @@ export type BackupTable = {
 };
 
 export const BACKUP_TABLES: BackupTable[] = [
-  { table: 'contacts', file: '01-personas', title: 'Personas', order: ['id'], byChurch: true },
-  { table: 'contact_children', file: '02-hijos', title: 'Hijos anotados en las fichas', order: ['id'], byChurch: false },
-  { table: 'households', file: '03-familias', title: 'Familias', order: ['id'], byChurch: true },
-  { table: 'household_members', file: '04-familias-integrantes', title: 'Integrantes de cada familia', order: ['household_id', 'contact_id'], byChurch: false },
-  { table: 'profiles', file: '05-cuentas', title: 'Cuentas de la app', select: 'id, church_id, display_name, role, extra_roles, title, finance_role, created_at, disabled_at', order: ['id'], byChurch: true },
-  { table: 'groups', file: '06-grupos-o-rutas', title: 'Grupos o rutas', order: ['id'], byChurch: true },
-  { table: 'church_services', file: '10-reuniones', title: 'Reuniones', order: ['id'], byChurch: true },
-  { table: 'attendances', file: '11-asistencia', title: 'Asistencia a las reuniones', order: ['id'], byChurch: true },
-  { table: 'contact_visits', file: '20-visitas-y-notas', title: 'Visitas y notas de seguimiento', order: ['id'], byChurch: true },
-  { table: 'follow_up_tasks', file: '21-seguimiento', title: 'Tareas de seguimiento', order: ['id'], byChurch: true },
-  { table: 'events', file: '30-eventos', title: 'Eventos', order: ['id'], byChurch: true },
-  { table: 'event_registrations', file: '31-eventos-inscripciones', title: 'Inscripciones a eventos', order: ['id'], byChurch: true },
-  { table: 'prayer_requests', file: '40-pedidos-de-oracion', title: 'Pedidos de oración', order: ['id'], byChurch: true },
-  { table: 'classes', file: '50-clases', title: 'Clases', order: ['id'], byChurch: true },
-  { table: 'class_students', file: '51-clases-alumnos', title: 'Alumnos de cada clase', order: ['class_id', 'contact_id'], byChurch: false },
-  { table: 'class_teachers', file: '52-clases-maestros', title: 'Maestros de cada clase', order: ['id'], byChurch: false },
-  { table: 'class_attendance', file: '53-clases-asistencia', title: 'Asistencia a las clases', order: ['id'], byChurch: true },
-  { table: 'ministries', file: '60-ministerios', title: 'Ministerios', order: ['id'], byChurch: true },
-  { table: 'ministry_people', file: '61-ministerios-personas', title: 'Personas de cada ministerio', order: ['ministry_id', 'contact_id'], byChurch: false },
-  { table: 'fin_funds', file: '70-finanzas-fondos', title: 'Finanzas: fondos', order: ['id'], byChurch: true, finance: true },
-  { table: 'fin_accounts', file: '71-finanzas-cuentas', title: 'Finanzas: cuentas', order: ['id'], byChurch: true, finance: true },
-  { table: 'fin_categories', file: '72-finanzas-categorias', title: 'Finanzas: categorías', order: ['id'], byChurch: true, finance: true },
-  { table: 'fin_entries', file: '73-finanzas-movimientos', title: 'Finanzas: movimientos', order: ['id'], byChurch: true, finance: true },
-  { table: 'admin_giving', file: '74-finanzas-ofrendas-por-persona', title: 'Finanzas: ofrendas por persona', order: ['id'], byChurch: true, finance: true },
+  { table: 'contacts', file: '01-personas', get title() { return tx('Personas'); }, order: ['id'], byChurch: true },
+  { table: 'contact_children', file: '02-hijos', get title() { return tx('Hijos anotados en las fichas'); }, order: ['id'], byChurch: false },
+  { table: 'households', file: '03-familias', get title() { return tx('Familias'); }, order: ['id'], byChurch: true },
+  { table: 'household_members', file: '04-familias-integrantes', get title() { return tx('Integrantes de cada familia'); }, order: ['household_id', 'contact_id'], byChurch: false },
+  { table: 'profiles', file: '05-cuentas', get title() { return tx('Cuentas de la app'); }, select: 'id, church_id, display_name, role, extra_roles, title, finance_role, created_at, disabled_at', order: ['id'], byChurch: true },
+  { table: 'groups', file: '06-grupos-o-rutas', get title() { return tx('Grupos o rutas'); }, order: ['id'], byChurch: true },
+  { table: 'church_services', file: '10-reuniones', get title() { return tx('Reuniones'); }, order: ['id'], byChurch: true },
+  { table: 'attendances', file: '11-asistencia', get title() { return tx('Asistencia a las reuniones'); }, order: ['id'], byChurch: true },
+  { table: 'contact_visits', file: '20-visitas-y-notas', get title() { return tx('Visitas y notas de seguimiento'); }, order: ['id'], byChurch: true },
+  { table: 'follow_up_tasks', file: '21-seguimiento', get title() { return tx('Tareas de seguimiento'); }, order: ['id'], byChurch: true },
+  { table: 'events', file: '30-eventos', get title() { return tx('Eventos'); }, order: ['id'], byChurch: true },
+  { table: 'event_registrations', file: '31-eventos-inscripciones', get title() { return tx('Inscripciones a eventos'); }, order: ['id'], byChurch: true },
+  { table: 'prayer_requests', file: '40-pedidos-de-oracion', get title() { return tx('Pedidos de oración'); }, order: ['id'], byChurch: true },
+  { table: 'classes', file: '50-clases', get title() { return tx('Clases'); }, order: ['id'], byChurch: true },
+  { table: 'class_students', file: '51-clases-alumnos', get title() { return tx('Alumnos de cada clase'); }, order: ['class_id', 'contact_id'], byChurch: false },
+  { table: 'class_teachers', file: '52-clases-maestros', get title() { return tx('Maestros de cada clase'); }, order: ['id'], byChurch: false },
+  { table: 'class_attendance', file: '53-clases-asistencia', get title() { return tx('Asistencia a las clases'); }, order: ['id'], byChurch: true },
+  { table: 'ministries', file: '60-ministerios', get title() { return tx('Ministerios'); }, order: ['id'], byChurch: true },
+  { table: 'ministry_people', file: '61-ministerios-personas', get title() { return tx('Personas de cada ministerio'); }, order: ['ministry_id', 'contact_id'], byChurch: false },
+  { table: 'fin_funds', file: '70-finanzas-fondos', get title() { return tx('Finanzas: fondos'); }, order: ['id'], byChurch: true, finance: true },
+  { table: 'fin_accounts', file: '71-finanzas-cuentas', get title() { return tx('Finanzas: cuentas'); }, order: ['id'], byChurch: true, finance: true },
+  { table: 'fin_categories', file: '72-finanzas-categorias', get title() { return tx('Finanzas: categorías'); }, order: ['id'], byChurch: true, finance: true },
+  { table: 'fin_entries', file: '73-finanzas-movimientos', get title() { return tx('Finanzas: movimientos'); }, order: ['id'], byChurch: true, finance: true },
+  { table: 'admin_giving', file: '74-finanzas-ofrendas-por-persona', get title() { return tx('Finanzas: ofrendas por persona'); }, order: ['id'], byChurch: true, finance: true },
 ];
 
 export const PAGE = 1000;
@@ -79,7 +80,7 @@ export function rowsToCsv(rows: Record<string, unknown>[], names?: Map<string, s
     const cell = safeCell(r[c]);
     return c === 'contact_id' && withName ? [cell, safeCell(names!.get(String(r[c] ?? '')) ?? '')] : [cell];
   }));
-  return toCsv(header.length ? header : ['sin datos'], body);
+  return toCsv(header.length ? header : [tx('sin datos')], body);
 }
 
 /** Las tandas para leer una tabla grande: [0, 999], [1000, 1999]... Corta cuando una tanda viene incompleta. */
@@ -92,23 +93,23 @@ export type BackupResult = { file: string; title: string; rows: number; error?: 
 
 /** El archivo LEEME de la copia: qué hay en cada planilla, en palabras simples. */
 export function backupReadme(o: { church: string; when: string; who: string; results: BackupResult[]; finance: boolean }): string {
-  const lines = o.results.map((r) => `- ${r.file}.csv: ${r.title} (${r.error ? `NO SE PUDO BAJAR: ${r.error}` : `${r.rows} ${r.rows === 1 ? 'fila' : 'filas'}`})`);
+  const lines = o.results.map((r) => tx('- {file}.csv: {title} ({v1})', { file: r.file, title: r.title, v1: r.error ? `NO SE PUDO BAJAR: ${r.error}` : `${r.rows} ${r.rows === 1 ? tx('fila') : tx('filas')}` }));
   return [
-    `Copia de todos los datos de ${o.church}`,
-    `Hecha el ${o.when} por ${o.who}, desde la app La Mies.`,
+    tx('Copia de todos los datos de {church}', { church: o.church }),
+    tx('Hecha el {when} por {who}, desde la app La Mies.', { when: o.when, who: o.who }),
     '',
-    'Cada archivo .csv es una planilla. Se abre con Excel, Google Sheets o LibreOffice (las columnas están separadas por punto y coma).',
-    'Las columnas que terminan en "_id" son números internos que unen una planilla con otra. Por ejemplo, "contact_id" es la persona de 01-personas.csv.',
-    'Las planillas que hablan de una persona traen al lado la columna "persona" con su nombre.',
+    tx('Cada archivo .csv es una planilla. Se abre con Excel, Google Sheets o LibreOffice (las columnas están separadas por punto y coma).'),
+    tx('Las columnas que terminan en "_id" son números internos que unen una planilla con otra. Por ejemplo, "contact_id" es la persona de 01-personas.csv.'),
+    tx('Las planillas que hablan de una persona traen al lado la columna "persona" con su nombre.'),
     '',
-    'Qué trae:',
+    tx('Qué trae:'),
     ...lines,
     '',
-    o.finance ? 'Trae las finanzas porque quien la bajó tiene permiso de finanzas.' : 'NO trae las finanzas: quien la bajó no tiene permiso de finanzas.',
-    'Trae solo lo que esa persona puede ver en la app. Por ejemplo, los pedidos de oración privados de otros no salen.',
-    'No trae las fotos ni los archivos (comprobantes, prédicas, materiales): solo los datos.',
+    o.finance ? tx('Trae las finanzas porque quien la bajó tiene permiso de finanzas.') : tx('NO trae las finanzas: quien la bajó no tiene permiso de finanzas.'),
+    tx('Trae solo lo que esa persona puede ver en la app. Por ejemplo, los pedidos de oración privados de otros no salen.'),
+    tx('No trae las fotos ni los archivos (comprobantes, prédicas, materiales): solo los datos.'),
     '',
-    'CUIDADO: acá hay teléfonos, domicilios y datos privados de los hermanos. Guardalo en un lugar seguro y no lo compartas.',
+    tx('CUIDADO: acá hay teléfonos, domicilios y datos privados de los hermanos. Guardalo en un lugar seguro y no lo compartas.'),
     '',
   ].join('\r\n');
 }

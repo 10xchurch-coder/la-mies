@@ -7,6 +7,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Row = { id: string; kind: 'weekly' | 'monthly' | 'yearly'; period: string; title: string; created_at: string };
 
@@ -20,16 +21,16 @@ export default function Informes() {
   useFocusEffect(load);
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Informes y consejos" subtitle="Cada mes y cada año" back />
+      <Header title={tx('Informes y consejos')} subtitle={tx('Cada mes y cada año')} back />
       <Screen>
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="file-text" title="Todavía no hay informes" text="El primero llega el 1.º del mes que viene, con los números del mes y sugerencias." /> : null}
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="file-text" title={tx('Todavía no hay informes')} text={tx('El primero llega el 1.º del mes que viene, con los números del mes y sugerencias.')} /> : null}
         {(rows ?? []).map((r) => (
           <Pressable key={r.id} onPress={() => router.push(`/informes/${r.id}` as Href)} accessibilityRole="button">
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
               <Feather name={r.kind === 'yearly' ? 'award' : 'file-text'} size={20} color={colors.green} />
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{r.title}</Text>
-                <Text style={{ fontSize: 12, color: colors.muted }}>{r.kind === 'yearly' ? 'Informe anual' : r.kind === 'monthly' ? 'Informe mensual' : 'Semanal'}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{r.kind === 'yearly' ? tx('Informe anual') : r.kind === 'monthly' ? tx('Informe mensual') : tx('Semanal')}</Text>
               </View>
               <Feather name="chevron-right" size={18} color={colors.muted} />
             </Card>

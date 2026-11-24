@@ -16,6 +16,7 @@ import { STATUS_LABEL, addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { Cancellation, ChurchService, SheetRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -70,7 +71,7 @@ export default function Asistencia() {
     try {
       setRows(await attendanceSheet(date, service.id));
     } catch (e) {
-      Alert.alert('No se pudo cargar', errorMessage(e));
+      Alert.alert(tx('No se pudo cargar'), errorMessage(e));
       setRows([]);
     }
   }, [service, date]);
@@ -114,16 +115,16 @@ export default function Asistencia() {
       await setCancelled({ serviceId: service.id, date, cancelled: off });
       loadOffs();
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setMarking(false);
     }
   };
   const askOff = () => {
     if (!service) return;
-    Alert.alert(`¿No hubo ${service.name.toLowerCase()}?`, `${fmtDateShort(date)}. Esa fecha no va a contar para la fidelidad ni para las ausencias, y el informe va a decir "no hubo".`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'No hubo', style: 'destructive', onPress: () => markOff(true) },
+    Alert.alert(tx('¿No hubo {name}?', { name: service.name.toLowerCase() }), tx('{fmtDateShort}. Esa fecha no va a contar para la fidelidad ni para las ausencias, y el informe va a decir "no hubo".', { fmtDateShort: fmtDateShort(date) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('No hubo'), style: 'destructive', onPress: () => markOff(true) },
     ]);
   };
 
@@ -137,7 +138,7 @@ export default function Asistencia() {
       await setAttendance(r.contact_id, date, service.id, next);
     } catch (e) {
       setRows((rs) => rs?.map((x) => (x.contact_id === r.contact_id ? { ...x, present: !next } : x)) ?? null);
-      Alert.alert('No se guardó', errorMessage(e));
+      Alert.alert(tx('No se guardó'), errorMessage(e));
     } finally {
       busyToggles.current -= 1;
     }
@@ -151,9 +152,9 @@ export default function Asistencia() {
       await setAttendance(p.id, date, service.id, true);
       setQuickName('');
       await load();
-      Alert.alert('Visita anotada', `${p.name} quedó presente. Después podés completar sus datos y su foto en Personas.`);
+      Alert.alert(tx('Visita anotada'), tx('{name} quedó presente. Después podés completar sus datos y su foto en Personas.', { name: p.name }));
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setAdding(false);
     }
@@ -179,7 +180,7 @@ export default function Asistencia() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Asistencia" subtitle={service ? `${service.name} · ${fmtDateShort(date)}` : 'Sin reuniones cargadas'} back />
+      <Header title={tx('Asistencia')} subtitle={service ? `${service.name} · ${fmtDateShort(date)}` : tx('Sin reuniones cargadas')} back />
       <View style={styles.filters}>
         <DateChips
           dates={services.map((s) => s.id)}
@@ -187,19 +188,19 @@ export default function Asistencia() {
           onChange={(sid) => setService(services.find((s) => s.id === sid) ?? null)}
           format={(sid) => services.find((s) => s.id === sid)?.name ?? ''}
         />
-        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => `${d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d)}${offOn(d) ? ' · no hubo' : ''}`} />
+        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => `${d === isoDate(new Date()) ? tx('Hoy') : fmtDateShort(d)}${offOn(d) ? tx(' · no hubo') : ''}`} />
         {isOff ? null : (
         <>
         <View style={styles.counter}>
           <Text style={{ fontSize: 28, fontWeight: '800', color: colors.greenText }}>{present}</Text>
-          <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: colors.greenText }}>presentes{rows ? ` de ${rows.length} en la lista` : ''}</Text>
+          <Text style={{ flex: 1, fontSize: 13, fontWeight: '600', color: colors.greenText }}>{tx('presentes')}{rows ? tx(' de {n} en la lista', { n: rows.length }) : ''}</Text>
           <Pressable onPress={() => setOnlyPresent(!onlyPresent)} style={[styles.filter, onlyPresent && { backgroundColor: colors.green }]}>
-            <Text style={{ fontSize: 12, fontWeight: '800', color: onlyPresent ? '#FFF' : colors.greenText }}>{onlyPresent ? 'Ver todos' : 'Solo presentes'}</Text>
+            <Text style={{ fontSize: 12, fontWeight: '800', color: onlyPresent ? '#FFF' : colors.greenText }}>{onlyPresent ? tx('Ver todos') : tx('Solo presentes')}</Text>
           </Pressable>
         </View>
         <View style={styles.search}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} />
         </View>
         </>
         )}
@@ -207,15 +208,15 @@ export default function Asistencia() {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, rowGap: 8, justifyContent: 'center' }}>
             {present === 0 ? (
               <Pressable onPress={askOff} disabled={marking} accessibilityRole="button" hitSlop={8}>
-                <Text style={styles.link}>No hubo esta reunión</Text>
+                <Text style={styles.link}>{tx('No hubo esta reunión')}</Text>
               </Pressable>
             ) : null}
             {/* Entrada con chip: cada hermano apoya su chip en este teléfono y queda presente (usa la misma función que esta pantalla). */}
             <Pressable onPress={() => router.push({ pathname: '/asistencia-chip', params: { servicio: service.id, fecha: date } } as never)} accessibilityRole="button" hitSlop={8}>
-              <Text style={styles.link}>Entrada con chip</Text>
+              <Text style={styles.link}>{tx('Entrada con chip')}</Text>
             </Pressable>
             <Pressable onPress={() => router.push({ pathname: '/suspender', params: { servicio: service.id } } as never)} accessibilityRole="button" hitSlop={8}>
-              <Text style={styles.link}>Suspender una fecha próxima</Text>
+              <Text style={styles.link}>{tx('Suspender una fecha próxima')}</Text>
             </Pressable>
           </View>
         ) : null}
@@ -224,9 +225,9 @@ export default function Asistencia() {
         <View style={styles.list}>
           <Card style={{ gap: 10, alignItems: 'center', padding: 20, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
             <Feather name="slash" size={28} color={colors.amberText} />
-            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>No hubo {service.name.toLowerCase()} el {fmtDateShort(date)}</Text>
-            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 19 }}>Esta fecha no cuenta para la fidelidad ni para las ausencias. En el informe semanal figura como &quot;no hubo&quot;.</Text>
-            <Button title="Sí hubo: tomar asistencia" variant="outline" small icon="rotate-ccw" loading={marking} onPress={() => markOff(false)} />
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{tx('No hubo {name} el {fmtDateShort}', { name: service.name.toLowerCase(), fmtDateShort: fmtDateShort(date) })}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', lineHeight: 19 }}>{tx('Esta fecha no cuenta para la fidelidad ni para las ausencias. En el informe semanal figura como "no hubo".')}</Text>
+            <Button title={tx('Sí hubo: tomar asistencia')} variant="outline" small icon="rotate-ccw" loading={marking} onPress={() => markOff(false)} />
           </Card>
         </View>
       ) : rows === null ? (
@@ -241,21 +242,21 @@ export default function Asistencia() {
           columnWrapperStyle={{ gap: 8 }}
           ListFooterComponent={back.length ? (
             <View style={{ gap: 8, marginTop: 12 }}>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>EN INACTIVOS · ¿VOLVIÓ?</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('EN INACTIVOS · ¿VOLVIÓ?')}</Text>
               {back.map((b) => (
                 <Pressable key={b.id} accessibilityRole="button" onPress={async () => {
                   if (!service) return;
-                  try { await setAttendance(b.id, date, service.id, true); setQ(''); await load(); Alert.alert('¡Volvió!', `${b.name} quedó presente y volvió a su lista.`); }
-                  catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+                  try { await setAttendance(b.id, date, service.id, true); setQ(''); await load(); Alert.alert(tx('¡Volvió!'), tx('{name} quedó presente y volvió a su lista.', { name: b.name })); }
+                  catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); }
                 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 12, backgroundColor: colors.bgSoft }}>
                   <Face name={b.name} path={b.photo_path} size={40} />
                   <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text }}>{b.name}</Text>
-                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Marcar presente</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>{tx('Marcar presente')}</Text>
                 </Pressable>
               ))}
             </View>
           ) : undefined}
-          ListEmptyComponent={<Empty icon="users" title="No hay nadie en la lista" text="Aparecen los miembros, las visitas y quienes prometieron venir. Agregá una visita nueva abajo." />}
+          ListEmptyComponent={<Empty icon="users" title={tx('No hay nadie en la lista')} text={tx('Aparecen los miembros, las visitas y quienes prometieron venir. Agregá una visita nueva abajo.')} />}
           renderItem={({ item: r }) => (
             <Pressable onPress={() => toggle(r)} onLongPress={() => router.push({ pathname: '/contacto/[id]', params: { id: r.contact_id } })} accessibilityRole="checkbox" accessibilityState={{ checked: r.present }} style={[styles.cell, { maxWidth: `${100 / cols}%` }, r.present && styles.cellOn]}>
               <View>
@@ -274,8 +275,8 @@ export default function Asistencia() {
       )}
       {isOff ? null : <View style={styles.bottom}>
         <View style={{ flexDirection: 'row', gap: 8, width: '100%', maxWidth: CONTENT_MAX_WIDTH, alignSelf: 'center' }}>
-        <TextInput value={quickName} onChangeText={setQuickName} placeholder="Visita nueva: nombre y apellido" placeholderTextColor="#8B918C" style={styles.quick} />
-        <Button title="Anotar" small onPress={quickAdd} loading={adding} disabled={quickName.trim().length < 2} style={{ paddingHorizontal: 18 }} />
+        <TextInput value={quickName} onChangeText={setQuickName} placeholder={tx('Visita nueva: nombre y apellido')} placeholderTextColor="#8B918C" style={styles.quick} />
+        <Button title={tx('Anotar')} small onPress={quickAdd} loading={adding} disabled={quickName.trim().length < 2} style={{ paddingHorizontal: 18 }} />
         </View>
       </View>}
     </View>

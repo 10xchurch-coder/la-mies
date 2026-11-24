@@ -11,16 +11,17 @@ import { supabase } from '@/lib/supabase';
 import { listTraining } from '@/lib/api';
 import type { TrainingItem } from '@/types';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Row = { id: string; slug: string; section: string; title: string; summary: string | null; sort_order: number; body?: string };
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
 const EVANG = 'Evangelismo personal';
 const FOLDERS: { section: string; icon: IconName; hint: string; bg: string; fg: string }[] = [
-  { section: EVANG, icon: 'compass', hint: 'Todo para aprender a compartir a Cristo: cómo presentar el evangelio a cada persona y creencia, tu testimonio y qué responder', bg: 'amberSoft', fg: 'amberText' },
-  { section: 'Lo que creemos', icon: 'book-open', hint: 'Las doctrinas de la iglesia, explicadas con la Biblia', bg: 'greenSoft', fg: 'greenText' },
-  { section: 'Preguntas y respuestas', icon: 'help-circle', hint: 'Las preguntas más comunes sobre la fe', bg: 'blueSoft', fg: 'blueText' },
-  { section: 'Finanzas bíblicas', icon: 'dollar-sign', hint: 'El dinero, el trabajo, las deudas y los negocios según Dios', bg: 'amberSoft', fg: 'amberText' },
+  { section: EVANG, icon: 'compass', get hint() { return tx('Todo para aprender a compartir a Cristo: cómo presentar el evangelio a cada persona y creencia, tu testimonio y qué responder'); }, bg: 'amberSoft', fg: 'amberText' },
+  { get section() { return tx('Lo que creemos'); }, icon: 'book-open', get hint() { return tx('Las doctrinas de la iglesia, explicadas con la Biblia'); }, bg: 'greenSoft', fg: 'greenText' },
+  { get section() { return tx('Preguntas y respuestas'); }, icon: 'help-circle', get hint() { return tx('Las preguntas más comunes sobre la fe'); }, bg: 'blueSoft', fg: 'blueText' },
+  { get section() { return tx('Finanzas bíblicas'); }, icon: 'dollar-sign', get hint() { return tx('El dinero, el trabajo, las deudas y los negocios según Dios'); }, bg: 'amberSoft', fg: 'amberText' },
 ];
 const pal = colors as unknown as Record<string, string>;
 
@@ -66,21 +67,21 @@ export default function Crecimiento() {
   const evangBlocks: EvangBlock[] = (() => {
     const A = (slug: string) => { const r = art(slug); return r ? [{ r }] : []; };
     const T = (name: string) => cat(name).map((r) => ({ r, train: true }));
-    const known = ['Tips para recordar', 'Presentaciones del evangelio', 'Respuestas bíblicas', 'Objeciones comunes'];
+    const known = [tx('Tips para recordar'), 'Presentaciones del evangelio', tx('Respuestas bíblicas'), tx('Objeciones comunes')];
     const more = [...new Set(train.map((t) => t.category))].filter((c) => !known.includes(c)).flatMap((c) => T(c));
     const used = new Set<string>();
     const AA = (...slugs: string[]) => slugs.flatMap((x) => { used.add(x); return A(x); });
     const blocks: EvangBlock[] = [
-      { key: 'empezar', title: '1. Para empezar', icon: 'flag', hint: 'Guía para principiantes, cómo empezar una conversación y tips para recordar', items: [...AA('guia-principiantes', 'por-que-compartir', 'empezar-conversacion', 'principios-conversacion'), ...T('Tips para recordar')] },
-      { key: 'presentar', title: '2. Cómo presentar el evangelio', icon: 'message-circle', hint: 'El mensaje paso a paso y cómo guiar a alguien a confiar en Cristo', items: [...AA('salvacion'), ...T('Presentaciones del evangelio'), ...AA('guiar-a-confiar-en-cristo')] },
-      { key: 'quien', title: '3. A quién se lo presentás', icon: 'users', hint: 'Niños, jóvenes, por WhatsApp y a quien está sufriendo', items: AA('evangelio-a-un-nino', 'evangelio-a-jovenes', 'evangelio-por-whatsapp', 'evangelio-a-quien-sufre') },
-      { key: 'creencias', title: '4. Según lo que cree la persona', icon: 'globe', hint: 'Ateo, católico, testigo de Jehová, mormón, adventista, musulmán, budista y más', items: AA('creencia-ateismo', 'creencia-agnosticismo', 'creencia-indiferente', 'creencia-cristiano-de-nombre', 'creencia-catolico', 'creencia-religiosidad-popular', 'creencia-testigos-de-jehova', 'creencia-mormones', 'creencia-adventistas', 'creencia-islam', 'creencia-budismo', 'creencia-hinduismo', 'creencia-judaismo', 'creencia-nueva-era') },
-      { key: 'testimonio', title: '5. Tu testimonio', icon: 'heart', hint: 'Cómo contar lo que Cristo hizo en vos', items: AA('tu-testimonio') },
-      { key: 'responder', title: '6. Qué responder cuando preguntan o dudan', icon: 'help-circle', hint: 'Respuestas bíblicas y objeciones comunes', items: [...T('Respuestas bíblicas'), ...T('Objeciones comunes'), ...more] },
-      { key: 'cree', title: '7. Cuando alguien cree', icon: 'check-circle', hint: 'Los primeros pasos de un nuevo creyente', items: AA('cuando-alguien-cree') },
+      { key: 'empezar', title: tx('1. Para empezar'), icon: 'flag', hint: tx('Guía para principiantes, cómo empezar una conversación y tips para recordar'), items: [...AA('guia-principiantes', 'por-que-compartir', 'empezar-conversacion', 'principios-conversacion'), ...T(tx('Tips para recordar'))] },
+      { key: 'presentar', title: tx('2. Cómo presentar el evangelio'), icon: 'message-circle', hint: tx('El mensaje paso a paso y cómo guiar a alguien a confiar en Cristo'), items: [...AA('salvacion'), ...T('Presentaciones del evangelio'), ...AA('guiar-a-confiar-en-cristo')] },
+      { key: 'quien', title: tx('3. A quién se lo presentás'), icon: 'users', hint: tx('Niños, jóvenes, por WhatsApp y a quien está sufriendo'), items: AA('evangelio-a-un-nino', 'evangelio-a-jovenes', 'evangelio-por-whatsapp', 'evangelio-a-quien-sufre') },
+      { key: 'creencias', title: tx('4. Según lo que cree la persona'), icon: 'globe', hint: tx('Ateo, católico, testigo de Jehová, mormón, adventista, musulmán, budista y más'), items: AA('creencia-ateismo', 'creencia-agnosticismo', 'creencia-indiferente', 'creencia-cristiano-de-nombre', 'creencia-catolico', 'creencia-religiosidad-popular', 'creencia-testigos-de-jehova', 'creencia-mormones', 'creencia-adventistas', 'creencia-islam', 'creencia-budismo', 'creencia-hinduismo', 'creencia-judaismo', 'creencia-nueva-era') },
+      { key: 'testimonio', title: tx('5. Tu testimonio'), icon: 'heart', hint: tx('Cómo contar lo que Cristo hizo en vos'), items: AA('tu-testimonio') },
+      { key: 'responder', title: tx('6. Qué responder cuando preguntan o dudan'), icon: 'help-circle', hint: tx('Respuestas bíblicas y objeciones comunes'), items: [...T(tx('Respuestas bíblicas')), ...T(tx('Objeciones comunes')), ...more] },
+      { key: 'cree', title: tx('7. Cuando alguien cree'), icon: 'check-circle', hint: tx('Los primeros pasos de un nuevo creyente'), items: AA('cuando-alguien-cree') },
     ];
     const rest = (rows ?? []).filter((r) => r.section === EVANG && !used.has(r.slug)).map((r) => ({ r }));
-    if (rest.length) blocks.push({ key: 'mas', title: 'Más', icon: 'folder', hint: 'Otros temas', items: rest });
+    if (rest.length) blocks.push({ key: 'mas', title: tx('Más'), icon: 'folder', hint: tx('Otros temas'), items: rest });
     return blocks.filter((b) => b.items.length);
   })();
   const evangCount = (rows ?? []).filter((r) => r.section === EVANG).length + train.length;
@@ -93,11 +94,11 @@ export default function Crecimiento() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={subBlock ? subBlock.title.replace(/^\d+\.\s*/, '') : seccion ?? 'Crecimiento'} subtitle={subBlock ? `${EVANG} · ${subBlock.items.length} temas` : folder ? `${isEvang ? evangCount : inFolder.length} temas` : 'Para leer, aprender y crecer en la fe'} back />
+      <Header title={subBlock ? subBlock.title.replace(/^\d+\.\s*/, '') : seccion ?? tx('Crecimiento')} subtitle={subBlock ? tx('{EVANG} · {n} temas', { EVANG: tx(EVANG), n: subBlock.items.length }) : folder ? tx('{v1} temas', { v1: isEvang ? evangCount : inFolder.length }) : tx('Para leer, aprender y crecer en la fe')} back />
       <View style={{ paddingHorizontal: 16, paddingBottom: 12, width: '100%', maxWidth: 720, alignSelf: 'center' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input }}>
           <Feather name="search" size={20} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder={seccion ? `Buscar en ${seccion.toLowerCase()}` : 'Buscar: bautismo, deudas, oración…'} placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel="Buscar" />
+          <TextInput value={q} onChangeText={setQ} placeholder={seccion ? tx('Buscar en {seccion}', { seccion: seccion.toLowerCase() }) : tx('Buscar: bautismo, deudas, oración…')} placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel={tx('Buscar')} />
         </View>
       </View>
       <Screen>
@@ -107,7 +108,7 @@ export default function Crecimiento() {
               {found.map((r) => <ArticleRow key={r.id} r={r} icon="search" onPress={() => open(r)} />)}
               {foundTrain.map((r) => <ArticleRow key={r.id} r={r} icon="search" onPress={() => openTrain(r)} />)}
             </>
-          ) : <Empty icon="book-open" title="No encontramos ese tema" />
+          ) : <Empty icon="book-open" title={tx('No encontramos ese tema')} />
         ) : isEvang ? (
           <>
             {subBlock ? subBlock.items.map((it) => <ArticleRow key={it.r.id} r={it.r} icon={it.train ? 'compass' : 'book-open'} onPress={() => (it.train ? openTrain(it.r) : open(it.r))} />)
@@ -119,7 +120,7 @@ export default function Crecimiento() {
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{b.title}</Text>
-                      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{b.hint} · {b.items.length} temas</Text>
+                      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('{hint} · {n} temas', { hint: b.hint, n: b.items.length })}</Text>
                     </View>
                     <Feather name="folder" size={18} color={colors.muted} />
                   </Card>
@@ -128,25 +129,25 @@ export default function Crecimiento() {
             {subBlock ? null : <Pressable onPress={() => router.push('/(tabs)/mapa' as Href)} accessibilityRole="button">
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
                 <Feather name="map" size={22} color={colors.greenText} />
-                <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText, lineHeight: 19 }}>Ya aprendiste lo básico: salí a evangelizar desde el Mapa</Text>
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.greenText, lineHeight: 19 }}>{tx('Ya aprendiste lo básico: salí a evangelizar desde el Mapa')}</Text>
                 <Feather name="chevron-right" size={18} color={colors.greenText} />
               </Card>
             </Pressable>}
           </>
         ) : seccion ? (
-          inFolder.length ? inFolder.map((r) => <ArticleRow key={r.id} r={r} icon={folder?.icon ?? 'book-open'} onPress={() => open(r)} />) : <Empty icon="book-open" title="Todavía no hay material" />
+          inFolder.length ? inFolder.map((r) => <ArticleRow key={r.id} r={r} icon={folder?.icon ?? 'book-open'} onPress={() => open(r)} />) : <Empty icon="book-open" title={tx('Todavía no hay material')} />
         ) : (
           <>
             {first.map((r) => (
               <Pressable key={r.id} onPress={() => open(r)} accessibilityRole="button">
                 <Card style={{ gap: 6, backgroundColor: colors.green, borderColor: colors.green, padding: 16 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFFFFF', letterSpacing: 1, opacity: 0.9 }}>LO PRIMERO</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#FFFFFF', letterSpacing: 1, opacity: 0.9 }}>{tx('LO PRIMERO')}</Text>
                   <Text style={{ fontSize: 20, fontWeight: '900', color: '#FFFFFF' }}>{r.title}</Text>
                   {r.summary ? <Text style={{ fontSize: 13, color: '#FFFFFF', opacity: 0.92, lineHeight: 19 }}>{r.summary}</Text> : null}
                 </Card>
               </Pressable>
             ))}
-            <SectionTitle>Carpetas</SectionTitle>
+            <SectionTitle>{tx('Carpetas')}</SectionTitle>
             {FOLDERS.map((f) => {
               const count = f.section === EVANG ? evangCount : (rows ?? []).filter((r) => r.section === f.section).length;
               if (!count) return null;
@@ -158,7 +159,7 @@ export default function Crecimiento() {
                     </View>
                     <View style={{ flex: 1, gap: 2 }}>
                       <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{f.section}</Text>
-                      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{f.hint} · {count} temas</Text>
+                      <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('{hint} · {count} temas', { hint: f.hint, count })}</Text>
                     </View>
                     <Feather name="folder" size={18} color={colors.muted} />
                   </Card>

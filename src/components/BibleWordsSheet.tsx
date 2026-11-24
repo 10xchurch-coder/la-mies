@@ -14,6 +14,7 @@ import {
 } from '@/lib/bibleOrig';
 import { numberingDiffers, refLabel, refText } from '@/lib/bibleStudy';
 import { colors } from '@/theme';
+import { tx, txLocale } from '@/lib/i18n';
 
 const STEP = 20;
 /** Más de esto de una vez no se lee cómodo en una hoja. */
@@ -21,7 +22,7 @@ const MAX_VERSES = 6;
 export const WORDS_CREDIT = 'Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0.';
 
 /** El nombre del botón que abre la hoja: en español, o en inglés si se lee la King James. */
-export const wordsTitle = (version: BibleVersion): string => (version.lang === 'en' ? 'Original words / Strong’s' : 'Palabras originales');
+export const wordsTitle = (version: BibleVersion): string => (version.lang === 'en' ? tx('Original words / Strong’s') : tx('Palabras originales'));
 
 export function BibleWordsSheet({ visible, onClose, version, book, chapter, verses, onOpen }: {
   visible: boolean; onClose: () => void; version: BibleVersion; book: number; chapter: number; verses: number[];
@@ -66,7 +67,7 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
     setShown(STEP);
     setProgress('');
     ensureDefinition(strong).then(() => { if (alive) setDefReady((n) => n + 1); });
-    strongVerses(strong, () => alive, (done, of) => { if (alive && of > 4) setProgress(`${done} de ${of} libros`); })
+    strongVerses(strong, () => alive, (done, of) => { if (alive && of > 4) setProgress(tx('{done} de {of} libros', { done, of })); })
       .then((r) => { if (alive && r) setFound(r); });
     return () => { alive = false; };
   }, [strong]);
@@ -81,18 +82,18 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
   useBibleReady(visibleHits.map((r) => [version.id, r.book]));
   const offNumbers = version.id !== 'kjv';
 
-  const title = open ? `Strong ${strongLabel(strong)}` : wordsTitle(version);
+  const title = open ? tx('Strong {strongLabel}', { strongLabel: strongLabel(strong) }) : wordsTitle(version);
   const sub = open
-    ? `Palabra en ${langName}`
-    : total ? `Así está escrito en ${langName}. Tocá una palabra para ver más.` : `El versículo en ${langName}`;
+    ? tx('Palabra en {langName}', { langName })
+    : total ? tx('Así está escrito en {langName}. Tocá una palabra para ver más.', { langName }) : tx('El versículo en {langName}', { langName });
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={() => (open ? setOpen(null) : onClose())}>
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} accessibilityLabel="Cerrar" />
+      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' }} onPress={onClose} accessibilityLabel={tx('Cerrar')} />
       <View style={{ backgroundColor: colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '86%' }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 18, paddingTop: 16, paddingBottom: 8, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
           {open ? (
-            <Pressable onPress={() => setOpen(null)} accessibilityRole="button" accessibilityLabel="Volver a las palabras del versículo" hitSlop={10}>
+            <Pressable onPress={() => setOpen(null)} accessibilityRole="button" accessibilityLabel={tx('Volver a las palabras del versículo')} hitSlop={10}>
               <Feather name="arrow-left" size={24} color={colors.text} />
             </Pressable>
           ) : null}
@@ -100,7 +101,7 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
             <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text }}>{title}</Text>
             <Text style={{ fontSize: 13, color: colors.muted }}>{sub}</Text>
           </View>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
+          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tx('Cerrar')} hitSlop={10}><Feather name="x" size={24} color={colors.muted} /></Pressable>
         </View>
 
         {!open ? (
@@ -108,17 +109,17 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
             {loading ? <ActivityIndicator color={colors.blue} style={{ marginVertical: 24 }} /> : null}
             {!total && !loading ? (
               <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>
-                No hay palabras para {verses.length > 1 ? 'estos versículos' : 'este versículo'}.{offNumbers && numberingDiffers(book, chapter) ? ' En este capítulo los números no son iguales en todas las Biblias: probá con el versículo de al lado.' : ''}
+                {tx('No hay palabras para {pl}.{pl2}', { pl: verses.length > 1 ? tx('estos versículos') : tx('este versículo'), pl2: offNumbers && numberingDiffers(book, chapter) ? tx(' En este capítulo los números no son iguales en todas las Biblias: probá con el versículo de al lado.') : '' })}
               </Text>
             ) : null}
             {total ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.blueSoft, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 }}>
                 <Feather name="info" size={15} color={colors.blueText} />
-                <Text style={{ flex: 1, fontSize: 13, color: colors.blueText }}>Lo que quiere decir cada palabra está en inglés.</Text>
+                <Text style={{ flex: 1, fontSize: 13, color: colors.blueText }}>{tx('Lo que quiere decir cada palabra está en inglés.')}</Text>
               </View>
             ) : null}
             {total && offNumbers && numberingDiffers(book, chapter) ? (
-              <Text style={{ fontSize: 12, color: colors.muted }}>En este capítulo los números de versículo no son iguales en todas las Biblias. Las palabras pueden ser las del versículo de antes o de después.</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('En este capítulo los números de versículo no son iguales en todas las Biblias. Las palabras pueden ser las del versículo de antes o de después.')}</Text>
             ) : null}
             {groups.map((g) => (g.words.length ? (
               <View key={g.verse} style={{ gap: 8 }}>
@@ -126,7 +127,7 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
                 <Text style={{ fontSize: 14, lineHeight: 20, color: colors.muted }} numberOfLines={4}>{refText(version, { book, chapter, verse: g.verse, end: g.verse })}</Text>
                 {g.words.map((w, i) => (
                   <Pressable key={`${g.verse}-${i}`} onPress={() => setOpen(w)} accessibilityRole="button"
-                    accessibilityLabel={`${w.lemma}, ${w.translit}. Strong ${w.label}. ${w.gloss}`}
+                    accessibilityLabel={tx('{lemma}, {translit}. Strong {label}. {gloss}', { lemma: w.lemma, translit: w.translit, label: w.label, gloss: w.gloss })}
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 12 }}>
                     <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted, width: 18, textAlign: 'center' }}>{i + 1}</Text>
                     <View style={{ flex: 1, gap: 2 }}>
@@ -148,10 +149,10 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
                 ))}
               </View>
             ) : null))}
-            {verses.length > MAX_VERSES ? <Text style={{ fontSize: 12, color: colors.muted }}>Se muestran los primeros {MAX_VERSES} versículos que tocaste.</Text> : null}
+            {verses.length > MAX_VERSES ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Se muestran los primeros {MAX_VERSES} versículos que tocaste.', { MAX_VERSES })}</Text> : null}
             {total ? (
               <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 17 }}>
-                {lang === 'G' ? 'Griego del texto tradicional (el de la Reina-Valera y la King James). ' : ''}{WORDS_CREDIT}
+                {lang === 'G' ? tx('Griego del texto tradicional (el de la Reina-Valera y la King James). ') : ''}{tx(WORDS_CREDIT)}
               </Text>
             ) : null}
           </ScrollView>
@@ -163,41 +164,41 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
               <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 4 }}>{info?.gloss || open.gloss}</Text>
               {open.word !== (info?.lemma || open.lemma) ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
-                  <Text style={{ fontSize: 13, color: colors.muted }}>En el versículo está escrita así:</Text>
+                  <Text style={{ fontSize: 13, color: colors.muted }}>{tx('En el versículo está escrita así:')}</Text>
                   <Text style={{ fontSize: 17, color: colors.text }}>{open.word}</Text>
                 </View>
               ) : null}
             </View>
             {senses.length > 1 ? (
               <View style={{ gap: 3 }}>
-                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>ESTE NÚMERO SE USA PARA</Text>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('ESTE NÚMERO SE USA PARA')}</Text>
                 {senses.slice(0, 8).map((s) => (
-                  <Text key={s.strong} style={{ fontSize: 14, color: colors.text, fontWeight: s.strong === strong ? '800' : '400' }}>• {s.gloss}{s.strong === strong ? '  (acá)' : ''}</Text>
+                  <Text key={s.strong} style={{ fontSize: 14, color: colors.text, fontWeight: s.strong === strong ? '800' : '400' }}>• {s.gloss}{s.strong === strong ? tx('  (acá)') : ''}</Text>
                 ))}
-                {senses.length > 8 ? <Text style={{ fontSize: 13, color: colors.muted }}>y {senses.length - 8} más</Text> : null}
+                {senses.length > 8 ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('y {v1} más', { v1: senses.length - 8 })}</Text> : null}
               </View>
             ) : null}
             <View style={{ gap: 4 }}>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>EXPLICACIÓN (EN INGLÉS)</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('EXPLICACIÓN (EN INGLÉS)')}</Text>
               {hasDefinitions(strong) ? (
                 def ? <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }}>{def}</Text>
-                  : <Text style={{ fontSize: 14, color: colors.muted }}>{defReady ? 'No hay una explicación más larga para esta palabra.' : 'Cargando…'}</Text>
+                  : <Text style={{ fontSize: 14, color: colors.muted }}>{defReady ? tx('No hay una explicación más larga para esta palabra.') : tx('Cargando…')}</Text>
               ) : (
-                <Text style={{ fontSize: 14, lineHeight: 20, color: colors.muted }}>Para el hebreo la app trae solo el significado corto de arriba. La explicación larga tiene dueño y hace falta pedir permiso para usarla.</Text>
+                <Text style={{ fontSize: 14, lineHeight: 20, color: colors.muted }}>{tx('Para el hebreo la app trae solo el significado corto de arriba. La explicación larga tiene dueño y hace falta pedir permiso para usarla.')}</Text>
               )}
             </View>
             <View style={{ gap: 8 }}>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>DÓNDE MÁS ESTÁ</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('DÓNDE MÁS ESTÁ')}</Text>
               {!found ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8 }}>
                   <ActivityIndicator color={colors.blue} />
-                  <Text style={{ fontSize: 14, color: colors.muted }}>Buscando en toda la Biblia…{progress ? ` ${progress}` : ''}</Text>
+                  <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Buscando en toda la Biblia…{v1}', { v1: progress ? ` ${progress}` : '' })}</Text>
                 </View>
               ) : (
                 <Text style={{ fontSize: 15, color: colors.text }}>
-                  <Text style={{ fontWeight: '800' }}>{found.total === 1 ? 'Aparece 1 vez' : `Aparece ${found.total.toLocaleString('es-AR')} veces`}</Text>
-                  {found.verses !== found.total ? `, en ${found.verses.toLocaleString('es-AR')} versículos` : ''}
-                  {found.books.length > 1 ? ` de ${found.books.length} libros` : found.books.length === 1 ? `, en ${bookNameIn(version, found.books[0].book)}` : ''}. Tocá un versículo para abrirlo.
+                  <Text style={{ fontWeight: '800' }}>{found.total === 1 ? tx('Aparece 1 vez') : tx('Aparece {toLocaleString} veces', { toLocaleString: found.total.toLocaleString(txLocale()) })}</Text>
+                  {found.verses !== found.total ? tx(', en {toLocaleString} versículos', { toLocaleString: found.verses.toLocaleString(txLocale()) }) : ''}
+                  {found.books.length > 1 ? tx(' de {n} libros', { n: found.books.length }) : found.books.length === 1 ? tx(', en {bookNameIn}', { bookNameIn: bookNameIn(version, found.books[0].book) }) : ''}{tx('. Tocá un versículo para abrirlo.')}
                 </Text>
               )}
               {visibleHits.map((r) => {
@@ -211,15 +212,15 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
                       <Feather name="chevron-right" size={18} color={colors.muted} />
                     </View>
                     <Text style={{ fontSize: 15, lineHeight: 21, color: text ? colors.text : colors.muted }} numberOfLines={4}>
-                      {text || (version.load && !version.books[r.book]().length ? 'Cargando…' : 'En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.')}
+                      {text || (version.load && !version.books[r.book]().length ? tx('Cargando…') : tx('En esta Biblia este versículo tiene otro número. Tocá para abrir el capítulo.'))}
                     </Text>
                   </Pressable>
                 );
               })}
-              {flat.length > shown ? <Button title={`Ver más (${(flat.length - shown).toLocaleString('es-AR')})`} variant="outline" icon="chevron-down" onPress={() => setShown(shown + STEP * 2)} /> : null}
-              {found && offNumbers ? <Text style={{ fontSize: 12, color: colors.muted }}>Los números de versículo son los de la King James. En muy pocos capítulos tu Biblia los cuenta distinto y el versículo puede ser el de al lado.</Text> : null}
+              {flat.length > shown ? <Button title={tx('Ver más ({toLocaleString})', { toLocaleString: (flat.length - shown).toLocaleString(txLocale()) })} variant="outline" icon="chevron-down" onPress={() => setShown(shown + STEP * 2)} /> : null}
+              {found && offNumbers ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Los números de versículo son los de la King James. En muy pocos capítulos tu Biblia los cuenta distinto y el versículo puede ser el de al lado.')}</Text> : null}
             </View>
-            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 17 }}>{WORDS_CREDIT}</Text>
+            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', lineHeight: 17 }}>{tx(WORDS_CREDIT)}</Text>
           </ScrollView>
         )}
       </View>

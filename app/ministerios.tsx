@@ -9,6 +9,7 @@ import { listMinistries, listProfiles, ministryMembers, ministryPeopleRows } fro
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Ministry, MinistryMember, Profile, MinistryPersonRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -36,9 +37,9 @@ export default function Ministerios() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={isLeader ? 'Ministerios' : 'Mis ministerios'} subtitle="Cada uno con su chat, sus turnos y sus recomendaciones" back />
+      <Header title={isLeader ? tx('Ministerios') : tx('Mis ministerios')} subtitle={tx('Cada uno con su chat, sus turnos y sus recomendaciones')} back />
       <Screen>
-        {rows && !rows.length ? <Empty icon="heart" title={isLeader ? 'Todavía no hay ministerios' : 'Todavía no estás en ningún ministerio'} text={isLeader ? undefined : 'Cuando el pastor o un líder te sume a un ministerio, aparece acá.'} /> : null}
+        {rows && !rows.length ? <Empty icon="heart" title={isLeader ? tx('Todavía no hay ministerios') : tx('Todavía no estás en ningún ministerio')} text={isLeader ? undefined : tx('Cuando el pastor o un líder te sume a un ministerio, aparece acá.')} /> : null}
         {sorted.map((m) => {
           const mine = isMine(m);
           const count = crewRows.filter((x) => x.ministry_id === m.id).length;
@@ -52,9 +53,9 @@ export default function Ministerios() {
                 <View style={{ flex: 1, gap: 3 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                     <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{m.name}</Text>
-                    {mine ? <Tag text="Estás acá" tone="green" /> : null}
+                    {mine ? <Tag text={tx('Estás acá')} tone="green" /> : null}
                   </View>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>{count} {count === 1 ? 'integrante' : 'integrantes'}{leader ? ` · líder: ${leader}` : ''}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{count} {count === 1 ? tx('integrante') : tx('integrantes')}{leader ? tx(' · líder: {leader}', { leader }) : ''}</Text>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.muted} />
               </Card>

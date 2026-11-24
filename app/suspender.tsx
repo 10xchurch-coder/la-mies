@@ -13,6 +13,7 @@ import { addDays, dayName, fmtDateShort, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
 import type { Cancellation } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const PAST_WEEKS = 4;
 const NEXT_WEEKS = 8;
@@ -58,7 +59,7 @@ export default function Suspender() {
       await setCancelled({ serviceId: servicio ?? null, eventId: evento ?? null, date: d, cancelled: off });
       setOffs(await listCancellations(isoDate(addDays(new Date(), -7 * (PAST_WEEKS + 1)))));
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(null);
     }
@@ -68,8 +69,8 @@ export default function Suspender() {
   if (!item) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="No hubo" back />
-        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>No se encontró esa reunión.</Text>
+        <Header title={tx('No hubo')} back />
+        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>{tx('No se encontró esa reunión.')}</Text>
       </View>
     );
   }
@@ -80,9 +81,9 @@ export default function Suspender() {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderBottomWidth: last ? 0 : 1, borderBottomColor: colors.border, backgroundColor: off ? colors.amberSoft : 'transparent' }}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{d === today ? `Hoy · ${fmtDateShort(d)}` : fmtDateShort(d)}</Text>
+          <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{d === today ? tx('Hoy · {fmtDateShort}', { fmtDateShort: fmtDateShort(d) }) : fmtDateShort(d)}</Text>
           <Text style={{ fontSize: 12, color: off ? colors.amberText : colors.muted }}>
-            {off ? (future ? 'Se suspende' : 'No hubo') : future ? 'Se hace' : 'Hubo'}
+            {off ? (future ? tx('Se suspende') : tx('No hubo')) : future ? tx('Se hace') : tx('Hubo')}
           </Text>
         </View>
         <Pressable
@@ -90,13 +91,13 @@ export default function Suspender() {
           disabled={busy !== null}
           accessibilityRole="switch"
           accessibilityState={{ checked: off, busy: busy === d }}
-          accessibilityLabel={`${item.name} ${fmtDateShort(d)}: ${off ? 'no hubo' : 'hubo'}`}
+          accessibilityLabel={`${item.name} ${fmtDateShort(d)}: ${off ? tx('no hubo') : tx('hubo')}`}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14, borderRadius: 19, borderWidth: 1.5,
             borderColor: off ? colors.amber : colors.input, backgroundColor: off ? colors.amber : colors.bg, opacity: busy === d ? 0.5 : 1 }}
         >
           <Feather name={off ? 'x-circle' : 'slash'} size={15} color={off ? '#FFF' : colors.text} />
           <Text style={{ fontSize: 13, fontWeight: '800', color: off ? '#FFF' : colors.text }}>
-            {off ? (future ? 'Suspendida' : 'No hubo') : future ? 'Suspender' : 'Marcar "no hubo"'}
+            {off ? (future ? tx('Suspendida') : tx('No hubo')) : future ? tx('Suspender') : tx('Marcar "no hubo"')}
           </Text>
         </Pressable>
       </View>
@@ -105,23 +106,22 @@ export default function Suspender() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={item.name} subtitle={`Cada ${dayName(item.dow)} · fechas que no se hacen`} back />
+      <Header title={item.name} subtitle={tx('Cada {dayName} · fechas que no se hacen', { dayName: dayName(item.dow) })} back />
       <Screen>
         <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-          Marcá las fechas en que no hubo {item.name.toLowerCase()} o en que se suspende. Esas fechas no bajan los números:
-          no cuentan para la fidelidad ni para las ausencias, y en el informe semanal figuran como &quot;no hubo&quot;.
+          {tx('Marcá las fechas en que no hubo')} {item.name.toLowerCase()} {tx('o en que se suspende. Esas fechas no bajan los números: no cuentan para la fidelidad ni para las ausencias, y en el informe semanal figuran como "no hubo".')}
         </Text>
-        <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>Próximas</Text>
+        <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>{tx('Próximas')}</Text>
         <Card style={{ padding: 0, overflow: 'hidden' }}>
           {dates.next.map((d, i) => <Row key={d} d={d} last={i === dates.next.length - 1} />)}
         </Card>
-        <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>Últimas</Text>
+        <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.4 }}>{tx('Últimas')}</Text>
         <Card style={{ padding: 0, overflow: 'hidden' }}>
           {dates.past.map((d, i) => <Row key={d} d={d} last={i === dates.past.length - 1} />)}
         </Card>
         {servicio ? (
           <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>
-            Si ya se tomó asistencia ese día, primero sacá a los presentes en Asistencia.
+            {tx('Si ya se tomó asistencia ese día, primero sacá a los presentes en Asistencia.')}
           </Text>
         ) : null}
       </Screen>

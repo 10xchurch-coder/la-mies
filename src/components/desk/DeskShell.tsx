@@ -12,6 +12,7 @@ import { useLayout } from '@/lib/layout';
 import { rolesLabel } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 import { colors, themed, toneOf } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -63,18 +64,18 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
       <View style={styles.brand}>
         {logo ? <Image source={{ uri: logo }} style={{ width: 34, height: 34 }} contentFit="contain" /> : null}
         <View style={{ flex: 1 }}>
-          <Text style={styles.brandName} numberOfLines={2}>{church?.name ?? 'Iglesia'}</Text>
-          <Text style={styles.brandSub}>Escritorio · La Mies</Text>
+          <Text style={styles.brandName} numberOfLines={2}>{church?.name ?? tx('Iglesia')}</Text>
+          <Text style={styles.brandSub}>{tx('Escritorio · La Mies')}</Text>
         </View>
       </View>
       <View style={styles.find}>
         <Feather name="search" size={15} color={colors.muted} />
-        <TextInput value={find} onChangeText={setFind} placeholder="Buscar una sección…" placeholderTextColor={colors.muted} accessibilityLabel="Buscar una sección" autoCorrect={false}
+        <TextInput value={find} onChangeText={setFind} placeholder={tx('Buscar una sección…')} placeholderTextColor={colors.muted} accessibilityLabel={tx('Buscar una sección')} autoCorrect={false}
           style={{ flex: 1, height: '100%', fontSize: 13, color: colors.text, ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}) }} />
-        {find ? <Pressable onPress={() => setFind('')} hitSlop={8} accessibilityLabel="Borrar la búsqueda"><Feather name="x" size={15} color={colors.muted} /></Pressable> : null}
+        {find ? <Pressable onPress={() => setFind('')} hitSlop={8} accessibilityLabel={tx('Borrar la búsqueda')}><Feather name="x" size={15} color={colors.muted} /></Pressable> : null}
       </View>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingVertical: 6, paddingHorizontal: 10, gap: 14 }} keyboardShouldPersistTaps="handled">
-        {nav.length ? null : <Text style={{ fontSize: 13, color: colors.muted, padding: 10 }}>No hay ninguna sección con ese nombre.</Text>}
+        {nav.length ? null : <Text style={{ fontSize: 13, color: colors.muted, padding: 10 }}>{tx('No hay ninguna sección con ese nombre.')}</Text>}
         {nav.map((g) => {
           const c = toneOf(g.tone);
           return (
@@ -107,11 +108,11 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
         <View style={{ flexDirection: 'row', gap: 14, marginTop: 8 }}>
           <Pressable accessibilityRole="button" onPress={() => { setDeskPref(false); router.replace('/(tabs)/iglesia'); }} style={styles.footLink}>
             <Feather name="smartphone" size={14} color={colors.muted} />
-            <Text style={styles.footLinkText}>Vista de teléfono</Text>
+            <Text style={styles.footLinkText}>{tx('Vista de teléfono')}</Text>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={() => signOut()} style={styles.footLink}>
             <Feather name="log-out" size={14} color={colors.muted} />
-            <Text style={styles.footLinkText}>Salir</Text>
+            <Text style={styles.footLinkText}>{tx('Salir')}</Text>
           </Pressable>
         </View>
       </View>
@@ -124,17 +125,17 @@ export function DeskShell({ children }: { children: React.ReactNode }) {
       <View style={{ flex: 1, minWidth: 0, paddingTop: narrow ? 0 : insets.top, paddingRight: insets.right }}>
         {narrow ? (
           <View style={[styles.narrowBar, { height: 50 + insets.top, paddingTop: insets.top }]}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Menú" onPress={() => setOpen((v) => !v)} style={{ padding: 10 }}>
+            <Pressable accessibilityRole="button" accessibilityLabel={tx('Menú')} onPress={() => setOpen((v) => !v)} style={{ padding: 10 }}>
               <Feather name={open ? 'x' : 'menu'} size={22} color={colors.text} />
             </Pressable>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{church?.name ?? 'Escritorio'}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{church?.name ?? tx('Escritorio')}</Text>
           </View>
         ) : null}
         {children}
       </View>
       {narrow && open ? (
         <>
-          <Pressable accessibilityLabel="Cerrar menú" onPress={() => setOpen(false)} style={styles.scrim} />
+          <Pressable accessibilityLabel={tx('Cerrar menú')} onPress={() => setOpen(false)} style={styles.scrim} />
           {side}
         </>
       ) : null}

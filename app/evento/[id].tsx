@@ -16,6 +16,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchEvent, EventRegistration } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
@@ -84,8 +85,8 @@ export default function Evento() {
   if (!ev) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Evento" back />
-        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>Este evento ya no está en el calendario.</Text>
+        <Header title={tx('Evento')} back />
+        <Text style={{ padding: 24, color: colors.muted, textAlign: 'center' }}>{tx('Este evento ya no está en el calendario.')}</Text>
       </View>
     );
   }
@@ -94,8 +95,8 @@ export default function Evento() {
   const day = new Date(`${on}T12:00:00`);
   const endIso = ev.ends_at ? isoDate(new Date(ev.ends_at)) : null;
   const when = ev.weekly
-    ? `Cada ${dayName(start.getDay())}${ev.all_day ? '' : ` a las ${hhmm(start)}`}`
-    : `${cap(day.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}${ev.all_day ? (endIso && endIso > on ? ` al ${fmtDateShort(endIso)}` : '') : ` · ${hhmm(start)}`}`;
+    ? tx('Cada {dayName}{v1}', { dayName: dayName(start.getDay()), v1: ev.all_day ? '' : tx(' a las {hhmm}', { hhmm: hhmm(start) }) })
+    : `${cap(day.toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' }))}${ev.all_day ? (endIso && endIso > on ? ` al ${fmtDateShort(endIso)}` : '') : ` · ${hhmm(start)}`}`;
   const program = (ev.program ?? '').split('\n').map((x) => x.replace(/^[-•]\s*/, '').trim()).filter(Boolean);
   const mine = regs.find((r) => r.user_id === session?.user.id);
   const past = on < isoDate(new Date());
@@ -109,7 +110,7 @@ export default function Evento() {
   };
 
   const toggleGoing = async () => {
-    try { await setRsvp(ev.id, on, !going); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+    try { await setRsvp(ev.id, on, !going); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); }
   };
 
   const openForm = () => setForm(mine
@@ -119,18 +120,18 @@ export default function Evento() {
   const submit = async () => {
     if (!form) return;
     const people = Math.max(1, Math.min(50, Number(form.people) || 1));
-    if (!form.name.trim()) { Alert.alert('Falta el nombre'); return; }
+    if (!form.name.trim()) { Alert.alert(tx('Falta el nombre')); return; }
     const bad = phoneProblem(form.phone);
-    if (bad) { Alert.alert('Revisá el teléfono', bad); return; }
+    if (bad) { Alert.alert(tx('Revisá el teléfono'), bad); return; }
     setBusy(true);
     try {
       await saveRegistration({ id: form.id, event_id: ev.id, occurs_on: on, name: form.name.trim(), phone: formatPhone(form.phone) || null, people, needs_ride: form.ride, needs_lodging: form.lodging, notes: form.notes.trim() || null });
       if (!going) await setRsvp(ev.id, on, true).catch(() => undefined);
       setForm(null);
       load();
-      Alert.alert('¡Listo!', form.id ? 'Se actualizó tu inscripción.' : 'Quedaste inscripto.');
+      Alert.alert(tx('¡Listo!'), form.id ? tx('Se actualizó tu inscripción.') : tx('Quedaste inscripto.'));
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -140,12 +141,12 @@ export default function Evento() {
     const full = (ev.reg_price ?? 0) * r.people;
     const paid = r.paid_amount >= full && full > 0;
     saveRegistration({ id: r.id, event_id: r.event_id, occurs_on: r.occurs_on, name: r.name, paid_amount: paid ? 0 : full || 1 })
-      .then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+      .then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
   };
 
-  const remove = () => Alert.alert('Borrar evento', ev.title, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Borrar', style: 'destructive', onPress: () => deleteEvent(ev.id).then(() => router.back()) },
+  const remove = () => Alert.alert(tx('Borrar evento'), ev.title, [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Borrar'), style: 'destructive', onPress: () => deleteEvent(ev.id).then(() => router.back()) },
   ]);
 
   const totals = {
@@ -163,7 +164,7 @@ export default function Evento() {
         <EventImage ev={ev} width="100%" height={200} radius={16}>
           <View style={{ position: 'absolute', left: 12, top: 12, backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6, alignItems: 'center' }}>
             {ev.weekly ? (
-              <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }}>CADA {dayName(start.getDay()).toUpperCase()}</Text>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }}>{tx('CADA')} {dayName(start.getDay()).toUpperCase()}</Text>
             ) : (
               <>
                 <Text style={{ fontSize: 11, fontWeight: '800', color: colors.greenText }}>{dayName(day.getDay()).slice(0, 3).toUpperCase()}</Text>
@@ -175,59 +176,59 @@ export default function Evento() {
 
         <View style={{ gap: 4 }}>
           <Text style={{ fontSize: 24, fontWeight: '900', color: colors.text, letterSpacing: -0.3 }}>{ev.title}</Text>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{when}{ev.yearly ? ' · todos los años' : ''}</Text>
+          <Text style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{when}{ev.yearly ? tx(' · todos los años') : ''}</Text>
         </View>
         {ev.weekly && offDates.length ? (
           <Card style={{ gap: 4, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>Se suspende</Text>
-            <Text style={{ fontSize: 14, color: colors.text }}>No hay {ev.title.toLowerCase()} el {offDates.map(fmtDateShort).join(', el ')}.</Text>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.amberText }}>{tx('Se suspende')}</Text>
+            <Text style={{ fontSize: 14, color: colors.text }}>{tx('No hay {title} el {map}.', { title: ev.title.toLowerCase(), map: offDates.map(fmtDateShort).join(', el ') })}</Text>
           </Card>
         ) : null}
         {ev.description ? <Text style={{ fontSize: 16, color: colors.text, lineHeight: 24 }}>{ev.description}</Text> : null}
 
         {!ev.weekly && !past ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Button title={going ? 'Voy ✓' : 'Voy'} icon={going ? 'check-circle' : 'circle'} variant={going ? 'primary' : 'outline'} onPress={toggleGoing} style={{ flex: 1 }} />
-            <Button title="Compartir" icon="share-2" variant="outline" onPress={share} style={{ flex: 1 }} />
+            <Button title={going ? tx('Voy ✓') : tx('Voy')} icon={going ? 'check-circle' : 'circle'} variant={going ? 'primary' : 'outline'} onPress={toggleGoing} style={{ flex: 1 }} />
+            <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={share} style={{ flex: 1 }} />
           </View>
-        ) : <Button title="Compartir" icon="share-2" variant="outline" onPress={share} />}
-        {goingCount ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', marginTop: -6 }}>{goingCount === 1 ? '1 persona va' : `${goingCount} personas van`}. Te recordamos la víspera.</Text> : null}
+        ) : <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={share} />}
+        {goingCount ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center', marginTop: -6 }}>{tx('{v1}. Te recordamos la víspera.', { v1: goingCount === 1 ? tx('1 persona va') : tx('{goingCount} personas van', { goingCount }) })}</Text> : null}
 
         <Card style={{ paddingVertical: 2 }}>
           {ev.place ? (
-            <Row icon="map-pin" label="Dónde">
+            <Row icon="map-pin" label={tx('Dónde')}>
               <Text style={{ fontSize: 15, color: colors.text }}>{ev.place}</Text>
-              <Pressable onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${ev.place}, Posadas, Misiones`)}`)} accessibilityRole="link">
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green, marginTop: 2 }}>Cómo llegar →</Text>
+              <Pressable onPress={() => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(tx('{place}, Posadas, Misiones', { place: ev.place }))}`)} accessibilityRole="link">
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green, marginTop: 2 }}>{tx('Cómo llegar →')}</Text>
               </Pressable>
             </Row>
           ) : null}
-          {ev.cost ? <Row icon="dollar-sign" label="Costo"><Text style={{ fontSize: 15, color: colors.text }}>{ev.cost}</Text></Row> : null}
-          {ev.transport ? <Row icon="truck" label="Transporte"><Text style={{ fontSize: 15, color: colors.text }}>{ev.transport}</Text></Row> : null}
-          {ev.bring ? <Row icon="shopping-bag" label="Qué llevar"><Text style={{ fontSize: 15, color: colors.text }}>{ev.bring}</Text></Row> : null}
+          {ev.cost ? <Row icon="dollar-sign" label={tx('Costo')}><Text style={{ fontSize: 15, color: colors.text }}>{ev.cost}</Text></Row> : null}
+          {ev.transport ? <Row icon="truck" label={tx('Transporte')}><Text style={{ fontSize: 15, color: colors.text }}>{ev.transport}</Text></Row> : null}
+          {ev.bring ? <Row icon="shopping-bag" label={tx('Qué llevar')}><Text style={{ fontSize: 15, color: colors.text }}>{ev.bring}</Text></Row> : null}
           {program.length ? (
-            <Row icon="list" label="Programa">
+            <Row icon="list" label={tx('Programa')}>
               {program.map((p, i) => <Text key={i} style={{ fontSize: 15, color: colors.text }}>• {p}</Text>)}
             </Row>
           ) : null}
           {ev.contact_name || ev.contact_phone ? (
-            <Row icon="user" label="Consultas">
+            <Row icon="user" label={tx('Consultas')}>
               <Text style={{ fontSize: 15, color: colors.text }}>{[ev.contact_name, ev.contact_phone].filter(Boolean).join(' · ')}</Text>
               {wa ? (
-                <Pressable onPress={() => Linking.openURL(`https://wa.me/${wa.startsWith('54') ? wa : `549${wa}`}?text=${encodeURIComponent(`Hola, te escribo por ${ev.title}.`)}`)} accessibilityRole="link">
-                  <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green, marginTop: 2 }}>Escribir por WhatsApp →</Text>
+                <Pressable onPress={() => Linking.openURL(`https://wa.me/${wa.startsWith('54') ? wa : `549${wa}`}?text=${encodeURIComponent(tx('Hola, te escribo por {title}.', { title: ev.title }))}`)} accessibilityRole="link">
+                  <Text style={{ fontSize: 14, fontWeight: '800', color: colors.green, marginTop: 2 }}>{tx('Escribir por WhatsApp →')}</Text>
                 </Pressable>
               ) : null}
             </Row>
           ) : null}
           {!ev.place && !ev.cost && !ev.transport && !ev.bring && !program.length && !ev.contact_name && !ev.contact_phone ? (
-            <Text style={{ fontSize: 13, color: colors.muted, paddingVertical: 12 }}>{staff ? 'Podés agregar lugar, costo, transporte, qué llevar y el programa con "Editar".' : 'No hay más detalles por ahora.'}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, paddingVertical: 12 }}>{staff ? tx('Podés agregar lugar, costo, transporte, qué llevar y el programa con "Editar".') : tx('No hay más detalles por ahora.')}</Text>
           ) : null}
         </Card>
 
         {shifts.length ? (
           <>
-            <SectionTitle>Tus turnos para servir</SectionTitle>
+            <SectionTitle>{tx('Tus turnos para servir')}</SectionTitle>
             <Card style={{ gap: 10 }}>
               {shifts.map((x) => (
                 <View key={x.id} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
@@ -238,49 +239,49 @@ export default function Evento() {
                   </View>
                 </View>
               ))}
-              <Text style={{ fontSize: 12, color: colors.muted }}>Te va a llegar un aviso unas 2 horas antes de cada turno.</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Te va a llegar un aviso unas 2 horas antes de cada turno.')}</Text>
             </Card>
           </>
         ) : null}
 
         {ev.registration && !ev.weekly ? (
           <>
-            <SectionTitle>Inscripción</SectionTitle>
+            <SectionTitle>{tx('Inscripción')}</SectionTitle>
             <Card style={{ gap: 8 }}>
               <Text style={{ fontSize: 14, color: colors.text }}>
-                {regCount} {regCount === 1 ? 'inscripto' : 'inscriptos'}{ev.reg_capacity ? ` de ${ev.reg_capacity} lugares` : ''}
-                {ev.reg_price ? ` · ${fmtMoney(ev.reg_price)} por persona` : ''}
-                {ev.reg_deadline ? ` · hasta el ${fmtDateShort(ev.reg_deadline)}` : ''}
+                {regCount} {regCount === 1 ? tx('inscripto') : tx('inscriptos')}{ev.reg_capacity ? tx(' de {reg_capacity} lugares', { reg_capacity: ev.reg_capacity }) : ''}
+                {ev.reg_price ? tx(' · {fmtMoney} por persona', { fmtMoney: fmtMoney(ev.reg_price) }) : ''}
+                {ev.reg_deadline ? tx(' · hasta el {fmtDateShort}', { fmtDateShort: fmtDateShort(ev.reg_deadline) }) : ''}
               </Text>
               {mine && !form ? (
                 <View style={{ gap: 6 }}>
-                  <Tag text={`Estás inscripto${mine.people > 1 ? ` (${mine.people} personas)` : ''}`} tone="green" />
-                  {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>{mine.paid_amount >= ev.reg_price * mine.people ? 'Pagado ✓' : `Falta pagar ${fmtMoney(ev.reg_price * mine.people - mine.paid_amount)}`}</Text> : null}
-                  <Button title="Mi entrada (QR)" icon="tag" onPress={() => router.push({ pathname: '/evento/boleto', params: { id: ev.id, fecha: on } } as never)} />
+                  <Tag text={tx('Estás inscripto{v1}', { v1: mine.people > 1 ? tx(' ({people} personas)', { people: mine.people }) : '' })} tone="green" />
+                  {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>{mine.paid_amount >= ev.reg_price * mine.people ? tx('Pagado ✓') : tx('Falta pagar {fmtMoney}', { fmtMoney: fmtMoney(ev.reg_price * mine.people - mine.paid_amount) })}</Text> : null}
+                  <Button title={tx('Mi entrada (QR)')} icon="tag" onPress={() => router.push({ pathname: '/evento/boleto', params: { id: ev.id, fecha: on } } as never)} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Button title="Cambiar" variant="outline" small onPress={openForm} style={{ flex: 1 }} />
-                    <Button title="Darme de baja" variant="ghost" small onPress={() => deleteRegistration(mine.id).then(load)} style={{ flex: 1 }} />
+                    <Button title={tx('Cambiar')} variant="outline" small onPress={openForm} style={{ flex: 1 }} />
+                    <Button title={tx('Darme de baja')} variant="ghost" small onPress={() => deleteRegistration(mine.id).then(load)} style={{ flex: 1 }} />
                   </View>
                 </View>
               ) : null}
               {!mine && !form ? (
-                past || closed ? <Text style={{ fontSize: 13, color: colors.muted }}>La inscripción está cerrada.</Text>
-                  : full ? <Text style={{ fontSize: 13, color: colors.red }}>No quedan lugares.</Text>
-                  : <Button title="Inscribirme" icon="edit-3" onPress={openForm} />
+                past || closed ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('La inscripción está cerrada.')}</Text>
+                  : full ? <Text style={{ fontSize: 13, color: colors.red }}>{tx('No quedan lugares.')}</Text>
+                  : <Button title={tx('Inscribirme')} icon="edit-3" onPress={openForm} />
               ) : null}
               {form ? (
                 <View style={{ gap: 10 }}>
-                  <Field label="Nombre" value={form.name} onChangeText={(t) => setForm({ ...form, name: t })} />
+                  <Field label={tx('Nombre')} value={form.name} onChangeText={(t) => setForm({ ...form, name: t })} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <PhoneField label="Teléfono" value={form.phone} onChangeText={(t) => setForm({ ...form, phone: t })} style={{ flex: 1 }} />
-                    <Field label="Cuántos van" value={form.people} onChangeText={(t) => setForm({ ...form, people: t.replace(/\D/g, '') })} keyboardType="number-pad" style={{ width: 110 }} />
+                    <PhoneField label={tx('Teléfono')} value={form.phone} onChangeText={(t) => setForm({ ...form, phone: t })} style={{ flex: 1 }} />
+                    <Field label={tx('Cuántos van')} value={form.people} onChangeText={(t) => setForm({ ...form, people: t.replace(/\D/g, '') })} keyboardType="number-pad" style={{ width: 110 }} />
                   </View>
-                  {ev.reg_ask_ride ? <Toggle label="Necesito transporte" value={form.ride} onChange={(v) => setForm({ ...form, ride: v })} /> : null}
-                  {ev.reg_ask_lodging ? <Toggle label="Necesito alojamiento" value={form.lodging} onChange={(v) => setForm({ ...form, lodging: v })} /> : null}
-                  <Field label="Algo más" hint="(opcional)" value={form.notes} onChangeText={(t) => setForm({ ...form, notes: t })} multiline placeholder="Edades de los chicos, comida especial…" />
+                  {ev.reg_ask_ride ? <Toggle label={tx('Necesito transporte')} value={form.ride} onChange={(v) => setForm({ ...form, ride: v })} /> : null}
+                  {ev.reg_ask_lodging ? <Toggle label={tx('Necesito alojamiento')} value={form.lodging} onChange={(v) => setForm({ ...form, lodging: v })} /> : null}
+                  <Field label={tx('Algo más')} hint={tx('(opcional)')} value={form.notes} onChangeText={(t) => setForm({ ...form, notes: t })} multiline placeholder={tx('Edades de los chicos, comida especial…')} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Button title="Cancelar" variant="ghost" onPress={() => setForm(null)} style={{ flex: 1 }} />
-                    <Button title={form.id ? 'Guardar' : 'Inscribirme'} onPress={submit} loading={busy} style={{ flex: 2 }} />
+                    <Button title={tx('Cancelar')} variant="ghost" onPress={() => setForm(null)} style={{ flex: 1 }} />
+                    <Button title={form.id ? tx('Guardar') : tx('Inscribirme')} onPress={submit} loading={busy} style={{ flex: 2 }} />
                   </View>
                 </View>
               ) : null}
@@ -288,12 +289,12 @@ export default function Evento() {
 
             {staff ? (
               <>
-                <SectionTitle>Inscriptos</SectionTitle>
+                <SectionTitle>{tx('Inscriptos')}</SectionTitle>
                 <Card style={{ gap: 4 }}>
                   <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>
-                    {totals.people} personas{ev.reg_ask_ride ? ` · ${totals.ride} con transporte` : ''}{ev.reg_ask_lodging ? ` · ${totals.lodging} con alojamiento` : ''}
+                    {totals.people} {tx('personas')}{ev.reg_ask_ride ? tx(' · {ride} con transporte', { ride: totals.ride }) : ''}{ev.reg_ask_lodging ? tx(' · {lodging} con alojamiento', { lodging: totals.lodging }) : ''}
                   </Text>
-                  {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>Pagado {fmtMoney(totals.paid)} de {fmtMoney(totals.due)}</Text> : null}
+                  {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Pagado {fmtMoney} de {fmtMoney2}', { fmtMoney: fmtMoney(totals.paid), fmtMoney2: fmtMoney(totals.due) })}</Text> : null}
                 </Card>
                 <Card style={{ padding: 0 }}>
                   {regs.map((r, i) => {
@@ -307,13 +308,13 @@ export default function Evento() {
                         </View>
                         {ev.reg_price ? (
                           <Pressable onPress={() => markPaid(r)} accessibilityRole="button" style={{ height: 32, paddingHorizontal: 10, borderRadius: 16, justifyContent: 'center', backgroundColor: paid ? colors.green : colors.bg, borderWidth: 1, borderColor: paid ? colors.green : colors.border }}>
-                            <Text style={{ fontSize: 12, fontWeight: '800', color: paid ? '#FFF' : colors.text }}>{paid ? 'Pagó ✓' : 'Marcar pagó'}</Text>
+                            <Text style={{ fontSize: 12, fontWeight: '800', color: paid ? '#FFF' : colors.text }}>{paid ? tx('Pagó ✓') : tx('Marcar pagó')}</Text>
                           </Pressable>
                         ) : null}
                       </View>
                     );
                   })}
-                  {!regs.length ? <Text style={{ padding: 12, color: colors.muted }}>Todavía no se inscribió nadie.</Text> : null}
+                  {!regs.length ? <Text style={{ padding: 12, color: colors.muted }}>{tx('Todavía no se inscribió nadie.')}</Text> : null}
                 </Card>
               </>
             ) : null}
@@ -321,21 +322,21 @@ export default function Evento() {
         ) : null}
 
         {staff && ev.weekly ? (
-          <Button title="Suspender una fecha / no hubo" icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
+          <Button title={tx('Suspender una fecha / no hubo')} icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
         ) : null}
         {!ev.weekly && mayPlan ? (
-          <Button title="Planificar este evento" icon="clipboard" onPress={() => router.push({ pathname: '/evento/plan', params: { id: ev.id } } as never)} />
+          <Button title={tx('Planificar este evento')} icon="clipboard" onPress={() => router.push({ pathname: '/evento/plan', params: { id: ev.id } } as never)} />
         ) : null}
         {!ev.weekly && (staff || mayPlan || can('personas.asistencia')) ? (
-          <Button title="Puerta: anotar y marcar entradas" variant="outline" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
+          <Button title={tx('Puerta: anotar y marcar entradas')} variant="outline" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
         ) : null}
         {!ev.weekly && staff ? (
-          <Button title="Hacer un sorteo de este evento" icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
+          <Button title={tx('Hacer un sorteo de este evento')} icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
         ) : null}
         {staff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Button title="Editar" icon="edit-2" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { id: ev.id } })} style={{ flex: 1 }} />
-            <Button title="Borrar" icon="trash-2" variant="ghost" onPress={remove} style={{ flex: 1 }} />
+            <Button title={tx('Editar')} icon="edit-2" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { id: ev.id } })} style={{ flex: 1 }} />
+            <Button title={tx('Borrar')} icon="trash-2" variant="ghost" onPress={remove} style={{ flex: 1 }} />
           </View>
         ) : null}
       </Screen>

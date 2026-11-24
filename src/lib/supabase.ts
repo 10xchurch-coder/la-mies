@@ -4,6 +4,7 @@ import Constants from 'expo-constants';
 import { createClient } from '@supabase/supabase-js';
 import { LargeSecureStore } from './secureStore';
 import { makeOfflineFetch, setOfflineUser, setTokenGetter } from './netFetch';
+import { tx } from './i18n';
 
 // Los dos valores públicos de Supabase se pegan en app.json → expo.extra
 // (supabaseUrl y supabaseAnonKey). Así viajan con la app cuando se compila en la nube.
@@ -46,18 +47,18 @@ if (Platform.OS !== 'web') {
 
 /** Mensaje legible para mostrar en pantalla. */
 export function errorMessage(e: unknown): string {
-  if (!e) return 'Error desconocido';
+  if (!e) return tx('Error desconocido');
   if (typeof e === 'string') return e;
   const any = e as { message?: string; error_description?: string };
-  const m = any.message ?? any.error_description ?? 'Error';
-  if (/invalid login credentials/i.test(m)) return 'Correo o contraseña incorrectos';
-  if (/email not confirmed/i.test(m)) return 'Primero confirmá tu correo (mirá tu bandeja de entrada)';
-  if (/network request failed|failed to fetch|load failed|networkerror/i.test(m)) return 'Sin conexión. Esto necesita internet: probá de nuevo cuando tengas señal.';
-  if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Iniciá sesión.';
-  if (/password should be at least/i.test(m)) return 'La contraseña tiene que tener al menos 10 caracteres';
-  if (/weak password|password is too weak|known to be weak/i.test(m)) return 'Esa contraseña es muy fácil de adivinar. Usá letras, números y más de 10 caracteres.';
-  if (/invalid totp code|invalid code|code has expired/i.test(m)) return 'Código incorrecto o vencido. Mirá el nuevo código en tu app de autenticación.';
-  if (/aal2|mfa/i.test(m) && /required/i.test(m)) return 'Falta el código de verificación en dos pasos.';
-  if (/rate limit|too many requests/i.test(m)) return 'Demasiados intentos. Esperá unos minutos y probá de nuevo.';
+  const m = any.message ?? any.error_description ?? tx('Error');
+  if (/invalid login credentials/i.test(m)) return tx('Correo o contraseña incorrectos');
+  if (/email not confirmed/i.test(m)) return tx('Primero confirmá tu correo (mirá tu bandeja de entrada)');
+  if (/network request failed|failed to fetch|load failed|networkerror/i.test(m)) return tx('Sin conexión. Esto necesita internet: probá de nuevo cuando tengas señal.');
+  if (/already registered/i.test(m)) return tx('Ese correo ya tiene cuenta. Iniciá sesión.');
+  if (/password should be at least/i.test(m)) return tx('La contraseña tiene que tener al menos 10 caracteres');
+  if (/weak password|password is too weak|known to be weak/i.test(m)) return tx('Esa contraseña es muy fácil de adivinar. Usá letras, números y más de 10 caracteres.');
+  if (/invalid totp code|invalid code|code has expired/i.test(m)) return tx('Código incorrecto o vencido. Mirá el nuevo código en tu app de autenticación.');
+  if (/aal2|mfa/i.test(m) && /required/i.test(m)) return tx('Falta el código de verificación en dos pasos.');
+  if (/rate limit|too many requests/i.test(m)) return tx('Demasiados intentos. Esperá unos minutos y probá de nuevo.');
   return m;
 }

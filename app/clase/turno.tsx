@@ -11,6 +11,7 @@ import { errorMessage } from '@/lib/supabase';
 import { fmtDateShort } from '@/lib/format';
 import { colors } from '@/theme';
 import type { ClassTeacher, Contact, Material, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Turno() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export default function Turno() {
       });
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -74,25 +75,25 @@ export default function Turno() {
   const ordered = [...members].sort((a, b) => Number(!!isClassTeacher(b)) - Number(!!isClassTeacher(a)) || a.name.localeCompare(b.name));
   const items = ordered.map((c) => {
     const t = isClassTeacher(c);
-    return { id: c.id, title: c.name, subtitle: t ? (t.is_helper ? 'Ayudante de la clase' : 'Maestro de la clase') : (c.profile_id ? people.find((p) => p.id === c.profile_id) ? 'Tiene la app' : undefined : undefined) };
+    return { id: c.id, title: c.name, subtitle: t ? (t.is_helper ? tx('Ayudante de la clase') : tx('Maestro de la clase')) : (c.profile_id ? people.find((p) => p.id === c.profile_id) ? tx('Tiene la app') : undefined : undefined) };
   });
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Turno de la clase" subtitle={fmtDateShort(date)} back />
+      <Header title={tx('Turno de la clase')} subtitle={fmtDateShort(date)} back />
       <Screen>
         <Card style={{ padding: 0 }}>
-          <RowLink icon="user" title={nameOf(teacher) ?? 'Elegir maestro'} subtitle="Maestro" onPress={() => setPicker('teacher')} />
-          <RowLink icon="user-plus" title={nameOf(helper) ?? 'Sin ayudante'} subtitle="Ayudante" onPress={() => setPicker('helper')} />
-          <RowLink icon="book" title={m ? m.title : 'Elegir material'} subtitle={m ? m.series : 'Capítulo o lección'} onPress={() => setPicker('material')} />
+          <RowLink icon="user" title={nameOf(teacher) ?? tx('Elegir maestro')} subtitle={tx('Maestro')} onPress={() => setPicker('teacher')} />
+          <RowLink icon="user-plus" title={nameOf(helper) ?? tx('Sin ayudante')} subtitle={tx('Ayudante')} onPress={() => setPicker('helper')} />
+          <RowLink icon="book" title={m ? m.title : tx('Elegir material')} subtitle={m ? m.series : tx('Capítulo o lección')} onPress={() => setPicker('material')} />
         </Card>
-        <Field label="Nota para el maestro" hint="(opcional)" value={note} onChangeText={setNote} multiline />
-        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Se eligen entre los miembros de la iglesia. Si el maestro o el ayudante tienen la app, el lunes de esa semana reciben un aviso con la clase y el capítulo.</Text>
-        <Button title="Guardar" onPress={save} loading={busy} />
+        <Field label={tx('Nota para el maestro')} hint={tx('(opcional)')} value={note} onChangeText={setNote} multiline />
+        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Se eligen entre los miembros de la iglesia. Si el maestro o el ayudante tienen la app, el lunes de esa semana reciben un aviso con la clase y el capítulo.')}</Text>
+        <Button title={tx('Guardar')} onPress={save} loading={busy} />
       </Screen>
-      <PickerModal visible={picker === 'teacher'} title="Maestro" items={items} allowNone onClose={() => setPicker(null)} onPick={(v) => { setTeacher(v); setPicker(null); }} />
-      <PickerModal visible={picker === 'helper'} title="Ayudante" items={items} allowNone onClose={() => setPicker(null)} onPick={(v) => { setHelper(v); setPicker(null); }} />
-      <PickerModal visible={picker === 'material'} title="Material" allowNone noneLabel="Sin material"
+      <PickerModal visible={picker === 'teacher'} title={tx('Maestro')} items={items} allowNone onClose={() => setPicker(null)} onPick={(v) => { setTeacher(v); setPicker(null); }} />
+      <PickerModal visible={picker === 'helper'} title={tx('Ayudante')} items={items} allowNone onClose={() => setPicker(null)} onPick={(v) => { setHelper(v); setPicker(null); }} />
+      <PickerModal visible={picker === 'material'} title={tx('Material')} allowNone noneLabel={tx('Sin material')}
         items={materials.map((x) => ({ id: x.id, title: x.title, subtitle: x.series, face: false }))} onClose={() => setPicker(null)} onPick={(v) => { setMaterial(v); setPicker(null); }} />
     </View>
   );

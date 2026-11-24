@@ -13,6 +13,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Missionary, MissionaryReport } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function MisioneroDetalle() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -31,37 +32,37 @@ export default function MisioneroDetalle() {
     if (!r.pdf_path) return;
     try {
       const url = await downloadUrl('missionaries', r.pdf_path, pdfLabel(r.pdf_name, r.month));
-      if (url) await Linking.openURL(url); else Alert.alert('No se pudo abrir', 'Probá de nuevo en un momento.');
+      if (url) await Linking.openURL(url); else Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo en un momento.'));
     } catch (e) {
-      Alert.alert('No se pudo abrir', errorMessage(e));
+      Alert.alert(tx('No se pudo abrir'), errorMessage(e));
     }
   };
   const askDeleteReport = (r: MissionaryReport) => {
-    Alert.alert('¿Borrar este informe?', `${monthLabel(r.month)}. Se borran también su PDF y sus fotos. No se puede deshacer.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => deleteMissionaryReport(r.id).then(() => removeMissionaryFiles([r.pdf_path, ...r.photo_paths])).then(load).catch((e) => Alert.alert('No se pudo borrar', errorMessage(e))) },
+    Alert.alert(tx('¿Borrar este informe?'), tx('{monthLabel}. Se borran también su PDF y sus fotos. No se puede deshacer.', { monthLabel: monthLabel(r.month) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: () => deleteMissionaryReport(r.id).then(() => removeMissionaryFiles([r.pdf_path, ...r.photo_paths])).then(load).catch((e) => Alert.alert(tx('No se pudo borrar'), errorMessage(e))) },
     ]);
   };
   const askDeleteMissionary = () => {
     if (!m) return;
-    Alert.alert(`¿Quitar a ${m.name}?`, 'Se borran también todos sus informes. No se puede deshacer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Quitar', style: 'destructive', onPress: async () => {
+    Alert.alert(tx('¿Quitar a {name}?', { name: m.name }), tx('Se borran también todos sus informes. No se puede deshacer.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Quitar'), style: 'destructive', onPress: async () => {
         try {
           const all = reports ?? [];
           await deleteMissionary(m.id);
           await removeMissionaryFiles([m.photo_path, m.thumb_path, ...all.flatMap((r) => [r.pdf_path, ...r.photo_paths])]);
           router.back();
-        } catch (e) { Alert.alert('No se pudo quitar', errorMessage(e)); }
+        } catch (e) { Alert.alert(tx('No se pudo quitar'), errorMessage(e)); }
       } },
     ]);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={m?.name ?? 'Misionero'} subtitle={m?.field ?? undefined} back />
+      <Header title={m?.name ?? tx('Misionero')} subtitle={m?.field ?? undefined} back />
       <Screen>
-        {m === undefined ? <Loading /> : m === null ? <Empty icon="globe" title="No encontramos a este misionero" /> : (
+        {m === undefined ? <Loading /> : m === null ? <Empty icon="globe" title={tx('No encontramos a este misionero')} /> : (
           <>
             <Card style={{ padding: 0, overflow: 'hidden' }}>
               {m.photo_path ? (
@@ -79,7 +80,7 @@ export default function MisioneroDetalle() {
                     <Text style={{ flex: 1, fontSize: 14, fontWeight: '600', color: colors.muted, lineHeight: 20 }}>{m.field}</Text>
                   </View>
                 ) : null}
-                {reports?.length ? <Text style={{ fontSize: 13, color: colors.greenText, fontWeight: '700' }}>{reports.length} {reports.length === 1 ? 'informe' : 'informes'} · último: {monthLabel(reports[0].month)}</Text> : null}
+                {reports?.length ? <Text style={{ fontSize: 13, color: colors.greenText, fontWeight: '700' }}>{tx('{n} {pl} · último: {monthLabel}', { n: reports.length, pl: reports.length === 1 ? tx('informe') : tx('informes'), monthLabel: monthLabel(reports[0].month) })}</Text> : null}
               </View>
             </Card>
             {m.bio ? (() => {
@@ -96,7 +97,7 @@ export default function MisioneroDetalle() {
                     <Card style={{ gap: 8, backgroundColor: colors.blueSoft, borderColor: colors.blueSoft }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <Feather name="heart" size={18} color={colors.blueText} />
-                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors.blueText }}>Cómo orar por ellos</Text>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors.blueText }}>{tx('Cómo orar por ellos')}</Text>
                       </View>
                       {prayItems.map((t) => <Text key={t} style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>•  {t}</Text>)}
                     </Card>
@@ -107,20 +108,20 @@ export default function MisioneroDetalle() {
             })() : null}
             {isStaff ? (
               <View style={{ gap: 8 }}>
-                <Button title="Subir informe del mes" icon="upload" onPress={() => router.push({ pathname: '/misioneros/informe', params: { missionary: m.id } } as unknown as Href)} />
+                <Button title={tx('Subir informe del mes')} icon="upload" onPress={() => router.push({ pathname: '/misioneros/informe', params: { missionary: m.id } } as unknown as Href)} />
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Button title="Editar datos" icon="edit-2" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/misioneros/editar', params: { id: m.id } } as unknown as Href)} />
-                  <Button title="Quitar" icon="trash-2" variant="ghost" small style={{ flex: 1 }} onPress={askDeleteMissionary} />
+                  <Button title={tx('Editar datos')} icon="edit-2" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/misioneros/editar', params: { id: m.id } } as unknown as Href)} />
+                  <Button title={tx('Quitar')} icon="trash-2" variant="ghost" small style={{ flex: 1 }} onPress={askDeleteMissionary} />
                 </View>
               </View>
             ) : null}
-            <SectionTitle>Informes</SectionTitle>
-            {reports === null ? <Loading /> : !reports.length ? <Empty icon="file-text" title="Todavía no hay informes" text={isStaff ? 'Subí el primero con el botón de arriba.' : undefined} /> : reports.map((r) => (
+            <SectionTitle>{tx('Informes')}</SectionTitle>
+            {reports === null ? <Loading /> : !reports.length ? <Empty icon="file-text" title={tx('Todavía no hay informes')} text={isStaff ? tx('Subí el primero con el botón de arriba.') : undefined} /> : reports.map((r) => (
               <Card key={r.id} style={{ gap: 10 }}>
                 <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textTransform: 'capitalize' }}>{monthLabel(r.month)}</Text>
                 {r.title ? <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.title}</Text> : null}
                 {r.summary ? <Text selectable style={{ fontSize: 15, color: colors.text, lineHeight: 22 }}>{r.summary}</Text> : null}
-                {r.pdf_path ? <Button title="Abrir el informe (PDF)" icon="file-text" variant="outline" onPress={() => openPdf(r)} /> : null}
+                {r.pdf_path ? <Button title={tx('Abrir el informe (PDF)')} icon="file-text" variant="outline" onPress={() => openPdf(r)} /> : null}
                 {r.photo_paths.length ? (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                     {r.photo_paths.map((p) => (
@@ -130,8 +131,8 @@ export default function MisioneroDetalle() {
                 ) : null}
                 {isStaff ? (
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Button title="Editar" icon="edit-2" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/misioneros/informe', params: { missionary: r.missionary_id, month: r.month } } as unknown as Href)} />
-                    <Button title="Borrar" icon="trash-2" variant="ghost" small style={{ flex: 1 }} onPress={() => askDeleteReport(r)} />
+                    <Button title={tx('Editar')} icon="edit-2" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/misioneros/informe', params: { missionary: r.missionary_id, month: r.month } } as unknown as Href)} />
+                    <Button title={tx('Borrar')} icon="trash-2" variant="ghost" small style={{ flex: 1 }} onPress={() => askDeleteReport(r)} />
                   </View>
                 ) : null}
               </Card>
@@ -140,7 +141,7 @@ export default function MisioneroDetalle() {
         )}
       </Screen>
       <Modal visible={!!big} transparent animationType="fade" onRequestClose={() => setBig(null)}>
-        <Pressable onPress={() => setBig(null)} accessibilityRole="button" accessibilityLabel="Cerrar foto" style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' }}>
+        <Pressable onPress={() => setBig(null)} accessibilityRole="button" accessibilityLabel={tx('Cerrar foto')} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center' }}>
           <SignedImage bucket="missionaries" path={big} fit="contain" style={{ width: '100%', height: '85%', backgroundColor: 'transparent' }} />
         </Pressable>
       </Modal>

@@ -14,9 +14,10 @@ import { planMonth, type RotaSlot } from '@/lib/rota';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ClassRow, ClassSchedule, ClassTeacher, Contact, Profile } from '@/types';
+import { tx, txList } from '@/lib/i18n';
 
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-const LIMITS: { v: number | null; label: string }[] = [{ v: 1, label: '1' }, { v: 2, label: '2' }, { v: 3, label: '3' }, { v: 4, label: '4' }, { v: null, label: 'Sin límite' }];
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
+const LIMITS: { v: number | null; label: string }[] = [{ v: 1, label: '1' }, { v: 2, label: '2' }, { v: 3, label: '3' }, { v: 4, label: '4' }, { v: null, get label() { return tx('Sin límite'); } }];
 const pad = (n: number) => String(n).padStart(2, '0');
 
 export default function Planificar() {
@@ -59,14 +60,14 @@ export default function Planificar() {
 
   // Cada maestro tiene una clave: su cuenta si tiene la app, o "c:" + su ficha si no la tiene.
   const keyOf = (t: ClassTeacher) => t.profile_id ?? `c:${t.contact_id}`;
-  const nameOf = (pid: string | null) => (!pid ? null : pid.startsWith('c:') ? members.find((c) => c.id === pid.slice(2))?.name ?? 'Sin nombre' : people.find((p) => p.id === pid)?.display_name ?? 'Sin nombre');
+  const nameOf = (pid: string | null) => (!pid ? null : pid.startsWith('c:') ? members.find((c) => c.id === pid.slice(2))?.name ?? tx('Sin nombre') : people.find((p) => p.id === pid)?.display_name ?? tx('Sin nombre'));
   const pool = useMemo(() => [...new Set(teachers.map(keyOf))].sort((a, b) => (nameOf(a) ?? '').localeCompare(nameOf(b) ?? '')), [teachers, people, members]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setLimit = async (pid: string, v: number | null) => {
     setLimits((l) => ({ ...l, [pid]: v }));
     if (pid.startsWith('c:')) return; // sin la app, el tope vale para este armado y no queda guardado
     const { error } = await supabase.from('teacher_prefs').upsert({ profile_id: pid, church_id: church?.id, per_month: v, updated_at: new Date().toISOString() });
-    if (error) Alert.alert('No se pudo guardar', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo guardar'), errorMessage(error));
   };
 
   const build = () => {
@@ -94,9 +95,9 @@ export default function Planificar() {
   const save = () => {
     if (!plan) return;
     const todo = plan.filter((s) => !s.kept);
-    Alert.alert('Guardar el mes', `Se van a guardar ${todo.length} turnos de ${MONTHS[ym.m]}. Cada maestro recibe el aviso el lunes de su semana.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Guardar', onPress: async () => {
+    Alert.alert(tx('Guardar el mes'), tx('Se van a guardar {n} turnos de {MONTHS}. Cada maestro recibe el aviso el lunes de su semana.', { n: todo.length, MONTHS: MONTHS[ym.m] }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Guardar'), onPress: async () => {
         setBusy(true);
         try {
           for (const s of todo) {
@@ -108,10 +109,10 @@ export default function Planificar() {
               material_id: prev?.material_id ?? null, note: prev?.note ?? null,
             });
           }
-          Alert.alert('Listo', 'Los turnos del mes quedaron guardados.');
+          Alert.alert(tx('Listo'), tx('Los turnos del mes quedaron guardados.'));
           router.back();
         } catch (e) {
-          Alert.alert('No se pudo guardar', errorMessage(e));
+          Alert.alert(tx('No se pudo guardar'), errorMessage(e));
         } finally {
           setBusy(false);
         }
@@ -122,8 +123,8 @@ export default function Planificar() {
   if (!can('ens.editar')) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Planificar el mes" back />
-        <Empty icon="lock" title="Sin permiso" text="Esto lo usa el pastor o el director de enseñanza." />
+        <Header title={tx('Planificar el mes')} back />
+        <Empty icon="lock" title={tx('Sin permiso')} text={tx('Esto lo usa el pastor o el director de enseñanza.')} />
       </View>
     );
   }
@@ -136,17 +137,17 @@ export default function Planificar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Planificar el mes" subtitle="Sugerencia de maestros para todas las clases" back />
+      <Header title={tx('Planificar el mes')} subtitle={tx('Sugerencia de maestros para todas las clases')} back />
       <Screen>
         <Card style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Pressable onPress={() => move(-1)} accessibilityLabel="Mes anterior" hitSlop={12}><Feather name="chevron-left" size={24} color={colors.green} /></Pressable>
+          <Pressable onPress={() => move(-1)} accessibilityLabel={tx('Mes anterior')} hitSlop={12}><Feather name="chevron-left" size={24} color={colors.green} /></Pressable>
           <Text style={{ fontSize: 18, fontWeight: '800', color: colors.text, textTransform: 'capitalize' }}>{MONTHS[ym.m]} {ym.y}</Text>
-          <Pressable onPress={() => move(1)} accessibilityLabel="Mes siguiente" hitSlop={12}><Feather name="chevron-right" size={24} color={colors.green} /></Pressable>
+          <Pressable onPress={() => move(1)} accessibilityLabel={tx('Mes siguiente')} hitSlop={12}><Feather name="chevron-right" size={24} color={colors.green} /></Pressable>
         </Card>
 
-        <SectionTitle>Cuántas veces por mes</SectionTitle>
-        <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Elegí cuántos turnos puede tener cada maestro en el mes (sumando todas las clases). Se guarda solo.</Text>
-        {!pool.length ? <Empty icon="users" title="Todavía no hay maestros" text="Agregalos en cada clase (Maestros → Agregar maestro)." /> : null}
+        <SectionTitle>{tx('Cuántas veces por mes')}</SectionTitle>
+        <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>{tx('Elegí cuántos turnos puede tener cada maestro en el mes (sumando todas las clases). Se guarda solo.')}</Text>
+        {!pool.length ? <Empty icon="users" title={tx('Todavía no hay maestros')} text={tx('Agregalos en cada clase (Maestros → Agregar maestro).')} /> : null}
         <Card style={{ padding: 0 }}>
           {pool.map((pid) => (
             <View key={pid} style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 8 }}>
@@ -157,7 +158,7 @@ export default function Planificar() {
                   return (
                     <Pressable key={o.label} onPress={() => setLimit(pid, o.v)} accessibilityRole="button" accessibilityState={{ selected: on }}
                       style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1, borderColor: on ? colors.green : colors.border, backgroundColor: on ? colors.greenSoft : colors.bg }}>
-                      <Text style={{ fontSize: 13, fontWeight: on ? '800' : '500', color: on ? colors.greenText : colors.text }}>{o.label}{o.v ? (o.v === 1 ? ' vez' : ' veces') : ''}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: on ? '800' : '500', color: on ? colors.greenText : colors.text }}>{o.label}{o.v ? (o.v === 1 ? tx(' vez') : tx(' veces')) : ''}</Text>
                     </Pressable>
                   );
                 })}
@@ -166,13 +167,13 @@ export default function Planificar() {
           ))}
         </Card>
 
-        <Toggle label="Reemplazar los turnos ya cargados" hint="Si está apagado, se respetan los que ya están y solo se llenan los vacíos." value={replace} onChange={(v) => { setReplace(v); setPlan(null); }} />
-        <Button title="Armar sugerencia" icon="shuffle" onPress={build} />
+        <Toggle label={tx('Reemplazar los turnos ya cargados')} hint={tx('Si está apagado, se respetan los que ya están y solo se llenan los vacíos.')} value={replace} onChange={(v) => { setReplace(v); setPlan(null); }} />
+        <Button title={tx('Armar sugerencia')} icon="shuffle" onPress={build} />
 
         {plan ? (
           <>
-            <SectionTitle>Sugerencia</SectionTitle>
-            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>Tocá un nombre para cambiarlo. Nada se guarda hasta que toques "Guardar el mes".</Text>
+            <SectionTitle>{tx('Sugerencia')}</SectionTitle>
+            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>{tx('Tocá un nombre para cambiarlo. Nada se guarda hasta que toques "Guardar el mes".')}</Text>
             {classes.map((k) => {
               const rows = plan.map((s, i) => ({ s, i })).filter(({ s }) => s.class_id === k.id);
               if (!rows.length) return null;
@@ -185,37 +186,37 @@ export default function Planificar() {
                       <Text style={{ width: 86, fontSize: 13, fontWeight: '700', color: colors.text }}>{fmtDateShort(s.on_date)}</Text>
                       <View style={{ flex: 1, gap: 4 }}>
                         <Pressable onPress={() => setEdit({ i, who: 'teacher' })} accessibilityRole="button">
-                          <Text style={{ fontSize: 14, color: s.teacher_id ? colors.text : colors.red, fontWeight: '600' }}>{nameOf(s.teacher_id) ?? 'Sin maestro disponible'}</Text>
+                          <Text style={{ fontSize: 14, color: s.teacher_id ? colors.text : colors.red, fontWeight: '600' }}>{nameOf(s.teacher_id) ?? tx('Sin maestro disponible')}</Text>
                         </Pressable>
                         {hasHelpers ? (
                           <Pressable onPress={() => setEdit({ i, who: 'helper' })} accessibilityRole="button">
-                            <Text style={{ fontSize: 13, color: colors.muted }}>Ayudante: {nameOf(s.helper_id) ?? 'nadie'}</Text>
+                            <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Ayudante: {nameOf}', { nameOf: nameOf(s.helper_id) ?? tx('nadie') })}</Text>
                           </Pressable>
                         ) : null}
                       </View>
-                      {s.kept ? <Tag text="Ya cargado" /> : null}
+                      {s.kept ? <Tag text={tx('Ya cargado')} /> : null}
                     </View>
                   ))}
                 </Card>
               );
             })}
-            <SectionTitle>Turnos por persona</SectionTitle>
+            <SectionTitle>{tx('Turnos por persona')}</SectionTitle>
             <Card style={{ gap: 4 }}>
               {pool.map((pid) => (
                 <Text key={pid} style={{ fontSize: 14, color: colors.text }}>
-                  {nameOf(pid)}: <Text style={{ fontWeight: '800' }}>{counts[pid] ?? 0}</Text>{limits[pid] ? ` de ${limits[pid]}` : ''}
+                  {nameOf(pid)}: <Text style={{ fontWeight: '800' }}>{counts[pid] ?? 0}</Text>{limits[pid] ? tx(' de {limits}', { limits: limits[pid] }) : ''}
                 </Text>
               ))}
             </Card>
-            <Button title="Guardar el mes" icon="check" onPress={save} loading={busy} />
+            <Button title={tx('Guardar el mes')} icon="check" onPress={save} loading={busy} />
           </>
         ) : null}
       </Screen>
       <PickerModal
         visible={!!edit}
-        title={edit?.who === 'helper' ? 'Ayudante' : 'Maestro'}
+        title={edit?.who === 'helper' ? tx('Ayudante') : tx('Maestro')}
         allowNone
-        items={editPool.map((pid) => ({ id: pid, title: nameOf(pid) ?? '', subtitle: busyThatDay(pid) ? 'Ya tiene otra clase ese día' : `${counts[pid] ?? 0} turnos este mes`, face: false }))}
+        items={editPool.map((pid) => ({ id: pid, title: nameOf(pid) ?? '', subtitle: busyThatDay(pid) ? tx('Ya tiene otra clase ese día') : tx('{counts} turnos este mes', { counts: counts[pid] ?? 0 }), face: false }))}
         onClose={() => setEdit(null)}
         onPick={(v) => {
           if (plan && edit) {

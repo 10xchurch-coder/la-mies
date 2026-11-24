@@ -13,6 +13,7 @@ import { fmtDay, fmtDistance, fmtMinutes, fmtRelativeDay, fmtTime } from '@/lib/
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { ChurchReport } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 type Period = 'last' | 'week' | 'month';
 
@@ -25,25 +26,25 @@ function range(period: Period, lastStart?: string, lastEnd?: string | null): { f
     from.setHours(0, 0, 0, 0);
     const to = new Date(from);
     to.setDate(from.getDate() + 7);
-    return { from, to, label: `Semana del ${fmtDay(from)}` };
+    return { from, to, label: tx('Semana del {fmtDay}', { fmtDay: fmtDay(from) }) };
   }
   if (period === 'month') {
     const from = new Date(now.getFullYear(), now.getMonth(), 1);
     const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    return { from, to, label: from.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }) };
+    return { from, to, label: from.toLocaleDateString(txLocale(), { month: 'long', year: 'numeric' }) };
   }
   if (lastStart) {
     const from = new Date(lastStart);
     from.setHours(0, 0, 0, 0);
     const to = new Date(from);
     to.setDate(from.getDate() + 1);
-    return { from, to, label: `Última salida · ${fmtRelativeDay(lastStart)}` };
+    return { from, to, label: tx('Última salida · {fmtRelativeDay}', { fmtRelativeDay: fmtRelativeDay(lastStart) }) };
   }
   const from = new Date(now);
   from.setHours(0, 0, 0, 0);
   const to = new Date(from);
   to.setDate(from.getDate() + 1);
-  return { from, to, label: 'Hoy' };
+  return { from, to, label: tx('Hoy') };
 }
 
 export default function Panel() {
@@ -88,13 +89,13 @@ export default function Panel() {
   }, [profile?.role]);
 
   const rotate = () => {
-    Alert.alert('Nuevo código', 'El código actual deja de funcionar. Los que ya están adentro no se ven afectados.', [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('Nuevo código'), tx('El código actual deja de funcionar. Los que ya están adentro no se ven afectados.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Generar',
+        text: tx('Generar'),
         onPress: async () => {
           const { data, error } = await supabase.rpc('rotate_join_code');
-          if (error) Alert.alert('No se pudo', errorMessage(error));
+          if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
           else { setJoinCode(typeof data === 'string' ? data : null); refreshProfile(); }
         },
       },
@@ -103,7 +104,7 @@ export default function Panel() {
 
   const shareCode = () => {
     if (!church || !joinCode) return;
-    Share.share({ message: `Para usar la app La Mies de ${church.name}: descargala, tocá "Crear cuenta" y poné el código ${joinCode}` });
+    Share.share({ message: tx('Para usar la app La Mies de {name}: descargala, tocá "Crear cuenta" y poné el código {joinCode}', { name: church.name, joinCode }) });
   };
 
   const t = report?.totals;
@@ -118,7 +119,7 @@ export default function Panel() {
   const isOpen = (metric: PanelMetric) => !!open && !open.user && open.metric === metric;
   const list = (metric: PanelMetric, user?: string) => (
     <DetailList
-      title={`${METRIC_LABEL[metric]}${user ? ` de ${names.get(user) ?? ''}` : ''}`}
+      title={`${METRIC_LABEL[metric]}${user ? tx(' de {get}', { get: names.get(user) ?? '' }) : ''}`}
       items={detail ? panelItems(metric, detail, user) : null}
       names={names}
       showWho={!user}
@@ -130,53 +131,53 @@ export default function Panel() {
   if (!profile || (!hasRole(profile, 'admin') && !hasRole(profile, 'captain'))) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Panel" back />
-        <Empty icon="lock" title="Solo para administradores y capitanes" />
+        <Header title={tx('Panel')} back />
+        <Empty icon="lock" title={tx('Solo para administradores y capitanes')} />
       </View>
     );
   }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Panel del pastor" subtitle={church?.name ?? ''} back />
+      <Header title={tx('Panel del pastor')} subtitle={church?.name ?? ''} back />
       <Screen>
         <Card style={{ padding: 0 }}>
-          <RowLink title="Evangelismo en vivo" subtitle="Quién está saliendo ahora, por dónde va y cómo viene el día" icon="radio" onPress={() => router.push('/equipo')} />
+          <RowLink title={tx('Evangelismo en vivo')} subtitle={tx('Quién está saliendo ahora, por dónde va y cómo viene el día')} icon="radio" onPress={() => router.push('/equipo')} />
         </Card>
-        <Segmented options={[{ value: 'last', label: 'Última salida' }, { value: 'week', label: 'Semana' }, { value: 'month', label: 'Mes' }]} value={period} onChange={setPeriod} />
+        <Segmented options={[{ value: 'last', label: tx('Última salida') }, { value: 'week', label: tx('Semana') }, { value: 'month', label: tx('Mes') }]} value={period} onChange={setPeriod} />
         <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{label}</Text>
         {report === undefined ? (
           <Loading />
         ) : !report || !t ? (
-          <Empty icon="bar-chart-2" title="Sin datos para este período" />
+          <Empty icon="bar-chart-2" title={tx('Sin datos para este período')} />
         ) : (
           <>
             <View style={{ gap: 8 }}>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Stat value={detail ? panelItems('contacts', detail).length : countContacts(report.sessions)} label="Contactos" onPress={() => toggle('contacts')} active={isOpen('contacts')} />
-                <Stat value={t.presentations} label="Presentaciones" tone="green" onPress={() => toggle('presentations')} active={isOpen('presentations')} />
+                <Stat value={detail ? panelItems('contacts', detail).length : countContacts(report.sessions)} label={tx('Contactos')} onPress={() => toggle('contacts')} active={isOpen('contacts')} />
+                <Stat value={t.presentations} label={tx('Presentaciones')} tone="green" onPress={() => toggle('presentations')} active={isOpen('presentations')} />
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Stat value={t.promises} label="Prometieron venir a la iglesia" tone="amber" onPress={() => toggle('promises')} active={isOpen('promises')} />
-                <Stat value={detail ? detail.came.length : t.came} label="Visitaron la iglesia" tone="blue" onPress={() => toggle('came')} active={isOpen('came')} />
+                <Stat value={t.promises} label={tx('Prometieron venir a la iglesia')} tone="amber" onPress={() => toggle('promises')} active={isOpen('promises')} />
+                <Stat value={detail ? detail.came.length : t.came} label={tx('Visitaron la iglesia')} tone="blue" onPress={() => toggle('came')} active={isOpen('came')} />
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Stat value={t.discipleship} label="Discipulado" onPress={() => toggle('discipleship')} active={isOpen('discipleship')} />
-                <Stat value={t.baptisms} label="Bautismos" onPress={() => toggle('baptisms')} active={isOpen('baptisms')} />
-                <Stat value={fmtMinutes(t.minutes)} label="En la calle" />
-                <Stat value={t.members} label="Hermanos" onPress={() => router.push('/salieron' as never)} />
+                <Stat value={t.discipleship} label={tx('Discipulado')} onPress={() => toggle('discipleship')} active={isOpen('discipleship')} />
+                <Stat value={t.baptisms} label={tx('Bautismos')} onPress={() => toggle('baptisms')} active={isOpen('baptisms')} />
+                <Stat value={fmtMinutes(t.minutes)} label={tx('En la calle')} />
+                <Stat value={t.members} label={tx('Hermanos')} onPress={() => router.push('/salieron' as never)} />
               </View>
               {(() => {
                 const outings = countOutings(report.sessions);
                 const houses = detail ? panelItems('contacts', detail).length : countContacts(report.sessions);
                 return (
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    {outings} {outings === 1 ? 'salida' : 'salidas'} · {fmtDistance(Number(t.km) * 1000)} caminados · {t.blocks} cuadras · {houses} {houses === 1 ? 'casa' : 'casas'}
+                    {tx('{outings} {pl} · {fmtDistance} caminados · {blocks} cuadras · {houses} {pl2}', { outings, pl: outings === 1 ? tx('salida') : tx('salidas'), fmtDistance: fmtDistance(Number(t.km) * 1000), blocks: t.blocks, houses, pl2: houses === 1 ? tx('casa') : tx('casas') })}
                   </Text>
                 );
               })()}
-              <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver quiénes son y quién los cargó.</Text>
-              <Button title="Marcar quiénes salieron a evangelizar" variant="outline" small icon="user-check" onPress={() => router.push('/salieron' as never)} />
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá un número para ver quiénes son y quién los cargó.')}</Text>
+              <Button title={tx('Marcar quiénes salieron a evangelizar')} variant="outline" small icon="user-check" onPress={() => router.push('/salieron' as never)} />
             </View>
 
             {open && !open.user ? list(open.metric) : null}
@@ -185,28 +186,28 @@ export default function Panel() {
               <Pressable onPress={() => router.push('/(tabs)/personas')} accessibilityRole="button" style={styles.pending}>
                 <Text style={{ fontSize: 26, fontWeight: '800', color: colors.amberText }}>{t.pending_pickups}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '700', color: colors.amberText }}>Prometieron venir y todavía no vinieron</Text>
-                  <Text style={{ fontSize: 12, color: colors.amberText }}>Asignar a un capitán antes del sábado</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '700', color: colors.amberText }}>{tx('Prometieron venir y todavía no vinieron')}</Text>
+                  <Text style={{ fontSize: 12, color: colors.amberText }}>{tx('Asignar a un capitán antes del sábado')}</Text>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.amberText} />
               </Pressable>
             ) : null}
 
-            <SectionTitle>Hermanos en este período</SectionTitle>
+            <SectionTitle>{tx('Hermanos en este período')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               <View style={[styles.tr, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.th, { flex: 1.6 }]}>Nombre</Text>
-                <Text style={styles.th}>Salidas</Text>
-                <Text style={styles.th}>Contac.</Text>
-                <Text style={styles.th}>Present.</Text>
-                <Text style={styles.th}>Promesas</Text>
-                <Text style={[styles.th, { textAlign: 'right' }]}>Última</Text>
+                <Text style={[styles.th, { flex: 1.6 }]}>{tx('Nombre')}</Text>
+                <Text style={styles.th}>{tx('Salidas')}</Text>
+                <Text style={styles.th}>{tx('Contac.')}</Text>
+                <Text style={styles.th}>{tx('Present.')}</Text>
+                <Text style={styles.th}>{tx('Promesas')}</Text>
+                <Text style={[styles.th, { textAlign: 'right' }]}>{tx('Última')}</Text>
               </View>
               {ranked.map((m, i) => {
                 const num = (metric: PanelMetric, n: number) => {
                   const on = !!open && open.user === m.user_id && open.metric === metric;
                   return (
-                    <Pressable accessibilityRole="button" accessibilityLabel={`${METRIC_LABEL[metric]} de ${m.display_name}: ${n}. Ver la lista`} disabled={!n} onPress={() => toggle(metric, m.user_id)} hitSlop={6} style={{ flex: 1, alignItems: 'center' }}>
+                    <Pressable accessibilityRole="button" accessibilityLabel={tx('{METRIC_LABEL} de {display_name}: {n}. Ver la lista', { METRIC_LABEL: METRIC_LABEL[metric], display_name: m.display_name, n })} disabled={!n} onPress={() => toggle(metric, m.user_id)} hitSlop={6} style={{ flex: 1, alignItems: 'center' }}>
                       <Text style={[styles.num, n > 0 && { color: colors.green, fontWeight: '800', textDecorationLine: 'underline' }, on && { backgroundColor: colors.greenSoft }]}>{n}</Text>
                     </Pressable>
                   );
@@ -229,21 +230,21 @@ export default function Panel() {
               })}
             </Card>
 
-            <SectionTitle>Salidas</SectionTitle>
+            <SectionTitle>{tx('Salidas')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {report.sessions.length ? (
                 report.sessions.slice(0, 20).map((s, i) => (
                   <View key={s.id} style={[styles.tr, { paddingVertical: 10 }, i === Math.min(20, report.sessions.length) - 1 && { borderBottomWidth: 0 }]}>
                     <View style={{ flex: 1, gap: 2 }}>
-                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{s.display_name} · {fmtDay(s.started_at)} {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : ' (en curso)'}</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{s.display_name} · {fmtDay(s.started_at)} {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : tx(' (en curso)')}</Text>
                       <Text style={{ fontSize: 12, color: colors.muted }}>
-                        {fmtDistance(s.distance_m)} · {s.blocks} cuadras · {s.presentations} present. · {s.promises} promesas{s.auto_stopped ? ' · cortada sola' : ''}{s.trimmed_at ? ' · recortada' : ''}
+                        {tx('{fmtDistance} · {blocks} cuadras · {presentations} present. · {promises} promesas{pl}{pl2}', { fmtDistance: fmtDistance(s.distance_m), blocks: s.blocks, presentations: s.presentations, promises: s.promises, pl: s.auto_stopped ? tx(' · cortada sola') : '', pl2: s.trimmed_at ? tx(' · recortada') : '' })}
                       </Text>
                     </View>
                   </View>
                 ))
               ) : (
-                <Text style={{ padding: 14, color: colors.muted, fontSize: 13 }}>No hubo salidas en este período.</Text>
+                <Text style={{ padding: 14, color: colors.muted, fontSize: 13 }}>{tx('No hubo salidas en este período.')}</Text>
               )}
             </Card>
           </>
@@ -251,17 +252,17 @@ export default function Panel() {
 
         {profile.role === 'admin' && church ? (
           <>
-            <SectionTitle>Código de la iglesia</SectionTitle>
+            <SectionTitle>{tx('Código de la iglesia')}</SectionTitle>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 13, color: colors.muted }}>Con este código los hermanos crean su cuenta y entran a tu iglesia. Si se filtra, generá uno nuevo.</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Con este código los hermanos crean su cuenta y entran a tu iglesia. Si se filtra, generá uno nuevo.')}</Text>
               <Text style={{ fontSize: 28, fontWeight: '800', letterSpacing: 2, textAlign: 'center', color: colors.green }}>{joinCode ?? '…'}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Compartir" variant="outline" small icon="share-2" onPress={shareCode} style={{ flex: 1 }} />
-                <Button title="Nuevo código" variant="ghost" small icon="refresh-cw" onPress={rotate} style={{ flex: 1 }} />
+                <Button title={tx('Compartir')} variant="outline" small icon="share-2" onPress={shareCode} style={{ flex: 1 }} />
+                <Button title={tx('Nuevo código')} variant="ghost" small icon="refresh-cw" onPress={rotate} style={{ flex: 1 }} />
               </View>
             </Card>
             <Card style={{ padding: 0 }}>
-              <RowLink title="Hermanos y roles" subtitle="Nombrar capitanes y administradores, armar grupos" icon="users" onPress={() => router.push('/admin/miembros')} />
+              <RowLink title={tx('Hermanos y roles')} subtitle={tx('Nombrar capitanes y administradores, armar grupos')} icon="users" onPress={() => router.push('/admin/miembros')} />
             </Card>
           </>
         ) : null}
@@ -276,19 +277,19 @@ function DetailList({ title, items, names, showWho, onClose, onOpen }: { title: 
     <View style={styles.detail}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingTop: 10, paddingBottom: 6 }}>
         <Text style={{ flex: 1, fontSize: 14, fontWeight: '800', color: colors.text }}>{title}{items ? ` · ${items.length}` : ''}</Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar la lista" onPress={onClose} hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={tx('Cerrar la lista')} onPress={onClose} hitSlop={10}><Feather name="x" size={18} color={colors.muted} /></Pressable>
       </View>
       {items === null ? (
-        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>Cargando…</Text>
+        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>{tx('Cargando…')}</Text>
       ) : items.length === 0 ? (
-        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>No hay nadie para mostrar en este período.</Text>
+        <Text style={{ padding: 12, fontSize: 13, color: colors.muted }}>{tx('No hay nadie para mostrar en este período.')}</Text>
       ) : (
         items.map((it) => (
           <Pressable key={it.key} accessibilityRole="link" onPress={() => onOpen(it.contact_id)} style={styles.detailRow}>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={1}>{it.name}</Text>
               <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>
-                {showWho ? `${it.user_id && names.get(it.user_id) ? `Lo cargó ${names.get(it.user_id)}` : 'No se sabe quién lo cargó'} · ` : ''}{fmtDay(it.when.length === 10 ? `${it.when}T12:00:00` : it.when)}
+                {showWho ? `${it.user_id && names.get(it.user_id) ? tx('Lo cargó {get}', { get: names.get(it.user_id) }) : tx('No se sabe quién lo cargó')} · ` : ''}{fmtDay(it.when.length === 10 ? `${it.when}T12:00:00` : it.when)}
               </Text>
             </View>
             <Feather name="chevron-right" size={16} color={colors.gray} />

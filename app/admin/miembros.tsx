@@ -11,6 +11,7 @@ import { ROLE_LABEL, groupWord } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { Group, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Miembros() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function Miembros() {
   const addGroup = async () => {
     if (!newGroup.trim() || !church) return;
     const { error } = await supabase.from('groups').insert({ church_id: church.id, name: newGroup.trim() });
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     else {
       setNewGroup('');
       load();
@@ -40,7 +41,7 @@ export default function Miembros() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Hermanos y roles" subtitle={`${people.length} en ${church?.name ?? 'la iglesia'}`} back />
+      <Header title={tx('Hermanos y roles')} subtitle={tx('{n} en {name}', { n: people.length, name: church?.name ?? tx('la iglesia') })} back />
       <Screen>
         <SectionTitle>{groupWord(church?.grouping, true)}</SectionTitle>
         <Card style={{ gap: 10 }}>
@@ -48,21 +49,21 @@ export default function Miembros() {
             {groups.map((g) => (
               <Tag key={g.id} text={`${g.name} · ${people.filter((p) => p.group_id === g.id).length}`} tone="blue" />
             ))}
-            {!groups.length ? <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no hay {groupWord(church?.grouping, true).toLowerCase()}. Si la iglesia no se organiza así, no hace falta crear ninguna.</Text> : null}
+            {!groups.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Todavía no hay {groupWord}. Si la iglesia no se organiza así, no hace falta crear ninguna.', { groupWord: groupWord(church?.grouping, true).toLowerCase() })}</Text> : null}
           </View>
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-            <Field label={`Nuevo ${gw.toLowerCase()}`} value={newGroup} onChangeText={setNewGroup} placeholder={church?.grouping === 'bus_routes' ? 'El Porvenir' : 'Grupo norte'} style={{ flex: 1 }} />
-            <Button title="Crear" small onPress={addGroup} disabled={!newGroup.trim()} />
+            <Field label={tx('Nuevo {gw}', { gw: gw.toLowerCase() })} value={newGroup} onChangeText={setNewGroup} placeholder={church?.grouping === 'bus_routes' ? tx('El Porvenir') : tx('Grupo norte')} style={{ flex: 1 }} />
+            <Button title={tx('Crear')} small onPress={addGroup} disabled={!newGroup.trim()} />
           </View>
         </Card>
 
-        <SectionTitle>Hermanos</SectionTitle>
+        <SectionTitle>{tx('Hermanos')}</SectionTitle>
         <Card style={{ padding: 0 }}>
           {people.map((p, i) => (
             <Pressable key={p.id} onPress={() => router.push({ pathname: '/admin/miembro', params: { id: p.id } })} accessibilityRole="button" style={[styles.row, i === people.length - 1 && { borderBottomWidth: 0 }]}>
               <Avatar name={p.display_name} size={36} color={p.role === 'admin' || p.role === 'secretary' ? colors.green : p.role === 'captain' ? colors.blueSoft : colors.bgSoft} textColor={p.role === 'admin' || p.role === 'secretary' ? '#FFFFFF' : p.role === 'captain' ? colors.blueText : colors.text} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{p.display_name}{p.id === profile?.id ? ' (vos)' : ''}</Text>
+                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{p.display_name}{p.id === profile?.id ? tx(' (vos)') : ''}</Text>
                 <Text style={{ fontSize: 12, color: colors.muted }}>
                   {ROLE_LABEL[p.role]}{p.group_id ? ` · ${groups.find((g) => g.id === p.group_id)?.name ?? ''}` : ''}
                 </Text>

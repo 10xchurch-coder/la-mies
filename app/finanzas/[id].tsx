@@ -13,8 +13,9 @@ import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { FinAccount, FinAttachment, FinCategory, FinEntry, FinFund } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
-const METHOD: Record<string, string> = { cash: 'Efectivo', transfer: 'Transferencia', card: 'Tarjeta', check: 'Cheque', other: 'Otro' };
+const METHOD: Record<string, string> = { get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, card: 'Tarjeta', get check() { return tx('Cheque'); }, other: 'Otro' };
 
 export function ReceiptThumb({ a, size = 96 }: { a: FinAttachment; size?: number }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -25,7 +26,7 @@ export function ReceiptThumb({ a, size = 96 }: { a: FinAttachment; size?: number
     if (u) Linking.openURL(u);
   };
   return (
-    <Pressable onPress={open} accessibilityRole="button" accessibilityLabel="Abrir comprobante">
+    <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={tx('Abrir comprobante')}>
       {pdf ? (
         <View style={{ width: size, height: size, borderRadius: 10, backgroundColor: colors.bgSoft, alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <Feather name="file-text" size={28} color={colors.muted} />
@@ -34,7 +35,7 @@ export function ReceiptThumb({ a, size = 96 }: { a: FinAttachment; size?: number
       ) : (
         <Image source={url ? { uri: url } : undefined} style={{ width: size, height: size, borderRadius: 10, backgroundColor: colors.bgSoft }} contentFit="cover" />
       )}
-      <Text style={{ fontSize: 10, color: colors.muted, marginTop: 2, width: size }} numberOfLines={1}>{a.kind === 'bank_screen' ? 'Banco' : a.kind === 'receipt' ? 'Recibo' : 'Otro'}</Text>
+      <Text style={{ fontSize: 10, color: colors.muted, marginTop: 2, width: size }} numberOfLines={1}>{a.kind === 'bank_screen' ? tx('Banco') : a.kind === 'receipt' ? tx('Recibo') : tx('Otro')}</Text>
     </Pressable>
   );
 }
@@ -66,55 +67,55 @@ export default function MovimientoVer() {
   useFocusEffect(load);
 
   if (e === undefined) return <Loading />;
-  if (!e) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title="Movimiento" back /><Text style={{ padding: 24, color: colors.muted }}>No se encontró.</Text></View>;
+  if (!e) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title={tx('Movimiento')} back /><Text style={{ padding: 24, color: colors.muted }}>{tx('No se encontró.')}</Text></View>;
 
   const fname = (x: string | null) => funds.find((f) => f.id === x)?.name ?? '';
   const canEdit = !e.voided_at && (financeLevel >= 3 || (financeLevel === 2 && e.created_by === profile?.id && Date.now() - new Date(e.created_at).getTime() < 7 * 86400000));
-  const title = e.kind === 'transfer' ? 'Pase entre fondos' : e.kind === 'income' ? 'Ingreso' : 'Gasto';
+  const title = e.kind === 'transfer' ? tx('Pase entre fondos') : e.kind === 'income' ? tx('Ingreso') : tx('Gasto');
 
   const add = async () => {
     if (!church) return;
     try {
-      const p = await pickAndUploadReceipt(church.id, e.on_date.slice(0, 7), e.kind === 'income' ? 'Pantalla del banco' : 'Recibo / factura');
+      const p = await pickAndUploadReceipt(church.id, e.on_date.slice(0, 7), e.kind === 'income' ? tx('Pantalla del banco') : tx('Recibo / factura'));
       if (!p) return;
       await addFinAttachment({ entry_id: e.id, month: e.on_date.slice(0, 7), path: p.path, kind: e.kind === 'income' ? 'bank_screen' : 'receipt', file_name: p.name });
       load();
     } catch (err) {
-      Alert.alert('No se pudo subir', errorMessage(err));
+      Alert.alert(tx('No se pudo subir'), errorMessage(err));
     }
   };
 
   const doVoid = async () => {
-    if (!voiding?.trim()) { Alert.alert('Poné el motivo'); return; }
+    if (!voiding?.trim()) { Alert.alert(tx('Poné el motivo')); return; }
     try {
       await voidFinEntry(e.id, voiding.trim());
       setVoiding(null);
       load();
     } catch (err) {
-      Alert.alert('No se pudo anular', errorMessage(err));
+      Alert.alert(tx('No se pudo anular'), errorMessage(err));
     }
   };
 
   const rows: [string, string][] = [
-    ['Fecha', fmtDateOnly(e.on_date)],
+    [tx('Fecha'), fmtDateOnly(e.on_date)],
     e.kind === 'transfer' ? (e.to_fund_id === e.fund_id
-      ? ['Cuentas', `${fname(e.fund_id)}: ${accounts.find((a) => a.id === e.account_id)?.name ?? ''} → ${accounts.find((a) => a.id === e.to_account_id)?.name ?? ''}`]
-      : ['Fondos', `${fname(e.fund_id)} → ${fname(e.to_fund_id)}`]) : ['Fondo', fname(e.fund_id)],
-    ...(e.category_id ? [['Categoría', cats.find((c) => c.id === e.category_id)?.name ?? '']] as [string, string][] : []),
-    ...(e.kind !== 'transfer' ? [['Cómo', `${METHOD[e.method]}${e.account_id ? ` · ${accounts.find((a) => a.id === e.account_id)?.name ?? ''}` : ''}`]] as [string, string][] : []),
-    ...(e.counterpart ? [[e.kind === 'income' ? 'Quién lo dio' : 'A quién', e.counterpart]] as [string, string][] : []),
-    ...(e.description ? [['Detalle', e.description]] as [string, string][] : []),
-    ...(e.source ? [['Origen', e.source === 'planilla' ? 'Planilla anterior' : e.source]] as [string, string][] : []),
+      ? [tx('Cuentas'), `${fname(e.fund_id)}: ${accounts.find((a) => a.id === e.account_id)?.name ?? ''} → ${accounts.find((a) => a.id === e.to_account_id)?.name ?? ''}`]
+      : [tx('Fondos'), `${fname(e.fund_id)} → ${fname(e.to_fund_id)}`]) : [tx('Fondo'), fname(e.fund_id)],
+    ...(e.category_id ? [[tx('Categoría'), cats.find((c) => c.id === e.category_id)?.name ?? '']] as [string, string][] : []),
+    ...(e.kind !== 'transfer' ? [[tx('Cómo'), `${METHOD[e.method]}${e.account_id ? ` · ${accounts.find((a) => a.id === e.account_id)?.name ?? ''}` : ''}`]] as [string, string][] : []),
+    ...(e.counterpart ? [[e.kind === 'income' ? tx('Quién lo dio') : tx('A quién'), e.counterpart]] as [string, string][] : []),
+    ...(e.description ? [[tx('Detalle'), e.description]] as [string, string][] : []),
+    ...(e.source ? [[tx('Origen'), e.source === 'planilla' ? tx('Planilla anterior') : e.source]] as [string, string][] : []),
   ];
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={title} subtitle={e.voided_at ? 'ANULADO' : undefined} back />
+      <Header title={tx(title)} subtitle={e.voided_at ? tx('ANULADO') : undefined} back />
       <Screen>
         <Text style={{ fontSize: 32, fontWeight: '800', color: e.voided_at ? colors.muted : e.kind === 'income' ? colors.greenText : e.kind === 'expense' ? colors.red : colors.text, textDecorationLine: e.voided_at ? 'line-through' : 'none' }}>
           {fmtMoney(e.amount, e.currency)}
         </Text>
-        {e.voided_at ? <Card style={{ padding: 12, backgroundColor: colors.redSoft, borderColor: colors.redSoft }}><Text style={{ color: colors.redText }}>Anulado el {fmtDateOnly(e.voided_at.slice(0, 10))}: {e.void_reason}</Text></Card> : null}
+        {e.voided_at ? <Card style={{ padding: 12, backgroundColor: colors.redSoft, borderColor: colors.redSoft }}><Text style={{ color: colors.redText }}>{tx('Anulado el {fmtDateOnly}: {void_reason}', { fmtDateOnly: fmtDateOnly(e.voided_at.slice(0, 10)), void_reason: e.void_reason })}</Text></Card> : null}
         <Card style={{ padding: 0 }}>
           {rows.map(([k, v], i) => (
             <View key={k} style={{ flexDirection: 'row', padding: 12, gap: 12, borderBottomWidth: i < rows.length - 1 ? 1 : 0, borderBottomColor: colors.border }}>
@@ -124,24 +125,24 @@ export default function MovimientoVer() {
           ))}
         </Card>
 
-        <SectionTitle>{`Comprobantes (${files.length})`}</SectionTitle>
+        <SectionTitle>{tx('Comprobantes ({n})', { n: files.length })}</SectionTitle>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
           {files.map((a) => <ReceiptThumb key={a.id} a={a} />)}
         </View>
-        {financeLevel >= 2 && !e.voided_at ? <Button title="Agregar comprobante" icon="camera" variant="outline" small onPress={add} /> : null}
+        {financeLevel >= 2 && !e.voided_at ? <Button title={tx('Agregar comprobante')} icon="camera" variant="outline" small onPress={add} /> : null}
 
         {canEdit ? (
           voiding === null ? (
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Corregir" icon="edit-2" variant="outline" onPress={() => router.push(`/finanzas/movimiento?id=${e.id}` as Href)} style={{ flex: 1 }} />
-              <Button title="Anular" icon="slash" variant="danger" onPress={() => setVoiding('')} style={{ flex: 1 }} />
+              <Button title={tx('Corregir')} icon="edit-2" variant="outline" onPress={() => router.push(`/finanzas/movimiento?id=${e.id}` as Href)} style={{ flex: 1 }} />
+              <Button title={tx('Anular')} icon="slash" variant="danger" onPress={() => setVoiding('')} style={{ flex: 1 }} />
             </View>
           ) : (
             <Card style={{ gap: 8 }}>
-              <Field label="Motivo de la anulación" value={voiding} onChangeText={setVoiding} placeholder="Cargado dos veces" autoFocus />
+              <Field label={tx('Motivo de la anulación')} value={voiding} onChangeText={setVoiding} placeholder={tx('Cargado dos veces')} autoFocus />
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" small onPress={() => setVoiding(null)} style={{ flex: 1 }} />
-                <Button title="Anular" variant="danger" small onPress={doVoid} style={{ flex: 2 }} />
+                <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setVoiding(null)} style={{ flex: 1 }} />
+                <Button title={tx('Anular')} variant="danger" small onPress={doVoid} style={{ flex: 2 }} />
               </View>
             </Card>
           )
@@ -149,10 +150,10 @@ export default function MovimientoVer() {
 
         {history.length ? (
           <>
-            <SectionTitle>Historial</SectionTitle>
+            <SectionTitle>{tx('Historial')}</SectionTitle>
             {history.map((h, i) => (
               <Text key={i} style={{ fontSize: 12, color: colors.muted }}>
-                {new Date(h.at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })} · {h.action === 'create' ? 'Cargado' : h.action === 'void' ? 'Anulado' : 'Corregido'}{h.by ? ` por ${h.by}` : ''}
+                {new Date(h.at).toLocaleString(txLocale(), { dateStyle: 'short', timeStyle: 'short' })} · {h.action === 'create' ? tx('Cargado') : h.action === 'void' ? tx('Anulado') : tx('Corregido')}{h.by ? tx(' por {by}', { by: h.by }) : ''}
               </Text>
             ))}
           </>

@@ -8,6 +8,7 @@ import { Card, Empty, Loading } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { fmtRelativeDay } from '@/lib/format';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Note = { kind: 'article' | 'training' | 'material'; ref: string; title: string; body: string; updated_at: string };
 
@@ -20,15 +21,15 @@ export default function MisNotas() {
   const open = (n: Note) => router.push((n.kind === 'article' ? `/crecimiento/${n.ref}` : n.kind === 'training' ? `/capacitacion/${n.ref}` : `/material/${n.ref}`) as Href);
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mis notas" subtitle="Tus apuntes de los estudios. Solo los ves vos" back />
+      <Header title={tx('Mis notas')} subtitle={tx('Tus apuntes de los estudios. Solo los ves vos')} back />
       <Screen>
         {notes === null ? <Loading /> : !notes.length ? (
-          <Empty icon="edit-3" title="Todavía no escribiste notas" />
+          <Empty icon="edit-3" title={tx('Todavía no escribiste notas')} />
         ) : notes.map((n) => (
           <Pressable key={`${n.kind}-${n.ref}`} onPress={() => open(n)} accessibilityRole="button">
             <Card style={{ gap: 4 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }} numberOfLines={1}>{n.title || 'Estudio'}</Text>
+                <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }} numberOfLines={1}>{n.title || tx('Estudio')}</Text>
                 <Feather name="chevron-right" size={18} color={colors.muted} />
               </View>
               <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }} numberOfLines={3}>{n.body}</Text>

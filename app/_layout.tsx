@@ -38,6 +38,7 @@ import { registerWebShell } from '@/lib/webShell';
 import { OfflineBadge } from '@/components/OfflineBadge';
 import { HideOnOutput } from '@/components/PresentChrome';
 import { colors, useThemeMode } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 // Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
 const RNErrorUtils = (globalThis as { ErrorUtils?: { getGlobalHandler: () => (e: Error, fatal?: boolean) => void; setGlobalHandler: (h: (e: Error, fatal?: boolean) => void) => void } }).ErrorUtils;
@@ -107,7 +108,7 @@ function useFeatureGuard() {
     if (!church || !disabled?.length) return;
     if (!pathOn(disabled, pathname)) {
       router.replace('/');
-      Alert.alert('Función apagada', 'Tu iglesia no usa esta parte de la app.');
+      Alert.alert(tx('Función apagada'), tx('Tu iglesia no usa esta parte de la app.'));
     }
   }, [church, disabled, pathname, router]);
 }

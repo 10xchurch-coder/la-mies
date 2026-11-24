@@ -17,6 +17,7 @@ import { liveMemberActions } from '@/lib/directions';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
 import type { CoverageRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Salida() {
   const router = useRouter();
@@ -90,7 +91,7 @@ export default function Salida() {
 
   const markHouse = () => {
     if (!last) {
-      Alert.alert('Esperando el GPS', 'Todavía no tenemos tu ubicación. Esperá unos segundos.');
+      Alert.alert(tx('Esperando el GPS'), tx('Todavía no tenemos tu ubicación. Esperá unos segundos.'));
       return;
     }
     router.push({
@@ -107,10 +108,10 @@ export default function Salida() {
   };
 
   const finish = () => {
-    Alert.alert('Finalizar la salida', '¿Terminamos acá? Lo que caminaste queda marcado en el mapa para toda la iglesia.', [
-      { text: 'Seguir', style: 'cancel' },
+    Alert.alert(tx('Finalizar la salida'), tx('¿Terminamos acá? Lo que caminaste queda marcado en el mapa para toda la iglesia.'), [
+      { text: tx('Seguir'), style: 'cancel' },
       {
-        text: 'Finalizar',
+        text: tx('Finalizar'),
         style: 'destructive',
         onPress: async () => {
           setEnding(true);
@@ -121,7 +122,7 @@ export default function Salida() {
             else router.replace('/(tabs)/mapa');
           } catch (e) {
             setEnding(false);
-            Alert.alert('No se pudo cerrar', `${e instanceof Error ? e.message : 'Error'}. Probá de nuevo cuando tengas señal; nada se pierde.`);
+            Alert.alert(tx('No se pudo cerrar'), tx('{v1}. Probá de nuevo cuando tengas señal; nada se pierde.', { v1: e instanceof Error ? e.message : tx('Error') }));
           }
         },
       },
@@ -136,23 +137,23 @@ export default function Salida() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={styles.liveDot} />
-            <Text style={styles.liveText}>{outing.active?.kind === 'flyers' ? 'Volantes en curso' : 'Evangelismo en curso'}</Text>
+            <Text style={styles.liveText}>{outing.active?.kind === 'flyers' ? tx('Volantes en curso') : tx('Evangelismo en curso')}</Text>
           </View>
-          <Pressable onPress={() => router.navigate('/(tabs)/iglesia')} accessibilityRole="button" accessibilityLabel="Usar el resto de la app sin cortar la salida" style={styles.appBtn}>
+          <Pressable onPress={() => router.navigate('/(tabs)/iglesia')} accessibilityRole="button" accessibilityLabel={tx('Usar el resto de la app sin cortar la salida')} style={styles.appBtn}>
             <Feather name="grid" size={14} color="#FFFFFF" />
-            <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800' }}>Usar la app</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '800' }}>{tx('Usar la app')}</Text>
           </Pressable>
         </View>
-        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600', opacity: 0.9, marginTop: -6 }}>Empezó {outing.active ? fmtTime(outing.active.startedAt) : ''} · la salida sigue aunque uses otras partes de la app</Text>
+        <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600', opacity: 0.9, marginTop: -6 }}>{tx('Empezó {v1} · la salida sigue aunque uses otras partes de la app', { v1: outing.active ? fmtTime(outing.active.startedAt) : '' })}</Text>
         <Text style={styles.timer}>{fmtDuration(elapsed)}</Text>
         <View style={{ flexDirection: 'row', gap: 6 }}>
-          <HeaderStat value={outing.contacts} label="Contactos" />
-          <HeaderStat value={outing.presentations} label="Evangelio" />
-          <HeaderStat value={outing.promises} label={outing.promises === 1 ? 'Promesa' : 'Promesas'} />
-          <HeaderStat value={fmtDistance(outing.distanceM)} label="Caminados" />
+          <HeaderStat value={outing.contacts} label={tx('Contactos')} />
+          <HeaderStat value={outing.presentations} label={tx('Evangelio')} />
+          <HeaderStat value={outing.promises} label={outing.promises === 1 ? tx('Promesa') : tx('Promesas')} />
+          <HeaderStat value={fmtDistance(outing.distanceM)} label={tx('Caminados')} />
         </View>
         {!outing.backgroundGranted ? (
-          <Text style={styles.warn}>Sin el permiso "Siempre" de ubicación, el recorrido solo se marca con la app abierta.</Text>
+          <Text style={styles.warn}>{tx('Sin el permiso "Siempre" de ubicación, el recorrido solo se marca con la app abierta.')}</Text>
         ) : null}
       </View>
 
@@ -168,17 +169,17 @@ export default function Salida() {
           onPressLive={(m) => liveMemberActions(m, { onChat: () => router.push('/salida-chat' as never) })}
         />
         <MapTypeButton style={mapStyle} onChange={setMapStyle} top={12} />
-        <Pressable accessibilityRole="button" accessibilityLabel="Abrir el chat de la salida" onPress={() => router.push('/salida-chat' as never)} style={styles.chatBtn}>
+        <Pressable accessibilityRole="button" accessibilityLabel={tx('Abrir el chat de la salida')} onPress={() => router.push('/salida-chat' as never)} style={styles.chatBtn}>
           <Feather name="message-circle" size={20} color="#FFFFFF" />
-          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>Chat{live.length ? ` · ${live.length + 1}` : ''}</Text>
+          <Text style={{ color: '#FFFFFF', fontSize: 13, fontWeight: '800' }}>{tx('Chat{v1}', { v1: live.length ? ` · ${live.length + 1}` : '' })}</Text>
         </Pressable>
         {live.length ? (
           <View style={styles.tapHint} pointerEvents="none">
-            <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>Tocá a un compañero para ir caminando hasta él</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: colors.text }}>{tx('Tocá a un compañero para ir caminando hasta él')}</Text>
           </View>
         ) : null}
         {!follow ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Centrar en mi ubicación" onPress={() => setFollow(true)} style={styles.locate}>
+          <Pressable accessibilityRole="button" accessibilityLabel={tx('Centrar en mi ubicación')} onPress={() => setFollow(true)} style={styles.locate}>
             <Feather name="crosshair" size={22} color={colors.text} />
           </Pressable>
         ) : null}
@@ -188,20 +189,20 @@ export default function Salida() {
           </View>
           <View>
             <Text style={{ fontSize: 12, fontWeight: '800', color: colors.text }}>
-              {outing.side.name ? `Vereda ${outing.side.name}` : last ? 'Buscando la calle…' : 'Esperando el GPS…'}
+              {outing.side.name ? tx('Vereda {name}', { name: outing.side.name }) : last ? tx('Buscando la calle…') : tx('Esperando el GPS…')}
             </Text>
             <Text style={{ fontSize: 10, fontWeight: '600', color: colors.muted }}>
-              {outing.side.overridden ? 'Corregida por vos · tocá para volver' : outing.side.match ? `${outing.side.match.roadName ?? 'Calle'} · tocá si es la otra vereda` : 'Las calles tardan unos segundos'}
+              {outing.side.overridden ? tx('Corregida por vos · tocá para volver') : outing.side.match ? tx('{roadName} · tocá si es la otra vereda', { roadName: outing.side.match.roadName ?? tx('Calle') }) : tx('Las calles tardan unos segundos')}
             </Text>
           </View>
         </Pressable>
       </View>
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + 8 }]}>
-        <Button title="Marcar esta casa" icon="map-pin" onPress={markHouse} />
+        <Button title={tx('Marcar esta casa')} icon="map-pin" onPress={markHouse} />
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button title="Arreglar el recorrido" variant="ghost" small onPress={() => router.push({ pathname: '/recortar', params: { session: outing.active?.id ?? '' } })} style={{ flex: 1 }} />
-          <Button title="Finalizar salida" variant="danger" icon="square" small onPress={finish} loading={ending} style={{ flex: 1 }} />
+          <Button title={tx('Arreglar el recorrido')} variant="ghost" small onPress={() => router.push({ pathname: '/recortar', params: { session: outing.active?.id ?? '' } })} style={{ flex: 1 }} />
+          <Button title={tx('Finalizar salida')} variant="danger" icon="square" small onPress={finish} loading={ending} style={{ flex: 1 }} />
         </View>
       </View>
     </View>

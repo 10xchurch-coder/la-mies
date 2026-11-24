@@ -15,6 +15,7 @@ import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
 import type { Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Marital = 'single' | 'married' | 'partner' | 'widowed' | null;
 
@@ -62,7 +63,7 @@ export default function NuevoContacto() {
   const save = async () => {
     if (!name.trim()) return;
     const bad = phoneProblem(phone);
-    if (bad) { Alert.alert('Revisá el teléfono', bad); return; }
+    if (bad) { Alert.alert(tx('Revisá el teléfono'), bad); return; }
     setBusy(true);
     try {
       const day = promised ? promiseDay : null;
@@ -76,7 +77,7 @@ export default function NuevoContacto() {
           phone: formatPhone(phone) || null,
           lat: Number(p.lat),
           lng: Number(p.lng),
-          address_hint: p.roadName ? `${p.roadName}${p.sideName ? ` · vereda ${p.sideName}` : ''}` : null,
+          address_hint: p.roadName ? `${p.roadName}${p.sideName ? tx(' · vereda {sideName}', { sideName: p.sideName }) : ''}` : null,
           road_id: p.road ? Number(p.road) : null,
           side: p.side === '1' ? 1 : p.side === '-1' ? -1 : null,
           interest,
@@ -97,12 +98,12 @@ export default function NuevoContacto() {
       } catch (e) {
         if (!isNetworkError(e)) throw e;
         await queueContact(item);
-        Alert.alert('Guardado en el teléfono', 'No hay señal. El contacto quedó guardado y se sube solo cuando vuelva la señal.');
+        Alert.alert(tx('Guardado en el teléfono'), tx('No hay señal. El contacto quedó guardado y se sube solo cuando vuelva la señal.'));
       }
       router.dismissAll();
       router.replace(outing.active ? '/salida' : '/(tabs)/personas');
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -110,86 +111,86 @@ export default function NuevoContacto() {
 
   const gw = church?.grouping === 'bus_routes' ? 'ruta' : 'grupo';
   const art = church?.grouping === 'bus_routes' ? 'la' : 'el';
-  const todo = church?.grouping === 'bus_routes' ? 'Toda' : 'Todo';
+  const todo = church?.grouping === 'bus_routes' ? tx('Toda') : tx('Todo');
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title="Nuevo contacto" subtitle={p.roadName ? `${p.roadName}${p.sideName ? ` · vereda ${p.sideName}` : ''}` : 'Marcado donde estás parado'} back />
+      <Header title={tx('Nuevo contacto')} subtitle={p.roadName ? `${p.roadName}${p.sideName ? tx(' · vereda {sideName}', { sideName: p.sideName }) : ''}` : tx('Marcado donde estás parado')} back />
       <Screen style={{ gap: 14 }}>
-        <Field label="Nombre" value={name} onChangeText={setName} autoCapitalize="words" autoFocus />
+        <Field label={tx('Nombre')} value={name} onChangeText={setName} autoCapitalize="words" autoFocus />
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <BigCheck label="Le presenté el evangelio" icon="book-open" on={gospel} onPress={() => setGospel(!gospel)} />
-          <BigCheck label="Prometió venir" icon="calendar" on={promised} onPress={() => setPromised(!promised)} />
+          <BigCheck label={tx('Le presenté el evangelio')} icon="book-open" on={gospel} onPress={() => setGospel(!gospel)} />
+          <BigCheck label={tx('Prometió venir')} icon="calendar" on={promised} onPress={() => setPromised(!promised)} />
         </View>
         {promised ? (
           <View style={styles.promise}>
-            <Segmented options={[{ value: 'sat', label: 'Sábado' }, { value: 'sun', label: 'Domingo' }]} value={promiseDay} onChange={setPromiseDay} />
+            <Segmented options={[{ value: 'sat', label: tx('Sábado') }, { value: 'sun', label: tx('Domingo') }]} value={promiseDay} onChange={setPromiseDay} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ flex: 1 }}>
-                <Toggle label={`Pasarlo a buscar con ${art} ${gw}`} value={pickup} onChange={setPickup} />
+                <Toggle label={tx('Pasarlo a buscar con {art} {gw}', { art, gw })} value={pickup} onChange={setPickup} />
               </View>
-              {pickup ? <Field label="Hora" value={pickupTime} onChangeText={setPickupTime} placeholder="14:30" style={{ width: 90 }} /> : null}
+              {pickup ? <Field label={tx('Hora')} value={pickupTime} onChangeText={setPickupTime} placeholder="14:30" style={{ width: 90 }} /> : null}
             </View>
           </View>
         ) : null}
 
-        <Field label="Nota rápida" value={notes} onChangeText={setNotes} multiline placeholder="Vive con la mamá. Escuchó todo el plan de salvación…" />
+        <Field label={tx('Nota rápida')} value={notes} onChangeText={setNotes} multiline placeholder={tx('Vive con la mamá. Escuchó todo el plan de salvación…')} />
 
-        <Button title="Guardar contacto" onPress={save} loading={busy} disabled={!name.trim()} />
+        <Button title={tx('Guardar contacto')} onPress={save} loading={busy} disabled={!name.trim()} />
 
-        <Text style={styles.more}>Más datos (opcional)</Text>
-        <PhoneField label="Teléfono" hint="(si te lo dio)" value={phone} onChangeText={setPhone} />
+        <Text style={styles.more}>{tx('Más datos (opcional)')}</Text>
+        <PhoneField label={tx('Teléfono')} hint={tx('(si te lo dio)')} value={phone} onChangeText={setPhone} />
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
-          <Field label="Edad" value={age} onChangeText={(v) => setAge(v.replace(/\D/g, ''))} keyboardType="number-pad" style={{ width: 104 }} />
+          <Field label={tx('Edad')} value={age} onChangeText={(v) => setAge(v.replace(/\D/g, ''))} keyboardType="number-pad" style={{ width: 104 }} />
           <View style={{ flex: 1, gap: 6 }}>
-            <Text style={styles.label}>Sexo</Text>
-            <Segmented options={[{ value: 'm', label: 'Hombre' }, { value: 'f', label: 'Mujer' }]} value={sex ?? ('' as 'm')} onChange={setSex} />
+            <Text style={styles.label}>{tx('Sexo')}</Text>
+            <Segmented options={[{ value: 'm', label: tx('Hombre') }, { value: 'f', label: tx('Mujer') }]} value={sex ?? ('' as 'm')} onChange={setSex} />
           </View>
         </View>
         <View style={{ gap: 8 }}>
-          <Text style={styles.label}>¿Cómo respondió?</Text>
+          <Text style={styles.label}>{tx('¿Cómo respondió?')}</Text>
           <Choice
             columns={2}
-            options={[{ value: 'very', label: 'Muy interesado' }, { value: 'some', label: 'Interesado' }, { value: 'little', label: 'Poco interés' }, { value: 'none', label: 'No volver' }]}
+            options={[{ value: 'very', label: tx('Muy interesado') }, { value: 'some', label: tx('Interesado') }, { value: 'little', label: tx('Poco interés') }, { value: 'none', label: tx('No volver') }]}
             value={interest}
             onChange={setInterest}
           />
         </View>
         <View style={{ gap: 8 }}>
-          <Text style={styles.label}>Estado civil</Text>
+          <Text style={styles.label}>{tx('Estado civil')}</Text>
           <Choice
             columns={2}
-            options={[{ value: 'single', label: 'Soltero/a' }, { value: 'married', label: 'Casado/a' }, { value: 'partner', label: 'En pareja' }, { value: 'widowed', label: 'Viudo/a' }]}
+            options={[{ value: 'single', label: tx('Soltero/a') }, { value: 'married', label: tx('Casado/a') }, { value: 'partner', label: tx('En pareja') }, { value: 'widowed', label: tx('Viudo/a') }]}
             value={(marital ?? '') as 'single'}
             onChange={(v) => setMarital(v)}
           />
         </View>
         <View style={{ gap: 8 }}>
-          <Text style={styles.label}>¿Tiene hijos?</Text>
-          <Segmented options={[{ value: 'no', label: 'No' }, { value: 'yes', label: 'Sí' }]} value={hasChildren} onChange={setHasChildren} />
+          <Text style={styles.label}>{tx('¿Tiene hijos?')}</Text>
+          <Segmented options={[{ value: 'no', label: tx('No') }, { value: 'yes', label: tx('Sí') }]} value={hasChildren} onChange={setHasChildren} />
           {hasChildren === 'yes' ? (
             <View style={styles.kids}>
               {children.map((c, i) => (
                 <View key={i} style={{ flexDirection: 'row', gap: 8 }}>
-                  <Field label={`Hijo ${i + 1}`} value={c.name} onChangeText={(v) => setChildren(children.map((x, j) => (j === i ? { ...x, name: v } : x)))} placeholder="Nombre" style={{ flex: 1 }} autoCapitalize="words" />
-                  <Field label="Edad" value={c.age} onChangeText={(v) => setChildren(children.map((x, j) => (j === i ? { ...x, age: v.replace(/\D/g, '') } : x)))} keyboardType="number-pad" style={{ width: 84 }} />
+                  <Field label={tx('Hijo {v1}', { v1: i + 1 })} value={c.name} onChangeText={(v) => setChildren(children.map((x, j) => (j === i ? { ...x, name: v } : x)))} placeholder={tx('Nombre')} style={{ flex: 1 }} autoCapitalize="words" />
+                  <Field label={tx('Edad')} value={c.age} onChangeText={(v) => setChildren(children.map((x, j) => (j === i ? { ...x, age: v.replace(/\D/g, '') } : x)))} keyboardType="number-pad" style={{ width: 84 }} />
                 </View>
               ))}
               <Pressable onPress={() => setChildren([...children, { name: '', age: '' }])} style={styles.addKid} accessibilityRole="button">
                 <Feather name="plus" size={16} color={colors.muted} />
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.muted }}>Agregar otro</Text>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.muted }}>{tx('Agregar otro')}</Text>
               </Pressable>
             </View>
           ) : null}
         </View>
         <View style={{ gap: 8 }}>
-          <Text style={styles.label}>Compartir este contacto con</Text>
+          <Text style={styles.label}>{tx('Compartir este contacto con')}</Text>
           <Choice
             options={[
-              { value: 'group', label: group ? `${todo} mi ${gw} (${group.name})` : 'Toda la iglesia' },
-              { value: 'me', label: 'Solo yo, por ahora' },
-              { value: 'custom', label: 'Elegir personas' },
+              { value: 'group', label: group ? tx('{todo} mi {gw} ({name})', { todo: tx(todo), gw, name: group.name }) : tx('Toda la iglesia') },
+              { value: 'me', label: tx('Solo yo, por ahora') },
+              { value: 'custom', label: tx('Elegir personas') },
             ]}
             value={share}
             onChange={setShare}
@@ -206,9 +207,9 @@ export default function NuevoContacto() {
               })}
             </View>
           ) : null}
-          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Los administradores de la iglesia ven todos los contactos, sin importar esta opción.</Text>
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Los administradores de la iglesia ven todos los contactos, sin importar esta opción.')}</Text>
         </View>
-        <Button title="Guardar contacto" onPress={save} loading={busy} disabled={!name.trim()} />
+        <Button title={tx('Guardar contacto')} onPress={save} loading={busy} disabled={!name.trim()} />
       </Screen>
     </KeyboardAvoidingView>
   );

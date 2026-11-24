@@ -3,6 +3,7 @@
 import { supabase } from './supabase';
 import { cleanItems, type PlanItem, type ServicePlan } from './servicePlan';
 import type { MemoryVerse, VerseDone } from './verses';
+import { tx } from './i18n';
 
 function ok<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) throw r.error;
@@ -111,7 +112,7 @@ export async function askQuestion(body: string, anonymous: boolean): Promise<voi
   if (!anonymous) {
     const { data } = await supabase.auth.getUser();
     user_id = data.user?.id ?? null;
-    if (!user_id) throw new Error('Sin sesión');
+    if (!user_id) throw new Error(tx('Sin sesión'));
   }
   ok(await supabase.from('bible_questions').insert({ body, user_id }));
 }
@@ -136,6 +137,6 @@ export async function mySermonNotesList(): Promise<MySermonNote[]> {
   type Row = { sermon_id: string; answers: string[] | null; notes: string | null; updated_at: string; sermons: S | S[] | null };
   return ((r.data ?? []) as unknown as Row[]).map((x) => {
     const s = Array.isArray(x.sermons) ? x.sermons[0] : x.sermons;
-    return { sermon_id: x.sermon_id, answers: x.answers ?? [], notes: x.notes, updated_at: x.updated_at, title: s?.title ?? 'Prédica', preached_on: s?.preached_on ?? null, preacher: s?.preacher ?? null, notes_outline: s?.notes_outline ?? null };
+    return { sermon_id: x.sermon_id, answers: x.answers ?? [], notes: x.notes, updated_at: x.updated_at, title: s?.title ?? tx('Prédica'), preached_on: s?.preached_on ?? null, preacher: s?.preacher ?? null, notes_outline: s?.notes_outline ?? null };
   });
 }

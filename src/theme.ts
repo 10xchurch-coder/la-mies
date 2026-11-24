@@ -1,5 +1,6 @@
 // Colores y medidas de la app (los mismos del diseño).
 import { useSyncExternalStore } from 'react';
+import { tx } from '@/lib/i18n';
 
 export type Palette = {
   green: string; greenDark: string; greenSoft: string; greenText: string;
@@ -165,15 +166,15 @@ export function coverageColor(lastCoveredAt: string | Date, kind: 'soulwinning' 
 }
 
 export const COVERAGE_LEGEND = [
-  { color: colors.green, label: 'Esta semana' },
-  { color: colors.blue, label: 'Este mes' },
-  { color: colors.gray, label: 'Hace más de un mes' },
+  { color: colors.green, get label() { return tx('Esta semana'); } },
+  { color: colors.blue, get label() { return tx('Este mes'); } },
+  { color: colors.gray, get label() { return tx('Hace más de un mes'); } },
 ];
 
 export const FLYERS_LEGEND = [
-  { color: colors.orange, label: 'Esta semana' },
-  { color: colors.orangeLight, label: 'Este mes' },
-  { color: colors.tan, label: 'Hace más de un mes' },
+  { color: colors.orange, get label() { return tx('Esta semana'); } },
+  { color: colors.orangeLight, get label() { return tx('Este mes'); } },
+  { color: colors.tan, get label() { return tx('Hace más de un mes'); } },
 ];
 
 /** Un color por área de la app (personas, crecer, comunidad...): el fuerte, el fondo suave y el del texto. */

@@ -14,12 +14,13 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { ChurchService, ClassRow, SheetRow } from '@/types';
+import { tx, txList } from '@/lib/i18n';
 
 type ServiceDay = { service: ChurchService; rows: SheetRow[] };
 type ClassDay = { cls: ClassRow; present: string[]; absent: string[]; listTaken: boolean };
 
-const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DAYS = txList(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']);
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 const longDate = (d: Date) => `${DAYS[d.getDay()]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
 
 export default function DeskAttendance() {
@@ -62,7 +63,7 @@ export default function DeskAttendance() {
 
   useEffect(() => {
     setServices(null);
-    load().catch((e) => { setServices([]); Alert.alert('No se pudo cargar', errorMessage(e)); });
+    load().catch((e) => { setServices([]); Alert.alert(tx('No se pudo cargar'), errorMessage(e)); });
     const id = setInterval(() => { load().catch(() => undefined); }, 15000);
     return () => clearInterval(id);
   }, [load]);
@@ -75,7 +76,7 @@ export default function DeskAttendance() {
     try {
       await setAttendance(row.contact_id, date, sd.service.id, next);
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       busy.current--;
       load().catch(() => undefined);
@@ -84,37 +85,37 @@ export default function DeskAttendance() {
 
   const chip = (sd: ServiceDay, r: SheetRow) => (
     <Pressable key={r.contact_id} disabled={!canMark} onPress={() => toggle(sd, r)} accessibilityRole="button"
-      accessibilityLabel={`${r.name}: ${r.present ? 'presente. Tocar para quitar' : 'no marcado. Tocar para marcar presente'}`}
+      accessibilityLabel={`${r.name}: ${r.present ? tx('presente. Tocar para quitar') : tx('no marcado. Tocar para marcar presente')}`}
       style={(s) => [styles.chip, r.present ? styles.chipOn : styles.chipOff, (s as { hovered?: boolean }).hovered && canMark && { opacity: 0.8 }]}>
       <Feather name={r.present ? 'check' : 'plus'} size={13} color={r.present ? colors.greenText : colors.muted} />
       <Text style={{ fontSize: 13, fontWeight: '600', color: r.present ? colors.greenText : colors.text }}>{r.name}</Text>
-      {r.status !== 'member' ? <Text style={{ fontSize: 11, color: colors.muted }}>visita</Text> : null}
+      {r.status !== 'member' ? <Text style={{ fontSize: 11, color: colors.muted }}>{tx('visita')}</Text> : null}
     </Pressable>
   );
 
   return (
     <DeskPage
-      title="Asistencia del día"
-      subtitle={`${isToday ? 'Hoy, ' : ''}${longDate(day)}${updated ? ` · actualizado ${fmtTime(updated)}` : ''} · se actualiza sola`}
+      title={tx('Asistencia del día')}
+      subtitle={tx('{pl}{longDate}{v1} · se actualiza sola', { pl: isToday ? tx('Hoy, ') : '', longDate: longDate(day), v1: updated ? tx(' · actualizado {fmtTime}', { fmtTime: fmtTime(updated) }) : '' })}
       actions={(
         <>
           {Platform.OS === 'web' ? React.createElement('input', {
-            type: 'date', value: date, max: isoDate(new Date()), 'aria-label': 'Elegir una fecha',
+            type: 'date', value: date, max: isoDate(new Date()), 'aria-label': tx('Elegir una fecha'),
             onChange: (e: { target: { value: string } }) => { if (e.target.value) setDay(new Date(`${e.target.value}T12:00:00`)); },
             style: { height: 36, padding: '0 10px', borderRadius: 9, border: `1px solid ${colors.input}`, background: colors.bg, color: colors.text, fontSize: 13, fontFamily: 'inherit' },
           }) : null}
-          <DeskButton label="Domingo pasado" onPress={() => { const t = new Date(); setDay(addDays(t, -(t.getDay() === 0 ? 7 : t.getDay()))); }} />
-          <DeskButton label="Día anterior" icon="chevron-left" onPress={() => setDay((d) => addDays(d, -1))} />
-          <DeskButton label="Hoy" onPress={() => setDay(new Date())} disabled={isToday} />
-          <DeskButton label="Día siguiente" icon="chevron-right" onPress={() => setDay((d) => addDays(d, 1))} disabled={isToday} />
-          {canMark ? <DeskButton label="Tomar asistencia" icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
+          <DeskButton label={tx('Domingo pasado')} onPress={() => { const t = new Date(); setDay(addDays(t, -(t.getDay() === 0 ? 7 : t.getDay()))); }} />
+          <DeskButton label={tx('Día anterior')} icon="chevron-left" onPress={() => setDay((d) => addDays(d, -1))} />
+          <DeskButton label={tx('Hoy')} onPress={() => setDay(new Date())} disabled={isToday} />
+          <DeskButton label={tx('Día siguiente')} icon="chevron-right" onPress={() => setDay((d) => addDays(d, 1))} disabled={isToday} />
+          {canMark ? <DeskButton label={tx('Tomar asistencia')} icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
         </>
       )}
     >
       {services === null ? <Loading /> : (
         <>
           {services.length === 0 ? (
-            <Panel title="No hay reuniones este día" hint="Las reuniones se configuran en Ajustes. Probá con otro día.">
+            <Panel title={tx('No hay reuniones este día')} hint={tx('Las reuniones se configuran en Ajustes. Probá con otro día.')}>
               <View />
             </Panel>
           ) : services.map((sd) => {
@@ -123,16 +124,16 @@ export default function DeskAttendance() {
             const missing = sd.rows.filter((r) => !r.present && r.status === 'member');
             const open = !!showMissing[sd.service.id];
             return (
-              <Panel key={sd.service.id} title={`${sd.service.name} · ${sd.service.time.slice(0, 5)}`} hint={sum.present === 0 ? 'Todavía no se marcó a nadie' : undefined}>
+              <Panel key={sd.service.id} title={`${sd.service.name} · ${sd.service.time.slice(0, 5)}`} hint={sum.present === 0 ? tx('Todavía no se marcó a nadie') : undefined}>
                 <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-                  <Num value={sum.present} label="Presentes" tone="green" />
-                  <Num value={sum.members} label="Miembros" />
-                  <Num value={sum.visitors} label="Visitas" tone="blue" />
-                  <Num value={sum.missing} label="Miembros sin marcar" tone={sum.missing ? 'amber' : undefined} />
+                  <Num value={sum.present} label={tx('Presentes')} tone="green" />
+                  <Num value={sum.members} label={tx('Miembros')} />
+                  <Num value={sum.visitors} label={tx('Visitas')} tone="blue" />
+                  <Num value={sum.missing} label={tx('Miembros sin marcar')} tone={sum.missing ? 'amber' : undefined} />
                 </View>
                 {here.length ? (
                   <>
-                    <Text style={styles.sub}>Presentes{canMark ? ' (tocá un nombre para quitarlo)' : ''}</Text>
+                    <Text style={styles.sub}>{tx('Presentes{pl}', { pl: canMark ? tx(' (tocá un nombre para quitarlo)') : '' })}</Text>
                     <View style={styles.chips}>{here.map((r) => chip(sd, r))}</View>
                   </>
                 ) : null}
@@ -140,7 +141,7 @@ export default function DeskAttendance() {
                   <>
                     <Pressable onPress={() => setShowMissing((m) => ({ ...m, [sd.service.id]: !open }))} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
                       <Feather name={open ? 'chevron-down' : 'chevron-right'} size={16} color={colors.muted} />
-                      <Text style={styles.sub}>Miembros sin marcar ({missing.length}){canMark && open ? ' — tocá un nombre para marcarlo presente' : ''}</Text>
+                      <Text style={styles.sub}>{tx('Miembros sin marcar ({n}){pl}', { n: missing.length, pl: canMark && open ? tx(' — tocá un nombre para marcarlo presente') : '' })}</Text>
                     </Pressable>
                     {open ? <View style={styles.chips}>{missing.map((r) => chip(sd, r))}</View> : null}
                   </>
@@ -149,7 +150,7 @@ export default function DeskAttendance() {
             );
           })}
 
-          <Panel title="Clases" hint={classes.length ? 'Cuenta a los alumnos marcados en la lista de la clase o en cualquier reunión del día.' : 'La iglesia no tiene clases cargadas.'}>
+          <Panel title={tx('Clases')} hint={classes.length ? tx('Cuenta a los alumnos marcados en la lista de la clase o en cualquier reunión del día.') : tx('La iglesia no tiene clases cargadas.')}>
             {classes.map((c) => (
               <View key={c.cls.id} style={styles.classRow}>
                 <View style={{ width: 70, alignItems: 'center', paddingVertical: 6, borderRadius: 10, backgroundColor: c.present.length ? colors.greenSoft : colors.bgSoft }}>
@@ -158,12 +159,12 @@ export default function DeskAttendance() {
                 <View style={{ width: 190 }}>
                   <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{c.cls.name}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>
-                    de {c.present.length + c.absent.length} {c.present.length + c.absent.length === 1 ? 'alumno' : 'alumnos'}{c.listTaken ? '' : ' · sin lista de la clase'}
+                    {tx('de')} {c.present.length + c.absent.length} {c.present.length + c.absent.length === 1 ? tx('alumno') : tx('alumnos')}{c.listTaken ? '' : tx(' · sin lista de la clase')}
                   </Text>
                 </View>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>{c.present.join(' · ') || 'Ninguno marcado presente'}</Text>
-                  {c.absent.length ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>Faltaron: {c.absent.join(' · ')}</Text> : null}
+                  <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>{c.present.join(' · ') || tx('Ninguno marcado presente')}</Text>
+                  {c.absent.length ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 18 }}>{tx('Faltaron: {absent}', { absent: c.absent.join(' · ') })}</Text> : null}
                 </View>
               </View>
             ))}

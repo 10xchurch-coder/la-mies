@@ -11,6 +11,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { addDays, fmtBytes, fmtDateShort, isoDate, youtubeId } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function NuevaPredica() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function NuevaPredica() {
       setOutline(s.notes_outline ?? '');
       setYoutube(s.youtube_url ?? '');
       setDate(s.preached_on);
-      setExistingAudio(s.audio_name ?? (s.audio_path ? 'Audio cargado' : null));
+      setExistingAudio(s.audio_name ?? (s.audio_path ? tx('Audio cargado') : null));
     }).catch(() => undefined);
   }, [id]);
 
@@ -49,11 +50,11 @@ export default function NuevaPredica() {
 
   const save = async () => {
     if (!title.trim() || !church) {
-      Alert.alert('Falta el título');
+      Alert.alert(tx('Falta el título'));
       return;
     }
     if (youtube.trim() && !youtubeId(youtube)) {
-      Alert.alert('El link de YouTube no parece válido', 'Copiá el link desde el botón Compartir del video.');
+      Alert.alert(tx('El link de YouTube no parece válido'), tx('Copiá el link desde el botón Compartir del video.'));
       return;
     }
     setBusy(true);
@@ -71,7 +72,7 @@ export default function NuevaPredica() {
       if (error) throw error;
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -79,27 +80,27 @@ export default function NuevaPredica() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title={id ? 'Editar prédica' : 'Subir prédica'} back />
+      <Header title={id ? tx('Editar prédica') : tx('Subir prédica')} back />
       <Screen>
-        <Field label="Título" value={title} onChangeText={setTitle} />
-        <Field label="Predicador" value={preacher} onChangeText={setPreacher} autoCapitalize="words" />
-        <Field label="Pasaje" hint="(opcional)" placeholder="Ej: Juan 3:1-21" value={passage} onChangeText={setPassage} />
-        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>Fecha</Text>
-        <DateChips dates={dates.includes(date) ? dates : [date, ...dates]} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
-        <Field label="Link de YouTube" hint="(opcional)" autoCapitalize="none" keyboardType="url" placeholder="https://youtu.be/..." value={youtube} onChangeText={setYoutube} />
+        <Field label={tx('Título')} value={title} onChangeText={setTitle} />
+        <Field label={tx('Predicador')} value={preacher} onChangeText={setPreacher} autoCapitalize="words" />
+        <Field label={tx('Pasaje')} hint={tx('(opcional)')} placeholder={tx('Ej: Juan 3:1-21')} value={passage} onChangeText={setPassage} />
+        <Text style={{ fontSize: 13, fontWeight: '600', color: colors.label }}>{tx('Fecha')}</Text>
+        <DateChips dates={dates.includes(date) ? dates : [date, ...dates]} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? tx('Hoy') : fmtDateShort(d))} />
+        <Field label={tx('Link de YouTube')} hint={tx('(opcional)')} autoCapitalize="none" keyboardType="url" placeholder="https://youtu.be/..." value={youtube} onChangeText={setYoutube} />
         <Card style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Audio</Text>
+          <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Audio')}</Text>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
-            {file ? `${file.name} ${fmtBytes(file.size)}` : existingAudio ? `Actual: ${existingAudio}` : 'MP3 o M4A, hasta 50 MB. Una prédica de una hora en MP3 a 64 kbps pesa unos 28 MB.'}
+            {file ? `${file.name} ${fmtBytes(file.size)}` : existingAudio ? tx('Actual: {existingAudio}', { existingAudio }) : tx('MP3 o M4A, hasta 50 MB. Una prédica de una hora en MP3 a 64 kbps pesa unos 28 MB.')}
           </Text>
-          <Button title={file || existingAudio ? 'Cambiar audio' : 'Elegir audio'} icon="music" variant="outline" small onPress={() => pickDocument('audio').then((f) => f && setFile(f))} />
+          <Button title={file || existingAudio ? tx('Cambiar audio') : tx('Elegir audio')} icon="music" variant="outline" small onPress={() => pickDocument('audio').then((f) => f && setFile(f))} />
         </Card>
-        <Field label="Descripción" hint="(opcional)" value={description} onChangeText={setDescription} multiline />
-        <Field label="Resumen" hint="(opcional, se ve debajo del video)" value={summary} onChangeText={setSummary} multiline placeholder="Los puntos principales del mensaje…" />
-        <Field label="Bosquejo para completar" hint="(opcional)" value={outline} onChangeText={setOutline} multiline
-          placeholder={'Un renglón por punto. Poné ___ donde va la palabra que completan.\nEj: 1. Jesús vino a buscar y a ___ lo que se había perdido (Lucas 19:10)'} />
-        <Button title="Guardar" onPress={save} loading={busy} />
-        {busy && file ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Subiendo el audio… puede tardar un par de minutos.</Text> : null}
+        <Field label={tx('Descripción')} hint={tx('(opcional)')} value={description} onChangeText={setDescription} multiline />
+        <Field label={tx('Resumen')} hint={tx('(opcional, se ve debajo del video)')} value={summary} onChangeText={setSummary} multiline placeholder={tx('Los puntos principales del mensaje…')} />
+        <Field label={tx('Bosquejo para completar')} hint={tx('(opcional)')} value={outline} onChangeText={setOutline} multiline
+          placeholder={tx('Un renglón por punto. Poné ___ donde va la palabra que completan.\nEj: 1. Jesús vino a buscar y a ___ lo que se había perdido (Lucas 19:10)')} />
+        <Button title={tx('Guardar')} onPress={save} loading={busy} />
+        {busy && file ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Subiendo el audio… puede tardar un par de minutos.')}</Text> : null}
       </Screen>
     </KeyboardAvoidingView>
   );

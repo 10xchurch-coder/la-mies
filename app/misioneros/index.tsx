@@ -10,6 +10,7 @@ import { monthLabel } from '@/lib/missionaries';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Missionary } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Misioneros() {
   const { isStaff } = useAuth();
@@ -22,11 +23,11 @@ export default function Misioneros() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Misioneros" subtitle="Los que sostenemos y oramos por ellos" back />
+      <Header title={tx('Misioneros')} subtitle={tx('Los que sostenemos y oramos por ellos')} back />
       <Screen>
-        {isStaff ? <Button title="Agregar misionero" icon="plus" variant="outline" onPress={() => router.push('/misioneros/editar' as Href)} /> : null}
+        {isStaff ? <Button title={tx('Agregar misionero')} icon="plus" variant="outline" onPress={() => router.push('/misioneros/editar' as Href)} /> : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="globe" title="Todavía no hay misioneros" text={isStaff ? 'Agregá al primero con el botón de arriba.' : 'Pronto vas a ver acá a nuestros misioneros y sus informes.'} />
+          <Empty icon="globe" title={tx('Todavía no hay misioneros')} text={isStaff ? tx('Agregá al primero con el botón de arriba.') : tx('Pronto vas a ver acá a nuestros misioneros y sus informes.')} />
         ) : rows.map((m) => (
           <Pressable key={m.id} accessibilityRole="button" onPress={() => router.push(`/misioneros/${m.id}` as Href)}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14, padding: 12 }}>
@@ -34,7 +35,7 @@ export default function Misioneros() {
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{m.name}</Text>
                 {m.field ? <Text style={{ fontSize: 13, color: colors.muted }}>{m.field}</Text> : null}
-                {last[m.id] ? <Tag text={`Último informe: ${monthLabel(last[m.id])}`} tone="green" /> : <Tag text="Sin informes todavía" tone="gray" />}
+                {last[m.id] ? <Tag text={tx('Último informe: {monthLabel}', { monthLabel: monthLabel(last[m.id]) })} tone="green" /> : <Tag text={tx('Sin informes todavía')} tone="gray" />}
               </View>
             </Card>
           </Pressable>

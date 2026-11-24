@@ -6,6 +6,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { Feather } from '@expo/vector-icons';
 import { colors, themed } from '../theme';
 import { Button } from './ui';
+import { tx } from '@/lib/i18n';
 
 const RELOCK_AFTER_MS = 2 * 60 * 1000;
 
@@ -15,9 +16,9 @@ export async function biometricsAvailable(): Promise<{ available: boolean; label
     const enrolled = await LocalAuthentication.isEnrolledAsync();
     const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
     const face = types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION);
-    return { available: hw && enrolled, label: face ? 'Face ID' : 'huella o código' };
+    return { available: hw && enrolled, label: face ? tx('Face ID') : tx('huella o código') };
   } catch {
-    return { available: false, label: 'código' };
+    return { available: false, label: tx('código') };
   }
 }
 
@@ -38,15 +39,15 @@ export function LockGate({ enabled, children }: { enabled: boolean; children: Re
         return;
       }
       const res = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Desbloqueá La Mies',
-        cancelLabel: 'Cancelar',
-        fallbackLabel: 'Usar el código del teléfono',
+        promptMessage: tx('Desbloqueá La Mies'),
+        cancelLabel: tx('Cancelar'),
+        fallbackLabel: tx('Usar el código del teléfono'),
         disableDeviceFallback: false,
       });
       if (res.success) setLocked(false);
-      else setError('No se pudo verificar. Probá de nuevo.');
+      else setError(tx('No se pudo verificar. Probá de nuevo.'));
     } catch {
-      setError('No se pudo verificar. Probá de nuevo.');
+      setError(tx('No se pudo verificar. Probá de nuevo.'));
     } finally {
       setBusy(false);
     }
@@ -87,10 +88,10 @@ export function LockGate({ enabled, children }: { enabled: boolean; children: Re
       <View style={styles.badge}>
         <Feather name="lock" size={34} color="#FFFFFF" />
       </View>
-      <Text style={styles.title}>La Mies</Text>
-      <Text style={styles.text}>Desbloqueá con Face ID, huella o el código del teléfono</Text>
+      <Text style={styles.title}>{tx('La Mies')}</Text>
+      <Text style={styles.text}>{tx('Desbloqueá con Face ID, huella o el código del teléfono')}</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button title="Desbloquear" onPress={authenticate} loading={busy} style={{ alignSelf: 'stretch', marginTop: 12 }} />
+      <Button title={tx('Desbloquear')} onPress={authenticate} loading={busy} style={{ alignSelf: 'stretch', marginTop: 12 }} />
     </View>
   );
 }

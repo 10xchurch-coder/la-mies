@@ -9,6 +9,7 @@ import { listProfiles, listZones, zoneProgress } from '@/lib/api';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Profile, Zone, ZoneProgress } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Zonas() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function Zonas() {
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{z.name}</Text>
             <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>
-              {people.filter((x) => z.assigned.includes(x.id)).map((x) => x.display_name).join(', ') || 'Sin asignar'}
+              {people.filter((x) => z.assigned.includes(x.id)).map((x) => x.display_name).join(', ') || tx('Sin asignar')}
             </Text>
           </View>
           <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{pct == null ? '…' : `${pct}%`}</Text>
@@ -52,19 +53,19 @@ export default function Zonas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Zonas" subtitle="Dónde sale cada uno y cuánto falta" back />
+      <Header title={tx('Zonas')} subtitle={tx('Dónde sale cada uno y cuánto falta')} back />
       <Screen>
-        {isLeader ? <Button title="Nueva zona" icon="plus" onPress={() => router.push('/zona' as Href)} /> : null}
-        {zones === null ? <Loading /> : !zones.length ? <Empty icon="map" title="Todavía no hay zonas" text={isLeader ? 'Dibujá una zona en el mapa y asignala a una pareja.' : 'Cuando el líder asigne zonas, las ves acá.'} /> : null}
+        {isLeader ? <Button title={tx('Nueva zona')} icon="plus" onPress={() => router.push('/zona' as Href)} /> : null}
+        {zones === null ? <Loading /> : !zones.length ? <Empty icon="map" title={tx('Todavía no hay zonas')} text={isLeader ? tx('Dibujá una zona en el mapa y asignala a una pareja.') : tx('Cuando el líder asigne zonas, las ves acá.')} /> : null}
         {mine.length ? (
           <>
-            <SectionTitle>Mis zonas</SectionTitle>
+            <SectionTitle>{tx('Mis zonas')}</SectionTitle>
             {mine.map((z) => <Row key={z.id} z={z} />)}
           </>
         ) : null}
         {others.length ? (
           <>
-            <SectionTitle>{mine.length ? 'Las demás' : 'Zonas de la iglesia'}</SectionTitle>
+            <SectionTitle>{mine.length ? tx('Las demás') : tx('Zonas de la iglesia')}</SectionTitle>
             {others.map((z) => <Row key={z.id} z={z} />)}
           </>
         ) : null}

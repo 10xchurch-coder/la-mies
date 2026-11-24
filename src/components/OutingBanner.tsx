@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOuting } from '@/store/outing';
 import { fmtDuration } from '@/lib/format';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const HIDE = new Set(['salida', 'login', 'registro', 'contacto', 'recortar', 'resumen']);
 
@@ -28,11 +29,11 @@ export function OutingBanner() {
   const flyers = active.kind === 'flyers';
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: (onTabs ? 92 : 16) + (onTabs ? 0 : insets.bottom) }]}>
-      <Pressable onPress={() => router.push('/salida')} accessibilityRole="button" accessibilityLabel="Volver a la salida en curso"
+      <Pressable onPress={() => router.push('/salida')} accessibilityRole="button" accessibilityLabel={tx('Volver a la salida en curso')}
         style={({ pressed }) => [styles.pill, flyers && { backgroundColor: colors.orange }, pressed && { opacity: 0.9 }]}>
         <View style={styles.dot} />
-        <Text style={styles.text}>{flyers ? 'Volantes' : 'Salida'} en curso · {fmtDuration(now - active.startedAt)}</Text>
-        <Text style={styles.back}>Volver</Text>
+        <Text style={styles.text}>{tx('{pl} en curso · {fmtDuration}', { pl: flyers ? tx('Volantes') : tx('Salida'), fmtDuration: fmtDuration(now - active.startedAt) })}</Text>
+        <Text style={styles.back}>{tx('Volver')}</Text>
         <Feather name="chevron-right" size={18} color="#FFF" />
       </Pressable>
     </View>

@@ -10,6 +10,7 @@ import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Recuperar() {
   const router = useRouter();
@@ -26,11 +27,11 @@ export default function Recuperar() {
       return;
     }
     if (await leakedCount(pw)) {
-      setMsg(LEAKED_MSG);
+      setMsg(tx(LEAKED_MSG));
       return;
     }
     if (pw !== pw2) {
-      setMsg('Las dos contraseñas no son iguales.');
+      setMsg(tx('Las dos contraseñas no son iguales.'));
       return;
     }
     setBusy(true);
@@ -45,21 +46,21 @@ export default function Recuperar() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title="Nueva contraseña" subtitle={session?.user.email ?? undefined} />
+      <Header title={tx('Nueva contraseña')} subtitle={session?.user.email ?? undefined} />
       <Screen style={{ gap: 16 }}>
         {!session ? (
           <>
             <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-              Este link ya venció o se abrió en otro navegador. Volvé a pedir uno desde "¿Olvidaste tu contraseña?" y abrilo en el mismo teléfono o computadora.
+              {tx('Este link ya venció o se abrió en otro navegador. Volvé a pedir uno desde "¿Olvidaste tu contraseña?" y abrilo en el mismo teléfono o computadora.')}
             </Text>
-            <Button title="Ir a iniciar sesión" onPress={() => router.replace('/login')} />
+            <Button title={tx('Ir a iniciar sesión')} onPress={() => router.replace('/login')} />
           </>
         ) : (
           <>
-            <PasswordField label="Contraseña nueva" value={pw} onChangeText={setPw} personal={[session.user.email?.split('@')[0] ?? '']} />
-            <PasswordField label="Repetila" value={pw2} onChangeText={setPw2} isNew={false} />
+            <PasswordField label={tx('Contraseña nueva')} value={pw} onChangeText={setPw} personal={[session.user.email?.split('@')[0] ?? '']} />
+            <PasswordField label={tx('Repetila')} value={pw2} onChangeText={setPw2} isNew={false} />
             {msg ? <Text style={{ color: colors.red, fontSize: 13 }}>{msg}</Text> : null}
-            <Button title="Guardar contraseña" onPress={save} loading={busy} disabled={!pw || !pw2} />
+            <Button title={tx('Guardar contraseña')} onPress={save} loading={busy} disabled={!pw || !pw2} />
           </>
         )}
       </Screen>

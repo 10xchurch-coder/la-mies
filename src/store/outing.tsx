@@ -13,16 +13,17 @@ import { matchPoint, sideName, type Match, type SideName } from '../lib/geo';
 import { coverageFromTrack, walkedDistance, type TrackPoint } from '../lib/track';
 import type { OutingKind, RoadRow, TeamLiveRow } from '../types';
 import { useAuth } from './auth';
+import { tx } from '@/lib/i18n';
 
 /** Aviso antes del permiso del sistema: qué datos, para qué y cuándo (requisito de Google Play). */
 function backgroundDisclosure(): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(
-      'Ubicación durante la salida',
-      'La Mies recopila datos de tu ubicación para marcar en el mapa las calles que recorrés durante una salida de evangelismo, incluso cuando la app está cerrada o no está en uso. Solo se usa mientras la salida está activa y se detiene al finalizarla. En el siguiente aviso elegí "Permitir todo el tiempo".',
+      tx('Ubicación durante la salida'),
+      tx('La Mies recopila datos de tu ubicación para marcar en el mapa las calles que recorrés durante una salida de evangelismo, incluso cuando la app está cerrada o no está en uso. Solo se usa mientras la salida está activa y se detiene al finalizarla. En el siguiente aviso elegí "Permitir todo el tiempo".'),
       [
-        { text: 'Ahora no', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Continuar', onPress: () => resolve(true) },
+        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
+        { text: tx('Continuar'), onPress: () => resolve(true) },
       ],
       { cancelable: false },
     );
@@ -159,7 +160,7 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const start = useCallback(async (kind: OutingKind) => {
-    if (Platform.OS === 'web') throw new Error('Las salidas se hacen desde el teléfono: la computadora no puede seguir el recorrido.');
+    if (Platform.OS === 'web') throw new Error(tx('Las salidas se hacen desde el teléfono: la computadora no puede seguir el recorrido.'));
     const fg = await Location.requestForegroundPermissionsAsync();
     if (fg.status !== 'granted') throw new Error('Necesitamos el permiso de ubicación para marcar las calles.');
     // Aviso destacado que Google exige antes de pedir la ubicación en segundo plano.
@@ -188,7 +189,7 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
   }, [refreshRoads]);
 
   const stop = useCallback(async () => {
-    if (!active) throw new Error('No hay salida activa');
+    if (!active) throw new Error(tx('No hay salida activa'));
     const res = await finishTracking(active.id);
     setActive(null);
     setPoints([]);
@@ -197,7 +198,7 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
 
   const trim = useCallback(
     async (cutoffMs: number) => {
-      if (!active) throw new Error('No hay salida activa');
+      if (!active) throw new Error(tx('No hay salida activa'));
       await trimTracking(active.id, cutoffMs, false);
       setActive(null);
       setPoints([]);
@@ -255,6 +256,6 @@ export function OutingProvider({ children }: { children: React.ReactNode }) {
 
 export function useOuting(): OutingState {
   const v = useContext(Ctx);
-  if (!v) throw new Error('useOuting fuera de OutingProvider');
+  if (!v) throw new Error(tx('useOuting fuera de OutingProvider'));
   return v;
 }

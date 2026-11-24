@@ -13,6 +13,7 @@ import { shareImage, shareText } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { SessionSummary } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Resumen() {
   const router = useRouter();
@@ -31,15 +32,15 @@ export default function Resumen() {
   if (!s) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Resumen de la salida" back />
+        <Header title={tx('Resumen de la salida')} back />
         <Loading />
       </View>
     );
   }
 
   const text = `${s.name} · ${church?.name ?? ''}\n${fmtDayYear(s.started_at)} ${fmtTime(s.started_at)}${s.ended_at ? `–${fmtTime(s.ended_at)}` : ''}\n`
-    + `⏱ ${fmtMinutes(s.minutes)} · 🚶 ${fmtDistance(s.distance_m)}\n🏠 ${s.houses} casas · ${s.sidewalks} veredas\n`
-    + `📝 ${s.contacts} contactos · 📖 ${s.presentations} con el evangelio · 🤝 ${s.promises} promesas\n\n"Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega" Juan 4:35`;
+    + tx('⏱ {fmtMinutes} · 🚶 {fmtDistance}\n🏠 {houses} casas · {sidewalks} veredas\n', { fmtMinutes: fmtMinutes(s.minutes), fmtDistance: fmtDistance(s.distance_m), houses: s.houses, sidewalks: s.sidewalks })
+    + tx('📝 {contacts} contactos · 📖 {presentations} con el evangelio · 🤝 {promises} promesas\n\n"Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega" Juan 4:35', { contacts: s.contacts, presentations: s.presentations, promises: s.promises });
 
   const share = async () => {
     try {
@@ -48,11 +49,11 @@ export default function Resumen() {
         return captureRef(ref as unknown as number, { format: 'png', quality: 1, result: 'tmpfile' });
       });
       if (!ok) {
-        const how = await shareText(text, 'Salida');
-        if (how === 'copied') Alert.alert('Copiado', 'El resumen quedó copiado. Pegalo en WhatsApp.');
+        const how = await shareText(text, tx('Salida'));
+        if (how === 'copied') Alert.alert(tx('Copiado'), tx('El resumen quedó copiado. Pegalo en WhatsApp.'));
       }
     } catch {
-      await shareText(text, 'Salida');
+      await shareText(text, tx('Salida'));
     }
   };
 
@@ -60,12 +61,12 @@ export default function Resumen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Resumen de la salida" back />
+      <Header title={tx('Resumen de la salida')} back />
       <Screen>
         <View ref={ref} collapsable={false} style={styles.card}>
           <View style={styles.top}>
             <Feather name="sun" size={14} color="#FFFFFF" />
-            <Text style={styles.topText}>{church?.name ?? 'La Mies'} · Salida de evangelismo</Text>
+            <Text style={styles.topText}>{tx('{name} · Salida de evangelismo', { name: church?.name ?? tx('La Mies') })}</Text>
           </View>
           <Text style={styles.who}>{s.name}</Text>
           <Text style={styles.when}>{fmtDayYear(s.started_at)} · {fmtTime(s.started_at)}{s.ended_at ? ` a ${fmtTime(s.ended_at)}` : ''}</Text>
@@ -77,21 +78,21 @@ export default function Resumen() {
             </View>
           ) : null}
           <View style={styles.grid}>
-            <Big value={s.houses} label="Casas" />
-            <Big value={s.contacts} label="Contactos" />
-            <Big value={s.presentations} label="Evangelio" />
-            <Big value={s.promises} label="Promesas" />
+            <Big value={s.houses} label={tx('Casas')} />
+            <Big value={s.contacts} label={tx('Contactos')} />
+            <Big value={s.presentations} label={tx('Evangelio')} />
+            <Big value={s.promises} label={tx('Promesas')} />
           </View>
-          <Text style={styles.small}>{fmtMinutes(s.minutes)} · {fmtDistance(s.distance_m)} caminados · {s.sidewalks} veredas</Text>
-          <Text style={styles.verse}>"Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega" Juan 4:35</Text>
+          <Text style={styles.small}>{tx('{fmtMinutes} · {fmtDistance} caminados · {sidewalks} veredas', { fmtMinutes: fmtMinutes(s.minutes), fmtDistance: fmtDistance(s.distance_m), sidewalks: s.sidewalks })}</Text>
+          <Text style={styles.verse}>{tx('"Alzad vuestros ojos y mirad los campos, porque ya están blancos para la siega" Juan 4:35')}</Text>
         </View>
         {s.ended_at && s.minutes < 10 && s.distance_m < 300 && s.contacts + s.presentations + s.promises === 0 ? (
           <Text style={{ color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 }}>
-            Esta salida duró menos de 10 minutos, casi no tuvo recorrido y no registraste a nadie, así que no suma a tus números. Si fue una prueba, podés borrarla en Yo → Mis salidas.
+            {tx('Esta salida duró menos de 10 minutos, casi no tuvo recorrido y no registraste a nadie, así que no suma a tus números. Si fue una prueba, podés borrarla en Yo → Mis salidas.')}
           </Text>
         ) : null}
-        <Button title="Compartir en WhatsApp" icon="share-2" onPress={share} />
-        <Button title="Listo" variant="ghost" onPress={() => router.replace('/(tabs)/mapa')} />
+        <Button title={tx('Compartir en WhatsApp')} icon="share-2" onPress={share} />
+        <Button title={tx('Listo')} variant="ghost" onPress={() => router.replace('/(tabs)/mapa')} />
       </Screen>
     </View>
   );

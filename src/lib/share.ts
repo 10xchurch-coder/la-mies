@@ -1,11 +1,12 @@
 // Compartir: una imagen (la tarjeta del versículo) o un texto, en el teléfono o en la web.
 import { Platform, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { tx } from './i18n';
 
 export const WEB_URL = 'https://10xchurch-coder.github.io/la-mies';
 
 /** Comparte un texto con las apps del teléfono (WhatsApp, Instagram…). En la web, usa el menú del navegador o copia. */
-export async function shareText(text: string, title = 'La Mies'): Promise<'shared' | 'copied'> {
+export async function shareText(text: string, title = tx('La Mies')): Promise<'shared' | 'copied'> {
   if (Platform.OS === 'web') {
     const nav = globalThis.navigator as Navigator & { share?: (d: { text: string; title?: string }) => Promise<void> };
     if (nav?.share) {
@@ -27,7 +28,7 @@ export async function shareText(text: string, title = 'La Mies'): Promise<'share
  * Abre el menú de compartir del teléfono con un texto. No copia nada por su cuenta:
  * si el navegador no deja compartir, devuelve 'failed' para que la pantalla ofrezca WhatsApp o copiar.
  */
-export async function tryShareText(text: string, title = 'La Mies'): Promise<'shared' | 'cancelled' | 'failed'> {
+export async function tryShareText(text: string, title = tx('La Mies')): Promise<'shared' | 'cancelled' | 'failed'> {
   if (Platform.OS !== 'web') {
     await Share.share({ message: text, title });
     return 'shared';
@@ -48,6 +49,6 @@ export async function shareImage(captureRef: () => Promise<string>, mimeType = '
   const Sharing = await import('expo-sharing');
   if (!(await Sharing.isAvailableAsync())) return false;
   const uri = await captureRef();
-  await Sharing.shareAsync(uri, { mimeType, UTI: mimeType === 'image/jpeg' ? 'public.jpeg' : 'public.png', dialogTitle: 'Compartir versículo' });
+  await Sharing.shareAsync(uri, { mimeType, UTI: mimeType === 'image/jpeg' ? 'public.jpeg' : 'public.png', dialogTitle: tx('Compartir versículo') });
   return true;
 }

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui';
 import { DEMO_CONTACT_URL, demoViewFromParam, demoViewOfSession, enterDemo, isDemoSession } from '@/lib/demo';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Demo() {
   const { ver } = useLocalSearchParams<{ ver?: string }>();
@@ -54,22 +55,22 @@ export default function Demo() {
     <View style={styles.page}>
       <View style={styles.box}>
         <View style={styles.badge}><Feather name="eye" size={26} color="#FFF" /></View>
-        <Text style={styles.title}>La Mies · iglesia de ejemplo</Text>
+        <Text style={styles.title}>{tx('La Mies · iglesia de ejemplo')}</Text>
         {state === 'own-account' ? (
           <>
-            <Text style={styles.text}>En este navegador ya entraste con tu cuenta. Para mirar la iglesia de ejemplo hay que salir de tu cuenta acá (después volvés a entrar con tu correo).</Text>
-            <Button title="Ver la iglesia de ejemplo" icon="eye" onPress={leaveOwnAndEnter} />
-            <Button title="Volver a mi iglesia" variant="outline" onPress={() => router.replace('/')} />
+            <Text style={styles.text}>{tx('En este navegador ya entraste con tu cuenta. Para mirar la iglesia de ejemplo hay que salir de tu cuenta acá (después volvés a entrar con tu correo).')}</Text>
+            <Button title={tx('Ver la iglesia de ejemplo')} icon="eye" onPress={leaveOwnAndEnter} />
+            <Button title={tx('Volver a mi iglesia')} variant="outline" onPress={() => router.replace('/')} />
           </>
         ) : state === 'error' || state === 'off' ? (
           <>
             <Text style={styles.text}>{message}</Text>
-            {state === 'error' ? <Button title="Probar de nuevo" icon="refresh-cw" onPress={() => { started.current = true; enter(); }} /> : null}
-            <Button title="Quiero La Mies para mi iglesia" variant="outline" icon="mail" onPress={() => Linking.openURL(DEMO_CONTACT_URL).catch(() => undefined)} />
+            {state === 'error' ? <Button title={tx('Probar de nuevo')} icon="refresh-cw" onPress={() => { started.current = true; enter(); }} /> : null}
+            <Button title={tx('Quiero La Mies para mi iglesia')} variant="outline" icon="mail" onPress={() => Linking.openURL(DEMO_CONTACT_URL).catch(() => undefined)} />
           </>
         ) : (
           <>
-            <Text style={styles.text}>Estamos abriendo una iglesia inventada para que mires todo. Nada de lo que toques se guarda.</Text>
+            <Text style={styles.text}>{tx('Estamos abriendo una iglesia inventada para que mires todo. Nada de lo que toques se guarda.')}</Text>
             <ActivityIndicator size="large" color={colors.green} />
           </>
         )}

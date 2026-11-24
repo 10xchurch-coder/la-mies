@@ -15,6 +15,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Profile, Song } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
@@ -65,17 +66,17 @@ export default function CultoVer() {
   const change = (next: PlanItem[]) => { setItems(next); queue({ items: next }); };
 
   if (plan === undefined) return <Loading />;
-  if (!plan) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title="Orden del culto" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró, o no tenés una parte en este culto.</Text></View>;
+  if (!plan) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title={tx('Orden del culto')} back /><Text style={{ padding: 24, color: colors.text }}>{tx('No se encontró, o no tenés una parte en este culto.')}</Text></View>;
 
   const cur = items.find((x) => x.id === open) ?? null;
   const roles = mainRoles(items);
   const mine = items.filter((x) => x.whoId && x.whoId === profile?.id);
 
-  const remove = () => Alert.alert('Borrar este culto', '¿Seguro? Se borra el orden entero.', [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Borrar', style: 'destructive', onPress: async () => {
+  const remove = () => Alert.alert(tx('Borrar este culto'), tx('¿Seguro? Se borra el orden entero.'), [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Borrar'), style: 'destructive', onPress: async () => {
       pending.current = null;
-      try { await removePlan(id); router.back(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+      try { await removePlan(id); router.back(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); }
     } },
   ]);
 
@@ -85,14 +86,14 @@ export default function CultoVer() {
       <Screen>
         {isLeader ? (
           <Card style={{ gap: 10 }}>
-            <Field label="Nombre" value={title} onChangeText={(t) => { setTitle(t); if (t.trim().length >= 2) queue({ title: t.trim() }); }} />
-            <Field label="Fecha" placeholder="DD/MM/AAAA" keyboardType="number-pad" maxLength={10} value={dateText}
+            <Field label={tx('Nombre')} value={title} onChangeText={(t) => { setTitle(t); if (t.trim().length >= 2) queue({ title: t.trim() }); }} />
+            <Field label={tx('Fecha')} placeholder={tx('DD/MM/AAAA')} keyboardType="number-pad" maxLength={10} value={dateText}
               onChangeText={(t) => { const m = maskDateAR(t, dateText); setDateText(m); const iso = parseDateAR(m, true); if (iso) queue({ service_date: iso }); }} />
           </Card>
         ) : null}
         {mine.length ? (
           <Card style={{ gap: 4, backgroundColor: colors.greenSoft, borderColor: colors.greenSoft }}>
-            <Text style={{ fontSize: 12, fontWeight: '900', color: colors.greenText }}>TE TOCA</Text>
+            <Text style={{ fontSize: 12, fontWeight: '900', color: colors.greenText }}>{tx('TE TOCA')}</Text>
             <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{mine.map((x) => x.title).join(' · ')}</Text>
           </Card>
         ) : null}
@@ -102,8 +103,8 @@ export default function CultoVer() {
           </View>
         ) : null}
 
-        <SectionTitle>Las partes, en orden</SectionTitle>
-        {!items.length ? <Text style={{ fontSize: 14, color: colors.muted }}>Todavía no hay partes.</Text> : null}
+        <SectionTitle>{tx('Las partes, en orden')}</SectionTitle>
+        {!items.length ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Todavía no hay partes.')}</Text> : null}
         {items.map((it, i) => {
           const info = typeInfo(it.type);
           const isMine = !!it.whoId && it.whoId === profile?.id;
@@ -120,27 +121,27 @@ export default function CultoVer() {
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{it.title}</Text>
                   <Text style={{ fontSize: 13, color: it.whoName ? colors.text : colors.muted }}>
-                    {[it.title !== info.label ? info.label : null, it.ref, it.whoName ?? (isLeader ? 'Sin responsable' : null)].filter(Boolean).join(' · ')}
+                    {[it.title !== info.label ? info.label : null, it.ref, it.whoName ?? (isLeader ? tx('Sin responsable') : null)].filter(Boolean).join(' · ')}
                   </Text>
                   {it.note ? <Text style={{ fontSize: 12, color: colors.muted }}>{it.note}</Text> : null}
                 </View>
-                {isMine ? <Tag text="Vos" tone="green" /> : null}
+                {isMine ? <Tag text={tx('Vos')} tone="green" /> : null}
                 {isLeader ? <Feather name={isOpen ? 'chevron-up' : 'edit-2'} size={17} color={colors.muted} /> : goSong ? <Feather name="chevron-right" size={18} color={colors.muted} /> : null}
               </Pressable>
               {isOpen ? (
                 <View style={{ gap: 10 }}>
-                  {it.type === 'song' ? <Button title={it.songId ? 'Cambiar la canción' : 'Elegir del Cancionero'} icon="music" variant="outline" small onPress={() => setPicker('song')} /> : null}
-                  <Field label={it.type === 'song' ? 'Canción' : 'Título'} value={it.title} onChangeText={(t) => change(patchItem(items, it.id, { title: t, ...(it.type === 'song' ? { songId: null } : {}) }))} />
-                  {it.type === 'reading' ? <Field label="Pasaje" placeholder="Salmos 23" value={it.ref ?? ''} onChangeText={(t) => change(patchItem(items, it.id, { ref: t || null }))} /> : null}
+                  {it.type === 'song' ? <Button title={it.songId ? tx('Cambiar la canción') : tx('Elegir del Cancionero')} icon="music" variant="outline" small onPress={() => setPicker('song')} /> : null}
+                  <Field label={it.type === 'song' ? tx('Canción') : tx('Título')} value={it.title} onChangeText={(t) => change(patchItem(items, it.id, { title: t, ...(it.type === 'song' ? { songId: null } : {}) }))} />
+                  {it.type === 'reading' ? <Field label={tx('Pasaje')} placeholder={tx('Salmos 23')} value={it.ref ?? ''} onChangeText={(t) => change(patchItem(items, it.id, { ref: t || null }))} /> : null}
                   <Card style={{ padding: 0 }}>
-                    <RowLink icon="user" title={it.whoName ?? 'Elegir quién lo hace'} subtitle={it.whoId ? 'Usa la app: le llega un aviso el día antes' : it.whoName ? 'No usa la app: avisale vos' : 'Responsable'} onPress={() => setPicker('who')} />
+                    <RowLink icon="user" title={it.whoName ?? tx('Elegir quién lo hace')} subtitle={it.whoId ? tx('Usa la app: le llega un aviso el día antes') : it.whoName ? tx('No usa la app: avisale vos') : tx('Responsable')} onPress={() => setPicker('who')} />
                   </Card>
-                  {!it.whoId ? <Field label="O escribí el nombre" hint="(si no usa la app)" value={it.whoName ?? ''} autoCapitalize="words" onChangeText={(t) => change(patchItem(items, it.id, { whoName: t || null, whoId: null }))} /> : null}
-                  <Field label="Nota" hint="(opcional)" value={it.note ?? ''} onChangeText={(t) => change(patchItem(items, it.id, { note: t || null }))} />
+                  {!it.whoId ? <Field label={tx('O escribí el nombre')} hint={tx('(si no usa la app)')} value={it.whoName ?? ''} autoCapitalize="words" onChangeText={(t) => change(patchItem(items, it.id, { whoName: t || null, whoId: null }))} /> : null}
+                  <Field label={tx('Nota')} hint={tx('(opcional)')} value={it.note ?? ''} onChangeText={(t) => change(patchItem(items, it.id, { note: t || null }))} />
                   <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <Button title="Subir" icon="arrow-up" variant="outline" small disabled={i === 0} onPress={() => change(moveItem(items, it.id, -1))} style={{ flex: 1 }} />
-                    <Button title="Bajar" icon="arrow-down" variant="outline" small disabled={i === items.length - 1} onPress={() => change(moveItem(items, it.id, 1))} style={{ flex: 1 }} />
-                    <Button title="Sacar" icon="trash-2" variant="danger" small onPress={() => { setOpen(null); change(removeItem(items, it.id)); }} style={{ flex: 1 }} />
+                    <Button title={tx('Subir')} icon="arrow-up" variant="outline" small disabled={i === 0} onPress={() => change(moveItem(items, it.id, -1))} style={{ flex: 1 }} />
+                    <Button title={tx('Bajar')} icon="arrow-down" variant="outline" small disabled={i === items.length - 1} onPress={() => change(moveItem(items, it.id, 1))} style={{ flex: 1 }} />
+                    <Button title={tx('Sacar')} icon="trash-2" variant="danger" small onPress={() => { setOpen(null); change(removeItem(items, it.id)); }} style={{ flex: 1 }} />
                   </View>
                 </View>
               ) : null}
@@ -150,10 +151,10 @@ export default function CultoVer() {
 
         {isLeader ? (
           <>
-            <SectionTitle>Agregar una parte</SectionTitle>
+            <SectionTitle>{tx('Agregar una parte')}</SectionTitle>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {PLAN_TYPES.map((t) => (
-                <Pressable key={t.type} onPress={() => { const n = newItem(t.type); change([...items, n]); setOpen(n.id); }} accessibilityRole="button" accessibilityLabel={`Agregar ${t.label}`}
+                <Pressable key={t.type} onPress={() => { const n = newItem(t.type); change([...items, n]); setOpen(n.id); }} accessibilityRole="button" accessibilityLabel={tx('Agregar {label}', { label: t.label })}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 44, paddingHorizontal: 14, borderRadius: 22, borderWidth: 1.5, borderColor: colors.input, backgroundColor: colors.bg }}>
                   <Feather name={t.icon as IconName} size={15} color={colors.green} />
                   <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{t.label}</Text>
@@ -161,17 +162,17 @@ export default function CultoVer() {
               ))}
             </View>
             <Text style={{ fontSize: 12, color: saved === 'error' ? colors.red : colors.muted, textAlign: 'right' }}>
-              {saved === 'saving' ? 'Guardando…' : saved === 'ok' ? 'Guardado' : saved === 'error' ? 'No se pudo guardar. Revisá tu conexión.' : 'Se guarda solo. Lo ven los líderes y los que tienen una parte.'}
+              {saved === 'saving' ? tx('Guardando…') : saved === 'ok' ? tx('Guardado') : saved === 'error' ? tx('No se pudo guardar. Revisá tu conexión.') : tx('Se guarda solo. Lo ven los líderes y los que tienen una parte.')}
             </Text>
-            <Button title="Borrar este culto" variant="danger" small onPress={remove} />
+            <Button title={tx('Borrar este culto')} variant="danger" small onPress={remove} />
           </>
         ) : null}
       </Screen>
 
-      <PickerModal visible={picker === 'who' && !!cur} title="¿Quién lo hace?" allowNone noneLabel="Nadie / quitar"
+      <PickerModal visible={picker === 'who' && !!cur} title={tx('¿Quién lo hace?')} allowNone noneLabel={tx('Nadie / quitar')}
         items={people.map((p) => ({ id: p.id, title: p.display_name }))} onClose={() => setPicker(null)}
         onPick={(pid) => { if (cur) change(patchItem(items, cur.id, { whoId: pid, whoName: pid ? people.find((p) => p.id === pid)?.display_name ?? null : null })); setPicker(null); }} />
-      <PickerModal visible={picker === 'song' && !!cur} title="Elegí la canción"
+      <PickerModal visible={picker === 'song' && !!cur} title={tx('Elegí la canción')}
         items={songs.map((s) => ({ id: s.id, title: s.title, subtitle: s.author ?? undefined, face: false }))} onClose={() => setPicker(null)}
         onPick={(sid) => { const s = songs.find((x) => x.id === sid); if (cur && s) change(patchItem(items, cur.id, { songId: s.id, title: s.title })); setPicker(null); }} />
     </View>

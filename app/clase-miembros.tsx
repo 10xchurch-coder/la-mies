@@ -14,6 +14,7 @@ import {
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function ClaseMiembros() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function ClaseMiembros() {
     peopleSettings().then(setCfg).catch(() => undefined);
   }, []);
   useFocusEffect(load);
-  const fail = (e: unknown) => Alert.alert('No se pudo', errorMessage(e));
+  const fail = (e: unknown) => Alert.alert(tx('No se pudo'), errorMessage(e));
 
   const names = memberLessons(cfg?.member_lessons);
   const finalLabel = cfg?.member_final?.trim() || DEFAULT_MEMBER_FINAL;
@@ -36,16 +37,16 @@ export default function ClaseMiembros() {
   const finished = (rows ?? []).filter((r) => r.final_on);
 
   const markFinal = (r: MemberClassRow) => {
-    Alert.alert(`${finalLabel}`, `¿Marcamos este paso para ${r.name} con la fecha de hoy?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sí', onPress: () => {
+    Alert.alert(`${finalLabel}`, tx('¿Marcamos este paso para {name} con la fecha de hoy?', { name: r.name }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Sí'), onPress: () => {
         memberClassFinal(r.id).then(() => {
           load();
           if (r.status === 'member') return;
           // El paso final suele ser recibirlo como miembro: se ofrece dejar su ficha al día.
-          Alert.alert('¿Ya es miembro?', `Si querés, ${r.name} queda como miembro de la iglesia desde hoy.`, [
-            { text: 'Todavía no', style: 'cancel' },
-            { text: 'Sí, es miembro', onPress: () => { recordDecision(r.id, 'member', null, '').then(load).catch(fail); } },
+          Alert.alert(tx('¿Ya es miembro?'), tx('Si querés, {name} queda como miembro de la iglesia desde hoy.', { name: r.name }), [
+            { text: tx('Todavía no'), style: 'cancel' },
+            { text: tx('Sí, es miembro'), onPress: () => { recordDecision(r.id, 'member', null, '').then(load).catch(fail); } },
           ]);
         }).catch(fail);
       } },
@@ -61,7 +62,7 @@ export default function ClaseMiembros() {
           <View style={{ flex: 1, gap: 3 }}>
             <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.name}</Text>
             <View style={{ flexDirection: 'row' }}>
-              <Tag text={r.final_on ? `${finalLabel} · ${showDay(r.final_on)}` : `${p.done} de ${names.length} lecciones`} tone={r.final_on ? 'green' : p.complete ? 'amber' : 'blue'} />
+              <Tag text={r.final_on ? `${finalLabel} · ${showDay(r.final_on)}` : tx('{done} de {n} lecciones', { done: p.done, n: names.length })} tone={r.final_on ? 'green' : p.complete ? 'amber' : 'blue'} />
             </View>
           </View>
         </Pressable>
@@ -70,7 +71,7 @@ export default function ClaseMiembros() {
             {names.map((n, i) => {
               const on = !!r.done?.[String(i + 1)];
               return (
-                <Pressable key={i} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${n}: ${on ? 'hecha' : 'sin hacer'}`}
+                <Pressable key={i} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${n}: ${on ? tx('hecha') : tx('sin hacer')}`}
                   onPress={() => { memberClassSet(r.id, i + 1, !on).then(load).catch(fail); }}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44, paddingHorizontal: 10, borderRadius: 10, backgroundColor: on ? colors.greenSoft : colors.bgSoft }}>
                   <Feather name={on ? 'check-square' : 'square'} size={20} color={on ? colors.greenText : colors.muted} />
@@ -80,19 +81,19 @@ export default function ClaseMiembros() {
               );
             })}
             {isStaff ? (
-              <Button title={`Último paso: ${finalLabel}`} icon="award" small variant={p.complete ? 'primary' : 'outline'} onPress={() => markFinal(r)} />
-            ) : p.complete ? <Text style={{ fontSize: 12, color: colors.muted }}>Terminó las lecciones. Falta el último paso, que lo marca el pastor: {finalLabel}.</Text> : null}
+              <Button title={tx('Último paso: {finalLabel}', { finalLabel })} icon="award" small variant={p.complete ? 'primary' : 'outline'} onPress={() => markFinal(r)} />
+            ) : p.complete ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Terminó las lecciones. Falta el último paso, que lo marca el pastor: {finalLabel}.', { finalLabel })}</Text> : null}
             {isStaff ? (
-              <Button title="Sacar de la clase" variant="ghost" small onPress={() => Alert.alert('¿Sacar de la clase?', `Se borra lo anotado de ${r.name} en esta clase. Su ficha no cambia.`, [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Sacar', style: 'destructive', onPress: () => { memberClassRemove(r.id).then(load).catch(fail); } },
+              <Button title={tx('Sacar de la clase')} variant="ghost" small onPress={() => Alert.alert(tx('¿Sacar de la clase?'), tx('Se borra lo anotado de {name} en esta clase. Su ficha no cambia.', { name: r.name }), [
+                { text: tx('Cancelar'), style: 'cancel' },
+                { text: tx('Sacar'), style: 'destructive', onPress: () => { memberClassRemove(r.id).then(load).catch(fail); } },
               ])} />
             ) : null}
           </>
         ) : isStaff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            {r.status === 'member' ? <Button title="Certificado" icon="printer" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/certificado/imprimir', params: { id: r.id, tipo: 'miembro' } } as unknown as Href)} /> : null}
-            <Button title="Deshacer el último paso" variant="ghost" small style={{ flex: 1 }} onPress={() => { memberClassFinal(r.id, true).then(load).catch(fail); }} />
+            {r.status === 'member' ? <Button title={tx('Certificado')} icon="printer" variant="outline" small style={{ flex: 1 }} onPress={() => router.push({ pathname: '/certificado/imprimir', params: { id: r.id, tipo: 'miembro' } } as unknown as Href)} /> : null}
+            <Button title={tx('Deshacer el último paso')} variant="ghost" small style={{ flex: 1 }} onPress={() => { memberClassFinal(r.id, true).then(load).catch(fail); }} />
           </View>
         ) : null}
       </Card>
@@ -101,16 +102,16 @@ export default function ClaseMiembros() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Clase de miembros" subtitle={rows ? `${doing.length} haciendo la clase · ${finished.length} terminaron` : undefined} back />
+      <Header title={tx('Clase de miembros')} subtitle={rows ? tx('{n} haciendo la clase · {n2} terminaron', { n: doing.length, n2: finished.length }) : undefined} back />
       <Screen>
-        {isLeader ? <Button title="Anotar a alguien en la clase" icon="plus" onPress={() => { personChoices().then(setPeople).catch(() => undefined); setPicking(true); }} /> : null}
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title="Nadie está en la clase de miembros" text="Tocá “Anotar a alguien en la clase” para empezar." /> : null}
+        {isLeader ? <Button title={tx('Anotar a alguien en la clase')} icon="plus" onPress={() => { personChoices().then(setPeople).catch(() => undefined); setPicking(true); }} /> : null}
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="users" title={tx('Nadie está en la clase de miembros')} text={tx('Tocá “Anotar a alguien en la clase” para empezar.')} /> : null}
         {doing.map(card)}
-        {finished.length ? <SectionTitle>Terminaron</SectionTitle> : null}
+        {finished.length ? <SectionTitle>{tx('Terminaron')}</SectionTitle> : null}
         {finished.map(card)}
-        {isStaff ? <Button title="Cambiar las lecciones y el último paso" icon="edit-2" variant="ghost" small onPress={() => router.push({ pathname: '/discipulado/lecciones', params: { de: 'miembros' } } as unknown as Href)} /> : null}
+        {isStaff ? <Button title={tx('Cambiar las lecciones y el último paso')} icon="edit-2" variant="ghost" small onPress={() => router.push({ pathname: '/discipulado/lecciones', params: { de: 'miembros' } } as unknown as Href)} /> : null}
       </Screen>
-      <PickerModal visible={picking} title="¿Quién empieza la clase?" onClose={() => setPicking(false)}
+      <PickerModal visible={picking} title={tx('¿Quién empieza la clase?')} onClose={() => setPicking(false)}
         items={people.filter((p) => !(rows ?? []).some((r) => r.id === p.id)).map((p) => ({ id: p.id, title: p.name, photo: p.photo_path }))}
         onPick={(id) => { setPicking(false); if (id) memberClassSet(id, null).then(load).catch(fail); }} />
     </View>

@@ -13,6 +13,7 @@ import { fmtDateShort, isoDate, upcomingDates } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Culto() {
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function Culto() {
       setMaking(false);
       router.push(`/culto/${id}` as Href);
     } catch (e) {
-      Alert.alert('No se pudo crear', errorMessage(e));
+      Alert.alert(tx('No se pudo crear'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -57,14 +58,14 @@ export default function Culto() {
         <Card style={{ gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }}>{fmtDateShort(p.service_date).toUpperCase()}{p.service_date === today ? ' · HOY' : ''}</Text>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: colors.greenText }}>{fmtDateShort(p.service_date).toUpperCase()}{p.service_date === today ? tx(' · HOY') : ''}</Text>
               <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{p.title}</Text>
             </View>
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </View>
           {roles.map((r) => <Text key={r.label} style={{ fontSize: 13, color: colors.muted }}>{r.label}: <Text style={{ color: colors.text, fontWeight: '600' }}>{r.names.join(', ')}</Text></Text>)}
-          {!roles.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{p.items.length} {p.items.length === 1 ? 'parte' : 'partes'}</Text> : null}
-          {mine.length ? <View style={{ flexDirection: 'row' }}><Tag text={`Te toca: ${mine.map((x) => x.title).join(', ')}`} tone="green" /></View> : null}
+          {!roles.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{p.items.length} {p.items.length === 1 ? tx('parte') : tx('partes')}</Text> : null}
+          {mine.length ? <View style={{ flexDirection: 'row' }}><Tag text={tx('Te toca: {map}', { map: mine.map((x) => x.title).join(', ') })} tone="green" /></View> : null}
         </Card>
       </Pressable>
     );
@@ -72,31 +73,31 @@ export default function Culto() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Orden del culto" subtitle="Qué se hace y quién lo hace" back />
+      <Header title={tx('Orden del culto')} subtitle={tx('Qué se hace y quién lo hace')} back />
       <Screen>
         {isLeader ? (
           making ? (
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>¿Qué día es el culto?</Text>
+              <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('¿Qué día es el culto?')}</Text>
               <DateChips dates={dates} value={date} onChange={pick} format={fmtDateShort} />
-              <Field label="Nombre" value={title} onChangeText={setTitle} placeholder="Culto del domingo" />
-              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Empieza con las partes de siempre. Después cambiás, sacás o agregás lo que quieras.</Text>
+              <Field label={tx('Nombre')} value={title} onChangeText={setTitle} placeholder={tx('Culto del domingo')} />
+              <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Empieza con las partes de siempre. Después cambiás, sacás o agregás lo que quieras.')}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Cancelar" variant="ghost" onPress={() => setMaking(false)} style={{ flex: 1 }} />
-                <Button title="Crear" onPress={create} loading={busy} disabled={title.trim().length < 2} style={{ flex: 2 }} />
+                <Button title={tx('Cancelar')} variant="ghost" onPress={() => setMaking(false)} style={{ flex: 1 }} />
+                <Button title={tx('Crear')} onPress={create} loading={busy} disabled={title.trim().length < 2} style={{ flex: 2 }} />
               </View>
             </Card>
-          ) : <Button title="Armar un culto" icon="plus" onPress={start} />
+          ) : <Button title={tx('Armar un culto')} icon="plus" onPress={start} />
         ) : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="list" title="No hay cultos armados" text={isLeader ? 'Tocá “Armar un culto” para empezar.' : 'Cuando te den una parte en un culto, la vas a ver acá.'} />
+          <Empty icon="list" title={tx('No hay cultos armados')} text={isLeader ? tx('Tocá “Armar un culto” para empezar.') : tx('Cuando te den una parte en un culto, la vas a ver acá.')} />
         ) : rows.map(row)}
         {old === null ? (
-          <Text onPress={() => pastPlans(today).then(setOld).catch(() => setOld([]))} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center', paddingVertical: 8 }}>Ver los cultos anteriores</Text>
+          <Text onPress={() => pastPlans(today).then(setOld).catch(() => setOld([]))} style={{ fontSize: 13, fontWeight: '700', color: colors.green, textAlign: 'center', paddingVertical: 8 }}>{tx('Ver los cultos anteriores')}</Text>
         ) : (
           <>
-            <SectionTitle>Anteriores</SectionTitle>
-            {old.length ? old.map(row) : <Text style={{ fontSize: 13, color: colors.muted }}>No hay cultos anteriores.</Text>}
+            <SectionTitle>{tx('Anteriores')}</SectionTitle>
+            {old.length ? old.map(row) : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No hay cultos anteriores.')}</Text>}
           </>
         )}
       </Screen>

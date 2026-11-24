@@ -7,12 +7,13 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { MapStyleElement, MapType } from './map';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, themed } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export type MapStyle = 'satellite' | 'standard' | 'simple';
 const OPTIONS: { value: MapStyle; label: string }[] = [
-  { value: 'satellite', label: 'Satélite' },
-  { value: 'standard', label: 'Calles' },
-  { value: 'simple', label: 'Simple' },
+  { value: 'satellite', get label() { return tx('Satélite'); } },
+  { value: 'standard', get label() { return tx('Calles'); } },
+  { value: 'simple', get label() { return tx('Simple'); } },
 ];
 const KEY = 'lamies.mapStyle';
 
@@ -59,7 +60,7 @@ export function useMapStyle(): [MapStyle, (s: MapStyle) => void] {
 /** Tres botones juntos, siempre a la vista, para cambiar en cualquier momento. */
 export function MapTypeButton({ style, onChange, top = 60 }: { style: MapStyle; onChange: (s: MapStyle) => void; top?: number }) {
   return (
-    <View style={[styles.wrap, { top }]} accessibilityRole="radiogroup" accessibilityLabel="Estilo del mapa">
+    <View style={[styles.wrap, { top }]} accessibilityRole="radiogroup" accessibilityLabel={tx('Estilo del mapa')}>
       {OPTIONS.map((o) => {
         const on = o.value === style;
         return (

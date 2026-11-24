@@ -4,6 +4,7 @@ import { MAX_CARDS, newItem, parsePassage, type NoticeCard, type PresentItem } f
 import { findRefs, refLabel } from './sermonOutline';
 import { typeInfo as planType, type PlanItem } from './servicePlan';
 import { searchKey } from './songs';
+import { tx, txList } from './i18n';
 
 // ---------- Anuncios y eventos ----------
 
@@ -11,8 +12,8 @@ export type AnnLike = { title: string; body: string; audience: string; created_a
 export type EventLike = { title: string; starts_at: string; ends_at: string | null; all_day: boolean; place: string | null; weekly: boolean; yearly?: boolean };
 export type CardOptions = { days: number; ahead: number; anns: boolean; events: boolean; weekly: boolean };
 
-const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DAYS = txList(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']);
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 const DAY_MS = 86400000;
 const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayDiff = (a: Date, b: Date) => Math.round((midnight(a).getTime() - midnight(b).getTime()) / DAY_MS);
@@ -23,8 +24,8 @@ const dayMonth = (d: Date) => `${d.getDate()} de ${MONTHS[d.getMonth()]}`;
 /** "Hoy", "Mañana", "Sábado 28 de noviembre". */
 export function dayWords(d: Date, now: Date): string {
   const n = dayDiff(d, now);
-  if (n === 0) return 'Hoy';
-  if (n === 1) return 'Mañana';
+  if (n === 0) return tx('Hoy');
+  if (n === 1) return tx('Mañana');
   return `${cap(DAYS[d.getDay()])} ${dayMonth(d)}`;
 }
 

@@ -18,6 +18,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { Contact, Engagement, Group, PersonStatus } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Opt = { value: string; label: string };
 
@@ -33,7 +34,7 @@ function Select({ value, options, onChange, label, width }: { value: string; opt
   const i = Math.max(0, options.findIndex((o) => o.value === value));
   // En el iPad: con pocas opciones se elige de una lista; con muchas, cada toque pasa a la siguiente.
   const pick = () => (options.length <= 7
-    ? Alert.alert(label, undefined, [...options.map((o) => ({ text: o.label, onPress: () => onChange(o.value) })), { text: 'Cancelar', style: 'cancel' as const }])
+    ? Alert.alert(label, undefined, [...options.map((o) => ({ text: o.label, onPress: () => onChange(o.value) })), { text: tx('Cancelar'), style: 'cancel' as const }])
     : onChange(options[(i + 1) % options.length].value));
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={pick}
@@ -46,16 +47,16 @@ function Select({ value, options, onChange, label, width }: { value: string; opt
 
 // "min" es el ancho que tiene que tener la tabla para que la columna entre sin apretar a las demás.
 const COLS: { key: PersonSort | 'phone' | 'baptized' | 'family'; label: string; width?: number; flex?: number; sort?: PersonSort; min?: number }[] = [
-  { key: 'name', label: 'Nombre', flex: 2.4, sort: 'name' },
-  { key: 'status', label: 'Estado', width: 92, sort: 'status' },
-  { key: 'group', label: 'Grupo', flex: 1.2, sort: 'group', min: 800 },
-  { key: 'phone', label: 'Teléfono', flex: 1.2, min: 520 },
+  { key: 'name', get label() { return tx('Nombre'); }, flex: 2.4, sort: 'name' },
+  { key: 'status', get label() { return tx('Estado'); }, width: 92, sort: 'status' },
+  { key: 'group', get label() { return tx('Grupo'); }, flex: 1.2, sort: 'group', min: 800 },
+  { key: 'phone', get label() { return tx('Teléfono'); }, flex: 1.2, min: 520 },
   // La familia es solo un vínculo: la asistencia de al lado es de cada persona.
-  { key: 'family', label: 'Familia', flex: 1.1, min: 1100 },
-  { key: 'age', label: 'Edad', width: 64, sort: 'age', min: 900 },
-  { key: 'baptized', label: 'Bautizado', width: 96, min: 1000 },
-  { key: 'last', label: 'Última vez', width: 112, sort: 'last' },
-  { key: 'pct', label: 'Asistencia', width: 150, sort: 'pct', min: 660 },
+  { key: 'family', get label() { return tx('Familia'); }, flex: 1.1, min: 1100 },
+  { key: 'age', get label() { return tx('Edad'); }, width: 64, sort: 'age', min: 900 },
+  { key: 'baptized', get label() { return tx('Bautizado'); }, width: 96, min: 1000 },
+  { key: 'last', get label() { return tx('Última vez'); }, width: 112, sort: 'last' },
+  { key: 'pct', get label() { return tx('Asistencia'); }, width: 150, sort: 'pct', min: 660 },
 ];
 
 export default function DeskPeople() {
@@ -104,11 +105,11 @@ export default function DeskPeople() {
     .map((c) => (c.key === 'group' ? { ...c, label: gw } : c));
 
   const exportCsv = () => {
-    if (demoBlocked('Bajar esta lista')) return;
+    if (demoBlocked(tx('Bajar esta lista'))) return;
     const csv = toCsv(
-      ['Nombre', 'Estado', gw, 'Familia', 'Teléfono', 'Correo', 'Domicilio', 'Nacimiento', 'Edad', 'Bautizado', 'Miembro desde', 'Última vez que vino', 'Asistencia % (12 semanas)'],
+      [tx('Nombre'), tx('Estado'), gw, tx('Familia'), tx('Teléfono'), tx('Correo'), tx('Domicilio'), tx('Nacimiento'), tx('Edad'), tx('Bautizado'), tx('Miembro desde'), tx('Última vez que vino'), tx('Asistencia % (12 semanas)')],
       shown.map((c) => [c.name, STATUS_LABEL[c.status] ?? c.status, groupName.get(c.group_id ?? '') ?? '', families.get(c.id)?.name ?? '', c.phone ? formatPhone(c.phone) : '', c.email, c.address ?? c.address_hint,
-        fmtDateAR(c.birthdate), ageOf(c), c.baptized || c.baptized_on ? 'Sí' : 'No', fmtDateAR(c.member_since), fmtDateAR(last.get(c.id) ?? null), pct.has(c.id) ? Math.round(pct.get(c.id)!) : '']),
+        fmtDateAR(c.birthdate), ageOf(c), c.baptized || c.baptized_on ? tx('Sí') : 'No', fmtDateAR(c.member_since), fmtDateAR(last.get(c.id) ?? null), pct.has(c.id) ? Math.round(pct.get(c.id)!) : '']),
     );
     if (Platform.OS !== 'web') { downloadText(`personas-${new Date().toISOString().slice(0, 10)}.csv`, csv).catch(() => undefined); return; }
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
@@ -121,32 +122,32 @@ export default function DeskPeople() {
   const toggleSort = (by: PersonSort) => setSort((s) => (s.by === by ? { by, dir: (s.dir * -1) as 1 | -1 } : { by, dir: by === 'last' || by === 'pct' ? -1 : 1 }));
 
   const tabs: { value: PersonFilter['status']; label: string; n: number }[] = [
-    { value: 'member', label: 'Miembros', n: counts.member },
-    { value: 'visitor', label: 'Visitas', n: counts.visitor },
-    { value: 'contact', label: 'Contactos', n: counts.contact },
-    { value: 'all', label: 'Todos', n: counts.all },
+    { value: 'member', label: tx('Miembros'), n: counts.member },
+    { value: 'visitor', label: tx('Visitas'), n: counts.visitor },
+    { value: 'contact', label: tx('Contactos'), n: counts.contact },
+    { value: 'all', label: tx('Todos'), n: counts.all },
   ];
 
   return (
     <DeskPage
       scroll={false}
-      title="Personas"
-      subtitle={rows ? `${shown.length} de ${counts.all} personas` : 'Cargando…'}
+      title={tx('Personas')}
+      subtitle={rows ? tx('{n} de {all} personas', { n: shown.length, all: counts.all }) : tx('Cargando…')}
       actions={<>
-        <DeskButton label="Bajar a Excel" icon="download" onPress={exportCsv} disabled={!shown.length} />
-        {can('personas.editar') ? <DeskButton label="Importar" icon="upload" onPress={() => router.push('/importar' as Href)} /> : null}
-        <DeskButton label="Agregar persona" icon="user-plus" primary onPress={() => router.push('/persona/nueva')} />
+        <DeskButton label={tx('Bajar a Excel')} icon="download" onPress={exportCsv} disabled={!shown.length} />
+        {can('personas.editar') ? <DeskButton label={tx('Importar')} icon="upload" onPress={() => router.push('/importar' as Href)} /> : null}
+        <DeskButton label={tx('Agregar persona')} icon="user-plus" primary onPress={() => router.push('/persona/nueva')} />
       </>}
     >
       <View style={styles.toolbar}>
         <View style={styles.search}>
           <Feather name="search" size={16} color={colors.muted} />
           <TextInput
-            accessibilityLabel="Buscar persona" placeholder="Buscar por nombre, teléfono o domicilio" placeholderTextColor={colors.muted}
+            accessibilityLabel={tx('Buscar persona')} placeholder={tx('Buscar por nombre, teléfono o domicilio')} placeholderTextColor={colors.muted}
             value={filter.q} onChangeText={(q) => setFilter((f) => ({ ...f, q }))}
             style={[{ flex: 1, fontSize: 14, color: colors.text, height: 36 }, Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null]}
           />
-          {filter.q ? <Pressable accessibilityLabel="Borrar búsqueda" onPress={() => setFilter((f) => ({ ...f, q: '' }))}><Feather name="x" size={16} color={colors.muted} /></Pressable> : null}
+          {filter.q ? <Pressable accessibilityLabel={tx('Borrar búsqueda')} onPress={() => setFilter((f) => ({ ...f, q: '' }))}><Feather name="x" size={16} color={colors.muted} /></Pressable> : null}
         </View>
         <View style={styles.tabs}>
           {tabs.map((t) => {
@@ -161,15 +162,15 @@ export default function DeskPeople() {
         </View>
         {church?.grouping !== 'none' && groups.length ? (
           <Select label={gw} value={filter.group} onChange={(group) => setFilter((f) => ({ ...f, group }))} width={170}
-            options={[{ value: 'all', label: `${gw}: todos` }, ...groups.map((g) => ({ value: g.id, label: g.name })), { value: 'none', label: `Sin ${gw.toLowerCase()}` }]} />
+            options={[{ value: 'all', label: tx('{gw}: todos', { gw }) }, ...groups.map((g) => ({ value: g.id, label: g.name })), { value: 'none', label: tx('Sin {gw}', { gw: gw.toLowerCase() }) }]} />
         ) : null}
-        <Select label="Más filtros" value={filter.extra} onChange={(extra) => setFilter((f) => ({ ...f, extra: extra as PersonFilter['extra'] }))} width={210}
+        <Select label={tx('Más filtros')} value={filter.extra} onChange={(extra) => setFilter((f) => ({ ...f, extra: extra as PersonFilter['extra'] }))} width={210}
           options={[
-            { value: 'all', label: 'Sin más filtros' },
-            { value: 'absent', label: 'No vienen hace 3 semanas o más' },
-            { value: 'unbaptized', label: 'Sin bautizar' },
-            { value: 'no_phone', label: 'Sin teléfono' },
-            { value: 'no_account', label: 'Sin cuenta en la app' },
+            { value: 'all', label: tx('Sin más filtros') },
+            { value: 'absent', label: tx('No vienen hace 3 semanas o más') },
+            { value: 'unbaptized', label: tx('Sin bautizar') },
+            { value: 'no_phone', label: tx('Sin teléfono') },
+            { value: 'no_account', label: tx('Sin cuenta en la app') },
           ]} />
       </View>
 
@@ -180,7 +181,7 @@ export default function DeskPeople() {
               const active = c.sort && sort.by === c.sort;
               return (
                 <Pressable key={c.key} disabled={!c.sort} onPress={() => c.sort && toggleSort(c.sort)} accessibilityRole={c.sort ? 'button' : undefined}
-                  accessibilityLabel={c.sort ? `Ordenar por ${c.label}` : undefined}
+                  accessibilityLabel={c.sort ? tx('Ordenar por {label}', { label: c.label }) : undefined}
                   style={[styles.cell, c.width ? { width: c.width } : { flex: c.flex }, { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 4 }]}>
                   <Text style={[styles.th, active && { color: colors.text }]} numberOfLines={1}>{c.label}</Text>
                   {active ? <Feather name={sort.dir === 1 ? 'arrow-up' : 'arrow-down'} size={12} color={colors.text} /> : null}
@@ -196,8 +197,8 @@ export default function DeskPeople() {
             ListEmptyComponent={rows ? (
               <View style={{ padding: 40, alignItems: 'center', gap: 6 }}>
                 <Feather name="users" size={28} color={colors.gray} />
-                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>No hay nadie con esos filtros</Text>
-                <Text style={{ fontSize: 13, color: colors.muted }}>Probá con otra búsqueda o quitá algún filtro.</Text>
+                <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{tx('No hay nadie con esos filtros')}</Text>
+                <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Probá con otra búsqueda o quitá algún filtro.')}</Text>
               </View>
             ) : undefined}
             renderItem={({ item: c }) => {
@@ -220,7 +221,7 @@ export default function DeskPeople() {
                   case 'phone': return <Text style={styles.td} numberOfLines={1}>{c.phone ? formatPhone(c.phone) : '—'}</Text>;
                   case 'family': return <Text style={[styles.td, !families.has(c.id) && { color: colors.muted }]} numberOfLines={1}>{families.get(c.id)?.name ?? '—'}</Text>;
                   case 'age': return <Text style={styles.td}>{ageOf(c) ?? '—'}</Text>;
-                  case 'baptized': return c.baptized || c.baptized_on ? <Feather name="check" size={16} color={colors.green} /> : <Text style={[styles.td, { color: colors.muted }]}>No</Text>;
+                  case 'baptized': return c.baptized || c.baptized_on ? <Feather name="check" size={16} color={colors.green} /> : <Text style={[styles.td, { color: colors.muted }]}>{tx('No')}</Text>;
                   case 'last': return (
                     <Text style={[styles.td, c.status !== 'contact' && days !== null && days >= 21 && { color: colors.red, fontWeight: '700' }]} numberOfLines={1}>
                       {lastOn ? fmtDateShort(lastOn) : '—'}
@@ -239,7 +240,7 @@ export default function DeskPeople() {
               };
               const on = openId === c.id;
               return (
-                <Pressable accessibilityRole="button" accessibilityLabel={`Abrir ${c.name}`} onPress={() => setOpenId(on ? null : c.id)}
+                <Pressable accessibilityRole="button" accessibilityLabel={tx('Abrir {name}', { name: c.name })} onPress={() => setOpenId(on ? null : c.id)}
                   style={(s) => [styles.tr, (s as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }, on && { backgroundColor: colors.greenSoft }]}>
                   {cols.map((col) => (
                     <View key={col.key} style={[styles.cell, col.width ? { width: col.width } : { flex: col.flex }]}>{cell(col.key)}</View>
@@ -292,9 +293,9 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
 
   const save = async () => {
     const birthdate = f.birth.trim() ? parseDateAR(f.birth) : null;
-    if (!f.name.trim()) return Alert.alert('Falta el nombre', 'Escribí el nombre de la persona.');
-    if (phoneProblem(f.phone)) return Alert.alert('Revisá el teléfono', phoneProblem(f.phone) ?? '');
-    if (f.birth.trim() && !birthdate) return Alert.alert('Revisá la fecha', 'Escribí la fecha de nacimiento así: 08/12/1993.');
+    if (!f.name.trim()) return Alert.alert(tx('Falta el nombre'), tx('Escribí el nombre de la persona.'));
+    if (phoneProblem(f.phone)) return Alert.alert(tx('Revisá el teléfono'), phoneProblem(f.phone) ?? '');
+    if (f.birth.trim() && !birthdate) return Alert.alert(tx('Revisá la fecha'), tx('Escribí la fecha de nacimiento así: 08/12/1993.'));
     // Se manda solo lo que cambió, para no pisar lo que otro haya corregido mientras tanto.
     const patch: Partial<Contact> = {};
     if (f.name !== start.name) patch.name = f.name.trim();
@@ -312,17 +313,17 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
   };
 
   const remove = () => {
-    if (person.profile_id) return Alert.alert('Tiene cuenta en la app', 'Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.');
-    Alert.alert(`¿Borrar a ${person.name}?`, 'Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => { deleteContact(person.id).then(onDeleted).catch((e) => Alert.alert('No se pudo borrar', errorMessage(e))); } },
+    if (person.profile_id) return Alert.alert(tx('Tiene cuenta en la app'), tx('Esta persona tiene cuenta. Primero quitale la cuenta en Administración > Cuentas.'));
+    Alert.alert(tx('¿Borrar a {name}?', { name: person.name }), tx('Se borra la ficha y también sus asistencias, visitas, clases y ministerios. No se puede deshacer.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: () => { deleteContact(person.id).then(onDeleted).catch((e) => Alert.alert(tx('No se pudo borrar'), errorMessage(e))); } },
     ]);
   };
 
@@ -334,45 +335,45 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }} numberOfLines={2}>{person.name}</Text>
           <Text style={{ fontSize: 12, color: colors.muted }}>
-            {STATUS_LABEL[person.status]}{person.member_since ? ` desde ${fmtDateAR(person.member_since)}` : ''}
+            {STATUS_LABEL[person.status]}{person.member_since ? tx(' desde {fmtDateAR}', { fmtDateAR: fmtDateAR(person.member_since) }) : ''}
           </Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" onPress={onClose} style={{ padding: 6 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={tx('Cerrar')} onPress={onClose} style={{ padding: 6 }}>
           <Feather name="x" size={20} color={colors.muted} />
         </Pressable>
       </View>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <DeskButton label="WhatsApp" icon="message-circle" disabled={!person.phone} onPress={() => openWhatsApp(person.phone, '')} />
-          <DeskButton label="Llamar" icon="phone" disabled={!person.phone} onPress={() => Linking.openURL(`tel:${telDigits(person.phone)}`)} />
+          <DeskButton label={tx('WhatsApp')} icon="message-circle" disabled={!person.phone} onPress={() => openWhatsApp(person.phone, '')} />
+          <DeskButton label={tx('Llamar')} icon="phone" disabled={!person.phone} onPress={() => Linking.openURL(`tel:${telDigits(person.phone)}`)} />
         </View>
         {engagement && engagement.possible > 0 ? (
           <View style={{ padding: 12, borderRadius: 10, backgroundColor: colors.bgSoft, gap: 2 }}>
             <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text }}>
-              Vino {engagement.attended} de {engagement.possible} veces en 12 semanas{faith ? ` · ${faith.label}` : ''}
+              {tx('Vino {attended} de {possible} veces en 12 semanas{v1}', { attended: engagement.attended, possible: engagement.possible, v1: faith ? ` · ${faith.label}` : '' })}
             </Text>
             <Text style={{ fontSize: 12, color: colors.muted }}>
-              {engagement.last_attended ? `Última vez: ${fmtDateAR(engagement.last_attended)}` : 'Todavía sin asistencia anotada'}
+              {engagement.last_attended ? tx('Última vez: {fmtDateAR}', { fmtDateAR: fmtDateAR(engagement.last_attended) }) : tx('Todavía sin asistencia anotada')}
             </Text>
           </View>
         ) : null}
-        <Input label="Nombre" value={f.name} onChange={(name) => setF((x) => ({ ...x, name }))} editable={canEdit} />
-        {canEdit ? <PhoneField label="Teléfono" value={f.phone} onChangeText={(phone) => setF((x) => ({ ...x, phone }))} /> : <Input label="Teléfono" value={f.phone} onChange={() => undefined} editable={false} />}
-        <Input label="Correo" value={f.email} onChange={(email) => setF((x) => ({ ...x, email }))} editable={canEdit} keyboard="email-address" />
-        <Input label="Domicilio" value={f.address} onChange={(address) => setF((x) => ({ ...x, address }))} editable={canEdit} />
-        <Input label="Fecha de nacimiento" placeholder="08/12/1993" value={f.birth} onChange={(birth) => setF((x) => ({ ...x, birth: maskDateAR(birth, x.birth) }))} editable={canEdit} />
+        <Input label={tx('Nombre')} value={f.name} onChange={(name) => setF((x) => ({ ...x, name }))} editable={canEdit} />
+        {canEdit ? <PhoneField label={tx('Teléfono')} value={f.phone} onChangeText={(phone) => setF((x) => ({ ...x, phone }))} /> : <Input label={tx('Teléfono')} value={f.phone} onChange={() => undefined} editable={false} />}
+        <Input label={tx('Correo')} value={f.email} onChange={(email) => setF((x) => ({ ...x, email }))} editable={canEdit} keyboard="email-address" />
+        <Input label={tx('Domicilio')} value={f.address} onChange={(address) => setF((x) => ({ ...x, address }))} editable={canEdit} />
+        <Input label={tx('Fecha de nacimiento')} placeholder="08/12/1993" value={f.birth} onChange={(birth) => setF((x) => ({ ...x, birth: maskDateAR(birth, x.birth) }))} editable={canEdit} />
         {canEdit ? (
           <>
             <View style={{ gap: 4 }}>
-              <Text style={styles.label}>Estado</Text>
-              <Select label="Estado" value={f.status} onChange={(status) => setF((x) => ({ ...x, status }))}
-                options={[{ value: 'member', label: 'Miembro' }, { value: 'visitor', label: 'Visita' }, { value: 'contact', label: 'Contacto' }]} />
+              <Text style={styles.label}>{tx('Estado')}</Text>
+              <Select label={tx('Estado')} value={f.status} onChange={(status) => setF((x) => ({ ...x, status }))}
+                options={[{ value: 'member', label: tx('Miembro') }, { value: 'visitor', label: tx('Visita') }, { value: 'contact', label: tx('Contacto') }]} />
             </View>
             {showGroup && groups.length ? (
               <View style={{ gap: 4 }}>
                 <Text style={styles.label}>{groupWordLabel}</Text>
                 <Select label={groupWordLabel} value={f.group} onChange={(group) => setF((x) => ({ ...x, group }))}
-                  options={[{ value: '', label: `Sin ${groupWordLabel.toLowerCase()}` }, ...groups.map((g) => ({ value: g.id, label: g.name }))]} />
+                  options={[{ value: '', label: tx('Sin {groupWordLabel}', { groupWordLabel: groupWordLabel.toLowerCase() }) }, ...groups.map((g) => ({ value: g.id, label: g.name }))]} />
               </View>
             ) : null}
           </>
@@ -381,18 +382,18 @@ function PersonDrawer({ person, groups, groupWordLabel, showGroup, canEdit, canD
       <View style={{ padding: 14, gap: 8, borderTopWidth: 1, borderTopColor: colors.border }}>
         {canEdit ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <DeskButton label={busy ? 'Guardando…' : 'Guardar cambios'} icon="check" primary disabled={!dirty || busy} onPress={save} />
-            {saved ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Guardado</Text> : dirty ? <Text style={{ fontSize: 12, color: colors.muted }}>Hay cambios sin guardar</Text> : null}
+            <DeskButton label={busy ? tx('Guardando…') : tx('Guardar cambios')} icon="check" primary disabled={!dirty || busy} onPress={save} />
+            {saved ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>{tx('Guardado')}</Text> : dirty ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Hay cambios sin guardar')}</Text> : null}
           </View>
         ) : null}
         <Pressable accessibilityRole="link" onPress={onOpenFull} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 4 }}>
-          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Abrir la ficha completa</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>{tx('Abrir la ficha completa')}</Text>
           <Feather name="chevron-right" size={15} color={colors.green} />
         </Pressable>
         {canDelete ? (
           <Pressable accessibilityRole="button" onPress={remove} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 }}>
             <Feather name="trash-2" size={14} color={colors.red} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.red }}>Borrar esta persona</Text>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.red }}>{tx('Borrar esta persona')}</Text>
           </Pressable>
         ) : null}
       </View>

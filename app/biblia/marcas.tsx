@@ -11,12 +11,13 @@ import { useBibleReady } from '@/lib/bibleReady';
 import { myMarks, type BibleMark } from '@/lib/bibleMarks';
 import { loadBiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Tab = 'notas' | 'resaltados' | 'guardados';
 const TABS: { id: Tab; label: string; icon: React.ComponentProps<typeof Feather>['name']; empty: string }[] = [
-  { id: 'notas', label: 'Notas', icon: 'edit-3', empty: 'Tocá un versículo y elegí “Nota” para escribir lo que querés recordar.' },
-  { id: 'resaltados', label: 'Resaltados', icon: 'droplet', empty: 'Tocá un versículo y elegí un color para resaltarlo.' },
-  { id: 'guardados', label: 'Guardados', icon: 'star', empty: 'Tocá un versículo y elegí “Guardar” para tenerlo siempre a mano.' },
+  { id: 'notas', get label() { return tx('Notas'); }, icon: 'edit-3', get empty() { return tx('Tocá un versículo y elegí “Nota” para escribir lo que querés recordar.'); } },
+  { id: 'resaltados', get label() { return tx('Resaltados'); }, icon: 'droplet', get empty() { return tx('Tocá un versículo y elegí un color para resaltarlo.'); } },
+  { id: 'guardados', get label() { return tx('Guardados'); }, icon: 'star', get empty() { return tx('Tocá un versículo y elegí “Guardar” para tenerlo siempre a mano.'); } },
 ];
 
 export default function MisMarcas() {
@@ -38,7 +39,7 @@ export default function MisMarcas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mis notas y resaltados" subtitle="Solo vos las ves" back />
+      <Header title={tx('Mis notas y resaltados')} subtitle={tx('Solo vos las ves')} back />
       <Screen>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {TABS.map((t) => {
@@ -52,7 +53,7 @@ export default function MisMarcas() {
             );
           })}
         </View>
-        {rows === null ? <Loading /> : !list.length ? <Empty icon={TABS.find((t) => t.id === tab)!.icon} title="Todavía no hay nada acá" text={TABS.find((t) => t.id === tab)!.empty} /> : null}
+        {rows === null ? <Loading /> : !list.length ? <Empty icon={TABS.find((t) => t.id === tab)!.icon} title={tx('Todavía no hay nada acá')} text={TABS.find((t) => t.id === tab)!.empty} /> : null}
         {list.map((m) => {
           const text = chapterText(version, m.book, m.chapter)[m.verse - 1] ?? '';
           const dot = MARK_COLORS.find((c) => c.id === m.color)?.dot;

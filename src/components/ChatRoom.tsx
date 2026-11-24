@@ -27,6 +27,7 @@ import { fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Features = { photo?: boolean; doc?: boolean; poll?: boolean; location?: boolean };
 
@@ -40,7 +41,7 @@ function ChatImage({ path, onOpen }: { path: string; onOpen: (url: string) => vo
   useEffect(() => { signedUrl('chat', path).then(setUrl).catch(() => setUrl(null)); }, [path]);
   if (!url) return <View style={styles.imgBox}><ActivityIndicator color={colors.green} /></View>;
   return (
-    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel="Ver la foto grande">
+    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto grande')}>
       <Image source={{ uri: url }} style={styles.img} contentFit="cover" transition={150} />
     </Pressable>
   );
@@ -48,7 +49,7 @@ function ChatImage({ path, onOpen }: { path: string; onOpen: (url: string) => vo
 
 const SEND_LIVE = [15, 30, 60] as const;
 
-export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, placeholder = 'Escribí un mensaje…', readOnly = false, features = {} }: {
+export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, placeholder = tx('Escribí un mensaje…'), readOnly = false, features = {} }: {
   room: ChatRoomKind; ministryId?: string | null; canAnnounce?: boolean; empty: { title: string; text: string }; placeholder?: string; readOnly?: boolean; features?: Features;
 }) {
   const insets = useSafeAreaInsets();
@@ -138,13 +139,13 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
     ch.on('presence', { event: 'sync' }, () => {
       const st = ch.presenceState() as Record<string, { name?: string }[]>;
       const next: Record<string, string> = {};
-      for (const [uid, metas] of Object.entries(st)) if (uid !== myId && metas[0]) next[uid] = metas[0].name ?? 'Alguien';
+      for (const [uid, metas] of Object.entries(st)) if (uid !== myId && metas[0]) next[uid] = metas[0].name ?? tx('Alguien');
       setOnline(next);
     }).on('broadcast', { event: 'typing' }, ({ payload }) => {
       const p = payload as { id?: string; name?: string };
-      if (p?.id && p.id !== myId) setTyping((t) => ({ ...t, [p.id as string]: { name: p.name ?? 'Alguien', at: Date.now() } }));
+      if (p?.id && p.id !== myId) setTyping((t) => ({ ...t, [p.id as string]: { name: p.name ?? tx('Alguien'), at: Date.now() } }));
     }).subscribe((status) => {
-      if (status === 'SUBSCRIBED' && privacy.show_online) ch.track({ name: profile?.display_name ?? 'Alguien' }).catch(() => undefined);
+      if (status === 'SUBSCRIBED' && privacy.show_online) ch.track({ name: profile?.display_name ?? tx('Alguien') }).catch(() => undefined);
     });
     const t = setInterval(() => { setTyping((x) => { const n = Object.fromEntries(Object.entries(x).filter(([, v]) => Date.now() - v.at < 4500)); return Object.keys(n).length === Object.keys(x).length ? x : n; }); force((v) => v + 1); }, 2000);
     return () => { clearInterval(t); presenceRef.current = null; supabase.removeChannel(ch); };
@@ -154,7 +155,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
     setText(v);
     if (v && Date.now() - lastTyping.current > 2500) {
       lastTyping.current = Date.now();
-      presenceRef.current?.send({ type: 'broadcast', event: 'typing', payload: { id: myId, name: profile?.display_name ?? 'Alguien' } }).catch(() => undefined);
+      presenceRef.current?.send({ type: 'broadcast', event: 'typing', payload: { id: myId, name: profile?.display_name ?? tx('Alguien') } }).catch(() => undefined);
     }
   };
 
@@ -177,7 +178,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       setAnnounce(false);
       load();
     } catch (e) {
-      Alert.alert('No se envió', errorMessage(e));
+      Alert.alert(tx('No se envió'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -185,7 +186,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
 
   const guard = async (fn: () => Promise<unknown>) => {
     setSending(true);
-    try { await fn(); load(); } catch (e) { Alert.alert('No se envió', errorMessage(e)); } finally { setSending(false); }
+    try { await fn(); load(); } catch (e) { Alert.alert(tx('No se envió'), errorMessage(e)); } finally { setSending(false); }
   };
   const sendFile = (pick: () => Promise<ChatAttachment | null>) => {
     if (!church?.id) return;
@@ -199,70 +200,70 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
     load();
   };
 
-  const liveChoice = () => showActions('Ubicación en tiempo real', 'Los del chat ven cómo te movés en el mapa. Podés dejar de compartir cuando quieras.', [
-    ...SEND_LIVE.map((m) => ({ text: m === 60 ? '1 hora' : `${m} minutos`, icon: 'radio' as const, onPress: () => guard(() => startLiveShare(ref, m)) })),
-    { text: 'Cancelar', icon: 'x' as const },
+  const liveChoice = () => showActions(tx('Ubicación en tiempo real'), tx('Los del chat ven cómo te movés en el mapa. Podés dejar de compartir cuando quieras.'), [
+    ...SEND_LIVE.map((m) => ({ text: m === 60 ? tx('1 hora') : tx('{m} minutos', { m }), icon: 'radio' as const, onPress: () => guard(() => startLiveShare(ref, m)) })),
+    { text: tx('Cancelar'), icon: 'x' as const },
   ]);
 
   const attachItems = (): AttachItem[] => {
     const cid = church?.id ?? '';
     return [
       ...(features.photo ? [
-        { key: 'cam', label: 'Cámara', icon: 'camera' as const, color: '#E0457B', onPress: () => sendFile(() => pickChatImage(cid, 'camera')) },
-        { key: 'photo', label: 'Foto', icon: 'image' as const, color: '#8E5BD9', onPress: () => sendFile(() => pickChatImage(cid, 'library')) },
+        { key: 'cam', label: tx('Cámara'), icon: 'camera' as const, color: '#E0457B', onPress: () => sendFile(() => pickChatImage(cid, 'camera')) },
+        { key: 'photo', label: tx('Foto'), icon: 'image' as const, color: '#8E5BD9', onPress: () => sendFile(() => pickChatImage(cid, 'library')) },
       ] : []),
-      ...(features.doc ? [{ key: 'doc', label: 'Documento', icon: 'file-text' as const, color: '#3F6FD8', onPress: () => sendFile(() => pickChatDocument(cid)) }] : []),
+      ...(features.doc ? [{ key: 'doc', label: tx('Documento'), icon: 'file-text' as const, color: '#3F6FD8', onPress: () => sendFile(() => pickChatDocument(cid)) }] : []),
       ...(features.location ? [
-        { key: 'here', label: 'Mi ubicación', icon: 'map-pin' as const, color: '#1FA463', onPress: () => guard(async () => { const p = await currentPlace(); await chatSendLocation(ref, p.lat, p.lng); }) },
-        { key: 'pin', label: 'Elegir lugar en el mapa', icon: 'crosshair' as const, color: '#2A9D8F', onPress: () => router.push({ pathname: '/ubicacion', params: { room, ...(ministryId ? { ministry: ministryId } : {}) } } as unknown as Href) },
-        { key: 'live', label: 'Ubicación en tiempo real', icon: 'radio' as const, color: '#E8743B', onPress: liveChoice },
+        { key: 'here', label: tx('Mi ubicación'), icon: 'map-pin' as const, color: '#1FA463', onPress: () => guard(async () => { const p = await currentPlace(); await chatSendLocation(ref, p.lat, p.lng); }) },
+        { key: 'pin', label: tx('Elegir lugar en el mapa'), icon: 'crosshair' as const, color: '#2A9D8F', onPress: () => router.push({ pathname: '/ubicacion', params: { room, ...(ministryId ? { ministry: ministryId } : {}) } } as unknown as Href) },
+        { key: 'live', label: tx('Ubicación en tiempo real'), icon: 'radio' as const, color: '#E8743B', onPress: liveChoice },
       ] : []),
-      ...(features.poll ? [{ key: 'poll', label: 'Encuesta', icon: 'bar-chart-2' as const, color: '#E0A100', onPress: () => setComposing(true) }] : []),
+      ...(features.poll ? [{ key: 'poll', label: tx('Encuesta'), icon: 'bar-chart-2' as const, color: '#E0A100', onPress: () => setComposing(true) }] : []),
     ];
   };
   const canAttach = !readOnly && (features.photo || features.doc || features.poll || features.location);
 
-  const vote = (optionId: string) => { votePoll(optionId).then(loadPolls).catch((e) => Alert.alert('No se pudo votar', errorMessage(e))); };
+  const vote = (optionId: string) => { votePoll(optionId).then(loadPolls).catch((e) => Alert.alert(tx('No se pudo votar'), errorMessage(e))); };
 
   const openFile = async (m: ChatMessage) => {
     const url = await downloadUrl('chat', m.attachment_path as string, m.attachment_name).catch(() => null);
-    if (!url) return Alert.alert('No se pudo abrir', 'Probá de nuevo cuando tengas señal.');
-    Linking.openURL(url).catch(() => Alert.alert('No se pudo abrir', 'No hay una aplicación para abrir este archivo.'));
+    if (!url) return Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo cuando tengas señal.'));
+    Linking.openURL(url).catch(() => Alert.alert(tx('No se pudo abrir'), tx('No hay una aplicación para abrir este archivo.')));
   };
 
-  const excerpt = (m: ChatMessage) => (m.kind === 'image' ? `[Foto] ${m.body}`.trim() : m.kind === 'file' ? `[Documento] ${m.attachment_name ?? ''} ${m.body}`.trim() : m.kind === 'poll' ? `[Encuesta] ${m.body}` : m.kind === 'location' || m.kind === 'live' ? `[Ubicación] ${m.body}`.trim() : m.body);
+  const excerpt = (m: ChatMessage) => (m.kind === 'image' ? tx('[Foto] {body}', { body: m.body }).trim() : m.kind === 'file' ? tx('[Documento] {attachment_name} {body}', { attachment_name: m.attachment_name ?? '', body: m.body }).trim() : m.kind === 'poll' ? tx('[Encuesta] {body}', { body: m.body }) : m.kind === 'location' || m.kind === 'live' ? tx('[Ubicación] {body}', { body: m.body }).trim() : m.body);
   const modKind = room === 'church' ? 'church_chat' : room === 'outing' ? 'outing_chat' : 'ministry_message';
 
   const options = (m: ChatMessage) => {
     const acts = [
-      ...(m.body && m.kind !== 'poll' ? [{ text: 'Copiar', icon: 'copy' as const, onPress: () => { Clipboard.setStringAsync(m.body).catch(() => undefined); } }] : []),
-      ...(m.mine && !readOnly ? [{ text: 'Info (quién lo vio)', icon: 'info' as const, onPress: () => { loadReceipts(); setInfo(m); } }] : []),
+      ...(m.body && m.kind !== 'poll' ? [{ text: tx('Copiar'), icon: 'copy' as const, onPress: () => { Clipboard.setStringAsync(m.body).catch(() => undefined); } }] : []),
+      ...(m.mine && !readOnly ? [{ text: tx('Info (quién lo vio)'), icon: 'info' as const, onPress: () => { loadReceipts(); setInfo(m); } }] : []),
       ...(m.mine || isStaff ? [{
-        text: 'Borrar para todos', icon: 'trash-2' as const, destructive: true,
-        onPress: () => Alert.alert('Borrar mensaje', '¿Borrar este mensaje para todos?', [
-          { text: 'Cancelar', style: 'cancel' as const },
-          { text: 'Borrar', style: 'destructive' as const, onPress: () => chatDelete(ref, m.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+        text: tx('Borrar para todos'), icon: 'trash-2' as const, destructive: true,
+        onPress: () => Alert.alert(tx('Borrar mensaje'), tx('¿Borrar este mensaje para todos?'), [
+          { text: tx('Cancelar'), style: 'cancel' as const },
+          { text: tx('Borrar'), style: 'destructive' as const, onPress: () => chatDelete(ref, m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
         ]),
       }] : []),
-      ...(!m.mine ? [{ text: 'Denunciar o bloquear', icon: 'flag' as const, onPress: () => moderate({ kind: modKind, targetId: m.id, authorId: m.user_id, authorName: m.name, excerpt: excerpt(m), onChange: load }) }] : []),
-      { text: 'Cancelar', icon: 'x' as const },
+      ...(!m.mine ? [{ text: tx('Denunciar o bloquear'), icon: 'flag' as const, onPress: () => moderate({ kind: modKind, targetId: m.id, authorId: m.user_id, authorName: m.name, excerpt: excerpt(m), onChange: load }) }] : []),
+      { text: tx('Cancelar'), icon: 'x' as const },
     ];
-    showActions('Mensaje', undefined, acts);
+    showActions(tx('Mensaje'), undefined, acts);
   };
 
   const content = (m: ChatMessage) => {
     if (m.kind === 'poll') return <PollCard question={m.body} rows={polls[m.id]} mine={false} onVote={vote} onLong={() => options(m)} />;
-    if (m.kind === 'location' || m.kind === 'live') return <LocationBubble m={m} onStop={() => stopLiveShare(room, m.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />;
+    if (m.kind === 'location' || m.kind === 'live') return <LocationBubble m={m} onStop={() => stopLiveShare(room, m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />;
     return (
       <>
-        {m.kind === 'announcement' ? <Text style={styles.annTag}>📢 ANUNCIO</Text> : null}
+        {m.kind === 'announcement' ? <Text style={styles.annTag}>{tx('📢 ANUNCIO')}</Text> : null}
         {m.kind === 'image' && m.attachment_path ? <ChatImage path={m.attachment_path} onOpen={setViewer} /> : null}
         {m.kind === 'file' && isVoice(m.attachment_name) && m.attachment_path ? <VoiceBubble path={m.attachment_path} /> : m.kind === 'file' ? (
-          <Pressable onPress={() => openFile(m)} accessibilityRole="button" accessibilityLabel={`Abrir ${m.attachment_name ?? 'documento'}`} style={styles.file}>
+          <Pressable onPress={() => openFile(m)} accessibilityRole="button" accessibilityLabel={tx('Abrir {attachment_name}', { attachment_name: m.attachment_name ?? tx('documento') })} style={styles.file}>
             <Feather name="file-text" size={26} color={colors.green} />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? 'Documento'}</Text>
-              <Text style={{ fontSize: 12, color: colors.muted }}>{sizeText(m.attachment_size)}{m.attachment_size ? ' · ' : ''}tocá para abrir</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? tx('Documento')}</Text>
+              <Text style={{ fontSize: 12, color: colors.muted }}>{tx('{sizeText}{pl}tocá para abrir', { sizeText: sizeText(m.attachment_size), pl: m.attachment_size ? ' · ' : '' })}</Text>
             </View>
           </Pressable>
         ) : null}
@@ -274,8 +275,8 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
   // Arriba del chat: quién está escribiendo, o quién está en línea.
   const typers = Object.values(typing).map((t) => t.name);
   const onlineNames = Object.values(online);
-  const status = typers.length ? `${typers.slice(0, 2).join(' y ')} ${typers.length > 1 ? 'están escribiendo…' : 'está escribiendo…'}`
-    : onlineNames.length ? `En línea: ${onlineNames.slice(0, 3).join(', ')}${onlineNames.length > 3 ? ` y ${onlineNames.length - 3} más` : ''}` : null;
+  const status = typers.length ? `${typers.slice(0, 2).join(' y ')} ${typers.length > 1 ? tx('están escribiendo…') : tx('está escribiendo…')}`
+    : onlineNames.length ? tx('En línea: {onlineNames}{v1}', { onlineNames: onlineNames.slice(0, 3).join(', '), v1: onlineNames.length > 3 ? tx(' y {v1} más', { v1: onlineNames.length - 3 }) : '' }) : null;
 
   const infoReceipts = (m: ChatMessage) => {
     const t = new Date(m.created_at).getTime();
@@ -317,7 +318,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
               <View style={{ marginTop: sameAuthor ? 0 : 6 }}>
                 {newDay ? <Text style={styles.day}>{fmtRelativeDay(m.created_at)}</Text> : null}
                 <Pressable onLongPress={() => options(m)} delayLongPress={300}
-                  style={[styles.row, m.mine && { justifyContent: 'flex-end' }]} accessibilityHint="Mantené apretado para más opciones">
+                  style={[styles.row, m.mine && { justifyContent: 'flex-end' }]} accessibilityHint={tx('Mantené apretado para más opciones')}>
                   {!m.mine ? (sameAuthor ? <View style={{ width: 32 }} /> : <Face name={m.name} path={m.photo_path} size={32} />) : null}
                   <View style={[styles.bubble, m.mine ? styles.mine : styles.theirs, m.kind === 'announcement' && styles.announce, (m.kind === 'poll' || m.kind === 'location' || m.kind === 'live') && { maxWidth: '88%' }]}>
                     {!m.mine && !sameAuthor ? <Text style={styles.name}>{m.name}</Text> : null}
@@ -338,25 +339,25 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
           {canAnnounce ? (
             <Pressable onPress={() => setAnnounce(!announce)} style={styles.annRow} accessibilityRole="checkbox" accessibilityState={{ checked: announce }}>
               <Feather name={announce ? 'check-square' : 'square'} size={18} color={colors.amberText} />
-              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText, flex: 1 }}>Mandar como anuncio (les llega aviso al teléfono a todos)</Text>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText, flex: 1 }}>{tx('Mandar como anuncio (les llega aviso al teléfono a todos)')}</Text>
             </Pressable>
           ) : null}
           {recording ? <View style={styles.inputLine}><VoiceRecorder onSend={sendVoice} onCancel={() => setRecording(false)} /></View> : (
           <View style={styles.inputLine}>
             <View style={styles.pill}>
               {canAttach ? (
-                <Pressable onPress={() => setMenu(true)} disabled={sending} hitSlop={8} style={[styles.plus, sending && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel="Adjuntar">
+                <Pressable onPress={() => setMenu(true)} disabled={sending} hitSlop={8} style={[styles.plus, sending && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel={tx('Adjuntar')}>
                   {sending ? <ActivityIndicator color={colors.green} /> : <Feather name="plus" size={24} color={colors.muted} />}
                 </Pressable>
               ) : <View style={{ width: 8 }} />}
               <TextInput value={text} onChangeText={onType} placeholder={placeholder} placeholderTextColor="#8B918C" multiline maxLength={room === 'ministry' ? 4000 : 1000} style={styles.input} />
             </View>
             {voiceAvailable && !text.trim() && !busy && room !== 'outing' ? (
-              <Pressable onPress={() => setRecording(true)} style={[styles.sendBtn, { backgroundColor: colors.violet }]} accessibilityRole="button" accessibilityLabel="Grabar un mensaje de voz">
+              <Pressable onPress={() => setRecording(true)} style={[styles.sendBtn, { backgroundColor: colors.violet }]} accessibilityRole="button" accessibilityLabel={tx('Grabar un mensaje de voz')}>
                 <Feather name="mic" size={20} color="#FFF" />
               </Pressable>
             ) : (
-            <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, announce && { backgroundColor: colors.amber }, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel="Enviar">
+            <Pressable onPress={send} disabled={busy || !text.trim()} style={[styles.sendBtn, announce && { backgroundColor: colors.amber }, (!text.trim() || busy) && { opacity: 0.5 }]} accessibilityRole="button" accessibilityLabel={tx('Enviar')}>
               {busy ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
             </Pressable>
             )}
@@ -366,7 +367,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       )}
       <AttachSheet visible={menu} items={attachItems()} onClose={() => setMenu(false)} />
       <Modal visible={!!viewer} transparent animationType="fade" onRequestClose={() => setViewer(null)}>
-        <Pressable style={styles.viewer} onPress={() => setViewer(null)} accessibilityLabel="Cerrar la foto">
+        <Pressable style={styles.viewer} onPress={() => setViewer(null)} accessibilityLabel={tx('Cerrar la foto')}>
           {viewer ? <Image source={{ uri: viewer }} style={{ flex: 1 }} contentFit="contain" /> : null}
           <View style={[styles.close, { top: insets.top + 12 }]}><Feather name="x" size={24} color="#FFF" /></View>
         </Pressable>
@@ -374,10 +375,10 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       <Modal visible={!!info} transparent animationType="slide" onRequestClose={() => setInfo(null)}>
         <Pressable style={styles.shade} onPress={() => setInfo(null)}>
           <Pressable onPress={() => undefined} style={[styles.infoSheet, { paddingBottom: insets.bottom + 14 }]}>
-            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>Info del mensaje</Text>
-            {!privacy.read_receipts ? <Text style={styles.hint}>Tenés apagadas las confirmaciones de lectura: no ves quién lo leyó (ni los demás ven si leíste). Se cambia en Ajustes → Chats.</Text> : null}
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{tx('Info del mensaje')}</Text>
+            {!privacy.read_receipts ? <Text style={styles.hint}>{tx('Tenés apagadas las confirmaciones de lectura: no ves quién lo leyó (ni los demás ven si leíste). Se cambia en Ajustes → Chats.')}</Text> : null}
             <ScrollView style={{ maxHeight: 380 }}>
-              {info ? ([['Visto por', infoReceipts(info).read, true], ['Entregado a', infoReceipts(info).delivered, false], ['Todavía no le llegó', infoReceipts(info).waiting, false]] as const).map(([title, list, blue]) => (
+              {info ? ([['Visto por', infoReceipts(info).read, true], ['Entregado a', infoReceipts(info).delivered, false], [tx('Todavía no le llegó'), infoReceipts(info).waiting, false]] as const).map(([title, list, blue]) => (
                 list.length ? (
                   <View key={title} style={{ gap: 6, marginTop: 12 }}>
                     <Text style={{ fontSize: 12, fontWeight: '800', color: blue ? '#2E9BD6' : colors.muted, letterSpacing: 0.4 }}>{title.toUpperCase()}</Text>
@@ -391,7 +392,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
                   </View>
                 ) : null
               )) : null}
-              {!receipts.length ? <Text style={styles.hint}>Todavía no hay nadie más en este chat.</Text> : null}
+              {!receipts.length ? <Text style={styles.hint}>{tx('Todavía no hay nadie más en este chat.')}</Text> : null}
             </ScrollView>
           </Pressable>
         </Pressable>

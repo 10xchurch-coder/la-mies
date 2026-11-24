@@ -13,6 +13,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Sermon } from '@/types';
+import { tx } from '@/lib/i18n';
 
 function Player({ id }: { id: string }) {
   if (Platform.OS === 'web') {
@@ -29,14 +30,14 @@ function Player({ id }: { id: string }) {
   }
   // En el teléfono se abre en YouTube (la app vuelve sola con el botón atrás).
   return (
-    <Pressable onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${id}`)} accessibilityRole="button" accessibilityLabel="Ver la transmisión"
+    <Pressable onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${id}`)} accessibilityRole="button" accessibilityLabel={tx('Ver la transmisión')}
       style={{ width: '100%', aspectRatio: 16 / 9, borderRadius: 14, overflow: 'hidden', backgroundColor: '#000' }}>
       <Image source={{ uri: `https://i.ytimg.com/vi/${id}/hqdefault_live.jpg` }} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} contentFit="cover" />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.25)' }}>
         <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: '#E11D48', alignItems: 'center', justifyContent: 'center' }}>
           <Feather name="play" size={34} color="#FFF" style={{ marginLeft: 4 }} />
         </View>
-        <Text style={{ color: '#FFF', fontWeight: '800', marginTop: 8 }}>Tocá para verlo</Text>
+        <Text style={{ color: '#FFF', fontWeight: '800', marginTop: 8 }}>{tx('Tocá para verlo')}</Text>
       </View>
     </Pressable>
   );
@@ -89,61 +90,61 @@ export default function Vivo() {
       await addLiveComment(video, body);
       setComments(await liveComments(video));
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
       setText(body);
     }
   };
 
   const share = () => {
     if (!video) return;
-    Share.share({ message: `Estamos en vivo en la ${church?.name ?? 'iglesia'}. Miralo acá: https://www.youtube.com/watch?v=${video}` }).catch(() => undefined);
+    Share.share({ message: `Estamos en vivo en la ${church?.name ?? tx('iglesia')}. Miralo acá: https://www.youtube.com/watch?v=${video}` }).catch(() => undefined);
   };
 
   const goLive = async () => {
-    try { await setLive(link.trim() || null); setLink(''); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); }
+    try { await setLive(link.trim() || null); setLink(''); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); }
   };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title="En vivo" subtitle={video ? 'El culto está en vivo ahora' : 'Transmisión del culto'} back />
+      <Header title={tx('En vivo')} subtitle={video ? tx('El culto está en vivo ahora') : tx('Transmisión del culto')} back />
       <Screen>
         {video ? (
           <>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#E11D48', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 }}>
                 <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#FFF' }} />
-                <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>EN VIVO</Text>
+                <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{tx('EN VIVO')}</Text>
               </View>
-              <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }} numberOfLines={2}>{st?.live_title ?? 'Culto en vivo'}</Text>
+              <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: colors.text }} numberOfLines={2}>{st?.live_title ?? tx('Culto en vivo')}</Text>
             </View>
             <Player id={video} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Compartir" icon="share-2" variant="outline" onPress={share} style={{ flex: 1 }} />
-              <Button title="Abrir en YouTube" icon="youtube" variant="outline" onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${video}`)} style={{ flex: 1 }} />
+              <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={share} style={{ flex: 1 }} />
+              <Button title={tx('Abrir en YouTube')} icon="youtube" variant="outline" onPress={() => Linking.openURL(`https://www.youtube.com/watch?v=${video}`)} style={{ flex: 1 }} />
             </View>
 
-            <SectionTitle>Mis notas</SectionTitle>
-            <Field label="Notas" value={notes} onChangeText={onNotes} multiline placeholder="Escribí lo que Dios te habla durante el mensaje…" hint={notesSaved ? '(se guardan solas)' : '(guardando…)'} />
-            <Text style={{ fontSize: 12, color: colors.muted, marginTop: -6 }}>Las vas a encontrar después en la prédica, en Prédicas.</Text>
+            <SectionTitle>{tx('Mis notas')}</SectionTitle>
+            <Field label={tx('Notas')} value={notes} onChangeText={onNotes} multiline placeholder={tx('Escribí lo que Dios te habla durante el mensaje…')} hint={notesSaved ? tx('(se guardan solas)') : tx('(guardando…)')} />
+            <Text style={{ fontSize: 12, color: colors.muted, marginTop: -6 }}>{tx('Las vas a encontrar después en la prédica, en Prédicas.')}</Text>
 
-            <SectionTitle>Comentarios de la iglesia</SectionTitle>
+            <SectionTitle>{tx('Comentarios de la iglesia')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {comments.map((c, i) => (
-                <Pressable key={c.id} onLongPress={() => (c.mine || can('com.moderar')) && Alert.alert('Borrar el comentario', c.body, [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Borrar', style: 'destructive', onPress: () => deleteLiveComment(c.id).then(() => setComments(comments.filter((x) => x.id !== c.id))) },
+                <Pressable key={c.id} onLongPress={() => (c.mine || can('com.moderar')) && Alert.alert(tx('Borrar el comentario'), c.body, [
+                  { text: tx('Cancelar'), style: 'cancel' },
+                  { text: tx('Borrar'), style: 'destructive', onPress: () => deleteLiveComment(c.id).then(() => setComments(comments.filter((x) => x.id !== c.id))) },
                 ])} style={{ padding: 10, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
-                  <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{c.author ?? 'Alguien'}</Text>  {c.body}</Text>
+                  <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '800' }}>{c.author ?? tx('Alguien')}</Text>  {c.body}</Text>
                   <Text style={{ fontSize: 11, color: colors.muted }}>{fmtTime(c.created_at)}</Text>
                 </Pressable>
               ))}
-              {!comments.length ? <Text style={{ padding: 12, color: colors.muted }}>Sé el primero en comentar: un saludo, un “¡amén!” o un pedido de oración.</Text> : null}
+              {!comments.length ? <Text style={{ padding: 12, color: colors.muted }}>{tx('Sé el primero en comentar: un saludo, un “¡amén!” o un pedido de oración.')}</Text> : null}
             </Card>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <TextInput value={text} onChangeText={setText} placeholder="Escribí un comentario" placeholderTextColor={colors.muted} maxLength={500}
+              <TextInput value={text} onChangeText={setText} placeholder={tx('Escribí un comentario')} placeholderTextColor={colors.muted} maxLength={500}
                 onSubmitEditing={send} returnKeyType="send"
                 style={{ flex: 1, height: 46, borderRadius: 23, borderWidth: 1, borderColor: colors.input, paddingHorizontal: 16, fontSize: 15, color: colors.text, backgroundColor: colors.bg }} />
-              <Pressable onPress={send} accessibilityRole="button" accessibilityLabel="Enviar" style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable onPress={send} accessibilityRole="button" accessibilityLabel={tx('Enviar')} style={{ width: 46, height: 46, borderRadius: 23, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
                 <Feather name="send" size={18} color="#FFF" />
               </Pressable>
             </View>
@@ -152,12 +153,12 @@ export default function Vivo() {
           <>
             <Card style={{ alignItems: 'center', gap: 8, paddingVertical: 24 }}>
               <Feather name="radio" size={34} color={colors.muted} />
-              <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>No hay transmisión ahora</Text>
-              <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>Cuando el culto esté en vivo te llega un aviso y lo ves acá, con comentarios y notas.</Text>
+              <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{tx('No hay transmisión ahora')}</Text>
+              <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('Cuando el culto esté en vivo te llega un aviso y lo ves acá, con comentarios y notas.')}</Text>
             </Card>
             {last ? (
               <>
-                <SectionTitle>La última prédica</SectionTitle>
+                <SectionTitle>{tx('La última prédica')}</SectionTitle>
                 <Pressable onPress={() => router.push({ pathname: '/predica/[id]', params: { id: last.id } })} accessibilityRole="button">
                   <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <Feather name="play-circle" size={28} color={colors.green} />
@@ -175,19 +176,19 @@ export default function Vivo() {
 
         {can('predicas.subir') ? (
           <Card style={{ gap: 8, marginTop: 8 }}>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>Para quien maneja la transmisión</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{tx('Para quien maneja la transmisión')}</Text>
             <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-              La app se da cuenta sola cuando el canal de YouTube está en vivo (lo revisa cada 3 minutos) y avisa a todos. Si no aparece, pegá el link de la transmisión.
+              {tx('La app se da cuenta sola cuando el canal de YouTube está en vivo (lo revisa cada 3 minutos) y avisa a todos. Si no aparece, pegá el link de la transmisión.')}
             </Text>
             {video ? (
-              <Button title="Terminar la transmisión en la app" variant="ghost" small onPress={() => setLive(null).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)))} />
+              <Button title={tx('Terminar la transmisión en la app')} variant="ghost" small onPress={() => setLive(null).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />
             ) : (
               <>
-                <Field label="Link de la transmisión" value={link} onChangeText={setLink} placeholder="https://youtube.com/live/…" autoCapitalize="none" />
-                <Button title="Estamos en vivo" icon="radio" small onPress={goLive} disabled={!link.trim()} />
+                <Field label={tx('Link de la transmisión')} value={link} onChangeText={setLink} placeholder="https://youtube.com/live/…" autoCapitalize="none" />
+                <Button title={tx('Estamos en vivo')} icon="radio" small onPress={goLive} disabled={!link.trim()} />
               </>
             )}
-            {st?.live_since ? <Text style={{ fontSize: 11, color: colors.muted }}>En vivo desde las {fmtTime(st.live_since)}</Text> : null}
+            {st?.live_since ? <Text style={{ fontSize: 11, color: colors.muted }}>{tx('En vivo desde las {fmtTime}', { fmtTime: fmtTime(st.live_since) })}</Text> : null}
           </Card>
         ) : null}
       </Screen>

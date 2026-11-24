@@ -2,6 +2,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 function Inline({ text, style }: { text: string; style?: object }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -23,7 +24,7 @@ export function Article({ body }: { body: string }) {
           return (
             <View key={i} style={{ borderLeftWidth: 4, borderLeftColor: colors.green, backgroundColor: colors.greenSoft, borderRadius: 10, paddingVertical: 12, paddingHorizontal: 14, gap: 6 }}>
               <Inline text={m ? m[1] : t.slice(2)} style={{ ...base, fontFamily: 'Georgia, serif', fontSize: 16.5, lineHeight: 26 }} />
-              {m ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText, letterSpacing: 0.3 }}>{m[2]} · RV1960</Text> : null}
+              {m ? <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText, letterSpacing: 0.3 }}>{m[2]} {tx('· RV1960')}</Text> : null}
             </View>
           );
         }

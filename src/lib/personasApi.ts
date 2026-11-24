@@ -1,6 +1,7 @@
 // Lo que las pantallas de discipulado, decisiones, visitas nuevas y clase de miembros le piden a la base.
 import { supabase } from './supabase';
 import type { CareRow, DecisionKind, DecisionState, DiscRow, Done } from './personas';
+import { tx } from './i18n';
 
 function ok<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) throw r.error;
@@ -88,7 +89,7 @@ export const memberClassFinal = async (contact: string, undo = false) => { ok(aw
 export async function memberClassRemove(contact: string): Promise<void> {
   const r = await supabase.from('member_class').delete().eq('contact_id', contact).select('contact_id');
   if (r.error) throw r.error;
-  if (!r.data?.length) throw new Error('Solo el pastor o la secretaría lo pueden sacar de la clase.');
+  if (!r.data?.length) throw new Error(tx('Solo el pastor o la secretaría lo pueden sacar de la clase.'));
 }
 
 // ---------- Tarjeta de visita (QR de la puerta) ----------

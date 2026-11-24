@@ -10,6 +10,7 @@ import { searchKey } from '@/lib/songs';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Song } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Canciones() {
   const { can } = useAuth();
@@ -23,18 +24,18 @@ export default function Canciones() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Cancionero" subtitle={rows ? `${rows.length} ${rows.length === 1 ? 'canción' : 'canciones'}` : undefined} back />
+      <Header title={tx('Cancionero')} subtitle={rows ? `${rows.length} ${rows.length === 1 ? tx('canción') : tx('canciones')}` : undefined} back />
       <Screen>
-        {can('com.anuncios') ? <Button title="Agregar una canción" icon="plus" onPress={() => router.push('/canciones/editar' as Href)} /> : null}
+        {can('com.anuncios') ? <Button title={tx('Agregar una canción')} icon="plus" onPress={() => router.push('/canciones/editar' as Href)} /> : null}
         {rows?.length ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: colors.bgSoft }}>
             <Feather name="search" size={18} color={colors.muted} />
-            <TextInput value={q} onChangeText={setQ} placeholder="Buscar por título o por una frase" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
+            <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar por título o por una frase')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
           </View>
         ) : null}
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="music" title="Todavía no hay canciones" text="Pronto vas a encontrar acá las canciones que cantamos, con la letra." />
-        ) : !shown.length ? <Text style={{ fontSize: 14, color: colors.muted }}>No encontré ninguna con eso.</Text> : (
+          <Empty icon="music" title={tx('Todavía no hay canciones')} text={tx('Pronto vas a encontrar acá las canciones que cantamos, con la letra.')} />
+        ) : !shown.length ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('No encontré ninguna con eso.')}</Text> : (
           <Card style={{ padding: 0 }}>
             {shown.map((s, i) => (
               <Pressable key={s.id} onPress={() => router.push(`/canciones/${s.id}` as Href)} accessibilityRole="button"

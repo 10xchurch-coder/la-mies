@@ -15,6 +15,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { InactiveRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const PAGE = 50;
 
@@ -39,34 +40,34 @@ export default function Inactivos() {
   useFocusEffect(useCallback(() => { if (allowed) load(qRef.current); }, [allowed, load]));
   useEffect(() => { const t = setTimeout(() => { if (allowed) load(q); }, 300); return () => clearTimeout(t); }, [q, allowed, load]);
 
-  if (!allowed) return <Empty icon="lock" title="Solo el pastor y la secretaría" />;
+  if (!allowed) return <Empty icon="lock" title={tx('Solo el pastor y la secretaría')} />;
   const total = rows?.[0]?.total ?? 0;
 
-  const restore = (r: InactiveRow) => Alert.alert('¿Volver a su lista?', `${r.name} vuelve a ${STATUS_LABEL[r.prev_status ?? 'member'].toLowerCase()}s.`, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Volver', onPress: async () => {
+  const restore = (r: InactiveRow) => Alert.alert(tx('¿Volver a su lista?'), tx('{name} vuelve a {STATUS_LABEL}s.', { name: r.name, STATUS_LABEL: STATUS_LABEL[r.prev_status ?? 'member'].toLowerCase() }), [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Volver'), onPress: async () => {
       setBusy(true);
-      try { await setContactInactive(r.id, false); setRows((rs) => rs?.filter((x) => x.id !== r.id) ?? null); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } finally { setBusy(false); }
+      try { await setContactInactive(r.id, false); setRows((rs) => rs?.filter((x) => x.id !== r.id) ?? null); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } finally { setBusy(false); }
     } },
   ]);
   const whatsapp = (r: InactiveRow) => {
     const d = (r.phone ?? '').replace(/\D/g, '');
     const first = r.name.split(' ')[0];
-    Linking.openURL(`https://wa.me/${d.startsWith('54') ? d : `549${d}`}?text=${encodeURIComponent(`Hola ${first}, ¿cómo estás? Te escribo de ${church?.name ?? 'la iglesia'}. Te extrañamos, nos encantaría verte de nuevo.`)}`).catch(() => undefined);
+    Linking.openURL(`https://wa.me/${d.startsWith('54') ? d : `549${d}`}?text=${encodeURIComponent(tx('Hola {first}, ¿cómo estás? Te escribo de {name}. Te extrañamos, nos encantaría verte de nuevo.', { first, name: church?.name ?? tx('la iglesia') }))}`).catch(() => undefined);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Inactivos" subtitle={rows ? `${total} ${total === 1 ? 'persona' : 'personas'}${church?.inactive_months ? ` · pasan solos a los ${monthsLabel(church.inactive_months)} sin venir` : ''}` : undefined} back
+      <Header title={tx('Inactivos')} subtitle={rows ? `${total} ${total === 1 ? tx('persona') : tx('personas')}${church?.inactive_months ? tx(' · pasan solos a los {monthsLabel} sin venir', { monthsLabel: monthsLabel(church.inactive_months) }) : ''}` : undefined} back
         right={can('admin.permisos') ? (
-          <Pressable onPress={() => router.push('/admin/inactivos' as Href)} accessibilityRole="button" accessibilityLabel="Ajustes de inactivos" hitSlop={8}>
+          <Pressable onPress={() => router.push('/admin/inactivos' as Href)} accessibilityRole="button" accessibilityLabel={tx('Ajustes de inactivos')} hitSlop={8}>
             <Feather name="settings" size={22} color={colors.text} />
           </Pressable>
         ) : undefined} />
       <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: colors.bgSoft }}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar por nombre o teléfono" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar por nombre o teléfono')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} autoCorrect={false} />
         </View>
       </View>
       {rows === null ? <Loading /> : (
@@ -74,7 +75,7 @@ export default function Inactivos() {
           data={rows}
           keyExtractor={(r) => r.id}
           contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 8 }}
-          ListEmptyComponent={<Empty icon="user-x" title={q ? 'No encontré a nadie' : 'No hay nadie en inactivos'} text={q ? undefined : 'Acá van a aparecer los que dejen de venir, y los que pases a mano desde su ficha.'} />}
+          ListEmptyComponent={<Empty icon="user-x" title={q ? tx('No encontré a nadie') : tx('No hay nadie en inactivos')} text={q ? undefined : tx('Acá van a aparecer los que dejen de venir, y los que pases a mano desde su ficha.')} />}
           onEndReachedThreshold={0.5}
           onEndReached={() => { if (more && rows.length) load(q, rows.length); }}
           renderItem={({ item: r }) => (
@@ -85,14 +86,14 @@ export default function Inactivos() {
                   <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{r.name}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }}>{sinceLabel(r.last_seen)}{r.phone ? ` · ${formatPhone(r.phone)}` : ''}</Text>
                   <View style={{ flexDirection: 'row', gap: 6 }}>
-                    <Tag text={`Era ${STATUS_LABEL[r.prev_status ?? 'member'].toLowerCase()}`} tone="gray" />
-                    {!r.inactive_auto ? <Tag text="Pasado a mano" tone="blue" /> : null}
+                    <Tag text={tx('Era {STATUS_LABEL}', { STATUS_LABEL: STATUS_LABEL[r.prev_status ?? 'member'].toLowerCase() })} tone="gray" />
+                    {!r.inactive_auto ? <Tag text={tx('Pasado a mano')} tone="blue" /> : null}
                   </View>
                 </View>
               </Pressable>
               <View style={{ gap: 6 }}>
-                {r.phone ? <Button title="WhatsApp" small variant="outline" onPress={() => whatsapp(r)} /> : null}
-                <Button title="Volvió" small variant="ghost" onPress={() => restore(r)} disabled={busy} />
+                {r.phone ? <Button title={tx('WhatsApp')} small variant="outline" onPress={() => whatsapp(r)} /> : null}
+                <Button title={tx('Volvió')} small variant="ghost" onPress={() => restore(r)} disabled={busy} />
               </View>
             </View>
           )}

@@ -1,6 +1,7 @@
 // Lo que se graba en un chip o se pone en un QR: la tarjeta de una persona, la etiqueta de un chico y la etiqueta del adulto que lo retira.
 // También la cuenta de cuántos hay adentro en un evento. Sin pantalla ni base, para poder probarse solo.
 
+import { tx } from './i18n';
 const PERSON = 'lamies:persona:';
 const CHILD = 'lamies:nino:';
 const PICKUP = 'lamies:retiro:';
@@ -84,7 +85,7 @@ export type DoorTotals = { registered: number; checked_in: number; inside: numbe
 /** El nombre de la entrada tal como se guarda: sin espacios de más y de 40 letras como mucho. Vacío = sin nombre. */
 export const cleanEntrance = (name: string | null | undefined): string => (name ?? '').replace(/\s+/g, ' ').trim().slice(0, 40);
 /** Cómo se muestra una entrada (las que no tienen nombre van juntas). */
-export const entranceLabel = (name: string | null | undefined): string => cleanEntrance(name) || 'Sin nombre';
+export const entranceLabel = (name: string | null | undefined): string => cleanEntrance(name) || tx('Sin nombre');
 
 /**
  * Cuenta personas (no inscripciones): anotados, los que entraron, los que están adentro ahora y los que ya se fueron.
@@ -119,13 +120,13 @@ export function fillPercent(inside: number, capacity: number | null | undefined)
 export type ScanResult = 'in' | 'back' | 'already' | 'out' | 'already_out' | 'not_in';
 /** El cartel que ve quien atiende la puerta después de leer una credencial. */
 export function scanFlash(result: ScanResult, name: string, people = 1): { tone: 'green' | 'amber' | 'red'; text: string } {
-  const many = people > 1 ? ` (${people} personas)` : '';
+  const many = people > 1 ? tx(' ({people} personas)', { people }) : '';
   switch (result) {
-    case 'in': return { tone: 'green', text: `✓ Entró ${name}${many}` };
-    case 'back': return { tone: 'green', text: `✓ ${name} volvió a entrar${many}` };
-    case 'already': return { tone: 'amber', text: `${name}: esta entrada ya se usó y sigue adentro` };
-    case 'out': return { tone: 'green', text: `✓ Salió ${name}${many}` };
-    case 'already_out': return { tone: 'amber', text: `${name} ya había salido` };
-    default: return { tone: 'red', text: `${name} todavía no entró` };
+    case 'in': return { tone: 'green', text: tx('✓ Entró {name}{many}', { name, many }) };
+    case 'back': return { tone: 'green', text: tx('✓ {name} volvió a entrar{many}', { name, many }) };
+    case 'already': return { tone: 'amber', text: tx('{name}: esta entrada ya se usó y sigue adentro', { name }) };
+    case 'out': return { tone: 'green', text: tx('✓ Salió {name}{many}', { name, many }) };
+    case 'already_out': return { tone: 'amber', text: tx('{name} ya había salido', { name }) };
+    default: return { tone: 'red', text: tx('{name} todavía no entró', { name }) };
   }
 }

@@ -11,6 +11,7 @@ import { filterCare, showDay, type CareFilter, type CareRow } from '@/lib/person
 import { careList } from '@/lib/personasApi';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Bienvenida() {
   const router = useRouter();
@@ -26,14 +27,14 @@ export default function Bienvenida() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Visitas nuevas" subtitle="Regalo de bienvenida y visita" back />
+      <Header title={tx('Visitas nuevas')} subtitle={tx('Regalo de bienvenida y visita')} back />
       <Screen>
-        {isLeader ? <Button title="Tarjeta de visita (QR de la puerta)" icon="grid" variant="outline" small onPress={() => router.push('/tarjeta-visita' as Href)} /> : null}
+        {isLeader ? <Button title={tx('Tarjeta de visita (QR de la puerta)')} icon="grid" variant="outline" small onPress={() => router.push('/tarjeta-visita' as Href)} /> : null}
         <Choice columns={3} value={filter} onChange={setFilter}
-          options={[{ value: 'all', label: `Todas (${rows?.length ?? 0})` }, { value: 'no_gift', label: `Sin regalo (${noGift})` }, { value: 'no_visit', label: `Sin visita (${noVisit})` }]} />
+          options={[{ value: 'all', label: tx('Todas ({n})', { n: rows?.length ?? 0 }) }, { value: 'no_gift', label: tx('Sin regalo ({noGift})', { noGift }) }, { value: 'no_visit', label: tx('Sin visita ({noVisit})', { noVisit }) }]} />
         {rows === null ? <Loading /> : !shown.length ? (
-          <Empty icon="gift" title={filter === 'no_gift' ? 'Todas recibieron su regalo' : filter === 'no_visit' ? 'Todas recibieron una visita' : 'No hay visitas cargadas'}
-            text={filter === 'all' ? 'Acá aparecen las personas que figuran como “Visita”.' : undefined} />
+          <Empty icon="gift" title={filter === 'no_gift' ? tx('Todas recibieron su regalo') : filter === 'no_visit' ? tx('Todas recibieron una visita') : tx('No hay visitas cargadas')}
+            text={filter === 'all' ? tx('Acá aparecen las personas que figuran como “Visita”.') : undefined} />
         ) : null}
         {shown.map((r) => (
           <Card key={r.id} style={{ padding: 12, gap: 10 }}>
@@ -41,7 +42,7 @@ export default function Bienvenida() {
               <Face name={r.name} path={r.photo_path} size={44} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.name}</Text>
-                <Text style={{ fontSize: 12, color: colors.muted }}>{r.first_on ? `Vino por primera vez el ${showDay(r.first_on)}` : `Cargada el ${showDay(r.since)} · todavía sin asistencia`}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }}>{r.first_on ? tx('Vino por primera vez el {showDay}', { showDay: showDay(r.first_on) }) : tx('Cargada el {showDay} · todavía sin asistencia', { showDay: showDay(r.since) })}</Text>
               </View>
             </Pressable>
             <CareButtons id={r.id} care={r} onChanged={load} />

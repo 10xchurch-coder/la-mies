@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { supabase } from './supabase';
 import { downloadText, fileSlug } from './download';
 import type { GivingMethod, GivingRow, StatementLine } from './giving';
+import { tx } from './i18n';
 
 function ok<T>(r: { data: T | null; error: { message: string } | null }): T {
   if (r.error) throw r.error;
@@ -66,7 +67,7 @@ export async function printHtml(title: string, html: string): Promise<void> {
   frame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0';
   document.body.appendChild(frame);
   const doc = frame.contentWindow?.document;
-  if (!doc || !frame.contentWindow) { frame.remove(); throw new Error('No se pudo abrir la hoja para imprimir'); }
+  if (!doc || !frame.contentWindow) { frame.remove(); throw new Error(tx('No se pudo abrir la hoja para imprimir')); }
   doc.open(); doc.write(html); doc.close();
   const win = frame.contentWindow;
   await new Promise((r) => setTimeout(r, 250));

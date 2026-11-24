@@ -16,6 +16,7 @@ import { WEB_URL } from '@/lib/share';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import { LangSwitch } from '@/components/LangChoice';
+import { tx } from '@/lib/i18n';
 
 export default function Registro() {
   const router = useRouter();
@@ -85,7 +86,7 @@ export default function Registro() {
       if (error) throw error;
       // Si el correo ya tenía cuenta, Supabase no avisa: devuelve un usuario sin identidades y no manda nada.
       if (!data.session && data.user && (data.user.identities?.length ?? 0) === 0) {
-        setMsg('Ya hay una cuenta con ese correo. Volvé a Entrar; si no te acordás la contraseña, tocá "¿Olvidaste tu contraseña?".');
+        setMsg(tx('Ya hay una cuenta con ese correo. Volvé a Entrar; si no te acordás la contraseña, tocá "¿Olvidaste tu contraseña?".'));
         return;
       }
       if (!data.session) {
@@ -105,25 +106,25 @@ export default function Registro() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title={session ? 'Unirme a mi iglesia' : 'Crear cuenta'} back={!session} subtitle="Pedile el código al administrador de tu iglesia" />
+      <Header title={session ? tx('Unirme a mi iglesia') : tx('Crear cuenta')} back={!session} subtitle={tx('Pedile el código al administrador de tu iglesia')} />
       <Screen style={{ gap: 16 }}>
         {!session ? <LangSwitch /> : null}
         {draft?.email && draft.password && !session ? (
-          <Text style={styles.msg}>Ya cargamos tu correo y tu contraseña. Completá tu nombre, tu celular y el código de la iglesia, y tocá "Crear cuenta".</Text>
+          <Text style={styles.msg}>{tx('Ya cargamos tu correo y tu contraseña. Completá tu nombre, tu celular y el código de la iglesia, y tocá "Crear cuenta".')}</Text>
         ) : null}
-        <Field label="Tu nombre" hint="(como te conocen en la iglesia)" value={name} onChangeText={setName} autoCapitalize="words" />
+        <Field label={tx('Tu nombre')} hint={tx('(como te conocen en la iglesia)')} value={name} onChangeText={setName} autoCapitalize="words" />
         {!session ? (
           <>
-            <Field label="Correo" autoCapitalize="none" keyboardType="email-address" autoComplete="email" value={email} onChangeText={setEmail} />
-            <PasswordField label="Contraseña" value={password} onChangeText={setPassword} personal={[name, email.split('@')[0] ?? '']} />
+            <Field label={tx('Correo')} autoCapitalize="none" keyboardType="email-address" autoComplete="email" value={email} onChangeText={setEmail} />
+            <PasswordField label={tx('Contraseña')} value={password} onChangeText={setPassword} personal={[name, email.split('@')[0] ?? '']} />
           </>
         ) : null}
-        <PhoneField label="Tu celular" hint="(obligatorio, con el código de área: así te encontramos si la iglesia ya te tiene cargado)" value={phone} onChangeText={setPhone} required />
-        <Field label="Código de la iglesia" autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} placeholder="Ej: VICTORIA-2026" />
+        <PhoneField label={tx('Tu celular')} hint={tx('(obligatorio, con el código de área: así te encontramos si la iglesia ya te tiene cargado)')} value={phone} onChangeText={setPhone} required />
+        <Field label={tx('Código de la iglesia')} autoCapitalize="characters" autoCorrect={false} value={code} onChangeText={setCode} placeholder={tx('Ej: VICTORIA-2026')} />
         {msg ? <Text style={styles.msg}>{msg}</Text> : null}
-        <Button title={session ? 'Unirme' : 'Crear cuenta'} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || !!phoneProblem(phone, true) || (!session && (!email || !password))} />
+        <Button title={session ? tx('Unirme') : tx('Crear cuenta')} onPress={submit} loading={busy} disabled={!name.trim() || !code.trim() || !!phoneProblem(phone, true) || (!session && (!email || !password))} />
         <Text style={styles.note}>
-          Tus datos y los contactos que marques los ve solo tu iglesia. Los administradores de la iglesia ven todo; vos elegís con quién más compartir cada contacto.
+          {tx('Tus datos y los contactos que marques los ve solo tu iglesia. Los administradores de la iglesia ven todo; vos elegís con quién más compartir cada contacto.')}
         </Text>
       </Screen>
     </KeyboardAvoidingView>

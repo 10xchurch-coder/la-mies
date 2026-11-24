@@ -10,6 +10,7 @@ import { buildStatement, yearsOf, type StatementLine } from '@/lib/giving';
 import { churchExtras, myGiving } from '@/lib/givingData';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function MisOfrendas() {
   const { profile, church } = useAuth();
@@ -32,19 +33,19 @@ export default function MisOfrendas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mis ofrendas" subtitle="Lo que la tesorería anotó a tu nombre" back />
+      <Header title={tx('Mis ofrendas')} subtitle={tx('Lo que la tesorería anotó a tu nombre')} back />
       <Screen>
         {lines === null ? <Loading /> : off ? (
-          <Empty icon="lock" title="Tu iglesia no tiene esto prendido" text="Si querés saber lo que diste, hablá con el tesorero o con el pastor." />
+          <Empty icon="lock" title={tx('Tu iglesia no tiene esto prendido')} text={tx('Si querés saber lo que diste, hablá con el tesorero o con el pastor.')} />
         ) : (
           <>
             <Card style={{ backgroundColor: colors.bgSoft, gap: 4 }}>
               <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>
-                Esto lo ves solo vos. Los demás hermanos y los líderes no lo ven. Si falta algo o hay un error, avisale al tesorero.
+                {tx('Esto lo ves solo vos. Los demás hermanos y los líderes no lo ven. Si falta algo o hay un error, avisale al tesorero.')}
               </Text>
             </Card>
             {years.length > 1 ? <Choice options={years.map((y) => ({ value: String(y), label: String(y) }))} value={year} onChange={setYear} /> : null}
-            <GivingStatementView statement={statement} person={profile?.display_name ?? 'Yo'} church={church?.name ?? 'Iglesia'} motto={motto} city={church?.city} />
+            <GivingStatementView statement={statement} person={profile?.display_name ?? 'Yo'} church={church?.name ?? tx('Iglesia')} motto={motto} city={church?.city} />
           </>
         )}
       </Screen>

@@ -10,6 +10,7 @@ import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ClassRow, ClassSchedule, ClassTeacher, Material, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Clases() {
   const router = useRouter();
@@ -39,10 +40,10 @@ export default function Clases() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={isLeader ? 'Clases' : 'Mis clases'} subtitle="Escuela dominical · sábado y domingo" back />
+      <Header title={isLeader ? tx('Clases') : tx('Mis clases')} subtitle={tx('Escuela dominical · sábado y domingo')} back />
       <Screen>
-        {can('ens.editar') ? <Button title="Planificar el mes (sugerencia automática)" icon="shuffle" variant="outline" onPress={() => router.push('/clase/planificar')} /> : null}
-        {classes && !classes.length ? <Empty icon="book" title="No hay clases cargadas" text="El pastor o la secretaría las crea desde Primeros pasos o desde Clases." /> : null}
+        {can('ens.editar') ? <Button title={tx('Planificar el mes (sugerencia automática)')} icon="shuffle" variant="outline" onPress={() => router.push('/clase/planificar')} /> : null}
+        {classes && !classes.length ? <Empty icon="book" title={tx('No hay clases cargadas')} text={tx('El pastor o la secretaría las crea desde Primeros pasos o desde Clases.')} /> : null}
         {(classes ?? []).map((k) => {
           const mine = teachers.some((t) => t.class_id === k.id && t.profile_id === profile?.id);
           const next = sched.filter((s) => s.class_id === k.id);
@@ -52,7 +53,7 @@ export default function Clases() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                   <Feather name="book-open" size={22} color={colors.green} />
                   <Text style={{ flex: 1, fontSize: 17, fontWeight: '800', color: colors.text }}>{k.name}</Text>
-                  {mine ? <Tag text="Sos maestro" tone="green" /> : null}
+                  {mine ? <Tag text={tx('Sos maestro')} tone="green" /> : null}
                   <Feather name="chevron-right" size={20} color={colors.muted} />
                 </View>
                 {next.length ? next.map((s) => {
@@ -60,10 +61,10 @@ export default function Clases() {
                   return (
                     <Text key={s.id} style={{ fontSize: 13, color: colors.text, lineHeight: 18 }}>
                       <Text style={{ fontWeight: '700' }}>{fmtDateShort(s.on_date)}: </Text>
-                      {scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? 'sin maestro'}{scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}{m ? ` · ${m.title}` : ''}
+                      {scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? tx('sin maestro')}{scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}{m ? ` · ${m.title}` : ''}
                     </Text>
                   );
-                }) : <Text style={{ fontSize: 13, color: colors.muted }}>Esta semana todavía no tiene maestro asignado</Text>}
+                }) : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Esta semana todavía no tiene maestro asignado')}</Text>}
               </Card>
             </Pressable>
           );

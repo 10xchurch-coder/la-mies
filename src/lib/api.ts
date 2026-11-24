@@ -13,6 +13,7 @@ import type {
   NotificationRow, OutingKind, Profile, RoadRow, ScoreRow, Sermon, Session, SheetRow, TeamLiveRow, TeamTotals, TrackPointRow,
   TrainingItem, UpcomingItem, DailyContent, ReadingStreak, ReadingBoardRow, AccountRow, DailyComment, DailySocial,
 } from '../types';
+import { tx, txLocale } from './i18n';
 
 function ok<T>(res: { data: T | null; error: unknown }): T {
   if (res.error) throw new Error(errorMessage(res.error));
@@ -65,13 +66,13 @@ export async function panelDetail(from: Date, to: Date): Promise<PanelDetail> {
     supabase.from('contacts').select('id, name, baptized_on, created_by').gte('baptized_on', d1).lt('baptized_on', d2),
   ]);
   const visits = ((ok(vis) ?? []) as unknown as { contact_id: string; user_id: string | null; visited_at: string; gospel_presented: boolean; promise_day: string | null; contacts: N }[])
-    .map((r) => ({ contact_id: r.contact_id, user_id: r.user_id, visited_at: r.visited_at, gospel_presented: !!r.gospel_presented, promise_day: r.promise_day, name: r.contacts?.name ?? 'Sin nombre' }));
+    .map((r) => ({ contact_id: r.contact_id, user_id: r.user_id, visited_at: r.visited_at, gospel_presented: !!r.gospel_presented, promise_day: r.promise_day, name: r.contacts?.name ?? tx('Sin nombre') }));
   // "Vinieron" son las visitas y contactos que vinieron, no los miembros de siempre.
   const first = new Map<string, string | null>();
   for (const x of visits) if (!first.has(x.contact_id)) first.set(x.contact_id, x.user_id);
   const came = ((ok(att) ?? []) as unknown as { contact_id: string; attended_on: string; contacts: N }[])
     .filter((r) => r.contacts && r.contacts.status !== 'member')
-    .map((r) => ({ contact_id: r.contact_id, name: r.contacts?.name ?? 'Sin nombre', when: r.attended_on, user_id: first.get(r.contact_id) ?? null }));
+    .map((r) => ({ contact_id: r.contact_id, name: r.contacts?.name ?? tx('Sin nombre'), when: r.attended_on, user_id: first.get(r.contact_id) ?? null }));
   const discipleship = ((ok(dis) ?? []) as { id: string; name: string; discipleship_since: string; created_by: string | null }[]).map((c) => ({ contact_id: c.id, name: c.name, when: c.discipleship_since, user_id: c.created_by }));
   const baptisms = ((ok(bap) ?? []) as { id: string; name: string; baptized_on: string; created_by: string | null }[]).map((c) => ({ contact_id: c.id, name: c.name, when: c.baptized_on, user_id: c.created_by }));
   return { visits, came, discipleship, baptisms };
@@ -145,7 +146,7 @@ export async function getTraining(id: string): Promise<TrainingItem | null> {
 
 export async function updateProfile(patch: Partial<Profile>): Promise<void> {
   const { data: u } = await supabase.auth.getUser();
-  if (!u.user) throw new Error('No hay sesión');
+  if (!u.user) throw new Error(tx('No hay sesión'));
   ok(await supabase.from('profiles').update(patch).eq('id', u.user.id));
 }
 
@@ -153,7 +154,7 @@ export async function updateProfile(patch: Partial<Profile>): Promise<void> {
 export async function uid(): Promise<string> {
   const { data } = await supabase.auth.getSession();
   const id = data.session?.user.id;
-  if (!id) throw new Error('No hay sesión');
+  if (!id) throw new Error(tx('No hay sesión'));
   return id;
 }
 
@@ -705,7 +706,7 @@ export async function weekLists(monday: string, since: string | null = null): Pr
   const iso = (d: Date) => `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`;
   const to = iso(end);
   const weekend = iso(new Date(end.getFullYear(), end.getMonth(), end.getDate() - 2));
-  const day = (s: string | null | undefined) => !s ? 'sin fecha' : new Date(s.length === 10 ? `${s}T12:00:00` : s).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' });
+  const day = (s: string | null | undefined) => !s ? tx('sin fecha') : new Date(s.length === 10 ? `${s}T12:00:00` : s).toLocaleDateString(txLocale(), { weekday: 'short', day: 'numeric', month: 'short' });
   type N = { name: string; status?: string; baseline?: string | null } | null;
   // Si una consulta falla, esa lista queda vacía; las demás se muestran igual.
   const rows = <T,>(r: { data: unknown; error: unknown }): T[] => (r.error || !Array.isArray(r.data) ? [] : (r.data as T[]));
@@ -721,7 +722,7 @@ export async function weekLists(monday: string, since: string | null = null): Pr
   const attRows = rows<{ contact_id: string; attended_on: string; contacts: N }>(att);
   const byPerson = new Map<string, { name: string; status: string; baseline: string | null; days: string[] }>();
   for (const r of attRows) {
-    const p = byPerson.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', status: r.contacts?.status ?? '', baseline: r.contacts?.baseline ?? null, days: [] };
+    const p = byPerson.get(r.contact_id) ?? { name: r.contacts?.name ?? tx('Sin nombre'), status: r.contacts?.status ?? '', baseline: r.contacts?.baseline ?? null, days: [] };
     if (!p.days.includes(r.attended_on)) p.days.push(r.attended_on);
     byPerson.set(r.contact_id, p);
   }
@@ -742,23 +743,23 @@ export async function weekLists(monday: string, since: string | null = null): Pr
   const byHand = new Map<string, { name: string; days: string[] }>();
   for (const r of rows<{ contact_id: string; went_on: string; contacts: { name: string; profile_id: string | null } | null }>(out)) {
     if (r.contacts?.profile_id && appIds.has(r.contacts.profile_id)) continue;
-    const p = byHand.get(r.contact_id) ?? { name: r.contacts?.name ?? 'Sin nombre', days: [] };
+    const p = byHand.get(r.contact_id) ?? { name: r.contacts?.name ?? tx('Sin nombre'), days: [] };
     p.days.push(r.went_on);
     byHand.set(r.contact_id, p);
   }
   return {
-    attendance: people.map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `${p.status === 'member' ? 'Miembro' : 'Visita'} · ${p.days.map(day).join(', ')}` })),
-    first_time: people.filter(([id, p]) => !earlier.has(id) && !p.baseline && p.days[0] >= from0).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `Vino el ${p.days.map(day).join(', ')}` })),
-    baptisms: rows<{ id: string; name: string; baptized_on: string }>(bap).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Bautizado el ${day(c.baptized_on)}` })),
-    new_members: rows<{ id: string; name: string; member_since: string; baseline: string | null }>(mem).filter((c) => c.baseline !== 'member').map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: `Miembro desde el ${day(c.member_since)}` })),
-    absent: rows<{ id: string; name: string }>(members).filter((c) => !cameWeekend.has(c.id)).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: 'No vino el fin de semana' })),
+    attendance: people.map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: `${p.status === 'member' ? tx('Miembro') : tx('Visita')} · ${p.days.map(day).join(', ')}` })),
+    first_time: people.filter(([id, p]) => !earlier.has(id) && !p.baseline && p.days[0] >= from0).map(([id, p]) => ({ key: id, contact_id: id, name: p.name, sub: tx('Vino el {map}', { map: p.days.map(day).join(', ') }) })),
+    baptisms: rows<{ id: string; name: string; baptized_on: string }>(bap).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: tx('Bautizado el {day}', { day: day(c.baptized_on) }) })),
+    new_members: rows<{ id: string; name: string; member_since: string; baseline: string | null }>(mem).filter((c) => c.baseline !== 'member').map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: tx('Miembro desde el {day}', { day: day(c.member_since) }) })),
+    absent: rows<{ id: string; name: string }>(members).filter((c) => !cameWeekend.has(c.id)).map((c) => ({ key: c.id, contact_id: c.id, name: c.name, sub: tx('No vino el fin de semana') })),
     gospel: rows<{ contact_id: string; user_id: string | null; visited_at: string; contacts: N }>(vis)
-      .map((v, i) => ({ key: `${v.contact_id}-${i}`, contact_id: v.contact_id, name: v.contacts?.name ?? 'Sin nombre', sub: `${v.user_id && who.get(v.user_id) ? `Se lo presentó ${who.get(v.user_id)} · ` : ''}${day(v.visited_at)}` })),
+      .map((v, i) => ({ key: `${v.contact_id}-${i}`, contact_id: v.contact_id, name: v.contacts?.name ?? tx('Sin nombre'), sub: `${v.user_id && who.get(v.user_id) ? tx('Se lo presentó {get} · ', { get: who.get(v.user_id) }) : ''}${day(v.visited_at)}` })),
     people_out: [
       ...withApp.sort((a, b) => b.presentations - a.presentations || a.display_name.localeCompare(b.display_name, 'es'))
-        .map((m) => ({ key: m.user_id, contact_id: null, name: m.display_name, sub: `${m.sessions} ${m.sessions === 1 ? 'salida' : 'salidas'} · ${m.presentations} ${m.presentations === 1 ? 'presentación' : 'presentaciones'}` })),
+        .map((m) => ({ key: m.user_id, contact_id: null, name: m.display_name, sub: `${m.sessions} ${m.sessions === 1 ? tx('salida') : tx('salidas')} · ${m.presentations} ${m.presentations === 1 ? tx('presentación') : tx('presentaciones')}` })),
       ...[...byHand.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name, 'es'))
-        .map(([id, p]) => ({ key: `mano-${id}`, contact_id: id, name: p.name, sub: `Salió el ${p.days.map(day).join(', ')} · sin la app` })),
+        .map(([id, p]) => ({ key: `mano-${id}`, contact_id: id, name: p.name, sub: tx('Salió el {map} · sin la app', { map: p.days.map(day).join(', ') }) })),
     ],
   };
 }
@@ -951,7 +952,7 @@ export async function myBiblePlan(): Promise<BiblePlanRow | null> {
 }
 export async function startBiblePlan(plan: PlanId, startedOn: string): Promise<void> {
   const { data: u } = await supabase.auth.getUser();
-  if (!u.user) throw new Error('Tenés que entrar con tu cuenta.');
+  if (!u.user) throw new Error(tx('Tenés que entrar con tu cuenta.'));
   ok(await supabase.from('bible_plans').upsert({ profile_id: u.user.id, plan, started_on: startedOn, done: [], updated_at: new Date().toISOString() }, { onConflict: 'profile_id' }));
 }
 export async function saveBiblePlanDone(done: number[]): Promise<void> {
@@ -1237,7 +1238,7 @@ export async function saveHouseholdMember(contactId: string, opts: { household?:
 export async function removeHouseholdMember(contactId: string, householdId: string): Promise<void> {
   const { data, error } = await supabase.from('household_members').delete().eq('contact_id', contactId).select('contact_id');
   if (error) throw new Error(errorMessage(error));
-  if (!data || data.length === 0) throw new Error('No podés sacar a esta persona de la familia.');
+  if (!data || data.length === 0) throw new Error(tx('No podés sacar a esta persona de la familia.'));
   // Solo se borra si quedó vacía (lo decide la base). Si no se puede, no pasa nada.
   await supabase.from('households').delete().eq('id', householdId);
 }
@@ -1320,7 +1321,7 @@ export async function reorderBusStops(group: string, ids: string[]): Promise<voi
 export async function removeBusStop(stop: string): Promise<void> {
   const { data, error } = await supabase.from('bus_stops').delete().eq('id', stop).select('id');
   if (error) throw new Error(errorMessage(error));
-  if (!data || data.length === 0) throw new Error('No podés cambiar las paradas de esta ruta.');
+  if (!data || data.length === 0) throw new Error(tx('No podés cambiar las paradas de esta ruta.'));
 }
 /** "Hoy no viene": saltea la parada en el viaje de ahora (o lo deshace). */
 export async function skipBusStop(stop: string, skip: boolean): Promise<void> {

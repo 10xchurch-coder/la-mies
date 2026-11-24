@@ -9,6 +9,7 @@ import { Card, Empty, Loading } from '@/components/ui';
 import { readingBoard } from '@/lib/api';
 import { colors } from '@/theme';
 import type { ReadingBoardRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Lectores() {
   const [rows, setRows] = useState<ReadingBoardRow[] | null>(null);
@@ -20,10 +21,10 @@ export default function Lectores() {
   if (!rows) return <Loading />;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Lectores de la Palabra" subtitle="Días seguidos leyendo el devocional" back />
+      <Header title={tx('Lectores de la Palabra')} subtitle={tx('Días seguidos leyendo el devocional')} back />
       <Screen>
         {!rows.length ? (
-          <Empty icon="book-open" title="Todavía nadie empezó" text="Abrí el devocional cada día y vas a aparecer acá." />
+          <Empty icon="book-open" title={tx('Todavía nadie empezó')} text={tx('Abrí el devocional cada día y vas a aparecer acá.')} />
         ) : (
           <Card style={{ padding: 0 }}>
             {rows.map((r, i) => (
@@ -32,7 +33,7 @@ export default function Lectores() {
                 <Face name={r.display_name} path={r.photo_path} size={40} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.display_name}</Text>
-                  <Text style={{ fontSize: 12, color: colors.muted }}>Mejor racha: {r.best_streak} {r.best_streak === 1 ? 'día' : 'días'}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Mejor racha: {best_streak} {pl}', { best_streak: r.best_streak, pl: r.best_streak === 1 ? tx('día') : tx('días') })}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Feather name="zap" size={16} color={r.current_streak ? colors.green : colors.muted} />

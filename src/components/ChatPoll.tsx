@@ -7,9 +7,10 @@ import { Button, Toggle } from './ui';
 import { createPoll, type PollOption } from '../lib/chat';
 import { errorMessage } from '../lib/supabase';
 import { colors, themed } from '../theme';
+import { tx, txLocale } from '@/lib/i18n';
 
 const CLOSES: { label: string; days: number | null }[] = [
-  { label: 'Sin límite', days: null }, { label: '1 día', days: 1 }, { label: '3 días', days: 3 }, { label: '1 semana', days: 7 },
+  { get label() { return tx('Sin límite'); }, days: null }, { get label() { return tx('1 día'); }, days: 1 }, { get label() { return tx('3 días'); }, days: 3 }, { get label() { return tx('1 semana'); }, days: 7 },
 ];
 
 export function PollCard({ question, rows, mine, onVote, onLong }: { question: string; rows: PollOption[] | undefined; mine: boolean; onVote: (optionId: string) => void; onLong: () => void }) {
@@ -26,8 +27,8 @@ export function PollCard({ question, rows, mine, onVote, onLong }: { question: s
       {rows.map((r) => {
         const pct = total ? Math.round((r.votes / total) * 100) : 0;
         return (
-          <Pressable key={r.option_id} onPress={() => (closed ? Alert.alert('La encuesta ya cerró') : onVote(r.option_id))} accessibilityRole="button"
-            accessibilityLabel={`${r.label}, ${r.votes} votos${r.mine ? ', elegida por vos' : ''}`}
+          <Pressable key={r.option_id} onPress={() => (closed ? Alert.alert(tx('La encuesta ya cerró')) : onVote(r.option_id))} accessibilityRole="button"
+            accessibilityLabel={`${r.label}, ${r.votes} votos${r.mine ? tx(', elegida por vos') : ''}`}
             style={[styles.opt, mine ? { borderColor: 'rgba(255,255,255,0.5)' } : { borderColor: colors.border, backgroundColor: colors.bg }, r.mine && { borderColor: mine ? '#FFF' : colors.green, borderWidth: 2 }]}>
             <View style={[styles.bar, { width: `${pct}%`, backgroundColor: mine ? 'rgba(255,255,255,0.25)' : colors.greenSoft }]} />
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -39,8 +40,8 @@ export function PollCard({ question, rows, mine, onVote, onLong }: { question: s
         );
       })}
       <Text style={{ fontSize: 11, color: sub }}>
-        {voters === 1 ? '1 persona votó' : `${voters} personas votaron`} · {rows[0].multiple ? 'podés marcar varias' : 'elegí una (tocá otra para cambiar)'}
-        {closes ? (closed ? ' · cerrada' : ` · cierra el ${closes.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}`) : ''}
+        {voters === 1 ? tx('1 persona votó') : tx('{voters} personas votaron', { voters })} · {rows[0].multiple ? tx('podés marcar varias') : tx('elegí una (tocá otra para cambiar)')}
+        {closes ? (closed ? tx(' · cerrada') : tx(' · cierra el {toLocaleDateString}', { toLocaleDateString: closes.toLocaleDateString(txLocale(), { day: 'numeric', month: 'short' }) })) : ''}
       </Text>
     </Pressable>
   );
@@ -66,7 +67,7 @@ export function PollComposer({ visible, onClose, onDone }: { visible: boolean; o
       reset();
       onDone();
     } catch (e) {
-      Alert.alert('No se pudo publicar', errorMessage(e));
+      Alert.alert(tx('No se pudo publicar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -76,22 +77,22 @@ export function PollComposer({ visible, onClose, onDone }: { visible: boolean; o
     <Modal visible={visible} animationType="slide" presentationStyle={Platform.OS === 'ios' ? 'pageSheet' : undefined} onRequestClose={onClose}>
       <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.head}>
-          <Text style={{ flex: 1, fontSize: 19, fontWeight: '800', color: colors.text }}>Nueva encuesta</Text>
-          <Pressable onPress={onClose} accessibilityLabel="Cerrar" style={{ padding: 6 }}><Feather name="x" size={22} color={colors.text} /></Pressable>
+          <Text style={{ flex: 1, fontSize: 19, fontWeight: '800', color: colors.text }}>{tx('Nueva encuesta')}</Text>
+          <Pressable onPress={onClose} accessibilityLabel={tx('Cerrar')} style={{ padding: 6 }}><Feather name="x" size={22} color={colors.text} /></Pressable>
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: insets.bottom + 20 }} keyboardShouldPersistTaps="handled">
-          <Text style={styles.label}>PREGUNTA</Text>
-          <TextInput value={question} onChangeText={setQuestion} placeholder="Ej.: ¿Qué día hacemos el asado de la iglesia?" placeholderTextColor="#8B918C" multiline maxLength={300} style={[styles.input, { minHeight: 60 }]} />
-          <Text style={styles.label}>OPCIONES (de 2 a 8)</Text>
+          <Text style={styles.label}>{tx('PREGUNTA')}</Text>
+          <TextInput value={question} onChangeText={setQuestion} placeholder={tx('Ej.: ¿Qué día hacemos el asado de la iglesia?')} placeholderTextColor="#8B918C" multiline maxLength={300} style={[styles.input, { minHeight: 60 }]} />
+          <Text style={styles.label}>{tx('OPCIONES (de 2 a 8)')}</Text>
           {options.map((o, i) => (
             <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <TextInput value={o} onChangeText={(t) => setOptions((all) => all.map((x, j) => (j === i ? t : x)))} placeholder={`Opción ${i + 1}`} placeholderTextColor="#8B918C" maxLength={80} style={[styles.input, { flex: 1 }]} />
-              {options.length > 2 ? <Pressable onPress={() => setOptions((all) => all.filter((_, j) => j !== i))} accessibilityLabel={`Quitar la opción ${i + 1}`} style={{ padding: 6 }}><Feather name="trash-2" size={20} color={colors.red} /></Pressable> : null}
+              <TextInput value={o} onChangeText={(t) => setOptions((all) => all.map((x, j) => (j === i ? t : x)))} placeholder={tx('Opción {v1}', { v1: i + 1 })} placeholderTextColor="#8B918C" maxLength={80} style={[styles.input, { flex: 1 }]} />
+              {options.length > 2 ? <Pressable onPress={() => setOptions((all) => all.filter((_, j) => j !== i))} accessibilityLabel={tx('Quitar la opción {v1}', { v1: i + 1 })} style={{ padding: 6 }}><Feather name="trash-2" size={20} color={colors.red} /></Pressable> : null}
             </View>
           ))}
-          {options.length < 8 ? <Text onPress={() => setOptions((all) => [...all, ''])} style={{ fontSize: 15, fontWeight: '800', color: colors.green }}>+ Agregar otra opción</Text> : null}
-          <Toggle label="Se pueden elegir varias" hint="Si no, cada uno elige una sola opción." value={multiple} onChange={setMultiple} />
-          <Text style={styles.label}>CUÁNDO CIERRA</Text>
+          {options.length < 8 ? <Text onPress={() => setOptions((all) => [...all, ''])} style={{ fontSize: 15, fontWeight: '800', color: colors.green }}>{tx('+ Agregar otra opción')}</Text> : null}
+          <Toggle label={tx('Se pueden elegir varias')} hint={tx('Si no, cada uno elige una sola opción.')} value={multiple} onChange={setMultiple} />
+          <Text style={styles.label}>{tx('CUÁNDO CIERRA')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
             {CLOSES.map((c, i) => (
               <Pressable key={c.label} onPress={() => setCloseIdx(i)} accessibilityRole="button" accessibilityState={{ selected: closeIdx === i }}
@@ -100,8 +101,8 @@ export function PollComposer({ visible, onClose, onDone }: { visible: boolean; o
               </Pressable>
             ))}
           </View>
-          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Todos los de la iglesia pueden votar. Se ven los totales, no quién votó qué.</Text>
-          {busy ? <ActivityIndicator color={colors.green} /> : <Button title="Publicar en el chat" icon="send" onPress={publish} disabled={!ready} />}
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Todos los de la iglesia pueden votar. Se ven los totales, no quién votó qué.')}</Text>
+          {busy ? <ActivityIndicator color={colors.green} /> : <Button title={tx('Publicar en el chat')} icon="send" onPress={publish} disabled={!ready} />}
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>

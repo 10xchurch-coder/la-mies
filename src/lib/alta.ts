@@ -2,11 +2,12 @@
 // los mensajes para compartir y los datos del equipo de La Mies. Acá no hay nada de la base ni de la pantalla, para poder probarse solo.
 import { FEATURES, cleanDisabled, type FeatureKey } from './features';
 import { phoneProblem } from './phone';
+import { tx } from './i18n';
 
 // ---------- El equipo de La Mies: UN solo lugar para cambiar a dónde llega el pedido de ayuda ----------
 /** Sin nombres ni teléfonos personales. `whatsapp`: solo cifras, con el código del país (por ejemplo "5493764000000"). Vacío: se ofrece solo el correo. */
 export const LA_MIES_TEAM = {
-  name: 'el equipo de La Mies',
+  get name() { return tx('el equipo de La Mies'); },
   email: 'info@iglesiavictoria.com',
   whatsapp: '', // FALTA DECIDIR: el número de WhatsApp del equipo (hoy no hay ninguno cargado)
 };
@@ -22,14 +23,14 @@ export type HelpLinks = { email: string; mailto: string; whatsapp: string | null
 export function helpLinks(o: { church?: string | null; step?: string | null; team?: typeof LA_MIES_TEAM }): HelpLinks {
   const team = o.team ?? LA_MIES_TEAM;
   const text = [
-    'Hola. Necesito ayuda con la app La Mies.',
-    o.church ? `Iglesia: ${o.church}.` : '',
-    o.step ? `Estoy en el paso: ${o.step}.` : '',
+    tx('Hola. Necesito ayuda con la app La Mies.'),
+    o.church ? tx('Iglesia: {church}.', { church: o.church }) : '',
+    o.step ? tx('Estoy en el paso: {step}.', { step: o.step }) : '',
   ].filter(Boolean).join(' ');
   const digits = (team.whatsapp ?? '').replace(/\D/g, '');
   return {
     email: team.email,
-    mailto: `mailto:${team.email}?subject=${encodeURIComponent('Ayuda con La Mies')}&body=${encodeURIComponent(text)}`,
+    mailto: `mailto:${team.email}?subject=${encodeURIComponent(tx('Ayuda con La Mies'))}&body=${encodeURIComponent(text)}`,
     whatsapp: digits.length >= 8 ? `https://wa.me/${digits}?text=${encodeURIComponent(text)}` : null,
     text,
   };
@@ -39,29 +40,29 @@ export function helpLinks(o: { church?: string | null; step?: string | null; tea
 export type Country = { code: string; label: string; timezone: string };
 /** Los países de la lista, con su zona horaria más común (se puede cambiar después en los ajustes de la iglesia). */
 export const COUNTRIES: Country[] = [
-  { code: 'AR', label: 'Argentina', timezone: 'America/Argentina/Buenos_Aires' },
-  { code: 'PY', label: 'Paraguay', timezone: 'America/Asuncion' },
-  { code: 'UY', label: 'Uruguay', timezone: 'America/Montevideo' },
-  { code: 'BR', label: 'Brasil', timezone: 'America/Sao_Paulo' },
-  { code: 'CL', label: 'Chile', timezone: 'America/Santiago' },
-  { code: 'BO', label: 'Bolivia', timezone: 'America/La_Paz' },
-  { code: 'PE', label: 'Perú', timezone: 'America/Lima' },
-  { code: 'CO', label: 'Colombia', timezone: 'America/Bogota' },
-  { code: 'EC', label: 'Ecuador', timezone: 'America/Guayaquil' },
-  { code: 'VE', label: 'Venezuela', timezone: 'America/Caracas' },
-  { code: 'MX', label: 'México', timezone: 'America/Mexico_City' },
-  { code: 'US', label: 'Estados Unidos', timezone: 'America/Chicago' },
-  { code: 'ES', label: 'España', timezone: 'Europe/Madrid' },
+  { code: 'AR', get label() { return tx('Argentina'); }, timezone: 'America/Argentina/Buenos_Aires' },
+  { code: 'PY', get label() { return tx('Paraguay'); }, timezone: 'America/Asuncion' },
+  { code: 'UY', get label() { return tx('Uruguay'); }, timezone: 'America/Montevideo' },
+  { code: 'BR', get label() { return tx('Brasil'); }, timezone: 'America/Sao_Paulo' },
+  { code: 'CL', get label() { return tx('Chile'); }, timezone: 'America/Santiago' },
+  { code: 'BO', get label() { return tx('Bolivia'); }, timezone: 'America/La_Paz' },
+  { code: 'PE', get label() { return tx('Perú'); }, timezone: 'America/Lima' },
+  { code: 'CO', get label() { return tx('Colombia'); }, timezone: 'America/Bogota' },
+  { code: 'EC', get label() { return tx('Ecuador'); }, timezone: 'America/Guayaquil' },
+  { code: 'VE', get label() { return tx('Venezuela'); }, timezone: 'America/Caracas' },
+  { code: 'MX', get label() { return tx('México'); }, timezone: 'America/Mexico_City' },
+  { code: 'US', get label() { return tx('Estados Unidos'); }, timezone: 'America/Chicago' },
+  { code: 'ES', get label() { return tx('España'); }, timezone: 'Europe/Madrid' },
 ];
 export const timezoneForCountry = (code: string | null | undefined): string =>
   COUNTRIES.find((c) => c.code === (code ?? '').toUpperCase())?.timezone ?? COUNTRIES[0].timezone;
 
 export const SIZES: { value: string; label: string }[] = [
-  { value: '1-30', label: 'Hasta 30' },
+  { value: '1-30', get label() { return tx('Hasta 30'); } },
   { value: '31-80', label: '31 a 80' },
   { value: '81-200', label: '81 a 200' },
   { value: '201-500', label: '201 a 500' },
-  { value: '500+', label: 'Más de 500' },
+  { value: '500+', get label() { return tx('Más de 500'); } },
 ];
 
 export type SignupForm = { church: string; city: string; province: string; country: string; pastor: string; email: string; whatsapp: string; size: string };
@@ -73,22 +74,22 @@ const letters = (s: string) => (s.normalize('NFD').match(/[a-z]/gi) ?? []).lengt
 export function signupProblems(f: SignupForm): Partial<Record<SignupField, string>> {
   const p: Partial<Record<SignupField, string>> = {};
   const church = f.church.trim();
-  if (church.length < 3 || letters(church) < 3) p.church = 'Escribí el nombre de la iglesia.';
-  else if (church.length > 120) p.church = 'El nombre es muy largo.';
-  else if (hasLink(church)) p.church = 'Solo el nombre, sin enlaces.';
-  if (!f.city.trim()) p.city = 'Escribí la ciudad.';
-  else if (f.city.trim().length > 80) p.city = 'La ciudad es muy larga.';
-  if (f.province.trim().length > 80) p.province = 'La provincia es muy larga.';
-  if (!COUNTRIES.some((c) => c.code === f.country)) p.country = 'Elegí el país.';
+  if (church.length < 3 || letters(church) < 3) p.church = tx('Escribí el nombre de la iglesia.');
+  else if (church.length > 120) p.church = tx('El nombre es muy largo.');
+  else if (hasLink(church)) p.church = tx('Solo el nombre, sin enlaces.');
+  if (!f.city.trim()) p.city = tx('Escribí la ciudad.');
+  else if (f.city.trim().length > 80) p.city = tx('La ciudad es muy larga.');
+  if (f.province.trim().length > 80) p.province = tx('La provincia es muy larga.');
+  if (!COUNTRIES.some((c) => c.code === f.country)) p.country = tx('Elegí el país.');
   const pastor = f.pastor.trim();
-  if (pastor.length < 2 || hasLink(pastor)) p.pastor = 'Escribí tu nombre.';
-  else if (pastor.length > 80) p.pastor = 'El nombre es muy largo.';
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) p.email = 'Revisá el correo.';
+  if (pastor.length < 2 || hasLink(pastor)) p.pastor = tx('Escribí tu nombre.');
+  else if (pastor.length > 80) p.pastor = tx('El nombre es muy largo.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) p.email = tx('Revisá el correo.');
   const phone = f.whatsapp.trim();
   if (f.country === 'AR' && !phone.startsWith('+')) {
     const bad = phoneProblem(phone, true);
     if (bad) p.whatsapp = bad;
-  } else if (phone.replace(/\D/g, '').length < 8) p.whatsapp = 'Escribí tu número de WhatsApp completo, con el código de área.';
+  } else if (phone.replace(/\D/g, '').length < 8) p.whatsapp = tx('Escribí tu número de WhatsApp completo, con el código de área.');
   return p;
 }
 
@@ -108,14 +109,14 @@ export type StepState = 'done' | 'todo' | 'skipped';
 export type Step = { key: StepKey; title: string; why: string; canSkip: boolean };
 
 export const STEPS: Step[] = [
-  { key: 'iglesia', title: 'Los datos de tu iglesia', why: 'Así la app lleva el nombre y el logo de tu iglesia.', canSkip: false },
-  { key: 'reuniones', title: 'Los días y horas de reunión', why: 'Con esto vas a poder tomar asistencia en cada reunión.', canSkip: false },
-  { key: 'funciones', title: 'Qué partes de la app van a usar', why: 'Menos botones es más fácil: prendé solo lo que tu iglesia usa.', canSkip: false },
-  { key: 'personas', title: 'Traé a tu gente', why: 'Con los hermanos cargados, la app ya sirve desde el primer día.', canSkip: true },
-  { key: 'lideres', title: 'Nombrá a tus líderes', why: 'Así no hacés todo vos: cada líder puede hacer su parte.', canSkip: true },
-  { key: 'codigo', title: 'Compartí el código de la iglesia', why: 'Con este código los hermanos crean su cuenta y quedan en tu iglesia.', canSkip: false },
-  { key: 'instalar', title: 'Instalá la app en los teléfonos', why: 'Con la app en el teléfono, a cada hermano le llegan los avisos.', canSkip: true },
-  { key: 'domingo', title: 'El primer domingo: tomá asistencia', why: 'Es lo primero que vas a usar cada semana, y lleva un minuto.', canSkip: true },
+  { key: 'iglesia', get title() { return tx('Los datos de tu iglesia'); }, get why() { return tx('Así la app lleva el nombre y el logo de tu iglesia.'); }, canSkip: false },
+  { key: 'reuniones', get title() { return tx('Los días y horas de reunión'); }, get why() { return tx('Con esto vas a poder tomar asistencia en cada reunión.'); }, canSkip: false },
+  { key: 'funciones', get title() { return tx('Qué partes de la app van a usar'); }, get why() { return tx('Menos botones es más fácil: prendé solo lo que tu iglesia usa.'); }, canSkip: false },
+  { key: 'personas', get title() { return tx('Traé a tu gente'); }, get why() { return tx('Con los hermanos cargados, la app ya sirve desde el primer día.'); }, canSkip: true },
+  { key: 'lideres', get title() { return tx('Nombrá a tus líderes'); }, get why() { return tx('Así no hacés todo vos: cada líder puede hacer su parte.'); }, canSkip: true },
+  { key: 'codigo', get title() { return tx('Compartí el código de la iglesia'); }, get why() { return tx('Con este código los hermanos crean su cuenta y quedan en tu iglesia.'); }, canSkip: false },
+  { key: 'instalar', get title() { return tx('Instalá la app en los teléfonos'); }, get why() { return tx('Con la app en el teléfono, a cada hermano le llegan los avisos.'); }, canSkip: true },
+  { key: 'domingo', get title() { return tx('El primer domingo: tomá asistencia'); }, get why() { return tx('Es lo primero que vas a usar cada semana, y lleva un minuto.'); }, canSkip: true },
 ];
 
 export type Facts = { logo: boolean; people: number; accounts: number; leaders: number; services: number; attendance: number; features_set: boolean; last_activity: string | null };
@@ -154,10 +155,10 @@ export function progress(saved: SavedSteps, facts: Facts): Progress {
   const i = states.indexOf('todo');
   return {
     total: STEPS.length, done, skipped, resolved: done + skipped, finished: i === -1, next: i === -1 ? null : STEPS[i].key,
-    label: `${done + skipped} de ${STEPS.length} pasos`,
+    label: tx('{v1} de {n} pasos', { v1: done + skipped, n: STEPS.length }),
   };
 }
-export const STATE_LABEL: Record<StepState, string> = { done: 'Hecho', todo: 'Falta', skipped: 'Lo salteo' };
+export const STATE_LABEL: Record<StepState, string> = { get done() { return tx('Hecho'); }, get todo() { return tx('Falta'); }, get skipped() { return tx('Lo salteo'); } };
 
 // ---------- Los modelos de funciones ----------
 export type PresetKey = 'basico' | 'completa' | 'elijo';
@@ -166,9 +167,9 @@ export const BASIC_ON: FeatureKey[] = ['asistencia', 'devocional', 'oracion', 'e
 /** "Iglesia completa": todo, menos lo que pide equipo o cuentas aparte (radio, transmisión en vivo, música). */
 export const FULL_OFF: FeatureKey[] = ['vivo', 'musica', 'radio'];
 export const PRESETS: { key: PresetKey; label: string; hint: string }[] = [
-  { key: 'basico', label: 'Lo básico', hint: 'Asistencia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.' },
-  { key: 'completa', label: 'Iglesia completa', hint: 'Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo radio, culto en vivo y música.' },
-  { key: 'elijo', label: 'Elijo yo', hint: 'Prendé y apagá cada parte una por una.' },
+  { key: 'basico', get label() { return tx('Lo básico'); }, get hint() { return tx('Asistencia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.'); } },
+  { key: 'completa', get label() { return tx('Iglesia completa'); }, get hint() { return tx('Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo radio, culto en vivo y música.'); } },
+  { key: 'elijo', get label() { return tx('Elijo yo'); }, get hint() { return tx('Prendé y apagá cada parte una por una.'); } },
 ];
 /** Qué queda apagado con cada modelo. "Elijo yo" no cambia nada. */
 export function presetOff(key: PresetKey, current: readonly string[] | null | undefined = []): FeatureKey[] {
@@ -198,27 +199,27 @@ export function joinMessage(o: { church: string; code: string; webUrl: string; s
   const s = o.stores ?? STORE_LINKS;
   const code = o.code.trim().toUpperCase();
   return [
-    `¡Hola! ${o.church} ya tiene su app: La Mies.`,
+    tx('¡Hola! {church} ya tiene su app: La Mies.', { church: o.church }),
     '',
-    'Para entrar:',
-    `1) Abrí este enlace: ${joinLink(o.webUrl, code)}`,
-    '2) Tocá "Crear cuenta" y poné tu nombre, tu correo y tu celular.',
-    `3) En "Código de la iglesia" tiene que decir: ${code}`,
+    tx('Para entrar:'),
+    tx('1) Abrí este enlace: {joinLink}', { joinLink: joinLink(o.webUrl, code) }),
+    tx('2) Tocá "Crear cuenta" y poné tu nombre, tu correo y tu celular.'),
+    tx('3) En "Código de la iglesia" tiene que decir: {code}', { code }),
     s.ios || s.android ? '' : null,
-    s.android ? `Para Android: ${s.android}` : null,
-    s.ios ? `Para iPhone: ${s.ios}` : null,
+    s.android ? tx('Para Android: {android}', { android: s.android }) : null,
+    s.ios ? tx('Para iPhone: {ios}', { ios: s.ios }) : null,
   ].filter((l) => l !== null).join('\n');
 }
 
 // ---------- Para el equipo de La Mies ----------
 export type SignupStatus = 'pending' | 'reviewed' | 'suspended';
-export const SIGNUP_STATUS_LABEL: Record<SignupStatus, string> = { pending: 'Sin revisar', reviewed: 'Revisada', suspended: 'Suspendida' };
+export const SIGNUP_STATUS_LABEL: Record<SignupStatus, string> = { get pending() { return tx('Sin revisar'); }, get reviewed() { return tx('Revisada'); }, get suspended() { return tx('Suspendida'); } };
 /** "hoy", "ayer", "hace 5 días", "sin movimiento". */
 export function activityLabel(last: string | null | undefined, now = new Date()): string {
-  if (!last) return 'sin movimiento';
+  if (!last) return tx('sin movimiento');
   const days = Math.floor((now.getTime() - new Date(last).getTime()) / 86400000);
-  if (!Number.isFinite(days)) return 'sin movimiento';
+  if (!Number.isFinite(days)) return tx('sin movimiento');
   if (days <= 0) return 'hoy';
-  if (days === 1) return 'ayer';
-  return `hace ${days} días`;
+  if (days === 1) return tx('ayer');
+  return tx('hace {days} días', { days });
 }

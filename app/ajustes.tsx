@@ -22,6 +22,7 @@ import { blockedPeople, unblockUser } from '@/lib/moderation';
 import { RULES } from '@/components/RulesGate';
 import { TabsEditor } from '@/components/TabsEditor';
 import { LangChoice } from '@/components/LangChoice';
+import { tx } from '@/lib/i18n';
 
 export default function Ajustes() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function Ajustes() {
   const mustLock = needsAppLock(perms);
   const optIn = useLockOptIn();
   const isStaff = can('com.moderar');
-  const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: 'Face ID' });
+  const [bio, setBio] = useState<{ available: boolean; label: string }>({ available: true, label: tx('Face ID') });
   const mode = useThemeMode();
 
   const [blocked, setBlocked] = useState<{ id: string; name: string }[]>([]);
@@ -44,7 +45,7 @@ export default function Ajustes() {
       await updateProfile(patch);
       await refreshProfile();
     } catch (e) {
-      Alert.alert('No se pudo guardar', e instanceof Error ? e.message : 'Probá de nuevo');
+      Alert.alert(tx('No se pudo guardar'), e instanceof Error ? e.message : tx('Probá de nuevo'));
     }
   };
 
@@ -52,7 +53,7 @@ export default function Ajustes() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Ajustes" back />
+      <Header title={tx('Ajustes')} back />
       <Screen>
         <View style={styles.profile}>
           <Avatar name={profile?.display_name ?? '?'} size={52} color={colors.green} textColor="#FFFFFF" />
@@ -64,26 +65,26 @@ export default function Ajustes() {
           </View>
         </View>
 
-        <SectionTitle>Compartir mis contactos</SectionTitle>
+        <SectionTitle>{tx('Compartir mis contactos')}</SectionTitle>
         <Card style={{ gap: 10 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Cuando marco una casa nueva, compartirla con</Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Cuando marco una casa nueva, compartirla con')}</Text>
           <Choice
             options={[
-              { value: 'group', label: group ? `${church?.grouping === 'bus_routes' ? 'Toda' : 'Todo'} mi ${groupWord(church?.grouping).toLowerCase()}` : 'Toda la iglesia' },
-              { value: 'me', label: 'Solo yo' },
-              { value: 'ask', label: 'Preguntarme cada vez' },
+              { value: 'group', label: group ? tx('{pl} mi {groupWord}', { pl: church?.grouping === 'bus_routes' ? tx('Toda') : tx('Todo'), groupWord: groupWord(church?.grouping).toLowerCase() }) : tx('Toda la iglesia') },
+              { value: 'me', label: tx('Solo yo') },
+              { value: 'ask', label: tx('Preguntarme cada vez') },
             ]}
             value={profile?.share_default ?? 'group'}
             onChange={(v) => set({ share_default: v })}
           />
-          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Podés cambiarlo para un contacto puntual al momento de guardarlo. Los administradores de la iglesia ven todos los contactos.</Text>
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Podés cambiarlo para un contacto puntual al momento de guardarlo. Los administradores de la iglesia ven todos los contactos.')}</Text>
         </Card>
 
-        <SectionTitle>Apariencia</SectionTitle>
+        <SectionTitle>{tx('Apariencia')}</SectionTitle>
         <Card>
           <Toggle
-            label="Modo oscuro"
-            hint={mode === 'dark' ? 'Fondo oscuro, descansa la vista de noche.' : 'Fondo claro. Activalo para usar la app con fondo oscuro.'}
+            label={tx('Modo oscuro')}
+            hint={mode === 'dark' ? tx('Fondo oscuro, descansa la vista de noche.') : tx('Fondo claro. Activalo para usar la app con fondo oscuro.')}
             value={mode === 'dark'}
             onChange={(v) => saveThemeMode(v ? 'dark' : 'light')}
           />
@@ -91,52 +92,52 @@ export default function Ajustes() {
 
         <LangChoice />
 
-        <SectionTitle>Barra de abajo</SectionTitle>
+        <SectionTitle>{tx('Barra de abajo')}</SectionTitle>
         <Card>
           <TabsEditor />
         </Card>
 
-        <SectionTitle>Menú de Iglesia</SectionTitle>
+        <SectionTitle>{tx('Menú de Iglesia')}</SectionTitle>
         <Card style={{ padding: 0 }}>
-          <RowLink title="Ordenar mi menú" subtitle="Fijar favoritos arriba, mover botones y grupos" icon="move"
+          <RowLink title={tx('Ordenar mi menú')} subtitle={tx('Fijar favoritos arriba, mover botones y grupos')} icon="move"
             onPress={() => router.push({ pathname: '/(tabs)/iglesia', params: { editar: String(Date.now()) } } as never)} />
         </Card>
 
         {can('admin.iglesia') ? (
           <>
-            <SectionTitle>Cómo trabaja la iglesia</SectionTitle>
+            <SectionTitle>{tx('Cómo trabaja la iglesia')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {pathOn(church?.disabled_features, '/admin/seguimiento') ? (
-                <RowLink title="Seguimiento y mensajes" subtitle="Cuándo avisar para escribir o visitar, y qué dice cada WhatsApp" icon="message-circle" onPress={() => router.push('/admin/seguimiento' as never)} />
+                <RowLink title={tx('Seguimiento y mensajes')} subtitle={tx('Cuándo avisar para escribir o visitar, y qué dice cada WhatsApp')} icon="message-circle" onPress={() => router.push('/admin/seguimiento' as never)} />
               ) : null}
               {can('admin.permisos') ? (
-                <RowLink title="Funciones de la iglesia" subtitle="Prender o apagar cada parte de la app: finanzas, evangelismo, colectivo…" icon="toggle-right" onPress={() => router.push('/admin/funciones' as never)} />
+                <RowLink title={tx('Funciones de la iglesia')} subtitle={tx('Prender o apagar cada parte de la app: finanzas, evangelismo, colectivo…')} icon="toggle-right" onPress={() => router.push('/admin/funciones' as never)} />
               ) : null}
               {can('admin.permisos') ? (
-                <RowLink title="Inactivos" subtitle="A los cuántos meses sin venir un miembro pasa solo a la lista de inactivos, o apagarlo" icon="user-x" onPress={() => router.push('/admin/inactivos' as never)} />
+                <RowLink title={tx('Inactivos')} subtitle={tx('A los cuántos meses sin venir un miembro pasa solo a la lista de inactivos, o apagarlo')} icon="user-x" onPress={() => router.push('/admin/inactivos' as never)} />
               ) : null}
               {can('admin.permisos') ? (
-                <RowLink title="Ver como miembro" subtitle="Mirá la app como la ve un hermano común y volvé a tu vista cuando quieras" icon="eye" onPress={() => router.push('/miembro-vista' as never)} />
+                <RowLink title={tx('Ver como miembro')} subtitle={tx('Mirá la app como la ve un hermano común y volvé a tu vista cuando quieras')} icon="eye" onPress={() => router.push('/miembro-vista' as never)} />
               ) : null}
             </Card>
           </>
         ) : null}
         {can('personas.editar') ? (
           <>
-            <SectionTitle>Personas de la iglesia</SectionTitle>
+            <SectionTitle>{tx('Personas de la iglesia')}</SectionTitle>
             <Card style={{ padding: 0 }}>
-              <RowLink title="Importar desde una planilla" subtitle="Subí tu Excel o CSV y agregá a todos de una vez" icon="upload" onPress={() => router.push('/importar' as never)} />
+              <RowLink title={tx('Importar desde una planilla')} subtitle={tx('Subí tu Excel o CSV y agregá a todos de una vez')} icon="upload" onPress={() => router.push('/importar' as never)} />
             </Card>
           </>
         ) : null}
 
-        <SectionTitle>Seguridad y ubicación</SectionTitle>
+        <SectionTitle>{tx('Seguridad y ubicación')}</SectionTitle>
         <Card>
           <Toggle
-            label={`Pedir ${bio.label} para abrir la app`}
-            hint={!bio.available ? 'Tu teléfono no tiene Face ID, huella ni código configurado.'
-              : mustLock ? 'Obligatorio porque podés ver finanzas o datos de administración. También se pide si la app estuvo cerrada más de 2 minutos.'
-              : 'Opcional. Si lo activás, también se pide si la app estuvo cerrada más de 2 minutos.'}
+            label={tx('Pedir {label} para abrir la app', { label: bio.label })}
+            hint={!bio.available ? tx('Tu teléfono no tiene Face ID, huella ni código configurado.')
+              : mustLock ? tx('Obligatorio porque podés ver finanzas o datos de administración. También se pide si la app estuvo cerrada más de 2 minutos.')
+              : tx('Opcional. Si lo activás, también se pide si la app estuvo cerrada más de 2 minutos.')}
             value={mustLock || !!optIn}
             disabled={mustLock}
             onChange={(v) => { setLockOptIn(v); }}
@@ -144,57 +145,57 @@ export default function Ajustes() {
           <View style={{ flexDirection: 'row', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Feather name="lock" size={22} color={colors.green} />
             <Text style={{ flex: 1, fontSize: 14, lineHeight: 20, color: colors.text }}>
-              Tu ubicación en vivo se comparte con el equipo <Text style={{ fontWeight: '700' }}>solo mientras una salida está activa</Text>. Al terminar, queda guardado el recorrido para el mapa de veredas, no dónde estás.
+              {tx('Tu ubicación en vivo se comparte con el equipo')} <Text style={{ fontWeight: '700' }}>{tx('solo mientras una salida está activa')}</Text>{tx('. Al terminar, queda guardado el recorrido para el mapa de veredas, no dónde estás.')}
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 12, paddingVertical: 10, borderTopWidth: 1, borderTopColor: colors.border }}>
             <Feather name="truck" size={22} color={colors.green} />
             <Text style={{ flex: 1, fontSize: 14, lineHeight: 20, color: colors.text }}>
-              Si la app detecta velocidad de vehículo durante una salida, la corta sola en el último punto en que caminabas, para que no queden líneas por toda la ciudad.
+              {tx('Si la app detecta velocidad de vehículo durante una salida, la corta sola en el último punto en que caminabas, para que no queden líneas por toda la ciudad.')}
             </Text>
           </View>
         </Card>
 
-        <SectionTitle>Cuenta</SectionTitle>
+        <SectionTitle>{tx('Cuenta')}</SectionTitle>
         <Card style={{ padding: 0 }}>
-          {isStaff ? <RowLink title="Denuncias" subtitle="Comentarios o pedidos que alguien denunció" icon="flag" onPress={() => router.push('/admin/denuncias' as never)} /> : null}
-          <RowLink title="Normas de la comunidad" subtitle="Respeto, privacidad y denuncias" icon="book" onPress={() => Alert.alert('Normas de la comunidad', RULES.map((r, i) => `${i + 1}. ${r}`).join('\n\n'))} />
+          {isStaff ? <RowLink title={tx('Denuncias')} subtitle={tx('Comentarios o pedidos que alguien denunció')} icon="flag" onPress={() => router.push('/admin/denuncias' as never)} /> : null}
+          <RowLink title={tx('Normas de la comunidad')} subtitle={tx('Respeto, privacidad y denuncias')} icon="book" onPress={() => Alert.alert(tx('Normas de la comunidad'), RULES.map((r, i) => `${i + 1}. ${r}`).join('\n\n'))} />
           <RowLink
-            title="Personas bloqueadas"
-            subtitle={blocked.length ? blocked.map((b) => b.name).join(', ') : 'No bloqueaste a nadie'}
+            title={tx('Personas bloqueadas')}
+            subtitle={blocked.length ? blocked.map((b) => b.name).join(', ') : tx('No bloqueaste a nadie')}
             icon="slash"
             onPress={() => blocked.length
-              ? Alert.alert('Desbloquear', 'Elegí a quién volver a ver.', [...blocked.slice(0, 3).map((b) => ({ text: b.name, onPress: () => { unblockUser(b.id).then(loadBlocked); } })), { text: 'Cancelar', style: 'cancel' as const }])
+              ? Alert.alert(tx('Desbloquear'), tx('Elegí a quién volver a ver.'), [...blocked.slice(0, 3).map((b) => ({ text: b.name, onPress: () => { unblockUser(b.id).then(loadBlocked); } })), { text: tx('Cancelar'), style: 'cancel' as const }])
               : undefined}
           />
-          <RowLink title="Seguridad de mi cuenta" subtitle="Contraseña y verificación en dos pasos" icon="shield" onPress={() => router.push('/seguridad')} />
+          <RowLink title={tx('Seguridad de mi cuenta')} subtitle={tx('Contraseña y verificación en dos pasos')} icon="shield" onPress={() => router.push('/seguridad')} />
           <RowLink
-            title="Cerrar sesión"
+            title={tx('Cerrar sesión')}
             icon="log-out"
             danger
-            onPress={() => Alert.alert('Cerrar sesión', '¿Salir de la app en este teléfono?', [{ text: 'Cancelar', style: 'cancel' }, { text: 'Salir', style: 'destructive', onPress: () => signOut().then(() => router.replace('/login')) }])}
+            onPress={() => Alert.alert(tx('Cerrar sesión'), tx('¿Salir de la app en este teléfono?'), [{ text: tx('Cancelar'), style: 'cancel' }, { text: tx('Salir'), style: 'destructive', onPress: () => signOut().then(() => router.replace('/login')) }])}
           />
           <RowLink
-            title="Eliminar mi cuenta"
-            subtitle="Borra tu cuenta y tus datos personales en el momento"
+            title={tx('Eliminar mi cuenta')}
+            subtitle={tx('Borra tu cuenta y tus datos personales en el momento')}
             icon="trash-2"
             danger
             onPress={() =>
               Alert.alert(
-                'Eliminar mi cuenta',
-                'Se borran ahora mismo tu cuenta y tus datos personales (foto, teléfono, dirección, DNI, tus salidas y comentarios). Las fichas de las personas que visitaste quedan en la iglesia para su seguimiento. No se puede deshacer. ¿Seguro?',
+                tx('Eliminar mi cuenta'),
+                tx('Se borran ahora mismo tu cuenta y tus datos personales (foto, teléfono, dirección, DNI, tus salidas y comentarios). Las fichas de las personas que visitaste quedan en la iglesia para su seguimiento. No se puede deshacer. ¿Seguro?'),
                 [
-                  { text: 'Cancelar', style: 'cancel' },
+                  { text: tx('Cancelar'), style: 'cancel' },
                   {
-                    text: 'Eliminar', style: 'destructive',
+                    text: tx('Eliminar'), style: 'destructive',
                     onPress: async () => {
                       try {
                         await deleteMyAccount();
                         await signOut().catch(() => undefined);
                         router.replace('/login');
-                        Alert.alert('Cuenta eliminada', 'Tu cuenta y tus datos personales se borraron. Gracias por haber usado La Mies.');
+                        Alert.alert(tx('Cuenta eliminada'), tx('Tu cuenta y tus datos personales se borraron. Gracias por haber usado La Mies.'));
                       } catch (e) {
-                        Alert.alert('No se pudo', errorMessage(e));
+                        Alert.alert(tx('No se pudo'), errorMessage(e));
                       }
                     },
                   },
@@ -203,7 +204,7 @@ export default function Ajustes() {
             }
           />
         </Card>
-        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>La Mies · versión {APP_VERSION} · {updateLabel()} · {church?.name ?? ''}</Text>
+        <Text style={{ fontSize: 11, color: colors.muted, textAlign: 'center' }}>{tx('La Mies · versión {APP_VERSION} · {updateLabel} · {name}', { APP_VERSION, updateLabel: updateLabel(), name: church?.name ?? '' })}</Text>
       </Screen>
     </View>
   );

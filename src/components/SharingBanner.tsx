@@ -11,6 +11,7 @@ import { isPaused } from '@/lib/famLoc';
 import { refreshFamLoc, sharingNow, useFamLoc, watchWhileOpen } from '@/lib/famLocTask';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { fmtTime } from '@/lib/format';
+import { tx } from '@/lib/i18n';
 
 export function SharingBanner() {
   const { profile, church } = useAuth();
@@ -41,11 +42,11 @@ export function SharingBanner() {
   return (
     <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92 + (outing.active ? 54 : 0) }]}>
       <Pressable onPress={() => router.push('/familia-ubicacion' as Href)} accessibilityRole="button"
-        accessibilityLabel={paused ? 'Tu ubicación está en pausa. Tocá para ver.' : `Estás compartiendo tu ubicación con ${n} personas. Tocá para ver.`}
+        accessibilityLabel={paused ? tx('Tu ubicación está en pausa. Tocá para ver.') : tx('Estás compartiendo tu ubicación con {n} personas. Tocá para ver.', { n })}
         style={({ pressed }) => [styles.pill, paused && { backgroundColor: '#6B7280' }, pressed && { opacity: 0.9 }]}>
         <Feather name={paused ? 'pause-circle' : 'map-pin'} size={16} color="#FFF" />
         <Text style={styles.text}>
-          {paused ? `Ubicación en pausa hasta las ${fmtTime(me.paused_until as string)}` : n === 1 ? 'Compartís tu ubicación con 1 persona' : `Compartís tu ubicación con ${n} personas`}
+          {paused ? tx('Ubicación en pausa hasta las {fmtTime}', { fmtTime: fmtTime(me.paused_until as string) }) : n === 1 ? tx('Compartís tu ubicación con 1 persona') : tx('Compartís tu ubicación con {n} personas', { n })}
         </Text>
         <Feather name="chevron-right" size={18} color="#FFF" />
       </Pressable>

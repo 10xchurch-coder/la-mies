@@ -14,6 +14,7 @@ import {
 } from '@/lib/personasApi';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Person = { id: string; name: string; status: string; baptized_on?: string | null; baptized_here?: boolean | null; member_since?: string | null };
 
@@ -38,7 +39,7 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
       onChanged?.();
       if (done) Alert.alert(done);
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -61,9 +62,9 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
   const addLesson = () => {
     if (!prog.next) return;
     const n = prog.next;
-    Alert.alert('Anotar una lección', `¿Hoy hicieron «${names[n - 1]}» (lección ${n} de ${info.total})?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sí, anotar', onPress: () => { run(() => discLesson(c.id, n, null), prog.done + 1 >= info.total ? '¡Terminó el curso!' : 'Lección anotada'); } },
+    Alert.alert(tx('Anotar una lección'), tx('¿Hoy hicieron «{names}» (lección {n} de {total})?', { names: names[n - 1], n, total: info.total }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Sí, anotar'), onPress: () => { run(() => discLesson(c.id, n, null), prog.done + 1 >= info.total ? tx('¡Terminó el curso!') : tx('Lección anotada')); } },
     ]);
   };
 
@@ -73,60 +74,60 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
       {track ? (
         <View style={{ gap: 4 }}>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-            <Tag text={prog.complete ? 'Terminó el curso' : `Lección ${prog.done} de ${info.total}`} tone={prog.complete ? 'green' : 'blue'} />
-            {stale ? <Tag text="Más de 14 días sin juntarse" tone="red" /> : null}
+            <Tag text={prog.complete ? tx('Terminó el curso') : tx('Lección {done} de {total}', { done: prog.done, total: info.total })} tone={prog.complete ? 'green' : 'blue'} />
+            {stale ? <Tag text={tx('Más de 14 días sin juntarse')} tone="red" /> : null}
           </View>
-          {prog.next ? <Text style={line}><Text style={{ fontWeight: '700' }}>Sigue: </Text>{names[prog.next - 1]}</Text> : null}
-          <Text style={line}><Text style={{ fontWeight: '700' }}>Le enseña: </Text>{track.teacher_name ?? 'todavía nadie'}</Text>
+          {prog.next ? <Text style={line}><Text style={{ fontWeight: '700' }}>{tx('Sigue:')} </Text>{names[prog.next - 1]}</Text> : null}
+          <Text style={line}><Text style={{ fontWeight: '700' }}>{tx('Le enseña:')} </Text>{track.teacher_name ?? tx('todavía nadie')}</Text>
           <Text style={[line, stale && { color: colors.redText, fontWeight: '700' }]}>
-            <Text style={{ fontWeight: '700' }}>Última vez que se juntaron: </Text>{track.last_met ? `${agoText(days)} (${showDay(track.last_met)})` : 'todavía no'}
+            <Text style={{ fontWeight: '700' }}>{tx('Última vez que se juntaron:')} </Text>{track.last_met ? `${agoText(days)} (${showDay(track.last_met)})` : tx('todavía no')}
           </Text>
         </View>
       ) : (
         <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
-          {info.track ? 'Dejó el discipulado. Lo que hizo quedó guardado.' : 'Todavía no empezó el discipulado.'}
+          {info.track ? tx('Dejó el discipulado. Lo que hizo quedó guardado.') : tx('Todavía no empezó el discipulado.')}
         </Text>
       )}
       {track ? (
         <View style={{ gap: 8 }}>
-          {info.can_lesson && prog.next ? <Button title="Anotar una lección" icon="check-circle" small onPress={addLesson} loading={busy} /> : null}
+          {info.can_lesson && prog.next ? <Button title={tx('Anotar una lección')} icon="check-circle" small onPress={addLesson} loading={busy} /> : null}
           {info.can ? (
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cambiar quién enseña" variant="outline" small onPress={() => openPicker('change')} style={{ flex: 1 }} />
-              <Button title="Dejar" variant="ghost" small style={{ flex: 0.5 }} onPress={() => Alert.alert('¿Deja el discipulado?', 'Sale de la lista. Las lecciones que hizo quedan guardadas.', [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Sí', onPress: () => { run(() => discActive(c.id, false)); } },
+              <Button title={tx('Cambiar quién enseña')} variant="outline" small onPress={() => openPicker('change')} style={{ flex: 1 }} />
+              <Button title={tx('Dejar')} variant="ghost" small style={{ flex: 0.5 }} onPress={() => Alert.alert(tx('¿Deja el discipulado?'), tx('Sale de la lista. Las lecciones que hizo quedan guardadas.'), [
+                { text: tx('Cancelar'), style: 'cancel' },
+                { text: tx('Sí'), onPress: () => { run(() => discActive(c.id, false)); } },
               ])} />
             </View>
           ) : null}
         </View>
       ) : info.can ? (
-        <Button title="Empezar discipulado" icon="book-open" small onPress={() => openPicker('start')} loading={busy} />
+        <Button title={tx('Empezar discipulado')} icon="book-open" small onPress={() => openPicker('start')} loading={busy} />
       ) : null}
 
       {info.can ? (
         <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <SectionTitle>Decisiones</SectionTitle>
+          <SectionTitle>{tx('Decisiones')}</SectionTitle>
           {info.decisions.map((d) => (
             <Text key={d.id} style={line}>
               <Text style={{ fontWeight: '700' }}>{DECISION_LABEL[d.kind]}</Text> · {showDay(d.on_date)}{d.note ? ` · ${d.note}` : ''}
             </Text>
           ))}
-          <Button title="Anotar una decisión" icon="heart" variant="outline" small onPress={() => router.push({ pathname: '/decisiones', params: { persona: c.id } } as unknown as Href)} />
+          <Button title={tx('Anotar una decisión')} icon="heart" variant="outline" small onPress={() => router.push({ pathname: '/decisiones', params: { persona: c.id } } as unknown as Href)} />
 
           {c.status !== 'member' || info.mclass ? (
             <>
               <View style={{ height: 1, backgroundColor: colors.border }} />
-              <SectionTitle>Clase de miembros</SectionTitle>
+              <SectionTitle>{tx('Clase de miembros')}</SectionTitle>
               {info.mclass ? (
                 <>
-                  <Text style={line}>{info.mclass.final_on ? `Terminó el ${showDay(info.mclass.final_on)}.` : `Hizo ${mDone} de ${mNames.length} lecciones.`}</Text>
-                  <Button title="Ver la clase de miembros" icon="list" variant="outline" small onPress={() => router.push('/clase-miembros' as Href)} />
+                  <Text style={line}>{info.mclass.final_on ? tx('Terminó el {showDay}.', { showDay: showDay(info.mclass.final_on) }) : tx('Hizo {mDone} de {n} lecciones.', { mDone, n: mNames.length })}</Text>
+                  <Button title={tx('Ver la clase de miembros')} icon="list" variant="outline" small onPress={() => router.push('/clase-miembros' as Href)} />
                 </>
               ) : (
-                <Button title="Empezar la clase de miembros" icon="users" variant="outline" small loading={busy}
-                  onPress={() => { run(() => memberClassSet(c.id, null), 'Anotado en la clase de miembros'); }} />
+                <Button title={tx('Empezar la clase de miembros')} icon="users" variant="outline" small loading={busy}
+                  onPress={() => { run(() => memberClassSet(c.id, null), tx('Anotado en la clase de miembros')); }} />
               )}
             </>
           ) : null}
@@ -136,7 +137,7 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
       {c.status === 'visitor' ? (
         <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <SectionTitle>Bienvenida</SectionTitle>
+          <SectionTitle>{tx('Bienvenida')}</SectionTitle>
           <CareButtons id={c.id} care={info.care} onChanged={load} />
         </>
       ) : null}
@@ -144,14 +145,14 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
       {info.staff && ((c.baptized_on && c.baptized_here !== false) || (c.status === 'member' && c.member_since)) ? (
         <>
           <View style={{ height: 1, backgroundColor: colors.border }} />
-          <SectionTitle>Certificados para imprimir</SectionTitle>
+          <SectionTitle>{tx('Certificados para imprimir')}</SectionTitle>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {c.baptized_on && c.baptized_here !== false ? (
-              <Button title="De bautismo" icon="printer" variant="outline" small style={{ flex: 1 }}
+              <Button title={tx('De bautismo')} icon="printer" variant="outline" small style={{ flex: 1 }}
                 onPress={() => router.push({ pathname: '/certificado/imprimir', params: { id: c.id, tipo: 'bautismo' } } as unknown as Href)} />
             ) : null}
             {c.status === 'member' && c.member_since ? (
-              <Button title="De miembro" icon="printer" variant="outline" small style={{ flex: 1 }}
+              <Button title={tx('De miembro')} icon="printer" variant="outline" small style={{ flex: 1 }}
                 onPress={() => router.push({ pathname: '/certificado/imprimir', params: { id: c.id, tipo: 'miembro' } } as unknown as Href)} />
             ) : null}
           </View>
@@ -160,15 +161,15 @@ export function PersonasPanel({ c, onChanged }: { c: Person; onChanged?: () => v
 
       <PickerModal
         visible={picker !== null}
-        title="¿Quién le enseña?"
+        title={tx('¿Quién le enseña?')}
         items={teachers.map((t) => ({ id: t.id, title: t.name, photo: t.photo_path }))}
         allowNone
-        noneLabel={picker === 'start' ? 'Todavía no sé quién' : 'Nadie por ahora'}
+        noneLabel={picker === 'start' ? tx('Todavía no sé quién') : tx('Nadie por ahora')}
         onClose={() => setPicker(null)}
         onPick={(tid) => {
           const which = picker;
           setPicker(null);
-          if (which === 'start') run(() => discStart(c.id, tid), 'Empezó el discipulado');
+          if (which === 'start') run(() => discStart(c.id, tid), tx('Empezó el discipulado'));
           else run(() => discTeacher(c.id, tid));
         }}
       />

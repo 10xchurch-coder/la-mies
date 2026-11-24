@@ -10,9 +10,10 @@ import { fmtDateShort, fmtMoney, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { FinCategory, FinEntry, FinFund } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 export const monthTitle = (ym: string) => {
-  const s = new Date(`${ym}-15T12:00:00`).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  const s = new Date(`${ym}-15T12:00:00`).toLocaleDateString(txLocale(), { month: 'long', year: 'numeric' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 const shift = (ym: string, n: number) => {
@@ -51,7 +52,7 @@ export default function Movimientos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={fund ? `Fondo ${fname(fund)}` : 'Movimientos'} subtitle={monthTitle(ym)} back />
+      <Header title={fund ? tx('Fondo {fname}', { fname: fname(fund) }) : tx('Movimientos')} subtitle={monthTitle(ym)} back />
       <Screen>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Button title="" icon="chevron-left" variant="outline" small onPress={() => setYm(shift(ym, -1))} />
@@ -59,7 +60,7 @@ export default function Movimientos() {
           <Button title="" icon="chevron-right" variant="outline" small onPress={() => setYm(shift(ym, 1))} disabled={ym >= isoDate(new Date()).slice(0, 7)} />
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-          {[{ id: null as string | null, name: 'Todos' }, ...funds].map((f) => (
+          {[{ id: null as string | null, name: tx('Todos') }, ...funds].map((f) => (
             <Pressable key={f.id ?? 'all'} onPress={() => setFund(f.id)} accessibilityRole="button"
               style={{ height: 34, paddingHorizontal: 12, borderRadius: 17, justifyContent: 'center', backgroundColor: fund === f.id ? colors.green : colors.bgSoft }}>
               <Text style={{ fontSize: 13, fontWeight: '700', color: fund === f.id ? '#FFF' : colors.text }}>{f.name}</Text>
@@ -67,16 +68,16 @@ export default function Movimientos() {
           ))}
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Card style={{ flex: 1, padding: 12, gap: 2 }}><Text style={{ fontSize: 12, color: colors.muted }}>Entró</Text><Text style={{ fontSize: 18, fontWeight: '800', color: colors.greenText }}>{fmtMoney(inSum)}</Text></Card>
-          <Card style={{ flex: 1, padding: 12, gap: 2 }}><Text style={{ fontSize: 12, color: colors.muted }}>Salió</Text><Text style={{ fontSize: 18, fontWeight: '800', color: colors.red }}>{fmtMoney(outSum)}</Text></Card>
+          <Card style={{ flex: 1, padding: 12, gap: 2 }}><Text style={{ fontSize: 12, color: colors.muted }}>{tx('Entró##plata')}</Text><Text style={{ fontSize: 18, fontWeight: '800', color: colors.greenText }}>{fmtMoney(inSum)}</Text></Card>
+          <Card style={{ flex: 1, padding: 12, gap: 2 }}><Text style={{ fontSize: 12, color: colors.muted }}>{tx('Salió##plata')}</Text><Text style={{ fontSize: 18, fontWeight: '800', color: colors.red }}>{fmtMoney(outSum)}</Text></Card>
         </View>
-        {financeLevel >= 2 ? <Button title="Cargar movimiento" icon="plus" onPress={() => router.push(`/finanzas/movimiento?kind=income${fund ? `&fund=${fund}` : ''}` as Href)} /> : null}
+        {financeLevel >= 2 ? <Button title={tx('Cargar movimiento')} icon="plus" onPress={() => router.push(`/finanzas/movimiento?kind=income${fund ? `&fund=${fund}` : ''}` as Href)} /> : null}
 
-        {rows === null ? <Loading /> : !shown.length ? <Empty icon="inbox" title="No hay movimientos este mes" /> : null}
+        {rows === null ? <Loading /> : !shown.length ? <Empty icon="inbox" title={tx('No hay movimientos este mes')} /> : null}
         {shown.map((e) => {
           const s = sign(e);
           const cat = cats.find((c) => c.id === e.category_id)?.name;
-          const title = e.kind === 'transfer' ? (e.to_fund_id === e.fund_id ? `Banco ↔ caja · ${fname(e.fund_id)}` : `Pase ${fname(e.fund_id)} → ${fname(e.to_fund_id)}`) : cat ?? (e.kind === 'income' ? 'Ingreso' : 'Gasto');
+          const title = e.kind === 'transfer' ? (e.to_fund_id === e.fund_id ? tx('Banco ↔ caja · {fname}', { fname: fname(e.fund_id) }) : tx('Pase {fname} → {fname2}', { fname: fname(e.fund_id), fname2: fname(e.to_fund_id) })) : cat ?? (e.kind === 'income' ? tx('Ingreso') : tx('Gasto'));
           return (
             <Pressable key={e.id} onPress={() => router.push(`/finanzas/${e.id}` as Href)} accessibilityRole="button">
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, opacity: e.voided_at ? 0.5 : 1 }}>
@@ -86,7 +87,7 @@ export default function Movimientos() {
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text, textDecorationLine: e.voided_at ? 'line-through' : 'none' }}>{title}</Text>
                   <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>
-                    {fmtDateShort(e.on_date)}{!fund && e.kind !== 'transfer' ? ` · ${fname(e.fund_id)}` : ''}{e.counterpart ? ` · ${e.counterpart}` : ''}{e.description ? ` · ${e.description}` : ''}{e.voided_at ? ' · ANULADO' : ''}
+                    {fmtDateShort(e.on_date)}{!fund && e.kind !== 'transfer' ? ` · ${fname(e.fund_id)}` : ''}{e.counterpart ? ` · ${e.counterpart}` : ''}{e.description ? ` · ${e.description}` : ''}{e.voided_at ? tx(' · ANULADO') : ''}
                   </Text>
                 </View>
                 <Text style={{ fontSize: 15, fontWeight: '800', color: s > 0 ? colors.greenText : s < 0 ? colors.red : colors.text }}>
@@ -96,7 +97,7 @@ export default function Movimientos() {
             </Pressable>
           );
         })}
-        {voided ? <Button title={showVoid ? 'Ocultar anulados' : `Ver anulados (${voided})`} variant="ghost" small onPress={() => setShowVoid((v) => !v)} /> : null}
+        {voided ? <Button title={showVoid ? tx('Ocultar anulados') : tx('Ver anulados ({voided})', { voided })} variant="ghost" small onPress={() => setShowVoid((v) => !v)} /> : null}
       </Screen>
     </View>
   );

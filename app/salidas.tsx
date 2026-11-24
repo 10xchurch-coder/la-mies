@@ -11,6 +11,7 @@ import { KIND_LABEL, fmtDayYear, fmtDistance, fmtMinutes, fmtTime } from '@/lib/
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { OutingRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Salidas() {
   const router = useRouter();
@@ -40,12 +41,12 @@ export default function Salidas() {
               {scope === 'all' ? `${r.display_name} · ` : ''}{fmtDayYear(r.started_at)} {fmtTime(r.started_at)}{r.ended_at ? `–${fmtTime(r.ended_at)}` : ''}
             </Text>
             <Text style={{ fontSize: 12, color: colors.muted }}>
-              {KIND_LABEL[r.kind]} · {fmtMinutes(mins)} · {fmtDistance(r.distance_m ?? 0)} · {r.contacts} contactos · {r.presentations} evangelio · {r.promises} promesas
+              {tx('{KIND_LABEL} · {fmtMinutes} · {fmtDistance} · {contacts} contactos · {presentations} evangelio · {promises} promesas', { KIND_LABEL: KIND_LABEL[r.kind], fmtMinutes: fmtMinutes(mins), fmtDistance: fmtDistance(r.distance_m ?? 0), contacts: r.contacts, presentations: r.presentations, promises: r.promises })}
             </Text>
-            {r.ended_at && r.counts === false ? <Text style={{ fontSize: 12, color: colors.muted }}>Muy corta: no suma a los números. Si fue una prueba, tocala y borrala.</Text> : null}
-            {!r.ended_at && r.last_point ? <Text style={{ fontSize: 12, color: colors.red }}>Último punto: {fmtTime(r.last_point)}</Text> : null}
+            {r.ended_at && r.counts === false ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Muy corta: no suma a los números. Si fue una prueba, tocala y borrala.')}</Text> : null}
+            {!r.ended_at && r.last_point ? <Text style={{ fontSize: 12, color: colors.red }}>{tx('Último punto: {fmtTime}', { fmtTime: fmtTime(r.last_point) })}</Text> : null}
           </View>
-          {r.ended_at && r.counts === false ? <Tag text="No cuenta" tone="gray" /> : r.trimmed_at ? <Tag text="Corregida" tone="gray" /> : r.auto_stopped ? <Tag text="Cortada sola" tone="amber" /> : null}
+          {r.ended_at && r.counts === false ? <Tag text={tx('No cuenta')} tone="gray" /> : r.trimmed_at ? <Tag text={tx('Corregida')} tone="gray" /> : r.auto_stopped ? <Tag text={tx('Cortada sola')} tone="amber" /> : null}
           <Feather name="chevron-right" size={18} color={colors.muted} />
         </Card>
       </Pressable>
@@ -54,20 +55,20 @@ export default function Salidas() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={scope === 'all' ? 'Salidas de todos' : 'Mis salidas'} subtitle="Tocá una para arreglarla" back />
+      <Header title={scope === 'all' ? tx('Salidas de todos') : tx('Mis salidas')} subtitle={tx('Tocá una para arreglarla')} back />
       <Screen>
-        {isStaff ? <Segmented options={[{ value: 'mine', label: 'Mías' }, { value: 'all', label: 'De todos' }]} value={scope} onChange={setScope} /> : null}
+        {isStaff ? <Segmented options={[{ value: 'mine', label: tx('Mías') }, { value: 'all', label: tx('De todos') }]} value={scope} onChange={setScope} /> : null}
         {rows === null ? <Loading /> : null}
         {open.length ? (
           <>
-            <SectionTitle>En curso</SectionTitle>
+            <SectionTitle>{tx('En curso')}</SectionTitle>
             {open.map((r) => <Row key={r.id} r={r} />)}
           </>
         ) : null}
-        {rows && !rows.length ? <Empty icon="map" title="Todavía no hay salidas" /> : null}
+        {rows && !rows.length ? <Empty icon="map" title={tx('Todavía no hay salidas')} /> : null}
         {done.length ? (
           <>
-            <SectionTitle>Terminadas</SectionTitle>
+            <SectionTitle>{tx('Terminadas')}</SectionTitle>
             {done.map((r) => <Row key={r.id} r={r} />)}
           </>
         ) : null}

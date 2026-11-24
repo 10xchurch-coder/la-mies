@@ -13,6 +13,7 @@ import { fmtMoney, youtubeId } from '@/lib/format';
 import { phoneProblem } from '@/lib/phone';
 import { errorMessage } from '@/lib/supabase';
 import { showCode, ticketPayload } from '@/lib/ticket';
+import { tx, txLocale } from '@/lib/i18n';
 
 // Colores propios y fijos (claros): la página la ve gente de afuera, con o sin modo oscuro.
 const C = { bg: '#F6F7F5', card: '#FFFFFF', text: '#17201A', muted: '#5F6B63', line: '#E3E7E2', green: '#1F6B45', greenSoft: '#E3F1E8', violet: '#6D4BC3', violetSoft: '#E9E2F8', amber: '#B26A00', amberSoft: '#FCEFD6', blue: '#2563A8', blueSoft: '#E1ECF8', red: '#B3261E' };
@@ -46,8 +47,8 @@ export default function EventoPublico() {
   if (!data) return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 30, backgroundColor: C.bg }}>
       <Feather name="calendar" size={40} color={C.muted} />
-      <Text style={{ fontSize: 19, fontWeight: '800', color: C.text, textAlign: 'center' }}>Este evento no está disponible</Text>
-      <Text style={{ fontSize: 15, color: C.muted, textAlign: 'center' }}>Puede que el enlace esté mal copiado o que la iglesia lo haya cerrado.</Text>
+      <Text style={{ fontSize: 19, fontWeight: '800', color: C.text, textAlign: 'center' }}>{tx('Este evento no está disponible')}</Text>
+      <Text style={{ fontSize: 15, color: C.muted, textAlign: 'center' }}>{tx('Puede que el enlace esté mal copiado o que la iglesia lo haya cerrado.')}</Text>
     </View>
   );
 
@@ -55,7 +56,7 @@ export default function EventoPublico() {
   // Solo se abre un enlace de pago que empiece con https:// (la base también lo exige).
   const payUrl = ticket?.pay_url && /^https:\/\/\S+$/i.test(ticket.pay_url) ? ticket.pay_url : null;
   const tz = church.tz;
-  const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('es-AR', { timeZone: tz, ...o }).format(new Date(iso));
+  const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(txLocale(), { timeZone: tz, ...o }).format(new Date(iso));
   const dayLong = (iso: string) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const hour = (iso: string) => fmt(iso, { hour: '2-digit', minute: '2-digit', hour12: false });
   const sameDay = e.ends_at ? dayLong(e.starts_at) === dayLong(e.ends_at) : true;
@@ -66,10 +67,10 @@ export default function EventoPublico() {
 
   const submit = async () => {
     setErr(null);
-    if (form.name.trim().length < 2) return setErr('Escribí tu nombre y apellido.');
+    if (form.name.trim().length < 2) return setErr(tx('Escribí tu nombre y apellido.'));
     const bad = phoneProblem(form.phone, true);
     if (bad) return setErr(bad);
-    if (types.length && !form.type) return setErr('Elegí el tipo de entrada.');
+    if (types.length && !form.type) return setErr(tx('Elegí el tipo de entrada.'));
     setBusy(true);
     try {
       const r = await publicRegister(slug, { name: form.name.trim(), phone: form.phone, email: form.email.trim(), people: form.people, type: form.type });
@@ -119,7 +120,7 @@ export default function EventoPublico() {
       <View style={{ width: '100%', maxWidth: 680, padding: 16, gap: 14 }}>
         {updates.length ? (
           <Box tone={C.amberSoft}>
-            <H icon="bell">Avisos</H>
+            <H icon="bell">{tx('Avisos')}</H>
             {updates.slice(0, 3).map((u, i) => (
               <View key={i} style={{ gap: 2 }}>
                 <Text style={{ fontSize: 15, lineHeight: 21, color: C.text }}>{u.body}</Text>
@@ -131,7 +132,7 @@ export default function EventoPublico() {
 
         {ticket ? (
           <Box>
-            <H icon="tag">Tu entrada</H>
+            <H icon="tag">{tx('Tu entrada')}</H>
             <View style={{ alignItems: 'center', gap: 10 }}>
               <View style={{ padding: 12, backgroundColor: '#FFF', borderRadius: 14, borderWidth: 1, borderColor: C.line }}>
                 <QRCode value={ticketPayload(ticket.code)} size={200} backgroundColor="#FFF" color="#000" />
@@ -139,11 +140,11 @@ export default function EventoPublico() {
               <Text style={{ fontSize: 24, fontWeight: '900', letterSpacing: 3, color: C.text }}>{showCode(ticket.code)}</Text>
               <Text style={{ fontSize: 17, fontWeight: '800', color: C.text }}>{ticket.name}{ticket.people > 1 ? ` (+${ticket.people - 1})` : ''}</Text>
               {ticket.type ? <Text style={{ fontSize: 14, fontWeight: '700', color: C.violet }}>{ticket.type}</Text> : null}
-              <Text style={{ fontSize: 14, fontWeight: '800', color: ticket.checked_in ? C.green : C.blue }}>{ticket.checked_in ? 'Ya entraste' : 'Mostrá este código en la puerta'}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: ticket.checked_in ? C.green : C.blue }}>{ticket.checked_in ? tx('Ya entraste') : tx('Mostrá este código en la puerta')}</Text>
             </View>
             {Number(ticket.to_pay) > 0 ? (
               <View style={{ padding: 12, borderRadius: 12, backgroundColor: ticket.paid ? C.greenSoft : C.amberSoft, gap: 4 }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{ticket.paid ? 'Entrada paga ✓' : `Falta pagar ${fmtMoney(Math.max(Number(ticket.to_pay) - Number(ticket.paid_amount), 0))}`}</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{ticket.paid ? tx('Entrada paga ✓') : tx('Falta pagar {fmtMoney}', { fmtMoney: fmtMoney(Math.max(Number(ticket.to_pay) - Number(ticket.paid_amount), 0)) })}</Text>
                 {!ticket.paid && e.pay_info ? <Text selectable style={{ fontSize: 14, lineHeight: 20, color: C.text }}>{e.pay_info}</Text> : null}
                 {/* Botón "Pagar": abre el enlace de pago que pegó la iglesia (por ejemplo, de Mercado Pago). La app no cobra.
                     El pago lo confirma una persona del equipo con "Marcar que pagó".
@@ -152,21 +153,21 @@ export default function EventoPublico() {
                     y el aviso de pago (webhook) marca la entrada como paga sola. Ver la nota en supabase/migrations/0076. */}
                 {!ticket.paid && payUrl ? (
                   <>
-                    <Pressable onPress={() => Linking.openURL(payUrl)} accessibilityRole="link" accessibilityLabel="Pagar la entrada"
+                    <Pressable onPress={() => Linking.openURL(payUrl)} accessibilityRole="link" accessibilityLabel={tx('Pagar la entrada')}
                       style={{ height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green, marginTop: 6 }}>
-                      <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>Pagar</Text>
+                      <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>{tx('Pagar')}</Text>
                     </Pressable>
-                    <Text style={{ fontSize: 13, lineHeight: 18, color: C.text }}>Se abre la página de pago. Cuando la iglesia vea tu pago, acá va a decir “Entrada paga”. Puede tardar un rato. Guardá el comprobante.</Text>
+                    <Text style={{ fontSize: 13, lineHeight: 18, color: C.text }}>{tx('Se abre la página de pago. Cuando la iglesia vea tu pago, acá va a decir “Entrada paga”. Puede tardar un rato. Guardá el comprobante.')}</Text>
                   </>
                 ) : null}
               </View>
             ) : null}
-            <Text style={{ fontSize: 13, color: C.muted, textAlign: 'center' }}>Guardá esta página o sacale una captura. Con este mismo enlace volvés a ver tu entrada.</Text>
+            <Text style={{ fontSize: 13, color: C.muted, textAlign: 'center' }}>{tx('Guardá esta página o sacale una captura. Con este mismo enlace volvés a ver tu entrada.')}</Text>
           </Box>
         ) : e.registration ? (
           <Box>
-            <H icon="edit-3">Inscribite</H>
-            {soldOut ? <P>Ya no quedan lugares.</P> : (
+            <H icon="edit-3">{tx('Inscribite')}</H>
+            {soldOut ? <P>{tx('Ya no quedan lugares.')}</P> : (
               <>
                 {types.length ? (
                   <View style={{ gap: 8 }}>
@@ -179,37 +180,37 @@ export default function EventoPublico() {
                           <View style={{ flex: 1 }}>
                             <Text style={{ fontSize: 16, fontWeight: '800', color: C.text }}>{x.name}</Text>
                             {x.description ? <Text style={{ fontSize: 13, color: C.muted }}>{x.description}</Text> : null}
-                            {out ? <Text style={{ fontSize: 12, fontWeight: '700', color: C.red }}>Agotada</Text> : x.left !== null && x.left <= 20 ? <Text style={{ fontSize: 12, fontWeight: '700', color: C.amber }}>Quedan {x.left}</Text> : null}
+                            {out ? <Text style={{ fontSize: 12, fontWeight: '700', color: C.red }}>{tx('Agotada')}</Text> : x.left !== null && x.left <= 20 ? <Text style={{ fontSize: 12, fontWeight: '700', color: C.amber }}>{tx('Quedan {left}', { left: x.left })}</Text> : null}
                           </View>
-                          <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{Number(x.price) > 0 ? fmtMoney(x.price) : 'Gratis'}</Text>
+                          <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{Number(x.price) > 0 ? fmtMoney(x.price) : tx('Gratis')}</Text>
                         </Pressable>
                       );
                     })}
                   </View>
-                ) : e.left !== null && e.left <= 20 ? <Text style={{ fontSize: 13, fontWeight: '700', color: C.amber }}>Quedan {e.left} lugares</Text> : null}
+                ) : e.left !== null && e.left <= 20 ? <Text style={{ fontSize: 13, fontWeight: '700', color: C.amber }}>{tx('Quedan {left} lugares', { left: e.left })}</Text> : null}
                 <View style={{ gap: 6 }}>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: C.muted }}>Nombre y apellido</Text>
-                  <TextInput value={form.name} onChangeText={(name) => setForm({ ...form, name })} autoComplete="name" maxLength={120} accessibilityLabel="Nombre y apellido"
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: C.muted }}>{tx('Nombre y apellido')}</Text>
+                  <TextInput value={form.name} onChangeText={(name) => setForm({ ...form, name })} autoComplete="name" maxLength={120} accessibilityLabel={tx('Nombre y apellido')}
                     style={{ height: 50, borderRadius: 12, borderWidth: 1.5, borderColor: C.line, paddingHorizontal: 14, fontSize: 16, color: C.text, backgroundColor: C.card }} />
                 </View>
-                <PhoneField label="Celular" value={form.phone} onChangeText={(phone) => setForm({ ...form, phone })} required />
+                <PhoneField label={tx('Celular')} value={form.phone} onChangeText={(phone) => setForm({ ...form, phone })} required />
                 <View style={{ gap: 6 }}>
-                  <Text style={{ fontSize: 13, fontWeight: '700', color: C.muted }}>Correo <Text style={{ fontWeight: '500' }}>(opcional)</Text></Text>
-                  <TextInput value={form.email} onChangeText={(email) => setForm({ ...form, email })} autoCapitalize="none" keyboardType="email-address" autoComplete="email" maxLength={200} accessibilityLabel="Correo"
+                  <Text style={{ fontSize: 13, fontWeight: '700', color: C.muted }}>{tx('Correo')} <Text style={{ fontWeight: '500' }}>{tx('(opcional)')}</Text></Text>
+                  <TextInput value={form.email} onChangeText={(email) => setForm({ ...form, email })} autoCapitalize="none" keyboardType="email-address" autoComplete="email" maxLength={200} accessibilityLabel={tx('Correo')}
                     style={{ height: 50, borderRadius: 12, borderWidth: 1.5, borderColor: C.line, paddingHorizontal: 14, fontSize: 16, color: C.text, backgroundColor: C.card }} />
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                  <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: C.text }}>¿Cuántos van?</Text>
-                  <Pressable onPress={() => setForm({ ...form, people: Math.max(1, form.people - 1) })} accessibilityRole="button" accessibilityLabel="Uno menos" style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><Feather name="minus" size={20} color={C.text} /></Pressable>
+                  <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: C.text }}>{tx('¿Cuántos van?')}</Text>
+                  <Pressable onPress={() => setForm({ ...form, people: Math.max(1, form.people - 1) })} accessibilityRole="button" accessibilityLabel={tx('Uno menos')} style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><Feather name="minus" size={20} color={C.text} /></Pressable>
                   <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, minWidth: 24, textAlign: 'center' }}>{form.people}</Text>
-                  <Pressable onPress={() => setForm({ ...form, people: Math.min(10, form.people + 1) })} accessibilityRole="button" accessibilityLabel="Uno más" style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><Feather name="plus" size={20} color={C.text} /></Pressable>
+                  <Pressable onPress={() => setForm({ ...form, people: Math.min(10, form.people + 1) })} accessibilityRole="button" accessibilityLabel={tx('Uno más')} style={{ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><Feather name="plus" size={20} color={C.text} /></Pressable>
                 </View>
-                {unit > 0 ? <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>Total: {fmtMoney(unit * form.people)}</Text> : null}
+                {unit > 0 ? <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{tx('Total: {fmtMoney}', { fmtMoney: fmtMoney(unit * form.people) })}</Text> : null}
                 {err ? <Text accessibilityRole="alert" style={{ fontSize: 14, fontWeight: '700', color: C.red }}>{err}</Text> : null}
                 <Pressable onPress={submit} disabled={busy} accessibilityRole="button" style={{ height: 54, borderRadius: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green, opacity: busy ? 0.6 : 1 }}>
-                  {busy ? <ActivityIndicator color="#FFF" /> : <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>Inscribirme</Text>}
+                  {busy ? <ActivityIndicator color="#FFF" /> : <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>{tx('Inscribirme')}</Text>}
                 </Pressable>
-                <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center' }}>Tu nombre y tu celular los ven solo los organizadores del evento.</Text>
+                <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center' }}>{tx('Tu nombre y tu celular los ven solo los organizadores del evento.')}</Text>
               </>
             )}
           </Box>
@@ -217,18 +218,18 @@ export default function EventoPublico() {
 
         {e.has_stream || e.has_recordings ? (
           <Box>
-            <H icon="video">En vivo y grabaciones</H>
+            <H icon="video">{tx('En vivo y grabaciones')}</H>
             {!stream ? (
-              <P>{e.stream_access === 'paid' ? 'Lo ven quienes tienen su entrada paga, entrando con el enlace de su entrada.' : 'Lo ven quienes se inscribieron, entrando con el enlace de su entrada.'}</P>
+              <P>{e.stream_access === 'paid' ? tx('Lo ven quienes tienen su entrada paga, entrando con el enlace de su entrada.') : tx('Lo ven quienes se inscribieron, entrando con el enlace de su entrada.')}</P>
             ) : (
               <>
                 {stream.url ? (Platform.OS === 'web' && yt ? (
                   <View style={{ width: '100%', aspectRatio: 16 / 9, borderRadius: 12, overflow: 'hidden', backgroundColor: '#000' }}>
-                    {React.createElement('iframe', { src: `https://www.youtube.com/embed/${yt}`, title: 'Transmisión en vivo', allow: 'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen', allowFullScreen: true, style: { width: '100%', height: '100%', border: 0 } })}
+                    {React.createElement('iframe', { src: `https://www.youtube.com/embed/${yt}`, title: tx('Transmisión en vivo'), allow: 'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen', allowFullScreen: true, style: { width: '100%', height: '100%', border: 0 } })}
                   </View>
                 ) : (
                   <Pressable onPress={() => Linking.openURL(stream.url as string)} accessibilityRole="link" style={{ height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: C.violet }}>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: '#FFF' }}>Ver la transmisión</Text>
+                    <Text style={{ fontSize: 16, fontWeight: '800', color: '#FFF' }}>{tx('Ver la transmisión')}</Text>
                   </Pressable>
                 )) : null}
                 {stream.recordings.map((r, i) => (
@@ -245,17 +246,17 @@ export default function EventoPublico() {
 
         {e.description || e.cost || e.bring || e.transport ? (
           <Box>
-            <H icon="info">Sobre el evento</H>
+            <H icon="info">{tx('Sobre el evento')}</H>
             {e.description ? <P>{e.description}</P> : null}
-            <Info icon="dollar-sign" label="Costo" text={e.cost} />
-            <Info icon="briefcase" label="Qué llevar" text={e.bring} />
-            <Info icon="truck" label="Cómo llegar" text={e.transport} />
+            <Info icon="dollar-sign" label={tx('Costo')} text={e.cost} />
+            <Info icon="briefcase" label={tx('Qué llevar')} text={e.bring} />
+            <Info icon="truck" label={tx('Cómo llegar')} text={e.transport} />
           </Box>
         ) : null}
 
         {sessions.length ? (
           <Box>
-            <H icon="clock">Programa</H>
+            <H icon="clock">{tx('Programa')}</H>
             {sessions.map((x) => {
               const d = dayLong(x.starts_at);
               const head = d !== lastDay && (lastDay !== '' || !sameDay || sessions.some((y) => dayLong(y.starts_at) !== d));
@@ -280,11 +281,11 @@ export default function EventoPublico() {
               );
             })}
           </Box>
-        ) : e.program ? <Box><H icon="clock">Programa</H><P>{e.program}</P></Box> : null}
+        ) : e.program ? <Box><H icon="clock">{tx('Programa')}</H><P>{e.program}</P></Box> : null}
 
         {speakers.length ? (
           <Box>
-            <H icon="mic">Oradores</H>
+            <H icon="mic">{tx('Oradores')}</H>
             {speakers.map((p) => (
               <View key={p.id} style={{ flexDirection: 'row', gap: 12 }}>
                 <View style={{ width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: C.violetSoft }}>
@@ -300,21 +301,21 @@ export default function EventoPublico() {
           </Box>
         ) : null}
 
-        {e.faq ? <Box><H icon="help-circle">Preguntas frecuentes</H><P>{e.faq}</P></Box> : null}
+        {e.faq ? <Box><H icon="help-circle">{tx('Preguntas frecuentes')}</H><P>{e.faq}</P></Box> : null}
 
         {e.contact_name || e.contact_phone ? (
           <Box>
-            <H icon="phone">¿Dudas?</H>
+            <H icon="phone">{tx('¿Dudas?')}</H>
             <P>{[e.contact_name, e.contact_phone].filter(Boolean).join(' · ')}</P>
             {e.contact_phone ? (
               <Pressable onPress={() => Linking.openURL(`https://wa.me/${e.contact_phone?.replace(/\D/g, '')}`)} accessibilityRole="link" style={{ height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: C.greenSoft }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: C.green }}>Escribir por WhatsApp</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: C.green }}>{tx('Escribir por WhatsApp')}</Text>
               </Pressable>
             ) : null}
           </Box>
         ) : null}
 
-        <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', marginTop: 6 }}>{church.name} · hecho con La Mies</Text>
+        <Text style={{ fontSize: 12, color: C.muted, textAlign: 'center', marginTop: 6 }}>{tx('{name} · hecho con La Mies', { name: church.name })}</Text>
       </View>
     </ScrollView>
   );

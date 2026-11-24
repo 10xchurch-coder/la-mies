@@ -2,11 +2,12 @@
 // De cada persona se guarda qué clases completó y cuándo; completar cada parte es un logro.
 // No importa nada de la app para poder probarse sola.
 
+import { tx } from './i18n';
 export type DiscPart = 'one' | 'course';
 /** Por parte, el número de clase (desde 1) y la fecha en que la completó. */
 export type Discipleship = Partial<Record<DiscPart, Record<string, string>>>;
 
-export const PART_TITLE: Record<DiscPart, string> = { one: 'Discipulado personal', course: 'Curso de discipulado' };
+export const PART_TITLE: Record<DiscPart, string> = { get one() { return tx('Discipulado personal'); }, get course() { return tx('Curso de discipulado'); } };
 
 /** Marca o desmarca una clase. Devuelve un objeto nuevo. */
 export function toggleClass(d: Discipleship | null | undefined, part: DiscPart, n: number, today: string): Discipleship {

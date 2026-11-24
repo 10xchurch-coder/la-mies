@@ -19,6 +19,7 @@ import { useAuth } from '@/store/auth';
 import { useOuting } from '@/store/outing';
 import { colors, themed } from '@/theme';
 import type { OutingRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Mode = 'end' | 'range';
 
@@ -116,10 +117,10 @@ export default function Recortar() {
     setBusy(true);
     try {
       await fn();
-      Alert.alert('Listo', done);
+      Alert.alert(tx('Listo'), done);
       router.back();
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -128,15 +129,15 @@ export default function Recortar() {
   const confirmEnd = () => {
     if (a == null || !session) return;
     const t = pts[a].t;
-    Alert.alert('¿Cortar acá?', `Todo lo que pasó después de las ${fmtTime(t)} se borra del mapa y la salida queda terminada a esa hora. Las casas marcadas no se tocan.`, [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('¿Cortar acá?'), tx('Todo lo que pasó después de las {fmtTime} se borra del mapa y la salida queda terminada a esa hora. Las casas marcadas no se tocan.', { fmtTime: fmtTime(t) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Sí, cortar',
+        text: tx('Sí, cortar'),
         style: 'destructive',
         onPress: () => run(async () => {
           if (isActiveHere) await outing.trim(t);
           else await finishOuting(session, new Date(t));
-        }, `La salida quedó terminada a las ${fmtTime(t)}.`),
+        }, tx('La salida quedó terminada a las {fmtTime}.', { fmtTime: fmtTime(t) })),
       },
     ]);
   };
@@ -145,32 +146,32 @@ export default function Recortar() {
     if (!removedIdx || !session) return;
     const from = pts[removedIdx[0]].t;
     const to = pts[removedIdx[1]].t;
-    Alert.alert('¿Quitar este tramo?', `Se borra lo recorrido entre las ${fmtTime(from)} y las ${fmtTime(to)}. Lo de antes y lo de después queda.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sí, quitar', style: 'destructive', onPress: () => run(() => cutOutingRange(session, new Date(from), new Date(to)), 'Se quitó el tramo.') },
+    Alert.alert(tx('¿Quitar este tramo?'), tx('Se borra lo recorrido entre las {fmtTime} y las {fmtTime2}. Lo de antes y lo de después queda.', { fmtTime: fmtTime(from), fmtTime2: fmtTime(to) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Sí, quitar'), style: 'destructive', onPress: () => run(() => cutOutingRange(session, new Date(from), new Date(to)), tx('Se quitó el tramo.')) },
     ]);
   };
 
   const confirmFinishNow = () => {
     if (!session) return;
-    Alert.alert('Terminar la salida', `Se termina en el último punto que mandó el teléfono${info?.last_point ? ` (${fmtTime(info.last_point)})` : ''}.${mine ? '' : ` Le llega un aviso a ${info?.display_name ?? 'la persona'}.`}`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Terminar', style: 'destructive', onPress: () => run(() => (isActiveHere ? outing.stop().then(() => undefined) : finishOuting(session, null)), 'La salida quedó terminada.') },
+    Alert.alert(tx('Terminar la salida'), tx('Se termina en el último punto que mandó el teléfono{v1}.{v2}', { v1: info?.last_point ? ` (${fmtTime(info.last_point)})` : '', v2: mine ? '' : tx(' Le llega un aviso a {display_name}.', { display_name: info?.display_name ?? tx('la persona') }) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Terminar'), style: 'destructive', onPress: () => run(() => (isActiveHere ? outing.stop().then(() => undefined) : finishOuting(session, null)), tx('La salida quedó terminada.')) },
     ]);
   };
 
   const confirmDelete = () => {
     if (!session) return;
-    Alert.alert('Borrar la salida entera', 'Se borra el recorrido y las veredas que marcó. Las casas y contactos que se cargaron quedan. No se puede deshacer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => run(() => deleteOuting(session), 'La salida se borró.') },
+    Alert.alert(tx('Borrar la salida entera'), tx('Se borra el recorrido y las veredas que marcó. Las casas y contactos que se cargaron quedan. No se puede deshacer.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: () => run(() => deleteOuting(session), tx('La salida se borró.')) },
     ]);
   };
 
   if (points === null) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Arreglar la salida" back />
+        <Header title={tx('Arreglar la salida')} back />
         <Loading />
       </View>
     );
@@ -182,9 +183,9 @@ export default function Recortar() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
-        title="Arreglar la salida"
+        title={tx('Arreglar la salida')}
         back
-        subtitle={info ? `${mine ? 'Tu salida' : info.display_name} · ${fmtDayYear(info.started_at)} ${fmtTime(info.started_at)}${info.ended_at ? ` a ${fmtTime(info.ended_at)}` : ' · en curso'}` : undefined}
+        subtitle={info ? `${mine ? tx('Tu salida') : info.display_name} · ${fmtDayYear(info.started_at)} ${fmtTime(info.started_at)}${info.ended_at ? ` a ${fmtTime(info.ended_at)}` : tx(' · en curso')}` : undefined}
       />
       <View style={{ height: 280 }}>
         {pts.length && center ? (
@@ -206,7 +207,7 @@ export default function Recortar() {
           </MapView>
         ) : (
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.mapBg }}>
-            <Text style={{ color: colors.muted }}>Esta salida no tiene recorrido guardado</Text>
+            <Text style={{ color: colors.muted }}>{tx('Esta salida no tiene recorrido guardado')}</Text>
           </View>
         )}
       </View>
@@ -214,7 +215,7 @@ export default function Recortar() {
         {pts.length ? (
           <>
             <Segmented
-              options={[{ value: 'end', label: 'Cortar el final' }, { value: 'range', label: 'Quitar un tramo' }]}
+              options={[{ value: 'end', label: tx('Cortar el final') }, { value: 'range', label: tx('Quitar un tramo') }]}
               value={mode}
               onChange={(m) => {
                 setMode(m);
@@ -224,24 +225,24 @@ export default function Recortar() {
             />
             <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
               {mode === 'end'
-                ? 'Tocá en el mapa (o en la lista) el punto donde terminaste de verdad. Lo verde queda; lo rojo se borra.'
+                ? tx('Tocá en el mapa (o en la lista) el punto donde terminaste de verdad. Lo verde queda; lo rojo se borra.')
                 : a == null
-                  ? 'Tocá dónde EMPIEZA lo que hay que quitar.'
+                  ? tx('Tocá dónde EMPIEZA lo que hay que quitar.')
                   : b == null
-                    ? 'Ahora tocá dónde TERMINA lo que hay que quitar.'
-                    : 'Listo. Lo rojo se va a borrar.'}
-              {removedIdx ? ` Quedan ${Math.round(walkedDistance(kept))} m.` : ''}
+                    ? tx('Ahora tocá dónde TERMINA lo que hay que quitar.')
+                    : tx('Listo. Lo rojo se va a borrar.')}
+              {removedIdx ? tx(' Quedan {round} m.', { round: Math.round(walkedDistance(kept)) }) : ''}
             </Text>
             {mode === 'end' ? (
-              <Text style={styles.chosen}>Termina: {chosenLabel(a)}</Text>
+              <Text style={styles.chosen}>{tx('Termina: {chosenLabel}', { chosenLabel: chosenLabel(a) })}</Text>
             ) : (
-              <Text style={styles.chosen}>Desde: {chosenLabel(a)}   Hasta: {chosenLabel(b)}</Text>
+              <Text style={styles.chosen}>{tx('Desde: {chosenLabel}   Hasta: {chosenLabel2}', { chosenLabel: chosenLabel(a), chosenLabel2: chosenLabel(b) })}</Text>
             )}
             {mode === 'range' && isActiveHere ? (
-              <Text style={{ fontSize: 12, color: colors.amberText }}>Para quitar un tramo, primero terminá la salida.</Text>
+              <Text style={{ fontSize: 12, color: colors.amberText }}>{tx('Para quitar un tramo, primero terminá la salida.')}</Text>
             ) : null}
             <Button
-              title={mode === 'end' ? 'Cortar acá' : 'Quitar este tramo'}
+              title={mode === 'end' ? tx('Cortar acá') : tx('Quitar este tramo')}
               variant="danger"
               icon="scissors"
               onPress={mode === 'end' ? confirmEnd : confirmRange}
@@ -254,7 +255,7 @@ export default function Recortar() {
                 return (
                   <Pressable key={o.i} onPress={() => pick(o.i)} accessibilityRole="button" style={[styles.row, on && { backgroundColor: colors.greenSoft }]}>
                     <Text style={{ width: 52, fontSize: 15, fontWeight: '800', color: on ? colors.greenText : colors.text }}>{fmtTime(o.t)}</Text>
-                    <Text style={{ flex: 1, fontSize: 13, color: colors.muted }} numberOfLines={1}>{o.street ?? 'Calle sin identificar'}</Text>
+                    <Text style={{ flex: 1, fontSize: 13, color: colors.muted }} numberOfLines={1}>{o.street ?? tx('Calle sin identificar')}</Text>
                     {on ? <Feather name="check" size={18} color={colors.green} /> : null}
                   </Pressable>
                 );
@@ -262,24 +263,24 @@ export default function Recortar() {
             </View>
           </>
         ) : null}
-        {isOpen ? <Button title="Terminar la salida ahora" icon="square" variant="outline" onPress={confirmFinishNow} loading={busy} /> : null}
+        {isOpen ? <Button title={tx('Terminar la salida ahora')} icon="square" variant="outline" onPress={confirmFinishNow} loading={busy} /> : null}
         {!isOpen ? (
-          <Button title="Volver a pintar las cuadras" icon="refresh-cw" variant="outline" loading={busy}
+          <Button title={tx('Volver a pintar las cuadras')} icon="refresh-cw" variant="outline" loading={busy}
             onPress={async () => {
               if (!session) return;
               setBusy(true);
               try {
                 const n = await recomputeCoverage(session);
-                Alert.alert('Listo', n ? `Se pintaron ${n} tramos de vereda con el recorrido.` : 'El recorrido no pasa por calles cargadas.');
+                Alert.alert(tx('Listo'), n ? tx('Se pintaron {n} tramos de vereda con el recorrido.', { n }) : tx('El recorrido no pasa por calles cargadas.'));
                 load();
               } catch (e) {
-                Alert.alert('No se pudo', e instanceof Error ? e.message : '');
+                Alert.alert(tx('No se pudo'), e instanceof Error ? e.message : '');
               } finally {
                 setBusy(false);
               }
             }} />
         ) : null}
-        {!isActiveHere ? <Button title="Borrar la salida entera" icon="trash-2" variant="ghost" onPress={confirmDelete} /> : null}
+        {!isActiveHere ? <Button title={tx('Borrar la salida entera')} icon="trash-2" variant="ghost" onPress={confirmDelete} /> : null}
       </ScrollView>
     </View>
   );

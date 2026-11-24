@@ -10,6 +10,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchLink } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Enlaces({ group }: { group: 'music' | 'radio' }) {
   const { can } = useAuth();
@@ -23,7 +24,7 @@ export default function Enlaces({ group }: { group: 'music' | 'radio' }) {
   }, [kinds]);
   useFocusEffect(load);
 
-  if (!can('com.anuncios')) return <Empty icon="lock" title="Solo quien manda anuncios" text="Pedile al pastor o a la secretaría que lo cargue." />;
+  if (!can('com.anuncios')) return <Empty icon="lock" title={tx('Solo quien manda anuncios')} text={tx('Pedile al pastor o a la secretaría que lo cargue.')} />;
 
   const startNew = () => setForm({ kind: kinds[0], title: '', url: '', note: '' });
   const onUrl = (t: string) => {
@@ -33,47 +34,47 @@ export default function Enlaces({ group }: { group: 'music' | 'radio' }) {
   const save = async () => {
     if (!form) return;
     const url = cleanUrl(form.url);
-    if (form.title.trim().length < 2) { Alert.alert('Falta el nombre', 'Ponele un nombre, por ejemplo "Alabanzas del domingo".'); return; }
-    if (!url && form.kind !== 'radio_fm') { Alert.alert('El enlace no sirve', 'Pegá el enlace completo de la lista o de la radio.'); return; }
-    if (form.url.trim() && !url) { Alert.alert('El enlace no sirve', 'Tiene que empezar con http o https.'); return; }
+    if (form.title.trim().length < 2) { Alert.alert(tx('Falta el nombre'), tx('Ponele un nombre, por ejemplo "Alabanzas del domingo".')); return; }
+    if (!url && form.kind !== 'radio_fm') { Alert.alert(tx('El enlace no sirve'), tx('Pegá el enlace completo de la lista o de la radio.')); return; }
+    if (form.url.trim() && !url) { Alert.alert(tx('El enlace no sirve'), tx('Tiene que empezar con http o https.')); return; }
     setBusy(true);
     try {
       await saveChurchLink({ id: form.id, kind: form.kind, title: form.title, url, note: form.note });
       setForm(null); load();
-    } catch (e) { Alert.alert('No se pudo guardar', errorMessage(e)); } finally { setBusy(false); }
+    } catch (e) { Alert.alert(tx('No se pudo guardar'), errorMessage(e)); } finally { setBusy(false); }
   };
-  const remove = (l: ChurchLink) => Alert.alert('¿Sacar este enlace?', l.title, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Sacar', style: 'destructive', onPress: () => deleteChurchLink(l.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+  const remove = (l: ChurchLink) => Alert.alert(tx('¿Sacar este enlace?'), l.title, [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Sacar'), style: 'destructive', onPress: () => deleteChurchLink(l.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
   ]);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={group === 'music' ? 'Enlaces de la música' : 'Enlaces de la radio'} subtitle="Lo que ve toda la iglesia" back />
+      <Header title={group === 'music' ? tx('Enlaces de la música') : tx('Enlaces de la radio')} subtitle={tx('Lo que ve toda la iglesia')} back />
       <Screen>
-        {!form ? <Button title="Agregar un enlace" icon="plus" onPress={startNew} /> : (
+        {!form ? <Button title={tx('Agregar un enlace')} icon="plus" onPress={startNew} /> : (
           <Card style={{ gap: 10 }}>
-            <Field label="Nombre" value={form.title} onChangeText={(t) => setForm({ ...form, title: t })} placeholder={group === 'music' ? 'Alabanzas del domingo' : 'Radio Victoria'} />
-            <Field label={form.kind === 'radio_fm' ? 'Enlace (opcional)' : 'Enlace'} value={form.url} onChangeText={onUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url"
-              placeholder={group === 'music' ? 'Pegá el enlace de Spotify o YouTube Music' : 'Pegá el enlace de la radio por internet'} />
-            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>Qué es</Text>
+            <Field label={tx('Nombre')} value={form.title} onChangeText={(t) => setForm({ ...form, title: t })} placeholder={group === 'music' ? tx('Alabanzas del domingo') : tx('Radio Victoria')} />
+            <Field label={form.kind === 'radio_fm' ? tx('Enlace (opcional)') : tx('Enlace')} value={form.url} onChangeText={onUrl} autoCapitalize="none" autoCorrect={false} keyboardType="url"
+              placeholder={group === 'music' ? tx('Pegá el enlace de Spotify o YouTube Music') : tx('Pegá el enlace de la radio por internet')} />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{tx('Qué es')}</Text>
             <Choice options={kinds.map((k) => ({ value: k, label: KIND_LABEL[k] }))} value={form.kind} onChange={(k) => setForm({ ...form, kind: k })} />
-            <Field label="Una nota" hint="(opcional)" value={form.note} onChangeText={(t) => setForm({ ...form, note: t })}
-              placeholder={form.kind === 'radio_fm' ? 'Ejemplo: 98.5 FM, todos los días' : 'Ejemplo: lo que cantamos en el culto'} />
+            <Field label={tx('Una nota')} hint={tx('(opcional)')} value={form.note} onChangeText={(t) => setForm({ ...form, note: t })}
+              placeholder={form.kind === 'radio_fm' ? tx('Ejemplo: 98.5 FM, todos los días') : tx('Ejemplo: lo que cantamos en el culto')} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cancelar" variant="ghost" onPress={() => setForm(null)} style={{ flex: 1 }} />
-              <Button title="Guardar" onPress={save} loading={busy} style={{ flex: 2 }} />
+              <Button title={tx('Cancelar')} variant="ghost" onPress={() => setForm(null)} style={{ flex: 1 }} />
+              <Button title={tx('Guardar')} onPress={save} loading={busy} style={{ flex: 2 }} />
             </View>
           </Card>
         )}
-        <SectionTitle>Cargados</SectionTitle>
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="link" title="Todavía no hay enlaces" text="Agregá el primero con el botón de arriba." /> : (
+        <SectionTitle>{tx('Cargados')}</SectionTitle>
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="link" title={tx('Todavía no hay enlaces')} text={tx('Agregá el primero con el botón de arriba.')} /> : (
           <Card style={{ padding: 0 }}>
             {rows.map((l, i) => (
               <View key={l.id} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
                 <RowLink title={l.title} subtitle={`${KIND_LABEL[l.kind]}${l.note ? ` · ${l.note}` : ''}`}
                   onPress={() => setForm({ id: l.id, kind: l.kind, title: l.title, url: l.url ?? '', note: l.note ?? '' })} />
-                <View style={{ paddingHorizontal: 14, paddingBottom: 8 }}><Button title="Sacar" variant="ghost" small onPress={() => remove(l)} /></View>
+                <View style={{ paddingHorizontal: 14, paddingBottom: 8 }}><Button title={tx('Sacar')} variant="ghost" small onPress={() => remove(l)} /></View>
               </View>
             ))}
           </Card>

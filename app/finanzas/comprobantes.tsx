@@ -15,6 +15,7 @@ import { colors } from '@/theme';
 import type { FinAttachment, FinEntry } from '@/types';
 import { ReceiptThumb } from './[id]';
 import { monthTitle } from './movimientos';
+import { tx } from '@/lib/i18n';
 
 export default function Comprobantes() {
   const router = useRouter();
@@ -42,28 +43,28 @@ export default function Comprobantes() {
   const upload = async () => {
     if (!church || !open) return;
     try {
-      const p = await pickAndUploadReceipt(church.id, open, 'Comprobante');
+      const p = await pickAndUploadReceipt(church.id, open, tx('Comprobante'));
       if (!p) return;
       await addFinAttachment({ entry_id: null, month: open, path: p.path, kind: 'receipt', file_name: p.name });
       load();
     } catch (e) {
-      Alert.alert('No se pudo subir', errorMessage(e));
+      Alert.alert(tx('No se pudo subir'), errorMessage(e));
     }
   };
 
   if (!open) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Comprobantes" subtitle="Una carpeta por mes" back />
+        <Header title={tx('Comprobantes')} subtitle={tx('Una carpeta por mes')} back />
         <Screen>
-          {months === null ? <Loading /> : !months.length ? <Empty icon="folder" title="Todavía no hay comprobantes" /> : null}
+          {months === null ? <Loading /> : !months.length ? <Empty icon="folder" title={tx('Todavía no hay comprobantes')} /> : null}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
             {(months ?? []).map((m) => (
               <Pressable key={m.month} onPress={() => setOpen(m.month)} accessibilityRole="button"
                 style={{ width: '31%', flexGrow: 1, minHeight: 96, borderRadius: 14, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10 }}>
                 <Feather name="folder" size={28} color={colors.amber} />
                 <Text style={{ fontSize: 13, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{monthTitle(m.month)}</Text>
-                <Text style={{ fontSize: 11, color: colors.muted }}>{m.n} {m.n === 1 ? 'archivo' : 'archivos'}</Text>
+                <Text style={{ fontSize: 11, color: colors.muted }}>{m.n} {m.n === 1 ? tx('archivo') : tx('archivos')}</Text>
               </Pressable>
             ))}
           </View>
@@ -80,16 +81,16 @@ export default function Comprobantes() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={monthTitle(open)} subtitle="Comprobantes del mes" back />
+      <Header title={monthTitle(open)} subtitle={tx('Comprobantes del mes')} back />
       <Screen>
-        <Button title="Todas las carpetas" icon="folder" variant="ghost" small onPress={() => { setOpen(null); setFiles(null); }} />
-        {financeLevel >= 2 ? <Button title="Subir comprobante suelto" icon="upload" variant="outline" onPress={upload} /> : null}
-        {files === null ? <Loading /> : !files.length ? <Empty icon="image" title="No hay comprobantes en este mes" /> : null}
+        <Button title={tx('Todas las carpetas')} icon="folder" variant="ghost" small onPress={() => { setOpen(null); setFiles(null); }} />
+        {financeLevel >= 2 ? <Button title={tx('Subir comprobante suelto')} icon="upload" variant="outline" onPress={upload} /> : null}
+        {files === null ? <Loading /> : !files.length ? <Empty icon="image" title={tx('No hay comprobantes en este mes')} /> : null}
         {withEntry.map((e) => (
           <Pressable key={e.id} onPress={() => router.push(`/finanzas/${e.id}` as Href)} accessibilityRole="button">
             <Card style={{ gap: 8, padding: 12 }}>
               <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>
-                {fmtDateShort(e.on_date)} · {e.kind === 'income' ? 'Ingreso' : e.kind === 'expense' ? 'Gasto' : 'Pase'} {fmtMoney(e.amount, e.currency)}
+                {fmtDateShort(e.on_date)} · {e.kind === 'income' ? tx('Ingreso') : e.kind === 'expense' ? tx('Gasto') : tx('Pase')} {fmtMoney(e.amount, e.currency)}
                 {e.counterpart ? ` · ${e.counterpart}` : ''}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -100,7 +101,7 @@ export default function Comprobantes() {
         ))}
         {loose.length ? (
           <Card style={{ gap: 8, padding: 12 }}>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Sueltos (sin movimiento)</Text>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Sueltos (sin movimiento)')}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {loose.map((a) => <ReceiptThumb key={a.id} a={a} size={84} />)}
             </View>
@@ -108,10 +109,10 @@ export default function Comprobantes() {
         ) : null}
         {missing.length ? (
           <Card style={{ gap: 6, padding: 12, backgroundColor: colors.amberSoft, borderColor: colors.amberSoft }}>
-            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.amberText }}>Falta el comprobante ({missing.length})</Text>
+            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.amberText }}>{tx('Falta el comprobante ({n})', { n: missing.length })}</Text>
             {missing.slice(0, 10).map((e) => (
               <Text key={e.id} onPress={() => router.push(`/finanzas/${e.id}` as Href)} style={{ fontSize: 13, color: colors.text }}>
-                · {fmtDateShort(e.on_date)} {e.kind === 'income' ? 'ingreso' : 'gasto'} {fmtMoney(e.amount, e.currency)}{e.counterpart ? ` (${e.counterpart})` : ''}
+                · {fmtDateShort(e.on_date)} {e.kind === 'income' ? tx('ingreso') : tx('gasto')} {fmtMoney(e.amount, e.currency)}{e.counterpart ? ` (${e.counterpart})` : ''}
               </Text>
             ))}
           </Card>

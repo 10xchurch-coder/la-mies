@@ -15,6 +15,7 @@ import { addDays, fmtDateShort, isoDate, upcomingDates } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ClassRow, ClassSchedule, ClassTeacher, Contact, Material, Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const DOW: Record<string, number> = { sun: 0, sat: 6, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
 
@@ -69,7 +70,7 @@ export default function Clase() {
   const canAttend = canStudents || hasTurn;
   const nameOf = (pid: string | null) => people.find((p) => p.id === pid)?.display_name ?? null;
   const mainTeachers = teachers.filter((t) => !t.is_helper);
-  const teacherName = (t: ClassTeacher) => (t.profile_id ? nameOf(t.profile_id) : members.find((m) => m.id === t.contact_id)?.name) ?? 'Maestro';
+  const teacherName = (t: ClassTeacher) => (t.profile_id ? nameOf(t.profile_id) : members.find((m) => m.id === t.contact_id)?.name) ?? tx('Maestro');
   const sameTeacher = (t: ClassTeacher, s: { teacher_id: string | null; teacher_contact_id: string | null }) => (t.profile_id ? t.profile_id === s.teacher_id : !!t.contact_id && t.contact_id === s.teacher_contact_id);
 
   // Última clase que pasó (o hoy), para tomar asistencia.
@@ -90,14 +91,14 @@ export default function Clase() {
     const { error } = c.profile_id
       ? await supabase.from('class_teachers').upsert({ class_id: id, profile_id: c.profile_id, is_helper: helper }, { onConflict: 'class_id,profile_id' })
       : await supabase.from('class_teachers').upsert({ class_id: id, contact_id: c.id, is_helper: helper }, { onConflict: 'class_id,contact_id' });
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     load();
   };
 
   const removeTeacher = (t: ClassTeacher) => {
-    Alert.alert('Quitar', `¿Sacar a ${teacherName(t)} de esta clase?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Quitar', style: 'destructive', onPress: async () => {
+    Alert.alert(tx('Quitar'), tx('¿Sacar a {teacherName} de esta clase?', { teacherName: teacherName(t) }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Quitar'), style: 'destructive', onPress: async () => {
         const q = supabase.from('class_teachers').delete().eq('class_id', id);
         await (t.profile_id ? q.eq('profile_id', t.profile_id) : q.eq('contact_id', t.contact_id ?? ''));
         load();
@@ -109,7 +110,7 @@ export default function Clase() {
     setPicker(null);
     if (!cid) return;
     const { error } = await supabase.from('class_students').upsert({ class_id: id, contact_id: cid });
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     load();
   };
 
@@ -122,7 +123,7 @@ export default function Clase() {
       setKidName('');
       setKidAge('');
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -131,7 +132,7 @@ export default function Clase() {
   /** Reparte a los maestros por turno en las fechas que todavía no tienen maestro. */
   const rotateTeachers = async () => {
     if (!mainTeachers.length) {
-      Alert.alert('Primero agregá maestros a la clase');
+      Alert.alert(tx('Primero agregá maestros a la clase'));
       return;
     }
     const last = [...sched].filter((s) => s.teacher_id || s.teacher_contact_id).sort((a, b) => a.on_date.localeCompare(b.on_date)).pop();
@@ -172,22 +173,22 @@ export default function Clase() {
   };
 
   if (k === undefined) return <Loading />;
-  if (!k) return <View style={{ flex: 1 }}><Header title="Clase" back /><Text style={{ padding: 24, color: colors.text }}>No se encontró.</Text></View>;
+  if (!k) return <View style={{ flex: 1 }}><Header title={tx('Clase')} back /><Text style={{ padding: 24, color: colors.text }}>{tx('No se encontró.')}</Text></View>;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={k.name} subtitle={`${students.length} ${students.length === 1 ? 'alumno' : 'alumnos'} · ${mainTeachers.length} ${mainTeachers.length === 1 ? 'maestro' : 'maestros'}`} back />
+      <Header title={k.name} subtitle={`${students.length} ${students.length === 1 ? tx('alumno') : tx('alumnos')} · ${mainTeachers.length} ${mainTeachers.length === 1 ? tx('maestro') : tx('maestros')}`} back />
       <Screen>
         {canAttend ? (
-          <Button title={`Tomar asistencia · ${fmtDateShort(lastClassDate)}`} icon="check-square" onPress={() => router.push({ pathname: '/clase/asistencia', params: { id, date: lastClassDate } })} />
+          <Button title={tx('Tomar asistencia · {fmtDateShort}', { fmtDateShort: fmtDateShort(lastClassDate) })} icon="check-square" onPress={() => router.push({ pathname: '/clase/asistencia', params: { id, date: lastClassDate } })} />
         ) : null}
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button title="Lecciones" icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/clase/lecciones', params: { id } } as never)} style={{ flex: 1 }} />
-          <Button title="Versículos" icon="award" variant="outline" small onPress={() => router.push({ pathname: '/clase/versiculos', params: { id } } as never)} style={{ flex: 1 }} />
+          <Button title={tx('Lecciones')} icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/clase/lecciones', params: { id } } as never)} style={{ flex: 1 }} />
+          <Button title={tx('Versículos')} icon="award" variant="outline" small onPress={() => router.push({ pathname: '/clase/versiculos', params: { id } } as never)} style={{ flex: 1 }} />
         </View>
 
-        <SectionTitle>Próximas clases</SectionTitle>
+        <SectionTitle>{tx('Próximas clases')}</SectionTitle>
         <Card style={{ padding: 0 }}>
           {dates.map((d) => {
             const s = sched.find((x) => x.on_date === d);
@@ -197,8 +198,8 @@ export default function Clase() {
               <RowLink
                 key={d}
                 icon={mine ? 'star' : 'calendar'}
-                title={`${fmtDateShort(d)} · ${scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? 'Sin maestro'}${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}`}
-                subtitle={m ? `${m.series} · ${m.title}` : 'Sin material asignado'}
+                title={`${fmtDateShort(d)} · ${scheduleName(s, 'teacher', (p) => nameOf(p) ?? undefined) ?? tx('Sin maestro')}${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined) ? ` + ${scheduleName(s, 'helper', (p) => nameOf(p) ?? undefined)}` : ''}`}
+                subtitle={m ? `${m.series} · ${m.title}` : tx('Sin material asignado')}
                 onPress={
                   canManage
                     ? () => router.push({ pathname: '/clase/turno', params: { id, date: d } })
@@ -210,43 +211,43 @@ export default function Clase() {
         </Card>
         {canManage ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Button title="Alternar maestros" icon="repeat" variant="outline" small onPress={rotateTeachers} style={{ flex: 1 }} />
-            <Button title="Material en orden" icon="list" variant="outline" small onPress={() => setPicker('series')} style={{ flex: 1 }} />
+            <Button title={tx('Alternar maestros')} icon="repeat" variant="outline" small onPress={rotateTeachers} style={{ flex: 1 }} />
+            <Button title={tx('Material en orden')} icon="list" variant="outline" small onPress={() => setPicker('series')} style={{ flex: 1 }} />
           </View>
         ) : null}
-        {canManage ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>“Alternar maestros” llena las fechas vacías turnándolos por semana. “Material en orden” asigna los capítulos de una serie, uno por semana, desde el que elijas. El lunes a la mañana cada maestro recibe el aviso con su capítulo.</Text> : null}
+        {canManage ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('“Alternar maestros” llena las fechas vacías turnándolos por semana. “Material en orden” asigna los capítulos de una serie, uno por semana, desde el que elijas. El lunes a la mañana cada maestro recibe el aviso con su capítulo.')}</Text> : null}
 
-        <SectionTitle right={canStudents ? <Text onPress={() => router.push({ pathname: '/material/nuevo', params: { classId: id } })} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>+ Agregar</Text> : undefined}>Material de la clase</SectionTitle>
+        <SectionTitle right={canStudents ? <Text onPress={() => router.push({ pathname: '/material/nuevo', params: { classId: id } })} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>{tx('+ Agregar')}</Text> : undefined}>{tx('Material de la clase')}</SectionTitle>
         {(() => {
           const mine = materials.filter((m) => m.class_id === id || !m.class_id);
-          if (!mine.length) return <Text style={{ fontSize: 13, color: colors.muted }}>Todavía no hay material. {canStudents ? 'Tocá “+ Agregar” para subir un capítulo, un PDF o un texto.' : ''}</Text>;
+          if (!mine.length) return <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Todavía no hay material. {pl}', { pl: canStudents ? tx('Tocá “+ Agregar” para subir un capítulo, un PDF o un texto.') : '' })}</Text>;
           const bySeries = new Map<string, Material[]>();
           for (const m of mine) bySeries.set(m.series, [...(bySeries.get(m.series) ?? []), m]);
           return [...bySeries.entries()].map(([series, list]) => (
             <Card key={series} style={{ padding: 0 }}>
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted, paddingHorizontal: 14, paddingTop: 10 }}>{series}</Text>
               {list.sort((a, b) => a.chapter_order - b.chapter_order).map((m) => (
-                <RowLink key={m.id} icon={m.file_path ? 'file-text' : 'book-open'} title={m.title} subtitle={m.file_name ?? (m.body ? 'Texto para leer' : undefined)} onPress={() => router.push({ pathname: '/material/[id]', params: { id: m.id } })} />
+                <RowLink key={m.id} icon={m.file_path ? 'file-text' : 'book-open'} title={m.title} subtitle={m.file_name ?? (m.body ? tx('Texto para leer') : undefined)} onPress={() => router.push({ pathname: '/material/[id]', params: { id: m.id } })} />
               ))}
             </Card>
           ));
         })()}
 
-        <SectionTitle>Maestros</SectionTitle>
+        <SectionTitle>{tx('Maestros')}</SectionTitle>
         <Card style={{ padding: 0 }}>
           {teachers.map((t) => (
-            <RowLink key={t.profile_id ?? t.contact_id} icon="user" title={teacherName(t)} subtitle={`${t.is_helper ? 'Ayudante' : 'Maestro'}${t.profile_id ? '' : ' · sin la app'}${canManage ? ' · tocá para quitarlo de la clase' : ''}`} onPress={canManage ? () => removeTeacher(t) : undefined} />
+            <RowLink key={t.profile_id ?? t.contact_id} icon="user" title={teacherName(t)} subtitle={`${t.is_helper ? tx('Ayudante') : tx('Maestro')}${t.profile_id ? '' : tx(' · sin la app')}${canManage ? tx(' · tocá para quitarlo de la clase') : ''}`} onPress={canManage ? () => removeTeacher(t) : undefined} />
           ))}
-          {!teachers.length ? <Text style={{ padding: 14, color: colors.muted }}>Todavía no hay maestros.</Text> : null}
+          {!teachers.length ? <Text style={{ padding: 14, color: colors.muted }}>{tx('Todavía no hay maestros.')}</Text> : null}
         </Card>
         {canManage ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Button title="Agregar maestro" icon="user-plus" variant="outline" small onPress={() => setPicker('teacher')} style={{ flex: 1 }} />
-            <Button title="Agregar ayudante" icon="user-plus" variant="outline" small onPress={() => setPicker('helper')} style={{ flex: 1 }} />
+            <Button title={tx('Agregar maestro')} icon="user-plus" variant="outline" small onPress={() => setPicker('teacher')} style={{ flex: 1 }} />
+            <Button title={tx('Agregar ayudante')} icon="user-plus" variant="outline" small onPress={() => setPicker('helper')} style={{ flex: 1 }} />
           </View>
         ) : null}
 
-        <SectionTitle>Alumnos</SectionTitle>
+        <SectionTitle>{tx('Alumnos')}</SectionTitle>
         {canStudents ? (
           <>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
@@ -258,28 +259,28 @@ export default function Clase() {
               ))}
             </View>
             <Card style={{ gap: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>Agregar un alumno nuevo</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Agregar un alumno nuevo')}</Text>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Field label="Nombre" value={kidName} onChangeText={setKidName} style={{ flex: 1 }} autoCapitalize="words" />
-                <Field label="Edad" keyboardType="number-pad" value={kidAge} onChangeText={(t) => setKidAge(t.replace(/\D/g, ''))} style={{ width: 70 }} />
+                <Field label={tx('Nombre')} value={kidName} onChangeText={setKidName} style={{ flex: 1 }} autoCapitalize="words" />
+                <Field label={tx('Edad')} keyboardType="number-pad" value={kidAge} onChangeText={(t) => setKidAge(t.replace(/\D/g, ''))} style={{ width: 70 }} />
               </View>
-              <Button title="Agregar" small onPress={newKid} loading={busy} disabled={kidName.trim().length < 2} />
-              <Button title="Elegir de las personas cargadas" variant="ghost" small onPress={() => { listPeople().then(setAllPeople).catch(() => undefined); setPicker('student'); }} />
+              <Button title={tx('Agregar')} small onPress={newKid} loading={busy} disabled={kidName.trim().length < 2} />
+              <Button title={tx('Elegir de las personas cargadas')} variant="ghost" small onPress={() => { listPeople().then(setAllPeople).catch(() => undefined); setPicker('student'); }} />
             </Card>
           </>
         ) : (
-          <Text style={{ fontSize: 13, color: colors.muted }}>La lista de alumnos la ven los maestros de la clase y los líderes.</Text>
+          <Text style={{ fontSize: 13, color: colors.muted }}>{tx('La lista de alumnos la ven los maestros de la clase y los líderes.')}</Text>
         )}
-        {isTeacher ? <Tag text="Sos maestro de esta clase" tone="green" /> : null}
+        {isTeacher ? <Tag text={tx('Sos maestro de esta clase')} tone="green" /> : null}
       </Screen>
 
-      <PickerModal visible={picker === 'teacher' || picker === 'helper'} title={picker === 'helper' ? 'Elegí el ayudante' : 'Elegí el maestro'}
-        items={members.filter((m) => !teachers.some((t) => (m.profile_id && t.profile_id === m.profile_id) || t.contact_id === m.id)).map((m) => ({ id: m.id, title: m.name, subtitle: m.profile_id ? undefined : 'No tiene la app', photo: m.photo_path }))}
+      <PickerModal visible={picker === 'teacher' || picker === 'helper'} title={picker === 'helper' ? tx('Elegí el ayudante') : tx('Elegí el maestro')}
+        items={members.filter((m) => !teachers.some((t) => (m.profile_id && t.profile_id === m.profile_id) || t.contact_id === m.id)).map((m) => ({ id: m.id, title: m.name, subtitle: m.profile_id ? undefined : tx('No tiene la app'), photo: m.photo_path }))}
         onClose={() => setPicker(null)} onPick={(cid) => addTeacher(cid, picker === 'helper')} />
-      <PickerModal visible={picker === 'student'} title="Elegí el alumno"
-        items={allPeople.filter((p) => !students.some((s) => s.id === p.id)).map((p) => ({ id: p.id, title: p.name, subtitle: p.age != null ? `${p.age} años` : undefined, photo: p.photo_path }))}
+      <PickerModal visible={picker === 'student'} title={tx('Elegí el alumno')}
+        items={allPeople.filter((p) => !students.some((s) => s.id === p.id)).map((p) => ({ id: p.id, title: p.name, subtitle: p.age != null ? tx('{age} años', { age: p.age }) : undefined, photo: p.photo_path }))}
         onClose={() => setPicker(null)} onPick={addStudent} />
-      <PickerModal visible={picker === 'series'} title="¿Desde qué capítulo?"
+      <PickerModal visible={picker === 'series'} title={tx('¿Desde qué capítulo?')}
         items={materials.map((m) => ({ id: m.id, title: m.title, subtitle: m.series, face: false }))} onClose={() => setPicker(null)} onPick={fillMaterial} />
     </View>
   );

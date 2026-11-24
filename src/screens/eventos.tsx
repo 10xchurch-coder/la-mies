@@ -17,6 +17,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Cancellation, ChurchEvent, ChurchService } from '@/types';
+import { tx, txList, txLocale } from '@/lib/i18n';
 
 type Occ = { ev: ChurchEvent; date: string; start: Date };
 type WeeklyItem = { key: string; dow: number; time: string; title: string; place: string | null; note: string | null; ev?: ChurchEvent; main?: boolean; serviceId?: string };
@@ -65,7 +66,7 @@ function weeklyItems(services: ChurchService[], events: ChurchEvent[]): WeeklyIt
   return items.sort((a, b) => WEEK_ORDER.indexOf(a.dow) - WEEK_ORDER.indexOf(b.dow) || a.time.localeCompare(b.time));
 }
 
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
 
 /** Lunes de la semana de una fecha. */
@@ -93,7 +94,7 @@ function MonthGrid({ ym, occ, sel, onSel }: { ym: { y: number; m: number }; occ:
             const n = byDay.get(iso) ?? 0;
             const on = sel === iso;
             return (
-              <Pressable key={iso} onPress={() => onSel(iso)} accessibilityRole="button" accessibilityLabel={`${d.getDate()} ${n ? `, ${n} actividades` : ''}`}
+              <Pressable key={iso} onPress={() => onSel(iso)} accessibilityRole="button" accessibilityLabel={`${d.getDate()} ${n ? tx(', {n} actividades', { n }) : ''}`}
                 style={{ flex: 1, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 10, backgroundColor: on ? colors.green : iso === today ? colors.greenSoft : 'transparent' }}>
                 <Text style={{ fontSize: 15, fontWeight: n ? '800' : '500', color: on ? '#FFF' : inMonth ? colors.text : colors.border }}>{d.getDate()}</Text>
                 {n ? <View style={{ width: 6, height: 6, borderRadius: 3, marginTop: 2, backgroundColor: on ? '#FFF' : colors.amber }} /> : <View style={{ height: 8 }} />}
@@ -156,12 +157,12 @@ export default function Eventos() {
       await setRsvp(o.ev.id, o.date, going);
       load();
     } catch (e) {
-      Alert.alert('No se pudo', errorMessage(e));
+      Alert.alert(tx('No se pudo'), errorMessage(e));
     }
   };
 
   const remove = (ev: ChurchEvent) =>
-    Alert.alert('Borrar', ev.title, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Borrar', style: 'destructive', onPress: () => deleteEvent(ev.id).then(load) }]);
+    Alert.alert(tx('Borrar'), ev.title, [{ text: tx('Cancelar'), style: 'cancel' }, { text: tx('Borrar'), style: 'destructive', onPress: () => deleteEvent(ev.id).then(load) }]);
 
   const add = async () => {
     const weekly = adding === 'week';
@@ -170,12 +171,12 @@ export default function Eventos() {
     if (weekly) {
       const today = new Date();
       d = isoDate(addDays(today, (dow - today.getDay() + 7) % 7));
-      if (!t) { Alert.alert('Falta la hora', 'Poné la hora, por ejemplo 17:00.'); return; }
+      if (!t) { Alert.alert(tx('Falta la hora'), tx('Poné la hora, por ejemplo 17:00.')); return; }
     } else {
       d = parseDateAR(date, true);
     }
     if (!title.trim() || !d) {
-      Alert.alert('Faltan datos', weekly ? 'Poné el nombre.' : 'Poné el nombre y la fecha (por ejemplo 20/12/2026).');
+      Alert.alert(tx('Faltan datos'), weekly ? tx('Poné el nombre.') : tx('Poné el nombre y la fecha (por ejemplo 20/12/2026).'));
       return;
     }
     setBusy(true);
@@ -185,7 +186,7 @@ export default function Eventos() {
       setTitle(''); setDate(''); setTime(''); setPlace(''); setDesc(''); setYearly(false);
       load();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -209,14 +210,14 @@ export default function Eventos() {
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontSize: big ? 17 : 15, fontWeight: '800', color: colors.text }}>{o.ev.title}</Text>
           <Text style={{ fontSize: 12, color: colors.muted }}>
-            {cap(d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))} · {o.ev.all_day ? (endIso && endIso > o.date ? `hasta el ${fmtDateShort(endIso)}` : 'todo el día') : hhmm(o.start)}
-            {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? ' · todos los años' : ''}{count ? ` · ${count} van` : ''}
+            {cap(d.toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' }))} · {o.ev.all_day ? (endIso && endIso > o.date ? tx('hasta el {fmtDateShort}', { fmtDateShort: fmtDateShort(endIso) }) : tx('todo el día')) : hhmm(o.start)}
+            {o.ev.place ? ` · ${o.ev.place}` : ''}{o.ev.yearly ? tx(' · todos los años') : ''}{count ? tx(' · {count} van', { count }) : ''}
           </Text>
           {o.ev.description ? <Text numberOfLines={2} style={{ fontSize: 12, color: colors.text }}>{o.ev.description}</Text> : null}
-          {o.ev.registration ? <Text style={{ fontSize: 11, fontWeight: '800', color: colors.green }}>Con inscripción · tocá para anotarte</Text> : null}
+          {o.ev.registration ? <Text style={{ fontSize: 11, fontWeight: '800', color: colors.green }}>{tx('Con inscripción · tocá para anotarte')}</Text> : null}
         </View>
         <Pressable onPress={() => toggle(o, !going)} accessibilityRole="button" style={{ height: 36, paddingHorizontal: 12, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: going ? colors.green : colors.bg, borderWidth: 1, borderColor: going ? colors.green : colors.border }}>
-          <Text style={{ fontSize: 13, fontWeight: '800', color: going ? '#FFF' : colors.text }}>{going ? 'Voy ✓' : 'Voy'}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '800', color: going ? '#FFF' : colors.text }}>{going ? tx('Voy ✓') : tx('Voy')}</Text>
         </Pressable>
       </Card>
       </Pressable>
@@ -228,15 +229,15 @@ export default function Eventos() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Calendario" subtitle="Horarios y fechas de la iglesia" back />
+      <Header title={tx('Calendario')} subtitle={tx('Horarios y fechas de la iglesia')} back />
       <Screen>
         {events === null ? <Loading /> : (
           <>
-            <SectionTitle>Cada semana</SectionTitle>
+            <SectionTitle>{tx('Cada semana')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {WEEK_ORDER.filter((d) => week.some((w) => w.dow === d)).map((d, di, arr) => (
                 <View key={d} style={{ flexDirection: 'row', paddingHorizontal: 12, paddingVertical: 10, gap: 10, borderBottomWidth: di < arr.length - 1 ? 1 : 0, borderBottomColor: colors.border, backgroundColor: d === todayDow ? colors.greenSoft : 'transparent' }}>
-                  <Text style={{ width: 74, fontSize: 13, fontWeight: '800', color: d === todayDow ? colors.greenText : colors.muted }}>{cap(dayName(d))}{d === todayDow ? '\nhoy' : ''}</Text>
+                  <Text style={{ width: 74, fontSize: 13, fontWeight: '800', color: d === todayDow ? colors.greenText : colors.muted }}>{cap(dayName(d))}{d === todayDow ? tx('\nhoy') : ''}</Text>
                   <View style={{ flex: 1, gap: 4 }}>
                     {week.filter((w) => w.dow === d).map((w) => {
                       const off = offNext(w);
@@ -248,7 +249,7 @@ export default function Eventos() {
                           <Text style={{ width: 44, fontSize: 14, fontWeight: '800', color: off ? colors.muted : colors.green, textDecorationLine: off ? 'line-through' : 'none' }}>{w.time || '—'}</Text>
                           <View style={{ flex: 1 }}>
                             <Text style={{ fontSize: 14, fontWeight: w.main ? '800' : '600', color: off ? colors.muted : colors.text, textDecorationLine: off ? 'line-through' : 'none' }}>{w.title}{w.place ? <Text style={{ fontWeight: '400', color: colors.muted }}> · {w.place}</Text> : null}</Text>
-                            {off ? <Text style={{ fontSize: 12, fontWeight: '800', color: colors.amberText }}>No hay este {fmtDateShort(off)}</Text> : null}
+                            {off ? <Text style={{ fontSize: 12, fontWeight: '800', color: colors.amberText }}>{tx('No hay este {fmtDateShort}', { fmtDateShort: fmtDateShort(off) })}</Text> : null}
                           </View>
                           {tappable ? <Feather name="chevron-right" size={14} color={colors.muted} /> : null}
                         </Pressable>
@@ -257,54 +258,54 @@ export default function Eventos() {
                   </View>
                 </View>
               ))}
-              {!week.length ? <Text style={{ padding: 14, color: colors.muted }}>No hay horarios cargados.</Text> : null}
+              {!week.length ? <Text style={{ padding: 14, color: colors.muted }}>{tx('No hay horarios cargados.')}</Text> : null}
             </Card>
 
-            <SectionTitle>Esta semana</SectionTitle>
-            {thisWeek.length ? thisWeek.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} big />) : <Text style={{ fontSize: 13, color: colors.muted }}>Esta semana no hay actividades especiales, solo las de siempre.</Text>}
+            <SectionTitle>{tx('Esta semana')}</SectionTitle>
+            {thisWeek.length ? thisWeek.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} big />) : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('Esta semana no hay actividades especiales, solo las de siempre.')}</Text>}
 
-            <SectionTitle>{`Lo que queda de ${MONTHS[now.getMonth()]}`}</SectionTitle>
-            {thisMonth.length ? thisMonth.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />) : <Text style={{ fontSize: 13, color: colors.muted }}>No hay más fechas especiales este mes.</Text>}
+            <SectionTitle>{tx('Lo que queda de {MONTHS}', { MONTHS: MONTHS[now.getMonth()] })}</SectionTitle>
+            {thisMonth.length ? thisMonth.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />) : <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No hay más fechas especiales este mes.')}</Text>}
 
             {nextUp.length ? (
               <>
-                <SectionTitle>Lo que viene</SectionTitle>
+                <SectionTitle>{tx('Lo que viene')}</SectionTitle>
                 {nextUp.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />)}
               </>
             ) : null}
 
-            <Button title={showGrid ? 'Ocultar el calendario' : 'Ver el calendario del año'} icon="calendar" variant={showGrid ? 'ghost' : 'outline'} onPress={() => { setShowGrid((v) => !v); setSel(null); }} />
+            <Button title={showGrid ? tx('Ocultar el calendario') : tx('Ver el calendario del año')} icon="calendar" variant={showGrid ? 'ghost' : 'outline'} onPress={() => { setShowGrid((v) => !v); setSel(null); }} />
             {showGrid ? (
               <Card style={{ gap: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Pressable onPress={() => setYm((x) => (x.m === 0 ? { y: x.y - 1, m: 11 } : { y: x.y, m: x.m - 1 }))} hitSlop={10} accessibilityLabel="Mes anterior" style={{ padding: 6 }}>
+                  <Pressable onPress={() => setYm((x) => (x.m === 0 ? { y: x.y - 1, m: 11 } : { y: x.y, m: x.m - 1 }))} hitSlop={10} accessibilityLabel={tx('Mes anterior')} style={{ padding: 6 }}>
                     <Feather name="chevron-left" size={22} color={colors.text} />
                   </Pressable>
                   <Text style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800', color: colors.text }}>{cap(MONTHS[ym.m])} {ym.y}</Text>
-                  <Pressable onPress={() => setYm((x) => (x.m === 11 ? { y: x.y + 1, m: 0 } : { y: x.y, m: x.m + 1 }))} hitSlop={10} accessibilityLabel="Mes siguiente" style={{ padding: 6 }}>
+                  <Pressable onPress={() => setYm((x) => (x.m === 11 ? { y: x.y + 1, m: 0 } : { y: x.y, m: x.m + 1 }))} hitSlop={10} accessibilityLabel={tx('Mes siguiente')} style={{ padding: 6 }}>
                     <Feather name="chevron-right" size={22} color={colors.text} />
                   </Pressable>
                 </View>
                 <MonthGrid ym={ym} occ={occ} sel={sel} onSel={(d) => setSel(d === sel ? null : d)} />
                 {sel ? (
                   <View style={{ gap: 8 }}>
-                    <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{cap(new Date(`${sel}T12:00:00`).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{cap(new Date(`${sel}T12:00:00`).toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' }))}</Text>
                     {selList.map((o) => <EventCard key={`${o.ev.id}-${o.date}`} o={o} />)}
-                    {selWeekly.map((w) => <Text key={w.key} style={{ fontSize: 13, color: colors.muted }}>{w.time} · {w.title} (cada semana)</Text>)}
-                    {!selList.length && !selWeekly.length ? <Text style={{ fontSize: 13, color: colors.muted }}>No hay nada ese día.</Text> : null}
+                    {selWeekly.map((w) => <Text key={w.key} style={{ fontSize: 13, color: colors.muted }}>{tx('{time} · {title} (cada semana)', { time: w.time, title: w.title })}</Text>)}
+                    {!selList.length && !selWeekly.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No hay nada ese día.')}</Text> : null}
                   </View>
-                ) : <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Los días con punto naranja tienen una fecha especial. Tocá un día para verlo.</Text>}
+                ) : <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Los días con punto naranja tienen una fecha especial. Tocá un día para verlo.')}</Text>}
               </Card>
             ) : null}
 
             {isStaff ? (
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Fecha especial" icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'special' } })} style={{ flex: 1 }} />
-                <Button title="Cada semana" icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'week' } })} style={{ flex: 1 }} />
+                <Button title={tx('Fecha especial')} icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'special' } })} style={{ flex: 1 }} />
+                <Button title={tx('Cada semana')} icon="plus" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { tipo: 'week' } })} style={{ flex: 1 }} />
               </View>
             ) : null}
-            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Tocá cualquier fecha para ver los detalles, anotarte o compartirla.</Text>
-            {isStaff ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Si una reunión o una actividad de cada semana no se hace, tocala en &quot;Cada semana&quot; y marcá la fecha: no baja los números.</Text> : null}
+            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Tocá cualquier fecha para ver los detalles, anotarte o compartirla.')}</Text>
+            {isStaff ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Si una reunión o una actividad de cada semana no se hace, tocala en "Cada semana" y marcá la fecha: no baja los números.')}</Text> : null}
           </>
         )}
       </Screen>

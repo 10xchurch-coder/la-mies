@@ -20,6 +20,7 @@ import { isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
 import type { ChurchEvent, DoorMatch } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Flash = { tone: 'green' | 'amber' | 'red'; text: string } | null;
 const ENTRANCE_KEY = 'lamies.puerta.entrada';      // el nombre de la entrada queda guardado en este teléfono
@@ -56,20 +57,20 @@ export default function Puerta() {
   }, [id, fecha, refresh]));
 
   if (ev === undefined || allowed === null) return <Loading />;
-  if (!ev) return <Empty icon="calendar" title="Este evento ya no está" />;
-  if (!allowed) return <Empty icon="lock" title="Sin permiso para la puerta" text="Pedile al pastor que te dé el permiso de tomar asistencia." />;
+  if (!ev) return <Empty icon="calendar" title={tx('Este evento ya no está')} />;
+  if (!allowed) return <Empty icon="lock" title={tx('Sin permiso para la puerta')} text={tx('Pedile al pastor que te dé el permiso de tomar asistencia.')} />;
 
   const say = (f: Flash) => { setFlash(f); };
 
   const register = async () => {
     const n = name.trim();
-    if (n.length < 2) { say({ tone: 'red', text: 'Escribí el nombre' }); return; }
+    if (n.length < 2) { say({ tone: 'red', text: tx('Escribí el nombre') }); return; }
     const bad = phoneProblem(phone);
     if (bad) { say({ tone: 'red', text: bad }); return; }
     setBusy(true);
     try {
       const r = await doorWalkin(id, on, n, formatPhone(phone) || null, people, cleanEntrance(entrance));
-      say(r.already ? { tone: 'amber', text: `${r.name} ya estaba anotado y ya había entrado` } : { tone: 'green', text: `✓ ${r.name} anotado${people > 1 ? ` (${people} personas)` : ''}` });
+      say(r.already ? { tone: 'amber', text: tx('{name} ya estaba anotado y ya había entrado', { name: r.name }) } : { tone: 'green', text: tx('✓ {name} anotado{v1}', { name: r.name, v1: people > 1 ? tx(' ({people} personas)', { people }) : '' }) });
       setName(''); setPhone(''); setPeople(1); refresh(on);
       setNonce((x) => x + 1);
     } catch (e) { say({ tone: 'red', text: errorMessage(e) }); } finally { setBusy(false); }
@@ -78,9 +79,9 @@ export default function Puerta() {
   const checkIn = async (by: { code?: string; reg?: string }) => {
     try {
       const r = await doorScan(by, cleanEntrance(entrance), mode === 'out');
-      if (r.event_id !== id) { say({ tone: 'amber', text: `Ojo: la entrada de ${r.name} es de otro evento (${r.event_title ?? 'sin nombre'})` }); return; }
+      if (r.event_id !== id) { say({ tone: 'amber', text: tx('Ojo: la entrada de {name} es de otro evento ({event_title})', { name: r.name, event_title: r.event_title ?? tx('sin nombre') }) }); return; }
       say(scanFlash(r.result, r.name, r.people));
-      if (r.result === 'in' && r.occurs_on && r.occurs_on !== on) say({ tone: 'amber', text: `${r.name} entró, pero su entrada es del ${r.occurs_on}` });
+      if (r.result === 'in' && r.occurs_on && r.occurs_on !== on) say({ tone: 'amber', text: tx('{name} entró, pero su entrada es del {occurs_on}', { name: r.name, occurs_on: r.occurs_on }) });
       refresh(on);
       if (q.trim().length >= 2) search(q);
     } catch (e) { say({ tone: 'red', text: errorMessage(e) }); }
@@ -97,7 +98,7 @@ export default function Puerta() {
     try {
       const text = await readChip();
       const c = parseTicket(text);
-      if (!c) { say({ tone: 'red', text: text ? 'Ese chip no es una entrada de La Mies' : 'El chip está vacío: todavía no se le grabó la entrada' }); return; }
+      if (!c) { say({ tone: 'red', text: text ? tx('Ese chip no es una entrada de La Mies') : tx('El chip está vacío: todavía no se le grabó la entrada') }); return; }
       checkIn({ code: c });
     } catch (e) {
       if ((e as Error).message !== 'cancelado') say({ tone: 'red', text: (e as Error).message });
@@ -105,12 +106,12 @@ export default function Puerta() {
   };
   const onScanned = (text: string) => {
     const c = parseTicket(text);
-    if (!c) { say({ tone: 'red', text: 'Ese QR no es una entrada de La Mies' }); return; }
+    if (!c) { say({ tone: 'red', text: tx('Ese QR no es una entrada de La Mies') }); return; }
     checkIn({ code: c });
   };
   const byCode = () => {
     const c = parseTicket(code);
-    if (!c) { Alert.alert('Código no válido', 'Son 8 letras y números, por ejemplo 1A2B-3C4D.'); return; }
+    if (!c) { Alert.alert(tx('Código no válido'), tx('Son 8 letras y números, por ejemplo 1A2B-3C4D.')); return; }
     setCode(''); checkIn({ code: c });
   };
 
@@ -119,18 +120,18 @@ export default function Puerta() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Puerta" subtitle={ev.title} back />
+      <Header title={tx('Puerta')} subtitle={ev.title} back />
       <Screen>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Stat value={counts?.inside ?? '–'} label="Adentro ahora" tone="green" />
-          <Stat value={counts?.checked_in ?? '–'} label="Entraron" tone="blue" />
-          <Stat value={counts?.registered ?? '–'} label="Anotados" />
+          <Stat value={counts?.inside ?? '–'} label={tx('Adentro ahora')} tone="green" />
+          <Stat value={counts?.checked_in ?? '–'} label={tx('Entraron')} tone="blue" />
+          <Stat value={counts?.registered ?? '–'} label={tx('Anotados')} />
         </View>
         <Card style={{ gap: 10 }}>
-          <Field label="Nombre de esta entrada" hint="(opcional: Puerta principal, Estacionamiento…)" value={entrance} onChangeText={saveEntrance} maxLength={40} autoCorrect={false} />
-          <Segmented value={mode} onChange={setMode} options={[{ value: 'in', label: 'Entrada' }, { value: 'out', label: 'Salida' }]} />
-          {mode === 'out' ? <Text style={{ fontSize: 13, color: colors.amberText, fontWeight: '700' }}>Estás marcando a los que SALEN. Así el contador sabe cuántos quedan adentro.</Text> : null}
-          <Button title="Ver el contador en vivo" icon="monitor" variant="outline" small onPress={() => router.push({ pathname: '/evento/contador', params: { id, fecha: on } } as unknown as Href)} />
+          <Field label={tx('Nombre de esta entrada')} hint={tx('(opcional: Puerta principal, Estacionamiento…)')} value={entrance} onChangeText={saveEntrance} maxLength={40} autoCorrect={false} />
+          <Segmented value={mode} onChange={setMode} options={[{ value: 'in', label: tx('Entrada##puerta') }, { value: 'out', label: tx('Salida##puerta') }]} />
+          {mode === 'out' ? <Text style={{ fontSize: 13, color: colors.amberText, fontWeight: '700' }}>{tx('Estás marcando a los que SALEN. Así el contador sabe cuántos quedan adentro.')}</Text> : null}
+          <Button title={tx('Ver el contador en vivo')} icon="monitor" variant="outline" small onPress={() => router.push({ pathname: '/evento/contador', params: { id, fecha: on } } as unknown as Href)} />
         </Card>
         {flash ? (
           <Card style={{ backgroundColor: bg, borderColor: bg }}>
@@ -139,30 +140,30 @@ export default function Puerta() {
         ) : null}
 
         {mode === 'in' ? <>
-        <SectionTitle>Persona nueva</SectionTitle>
+        <SectionTitle>{tx('Persona nueva')}</SectionTitle>
         <Card style={{ gap: 10 }}>
-          <Field key={`n${nonce}`} autoFocus={nonce > 0} label="Nombre y apellido" value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
-          <PhoneField label="Teléfono" hint="(para el sorteo y para avisarle)" value={phone} onChangeText={setPhone} returnKeyType="done" onSubmitEditing={register} />
+          <Field key={`n${nonce}`} autoFocus={nonce > 0} label={tx('Nombre y apellido')} value={name} onChangeText={setName} autoCapitalize="words" returnKeyType="next" />
+          <PhoneField label={tx('Teléfono')} hint={tx('(para el sorteo y para avisarle)')} value={phone} onChangeText={setPhone} returnKeyType="done" onSubmitEditing={register} />
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }}>Cuántos entran</Text>
+            <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Cuántos entran')}</Text>
             <Button title="−" variant="outline" small onPress={() => setPeople((p) => Math.max(1, p - 1))} />
             <Text style={{ fontSize: 20, fontWeight: '900', color: colors.text, minWidth: 28, textAlign: 'center' }}>{people}</Text>
             <Button title="+" variant="outline" small onPress={() => setPeople((p) => Math.min(50, p + 1))} />
           </View>
-          <Button title="Anotar y dejar entrar" icon="user-plus" onPress={register} loading={busy} />
+          <Button title={tx('Anotar y dejar entrar')} icon="user-plus" onPress={register} loading={busy} />
         </Card>
         </> : null}
 
-        <SectionTitle>{mode === 'out' ? 'Sale alguien' : 'Ya tiene su entrada o estaba anotado'}</SectionTitle>
+        <SectionTitle>{mode === 'out' ? tx('Sale alguien') : tx('Ya tiene su entrada o estaba anotado')}</SectionTitle>
         <Card style={{ gap: 10 }}>
-          {nfcBuilt ? <Button title="Leer el chip de la credencial" icon="radio" variant="outline" onPress={chip} /> : null}
-          {scannerAvailable ? (scan ? <TicketScanner onCode={onScanned} onClose={() => setScan(false)} /> : <Button title="Leer el QR de la credencial" icon="camera" onPress={() => setScan(true)} />) : null}
-          {nfcBuilt ? <Text style={{ fontSize: 12, color: colors.muted }}>El chip y el QR de la credencial llevan el mismo código. Si el chip no lee, usá el QR o escribí el código.</Text> : null}
+          {nfcBuilt ? <Button title={tx('Leer el chip de la credencial')} icon="radio" variant="outline" onPress={chip} /> : null}
+          {scannerAvailable ? (scan ? <TicketScanner onCode={onScanned} onClose={() => setScan(false)} /> : <Button title={tx('Leer el QR de la credencial')} icon="camera" onPress={() => setScan(true)} />) : null}
+          {nfcBuilt ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('El chip y el QR de la credencial llevan el mismo código. Si el chip no lee, usá el QR o escribí el código.')}</Text> : null}
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-            <Field label="Código de la entrada" value={code} onChangeText={setCode} autoCapitalize="characters" autoCorrect={false} placeholder="1A2B-3C4D" style={{ flex: 1 }} onSubmitEditing={byCode} />
-            <Button title={mode === 'out' ? 'Sale' : 'Entrar'} onPress={byCode} />
+            <Field label={tx('Código de la entrada')} value={code} onChangeText={setCode} autoCapitalize="characters" autoCorrect={false} placeholder="1A2B-3C4D" style={{ flex: 1 }} onSubmitEditing={byCode} />
+            <Button title={mode === 'out' ? tx('Sale') : tx('Entrar##puerta')} onPress={byCode} />
           </View>
-          <Field label="Buscar por nombre o teléfono" value={q} onChangeText={search} autoCorrect={false} />
+          <Field label={tx('Buscar por nombre o teléfono')} value={q} onChangeText={search} autoCorrect={false} />
           {matches.map((m) => (
             <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6, borderTopWidth: 1, borderTopColor: colors.border }}>
               <View style={{ flex: 1, gap: 2 }}>
@@ -170,13 +171,13 @@ export default function Puerta() {
                 {m.phone ? <Text style={{ fontSize: 12, color: colors.muted }}>{m.phone}</Text> : null}
               </View>
               {mode === 'out'
-                ? (m.checked_in ? <Button title="Salió" small variant="outline" onPress={() => checkIn({ reg: m.id })} /> : <Tag text="No entró" tone="gray" />)
-                : (m.checked_in ? <Tag text="Ya entró" tone="green" /> : <Button title="Entró" small onPress={() => checkIn({ reg: m.id })} />)}
+                ? (m.checked_in ? <Button title={tx('Salió')} small variant="outline" onPress={() => checkIn({ reg: m.id })} /> : <Tag text={tx('No entró')} tone="gray" />)
+                : (m.checked_in ? <Tag text={tx('Ya entró')} tone="green" /> : <Button title={tx('Entró')} small onPress={() => checkIn({ reg: m.id })} />)}
             </View>
           ))}
-          {q.trim().length >= 2 && !matches.length ? <Text style={{ fontSize: 13, color: colors.muted }}>No hay nadie con ese nombre.{mode === 'in' ? ' Anotalo arriba como persona nueva.' : ''}</Text> : null}
+          {q.trim().length >= 2 && !matches.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No hay nadie con ese nombre.{pl}', { pl: mode === 'in' ? tx(' Anotalo arriba como persona nueva.') : '' })}</Text> : null}
         </Card>
-        {counts ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Se cuentan personas: una entrada para 3 suma 3.{counts.gone ? ` Ya salieron ${counts.gone}.` : ''}</Text> : null}
+        {counts ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Se cuentan personas: una entrada para 3 suma 3.{v1}', { v1: counts.gone ? tx(' Ya salieron {gone}.', { gone: counts.gone }) : '' })}</Text> : null}
       </Screen>
     </View>
   );

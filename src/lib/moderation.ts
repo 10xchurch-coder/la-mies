@@ -2,6 +2,7 @@
 import { Alert } from 'react-native';
 import { showActions } from '@/components/ActionSheet';
 import { supabase, errorMessage } from './supabase';
+import { tx } from './i18n';
 
 export type ReportKind = 'comment' | 'prayer' | 'ministry_message' | 'announcement' | 'church_chat' | 'outing_chat';
 
@@ -24,26 +25,26 @@ export async function unblockUser(userId: string): Promise<void> {
 }
 export async function blockedPeople(): Promise<{ id: string; name: string }[]> {
   const { data } = await supabase.from('user_blocks').select('blocked_id, profiles:blocked_id(display_name)');
-  return ((data ?? []) as unknown as { blocked_id: string; profiles: { display_name: string } | null }[]).map((r) => ({ id: r.blocked_id, name: r.profiles?.display_name ?? 'Alguien' }));
+  return ((data ?? []) as unknown as { blocked_id: string; profiles: { display_name: string } | null }[]).map((r) => ({ id: r.blocked_id, name: r.profiles?.display_name ?? tx('Alguien') }));
 }
 
 /** Menú "⋯" de una publicación ajena: denunciar y/o bloquear al autor. onChange recarga la lista. */
 export function moderate(opts: { kind: ReportKind; targetId: string; authorId: string | null; authorName?: string | null; excerpt: string; onChange?: () => void }) {
   const doReport = () =>
-    showActions('¿Por qué la denunciás?', 'Le llega al pastor y a la secretaría. Quien la publicó no sabe quién la denunció.', REASONS.map((r) => ({
-      text: r,
+    showActions(tx('¿Por qué la denunciás?'), tx('Le llega al pastor y a la secretaría. Quien la publicó no sabe quién la denunció.'), REASONS.map((r) => ({
+      text: tx(r),
       onPress: () => report(opts.kind, opts.targetId, opts.authorId, opts.excerpt, r)
-        .then(() => Alert.alert('Gracias', 'La denuncia le llegó al pastor. La va a revisar pronto.'))
-        .catch((e) => Alert.alert('No se pudo', errorMessage(e))),
+        .then(() => Alert.alert(tx('Gracias'), tx('La denuncia le llegó al pastor. La va a revisar pronto.')))
+        .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))),
     })));
   const doBlock = () =>
-    Alert.alert(`Bloquear a ${opts.authorName ?? 'esta persona'}`, 'Ya no vas a ver sus comentarios, mensajes del chat, pedidos de oración ni mensajes de ministerio. Lo podés deshacer en Ajustes.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Bloquear', style: 'destructive', onPress: () => blockUser(opts.authorId as string).then(() => opts.onChange?.()).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+    Alert.alert(tx('Bloquear a {authorName}', { authorName: opts.authorName ?? tx('esta persona') }), tx('Ya no vas a ver sus comentarios, mensajes del chat, pedidos de oración ni mensajes de ministerio. Lo podés deshacer en Ajustes.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Bloquear'), style: 'destructive', onPress: () => blockUser(opts.authorId as string).then(() => opts.onChange?.()).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
     ]);
-  showActions('Opciones', undefined, [
-    { text: 'Denunciar esta publicación', icon: 'flag', onPress: doReport },
-    ...(opts.authorId ? [{ text: `Bloquear a ${opts.authorName ?? 'esta persona'}`, icon: 'slash' as const, destructive: true, onPress: doBlock }] : []),
-    { text: 'Cancelar', icon: 'x' as const },
+  showActions(tx('Opciones'), undefined, [
+    { text: tx('Denunciar esta publicación'), icon: 'flag', onPress: doReport },
+    ...(opts.authorId ? [{ text: tx('Bloquear a {authorName}', { authorName: opts.authorName ?? tx('esta persona') }), icon: 'slash' as const, destructive: true, onPress: doBlock }] : []),
+    { text: tx('Cancelar'), icon: 'x' as const },
   ]);
 }

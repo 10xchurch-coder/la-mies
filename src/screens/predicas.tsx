@@ -11,6 +11,7 @@ import { fmtDateOnly, youtubeId } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Sermon } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Predicas() {
   const router = useRouter();
@@ -26,17 +27,17 @@ export default function Predicas() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
-        title="Prédicas"
-        subtitle="Mirá o escuchá cuando quieras"
+        title={tx('Prédicas')}
+        subtitle={tx('Mirá o escuchá cuando quieras')}
         right={isStaff ? (
-          <Pressable onPress={() => router.push('/predica/nueva')} accessibilityRole="button" accessibilityLabel="Subir prédica" style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
+          <Pressable onPress={() => router.push('/predica/nueva')} accessibilityRole="button" accessibilityLabel={tx('Subir prédica')} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
             <Feather name="plus" size={22} color="#FFF" />
           </Pressable>
         ) : undefined}
       />
       {rows === null ? <Loading /> : (
         <Screen>
-          {!rows.length ? <Empty icon="mic" title="Todavía no hay prédicas" text={isStaff ? 'Tocá + para cargar la de esta semana: el link de YouTube y el audio.' : 'Cuando se carguen, van a aparecer acá.'} /> : null}
+          {!rows.length ? <Empty icon="mic" title={tx('Todavía no hay prédicas')} text={isStaff ? tx('Tocá + para cargar la de esta semana: el link de YouTube y el audio.') : tx('Cuando se carguen, van a aparecer acá.')} /> : null}
           {rows.map((s) => {
             const yt = youtubeId(s.youtube_url);
             return (
@@ -61,7 +62,7 @@ export default function Predicas() {
                     <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{s.title}</Text>
                     <Text style={{ fontSize: 13, color: colors.muted }}>{[s.preacher, fmtDateOnly(s.preached_on), s.passage].filter(Boolean).join(' · ')}</Text>
                   </View>
-                  {s.audio_path ? <Tag text="Audio" tone="green" /> : null}
+                  {s.audio_path ? <Tag text={tx('Audio')} tone="green" /> : null}
                 </View>
               </Pressable>
             );

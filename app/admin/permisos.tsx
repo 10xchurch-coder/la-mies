@@ -10,6 +10,7 @@ import { errorMessage, supabase } from '@/lib/supabase';
 import { permsOf, useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Profile } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Permisos() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -35,24 +36,24 @@ export default function Permisos() {
   const base = permsOf({ ...p });
 
   const toggle = async (k: Perm, on: boolean) => {
-    if (k === 'admin.permisos' && !on && p.id === me?.id) { Alert.alert('No te podés sacar a vos mismo el permiso de dar permisos'); return; }
+    if (k === 'admin.permisos' && !on && p.id === me?.id) { Alert.alert(tx('No te podés sacar a vos mismo el permiso de dar permisos')); return; }
     const state = on === base.includes(k) ? 'default' : on ? 'grant' : 'revoke';
     setBusy(k);
     const { error } = await supabase.rpc('set_permission', { p_profile: p.id, p_perm: k, p_state: state });
     setBusy(null);
-    if (error) Alert.alert('No se pudo', errorMessage(error));
+    if (error) Alert.alert(tx('No se pudo'), errorMessage(error));
     load();
     if (p.id === me?.id) refreshProfile();
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={p.display_name} subtitle={`Permisos · ${roleLabel(p.role)}`} back />
+      <Header title={p.display_name} subtitle={tx('Permisos · {roleLabel}', { roleLabel: roleLabel(p.role) })} back />
       <Screen>
         <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
           {locked
-            ? isTopRole(p.role) ? 'Es pastor o administrador de la app: tiene todo, y solo otro pastor o administrador lo puede cambiar.' : 'Solo el pastor y el administrador de la app cambian permisos.'
-            : 'Prendé o apagá lo que quieras. Lo que viene con su rol dice "por su rol"; lo que cambiás vos queda marcado.'}
+            ? isTopRole(p.role) ? tx('Es pastor o administrador de la app: tiene todo, y solo otro pastor o administrador lo puede cambiar.') : tx('Solo el pastor y el administrador de la app cambian permisos.')
+            : tx('Prendé o apagá lo que quieras. Lo que viene con su rol dice "por su rol"; lo que cambiás vos queda marcado.')}
         </Text>
         {PERM_GROUPS.map((g) => (
           <View key={g.title} style={{ gap: 8 }}>
@@ -68,7 +69,7 @@ export default function Permisos() {
                       <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>{x.label}</Text>
                       {x.hint ? <Text style={{ fontSize: 12, color: colors.muted }}>{x.hint}</Text> : null}
                       <View style={{ flexDirection: 'row' }}>
-                        {ov === true ? <Tag text="Dado aparte" tone="green" /> : ov === false ? <Tag text="Sacado aparte" tone="red" /> : on ? <Tag text="Por su rol" tone="gray" /> : null}
+                        {ov === true ? <Tag text={tx('Dado aparte')} tone="green" /> : ov === false ? <Tag text={tx('Sacado aparte')} tone="red" /> : on ? <Tag text={tx('Por su rol')} tone="gray" /> : null}
                       </View>
                     </View>
                     <Switch value={on} disabled={locked || busy !== null} onValueChange={(v) => toggle(x.key, v)} trackColor={{ true: colors.green, false: colors.input }} />

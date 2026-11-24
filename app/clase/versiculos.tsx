@@ -15,6 +15,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Contact } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Versiculos() {
   const router = useRouter();
@@ -62,7 +63,7 @@ export default function Versiculos() {
       await setVerseDone(verseId, contactId, !was);
     } catch (e) {
       setDone(before);
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     }
   };
 
@@ -73,54 +74,54 @@ export default function Versiculos() {
       setReference(''); setBody(''); setForAll(false); setAdding(false);
       load();
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
   };
 
-  const hide = (v: MemoryVerse) => Alert.alert('Sacar de la lista', `¿Sacar ${v.reference}? Ya no cuenta para los premios.`, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Sacar', style: 'destructive', onPress: () => hideVerse(v.id).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+  const hide = (v: MemoryVerse) => Alert.alert(tx('Sacar de la lista'), tx('¿Sacar {reference}? Ya no cuenta para los premios.', { reference: v.reference }), [
+    { text: tx('Cancelar'), style: 'cancel' },
+    { text: tx('Sacar'), style: 'destructive', onPress: () => hideVerse(v.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
   ]);
 
   if (verses === null) return <Loading />;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Versículos de memoria" subtitle={name || 'Clase'} back />
+      <Header title={tx('Versículos de memoria')} subtitle={name || tx('Clase')} back />
       <Screen>
-        <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>Premios: {BADGES.map((b) => `${b.emoji} ${b.name} a los ${b.at}`).join(' · ')}.</Text>
+        <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>{tx('Premios: {map}.', { map: BADGES.map((b) => tx('{emoji} {name} a los {at}', { emoji: b.emoji, name: b.name, at: b.at })).join(' · ') })}</Text>
 
-        <SectionTitle right={canMark && !adding ? <Text onPress={() => setAdding(true)} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>+ Agregar</Text> : undefined}>Versículos</SectionTitle>
+        <SectionTitle right={canMark && !adding ? <Text onPress={() => setAdding(true)} style={{ color: colors.green, fontWeight: '800', fontSize: 13 }}>{tx('+ Agregar')}</Text> : undefined}>{tx('Versículos')}</SectionTitle>
         {adding ? (
           <Card style={{ gap: 10 }}>
-            <Field label="Cita" value={reference} onChangeText={setReference} placeholder="Juan 3:16" maxLength={80} />
-            <Field label="Texto del versículo" hint="(opcional)" value={body} onChangeText={setBody} multiline maxLength={1000} placeholder="Porque de tal manera amó Dios al mundo…" />
-            {leader ? <Toggle label="Para todas las clases" hint="Aparece en la lista de cada clase de la iglesia" value={forAll} onChange={setForAll} /> : null}
+            <Field label={tx('Cita')} value={reference} onChangeText={setReference} placeholder={tx('Juan 3:16')} maxLength={80} />
+            <Field label={tx('Texto del versículo')} hint={tx('(opcional)')} value={body} onChangeText={setBody} multiline maxLength={1000} placeholder={tx('Porque de tal manera amó Dios al mundo…')} />
+            {leader ? <Toggle label={tx('Para todas las clases')} hint={tx('Aparece en la lista de cada clase de la iglesia')} value={forAll} onChange={setForAll} /> : null}
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Cancelar" variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
-              <Button title="Guardar" small onPress={add} loading={busy} disabled={reference.trim().length < 2} style={{ flex: 2 }} />
+              <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setAdding(false)} style={{ flex: 1 }} />
+              <Button title={tx('Guardar')} small onPress={add} loading={busy} disabled={reference.trim().length < 2} style={{ flex: 2 }} />
             </View>
           </Card>
         ) : null}
-        {!list.length && !adding ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>Todavía no hay versículos. {canMark ? 'Tocá “+ Agregar” para armar la lista.' : ''}</Text> : null}
+        {!list.length && !adding ? <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{tx('Todavía no hay versículos. {pl}', { pl: canMark ? tx('Tocá “+ Agregar” para armar la lista.') : '' })}</Text> : null}
         {list.map((v) => {
           const n = students.filter((s) => has(v.id, s.id)).length;
           const isOpen = open === v.id;
           const canHide = leader || (isTeacher && !!v.class_id);
           return (
             <Card key={v.id} style={{ gap: 10, padding: 12 }}>
-              <Pressable onPress={() => setOpen(isOpen ? null : v.id)} accessibilityRole="button" accessibilityLabel={`${v.reference}. ${n} de ${students.length} lo saben`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Pressable onPress={() => setOpen(isOpen ? null : v.id)} accessibilityRole="button" accessibilityLabel={tx('{reference}. {n} de {n2} lo saben', { reference: v.reference, n, n2: students.length })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{v.reference}</Text>
                   {v.body ? <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }} numberOfLines={isOpen ? undefined : 2}>{v.body}</Text> : null}
-                  <Text style={{ fontSize: 12, color: colors.muted }}>{students.length ? `${n} de ${students.length} lo saben` : ''}{!v.class_id ? `${students.length ? ' · ' : ''}Para todas las clases` : ''}</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{students.length ? tx('{n} de {n2} lo saben', { n, n2: students.length }) : ''}{!v.class_id ? tx('{pl}Para todas las clases', { pl: students.length ? ' · ' : '' }) : ''}</Text>
                 </View>
                 <Feather name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
               </Pressable>
               {isOpen ? (
                 <>
-                  {canMark && students.length ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>Tocá a cada chico que ya lo sabe:</Text> : null}
+                  {canMark && students.length ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>{tx('Tocá a cada chico que ya lo sabe:')}</Text> : null}
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {students.map((s) => {
                       const on = has(v.id, s.id);
@@ -133,8 +134,8 @@ export default function Versiculos() {
                       );
                     })}
                   </View>
-                  {!students.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{canMark ? 'Esta clase todavía no tiene alumnos.' : 'Los maestros de la clase marcan quién lo aprendió.'}</Text> : null}
-                  {canHide ? <Text onPress={() => hide(v)} style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>Sacar este versículo de la lista</Text> : null}
+                  {!students.length ? <Text style={{ fontSize: 13, color: colors.muted }}>{canMark ? tx('Esta clase todavía no tiene alumnos.') : tx('Los maestros de la clase marcan quién lo aprendió.')}</Text> : null}
+                  {canHide ? <Text onPress={() => hide(v)} style={{ fontSize: 13, fontWeight: '700', color: colors.muted }}>{tx('Sacar este versículo de la lista')}</Text> : null}
                 </>
               ) : null}
             </Card>
@@ -143,7 +144,7 @@ export default function Versiculos() {
 
         {students.length && list.length ? (
           <>
-            <SectionTitle>Los chicos y sus premios</SectionTitle>
+            <SectionTitle>{tx('Los chicos y sus premios')}</SectionTitle>
             <Card style={{ padding: 0 }}>
               {ranked.map((s) => {
                 const c = counts.get(s.id) ?? 0;

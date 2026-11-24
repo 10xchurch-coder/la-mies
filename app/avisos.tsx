@@ -11,6 +11,7 @@ import { listNotifications, markRead } from '@/lib/api';
 import { fmtRelativeDay, fmtTime } from '@/lib/format';
 import { colors } from '@/theme';
 import type { NotificationRow } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 const ICON: Record<string, IconName> = { duty: 'calendar', class: 'book-open', ministry: 'volume-2', absences: 'user-x', link: 'link', outing: 'map', dm: 'send', dm_report: 'flag', pastor_msg: 'mail' };
@@ -54,7 +55,7 @@ export default function Avisos() {
         <Text style={{ fontSize: 11, color: colors.muted }}>{fmtRelativeDay(n.created_at)} · {fmtTime(n.created_at)}</Text>
       </View>
       {!n.read_at ? (
-        <Pressable onPress={() => dismiss(n)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Listo, sacar el aviso" style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable onPress={() => dismiss(n)} hitSlop={10} accessibilityRole="button" accessibilityLabel={tx('Listo, sacar el aviso')} style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
           <Feather name="x" size={18} color={colors.muted} />
         </Pressable>
       ) : null}
@@ -64,18 +65,18 @@ export default function Avisos() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
-        title="Avisos"
-        subtitle={unread ? `${unread} por atender` : 'Al día'}
+        title={tx('Avisos')}
+        subtitle={unread ? tx('{unread} por atender', { unread }) : tx('Al día')}
         back
-        right={unread ? <Text onPress={() => markRead().then(() => listNotifications().then(setRows))} style={{ color: colors.green, fontWeight: '800', padding: 8 }}>Listo con todos</Text> : undefined}
+        right={unread ? <Text onPress={() => markRead().then(() => listNotifications().then(setRows))} style={{ color: colors.green, fontWeight: '800', padding: 8 }}>{tx('Listo con todos')}</Text> : undefined}
       />
       {rows === null ? <Loading /> : (
         <Screen>
-          {!pending.length ? <Empty icon="check-circle" title="Estás al día" text="Cuando llegue un recordatorio, un anuncio o alguien para seguir, aparece acá. Al atenderlo, desaparece." /> : null}
+          {!pending.length ? <Empty icon="check-circle" title={tx('Estás al día')} text={tx('Cuando llegue un recordatorio, un anuncio o alguien para seguir, aparece acá. Al atenderlo, desaparece.')} /> : null}
           {pending.map((n) => <Item key={n.id} n={n} />)}
           {old.length ? (
             <Pressable onPress={() => setShowOld((v) => !v)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10 }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.muted }}>{showOld ? 'Ocultar anteriores' : `Ver anteriores (${old.length})`}</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: colors.muted }}>{showOld ? tx('Ocultar anteriores') : tx('Ver anteriores ({n})', { n: old.length })}</Text>
               <Feather name={showOld ? 'chevron-up' : 'chevron-down'} size={16} color={colors.muted} />
             </Pressable>
           ) : null}

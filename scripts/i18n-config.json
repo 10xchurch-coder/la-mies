@@ -15,6 +15,13 @@
     "src/lib/format.ts": [
       "toda",
       "todo"
+    ],
+    "app/familia-ubicacion.tsx": [
+      "Iglesia",
+      "Casa",
+      "Trabajo",
+      "Escuela",
+      "Otro"
     ]
   },
   "words": [

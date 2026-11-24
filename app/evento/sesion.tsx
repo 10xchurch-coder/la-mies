@@ -13,6 +13,7 @@ import { parseTicket } from '@/lib/ticket';
 import { fmtDay, fmtTime } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Flash = { tone: 'green' | 'amber' | 'red'; text: string } | null;
 
@@ -38,7 +39,7 @@ export default function Sesion() {
   }, [id, refresh]));
 
   if (ev === undefined || list === null) return <Loading />;
-  if (!ev) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title="Asistencia al programa" back /><Empty icon="calendar" title="Este evento ya no está" /></View>;
+  if (!ev) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title={tx('Asistencia al programa')} back /><Empty icon="calendar" title={tx('Este evento ya no está')} /></View>;
   const countOf = (sid: string) => counts.find((c) => c.session_id === sid);
   const current = s ? list.find((x) => x.id === s) : undefined;
 
@@ -46,14 +47,14 @@ export default function Sesion() {
   if (!current) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Asistencia al programa" subtitle={ev.title} back />
+        <Header title={tx('Asistencia al programa')} subtitle={ev.title} back />
         <Screen>
-          <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>Elegí el taller o el momento. Después leé la credencial de cada persona que entra (el QR o el chip) y queda anotada.</Text>
-          {!list.length ? <Empty icon="clock" title="El programa está vacío" text="Primero cargá los momentos en Planificar → Programa." /> : null}
+          <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>{tx('Elegí el taller o el momento. Después leé la credencial de cada persona que entra (el QR o el chip) y queda anotada.')}</Text>
+          {!list.length ? <Empty icon="clock" title={tx('El programa está vacío')} text={tx('Primero cargá los momentos en Planificar → Programa.')} /> : null}
           {list.map((x) => {
             const c = countOf(x.id);
             return (
-              <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={`Tomar asistencia de ${x.title}`} onPress={() => router.push({ pathname: '/evento/sesion', params: { id, s: x.id } } as unknown as Href)}>
+              <Pressable key={x.id} accessibilityRole="button" accessibilityLabel={tx('Tomar asistencia de {title}', { title: x.title })} onPress={() => router.push({ pathname: '/evento/sesion', params: { id, s: x.id } } as unknown as Href)}>
                 <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{x.title}</Text>
@@ -61,7 +62,7 @@ export default function Sesion() {
                   </View>
                   <View style={{ alignItems: 'center', minWidth: 54 }}>
                     <Text style={{ fontSize: 22, fontWeight: '900', color: colors.greenText }}>{c?.people ?? 0}</Text>
-                    <Text style={{ fontSize: 11, color: colors.muted }}>fueron</Text>
+                    <Text style={{ fontSize: 11, color: colors.muted }}>{tx('fueron')}</Text>
                   </View>
                   <Feather name="chevron-right" size={18} color={colors.gray} />
                 </Card>
@@ -77,14 +78,14 @@ export default function Sesion() {
   const mark = async (c: string) => {
     try {
       const r = await sessionScan(current.id, { code: c });
-      const many = r.people > 1 ? ` (${r.people} personas)` : '';
-      setFlash(r.result === 'ok' ? { tone: 'green', text: `✓ ${r.name}${many}` } : { tone: 'amber', text: `${r.name} ya estaba anotado acá` });
+      const many = r.people > 1 ? tx(' ({people} personas)', { people: r.people }) : '';
+      setFlash(r.result === 'ok' ? { tone: 'green', text: `✓ ${r.name}${many}` } : { tone: 'amber', text: tx('{name} ya estaba anotado acá', { name: r.name }) });
       refresh();
     } catch (e) { setFlash({ tone: 'red', text: errorMessage(e) }); }
   };
   const onText = (text: string | null, from: 'chip' | 'qr') => {
     const c = parseTicket(text);
-    if (!c) { setFlash({ tone: 'red', text: from === 'chip' ? (text ? 'Ese chip no es una entrada de La Mies' : 'El chip está vacío. Probá con el QR de la credencial.') : 'Ese QR no es una entrada de La Mies' }); return; }
+    if (!c) { setFlash({ tone: 'red', text: from === 'chip' ? (text ? tx('Ese chip no es una entrada de La Mies') : tx('El chip está vacío. Probá con el QR de la credencial.')) : tx('Ese QR no es una entrada de La Mies') }); return; }
     mark(c);
   };
   const chip = async () => {
@@ -93,7 +94,7 @@ export default function Sesion() {
   };
   const byCode = () => {
     const c = parseTicket(code);
-    if (!c) { Alert.alert('Código no válido', 'Son 8 letras y números, por ejemplo 1A2B-3C4D.'); return; }
+    if (!c) { Alert.alert(tx('Código no válido'), tx('Son 8 letras y números, por ejemplo 1A2B-3C4D.')); return; }
     setCode(''); mark(c);
   };
   const c = countOf(current.id);
@@ -104,20 +105,20 @@ export default function Sesion() {
       <Header title={current.title} subtitle={`${fmtDay(current.starts_at)} · ${fmtTime(current.starts_at)}${current.place ? ` · ${current.place}` : ''}`} back />
       <Screen>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Stat value={c?.people ?? 0} label="Personas acá" tone="green" />
-          <Stat value={c?.registrations ?? 0} label="Credenciales leídas" />
+          <Stat value={c?.people ?? 0} label={tx('Personas acá')} tone="green" />
+          <Stat value={c?.registrations ?? 0} label={tx('Credenciales leídas')} />
         </View>
         {flash ? <Card style={{ backgroundColor: bg, borderColor: bg }}><Text style={{ fontSize: 17, fontWeight: '800', color: fg }}>{flash.text}</Text></Card> : null}
         <Card style={{ gap: 10 }}>
-          {nfcBuilt ? <Button title="Leer el chip de la credencial" icon="radio" variant="outline" onPress={chip} /> : null}
-          {scannerAvailable ? (scan ? <TicketScanner onCode={(t) => onText(t, 'qr')} onClose={() => setScan(false)} /> : <Button title="Leer el QR de la credencial" icon="camera" onPress={() => setScan(true)} />) : null}
+          {nfcBuilt ? <Button title={tx('Leer el chip de la credencial')} icon="radio" variant="outline" onPress={chip} /> : null}
+          {scannerAvailable ? (scan ? <TicketScanner onCode={(t) => onText(t, 'qr')} onClose={() => setScan(false)} /> : <Button title={tx('Leer el QR de la credencial')} icon="camera" onPress={() => setScan(true)} />) : null}
           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
-            <Field label="Código de la entrada" value={code} onChangeText={setCode} autoCapitalize="characters" autoCorrect={false} placeholder="1A2B-3C4D" style={{ flex: 1 }} onSubmitEditing={byCode} />
-            <Button title="Anotar" onPress={byCode} />
+            <Field label={tx('Código de la entrada')} value={code} onChangeText={setCode} autoCapitalize="characters" autoCorrect={false} placeholder="1A2B-3C4D" style={{ flex: 1 }} onSubmitEditing={byCode} />
+            <Button title={tx('Anotar')} onPress={byCode} />
           </View>
         </Card>
-        <SectionTitle>Los que estuvieron</SectionTitle>
-        {!people.length ? <Text style={{ fontSize: 14, color: colors.muted }}>Todavía no se leyó ninguna credencial en este momento.</Text> : (
+        <SectionTitle>{tx('Los que estuvieron')}</SectionTitle>
+        {!people.length ? <Text style={{ fontSize: 14, color: colors.muted }}>{tx('Todavía no se leyó ninguna credencial en este momento.')}</Text> : (
           <Card style={{ padding: 0 }}>
             {people.map((p, i) => (
               <View key={p.registration_id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>

@@ -2,20 +2,21 @@
 // Que uno venga NO quiere decir que vino la familia: la asistencia y el seguimiento son de cada persona.
 // Acá no hay nada de la base ni de la pantalla, para poder probarse solo.
 
+import { tx } from './i18n';
 export type FamilyRole = 'padre' | 'madre' | 'hijo' | 'hija' | 'abuelo' | 'abuela' | 'otro';
 
 export const FAMILY_ROLES: { value: FamilyRole; label: string }[] = [
-  { value: 'padre', label: 'Papá' },
-  { value: 'madre', label: 'Mamá' },
-  { value: 'hijo', label: 'Hijo' },
-  { value: 'hija', label: 'Hija' },
-  { value: 'abuelo', label: 'Abuelo' },
-  { value: 'abuela', label: 'Abuela' },
-  { value: 'otro', label: 'Otro familiar' },
+  { value: 'padre', get label() { return tx('Papá'); } },
+  { value: 'madre', get label() { return tx('Mamá'); } },
+  { value: 'hijo', get label() { return tx('Hijo'); } },
+  { value: 'hija', get label() { return tx('Hija'); } },
+  { value: 'abuelo', get label() { return tx('Abuelo'); } },
+  { value: 'abuela', get label() { return tx('Abuela'); } },
+  { value: 'otro', get label() { return tx('Otro familiar'); } },
 ];
 
 const LABEL = new Map(FAMILY_ROLES.map((r) => [r.value, r.label]));
-export const roleLabel = (r: string | null | undefined): string => LABEL.get(r as FamilyRole) ?? 'Familiar';
+export const roleLabel = (r: string | null | undefined): string => LABEL.get(r as FamilyRole) ?? tx('Familiar');
 
 export const isChildRole = (r: string | null | undefined): boolean => r === 'hijo' || r === 'hija';
 
@@ -54,8 +55,8 @@ export function pickupAdults<T extends { contact_id: string; role: string; can_p
 /** "Rubén Sosa" -> "Familia Sosa". Es solo una idea para el nombre: se puede cambiar. */
 export function familyNameFor(personName: string | null | undefined): string {
   const words = (personName ?? '').trim().split(/\s+/).filter(Boolean);
-  if (words.length < 2) return 'Familia';
-  return `Familia ${words[words.length - 1]}`;
+  if (words.length < 2) return tx('Familia');
+  return tx('Familia {words}', { words: words[words.length - 1] });
 }
 
 /** El lugar más probable de una persona en la familia, por su edad y su sexo. Siempre se puede cambiar. */
@@ -74,7 +75,7 @@ export type FamilyGroup<T> = { key: string; title: string; rows: T[] };
  * Las familias van por orden de nombre; al final, los que no tienen familia cargada.
  * Agrupar es solo para verlos juntos: no cambia nada de la asistencia de nadie.
  */
-export function groupByFamily<T>(rows: T[], familyOf: (row: T) => { id: string; name: string } | null | undefined, noFamilyTitle = 'Sin familia cargada'): FamilyGroup<T>[] {
+export function groupByFamily<T>(rows: T[], familyOf: (row: T) => { id: string; name: string } | null | undefined, noFamilyTitle = tx('Sin familia cargada')): FamilyGroup<T>[] {
   const groups = new Map<string, FamilyGroup<T>>();
   const alone: T[] = [];
   for (const r of rows) {

@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { cachedSignedUrl, signedUrl, type Bucket } from '@/lib/files';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function SignedImage({ bucket, path, style, fit = 'cover', onPress, label }: {
   bucket: Bucket; path: string | null | undefined; style?: StyleProp<ViewStyle>; fit?: 'cover' | 'contain'; onPress?: () => void; label?: string;
@@ -21,5 +22,5 @@ export function SignedImage({ bucket, path, style, fit = 'cover', onPress, label
       {url ? <Image source={{ uri: url }} style={{ width: '100%', height: '100%' }} contentFit={fit} transition={150} cachePolicy="memory-disk" /> : <Feather name="image" size={24} color={colors.green} />}
     </View>
   );
-  return onPress ? <Pressable onPress={onPress} accessibilityRole="imagebutton" accessibilityLabel={label ?? 'Ver foto'}>{inner}</Pressable> : inner;
+  return onPress ? <Pressable onPress={onPress} accessibilityRole="imagebutton" accessibilityLabel={label ?? tx('Ver foto')}>{inner}</Pressable> : inner;
 }

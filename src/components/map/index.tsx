@@ -5,6 +5,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import RNMapView, { Circle, Marker, Polygon, Polyline, type MapViewProps } from 'react-native-maps';
 import { themed } from '../../theme';
+import { tx } from '@/lib/i18n';
 
 export { Circle, Marker, Polygon, Polyline };
 export type { MapViewProps, Region, MapType, MapStyleElement } from 'react-native-maps';
@@ -18,8 +19,8 @@ export const MapView = React.forwardRef<RNMapView, MapViewProps>(function MapVie
   if (!mapAvailable) {
     return (
       <View style={[StyleSheet.absoluteFill, props.style, styles.missing]}>
-        <Text style={styles.title}>El mapa todavía no está activado en Android</Text>
-        <Text style={styles.text}>Falta la clave de Google Maps en esta versión de prueba. Todo lo demás funciona.</Text>
+        <Text style={styles.title}>{tx('El mapa todavía no está activado en Android')}</Text>
+        <Text style={styles.text}>{tx('Falta la clave de Google Maps en esta versión de prueba. Todo lo demás funciona.')}</Text>
       </View>
     );
   }

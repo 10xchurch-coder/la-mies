@@ -12,6 +12,7 @@ import { discLesson, discList, discStart, peopleSettings, personChoices, teacher
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Show = 'now' | 'stale' | 'done';
 
@@ -46,9 +47,9 @@ export default function Discipulado() {
   const addLesson = (r: DiscRow) => {
     const next = lessonProgress(r.lessons, total).next;
     if (!next) return;
-    Alert.alert(r.name, `¿Hoy hicieron «${names[next - 1]}» (lección ${next} de ${total})?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sí, anotar', onPress: () => { discLesson(r.id, next, null).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e))); } },
+    Alert.alert(r.name, tx('¿Hoy hicieron «{names}» (lección {next} de {total})?', { names: names[next - 1], next, total }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Sí, anotar'), onPress: () => { discLesson(r.id, next, null).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))); } },
     ]);
   };
   const startWith = () => {
@@ -59,20 +60,20 @@ export default function Discipulado() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Discipulado" subtitle={course} back />
+      <Header title={tx('Discipulado')} subtitle={course} back />
       <Screen>
         {data === null ? <Loading /> : (
           <>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Stat value={groups.now.length} label="Haciendo el curso" tone="blue" active={show === 'now'} onPress={() => setShow('now')} />
-              <Stat value={groups.stale.length} label={`Más de ${STALE_DAYS} días sin juntarse`} tone="amber" active={show === 'stale'} onPress={() => setShow('stale')} />
-              <Stat value={groups.done.length} label="Terminaron" tone="green" active={show === 'done'} onPress={() => setShow('done')} />
+              <Stat value={groups.now.length} label={tx('Haciendo el curso')} tone="blue" active={show === 'now'} onPress={() => setShow('now')} />
+              <Stat value={groups.stale.length} label={tx('Más de {STALE_DAYS} días sin juntarse', { STALE_DAYS })} tone="amber" active={show === 'stale'} onPress={() => setShow('stale')} />
+              <Stat value={groups.done.length} label={tx('Terminaron')} tone="green" active={show === 'done'} onPress={() => setShow('done')} />
             </View>
-            {data.lead ? <Button title="Empezar con alguien" icon="plus" onPress={startWith} /> : null}
+            {data.lead ? <Button title={tx('Empezar con alguien')} icon="plus" onPress={startWith} /> : null}
             {!list.length ? (
               <Empty icon="book-open"
-                title={show === 'stale' ? 'Todos se juntaron hace poco' : show === 'done' ? 'Todavía nadie terminó el curso' : data.lead ? 'Nadie está en discipulado' : 'No le estás enseñando a nadie'}
-                text={show === 'now' ? (data.lead ? 'Tocá “Empezar con alguien”, o entrá a la ficha de la persona y tocá “Empezar discipulado”.' : 'Cuando un líder te pida discipular a alguien, lo vas a ver acá.') : undefined} />
+                title={show === 'stale' ? tx('Todos se juntaron hace poco') : show === 'done' ? tx('Todavía nadie terminó el curso') : data.lead ? tx('Nadie está en discipulado') : tx('No le estás enseñando a nadie')}
+                text={show === 'now' ? (data.lead ? tx('Tocá “Empezar con alguien”, o entrá a la ficha de la persona y tocá “Empezar discipulado”.') : tx('Cuando un líder te pida discipular a alguien, lo vas a ver acá.')) : undefined} />
             ) : null}
             {list.map((r) => {
               const p = lessonProgress(r.lessons, total);
@@ -85,44 +86,44 @@ export default function Discipulado() {
                     <View style={{ flex: 1, gap: 3 }}>
                       <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{r.name}</Text>
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                        <Tag text={p.complete ? 'Terminó' : `Lección ${p.done} de ${total}`} tone={p.complete ? 'green' : 'blue'} />
-                        {r.mine ? <Tag text="Le enseñás vos" tone="green" /> : null}
+                        <Tag text={p.complete ? tx('Terminó') : tx('Lección {done} de {total}', { done: p.done, total })} tone={p.complete ? 'green' : 'blue'} />
+                        {r.mine ? <Tag text={tx('Le enseñás vos')} tone="green" /> : null}
                       </View>
                     </View>
                   </Pressable>
                   <View style={{ gap: 2 }}>
-                    {p.next ? <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '700' }}>Sigue: </Text>{names[p.next - 1]}</Text> : null}
-                    <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '700' }}>Le enseña: </Text>{r.teacher_name ?? 'todavía nadie'}</Text>
+                    {p.next ? <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '700' }}>{tx('Sigue:')} </Text>{names[p.next - 1]}</Text> : null}
+                    <Text style={{ fontSize: 13, color: colors.text }}><Text style={{ fontWeight: '700' }}>{tx('Le enseña:')} </Text>{r.teacher_name ?? tx('todavía nadie')}</Text>
                     <Text style={{ fontSize: 13, color: stale ? colors.amberText : colors.text, fontWeight: stale ? '800' : '400' }}>
-                      {r.last_met ? `Se juntaron ${agoText(days)}` : `Todavía no se juntaron (empezó ${agoText(days)})`}{stale ? ' · hay que llamarlo' : ''}
+                      {r.last_met ? tx('Se juntaron {agoText}', { agoText: agoText(days) }) : tx('Todavía no se juntaron (empezó {agoText})', { agoText: agoText(days) })}{stale ? tx(' · hay que llamarlo') : ''}
                     </Text>
                   </View>
-                  {p.next ? <Button title="Anotar una lección" icon="check-circle" variant="outline" small onPress={() => addLesson(r)} /> : null}
+                  {p.next ? <Button title={tx('Anotar una lección')} icon="check-circle" variant="outline" small onPress={() => addLesson(r)} /> : null}
                 </Card>
               );
             })}
-            {isStaff ? <Button title="Cambiar el nombre del curso y las lecciones" icon="edit-2" variant="ghost" small onPress={() => router.push('/discipulado/lecciones' as Href)} /> : null}
+            {isStaff ? <Button title={tx('Cambiar el nombre del curso y las lecciones')} icon="edit-2" variant="ghost" small onPress={() => router.push('/discipulado/lecciones' as Href)} /> : null}
           </>
         )}
       </Screen>
 
       <PickerModal
         visible={picker === 'person'}
-        title="¿Quién empieza el discipulado?"
+        title={tx('¿Quién empieza el discipulado?')}
         items={people.filter((p) => !(data?.rows ?? []).some((r) => r.id === p.id && r.active)).map((p) => ({ id: p.id, title: p.name, photo: p.photo_path }))}
         onClose={() => setPicker(null)}
         onPick={(id) => { setChosen(id); setPicker('teacher'); }}
       />
       <PickerModal
         visible={picker === 'teacher'}
-        title="¿Quién le enseña?"
+        title={tx('¿Quién le enseña?')}
         items={teachers.filter((t) => t.id !== chosen).map((t) => ({ id: t.id, title: t.name, photo: t.photo_path }))}
         allowNone
-        noneLabel="Todavía no sé quién"
+        noneLabel={tx('Todavía no sé quién')}
         onClose={() => setPicker(null)}
         onPick={(tid) => {
           setPicker(null);
-          if (chosen) discStart(chosen, tid).then(load).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+          if (chosen) discStart(chosen, tid).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
         }}
       />
     </View>

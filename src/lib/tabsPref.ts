@@ -3,21 +3,22 @@ import { useSyncExternalStore } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Feather } from '@expo/vector-icons';
 import type React from 'react';
+import { tx } from './i18n';
 
 export type TabKey = 'mapa' | 'personas' | 'iglesia' | 'chat' | 'yo' | 'predicas' | 'eventos' | 'oracion' | 'crecimiento' | 'directorio';
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
 export const TAB_OPTIONS: { key: TabKey; title: string; icon: IconName; fixed?: boolean }[] = [
-  { key: 'mapa', title: 'Mapa', icon: 'map' },
-  { key: 'personas', title: 'Personas', icon: 'users' },
-  { key: 'iglesia', title: 'Iglesia', icon: 'home', fixed: true },
-  { key: 'chat', title: 'Chat', icon: 'message-circle' },
-  { key: 'yo', title: 'Yo', icon: 'user', fixed: true },
-  { key: 'predicas', title: 'Prédicas', icon: 'play-circle' },
-  { key: 'eventos', title: 'Calendario', icon: 'calendar' },
-  { key: 'oracion', title: 'Oración', icon: 'heart' },
-  { key: 'crecimiento', title: 'Crecimiento', icon: 'sunrise' },
-  { key: 'directorio', title: 'Directorio', icon: 'book' },
+  { key: 'mapa', get title() { return tx('Mapa'); }, icon: 'map' },
+  { key: 'personas', get title() { return tx('Personas'); }, icon: 'users' },
+  { key: 'iglesia', get title() { return tx('Iglesia'); }, icon: 'home', fixed: true },
+  { key: 'chat', get title() { return tx('Chat'); }, icon: 'message-circle' },
+  { key: 'yo', get title() { return tx('Yo'); }, icon: 'user', fixed: true },
+  { key: 'predicas', get title() { return tx('Prédicas'); }, icon: 'play-circle' },
+  { key: 'eventos', get title() { return tx('Calendario'); }, icon: 'calendar' },
+  { key: 'oracion', get title() { return tx('Oración'); }, icon: 'heart' },
+  { key: 'crecimiento', get title() { return tx('Crecimiento'); }, icon: 'sunrise' },
+  { key: 'directorio', get title() { return tx('Directorio'); }, icon: 'book' },
 ];
 export const ALL_TABS = TAB_OPTIONS.map((t) => t.key);
 export const DEFAULT_TABS: TabKey[] = ['mapa', 'personas', 'iglesia', 'chat', 'yo'];

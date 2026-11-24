@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { RecordingPresets, requestRecordingPermissionsAsync, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus, useAudioRecorder } from 'expo-audio';
 import { signedUrl } from '@/lib/files';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 /** ¿Este mensaje con archivo es un mensaje de voz? */
 export const isVoice = (name: string | null | undefined) => /^voz-.*\.(m4a|mp4|webm|ogg|wav|aac)$/i.test(name ?? '');
@@ -37,7 +38,7 @@ export function VoiceRecorder({ onSend, onCancel }: { onSend: (uri: string, seco
     (async () => {
       try {
         const perm = await requestRecordingPermissionsAsync();
-        if (!perm.granted) { Alert.alert('Sin permiso', 'Para mandar mensajes de voz, activá el micrófono para La Mies en los ajustes.'); onCancel(); return; }
+        if (!perm.granted) { Alert.alert(tx('Sin permiso'), tx('Para mandar mensajes de voz, activá el micrófono para La Mies en los ajustes.')); onCancel(); return; }
         await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
         await recorder.prepareToRecordAsync();
         if (!alive) return;
@@ -45,7 +46,7 @@ export function VoiceRecorder({ onSend, onCancel }: { onSend: (uri: string, seco
         started.current = Date.now();
         setState('recording');
       } catch {
-        Alert.alert('No se pudo grabar', 'Probá de nuevo.');
+        Alert.alert(tx('No se pudo grabar'), tx('Probá de nuevo.'));
         onCancel();
       }
     })();
@@ -72,26 +73,26 @@ export function VoiceRecorder({ onSend, onCancel }: { onSend: (uri: string, seco
       await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => undefined);
       const uri = recorder.uri;
       if (send && uri && secs >= 1) await onSend(uri, secs);
-      else if (send) Alert.alert('Muy corto', 'Mantené la grabación al menos un segundo.');
+      else if (send) Alert.alert(tx('Muy corto'), tx('Mantené la grabación al menos un segundo.'));
     } catch {
-      if (send) Alert.alert('No se pudo mandar', 'Probá de nuevo cuando tengas señal.');
+      if (send) Alert.alert(tx('No se pudo mandar'), tx('Probá de nuevo cuando tengas señal.'));
     }
     onCancel();
   };
 
   return (
     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 }}>
-      <Pressable onPress={() => finish.current(false)} disabled={state === 'sending'} accessibilityRole="button" accessibilityLabel="Borrar la grabación"
+      <Pressable onPress={() => finish.current(false)} disabled={state === 'sending'} accessibilityRole="button" accessibilityLabel={tx('Borrar la grabación')}
         style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.redSoft }}>
         <Feather name="trash-2" size={20} color={colors.redText} />
       </Pressable>
       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 16, borderRadius: 24, backgroundColor: colors.bgSoft }}>
         <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: state === 'recording' ? colors.red : colors.gray }} />
         <Text style={{ flex: 1, fontSize: 15, fontWeight: '700', color: colors.text }}>
-          {state === 'starting' ? 'Preparando el micrófono…' : state === 'sending' ? 'Mandando…' : `Grabando  ${clock(seconds)}`}
+          {state === 'starting' ? tx('Preparando el micrófono…') : state === 'sending' ? tx('Mandando…') : tx('Grabando  {clock}', { clock: clock(seconds) })}
         </Text>
       </View>
-      <Pressable onPress={() => finish.current(true)} disabled={state !== 'recording'} accessibilityRole="button" accessibilityLabel="Enviar el mensaje de voz"
+      <Pressable onPress={() => finish.current(true)} disabled={state !== 'recording'} accessibilityRole="button" accessibilityLabel={tx('Enviar el mensaje de voz')}
         style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.green, opacity: state === 'recording' ? 1 : 0.5 }}>
         {state === 'sending' ? <ActivityIndicator color="#FFF" /> : <Feather name="send" size={19} color="#FFF" />}
       </Pressable>
@@ -108,9 +109,9 @@ export function VoiceBubble({ path }: { path: string }) {
     setLoading(true);
     const u = await signedUrl('chat', path).catch(() => null);
     setLoading(false);
-    if (u) setUrl(u); else Alert.alert('No se pudo abrir', 'Probá de nuevo cuando tengas señal.');
+    if (u) setUrl(u); else Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo cuando tengas señal.'));
   };
-  return <VoiceRow playing={false} loading={loading} label="Mensaje de voz" onPress={load} />;
+  return <VoiceRow playing={false} loading={loading} label={tx('Mensaje de voz')} onPress={load} />;
 }
 
 function VoicePlayer({ url }: { url: string }) {
@@ -123,13 +124,13 @@ function VoicePlayer({ url }: { url: string }) {
     if (st.duration && st.currentTime >= st.duration - 0.2) player.seekTo(0).catch(() => undefined);
     player.play();
   };
-  const label = st.isLoaded ? `${clock(st.currentTime)} / ${clock(st.duration || 0)}` : 'Cargando…';
+  const label = st.isLoaded ? `${clock(st.currentTime)} / ${clock(st.duration || 0)}` : tx('Cargando…');
   return <VoiceRow playing={st.playing} loading={!st.isLoaded} label={label} progress={st.duration ? st.currentTime / st.duration : 0} onPress={toggle} />;
 }
 
 function VoiceRow({ playing, loading, label, progress = 0, onPress }: { playing: boolean; loading: boolean; label: string; progress?: number; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} disabled={loading} accessibilityRole="button" accessibilityLabel={playing ? 'Pausar el mensaje de voz' : 'Escuchar el mensaje de voz'}
+    <Pressable onPress={onPress} disabled={loading} accessibilityRole="button" accessibilityLabel={playing ? tx('Pausar el mensaje de voz') : tx('Escuchar el mensaje de voz')}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 210, paddingVertical: 4 }}>
       <View style={{ width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.violet }}>
         {loading ? <ActivityIndicator color="#FFF" /> : <Feather name={playing ? 'pause' : 'play'} size={19} color="#FFF" />}

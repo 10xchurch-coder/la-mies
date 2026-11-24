@@ -8,6 +8,7 @@ import { shareText } from '@/lib/share';
 import { supabase } from '@/lib/supabase';
 import { colors } from '@/theme';
 import { downloadView } from '@/lib/download';
+import { tx } from '@/lib/i18n';
 
 function Inline({ text, style }: { text: string; style?: object }) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
@@ -22,7 +23,7 @@ export default function Informe() {
     supabase.from('pastor_reports').select('title, body').eq('id', id).maybeSingle().then(({ data }) => setR(data ?? null));
   }, [id]);
   if (r === undefined) return <Loading />;
-  if (!r) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title="Informe" back /><Text style={{ padding: 24, color: colors.muted }}>No se encontró.</Text></View>;
+  if (!r) return <View style={{ flex: 1, backgroundColor: colors.bg }}><Header title={tx('Informe')} back /><Text style={{ padding: 24, color: colors.muted }}>{tx('No se encontró.')}</Text></View>;
   const base = { fontSize: 15, lineHeight: 23, color: colors.text };
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -39,9 +40,9 @@ export default function Informe() {
             return <Inline key={i} text={t} style={base} />;
           })}
         </View>
-        <Button title="Compartir" icon="share-2" variant="outline" onPress={() => shareText(`${r.title}\n\n${r.body.replace(/\*\*/g, '')}`, r.title)} />
+        <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={() => shareText(`${r.title}\n\n${r.body.replace(/\*\*/g, '')}`, r.title)} />
         </View>
-        <Button title="Descargar" icon="download" variant="outline" onPress={() => downloadView(shot.current, r.title).catch((e) => Alert.alert('No se pudo descargar', String((e as Error)?.message ?? e)))} />
+        <Button title={tx('Descargar')} icon="download" variant="outline" onPress={() => downloadView(shot.current, r.title).catch((e) => Alert.alert(tx('No se pudo descargar'), String((e as Error)?.message ?? e)))} />
       </Screen>
     </View>
   );

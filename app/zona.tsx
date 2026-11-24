@@ -15,6 +15,7 @@ import { downloadView } from '@/lib/download';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { CoverageRow, HouseRow, Profile, RoadRow, Zone, ZoneProgress } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const COLORS = ['#2F8F5B', '#2563EB', '#D97706', '#7C3AED', '#DB2777', '#0D9488'];
 
@@ -91,17 +92,17 @@ export default function ZonaScreen() {
 
   const save = async () => {
     if (poly.length < 3) {
-      Alert.alert('Faltan esquinas', 'Tocá el mapa al menos en 3 lugares para marcar la zona.');
+      Alert.alert(tx('Faltan esquinas'), tx('Tocá el mapa al menos en 3 lugares para marcar la zona.'));
       return;
     }
     setBusy(true);
     try {
-      const z = await saveZone({ id: zone?.id, name: name.trim() || 'Zona', color, polygon: poly, assigned, note: zone?.note ?? null, on_date: zone?.on_date ?? null });
+      const z = await saveZone({ id: zone?.id, name: name.trim() || tx('Zona'), color, polygon: poly, assigned, note: zone?.note ?? null, on_date: zone?.on_date ?? null });
       setZone(z);
       setEditing(false);
       zoneProgress(z.id).then(setProgress).catch(() => undefined);
     } catch (e) {
-      Alert.alert('No se pudo guardar', errorMessage(e));
+      Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -109,16 +110,16 @@ export default function ZonaScreen() {
 
   const remove = () => {
     if (!zone) return;
-    Alert.alert('Borrar la zona', `¿Borrar "${zone.name}"? Lo caminado no se toca.`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Borrar', style: 'destructive', onPress: () => deleteZone(zone.id).then(() => router.back()).catch((e) => Alert.alert('No se pudo', errorMessage(e))) },
+    Alert.alert(tx('Borrar la zona'), tx('¿Borrar "{name}"? Lo caminado no se toca.', { name: zone.name }), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Borrar'), style: 'destructive', onPress: () => deleteZone(zone.id).then(() => router.back()).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) },
     ]);
   };
 
   if (!loaded || !region) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Zona" back />
+        <Header title={tx('Zona')} back />
         <Loading />
       </View>
     );
@@ -128,7 +129,7 @@ export default function ZonaScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={zone ? zone.name : 'Nueva zona'} subtitle={editing ? 'Tocá el mapa para marcar las esquinas. Arrastrá un punto para moverlo.' : names.length ? `Van: ${names.join(', ')}` : undefined} back />
+      <Header title={zone ? zone.name : tx('Nueva zona')} subtitle={editing ? tx('Tocá el mapa para marcar las esquinas. Arrastrá un punto para moverlo.') : names.length ? tx('Van: {names}', { names: names.join(', ') }) : undefined} back />
       <View ref={shot} collapsable={false} style={{ height: 340 }}>
         <CoverageMap
           roads={roads}
@@ -161,7 +162,7 @@ export default function ZonaScreen() {
         {zone && !editing ? (
           <View pointerEvents="none" style={{ position: 'absolute', left: 10, top: 10, maxWidth: '80%', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.92)' }}>
             <Text style={{ fontSize: 14, fontWeight: '800', color: '#111' }} numberOfLines={1}>{zone.name}</Text>
-            {progress ? <Text style={{ fontSize: 11, color: '#444' }}>{pct}% hecho · {progress.done} de {progress.sidewalks} veredas</Text> : null}
+            {progress ? <Text style={{ fontSize: 11, color: '#444' }}>{tx('{pct}% hecho · {done} de {sidewalks} veredas', { pct, done: progress.done, sidewalks: progress.sidewalks })}</Text> : null}
           </View>
         ) : null}
       </View>
@@ -169,16 +170,16 @@ export default function ZonaScreen() {
         {editing ? (
           <>
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button title="Deshacer" variant="outline" small icon="corner-up-left" onPress={() => setPoly((p) => p.slice(0, -1))} disabled={!poly.length} style={{ flex: 1 }} />
-              <Button title="Empezar de nuevo" variant="ghost" small onPress={() => setPoly([])} disabled={!poly.length} style={{ flex: 1 }} />
+              <Button title={tx('Deshacer')} variant="outline" small icon="corner-up-left" onPress={() => setPoly((p) => p.slice(0, -1))} disabled={!poly.length} style={{ flex: 1 }} />
+              <Button title={tx('Empezar de nuevo')} variant="ghost" small onPress={() => setPoly([])} disabled={!poly.length} style={{ flex: 1 }} />
             </View>
-            <Field label="Nombre" value={name} onChangeText={setName} placeholder="Barrio Itaembé Guazú, manzanas 1 a 6" />
+            <Field label={tx('Nombre')} value={name} onChangeText={setName} placeholder={tx('Barrio Itaembé Guazú, manzanas 1 a 6')} />
             <View style={{ flexDirection: 'row', gap: 10 }}>
               {COLORS.map((c) => (
                 <Pressable key={c} onPress={() => setColor(c)} accessibilityRole="button" style={[styles.color, { backgroundColor: c }, color === c && styles.colorOn]} />
               ))}
             </View>
-            <Text style={styles.label}>¿Quiénes van?</Text>
+            <Text style={styles.label}>{tx('¿Quiénes van?')}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {people.map((p) => {
                 const on = assigned.includes(p.id);
@@ -189,8 +190,8 @@ export default function ZonaScreen() {
                 );
               })}
             </View>
-            <Button title="Guardar zona" icon="check" onPress={save} loading={busy} />
-            {zone ? <Button title="Cancelar" variant="ghost" onPress={() => setEditing(false)} /> : null}
+            <Button title={tx('Guardar zona')} icon="check" onPress={save} loading={busy} />
+            {zone ? <Button title={tx('Cancelar')} variant="ghost" onPress={() => setEditing(false)} /> : null}
           </>
         ) : (
           <>
@@ -200,26 +201,26 @@ export default function ZonaScreen() {
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={styles.barBg}><View style={[styles.bar, { width: `${pct}%`, backgroundColor: color }]} /></View>
                   <Text style={{ fontSize: 13, color: colors.muted }}>
-                    {progress.done} de {progress.sidewalks} veredas · {progress.houses_done} de {progress.houses} casas
+                    {tx('{done} de {sidewalks} veredas · {houses_done} de {houses} casas', { done: progress.done, sidewalks: progress.sidewalks, houses_done: progress.houses_done, houses: progress.houses })}
                   </Text>
                 </View>
               </View>
             ) : null}
-            {names.length ? <Text style={{ fontSize: 14, color: colors.text }}><Text style={{ fontWeight: '800' }}>Asignada a: </Text>{names.join(', ')}</Text> : null}
+            {names.length ? <Text style={{ fontSize: 14, color: colors.text }}><Text style={{ fontWeight: '800' }}>{tx('Asignada a:')} </Text>{names.join(', ')}</Text> : null}
             {zone && assigned.includes(profile?.id ?? '') ? (
               <View style={styles.mine}>
                 <Feather name="flag" size={18} color={colors.greenText} />
-                <Text style={{ flex: 1, fontSize: 13, color: colors.greenText }}>Esta zona es tuya. Las veredas que camines se van pintando y el avance sube solo.</Text>
+                <Text style={{ flex: 1, fontSize: 13, color: colors.greenText }}>{tx('Esta zona es tuya. Las veredas que camines se van pintando y el avance sube solo.')}</Text>
               </View>
             ) : null}
             {zone ? (
-              <Button title="Descargar foto del mapa" icon="download" variant="outline"
-                onPress={() => downloadView(shot.current, `Zona ${zone.name}`).catch((e) => Alert.alert('No se pudo descargar', errorMessage(e)))} />
+              <Button title={tx('Descargar foto del mapa')} icon="download" variant="outline"
+                onPress={() => downloadView(shot.current, `Zona ${zone.name}`).catch((e) => Alert.alert(tx('No se pudo descargar'), errorMessage(e)))} />
             ) : null}
             {isLeader ? (
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Button title="Editar" variant="outline" icon="edit-2" onPress={() => setEditing(true)} style={{ flex: 1 }} />
-                <Button title="Borrar" variant="ghost" icon="trash-2" onPress={remove} style={{ flex: 1 }} />
+                <Button title={tx('Editar')} variant="outline" icon="edit-2" onPress={() => setEditing(true)} style={{ flex: 1 }} />
+                <Button title={tx('Borrar')} variant="ghost" icon="trash-2" onPress={remove} style={{ flex: 1 }} />
               </View>
             ) : null}
           </>

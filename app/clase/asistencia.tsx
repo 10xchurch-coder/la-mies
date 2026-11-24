@@ -14,6 +14,7 @@ import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { colors } from '@/theme';
 import { useLayout } from '@/lib/layout';
 import type { ClassAttendance, ClassRow, Contact } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const DOW: Record<string, number> = { sun: 0, sat: 6 };
 
@@ -64,7 +65,7 @@ export default function AsistenciaClase() {
     try {
       await saveClassAttendance(id, date, c.id, present, note.trim() || null);
     } catch (e) {
-      Alert.alert('No se guardó', errorMessage(e));
+      Alert.alert(tx('No se guardó'), errorMessage(e));
       load();
     }
   };
@@ -76,10 +77,10 @@ export default function AsistenciaClase() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={k?.name ?? 'Clase'} subtitle={`${present} presentes · ${fmtDateShort(date)}`} back />
+      <Header title={k?.name ?? tx('Clase')} subtitle={tx('{present} presentes · {fmtDateShort}', { present, fmtDateShort: fmtDateShort(date) })} back />
       <Screen>
-        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? 'Hoy' : fmtDateShort(d))} />
-        {!students.length ? <Empty icon="users" title="Esta clase no tiene alumnos" text="Agregalos desde la pantalla de la clase." /> : null}
+        <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? tx('Hoy') : fmtDateShort(d))} />
+        {!students.length ? <Empty icon="users" title={tx('Esta clase no tiene alumnos')} text={tx('Agregalos desde la pantalla de la clase.')} /> : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {ordered.map((c) => {
           const a = att[c.id];
@@ -90,7 +91,7 @@ export default function AsistenciaClase() {
                 <Face name={c.name} path={c.photo_path} size={48} ring={on ? colors.green : undefined} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text }}>{c.name}</Text>
-                  {c.age != null ? <Text style={{ fontSize: 12, color: colors.muted }}>{c.age} años</Text> : null}
+                  {c.age != null ? <Text style={{ fontSize: 12, color: colors.muted }}>{c.age} {tx('años')}</Text> : null}
                 </View>
                 <View style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 2, borderColor: on ? colors.green : colors.input, backgroundColor: on ? colors.green : '#FFF', alignItems: 'center', justifyContent: 'center' }}>
                   {on ? <Feather name="check" size={18} color="#FFF" /> : null}
@@ -100,7 +101,7 @@ export default function AsistenciaClase() {
                 value={notes[c.id] ?? ''}
                 onChangeText={(t) => setNotes((n) => ({ ...n, [c.id]: t }))}
                 onEndEditing={() => { if ((notes[c.id] ?? '') !== (a?.note ?? '')) save(c, on, notes[c.id] ?? ''); }}
-                placeholder="Nota (ej: recitó el versículo, vino con la abuela)"
+                placeholder={tx('Nota (ej: recitó el versículo, vino con la abuela)')}
                 placeholderTextColor="#8B918C"
                 style={{ minHeight: 40, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFF', paddingHorizontal: 10, fontSize: 14 }}
                 multiline

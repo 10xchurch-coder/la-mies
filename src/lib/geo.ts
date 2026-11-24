@@ -2,6 +2,7 @@
 // y cómo dibujar cada vereda corrida unos metros del eje de la calle.
 // Todo en TypeScript puro (sin dependencias) para poder probarlo.
 
+import { tx } from './i18n';
 export type LatLng = { lat: number; lng: number };
 
 /** Una calle de OpenStreetMap: sus puntos en orden. Cada par consecutivo es un "tramo" (seg). */
@@ -99,7 +100,7 @@ export function sideName(a: LatLng, b: LatLng, side: Side): SideName {
 }
 
 export function sideLabel(name: SideName): string {
-  return `Vereda ${name}`;
+  return tx('Vereda {name}', { name });
 }
 
 function roadBbox(r: Road): { minLat: number; minLng: number; maxLat: number; maxLng: number } {

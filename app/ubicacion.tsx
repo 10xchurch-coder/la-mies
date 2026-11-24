@@ -12,6 +12,7 @@ import { currentPlace } from '@/lib/chatLive';
 import { resolvePlace } from '@/lib/geoLink';
 import { errorMessage } from '@/lib/supabase';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const POSADAS = { lat: -27.3671, lng: -55.8961 };
 
@@ -37,7 +38,7 @@ export default function Ubicacion() {
       await chatSendLocation(ref, p.lat, p.lng, null, label);
       router.back();
     } catch (e) {
-      Alert.alert('No se envió', errorMessage(e));
+      Alert.alert(tx('No se envió'), errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -47,13 +48,13 @@ export default function Ubicacion() {
     setBusy(true);
     const p = await resolvePlace(link);
     setBusy(false);
-    if (!p) return Alert.alert('No pude leer ese lugar', 'Pegá el enlace de Google Maps (desde Compartir) o las coordenadas, por ejemplo: -27.3671, -55.8961');
+    if (!p) return Alert.alert(tx('No pude leer ese lugar'), tx('Pegá el enlace de Google Maps (desde Compartir) o las coordenadas, por ejemplo: -27.3671, -55.8961'));
     send(p);
   };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: colors.bg }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header title="Mandar ubicación" subtitle={mapAvailable ? 'Mové el mapa hasta poner el pin donde quieras' : 'Elegí cómo mandarla'} back />
+      <Header title={tx('Mandar ubicación')} subtitle={mapAvailable ? tx('Mové el mapa hasta poner el pin donde quieras') : tx('Elegí cómo mandarla')} back />
       {mapAvailable ? (
         <View style={{ flex: 1 }}>
           <MapView style={StyleSheet.absoluteFill} region={region} showsUserLocation toolbarEnabled={false}
@@ -63,18 +64,17 @@ export default function Ubicacion() {
       ) : (
         <View style={{ flex: 1, padding: 16, gap: 12 }}>
           <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-            El mapa para elegir un lugar todavía no está activo en este teléfono. Podés mandar dónde estás ahora, o pegar un enlace de Google Maps:
-            abrí el lugar en Google Maps, tocá Compartir, copiá el enlace y pegalo acá.
+            {tx('El mapa para elegir un lugar todavía no está activo en este teléfono. Podés mandar dónde estás ahora, o pegar un enlace de Google Maps: abrí el lugar en Google Maps, tocá Compartir, copiá el enlace y pegalo acá.')}
           </Text>
-          <TextInput value={link} onChangeText={setLink} placeholder="Enlace de Google Maps o coordenadas" placeholderTextColor="#8B918C" autoCapitalize="none" autoCorrect={false} style={styles.input} />
-          <Button title="Mandar ese lugar" icon="map-pin" onPress={sendLink} loading={busy} disabled={!link.trim()} />
+          <TextInput value={link} onChangeText={setLink} placeholder={tx('Enlace de Google Maps o coordenadas')} placeholderTextColor="#8B918C" autoCapitalize="none" autoCorrect={false} style={styles.input} />
+          <Button title={tx('Mandar ese lugar')} icon="map-pin" onPress={sendLink} loading={busy} disabled={!link.trim()} />
         </View>
       )}
       <View style={styles.bar}>
-        <TextInput value={label} onChangeText={setLabel} placeholder="Nombre del lugar (opcional)" placeholderTextColor="#8B918C" maxLength={80} style={styles.input} />
-        {mapAvailable ? <Button title="Mandar este lugar" icon="map-pin" onPress={() => send(center)} loading={busy} /> : null}
-        <Button title="Mandar mi ubicación de ahora" icon="crosshair" variant="outline" loading={busy}
-          onPress={async () => { try { send(await currentPlace()); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } }} />
+        <TextInput value={label} onChangeText={setLabel} placeholder={tx('Nombre del lugar (opcional)')} placeholderTextColor="#8B918C" maxLength={80} style={styles.input} />
+        {mapAvailable ? <Button title={tx('Mandar este lugar')} icon="map-pin" onPress={() => send(center)} loading={busy} /> : null}
+        <Button title={tx('Mandar mi ubicación de ahora')} icon="crosshair" variant="outline" loading={busy}
+          onPress={async () => { try { send(await currentPlace()); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } }} />
       </View>
     </KeyboardAvoidingView>
   );

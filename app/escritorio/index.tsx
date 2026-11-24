@@ -20,6 +20,7 @@ import { useAuth } from '@/store/auth';
 import { useFeatures } from '@/lib/useFeatures';
 import { colors, themed, toneOf, type Tone } from '@/theme';
 import type { AbsenceRow, ChurchEvent, Contact, FinBalance, ProgressRow, WeeklyReport } from '@/types';
+import { tx, txLocale } from '@/lib/i18n';
 
 type IconName = React.ComponentProps<typeof Feather>['name'];
 type Week = 'last' | 'this';
@@ -85,16 +86,16 @@ export default function DeskHome() {
   }, [monday, seesPanel, seesPeople, seesMoney, moderates, isPastor]));
 
   const firstName = (profile?.display_name ?? '').trim().split(/\s+/)[0] ?? '';
-  const weekLabel = `Semana del ${fmtDateShort(monday)} al ${fmtDateShort(isoDate(addDays(parseDate(monday), 6)))}`;
+  const weekLabel = tx('Semana del {fmtDateShort} al {fmtDateShort2}', { fmtDateShort: fmtDateShort(monday), fmtDateShort2: fmtDateShort(isoDate(addDays(parseDate(monday), 6))) });
 
   const kpis: { key: WeekListKey; label: string; value: number; prev?: number; icon: IconName; goodUp?: boolean; tone: Tone }[] = report ? [
-    { key: 'attendance', label: 'Asistencia', value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true, tone: 'green' },
-    { key: 'first_time', label: 'Vinieron por primera vez', value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true, tone: 'amber' },
-    { key: 'baptisms', label: 'Bautismos', value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true, tone: 'blue' },
-    { key: 'new_members', label: 'Miembros nuevos', value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true, tone: 'violet' },
-    { key: 'absent', label: 'Faltaron', value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false, tone: 'red' },
-    { key: 'gospel', label: 'Oyeron el evangelio', value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true, tone: 'teal' },
-    { key: 'people_out', label: 'Salieron a evangelizar', value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true, tone: 'pink' },
+    { key: 'attendance', label: tx('Asistencia'), value: report.attendance, prev: before?.attendance, icon: 'users', goodUp: true, tone: 'green' },
+    { key: 'first_time', label: tx('Vinieron por primera vez'), value: report.first_time, prev: before?.first_time, icon: 'user-plus', goodUp: true, tone: 'amber' },
+    { key: 'baptisms', label: tx('Bautismos'), value: report.baptisms, prev: before?.baptisms, icon: 'droplet', goodUp: true, tone: 'blue' },
+    { key: 'new_members', label: tx('Miembros nuevos'), value: report.new_members, prev: before?.new_members, icon: 'award', goodUp: true, tone: 'violet' },
+    { key: 'absent', label: tx('Faltaron'), value: report.absent, prev: before?.absent, icon: 'user-x', goodUp: false, tone: 'red' },
+    { key: 'gospel', label: tx('Oyeron el evangelio'), value: report.gospel, prev: before?.gospel, icon: 'book-open', goodUp: true, tone: 'teal' },
+    { key: 'people_out', label: tx('Salieron a evangelizar'), value: report.people_out, prev: before?.people_out, icon: 'map-pin', goodUp: true, tone: 'pink' },
   ] : [];
 
   const counts = useMemo(() => ({
@@ -123,28 +124,28 @@ export default function DeskHome() {
 
   return (
     <DeskPage
-      title={firstName ? `Hola, ${firstName}` : 'Inicio'}
-      subtitle="Cómo viene la iglesia y qué hay para atender."
+      title={firstName ? tx('Hola, {firstName}', { firstName }) : tx('Inicio')}
+      subtitle={tx('Cómo viene la iglesia y qué hay para atender.')}
       actions={<>
-        {seesPeople ? <DeskButton label="Agregar persona" icon="user-plus" onPress={() => router.push('/persona/nueva')} /> : null}
-        {can('com.anuncios') && on('anuncios') ? <DeskButton label="Mandar anuncio" icon="bell" onPress={() => router.push('/anuncios')} /> : null}
-        {can('personas.asistencia') && on('asistencia') ? <DeskButton label="Tomar asistencia" icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
+        {seesPeople ? <DeskButton label={tx('Agregar persona')} icon="user-plus" onPress={() => router.push('/persona/nueva')} /> : null}
+        {can('com.anuncios') && on('anuncios') ? <DeskButton label={tx('Mandar anuncio')} icon="bell" onPress={() => router.push('/anuncios')} /> : null}
+        {can('personas.asistencia') && on('asistencia') ? <DeskButton label={tx('Tomar asistencia')} icon="check-square" primary onPress={() => router.push('/asistencia')} /> : null}
       </>}
     >
       {seesPanel ? (
         <View style={{ gap: 10 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <View style={{ width: 280 }}>
-              <Segmented options={[{ value: 'last', label: 'Semana pasada' }, { value: 'this', label: 'Esta semana' }]} value={week} onChange={setWeek} />
+              <Segmented options={[{ value: 'last', label: tx('Semana pasada') }, { value: 'this', label: tx('Esta semana') }]} value={week} onChange={setWeek} />
             </View>
-            <Text style={{ fontSize: 13, color: colors.muted }}>{weekLabel} · comparado con la semana anterior</Text>
+            <Text style={{ fontSize: 13, color: colors.muted }}>{tx('{weekLabel} · comparado con la semana anterior', { weekLabel })}</Text>
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {report ? kpis.map((k) => {
               const d = delta(k.value, k.prev);
               const good = d && d.dir !== 'same' ? (d.dir === 'up') === !!k.goodUp : null;
               return (
-                <Pressable key={k.label} onPress={() => setOpenKpi(openKpi === k.key ? null : k.key)} accessibilityRole="button" accessibilityLabel={`${k.label}: ${k.value}. Ver los nombres`}
+                <Pressable key={k.label} onPress={() => setOpenKpi(openKpi === k.key ? null : k.key)} accessibilityRole="button" accessibilityLabel={tx('{label}: {value}. Ver los nombres', { label: k.label, value: k.value })}
                   style={(st) => [styles.kpi, { flexBasis: kpiBasis }, openKpi === k.key && { borderColor: toneOf(k.tone).solid, borderWidth: 2 }, (st as { hovered?: boolean }).hovered && { backgroundColor: colors.bgSoft }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <View style={{ width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: toneOf(k.tone).soft }}>
@@ -162,18 +163,18 @@ export default function DeskHome() {
                   </View>
                 </Pressable>
               );
-            }) : <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 20 }}>Cargando la semana…</Text>}
+            }) : <Text style={{ fontSize: 14, color: colors.muted, paddingVertical: 20 }}>{tx('Cargando la semana…')}</Text>}
           </View>
-          {report ? <Text style={{ fontSize: 12, color: colors.muted }}>Tocá un número para ver los nombres.</Text> : null}
+          {report ? <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Tocá un número para ver los nombres.')}</Text> : null}
           {openKpi ? (
-            <Panel title={`${kpis.find((k) => k.key === openKpi)?.label ?? ''}${lists ? ` · ${lists[openKpi].length}` : ''}`} hint={weekLabel} action="Cerrar" onAction={() => setOpenKpi(null)}>
+            <Panel title={`${kpis.find((k) => k.key === openKpi)?.label ?? ''}${lists ? ` · ${lists[openKpi].length}` : ''}`} hint={weekLabel} action={tx('Cerrar')} onAction={() => setOpenKpi(null)}>
               {openKpi === 'people_out' ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
-                  <DeskButton label="Marcar quiénes salieron" icon="user-check" onPress={() => router.push('/salieron' as Href)} />
-                  <Text style={styles.rowSub}>Para anotar a los hermanos que salieron sin usar la app.</Text>
+                  <DeskButton label={tx('Marcar quiénes salieron')} icon="user-check" onPress={() => router.push('/salieron' as Href)} />
+                  <Text style={styles.rowSub}>{tx('Para anotar a los hermanos que salieron sin usar la app.')}</Text>
                 </View>
               ) : null}
-              {!lists ? <EmptyLine text="Cargando los nombres…" /> : !lists[openKpi].length ? <EmptyLine text="No hay nadie en esta semana." /> : (
+              {!lists ? <EmptyLine text={tx('Cargando los nombres…')} /> : !lists[openKpi].length ? <EmptyLine text={tx('No hay nadie en esta semana.')} /> : (
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 18 }}>
                   {lists[openKpi].map((it) => (
                     <View key={it.key} style={{ width: twoCols ? '31%' : '47%', minWidth: 220 }}>
@@ -196,25 +197,25 @@ export default function DeskHome() {
       <View style={{ flexDirection: twoCols ? 'row' : 'column', gap: 18, alignItems: 'flex-start' }}>
         <View style={{ flex: twoCols ? 1.5 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
           {seesPanel && on('asistencia') ? (
-            <Panel title="Asistencia promedio por mes" hint="Promedio de los cultos de cada mes, últimos 12 meses" action="Ver progreso" onAction={() => router.push('/progreso-iglesia')}>
+            <Panel title={tx('Asistencia promedio por mes')} hint={tx('Promedio de los cultos de cada mes, últimos 12 meses')} action={tx('Ver progreso')} onAction={() => router.push('/progreso-iglesia')}>
               <AttendanceBars rows={progress} />
             </Panel>
           ) : null}
 
           {(seesPeople || seesPanel) && on('asistencia') ? (
-            <Panel title="Faltaron el último fin de semana" hint={absences ? `${absences.length} en total · ${absent3.length} hace tres semanas o más` : 'Cargando…'} action="Ver todos" onAction={() => router.push('/ausencias')}>
-              {absences && !absences.length ? <EmptyLine text="Nadie faltó. ¡Gloria a Dios!" /> : null}
+            <Panel title={tx('Faltaron el último fin de semana')} hint={absences ? tx('{n} en total · {n2} hace tres semanas o más', { n: absences.length, n2: absent3.length }) : tx('Cargando…')} action={tx('Ver todos')} onAction={() => router.push('/ausencias')}>
+              {absences && !absences.length ? <EmptyLine text={tx('Nadie faltó. ¡Gloria a Dios!')} /> : null}
               {absentShown.map((a) => (
                 <Row key={a.contact_id} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: a.contact_id } })}>
                   <Face name={a.name} path={a.photo_path} size={32} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle} numberOfLines={1}>{a.name}</Text>
                     <Text style={styles.rowSub} numberOfLines={1}>
-                      {a.group_name ? `${a.group_name} · ` : ''}{a.last_attended ? `Vino por última vez el ${fmtDateShort(a.last_attended)}` : 'Sin asistencia anotada'}
+                      {a.group_name ? `${a.group_name} · ` : ''}{a.last_attended ? tx('Vino por última vez el {fmtDateShort}', { fmtDateShort: fmtDateShort(a.last_attended) }) : tx('Sin asistencia anotada')}
                     </Text>
                   </View>
-                  <Pill tone={(a.weeks_missed ?? 1) >= 3 ? 'red' : (a.weeks_missed ?? 1) === 2 ? 'amber' : 'gray'} text={(a.weeks_missed ?? 1) >= 3 ? '3 o más' : (a.weeks_missed ?? 1) === 2 ? '2 seguidas' : '1 vez'} />
-                  <IconLink icon="message-circle" label={`WhatsApp a ${a.name}`} disabled={!a.phone}
+                  <Pill tone={(a.weeks_missed ?? 1) >= 3 ? 'red' : (a.weeks_missed ?? 1) === 2 ? 'amber' : 'gray'} text={(a.weeks_missed ?? 1) >= 3 ? tx('3 o más') : (a.weeks_missed ?? 1) === 2 ? tx('2 seguidas') : tx('1 vez')} />
+                  <IconLink icon="message-circle" label={tx('WhatsApp a {name}', { name: a.name })} disabled={!a.phone}
                     onPress={() => {
                       openWhatsApp(a.phone, messageText(missedKind(a.weeks_missed ?? 1), { to: a.name, from: profile?.display_name, church: church?.name }));
                       // Ya se le escribió: sale de la lista.
@@ -227,16 +228,16 @@ export default function DeskHome() {
           ) : null}
 
           {seesPanel && on('asistencia') && report?.services?.length ? (
-            <Panel title="Cultos de la semana" hint={weekLabel}>
+            <Panel title={tx('Cultos de la semana')} hint={weekLabel}>
               <View style={styles.tHead}>
-                <Text style={[styles.th, { flex: 1 }]}>Culto</Text>
-                <Text style={[styles.th, styles.num]}>Asistencia</Text>
-                <Text style={[styles.th, styles.num]}>Visitas</Text>
+                <Text style={[styles.th, { flex: 1 }]}>{tx('Culto')}</Text>
+                <Text style={[styles.th, styles.num]}>{tx('Asistencia')}</Text>
+                <Text style={[styles.th, styles.num]}>{tx('Visitas')}</Text>
               </View>
               {report.services.map((s) => (
                 <View key={`${s.name}${s.dow}`} style={styles.tRow}>
                   <Text style={[styles.td, { flex: 1 }]} numberOfLines={1}>{s.name}</Text>
-                  <Text style={[styles.td, styles.num, { fontWeight: '800' }, s.cancelled && !s.count ? { color: colors.amberText } : null]}>{s.cancelled && !s.count ? 'No hubo' : s.count}</Text>
+                  <Text style={[styles.td, styles.num, { fontWeight: '800' }, s.cancelled && !s.count ? { color: colors.amberText } : null]}>{s.cancelled && !s.count ? tx('No hubo') : s.count}</Text>
                   <Text style={[styles.td, styles.num]}>{s.cancelled && !s.count ? '–' : s.visitors}</Text>
                 </View>
               ))}
@@ -245,7 +246,7 @@ export default function DeskHome() {
         </View>
 
         <View style={{ flex: twoCols ? 1 : undefined, width: twoCols ? undefined : '100%', gap: 18 }}>
-          <Panel title="Para atender">
+          <Panel title={tx('Para atender')}>
             {on('seguimiento') ? (() => {
               // Por persona y por su paso más urgente (igual que en "Para seguir").
               const by = new Map<string, string[]>();
@@ -256,16 +257,16 @@ export default function DeskHome() {
               const visit = n((k) => !k.includes('call') && !k.includes('write2'));
               return (
                 <>
-                  <Todo icon="user-plus" n={first} text="vinieron por primera vez: mandarles la bienvenida" extra={overdue ? `${overdue} atrasadas` : undefined} onPress={() => router.push('/seguimiento')} />
-                  {again ? <Todo icon="repeat" n={again} text="volvieron otra semana: escribirles y coordinar visita" onPress={() => router.push('/seguimiento')} /> : null}
-                  {visit ? <Todo icon="home" n={visit} text="para visitar en su casa" onPress={() => router.push('/seguimiento')} /> : null}
+                  <Todo icon="user-plus" n={first} text={tx('vinieron por primera vez: mandarles la bienvenida')} extra={overdue ? tx('{overdue} atrasadas', { overdue }) : undefined} onPress={() => router.push('/seguimiento')} />
+                  {again ? <Todo icon="repeat" n={again} text={tx('volvieron otra semana: escribirles y coordinar visita')} onPress={() => router.push('/seguimiento')} /> : null}
+                  {visit ? <Todo icon="home" n={visit} text={tx('para visitar en su casa')} onPress={() => router.push('/seguimiento')} /> : null}
                 </>
               );
             })() : null}
             {(seesPeople || seesPanel) && on('asistencia') && absentRest.length ? (
               <>
-                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text="faltaron este fin de semana: escribirles" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '1' } })} /> : null}
-                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text="faltaron 2 semanas seguidas: coordinar visita" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '2' } })} /> : null}
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text={tx('faltaron este fin de semana: escribirles')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '1' } })} /> : null}
+                {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text={tx('faltaron 2 semanas seguidas: coordinar visita')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '2' } })} /> : null}
               </>
             ) : null}
             {on('seguimiento') && tasks.length ? (
@@ -279,33 +280,33 @@ export default function DeskHome() {
                 };
                 const people = (l: typeof tasks) => new Set(l.map((t) => t.contact_id)).size;
                 const buttons: { text: string; style?: 'cancel' | 'destructive'; onPress?: () => void }[] = [];
-                if (old.length && old.length < tasks.length) buttons.push({ text: `Solo los de antes de esta semana (${people(old)})`, style: 'destructive', onPress: () => { clear(old); } });
-                buttons.push({ text: `Todos (${people(tasks)})`, style: 'destructive', onPress: () => { clear([...tasks]); } });
-                buttons.push({ text: 'Cancelar', style: 'cancel' });
-                Alert.alert('¿Borrar los recordatorios de visitas nuevas?', 'Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.', buttons);
+                if (old.length && old.length < tasks.length) buttons.push({ text: tx('Solo los de antes de esta semana ({people})', { people: people(old) }), style: 'destructive', onPress: () => { clear(old); } });
+                buttons.push({ text: tx('Todos ({people})', { people: people(tasks) }), style: 'destructive', onPress: () => { clear([...tasks]); } });
+                buttons.push({ text: tx('Cancelar'), style: 'cancel' });
+                Alert.alert(tx('¿Borrar los recordatorios de visitas nuevas?'), tx('Empezás con la lista limpia. Las personas no se borran, y no queda registrado que les escribiste o los visitaste.'), buttons);
               }} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 10, marginLeft: 36, borderRadius: 8, borderWidth: 1, borderColor: colors.amberText }}>
                 <Feather name="trash-2" size={14} color={colors.amberText} />
-                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText }}>Borrar estos recordatorios</Text>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText }}>{tx('Borrar estos recordatorios')}</Text>
               </Pressable>
             ) : null}
-            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text="personas faltaron tres semanas o más" onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '3' } })} /> : null}
-            {isPastor ? <Todo icon="mail" n={pmUnread} text="mensajes privados sin leer" onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
-            {moderates ? <Todo icon="message-square" n={newSuggestions} text="sugerencias sin leer" onPress={() => router.push('/sugerencias')} /> : null}
-            {on('cumples') ? <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text="cumpleaños en los próximos 7 días" onPress={() => router.push('/cumples' as Href)} /> : null}
+            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text={tx('personas faltaron tres semanas o más')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '3' } })} /> : null}
+            {isPastor ? <Todo icon="mail" n={pmUnread} text={tx('mensajes privados sin leer')} onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
+            {moderates ? <Todo icon="message-square" n={newSuggestions} text={tx('sugerencias sin leer')} onPress={() => router.push('/sugerencias')} /> : null}
+            {on('cumples') ? <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text={tx('cumpleaños en los próximos 7 días')} onPress={() => router.push('/cumples' as Href)} /> : null}
           </Panel>
 
           {seesPeople ? (
-            <Panel title="Personas" action="Abrir la tabla" onAction={() => router.push('/escritorio/personas' as Href)}>
+            <Panel title={tx('Personas')} action={tx('Abrir la tabla')} onAction={() => router.push('/escritorio/personas' as Href)}>
               <View style={{ flexDirection: 'row', gap: 10 }}>
-                <Count n={counts.member} label="Miembros" />
-                <Count n={counts.visitor} label="Visitas" />
-                <Count n={counts.contact} label="Contactos" />
+                <Count n={counts.member} label={tx('Miembros')} />
+                <Count n={counts.visitor} label={tx('Visitas')} />
+                <Count n={counts.contact} label={tx('Contactos')} />
               </View>
             </Panel>
           ) : null}
 
-          {on('eventos') ? <Panel title="Próximos eventos" hint="Las próximas tres semanas" action="Calendario" onAction={() => router.push('/eventos')}>
-            {!soon.length ? <EmptyLine text="No hay eventos cargados para estas semanas." /> : null}
+          {on('eventos') ? <Panel title={tx('Próximos eventos')} hint={tx('Las próximas tres semanas')} action={tx('Calendario')} onAction={() => router.push('/eventos')}>
+            {!soon.length ? <EmptyLine text={tx('No hay eventos cargados para estas semanas.')} /> : null}
             {soon.map((e) => {
               const d = new Date(e.starts_at);
               return (
@@ -317,7 +318,7 @@ export default function DeskHome() {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowTitle} numberOfLines={1}>{e.title}</Text>
                     <Text style={styles.rowSub} numberOfLines={1}>
-                      {d.toLocaleDateString('es-AR', { weekday: 'long' })}{e.all_day ? '' : ` · ${d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`}{e.place ? ` · ${e.place}` : ''}
+                      {d.toLocaleDateString(txLocale(), { weekday: 'long' })}{e.all_day ? '' : ` · ${d.toLocaleTimeString(txLocale(), { hour: '2-digit', minute: '2-digit' })}`}{e.place ? ` · ${e.place}` : ''}
                     </Text>
                   </View>
                 </Row>
@@ -325,22 +326,22 @@ export default function DeskHome() {
             })}
           </Panel> : null}
 
-          {on('cumples') ? <Panel title="Cumpleaños" hint="Los próximos 14 días" action="Ver todos" onAction={() => router.push('/cumples' as Href)}>
-            {!bdays.length ? <EmptyLine text="Nadie cumple años en estos días." /> : null}
+          {on('cumples') ? <Panel title={tx('Cumpleaños')} hint={tx('Los próximos 14 días')} action={tx('Ver todos')} onAction={() => router.push('/cumples' as Href)}>
+            {!bdays.length ? <EmptyLine text={tx('Nadie cumple años en estos días.')} /> : null}
             {bdays.slice(0, 6).map((b) => (
               <Row key={b.contact_id} onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: b.contact_id } })}>
                 <Face name={b.name} path={b.photo_path} size={32} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle} numberOfLines={1}>{b.name}</Text>
-                  <Text style={styles.rowSub}>{daysTo(b.next_on) === 0 ? 'Hoy' : daysTo(b.next_on) === 1 ? 'Mañana' : fmtDateShort(b.next_on)} · cumple {b.turns}</Text>
+                  <Text style={styles.rowSub}>{tx('{v1} · cumple {turns}', { v1: daysTo(b.next_on) === 0 ? tx('Hoy') : daysTo(b.next_on) === 1 ? tx('Mañana') : fmtDateShort(b.next_on), turns: b.turns })}</Text>
                 </View>
-                <IconLink icon="message-circle" label={`Saludar a ${b.name}`} disabled={!b.phone} onPress={() => openWhatsApp(b.phone, '')} />
+                <IconLink icon="message-circle" label={tx('Saludar a {name}', { name: b.name })} disabled={!b.phone} onPress={() => openWhatsApp(b.phone, '')} />
               </Row>
             ))}
           </Panel> : null}
 
           {seesMoney && funds.length ? (
-            <Panel title="Fondos" hint="Saldo de hoy" action="Finanzas" onAction={() => router.push('/finanzas')}>
+            <Panel title={tx('Fondos')} hint={tx('Saldo de hoy')} action={tx('Finanzas')} onAction={() => router.push('/finanzas')}>
               {funds.map((f) => (
                 <View key={f.fund_id} style={styles.tRow}>
                   <Text style={[styles.td, { flex: 1 }]} numberOfLines={1}>{f.fund}</Text>
@@ -360,7 +361,7 @@ const daysTo = (iso: string) => Math.round((parseDate(iso).getTime() - parseDate
 function AttendanceBars({ rows }: { rows: ProgressRow[] }) {
   const shown = rows.slice(-12);
   const max = Math.max(1, ...shown.map((r) => r.avg_attendance));
-  if (!shown.length) return <EmptyLine text="Todavía no hay asistencia cargada." />;
+  if (!shown.length) return <EmptyLine text={tx('Todavía no hay asistencia cargada.')} />;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 190, paddingTop: 8 }}>
       {shown.map((r, i) => {
@@ -368,7 +369,7 @@ function AttendanceBars({ rows }: { rows: ProgressRow[] }) {
         const last = i === shown.length - 1;
         return (
           <View key={r.month} style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%', gap: 4 }}
-            accessibilityLabel={`${MONTHS[m]} ${r.month.slice(0, 4)}: ${Math.round(r.avg_attendance)} de promedio`}>
+            accessibilityLabel={tx('{MONTHS} {month}: {round} de promedio', { MONTHS: MONTHS[m], month: r.month.slice(0, 4), round: Math.round(r.avg_attendance) })}>
             <Text style={{ fontSize: 12, fontWeight: '700', color: last ? colors.text : colors.muted }}>{Math.round(r.avg_attendance) || ''}</Text>
             <View style={{ width: '100%', maxWidth: 44, height: `${Math.max(1.5, (r.avg_attendance / max) * 74)}%`, borderTopLeftRadius: 5, borderTopRightRadius: 5, backgroundColor: last ? colors.green : colors.blueLight }} />
             <Text style={{ fontSize: 11, fontWeight: '600', color: colors.muted }}>{MONTHS[m]}</Text>

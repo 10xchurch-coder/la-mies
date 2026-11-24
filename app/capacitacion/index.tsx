@@ -8,10 +8,11 @@ import { Card, Empty, SectionTitle } from '@/components/ui';
 import { listTraining } from '@/lib/api';
 import { colors, themed } from '@/theme';
 import type { TrainingItem } from '@/types';
+import { tx } from '@/lib/i18n';
 
 const FOLDERS: { category: string; icon: React.ComponentProps<typeof Feather>['name']; hint: string }[] = [
-  { category: 'Respuestas bíblicas', icon: 'book', hint: 'Versículos y explicación a mano, para usar mientras presentás el evangelio' },
-  { category: 'Objeciones comunes', icon: 'message-circle', hint: 'Qué responder cuando te dicen "ya soy católico", "no me interesa"…' },
+  { get category() { return tx('Respuestas bíblicas'); }, icon: 'book', get hint() { return tx('Versículos y explicación a mano, para usar mientras presentás el evangelio'); } },
+  { get category() { return tx('Objeciones comunes'); }, icon: 'message-circle', get hint() { return tx('Qué responder cuando te dicen "ya soy católico", "no me interesa"…'); } },
 ];
 
 export default function Capacitacion() {
@@ -36,7 +37,7 @@ export default function Capacitacion() {
       if (!map.has(it.category)) map.set(it.category, []);
       map.get(it.category)!.push(it);
     }
-    const order = ['Presentaciones del evangelio', 'Tips para recordar'];
+    const order = ['Presentaciones del evangelio', tx('Tips para recordar')];
     return [...map.entries()].sort((a, b) => ((order.indexOf(a[0]) + 99) % 99) - ((order.indexOf(b[0]) + 99) % 99));
   }, [items, q, categoria]);
 
@@ -53,7 +54,7 @@ export default function Capacitacion() {
                 </View>
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{f.category}</Text>
-                  <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{f.hint} · {n} temas</Text>
+                  <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('{hint} · {n} temas', { hint: f.hint, n })}</Text>
                 </View>
                 <Feather name="folder" size={18} color={colors.muted} />
               </Card>
@@ -65,11 +66,11 @@ export default function Capacitacion() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={categoria ?? 'Capacitación'} subtitle={categoria ? FOLDERS.find((f) => f.category === categoria)?.hint : 'Para aprender antes de salir y usar en la calle'} back />
+      <Header title={categoria ?? tx('Capacitación')} subtitle={categoria ? FOLDERS.find((f) => f.category === categoria)?.hint : tx('Para aprender antes de salir y usar en la calle')} back />
       <View style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
         <View style={styles.search}>
           <Feather name="search" size={20} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar un tema o una pregunta" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel="Buscar" />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar un tema o una pregunta')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel={tx('Buscar')} />
         </View>
       </View>
       <Screen>
@@ -87,7 +88,7 @@ export default function Capacitacion() {
                     <View style={{ flex: 1, gap: 3 }}>
                       <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{it.title}</Text>
                       {it.summary ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }} numberOfLines={2}>{it.summary}</Text> : null}
-                      <Text style={{ fontSize: 11, color: colors.muted }}>{it.kind === 'video' ? 'Video' : 'Para leer'}{it.minutes ? ` · ${it.minutes} min` : ''}</Text>
+                      <Text style={{ fontSize: 11, color: colors.muted }}>{it.kind === 'video' ? tx('Video') : tx('Para leer')}{it.minutes ? tx(' · {minutes} min', { minutes: it.minutes }) : ''}</Text>
                     </View>
                     <Feather name="chevron-right" size={20} color={colors.muted} />
                   </Card>
@@ -96,7 +97,7 @@ export default function Capacitacion() {
             </View>
           ))
         ) : (
-          <Empty icon="book-open" title="Todavía no hay material cargado" text="El administrador puede cargar consejos, artículos y videos desde el panel de Supabase (tabla training_items)." />
+          <Empty icon="book-open" title={tx('Todavía no hay material cargado')} text={tx('El administrador puede cargar consejos, artículos y videos desde el panel de Supabase (tabla training_items).')} />
         )}
       </Screen>
     </View>

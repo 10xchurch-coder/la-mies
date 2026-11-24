@@ -1,6 +1,7 @@
 // Misioneros: los meses del informe y cómo se ordenan. Sin nada de la base ni de la pantalla para poder probarse sola.
 
-const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+import { txList } from './i18n';
+const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 
 /** "2026-11-01" -> "noviembre de 2026". Si no es una fecha, devuelve lo mismo que le dieron. */
 export function monthLabel(month: string): string {

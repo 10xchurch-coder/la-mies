@@ -2,6 +2,7 @@
 // Solo lógica: sin pantalla ni base, para poder probarse sola.
 // Se guarda en la tabla service_plans (columna items). Otra pantalla (el modo presentación) lo puede leer con cleanItems().
 
+import { tx } from './i18n';
 export type PlanItemType = 'song' | 'prayer' | 'notices' | 'offering' | 'reading' | 'sermon' | 'other';
 
 export type PlanItem = {
@@ -23,13 +24,13 @@ export type PlanItem = {
 export type ServicePlan = { id: string; church_id: string; service_date: string; title: string; items: PlanItem[]; updated_at: string };
 
 export const PLAN_TYPES: { type: PlanItemType; label: string; icon: string }[] = [
-  { type: 'song', label: 'Canción', icon: 'music' },
-  { type: 'prayer', label: 'Oración', icon: 'heart' },
-  { type: 'notices', label: 'Anuncios', icon: 'volume-2' },
-  { type: 'offering', label: 'Ofrenda', icon: 'gift' },
-  { type: 'reading', label: 'Lectura bíblica', icon: 'book-open' },
-  { type: 'sermon', label: 'Prédica', icon: 'mic' },
-  { type: 'other', label: 'Otro', icon: 'more-horizontal' },
+  { type: 'song', get label() { return tx('Canción'); }, icon: 'music' },
+  { type: 'prayer', get label() { return tx('Oración'); }, icon: 'heart' },
+  { type: 'notices', get label() { return tx('Anuncios'); }, icon: 'volume-2' },
+  { type: 'offering', get label() { return tx('Ofrenda'); }, icon: 'gift' },
+  { type: 'reading', get label() { return tx('Lectura bíblica'); }, icon: 'book-open' },
+  { type: 'sermon', get label() { return tx('Prédica'); }, icon: 'mic' },
+  { type: 'other', get label() { return tx('Otro'); }, icon: 'more-horizontal' },
 ];
 const TYPES = new Set<string>(PLAN_TYPES.map((t) => t.type));
 export const typeInfo = (t: PlanItemType) => PLAN_TYPES.find((x) => x.type === t) ?? PLAN_TYPES[PLAN_TYPES.length - 1];
@@ -95,9 +96,9 @@ export const myParts = (items: PlanItem[], profileId: string | null | undefined)
 export function mainRoles(items: PlanItem[]): { label: string; names: string[] }[] {
   const names = (types: PlanItemType[]) => [...new Set(items.filter((x) => types.includes(x.type) && x.whoName).map((x) => x.whoName as string))];
   return [
-    { label: 'Predica', names: names(['sermon']) },
-    { label: 'Dirige las canciones', names: names(['song']) },
-    { label: 'Anuncios', names: names(['notices']) },
+    { label: tx('Predica'), names: names(['sermon']) },
+    { label: tx('Dirige las canciones'), names: names(['song']) },
+    { label: tx('Anuncios'), names: names(['notices']) },
   ].filter((r) => r.names.length > 0);
 }
 
@@ -105,5 +106,5 @@ export function mainRoles(items: PlanItem[]): { label: string; names: string[] }
 export function titleFor(isoDate: string): string {
   const [y, m, d] = isoDate.split('-').map(Number);
   const dow = new Date(y, (m || 1) - 1, d || 1, 12).getDay();
-  return `Culto del ${['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][dow]}`;
+  return tx('Culto del {v1}', { v1: ['domingo', tx('lunes'), tx('martes'), tx('miércoles'), tx('jueves'), tx('viernes'), tx('sábado')][dow] });
 }

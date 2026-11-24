@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { cachedSignedUrl, signedUrl } from '../lib/files';
 import { colors } from '../theme';
+import { tx } from '@/lib/i18n';
 
 export function Face({
   name, path, size = 44, ring, onPress, editable,
@@ -52,7 +53,7 @@ export function Face({
   );
   if (!onPress) return inner;
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={editable ? 'Cambiar foto' : name}>
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={editable ? tx('Cambiar foto') : name}>
       {inner}
     </Pressable>
   );

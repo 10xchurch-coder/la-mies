@@ -12,6 +12,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { buildRows, detectFields, FIELD_LABELS, parseCsv, type ImportField, type ImportRow } from '@/lib/importPeople';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type Status = 'member' | 'visitor' | 'contact';
 type Preview = { new: number; duplicates: number; invalid: number };
@@ -54,13 +55,13 @@ export default function Importar() {
   if (!can('personas.editar')) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Importar personas" back />
-        <Screen><Text style={{ color: colors.muted }}>Solo la secretaría o el pastor pueden importar personas.</Text></Screen>
+        <Header title={tx('Importar personas')} back />
+        <Screen><Text style={{ color: colors.muted }}>{tx('Solo la secretaría o el pastor pueden importar personas.')}</Text></Screen>
       </View>
     );
   }
 
-  const headers = table ? (hasHeader ? table[0] : table[0].map((_, i) => `Columna ${i + 1}`)) : [];
+  const headers = table ? (hasHeader ? table[0] : table[0].map((_, i) => tx('Columna {v1}', { v1: i + 1 }))) : [];
   const data = table ? (hasHeader ? table.slice(1) : table) : [];
   const built = table ? buildRows(data, fields) : { rows: [] as ImportRow[], dropped: 0 };
   const hasName = fields.includes('name');
@@ -72,16 +73,16 @@ export default function Importar() {
       const res = await DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true, multiple: false });
       if (res.canceled || !res.assets?.[0]) return;
       const a = res.assets[0];
-      if (a.size && a.size > 5 * 1024 * 1024) { setMsg('El archivo es muy grande (máximo 5 MB).'); return; }
+      if (a.size && a.size > 5 * 1024 * 1024) { setMsg(tx('El archivo es muy grande (máximo 5 MB).')); return; }
       const t = await readFile(a.uri, a.name);
-      if (t.length < 2) { setMsg('No encontré filas con datos en ese archivo.'); return; }
-      if (t.length > 3001) { setMsg('Tiene más de 3000 filas. Dividilo en partes más chicas.'); return; }
+      if (t.length < 2) { setMsg(tx('No encontré filas con datos en ese archivo.')); return; }
+      if (t.length > 3001) { setMsg(tx('Tiene más de 3000 filas. Dividilo en partes más chicas.')); return; }
       setFileName(a.name);
       setTable(t);
       setHasHeader(true);
       setFields(detectFields(t[0]));
     } catch (e) {
-      setMsg(`No pude leer el archivo. Probá guardarlo como CSV o Excel (.xlsx). ${errorMessage(e)}`);
+      setMsg(tx('No pude leer el archivo. Probá guardarlo como CSV o Excel (.xlsx). {errorMessage}', { errorMessage: errorMessage(e) }));
     }
   };
 
@@ -111,10 +112,10 @@ export default function Importar() {
   const doImport = () => {
     if (!preview || !preview.new) return;
     const label = status === 'member' ? 'miembros' : status === 'visitor' ? 'visitantes' : 'contactos';
-    Alert.alert(`Agregar ${preview.new} ${label}`, `Se van a agregar ${preview.new} personas nuevas. Las ${preview.duplicates} que ya estaban no se tocan. ¿Seguimos?`, [
-      { text: 'Cancelar', style: 'cancel' },
+    Alert.alert(tx('Agregar {new} {label}', { new: preview.new, label }), tx('Se van a agregar {new} personas nuevas. Las {duplicates} que ya estaban no se tocan. ¿Seguimos?', { new: preview.new, duplicates: preview.duplicates }), [
+      { text: tx('Cancelar'), style: 'cancel' },
       {
-        text: 'Agregar', onPress: async () => {
+        text: tx('Agregar'), onPress: async () => {
           setBusy(true); setMsg(null);
           try { setDone(await send(built.rows, true)); setTable(null); setPreview(null); } catch (e) { setMsg(errorMessage(e)); } finally { setBusy(false); }
         },
@@ -124,70 +125,69 @@ export default function Importar() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Importar personas" subtitle="Desde una planilla de Excel o CSV" back />
+      <Header title={tx('Importar personas')} subtitle={tx('Desde una planilla de Excel o CSV')} back />
       <Screen style={{ gap: 14 }}>
         {done ? (
           <Card style={{ gap: 6 }}>
-            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.green }}>Listo: {done.new} personas agregadas</Text>
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.green }}>{tx('Listo: {new} personas agregadas', { new: done.new })}</Text>
             <Text style={{ fontSize: 14, color: colors.text, lineHeight: 20 }}>
-              {done.duplicates ? `${done.duplicates} ya estaban cargadas y no se tocaron. ` : ''}{done.invalid ? `${done.invalid} filas no tenían nombre y se saltearon. ` : ''}
-              Cuando cada persona cree su cuenta con su celular, se une sola a su ficha.
+              {tx('{v1}{v2}Cuando cada persona cree su cuenta con su celular, se une sola a su ficha.', { v1: done.duplicates ? tx('{duplicates} ya estaban cargadas y no se tocaron. ', { duplicates: done.duplicates }) : '', v2: done.invalid ? tx('{invalid} filas no tenían nombre y se saltearon. ', { invalid: done.invalid }) : '' })}
             </Text>
-            <Button title="Ver personas" onPress={() => router.replace('/directorio' as never)} />
+            <Button title={tx('Ver personas')} onPress={() => router.replace('/directorio' as never)} />
           </Card>
         ) : null}
 
         {!table ? (
           <Card style={{ gap: 10 }}>
             <Text style={{ fontSize: 14, color: colors.text, lineHeight: 21 }}>
-              Elegí tu planilla (Excel .xlsx o CSV). La primera fila debería tener los títulos, por ejemplo: Nombre, Apellido, Celular, Correo, Dirección, Fecha de nacimiento.
-              {'\n'}Solo hace falta el nombre; el celular es lo más importante, porque con él la app reconoce a cada persona cuando crea su cuenta.
+              {tx('Elegí tu planilla (Excel .xlsx o CSV). La primera fila debería tener los títulos, por ejemplo: Nombre, Apellido, Celular, Correo, Dirección, Fecha de nacimiento.')}
+              {'\n'}{tx('Solo hace falta el nombre; el celular es lo más importante, porque con él la app reconoce a cada persona cuando crea su cuenta.')}
             </Text>
-            <Button title="Elegir archivo" icon="upload" onPress={pick} />
-            <Button title="Probar el importador nuevo: más fácil, y se puede deshacer" variant="ghost" small onPress={() => router.push('/admin/importar' as never)} />
+            <Button title={tx('Elegir archivo')} icon="upload" onPress={pick} />
+            <Button title={tx('Probar el importador nuevo: más fácil, y se puede deshacer')} variant="ghost" small onPress={() => router.push('/admin/importar' as never)} />
             {msg ? <Text style={{ color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 }}>{msg}</Text> : null}
           </Card>
         ) : (
           <>
             <Card style={{ gap: 4 }}>
               <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{fileName}</Text>
-              <Text style={{ fontSize: 13, color: colors.muted }}>{data.length} filas encontradas</Text>
-              <Button title="Elegir otro archivo" variant="ghost" small onPress={pick} />
+              <Text style={{ fontSize: 13, color: colors.muted }}>{tx('{n} filas encontradas', { n: data.length })}</Text>
+              <Button title={tx('Elegir otro archivo')} variant="ghost" small onPress={pick} />
             </Card>
 
-            <SectionTitle>¿La primera fila son títulos?</SectionTitle>
+            <SectionTitle>{tx('¿La primera fila son títulos?')}</SectionTitle>
             <Choice value={hasHeader ? 'si' : 'no'} onChange={(v) => { setHasHeader(v === 'si'); setPreview(null); setFields(v === 'si' ? detectFields(table[0]) : table[0].map(() => 'skip')); }}
-              options={[{ value: 'si', label: 'Sí, son títulos' }, { value: 'no', label: 'No, ya son datos' }]} />
+              options={[{ value: 'si', label: tx('Sí, son títulos') }, { value: 'no', label: tx('No, ya son datos') }]} />
 
-            <SectionTitle>Qué es cada columna</SectionTitle>
+            <SectionTitle>{tx('Qué es cada columna')}</SectionTitle>
             {headers.map((h, i) => (
               <Card key={i} style={{ gap: 8 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{h || `Columna ${i + 1}`}</Text>
-                <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>Ej: {data.slice(0, 3).map((r) => r[i]).filter(Boolean).join(' · ') || '—'}</Text>
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>{h || tx('Columna {v1}', { v1: i + 1 })}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{tx('Ej:')} {data.slice(0, 3).map((r) => r[i]).filter(Boolean).join(' · ') || '—'}</Text>
                 <Choice value={fields[i] ?? 'skip'} onChange={(v) => setField(i, v)} options={FIELD_OPTIONS} />
               </Card>
             ))}
 
-            <SectionTitle>Agregarlos como</SectionTitle>
+            <SectionTitle>{tx('Agregarlos como')}</SectionTitle>
             <Choice value={status} onChange={(v) => { setStatus(v); setPreview(null); }}
-              options={[{ value: 'member', label: 'Miembros' }, { value: 'visitor', label: 'Visitantes' }, { value: 'contact', label: 'Contactos' }]} />
+              options={[{ value: 'member', label: tx('Miembros') }, { value: 'visitor', label: tx('Visitantes') }, { value: 'contact', label: tx('Contactos') }]} />
 
-            {!hasName ? <Text style={{ color: colors.red, fontSize: 13 }}>Elegí qué columna es el Nombre.</Text> : null}
-            {hasName && !hasPhone ? <Text style={{ color: colors.amberText, fontSize: 13, lineHeight: 18 }}>No marcaste ninguna columna de Celular. Sin celular, la app no puede reconocer a la persona cuando cree su cuenta y puede quedar duplicada.</Text> : null}
+            {!hasName ? <Text style={{ color: colors.red, fontSize: 13 }}>{tx('Elegí qué columna es el Nombre.')}</Text> : null}
+            {hasName && !hasPhone ? <Text style={{ color: colors.amberText, fontSize: 13, lineHeight: 18 }}>{tx('No marcaste ninguna columna de Celular. Sin celular, la app no puede reconocer a la persona cuando cree su cuenta y puede quedar duplicada.')}</Text> : null}
             {msg ? <Text style={{ color: colors.amberText, backgroundColor: colors.amberSoft, padding: 10, borderRadius: 10, fontSize: 13, lineHeight: 18 }}>{msg}</Text> : null}
 
             {preview ? (
               <Card style={{ gap: 4 }}>
-                <Text style={{ fontSize: 16, fontWeight: '800', color: colors.green }}>{preview.new} personas nuevas para agregar</Text>
+                <Text style={{ fontSize: 16, fontWeight: '800', color: colors.green }}>{tx('{new} personas nuevas para agregar', { new: preview.new })}</Text>
                 <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>
-                  {preview.duplicates} ya estaban cargadas (mismo celular o mismo nombre) y se van a saltear. {preview.invalid + built.dropped} filas sin nombre se descartan.
+                  {tx('{duplicates} ya estaban cargadas (mismo celular o mismo nombre) y se van a saltear. {v1} filas sin nombre se descartan.', { duplicates: preview.duplicates, v1: preview.invalid + built.dropped })}
                 </Text>
               </Card>
             ) : null}
 
-            {!preview ? <Button title="Revisar antes de agregar" onPress={check} loading={busy} disabled={!hasName || !built.rows.length} />
-              : <Button title={`Agregar ${preview.new} personas`} onPress={doImport} loading={busy} disabled={!preview.new} />}
-            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Nada se agrega hasta que toques "Agregar". Las personas que ya están cargadas nunca se modifican.</Text>
+            {!preview ? <Button title={tx('Revisar antes de agregar')} onPress={check} loading={busy} disabled={!hasName || !built.rows.length} />
+              : <Button title={tx('Agregar {new} personas', { new: preview.new })} onPress={doImport} loading={busy} disabled={!preview.new} />}
+            <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Nada se agrega hasta que toques "Agregar". Las personas que ya están cargadas nunca se modifican.')}</Text>
           </>
         )}
       </Screen>

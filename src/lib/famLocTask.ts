@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
 import { backgroundAllowed, isPaused, shouldSend } from './famLoc';
 import { locMe, locPush, type LocMe, type PushStatus } from './famLocApi';
+import { tx } from './i18n';
 
 export const FAMILY_TASK = 'lamies-familia';
 const KEY = 'lamies.famloc.device'; // { userId }: este teléfono manda la ubicación de esta cuenta
@@ -128,13 +129,13 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(FAMILY_TASK)) {
 function disclosure(): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(
-      'Compartir tu ubicación',
+      tx('Compartir tu ubicación'),
       canBackground
-        ? 'La Mies recopila la ubicación de este teléfono para que las personas que vos elegiste vean dónde estás en el mapa, incluso con la app cerrada o la pantalla apagada. Podés pausarlo o apagarlo cuando quieras. En el aviso que sigue elegí "Permitir todo el tiempo" (en iPhone, "Siempre").'
-        : 'La Mies usa la ubicación de este aparato para que las personas que vos elegiste vean dónde estás en el mapa, mientras tenés la app abierta. Podés pausarlo o apagarlo cuando quieras.',
+        ? tx('La Mies recopila la ubicación de este teléfono para que las personas que vos elegiste vean dónde estás en el mapa, incluso con la app cerrada o la pantalla apagada. Podés pausarlo o apagarlo cuando quieras. En el aviso que sigue elegí "Permitir todo el tiempo" (en iPhone, "Siempre").')
+        : tx('La Mies usa la ubicación de este aparato para que las personas que vos elegiste vean dónde estás en el mapa, mientras tenés la app abierta. Podés pausarlo o apagarlo cuando quieras.'),
       [
-        { text: 'Ahora no', style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Continuar', onPress: () => resolve(true) },
+        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
+        { text: tx('Continuar'), onPress: () => resolve(true) },
       ],
       { cancelable: false },
     );
@@ -157,8 +158,8 @@ async function startTask(): Promise<boolean> {
       activityType: Location.ActivityType.Other,
       showsBackgroundLocationIndicator: false,
       foregroundService: {
-        notificationTitle: 'La Mies · compartís tu ubicación',
-        notificationBody: 'Te ven las personas que vos elegiste. Tocá para pausar o apagar.',
+        notificationTitle: tx('La Mies · compartís tu ubicación'),
+        notificationBody: tx('Te ven las personas que vos elegiste. Tocá para pausar o apagar.'),
         notificationColor: '#6D4BC3',
       },
     });
@@ -171,7 +172,7 @@ async function startTask(): Promise<boolean> {
 /** Este teléfono empieza a mandar mi ubicación (lo toca la persona; nunca se prende solo). */
 export async function startDevice(): Promise<DeviceMode> {
   const user = await currentUser();
-  if (!user) throw new Error('Tenés que entrar a la app.');
+  if (!user) throw new Error(tx('Tenés que entrar a la app.'));
   const already = await Location.getForegroundPermissionsAsync().catch(() => null);
   const needsBg = canBackground && (await Location.getBackgroundPermissionsAsync().catch(() => null))?.status !== 'granted';
   if ((already?.status !== 'granted' || needsBg) && !(await disclosure())) throw new Error('Sin el permiso de ubicación no se puede compartir.');

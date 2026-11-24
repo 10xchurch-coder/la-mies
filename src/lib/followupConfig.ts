@@ -2,6 +2,7 @@
 // Cada iglesia lo cambia desde Ajustes; lo que no cambió queda con estos valores.
 // No importa nada de la app para poder probarse sola.
 
+import { tx, txList } from './i18n';
 export type FollowupMessageKind = 'firstvisit' | 'secondvisit' | 'missed1' | 'missed2' | 'missed3' | 'promise' | 'followup' | 'visit';
 
 export type FollowupConfig = {
@@ -30,26 +31,26 @@ export const DEFAULT_FOLLOWUP: FollowupConfig = {
   disc_one_classes: 4,
   disc_course_classes: 13,
   messages: {
-    firstvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez este próximo fin de semana: {reuniones}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.',
-    secondvisit: 'Hola {nombre}, soy {yo} de {iglesia}. ¡Qué bueno verte otra vez! Nos alegra mucho que hayas vuelto. Me gustaría pasar a visitarte esta semana para conocerte mejor. ¿Qué día y horario te queda bien?',
-    missed1: 'Hola {nombre}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?',
-    missed2: 'Hola {nombre}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
-    missed3: 'Hola {nombre}. Recién oré por vos. Espero que estés bien. Dios te ama; buscalo de todo corazón y Él te va a sostener. Te esperamos {cuando}.',
-    promise: 'Hola {nombre}, soy {yo} de {iglesia}. Te escribo para recordarte que {cuando} tenemos el culto. ¡Me encantaría verte ahí! Si necesitás que te pasemos a buscar, avisame.',
-    followup: 'Hola {nombre}, soy {yo} de {iglesia}. Fue una alegría conocerte. Te quería invitar: {cuando} tenemos el culto y me encantaría que vengas. ¿Te puedo ayudar en algo?',
-    visit: 'Hola {nombre}, soy {yo} de {iglesia}. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?',
+    get firstvisit() { return tx('Hola {nombre}, soy {yo} de {iglesia}. ¡Qué alegría que nos hayas visitado! Gracias por venir. Queremos que te sientas como en casa. Te esperamos otra vez este próximo fin de semana: {reuniones}. Si hay algo por lo que podamos orar o en lo que te podamos ayudar, escribime.'); },
+    get secondvisit() { return tx('Hola {nombre}, soy {yo} de {iglesia}. ¡Qué bueno verte otra vez! Nos alegra mucho que hayas vuelto. Me gustaría pasar a visitarte esta semana para conocerte mejor. ¿Qué día y horario te queda bien?'); },
+    get missed1() { return tx('Hola {nombre}. ¡Te extrañamos este fin de semana en la iglesia! Quería saber cómo estás. ¿Hay algo en lo que te podamos ayudar, o algo por lo que podamos orar?'); },
+    get missed2() { return tx('Hola {nombre}. Hace dos semanas que no te vemos y te extrañamos mucho. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?'); },
+    get missed3() { return tx('Hola {nombre}. Recién oré por vos. Espero que estés bien. Dios te ama; buscalo de todo corazón y Él te va a sostener. Te esperamos {cuando}.'); },
+    get promise() { return tx('Hola {nombre}, soy {yo} de {iglesia}. Te escribo para recordarte que {cuando} tenemos el culto. ¡Me encantaría verte ahí! Si necesitás que te pasemos a buscar, avisame.'); },
+    get followup() { return tx('Hola {nombre}, soy {yo} de {iglesia}. Fue una alegría conocerte. Te quería invitar: {cuando} tenemos el culto y me encantaría que vengas. ¿Te puedo ayudar en algo?'); },
+    get visit() { return tx('Hola {nombre}, soy {yo} de {iglesia}. Me gustaría pasar a visitarte esta semana. ¿Qué día y horario te queda bien?'); },
   },
 };
 
 export const MESSAGE_TITLE: Record<FollowupMessageKind, string> = {
-  firstvisit: 'Vino por primera vez',
-  secondvisit: 'Vino por segunda vez',
-  missed1: 'Faltó 1 fin de semana',
-  missed2: 'Faltó 2 fines de semana',
-  missed3: 'Faltó 3 fines de semana o más',
-  promise: 'Recordarle el culto (prometió venir)',
-  followup: 'Invitarlo después de conocerlo en la calle',
-  visit: 'Coordinar una visita',
+  get firstvisit() { return tx('Vino por primera vez'); },
+  get secondvisit() { return tx('Vino por segunda vez'); },
+  get missed1() { return tx('Faltó 1 fin de semana'); },
+  get missed2() { return tx('Faltó 2 fines de semana'); },
+  get missed3() { return tx('Faltó 3 fines de semana o más'); },
+  get promise() { return tx('Recordarle el culto (prometió venir)'); },
+  get followup() { return tx('Invitarlo después de conocerlo en la calle'); },
+  get visit() { return tx('Coordinar una visita'); },
 };
 
 const LIMITS: Record<'write_hours' | 'visit_after_visits' | 'visit_days' | 'absent_visit_weeks' | 'disc_one_classes' | 'disc_course_classes', [number, number]> = {
@@ -93,13 +94,13 @@ export function missedKind(weeks: number): 'missed1' | 'missed2' | 'missed3' {
   return weeks >= 3 ? 'missed3' : weeks === 2 ? 'missed2' : 'missed1';
 }
 
-const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const DIAS = txList(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']);
 /** Todas las reuniones principales, en orden de la semana: "el sábado a las 20:00 y el domingo a las 10:00". */
 export function serviceList(services: { dow: number; time: string | null; main: boolean; active: boolean }[] | undefined): string {
   const order = (d: number) => (d + 6) % 7;   // lunes primero, domingo último
   const t = (x: string | null) => (x ?? '').slice(0, 5);
   const main = (services ?? []).filter((s) => s.active && s.main).sort((a, b) => order(a.dow) - order(b.dow) || t(a.time).localeCompare(t(b.time)));
-  if (!main.length) return 'el domingo';
-  const parts = main.map((s) => `el ${DIAS[s.dow]} a las ${t(s.time)}`);
+  if (!main.length) return tx('el domingo');
+  const parts = main.map((s) => tx('el {DIAS} a las {t}', { DIAS: DIAS[s.dow], t: t(s.time) }));
   return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}`;
 }

@@ -11,6 +11,7 @@ import { fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchEvent, EventRegistration } from '@/types';
+import { tx } from '@/lib/i18n';
 
 export default function Boleto() {
   const { id, fecha } = useLocalSearchParams<{ id: string; fecha?: string }>();
@@ -27,10 +28,10 @@ export default function Boleto() {
   }, [id, fecha, session?.user.id]));
 
   if (ev === undefined || reg === undefined) return <Loading />;
-  if (!ev || !reg || !reg.ticket_code) return <Empty icon="tag" title="No encontré tu entrada" text="Anotate primero desde la página del evento." />;
+  if (!ev || !reg || !reg.ticket_code) return <Empty icon="tag" title={tx('No encontré tu entrada')} text={tx('Anotate primero desde la página del evento.')} />;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mi entrada" subtitle={ev.title} back />
+      <Header title={tx('Mi entrada')} subtitle={ev.title} back />
       <Screen>
         <Card style={{ alignItems: 'center', gap: 14, paddingVertical: 24 }}>
           <View style={{ padding: 14, backgroundColor: '#FFF', borderRadius: 16 }}>
@@ -39,9 +40,9 @@ export default function Boleto() {
           <Text style={{ fontSize: 26, fontWeight: '900', letterSpacing: 3, color: colors.text }}>{showCode(reg.ticket_code)}</Text>
           <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{reg.name}{reg.people > 1 ? ` (+${reg.people - 1})` : ''}</Text>
           <Text style={{ fontSize: 14, color: colors.muted }}>{fmtDateShort(reg.occurs_on)}</Text>
-          {reg.checked_in_at ? <Tag text="Ya entraste" tone="green" /> : <Tag text="Mostrá este código en la puerta" tone="blue" />}
+          {reg.checked_in_at ? <Tag text={tx('Ya entraste')} tone="green" /> : <Tag text={tx('Mostrá este código en la puerta')} tone="blue" />}
         </Card>
-        <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>Una entrada sirve para todas las personas anotadas con vos. Sacale una captura por si no tenés señal.</Text>
+        <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('Una entrada sirve para todas las personas anotadas con vos. Sacale una captura por si no tenés señal.')}</Text>
       </Screen>
     </View>
   );

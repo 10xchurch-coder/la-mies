@@ -6,6 +6,7 @@ import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { chatLiveStop, chatLiveUpdate, chatSendLocation, type ChatRoomKind, type RoomRef } from './chat';
+import { tx } from './i18n';
 
 export const CHAT_LIVE_TASK = 'lamies-chat-live';
 const KEY = 'lamies.chat.live';
@@ -59,7 +60,7 @@ async function ensurePermission(): Promise<void> {
 export async function currentPlace(): Promise<{ lat: number; lng: number }> {
   if (Platform.OS === 'web') {
     return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition((p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }), () => reject(new Error('No pudimos saber dónde estás. Activá la ubicación del navegador.')), { enableHighAccuracy: true, timeout: 15000 });
+      navigator.geolocation.getCurrentPosition((p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }), () => reject(new Error(tx('No pudimos saber dónde estás. Activá la ubicación del navegador.'))), { enableHighAccuracy: true, timeout: 15000 });
     });
   }
   await ensurePermission();
@@ -70,9 +71,9 @@ export async function currentPlace(): Promise<{ lat: number; lng: number }> {
 function disclosure(minutes: number): Promise<boolean> {
   return new Promise((resolve) => {
     Alert.alert(
-      'Ubicación en tiempo real',
-      `La Mies va a mandar tu ubicación a este chat cada pocos segundos durante ${minutes} minutos, también con la pantalla apagada. Podés dejar de compartir cuando quieras, y se corta sola al terminar el tiempo. Solo lo ven los que están en este chat.`,
-      [{ text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) }, { text: 'Compartir', onPress: () => resolve(true) }],
+      tx('Ubicación en tiempo real'),
+      tx('La Mies va a mandar tu ubicación a este chat cada pocos segundos durante {minutes} minutos, también con la pantalla apagada. Podés dejar de compartir cuando quieras, y se corta sola al terminar el tiempo. Solo lo ven los que están en este chat.', { minutes }),
+      [{ text: tx('Cancelar'), style: 'cancel', onPress: () => resolve(false) }, { text: tx('Compartir'), onPress: () => resolve(true) }],
       { cancelable: false },
     );
   });
@@ -95,8 +96,8 @@ export async function startLiveShare(r: RoomRef, minutes: 15 | 30 | 60): Promise
     pausesUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
-      notificationTitle: 'La Mies · compartiendo tu ubicación',
-      notificationBody: `Los del chat ven dónde estás por ${minutes} minutos. Entrá a la app para dejar de compartir.`,
+      notificationTitle: tx('La Mies · compartiendo tu ubicación'),
+      notificationBody: tx('Los del chat ven dónde estás por {minutes} minutos. Entrá a la app para dejar de compartir.', { minutes }),
       notificationColor: '#1F6B45',
     },
   }).catch(() => undefined);

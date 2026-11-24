@@ -7,6 +7,7 @@ import { showDay } from '@/lib/personas';
 import { careList, careMark } from '@/lib/personasApi';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export type Care = { gift_on: string | null; gift_by: string | null; visit_on: string | null; visit_by: string | null };
 
@@ -25,23 +26,23 @@ export function CareButtons({ id, care, onChanged }: { id: string; care: Care | 
   const tap = (what: 'gift' | 'visit') => {
     const on = what === 'gift' ? care?.gift_on : care?.visit_on;
     const by = what === 'gift' ? care?.gift_by : care?.visit_by;
-    const run = (undo: boolean) => careMark(id, what, undo).then(() => { forget(); onChanged?.(); }).catch((e) => Alert.alert('No se pudo', errorMessage(e)));
+    const run = (undo: boolean) => careMark(id, what, undo).then(() => { forget(); onChanged?.(); }).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)));
     if (on) {
-      Alert.alert(what === 'gift' ? 'Ya recibió el regalo' : 'Ya lo visitaron', `El ${showDay(on)}${by ? `. Lo anotó ${by}.` : '.'}`, [
-        { text: 'Está bien', style: 'cancel' },
-        { text: 'Fue un error: sacarlo', style: 'destructive', onPress: () => { run(true); } },
+      Alert.alert(what === 'gift' ? tx('Ya recibió el regalo') : tx('Ya lo visitaron'), tx('El {showDay}{v1}', { showDay: showDay(on), v1: by ? tx('. Lo anotó {by}.', { by }) : '.' }), [
+        { text: tx('Está bien'), style: 'cancel' },
+        { text: tx('Fue un error: sacarlo'), style: 'destructive', onPress: () => { run(true); } },
       ]);
     } else {
-      Alert.alert(what === 'gift' ? '¿Recibió el regalo de bienvenida?' : '¿Recibió una visita?', 'Queda anotado con la fecha de hoy y tu nombre.', [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Sí, anotar', onPress: () => { run(false); } },
+      Alert.alert(what === 'gift' ? tx('¿Recibió el regalo de bienvenida?') : tx('¿Recibió una visita?'), tx('Queda anotado con la fecha de hoy y tu nombre.'), [
+        { text: tx('Cancelar'), style: 'cancel' },
+        { text: tx('Sí, anotar'), onPress: () => { run(false); } },
       ]);
     }
   };
   return (
     <View style={{ flexDirection: 'row', gap: 8 }}>
-      <Mark icon="gift" done={!!care?.gift_on} label={care?.gift_on ? `Regalo: ${showDay(care.gift_on)}${care.gift_by ? ` · ${care.gift_by}` : ''}` : 'Falta el regalo de bienvenida'} onPress={() => tap('gift')} />
-      <Mark icon="home" done={!!care?.visit_on} label={care?.visit_on ? `Visita: ${showDay(care.visit_on)}${care.visit_by ? ` · ${care.visit_by}` : ''}` : 'Falta la visita'} onPress={() => tap('visit')} />
+      <Mark icon="gift" done={!!care?.gift_on} label={care?.gift_on ? tx('Regalo: {showDay}{v1}', { showDay: showDay(care.gift_on), v1: care.gift_by ? ` · ${care.gift_by}` : '' }) : tx('Falta el regalo de bienvenida')} onPress={() => tap('gift')} />
+      <Mark icon="home" done={!!care?.visit_on} label={care?.visit_on ? tx('Visita: {showDay}{v1}', { showDay: showDay(care.visit_on), v1: care.visit_by ? ` · ${care.visit_by}` : '' }) : tx('Falta la visita')} onPress={() => tap('visit')} />
     </View>
   );
 }

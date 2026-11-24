@@ -3,7 +3,7 @@
 import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
 import { EN_BOOKS, KJV, loadKjvBook } from './bibleStudyData';
-import { getLang } from './i18n';
+import { getLang, tx } from './i18n';
 
 export type BibleVersionId = 'rv1909' | 'kjv';
 
@@ -29,8 +29,8 @@ export type BibleVersion = {
 
 /** Las versiones que ya están en la app. Las demás se suman acá cuando haya permiso y texto. */
 export const VERSIONS: BibleVersion[] = [
-  { id: 'rv1909', name: 'Reina-Valera 1909', short: 'RV1909', notice: 'Reina-Valera 1909 · Dominio público', books: RV1909 },
-  { id: 'kjv', name: 'King James Version (inglés)', short: 'KJV', notice: 'King James Version · Dominio público', books: KJV, lang: 'en', bookNames: EN_BOOKS, load: loadKjvBook },
+  { id: 'rv1909', get name() { return tx('Reina-Valera 1909'); }, get short() { return tx('RV1909'); }, notice: 'Reina-Valera 1909 · Dominio público', books: RV1909 },
+  { id: 'kjv', get name() { return tx('King James Version (inglés)'); }, short: 'KJV', notice: 'King James Version · Dominio público', books: KJV, lang: 'en', bookNames: EN_BOOKS, load: loadKjvBook },
 ];
 
 export const DEFAULT_VERSION: BibleVersionId = 'rv1909';

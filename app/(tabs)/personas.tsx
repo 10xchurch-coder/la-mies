@@ -12,6 +12,7 @@ import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { Contact, Group } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Scope = 'street' | 'visitor' | 'member' | 'all';
 type Filter = 'all' | 'mine' | 'promised' | 'very' | 'week';
@@ -74,28 +75,28 @@ export default function Personas() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
-        title="Personas"
-        subtitle={`${counts.member} miembros · ${counts.visitor} visitas · ${counts.street} contactos`}
+        title={tx('Personas')}
+        subtitle={tx('{member} miembros · {visitor} visitas · {street} contactos', { member: counts.member, visitor: counts.visitor, street: counts.street })}
         right={
-          <Pressable onPress={() => router.push('/persona/nueva')} accessibilityRole="button" accessibilityLabel="Agregar persona" style={styles.add}>
+          <Pressable onPress={() => router.push('/persona/nueva')} accessibilityRole="button" accessibilityLabel={tx('Agregar persona')} style={styles.add}>
             <Feather name="user-plus" size={18} color="#FFF" />
-            <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>Agregar</Text>
+            <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 14 }}>{tx('Agregar')}</Text>
           </Pressable>
         }
       />
       <View style={styles.filters}>
         <Segmented
-          options={[{ value: 'street', label: 'Calle' }, { value: 'visitor', label: 'Visitas' }, { value: 'member', label: 'Miembros' }, { value: 'all', label: 'Todos' }]}
+          options={[{ value: 'street', label: tx('Calle') }, { value: 'visitor', label: tx('Visitas') }, { value: 'member', label: tx('Miembros') }, { value: 'all', label: tx('Todos') }]}
           value={scope}
           onChange={setScope}
         />
         <View style={styles.search}>
           <Feather name="search" size={20} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar por nombre, calle o teléfono" placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel="Buscar" />
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar por nombre, calle o teléfono')} placeholderTextColor="#8B918C" style={{ flex: 1, fontSize: 15, color: colors.text }} accessibilityLabel={tx('Buscar')} />
         </View>
         {scope === 'street' ? (
           <Choice
-            options={[{ value: 'all', label: 'Todos' }, { value: 'mine', label: 'Míos' }, { value: 'promised', label: 'Prometieron' }, { value: 'very', label: 'Muy interesados' }, { value: 'week', label: 'Esta semana' }]}
+            options={[{ value: 'all', label: tx('Todos') }, { value: 'mine', label: tx('Míos') }, { value: 'promised', label: tx('Prometieron') }, { value: 'very', label: tx('Muy interesados') }, { value: 'week', label: tx('Esta semana') }]}
             value={filter}
             onChange={setFilter}
           />
@@ -110,7 +111,7 @@ export default function Personas() {
               />
             ) : null}
             {scope === 'member' || scope === 'visitor' ? (
-              <Choice options={[{ value: 'all', label: 'Todos' }, { value: 'unbaptized', label: 'Sin bautizar' }]} value={mfilter} onChange={(v) => setMfilter(v === mfilter ? 'all' : v)} />
+              <Choice options={[{ value: 'all', label: tx('Todos') }, { value: 'unbaptized', label: tx('Sin bautizar') }]} value={mfilter} onChange={(v) => setMfilter(v === mfilter ? 'all' : v)} />
             ) : null}
           </>
         )}
@@ -125,8 +126,8 @@ export default function Personas() {
         initialNumToRender={20}
         ListEmptyComponent={
           scope === 'street'
-            ? <Empty icon="map-pin" title="Todavía no hay contactos acá" text="Cuando marques una casa durante una salida, aparece en esta lista." />
-            : <Empty icon="users" title="No hay nadie acá todavía" text="Tocá Agregar para cargar a una persona. La secretaría puede marcarla como miembro." />
+            ? <Empty icon="map-pin" title={tx('Todavía no hay contactos acá')} text={tx('Cuando marques una casa durante una salida, aparece en esta lista.')} />
+            : <Empty icon="users" title={tx('No hay nadie acá todavía')} text={tx('Tocá Agregar para cargar a una persona. La secretaría puede marcarla como miembro.')} />
         }
         renderItem={({ item: c }) => (
           <Pressable onPress={() => router.push({ pathname: '/contacto/[id]', params: { id: c.id } })} accessibilityRole="button" style={({ pressed }) => [styles.card, cols > 1 && { maxWidth: '49.5%' }, pressed && { backgroundColor: colors.bgSoft }]}>
@@ -135,17 +136,17 @@ export default function Personas() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text style={{ fontSize: 16, fontWeight: '700', color: colors.text, flexShrink: 1 }} numberOfLines={1}>{c.name}</Text>
                 <Text style={{ fontSize: 13, color: colors.muted }}>
-                  {c.age ? `${c.age}` : ''}{c.age && c.sex ? ' · ' : ''}{c.sex === 'm' ? 'Hombre' : c.sex === 'f' ? 'Mujer' : ''}
+                  {c.age ? `${c.age}` : ''}{c.age && c.sex ? ' · ' : ''}{c.sex === 'm' ? tx('Hombre') : c.sex === 'f' ? tx('Mujer') : ''}
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                 {c.status !== 'contact' ? <Tag text={STATUS_LABEL[c.status]} tone={c.status === 'member' ? 'green' : 'blue'} /> : <Tag text={INTEREST_LABEL[c.interest]} tone={c.interest === 'very' ? 'green' : c.interest === 'some' ? 'blue' : c.interest === 'none' ? 'red' : 'gray'} />}
-                {c.promise_day && c.status === 'contact' ? <Tag text={`Prometió: ${PROMISE_LABEL[c.promise_day]}${c.pickup && c.pickup_time ? ` · buscarlo ${c.pickup_time}` : ''}`} tone="amber" /> : null}
-                {c.baptized || c.baptized_on ? <Tag text="Bautizado" tone="blue" /> : c.discipleship_since ? <Tag text="En discipulado" tone="blue" /> : null}
+                {c.promise_day && c.status === 'contact' ? <Tag text={tx('Prometió: {PROMISE_LABEL}{v1}', { PROMISE_LABEL: PROMISE_LABEL[c.promise_day], v1: c.pickup && c.pickup_time ? tx(' · buscarlo {pickup_time}', { pickup_time: c.pickup_time }) : '' })} tone="amber" /> : null}
+                {c.baptized || c.baptized_on ? <Tag text={tx('Bautizado')} tone="blue" /> : c.discipleship_since ? <Tag text={tx('En discipulado')} tone="blue" /> : null}
                 {c.group_id && groupName.get(c.group_id) ? <Tag text={groupName.get(c.group_id) as string} tone="gray" /> : null}
-                {c.profile_id ? <Tag text="Usa la app" tone="gray" /> : null}
+                {c.profile_id ? <Tag text={tx('Usa la app')} tone="gray" /> : null}
               </View>
-              {c.status === 'contact' ? <Text style={{ fontSize: 12, color: colors.muted }}>{c.address_hint ?? 'Sin calle'} · {fmtRelativeDay(c.created_at)}</Text> : null}
+              {c.status === 'contact' ? <Text style={{ fontSize: 12, color: colors.muted }}>{c.address_hint ?? tx('Sin calle')} · {fmtRelativeDay(c.created_at)}</Text> : null}
             </View>
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Pressable>

@@ -7,6 +7,7 @@ import { Card, Loading, SectionTitle, Stat } from '@/components/ui';
 import { myProgress } from '@/lib/api';
 import { LEVELS, badgesFor, levelFor, type Progress } from '@/lib/levels';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function Progreso() {
   const [p, setP] = useState<Progress | null>(null);
@@ -23,7 +24,7 @@ export default function Progreso() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mi progreso" back />
+      <Header title={tx('Mi progreso')} back />
       <Screen>
         <View style={styles.hero}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
@@ -31,18 +32,18 @@ export default function Progreso() {
               <Feather name="feather" size={32} color="#FFFFFF" />
             </View>
             <View style={{ flex: 1, gap: 3 }}>
-              <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase', opacity: 0.85 }}>{current ? `Nivel ${current.n}` : 'Todavía sin nivel'}</Text>
-              <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '800', letterSpacing: -0.4 }}>{current?.name ?? 'Tu primera salida te espera'}</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase', opacity: 0.85 }}>{current ? tx('Nivel {n}', { n: current.n }) : tx('Todavía sin nivel')}</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '800', letterSpacing: -0.4 }}>{current?.name ?? tx('Tu primera salida te espera')}</Text>
               <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '600', opacity: 0.9 }}>
-                {p.streak_weeks > 0 ? `${p.streak_weeks} ${p.streak_weeks === 1 ? 'semana seguida' : 'semanas seguidas'} saliendo` : 'Salí esta semana para empezar tu racha'}
+                {p.streak_weeks > 0 ? tx('{streak_weeks} {pl} saliendo', { streak_weeks: p.streak_weeks, pl: p.streak_weeks === 1 ? tx('semana seguida') : tx('semanas seguidas') }) : tx('Salí esta semana para empezar tu racha')}
               </Text>
             </View>
           </View>
           {next ? (
             <View style={{ gap: 6 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>Rumbo a {next.name}</Text>
-                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>{p.sessions} de {next.sessions} salidas</Text>
+                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>{tx('Rumbo a {name}', { name: next.name })}</Text>
+                <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700' }}>{tx('{sessions} de {sessions2} salidas', { sessions: p.sessions, sessions2: next.sessions })}</Text>
               </View>
               <View style={{ height: 10, borderRadius: 5, backgroundColor: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}>
                 <View style={{ width: `${pct}%`, height: '100%', borderRadius: 5, backgroundColor: '#FFFFFF' }} />
@@ -51,23 +52,23 @@ export default function Progreso() {
           ) : null}
         </View>
 
-        <SectionTitle>Mis números desde que empecé</SectionTitle>
+        <SectionTitle>{tx('Mis números desde que empecé')}</SectionTitle>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Stat value={p.sessions} label="Salidas" />
-          <Stat value={p.presentations} label="Presentaciones del evangelio" />
+          <Stat value={p.sessions} label={tx('Salidas')} />
+          <Stat value={p.presentations} label={tx('Presentaciones del evangelio')} />
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Stat value={p.promises} label="Prometieron venir a la iglesia" />
-          <Stat value={p.came} label="Vinieron a la iglesia" tone="green" />
+          <Stat value={p.promises} label={tx('Prometieron venir a la iglesia')} />
+          <Stat value={p.came} label={tx('Vinieron a la iglesia')} tone="green" />
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Stat value={p.discipleship} label="Discipulado" />
-          <Stat value={p.baptisms} label="Bautismos" />
-          <Stat value={`${p.km}`} label="km" />
-          <Stat value={Math.round(p.minutes / 60)} label="Horas" />
+          <Stat value={p.discipleship} label={tx('Discipulado')} />
+          <Stat value={p.baptisms} label={tx('Bautismos')} />
+          <Stat value={`${p.km}`} label={tx('km')} />
+          <Stat value={Math.round(p.minutes / 60)} label={tx('Horas')} />
         </View>
 
-        <SectionTitle>Insignias</SectionTitle>
+        <SectionTitle>{tx('Insignias')}</SectionTitle>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {badges.map((b) => (
             <View key={b.id} style={[styles.badge, !b.earned && styles.badgeLocked]}>
@@ -81,7 +82,7 @@ export default function Progreso() {
           ))}
         </View>
 
-        <SectionTitle>Niveles</SectionTitle>
+        <SectionTitle>{tx('Niveles')}</SectionTitle>
         <Card style={{ padding: 0 }}>
           {LEVELS.map((l, i) => {
             const done = p.sessions >= l.sessions;
@@ -90,15 +91,15 @@ export default function Progreso() {
               <View key={l.n} style={[styles.level, i === LEVELS.length - 1 && { borderBottomWidth: 0 }, here && { backgroundColor: '#F3F8F4' }]}>
                 {done ? <Feather name="check" size={20} color={colors.green} /> : <View style={styles.circle} />}
                 <Text style={{ flex: 1, fontSize: 14, fontWeight: here ? '800' : '700', color: done ? colors.text : colors.muted }}>{l.n} · {l.name}</Text>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: here ? colors.greenText : colors.muted }}>{here ? `${l.verse} · acá estás` : l.verse}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '600', color: here ? colors.greenText : colors.muted }}>{here ? tx('{verse} · acá estás', { verse: l.verse }) : l.verse}</Text>
               </View>
             );
           })}
         </Card>
 
         <View style={{ alignItems: 'center', gap: 4, paddingHorizontal: 8 }}>
-          <Text style={{ fontSize: 13, fontStyle: 'italic', color: colors.muted, textAlign: 'center', lineHeight: 19 }}>No nos cansemos, pues, de hacer el bien; porque a su tiempo segaremos, si no desmayamos</Text>
-          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green }}>Gálatas 6:9</Text>
+          <Text style={{ fontSize: 13, fontStyle: 'italic', color: colors.muted, textAlign: 'center', lineHeight: 19 }}>{tx('No nos cansemos, pues, de hacer el bien; porque a su tiempo segaremos, si no desmayamos')}</Text>
+          <Text style={{ fontSize: 12, fontWeight: '700', color: colors.green }}>{tx('Gálatas 6:9')}</Text>
         </View>
       </Screen>
     </View>

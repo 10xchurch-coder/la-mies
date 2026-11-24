@@ -10,6 +10,7 @@ import { upcomingBirthdays, type BirthdayRow } from '@/lib/api';
 import { isoDate, whatsappNumber } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx, txLocale } from '@/lib/i18n';
 
 export default function Cumples() {
   const router = useRouter();
@@ -19,23 +20,23 @@ export default function Cumples() {
 
   const today = isoDate(new Date());
   const groups: { title: string; list: BirthdayRow[] }[] = [
-    { title: 'Hoy', list: (rows ?? []).filter((r) => r.next_on === today) },
-    { title: 'Esta semana', list: (rows ?? []).filter((r) => r.next_on > today && r.next_on <= isoDate(new Date(Date.now() + 7 * 86400000))) },
-    { title: 'Más adelante', list: (rows ?? []).filter((r) => r.next_on > isoDate(new Date(Date.now() + 7 * 86400000))) },
+    { title: tx('Hoy'), list: (rows ?? []).filter((r) => r.next_on === today) },
+    { title: tx('Esta semana'), list: (rows ?? []).filter((r) => r.next_on > today && r.next_on <= isoDate(new Date(Date.now() + 7 * 86400000))) },
+    { title: tx('Más adelante'), list: (rows ?? []).filter((r) => r.next_on > isoDate(new Date(Date.now() + 7 * 86400000))) },
   ];
 
   const greet = (r: BirthdayRow) => {
     if (!r.phone) return;
     const first = r.name.split(' ')[0];
-    const msg = `¡Feliz cumpleaños, ${first}! 🎉 Que Dios te bendiga mucho en este nuevo año de vida. Te queremos mucho. ${profile?.display_name ?? ''}${church?.name ? ` · ${church.name}` : ''}`;
+    const msg = tx('¡Feliz cumpleaños, {first}! 🎉 Que Dios te bendiga mucho en este nuevo año de vida. Te queremos mucho. {display_name}{v1}', { first, display_name: profile?.display_name ?? '', v1: church?.name ? ` · ${church.name}` : '' });
     Linking.openURL(`https://wa.me/${whatsappNumber(r.phone)}?text=${encodeURIComponent(msg)}`);
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Cumpleaños" subtitle="Los próximos 30 días" back />
+      <Header title={tx('Cumpleaños')} subtitle={tx('Los próximos 30 días')} back />
       <Screen>
-        {rows === null ? <Loading /> : !rows.length ? <Empty icon="gift" title="No hay cumpleaños cargados" text="Cargá la fecha de nacimiento en la ficha de cada persona y aparecen acá. La víspera les llega un aviso a los líderes." /> : null}
+        {rows === null ? <Loading /> : !rows.length ? <Empty icon="gift" title={tx('No hay cumpleaños cargados')} text={tx('Cargá la fecha de nacimiento en la ficha de cada persona y aparecen acá. La víspera les llega un aviso a los líderes.')} /> : null}
         {groups.filter((g) => g.list.length).map((g) => (
           <View key={g.title} style={{ gap: 8 }}>
             <SectionTitle>{g.title}</SectionTitle>
@@ -46,11 +47,11 @@ export default function Cumples() {
                     <Face name={r.name} path={r.photo_path} size={40} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{r.name}</Text>
-                      <Text style={{ fontSize: 12, color: colors.muted }}>{new Date(`${r.next_on}T12:00:00`).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })} · cumple {r.turns}</Text>
+                      <Text style={{ fontSize: 12, color: colors.muted }}>{tx('{toLocaleDateString} · cumple {turns}', { toLocaleDateString: new Date(`${r.next_on}T12:00:00`).toLocaleDateString(txLocale(), { weekday: 'long', day: 'numeric', month: 'long' }), turns: r.turns })}</Text>
                     </View>
                   </Pressable>
                   {r.phone ? (
-                    <Pressable onPress={() => greet(r)} accessibilityRole="button" accessibilityLabel={`Saludar a ${r.name}`} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+                    <Pressable onPress={() => greet(r)} accessibilityRole="button" accessibilityLabel={tx('Saludar a {name}', { name: r.name })} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
                       <Feather name="message-circle" size={18} color={colors.green} />
                     </Pressable>
                   ) : null}

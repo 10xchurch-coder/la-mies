@@ -2,6 +2,7 @@
 // OJO: quién puede ver a quién lo decide la BASE (0082_ubicacion_familia.sql). Lo de acá es el mismo
 // criterio escrito en claro, para las pruebas y para lo que muestra la pantalla; no es lo que protege el dato.
 import { haversine, type LatLng } from './geo';
+import { tx } from './i18n';
 
 /**
  * Compartir con la app cerrada (segundo plano) solo se prende en las versiones de la tienda cuyo permiso
@@ -111,7 +112,7 @@ export function placeEvents(inside: string[], places: Place[], pos: LatLng, opts
 }
 
 export const placeEventText = (firstName: string, e: PlaceEvent): string =>
-  e.kind === 'llego' ? `${firstName} llegó a ${e.place.name}` : `${firstName} salió de ${e.place.name}`;
+  e.kind === 'llego' ? tx('{firstName} llegó a {name}', { firstName, name: e.place.name }) : tx('{firstName} salió de {name}', { firstName, name: e.place.name });
 
 // ---------------------------------------------------------------------------
 // Lo que manda el teléfono
@@ -132,16 +133,16 @@ export function shouldSend(last: { t: number; lat: number; lng: number } | null,
 // Textos
 // ---------------------------------------------------------------------------
 export function agoText(iso: string | number | Date | null | undefined, now: number = Date.now()): string {
-  if (iso == null) return 'sin ubicación todavía';
+  if (iso == null) return tx('sin ubicación todavía');
   const s = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000));
-  if (!Number.isFinite(s)) return 'sin ubicación todavía';
-  if (s < 90) return 'recién';
+  if (!Number.isFinite(s)) return tx('sin ubicación todavía');
+  if (s < 90) return tx('recién');
   const m = Math.round(s / 60);
-  if (m < 60) return `hace ${m} min`;
+  if (m < 60) return tx('hace {m} min', { m });
   const h = Math.round(m / 60);
-  if (h < 24) return `hace ${h} h`;
+  if (h < 24) return tx('hace {h} h', { h });
   const d = Math.round(h / 24);
-  return d === 1 ? 'hace 1 día' : `hace ${d} días`;
+  return d === 1 ? tx('hace 1 día') : tx('hace {d} días', { d });
 }
 
 /** Una posición de hace más de 15 minutos ya no es "ahora": se muestra apagada. */
@@ -149,13 +150,13 @@ export const isStale = (iso: string | null | undefined, now: number = Date.now()
   !iso || now - new Date(iso).getTime() > 15 * 60 * 1000;
 
 export function sharingLine(n: number): string {
-  if (n <= 0) return 'Tu ubicación está prendida, pero todavía no la ve nadie';
-  return n === 1 ? 'Estás compartiendo tu ubicación con 1 persona' : `Estás compartiendo tu ubicación con ${n} personas`;
+  if (n <= 0) return tx('Tu ubicación está prendida, pero todavía no la ve nadie');
+  return n === 1 ? tx('Estás compartiendo tu ubicación con 1 persona') : tx('Estás compartiendo tu ubicación con {n} personas', { n });
 }
 
 export function batteryText(pct: number | null | undefined): string | null {
   if (pct == null || !Number.isFinite(pct)) return null;
-  return `Batería ${Math.round(pct)}%`;
+  return tx('Batería {round}%', { round: Math.round(pct) });
 }
 
 /** El mapa se acomoda para que entren todos, y nunca más cerca que unas cuadras. */

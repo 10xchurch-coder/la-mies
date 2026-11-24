@@ -19,6 +19,7 @@ import { fmtDateShort, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
 import type { ChurchService } from '@/types';
+import { tx } from '@/lib/i18n';
 
 type Flash = { tone: 'green' | 'amber' | 'red'; title: string; text?: string; name?: string; photo?: string | null } | null;
 type Found = { id: string; name: string; photo_path: string | null };
@@ -59,8 +60,8 @@ export default function AsistenciaChip() {
 
   const welcome = (r: { name: string; photo_path: string | null; already: boolean }) => {
     setFlash(r.already
-      ? { tone: 'amber', title: `${r.name}, ya estabas anotado`, text: 'Tu asistencia ya estaba guardada. ¡Pasá!', name: r.name, photo: r.photo_path }
-      : { tone: 'green', title: `¡Bienvenido, ${r.name}!`, text: 'Quedaste presente.', name: r.name, photo: r.photo_path });
+      ? { tone: 'amber', title: `${r.name}, ya estabas anotado`, text: tx('Tu asistencia ya estaba guardada. ¡Pasá!'), name: r.name, photo: r.photo_path }
+      : { tone: 'green', title: tx('¡Bienvenido, {name}!', { name: r.name }), text: tx('Quedaste presente.'), name: r.name, photo: r.photo_path });
     if (!r.already) { setCount((n) => n + 1); setRecent((l) => [r.name, ...l.filter((x) => x !== r.name)].slice(0, 8)); }
   };
 
@@ -70,14 +71,14 @@ export default function AsistenciaChip() {
     if (!s) return;
     const token = parsePerson(text);
     if (!token) {
-      setFlash({ tone: 'red', title: from === 'chip' ? (text ? 'Ese chip no es una tarjeta de persona' : 'El chip está vacío') : 'Ese QR no es una tarjeta de persona', text: 'Pedí ayuda en la entrada o buscá tu nombre abajo.' });
+      setFlash({ tone: 'red', title: from === 'chip' ? (text ? tx('Ese chip no es una tarjeta de persona') : tx('El chip está vacío')) : tx('Ese QR no es una tarjeta de persona'), text: tx('Pedí ayuda en la entrada o buscá tu nombre abajo.') });
       return;
     }
     // El mismo chip dos veces seguidas (lo dejó apoyado): no se pregunta de nuevo.
     if (last.current && last.current.token === token && Date.now() - last.current.at < 4000) return;
     last.current = { token, at: Date.now() };
     try { welcome(await chipAttendance(token, date, s.id)); }
-    catch (e) { setFlash({ tone: 'red', title: 'No se pudo anotar', text: errorMessage(e) }); }
+    catch (e) { setFlash({ tone: 'red', title: tx('No se pudo anotar'), text: errorMessage(e) }); }
   }, [date]);
 
   /** Lee chips sin parar, uno atrás del otro, hasta que se toca "Dejar de leer" o se sale de la pantalla. */
@@ -87,14 +88,14 @@ export default function AsistenciaChip() {
     let fails = 0;
     while (running.current) {
       try {
-        const text = await readChip('Apoyá tu chip o tu tarjeta');
+        const text = await readChip(tx('Apoyá tu chip o tu tarjeta'));
         if (!running.current) break;
         fails = 0;
         await onText(text, 'chip');
       } catch (e) {
         if (!running.current || (e as Error).message === 'cancelado') break;      // en iPhone, cerrar el cartel del lector frena la lectura
         fails += 1;
-        setFlash({ tone: 'red', title: 'No se pudo leer el chip', text: 'Apoyalo otra vez y no lo muevas. Si no anda, buscá tu nombre abajo.' });
+        setFlash({ tone: 'red', title: tx('No se pudo leer el chip'), text: tx('Apoyalo otra vez y no lo muevas. Si no anda, buscá tu nombre abajo.') });
         if (fails >= 3) break;                                                    // algo anda mal con el lector: no insistir sin parar
       }
       await sleep(1300);                                                          // deja ver el cartel antes del próximo chip
@@ -116,7 +117,7 @@ export default function AsistenciaChip() {
       await setAttendance(p.id, date, service.id, true);
       setQ(''); setFound([]);
       welcome({ name: p.name, photo_path: p.photo_path, already: false });
-    } catch (e) { setFlash({ tone: 'red', title: 'No se pudo anotar', text: errorMessage(e) }); }
+    } catch (e) { setFlash({ tone: 'red', title: tx('No se pudo anotar'), text: errorMessage(e) }); }
   };
 
   // El cartel se borra solo, así el próximo ve la pantalla lista.
@@ -127,13 +128,13 @@ export default function AsistenciaChip() {
   const fg = flash?.tone === 'green' ? colors.greenText : flash?.tone === 'amber' ? colors.amberText : colors.red;
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Entrada con chip" subtitle={service ? `${service.name} · ${date === isoDate(new Date()) ? 'Hoy' : fmtDateShort(date)}` : undefined} back />
+      <Header title={tx('Entrada con chip')} subtitle={service ? `${service.name} · ${date === isoDate(new Date()) ? tx('Hoy') : fmtDateShort(date)}` : undefined} back />
       <Screen>
-        {!services.length || !service ? <Empty icon="calendar" title="No hay reuniones cargadas" text="Primero cargá las reuniones de la iglesia." /> : off ? (
+        {!services.length || !service ? <Empty icon="calendar" title={tx('No hay reuniones cargadas')} text={tx('Primero cargá las reuniones de la iglesia.')} /> : off ? (
           <Card style={{ gap: 8, alignItems: 'center', padding: 20, backgroundColor: colors.amberSoft, borderColor: colors.amber }}>
             <Feather name="slash" size={28} color={colors.amberText} />
-            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>Esta reunión está marcada como “no hubo”</Text>
-            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>No se puede tomar asistencia. Si sí hubo reunión, cambialo en la pantalla de Asistencia.</Text>
+            <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{tx('Esta reunión está marcada como “no hubo”')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('No se puede tomar asistencia. Si sí hubo reunión, cambialo en la pantalla de Asistencia.')}</Text>
           </Card>
         ) : (
           <>
@@ -149,38 +150,38 @@ export default function AsistenciaChip() {
               ) : (
                 <>
                   <Feather name="radio" size={48} color={colors.muted} />
-                  <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{reading ? 'Apoyá tu chip o tu tarjeta en el teléfono' : 'Tocá “Empezar” para leer los chips'}</Text>
+                  <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{reading ? tx('Apoyá tu chip o tu tarjeta en el teléfono') : tx('Tocá “Empezar” para leer los chips')}</Text>
                 </>
               )}
             </View>
 
             {nfcBuilt && nfc === 'ok' ? (
-              reading ? <Button title="Dejar de leer chips" icon="pause" variant="outline" onPress={stop} /> : <Button title="Empezar a leer chips" icon="radio" onPress={start} />
+              reading ? <Button title={tx('Dejar de leer chips')} icon="pause" variant="outline" onPress={stop} /> : <Button title={tx('Empezar a leer chips')} icon="radio" onPress={start} />
             ) : (
               <Text style={{ fontSize: 14, color: colors.amberText, fontWeight: '700', textAlign: 'center' }}>
-                {nfc === 'off' ? 'Prendé el NFC en los ajustes del teléfono para leer chips.' : nfcBuilt ? 'Este teléfono no lee chips.' : 'Para leer chips hace falta la app nueva en un teléfono con NFC.'} Podés leer el QR de la tarjeta o buscar el nombre.
+                {tx('{v1} Podés leer el QR de la tarjeta o buscar el nombre.', { v1: nfc === 'off' ? tx('Prendé el NFC en los ajustes del teléfono para leer chips.') : nfcBuilt ? tx('Este teléfono no lee chips.') : tx('Para leer chips hace falta la app nueva en un teléfono con NFC.') })}
               </Text>
             )}
-            {scannerAvailable ? (scan ? <TicketScanner onCode={(t) => { onText(t, 'qr'); }} onClose={() => setScan(false)} /> : <Button title="Leer el QR de la tarjeta" icon="camera" variant="outline" onPress={() => setScan(true)} />) : null}
+            {scannerAvailable ? (scan ? <TicketScanner onCode={(t) => { onText(t, 'qr'); }} onClose={() => setScan(false)} /> : <Button title={tx('Leer el QR de la tarjeta')} icon="camera" variant="outline" onPress={() => setScan(true)} />) : null}
 
-            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.greenText, textAlign: 'center' }}>{count} {count === 1 ? 'persona entró' : 'personas entraron'} por acá</Text>
-            {recent.length ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>Los últimos: {recent.join(' · ')}</Text> : null}
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.greenText, textAlign: 'center' }}>{tx('{count} {pl} por acá', { count, pl: count === 1 ? tx('persona entró') : tx('personas entraron') })}</Text>
+            {recent.length ? <Text style={{ fontSize: 13, color: colors.muted, textAlign: 'center' }}>{tx('Los últimos: {recent}', { recent: recent.join(' · ') })}</Text> : null}
 
-            <SectionTitle>¿No tenés el chip?</SectionTitle>
-            <Field label="Buscá tu nombre" value={q} onChangeText={setQ} autoCapitalize="words" autoCorrect={false} placeholder="Nombre y apellido" />
+            <SectionTitle>{tx('¿No tenés el chip?')}</SectionTitle>
+            <Field label={tx('Buscá tu nombre')} value={q} onChangeText={setQ} autoCapitalize="words" autoCorrect={false} placeholder={tx('Nombre y apellido')} />
             {found.length ? (
               <Card style={{ padding: 0 }}>
                 {found.map((p, i) => (
-                  <Pressable key={p.id} onPress={() => byName(p)} accessibilityRole="button" accessibilityLabel={`Marcar presente a ${p.name}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
+                  <Pressable key={p.id} onPress={() => byName(p)} accessibilityRole="button" accessibilityLabel={tx('Marcar presente a {name}', { name: p.name })} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
                     <Face name={p.name} path={p.photo_path} size={36} />
                     <Text style={{ flex: 1, fontSize: 16, fontWeight: '700', color: colors.text }}>{p.name}</Text>
-                    <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>Soy yo</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '800', color: colors.green }}>{tx('Soy yo')}</Text>
                   </Pressable>
                 ))}
               </Card>
-            ) : q.trim().length >= 2 ? <Text style={{ fontSize: 13, color: colors.muted }}>No aparece nadie con ese nombre. Avisá en la entrada.</Text> : null}
+            ) : q.trim().length >= 2 ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No aparece nadie con ese nombre. Avisá en la entrada.')}</Text> : null}
 
-            <Button title="Chips de la iglesia: darle un chip a alguien" icon="credit-card" variant="ghost" small onPress={() => { stop(); router.push('/chips' as Href); }} />
+            <Button title={tx('Chips de la iglesia: darle un chip a alguien')} icon="credit-card" variant="ghost" small onPress={() => { stop(); router.push('/chips' as Href); }} />
           </>
         )}
       </Screen>

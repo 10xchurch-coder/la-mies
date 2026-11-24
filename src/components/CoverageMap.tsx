@@ -6,6 +6,7 @@ import { Circle, MapView, Marker, Polygon, Polyline, type MapViewProps, type Reg
 import { offsetSegment, segmentOf, type LatLng } from '../lib/geo';
 import { colors, coverageColor, themed } from '../theme';
 import type { Contact, CoverageRow, HouseRow, RoadRow, Zone } from '../types';
+import { tx } from '@/lib/i18n';
 
 export type LiveMember = { user_id: string; display_name: string; lat: number; lng: number; me?: boolean };
 
@@ -136,7 +137,7 @@ export function CoverageMap({
           coordinate={{ latitude: c.lat as number, longitude: c.lng as number }}
           pinColor={c.interest === 'none' ? colors.red : c.interest === 'very' ? colors.green : colors.blue}
           title={c.name}
-          description={c.promise_day ? `Prometió venir el ${c.promise_day === 'sat' ? 'sábado' : 'domingo'}` : undefined}
+          description={c.promise_day ? tx('Prometió venir el {pl}', { pl: c.promise_day === 'sat' ? tx('sábado') : tx('domingo') }) : undefined}
           onCalloutPress={() => onPressContact?.(c)}
         />
       ))}
@@ -148,7 +149,7 @@ export function CoverageMap({
               <Text style={styles.liveInitial}>{m.display_name.charAt(0).toUpperCase()}</Text>
             </View>
             <View style={styles.liveLabel}>
-              <Text style={styles.liveLabelText}>{m.me ? 'Vos' : m.display_name}</Text>
+              <Text style={styles.liveLabelText}>{m.me ? tx('Vos') : m.display_name}</Text>
             </View>
           </View>
         </Marker>

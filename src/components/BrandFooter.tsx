@@ -5,6 +5,7 @@ import { Image } from 'expo-image';
 import { signedUrl } from '../lib/files';
 import { useAuth } from '../store/auth';
 import { themed } from '../theme';
+import { tx } from '@/lib/i18n';
 
 /** Dirección del logo (el de la iglesia puede ser un enlace o un archivo guardado). */
 export function useChurchLogo(): string | null {
@@ -21,14 +22,14 @@ export function useChurchLogo(): string | null {
 
 export function BrandFooter({ align = 'center' }: { align?: 'center' | 'left' }) {
   const { church } = useAuth();
-  const name = church?.name ?? 'La Mies';
+  const name = church?.name ?? tx('La Mies');
   const logo = useChurchLogo();
   return (
     <View style={[styles.row, align === 'left' && { alignSelf: 'flex-start' }]}>
       {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" cachePolicy="memory-disk" /> : null}
       <View style={{ flexShrink: 1 }}>
         <Text style={styles.name} numberOfLines={2}>{name}</Text>
-        <Text style={styles.app}>App La Mies · RV1960</Text>
+        <Text style={styles.app}>{tx('App La Mies · RV1960')}</Text>
       </View>
     </View>
   );

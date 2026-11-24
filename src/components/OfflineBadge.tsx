@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { netState, subscribeNet } from '@/lib/netFetch';
 import { pendingCount } from '@/lib/offline';
+import { tx } from '@/lib/i18n';
 
 export function OfflineBadge() {
   const insets = useSafeAreaInsets();
@@ -21,10 +22,10 @@ export function OfflineBadge() {
 
   const pending = net.pending + contacts;
   if (net.online && !pending) return null;
-  const changes = pending === 1 ? '1 cambio' : `${pending} cambios`;
+  const changes = pending === 1 ? tx('1 cambio') : tx('{pending} cambios', { pending });
   const text = !net.online
-    ? (pending ? `Sin conexión · ${changes} por subir` : 'Sin conexión · ves lo último guardado')
-    : `Subiendo ${changes}…`;
+    ? (pending ? tx('Sin conexión · {changes} por subir', { changes }) : tx('Sin conexión · ves lo último guardado'))
+    : tx('Subiendo {changes}…', { changes });
   return (
     <View pointerEvents="none" style={[styles.wrap, { bottom: insets.bottom + 70 }]}>
       <View style={[styles.pill, net.online && { backgroundColor: '#1F6B45' }]}>

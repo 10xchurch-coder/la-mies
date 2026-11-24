@@ -19,6 +19,7 @@ import { errorMessage, supabase } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
 import type { Group } from '@/types';
+import { tx } from '@/lib/i18n';
 
 // Si la ruta todavía no tiene ningún lugar marcado, el mapa arranca en Posadas.
 const START = { latitude: -27.3671, longitude: -55.896, latitudeDelta: 0.06, longitudeDelta: 0.06 };
@@ -94,7 +95,7 @@ export default function ColectivoParadas() {
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true);
-    try { await fn(); load(); } catch (e) { Alert.alert('No se pudo', errorMessage(e)); } finally { setBusy(false); }
+    try { await fn(); load(); } catch (e) { Alert.alert(tx('No se pudo'), errorMessage(e)); } finally { setBusy(false); }
   };
 
   const move = (s: BusStopRow, dir: -1 | 1) => {
@@ -125,9 +126,9 @@ export default function ColectivoParadas() {
   };
 
   const remove = (s: BusStopRow) => {
-    Alert.alert(`¿Quitar la parada de ${s.title}?`, 'Solo se quita de la lista del colectivo. Su ficha queda igual.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Quitar', style: 'destructive', onPress: () => { setOpen(null); run(() => removeBusStop(s.id)); } },
+    Alert.alert(tx('¿Quitar la parada de {title}?', { title: s.title }), tx('Solo se quita de la lista del colectivo. Su ficha queda igual.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Quitar'), style: 'destructive', onPress: () => { setOpen(null); run(() => removeBusStop(s.id)); } },
     ]);
   };
 
@@ -153,19 +154,19 @@ export default function ColectivoParadas() {
   const routeName = groups.find((g) => g.id === group)?.name;
 
   const status = (s: BusStopRow): { text: string; tone: 'green' | 'blue' | 'amber' | 'gray' | 'red' } | null => {
-    if (s.lat == null || s.lng == null) return { text: 'Falta marcar el lugar', tone: 'red' };
+    if (s.lat == null || s.lng == null) return { text: tx('Falta marcar el lugar'), tone: 'red' };
     if (!isLive) return null;
-    if (skipped.includes(s.id)) return { text: 'Hoy no viene', tone: 'gray' };
-    if (s.picked) return { text: 'Ya subió', tone: 'green' };
-    if (s.reached_at) return { text: 'El colectivo ya pasó', tone: 'gray' };
+    if (skipped.includes(s.id)) return { text: tx('Hoy no viene'), tone: 'gray' };
+    if (s.picked) return { text: tx('Ya subió'), tone: 'green' };
+    if (s.reached_at) return { text: tx('El colectivo ya pasó'), tone: 'gray' };
     const eta = etas.get(s.id);
-    if (s.notified_at) return { text: eta != null ? `Avisado · ${etaLabel(eta)}` : 'Avisado', tone: 'green' };
+    if (s.notified_at) return { text: eta != null ? tx('Avisado · {etaLabel}', { etaLabel: etaLabel(eta) }) : tx('Avisado'), tone: 'green' };
     return eta != null ? { text: etaLabel(eta), tone: 'blue' } : null;
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Paradas del colectivo" subtitle={stops ? `${list.length} ${list.length === 1 ? 'parada' : 'paradas'}${routeName ? ` · ${routeName}` : ''}` : undefined} back />
+      <Header title={tx('Paradas del colectivo')} subtitle={stops ? `${list.length} ${list.length === 1 ? tx('parada') : tx('paradas')}${routeName ? ` · ${routeName}` : ''}` : undefined} back />
       <Screen>
         {groups.length > 1 ? <Choice columns={2} options={groups.map((g) => ({ value: g.id, label: g.name }))} value={group ?? ''} onChange={setGroup} /> : null}
 
@@ -193,26 +194,26 @@ export default function ColectivoParadas() {
             ) : null}
             {placing ? (
               <Card style={{ backgroundColor: colors.amberSoft, borderColor: colors.amber, gap: 6 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.amberText }}>Tocá en el mapa donde para el colectivo</Text>
-                <Text style={{ fontSize: 13, color: colors.amberText }}>Mové y acercá el mapa hasta ver la casa. Después tocá justo en la puerta.</Text>
-                <Button title="Cancelar" variant="ghost" small onPress={() => setPlacing(null)} />
+                <Text style={{ fontSize: 14, fontWeight: '800', color: colors.amberText }}>{tx('Tocá en el mapa donde para el colectivo')}</Text>
+                <Text style={{ fontSize: 13, color: colors.amberText }}>{tx('Mové y acercá el mapa hasta ver la casa. Después tocá justo en la puerta.')}</Text>
+                <Button title={tx('Cancelar')} variant="ghost" small onPress={() => setPlacing(null)} />
               </Card>
             ) : withPlace.length ? (
               <Text style={{ fontSize: 12, color: colors.muted }}>
-                Los números son el orden en que pasa el colectivo. La línea verde une las paradas{isLive ? ' y el punto naranja es el colectivo' : ''}.
+                {tx('Los números son el orden en que pasa el colectivo. La línea verde une las paradas{pl}.', { pl: isLive ? tx(' y el punto naranja es el colectivo') : '' })}
               </Text>
             ) : null}
 
             <Card style={{ gap: 4, backgroundColor: colors.greenSoft, borderColor: colors.green }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.greenText }}>Aviso de {NOTICE_MINUTES} minutos</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.greenText }}>{tx('Aviso de {NOTICE_MINUTES} minutos', { NOTICE_MINUTES })}</Text>
               <Text style={{ fontSize: 13, color: colors.greenText, lineHeight: 18 }}>
-                Cuando el colectivo sale y le faltan unos {NOTICE_MINUTES} minutos para una parada, a esa persona le llega solo un aviso a la app. Es una vez por viaje. Si es un chico sin la app, les llega a los grandes de su familia.
+                {tx('Cuando el colectivo sale y le faltan unos {NOTICE_MINUTES} minutos para una parada, a esa persona le llega solo un aviso a la app. Es una vez por viaje. Si es un chico sin la app, les llega a los grandes de su familia.', { NOTICE_MINUTES })}
               </Text>
-              {noPlace ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.redText }}>{noPlace === 1 ? 'A 1 parada le falta' : `A ${noPlace} paradas les falta`} el lugar en el mapa: sin eso no se puede avisar.</Text> : null}
+              {noPlace ? <Text style={{ fontSize: 13, fontWeight: '700', color: colors.redText }}>{tx('{v1} el lugar en el mapa: sin eso no se puede avisar.', { v1: noPlace === 1 ? tx('A 1 parada le falta') : tx('A {noPlace} paradas les falta', { noPlace }) })}</Text> : null}
             </Card>
 
             {!list.length ? (
-              <Empty icon="map-pin" title="Esta ruta todavía no tiene paradas" text={canEdit ? 'Agregá abajo a cada persona o familia que pasa a buscar el colectivo, en el orden del recorrido.' : 'El jefe de la ruta las carga acá.'} />
+              <Empty icon="map-pin" title={tx('Esta ruta todavía no tiene paradas')} text={canEdit ? tx('Agregá abajo a cada persona o familia que pasa a buscar el colectivo, en el orden del recorrido.') : tx('El jefe de la ruta las carga acá.')} />
             ) : (
               <Card style={{ padding: 0 }}>
                 {list.map((s, i) => {
@@ -223,25 +224,25 @@ export default function ColectivoParadas() {
                     <View key={s.id} style={{ borderTopWidth: i ? 1 : 0, borderTopColor: colors.border }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12 }}>
                         <View style={styles.num}><Text style={styles.numText}>{s.pos}</Text></View>
-                        <Pressable onPress={() => toggleOpen(s)} accessibilityRole="button" accessibilityLabel={`Parada ${s.pos}: ${s.title}`} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Pressable onPress={() => toggleOpen(s)} accessibilityRole="button" accessibilityLabel={tx('Parada {pos}: {title}', { pos: s.pos, title: s.title })} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                           {s.household_id ? (
                             <View style={styles.famIcon}><Feather name="users" size={18} color={colors.amberText} /></View>
                           ) : <Face name={s.title} path={s.photo_path} size={36} />}
                           <View style={{ flex: 1, gap: 2 }}>
                             <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }} numberOfLines={1}>{s.title}</Text>
-                            <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{[s.people, s.address].filter(Boolean).join(' · ') || 'Sin dirección'}</Text>
+                            <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{[s.people, s.address].filter(Boolean).join(' · ') || tx('Sin dirección')}</Text>
                             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                               {st ? <Tag text={st.text} tone={st.tone} /> : null}
-                              {s.will_notify === 0 ? <Tag text="Nadie tiene la app" tone="amber" /> : null}
+                              {s.will_notify === 0 ? <Tag text={tx('Nadie tiene la app')} tone="amber" /> : null}
                             </View>
                           </View>
                         </Pressable>
                         {canEdit ? (
                           <View style={{ flexDirection: 'row' }}>
-                            <Pressable disabled={busy || i === 0} onPress={() => move(s, -1)} accessibilityRole="button" accessibilityLabel={`Subir a ${s.title}`} style={[styles.arrow, i === 0 && { opacity: 0.25 }]}>
+                            <Pressable disabled={busy || i === 0} onPress={() => move(s, -1)} accessibilityRole="button" accessibilityLabel={tx('Subir a {title}', { title: s.title })} style={[styles.arrow, i === 0 && { opacity: 0.25 }]}>
                               <Feather name="arrow-up" size={18} color={colors.green} />
                             </Pressable>
-                            <Pressable disabled={busy || i === list.length - 1} onPress={() => move(s, 1)} accessibilityRole="button" accessibilityLabel={`Bajar a ${s.title}`} style={[styles.arrow, i === list.length - 1 && { opacity: 0.25 }]}>
+                            <Pressable disabled={busy || i === list.length - 1} onPress={() => move(s, 1)} accessibilityRole="button" accessibilityLabel={tx('Bajar a {title}', { title: s.title })} style={[styles.arrow, i === list.length - 1 && { opacity: 0.25 }]}>
                               <Feather name="arrow-down" size={18} color={colors.green} />
                             </Pressable>
                           </View>
@@ -250,22 +251,22 @@ export default function ColectivoParadas() {
                       {isOpen && canEdit ? (
                         <View style={{ gap: 8, paddingHorizontal: 12, paddingBottom: 12 }}>
                           <Text style={{ fontSize: 12, color: colors.muted }}>
-                            {s.lat == null ? 'Todavía no sabemos dónde para el colectivo.' : s.own_place ? 'El lugar se marcó a mano para esta parada.' : 'El lugar es el de su casa (el de su ficha).'}
+                            {s.lat == null ? tx('Todavía no sabemos dónde para el colectivo.') : s.own_place ? tx('El lugar se marcó a mano para esta parada.') : tx('El lugar es el de su casa (el de su ficha).')}
                           </Text>
-                          <Field label="Dirección o seña" hint="(opcional)" value={address} onChangeText={setAddress} placeholder="Calle y número, o “la casa verde de la esquina”" />
-                          {mapAvailable ? <Button title="Marcar en el mapa" icon="map-pin" variant="outline" small onPress={() => setPlacing(s.id)} /> : null}
-                          <Button title="Estoy en la parada: usar este lugar" icon="crosshair" variant="outline" small loading={busy} onPress={() => placeHere(s)} />
+                          <Field label={tx('Dirección o seña')} hint={tx('(opcional)')} value={address} onChangeText={setAddress} placeholder={tx('Calle y número, o “la casa verde de la esquina”')} />
+                          {mapAvailable ? <Button title={tx('Marcar en el mapa')} icon="map-pin" variant="outline" small onPress={() => setPlacing(s.id)} /> : null}
+                          <Button title={tx('Estoy en la parada: usar este lugar')} icon="crosshair" variant="outline" small loading={busy} onPress={() => placeHere(s)} />
                           {s.own_place ? (
                             <>
-                              <Button title="Guardar la dirección" icon="check" variant="ghost" small onPress={() => run(() => setBusStopPlace(s.id, s.lat, s.lng, address.trim() || null))} />
-                              <Button title="Volver a usar el lugar de su casa" icon="home" variant="ghost" small onPress={() => run(() => setBusStopPlace(s.id, null, null, null))} />
+                              <Button title={tx('Guardar la dirección')} icon="check" variant="ghost" small onPress={() => run(() => setBusStopPlace(s.id, s.lat, s.lng, address.trim() || null))} />
+                              <Button title={tx('Volver a usar el lugar de su casa')} icon="home" variant="ghost" small onPress={() => run(() => setBusStopPlace(s.id, null, null, null))} />
                             </>
                           ) : null}
                           {isLive && !s.picked && (isSkipped || !s.reached_at) ? (
-                            <Button title={isSkipped ? 'Sí viene: volver a esperarlo' : 'Hoy no viene: saltar esta parada'} icon={isSkipped ? 'rotate-ccw' : 'skip-forward'} variant="ghost" small
+                            <Button title={isSkipped ? tx('Sí viene: volver a esperarlo') : tx('Hoy no viene: saltar esta parada')} icon={isSkipped ? 'rotate-ccw' : 'skip-forward'} variant="ghost" small
                               onPress={() => run(() => skipBusStop(s.id, !isSkipped))} />
                           ) : null}
-                          <Button title="Quitar la parada" icon="trash-2" variant="danger" small onPress={() => remove(s)} />
+                          <Button title={tx('Quitar la parada')} icon="trash-2" variant="danger" small onPress={() => remove(s)} />
                         </View>
                       ) : null}
                     </View>
@@ -276,8 +277,8 @@ export default function ColectivoParadas() {
 
             {canEdit ? (
               <>
-                <SectionTitle>Agregar una parada</SectionTitle>
-                <Field label="Persona o familia" value={q} onChangeText={onQ} placeholder="Buscar por nombre o apellido" autoCapitalize="words" />
+                <SectionTitle>{tx('Agregar una parada')}</SectionTitle>
+                <Field label={tx('Persona o familia')} value={q} onChangeText={onQ} placeholder={tx('Buscar por nombre o apellido')} autoCapitalize="words" />
                 {families.filter((f) => !famInStops.has(f.id)).map((f) => (
                   <Pressable key={f.id} onPress={() => add({ household: f.id })} accessibilityRole="button" style={styles.hit}>
                     <View style={styles.famIcon}><Feather name="users" size={16} color={colors.amberText} /></View>
@@ -285,19 +286,19 @@ export default function ColectivoParadas() {
                       <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{f.name}</Text>
                       {f.members ? <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{f.members}</Text> : null}
                     </View>
-                    <Text style={styles.addText}>Agregar familia</Text>
+                    <Text style={styles.addText}>{tx('Agregar familia')}</Text>
                   </Pressable>
                 ))}
                 {people.filter((p) => !inStops.has(p.id)).map((p) => (
                   <Pressable key={p.id} onPress={() => add({ contact: p.id })} accessibilityRole="button" style={styles.hit}>
                     <Face name={p.name} path={p.photo_path} size={30} />
                     <Text style={{ flex: 1, fontSize: 15, color: colors.text }}>{p.name}</Text>
-                    <Text style={styles.addText}>Agregar</Text>
+                    <Text style={styles.addText}>{tx('Agregar')}</Text>
                   </Pressable>
                 ))}
                 {ridersLeft.length && !q ? (
                   <>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>Pasajeros de esta ruta que todavía no tienen parada</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.label }}>{tx('Pasajeros de esta ruta que todavía no tienen parada')}</Text>
                     {ridersLeft.slice(0, 30).map((r) => (
                       <Pressable key={r.contact_id} onPress={() => add({ contact: r.contact_id })} accessibilityRole="button" style={styles.hit}>
                         <Face name={r.name} path={r.photo_path} size={30} />
@@ -305,13 +306,13 @@ export default function ColectivoParadas() {
                           <Text style={{ fontSize: 15, color: colors.text }}>{r.name}</Text>
                           {r.address ? <Text style={{ fontSize: 12, color: colors.muted }} numberOfLines={1}>{r.address}</Text> : null}
                         </View>
-                        <Text style={styles.addText}>Agregar</Text>
+                        <Text style={styles.addText}>{tx('Agregar')}</Text>
                       </Pressable>
                     ))}
                   </>
                 ) : null}
                 <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-                  Si varios de una casa suben juntos, agregá la familia: es una sola parada y el aviso les llega a todos los que tienen la app.
+                  {tx('Si varios de una casa suben juntos, agregá la familia: es una sola parada y el aviso les llega a todos los que tienen la app.')}
                 </Text>
               </>
             ) : null}

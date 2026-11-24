@@ -13,6 +13,7 @@ import { keepScreenOn } from '@/lib/presentAwake';
 import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
 import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
+import { tx } from '@/lib/i18n';
 
 const isWeb = Platform.OS === 'web' && typeof document !== 'undefined';
 // Lo guardado en esta computadora sirve solo si es de hace poco (no la última diapositiva del domingo pasado).
@@ -94,7 +95,7 @@ export default function Salida() {
   useEffect(() => {
     if (!isWeb) return;
     const title = document.title;
-    document.title = 'Pantalla de salida';
+    document.title = tx('Pantalla de salida');
     const prevBg = document.body.style.backgroundColor;
     document.body.style.backgroundColor = '#000000';
     const onFull = () => setFull(!!document.fullscreenElement);
@@ -134,29 +135,27 @@ export default function Salida() {
   const pointer = isWeb ? ({ onMouseMove: () => setBar(true) } as object) : {};
 
   return (
-    <Pressable style={{ flex: 1, backgroundColor: '#000000' }} onPress={(e) => onTap(e.nativeEvent?.pageX ?? width / 2)} accessibilityLabel="Pantalla de salida" {...pointer}>
+    <Pressable style={{ flex: 1, backgroundColor: '#000000' }} onPress={(e) => onTap(e.nativeEvent?.pageX ?? width / 2)} accessibilityLabel={tx('Pantalla de salida')} {...pointer}>
       <StatusBar hidden />
       <PresentSlide live={live} width={width} height={height} output clockOffset={offset} logoUrl={logo} churchName={church.name} />
       {!got ? (
         <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 10 }}>
-          <Text style={{ color: '#8B918C', fontSize: 22, fontWeight: '800', textAlign: 'center' }}>Pantalla de salida</Text>
+          <Text style={{ color: '#8B918C', fontSize: 22, fontWeight: '800', textAlign: 'center' }}>{tx('Pantalla de salida')}</Text>
           <Text style={{ color: '#6B716C', fontSize: 16, textAlign: 'center', lineHeight: 23, maxWidth: 520 }}>
-            {isWeb ? 'Llevá esta ventana al proyector y poné pantalla completa. ' : ''}
-            Acá va a aparecer lo que elijas en el Modo presentación.
-            {touchNav ? ' Tocá la derecha de la pantalla para pasar y la izquierda para volver.' : ''}
+            {tx('{pl}Acá va a aparecer lo que elijas en el Modo presentación.{pl2}', { pl: isWeb ? tx('Llevá esta ventana al proyector y poné pantalla completa. ') : '', pl2: touchNav ? tx(' Tocá la derecha de la pantalla para pasar y la izquierda para volver.') : '' })}
           </Text>
-          {status === 'sin-conexion' ? <Text style={{ color: '#E0574E', fontSize: 14, textAlign: 'center' }}>Sin conexión con otros aparatos. En esta misma computadora anda igual.</Text> : null}
+          {status === 'sin-conexion' ? <Text style={{ color: '#E0574E', fontSize: 14, textAlign: 'center' }}>{tx('Sin conexión con otros aparatos. En esta misma computadora anda igual.')}</Text> : null}
         </View>
       ) : null}
       {bar ? (
         <View style={{ position: 'absolute', top: 12, right: 12, flexDirection: 'row', gap: 8 }}>
           {isWeb ? (
             <Pressable onPress={goFull} accessibilityRole="button" style={{ backgroundColor: '#1F6B45', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}>
-              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '800' }}>{full ? 'Salir de pantalla completa' : 'Pantalla completa'}</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '800' }}>{full ? tx('Salir de pantalla completa') : tx('Pantalla completa')}</Text>
             </Pressable>
           ) : null}
           <Pressable onPress={leave} accessibilityRole="button" style={{ backgroundColor: '#2B332E', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}>
-            <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '800' }}>Cerrar</Text>
+            <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '800' }}>{tx('Cerrar')}</Text>
           </Pressable>
         </View>
       ) : null}

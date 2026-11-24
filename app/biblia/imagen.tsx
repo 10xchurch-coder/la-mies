@@ -14,6 +14,7 @@ import { loadBibleFont } from '@/lib/bibleFonts';
 import { BIBLE_FONTS, fontOf, type BibleFontId } from '@/lib/bibleLook';
 import { ART_SHAPES, DEFAULT_ART, artFontSize, blurRadius, brightLayer, photoOpacity, readLayer, shapeOf, step, type ArtLook } from '@/lib/verseArt';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const ART_FONTS = BIBLE_FONTS.filter((f) => f.id !== 'sistema');
 
@@ -91,7 +92,7 @@ async function renderWeb(p: Omit<Props, 'W' | 'fontOk'>): Promise<Blob> {
   for (const l of lines) { ctx.fillText(l, shape.w / 2, y); y += lh; }
   ctx.font = `700 ${refSize}px ${fam(true)}`;
   ctx.fillText(p.refText, shape.w / 2, y + 14 * K - (lh - size) + refSize * 0.4);
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('No se pudo armar la imagen'))), 'image/jpeg', 0.95));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error(tx('No se pudo armar la imagen')))), 'image/jpeg', 0.95));
 }
 
 export default function ImagenVersiculo() {
@@ -132,7 +133,7 @@ export default function ImagenVersiculo() {
       const r = await Picker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9 });
       if (!r.canceled && r.assets[0]) setOwn(r.assets[0].uri);
     } catch {
-      Alert.alert('No se pudo abrir tus fotos', 'Probá de nuevo.');
+      Alert.alert(tx('No se pudo abrir tus fotos'), tx('Probá de nuevo.'));
     }
   };
 
@@ -159,7 +160,7 @@ export default function ImagenVersiculo() {
       const Sharing = await import('expo-sharing');
       await Sharing.shareAsync(uri.startsWith('file://') ? uri : `file://${uri}`, { mimeType: 'image/jpeg', dialogTitle: refText, UTI: 'public.jpeg' });
     } catch {
-      Alert.alert('No se pudo armar la imagen', 'Probá de nuevo. Si elegiste una foto tuya, probá con otra.');
+      Alert.alert(tx('No se pudo armar la imagen'), tx('Probá de nuevo. Si elegiste una foto tuya, probá con otra.'));
     } finally {
       setBusy(null);
     }
@@ -176,14 +177,14 @@ export default function ImagenVersiculo() {
   const stepper = (label: string, value: number, max: number, onChange: (v: number) => void) => (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
       <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }}>{label}</Text>
-      <Pressable onPress={() => onChange(step(value, -1, max))} disabled={value <= 0} accessibilityRole="button" accessibilityLabel={`Menos ${label.toLowerCase()}`}
+      <Pressable onPress={() => onChange(step(value, -1, max))} disabled={value <= 0} accessibilityRole="button" accessibilityLabel={tx('Menos {label}', { label: label.toLowerCase() })}
         style={{ width: 44, height: 40, borderRadius: 10, backgroundColor: colors.bgSoft, alignItems: 'center', justifyContent: 'center', opacity: value <= 0 ? 0.4 : 1 }}>
         <Feather name="minus" size={18} color={colors.text} />
       </Pressable>
       <View style={{ flexDirection: 'row', gap: 4, width: 16 * (max + 1), justifyContent: 'center' }}>
         {Array.from({ length: max + 1 }, (_, i) => <View key={i} style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: i <= value ? colors.blue : colors.border }} />)}
       </View>
-      <Pressable onPress={() => onChange(step(value, 1, max))} disabled={value >= max} accessibilityRole="button" accessibilityLabel={`Más ${label.toLowerCase()}`}
+      <Pressable onPress={() => onChange(step(value, 1, max))} disabled={value >= max} accessibilityRole="button" accessibilityLabel={tx('Más {label}', { label: label.toLowerCase() })}
         style={{ width: 44, height: 40, borderRadius: 10, backgroundColor: colors.bgSoft, alignItems: 'center', justifyContent: 'center', opacity: value >= max ? 0.4 : 1 }}>
         <Feather name="plus" size={18} color={colors.text} />
       </Pressable>
@@ -193,9 +194,9 @@ export default function ImagenVersiculo() {
   const dpr = PixelRatio.get();
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Imagen del versículo" subtitle={refText} back />
+      <Header title={tx('Imagen del versículo')} subtitle={refText} back />
       <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
-        {!text ? <Text style={{ color: colors.muted }}>Volvé a la Biblia y tocá uno o más versículos.</Text> : (
+        {!text ? <Text style={{ color: colors.muted }}>{tx('Volvé a la Biblia y tocá uno o más versículos.')}</Text> : (
           <>
             <View style={{ alignItems: 'center' }}>
               <View style={{ borderRadius: 14, overflow: 'hidden', borderWidth: 1, borderColor: colors.border }}>
@@ -203,22 +204,22 @@ export default function ImagenVersiculo() {
               </View>
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Button title={busy === 'share' ? 'Armando…' : 'Compartir'} icon="share-2" style={{ flex: 1 }} disabled={!!busy} onPress={() => make('share')} />
-              <Button title={busy === 'save' ? 'Guardando…' : Platform.OS === 'web' ? 'Descargar' : 'Guardar'} icon="download" variant="outline" style={{ flex: 1 }} disabled={!!busy} onPress={() => make('save')} />
+              <Button title={busy === 'share' ? tx('Armando…') : tx('Compartir')} icon="share-2" style={{ flex: 1 }} disabled={!!busy} onPress={() => make('share')} />
+              <Button title={busy === 'save' ? tx('Guardando…') : Platform.OS === 'web' ? tx('Descargar') : tx('Guardar')} icon="download" variant="outline" style={{ flex: 1 }} disabled={!!busy} onPress={() => make('save')} />
             </View>
 
             <View style={{ gap: 8 }}>
               {title('FOTO DE FONDO')}
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                <Pressable onPress={pickOwn} accessibilityRole="button" accessibilityLabel="Usar una foto mía"
+                <Pressable onPress={pickOwn} accessibilityRole="button" accessibilityLabel={tx('Usar una foto mía')}
                   style={{ width: 72, height: 72, borderRadius: 12, borderWidth: 1.5, borderColor: own ? colors.blue : colors.border, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
                   <Feather name="image" size={20} color={colors.blueText} />
-                  <Text style={{ fontSize: 11, fontWeight: '700', color: colors.blueText }}>Mi foto</Text>
+                  <Text style={{ fontSize: 11, fontWeight: '700', color: colors.blueText }}>{tx('Mi foto')}</Text>
                 </Pressable>
                 {ALL_PHOTOS.map((id) => {
                   const on = !own && photo === id;
                   return (
-                    <Pressable key={id} onPress={() => { setOwn(null); setPhoto(id); }} accessibilityRole="button" accessibilityLabel="Elegir esta foto" accessibilityState={{ selected: on }}
+                    <Pressable key={id} onPress={() => { setOwn(null); setPhoto(id); }} accessibilityRole="button" accessibilityLabel={tx('Elegir esta foto')} accessibilityState={{ selected: on }}
                       style={{ width: 72, height: 72, borderRadius: 12, overflow: 'hidden', borderWidth: on ? 3 : 0, borderColor: colors.blue }}>
                       <Image source={{ uri: photoUrl(id, 200, 200, 60) }} style={{ width: '100%', height: '100%' }} contentFit="cover" cachePolicy="memory-disk" />
                     </Pressable>
@@ -235,18 +236,18 @@ export default function ImagenVersiculo() {
               {title('LETRA')}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{ART_FONTS.map((f) => chip(f.label, fontId === f.id, () => setFontId(f.id)))}</View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
-                {chip('Letra blanca', look.white, () => set({ white: true }))}
-                {chip('Letra negra', !look.white, () => set({ white: false }))}
+                {chip(tx('Letra blanca'), look.white, () => set({ white: true }))}
+                {chip(tx('Letra negra'), !look.white, () => set({ white: false }))}
               </View>
             </View>
             <View style={{ gap: 10 }}>
               {title('AJUSTES')}
-              {stepper('Tamaño de la letra', look.size, 6, (v) => set({ size: v }))}
-              {stepper('Cuánto se ve la foto', look.opacity, 4, (v) => set({ opacity: v }))}
-              {stepper('Desenfoque', look.blur, 4, (v) => set({ blur: v }))}
-              {stepper('Brillo', look.bright, 4, (v) => set({ bright: v }))}
+              {stepper(tx('Tamaño de la letra'), look.size, 6, (v) => set({ size: v }))}
+              {stepper(tx('Cuánto se ve la foto'), look.opacity, 4, (v) => set({ opacity: v }))}
+              {stepper(tx('Desenfoque'), look.blur, 4, (v) => set({ blur: v }))}
+              {stepper(tx('Brillo'), look.bright, 4, (v) => set({ bright: v }))}
             </View>
-            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>Fotos de Unsplash, de uso libre.</Text>
+            <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Fotos de Unsplash, de uso libre.')}</Text>
           </>
         )}
       </ScrollView>

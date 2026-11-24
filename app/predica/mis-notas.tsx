@@ -9,6 +9,7 @@ import { mySermonNotesList, type MySermonNote } from '@/lib/culto';
 import { blankCount, filledCount, filledOutline, hasNotes } from '@/lib/sermonNotes';
 import { fmtDateOnly } from '@/lib/format';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export default function MisNotasDePredicas() {
   const router = useRouter();
@@ -18,10 +19,10 @@ export default function MisNotasDePredicas() {
   }, []));
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title="Mis notas de prédicas" subtitle="Solo las ves vos" back />
+      <Header title={tx('Mis notas de prédicas')} subtitle={tx('Solo las ves vos')} back />
       <Screen>
         {rows === null ? <Loading /> : !rows.length ? (
-          <Empty icon="edit-3" title="Todavía no tenés notas" text="Abrí una prédica y completá el bosquejo mientras escuchás. Se guarda solo y queda acá." />
+          <Empty icon="edit-3" title={tx('Todavía no tenés notas')} text={tx('Abrí una prédica y completá el bosquejo mientras escuchás. Se guarda solo y queda acá.')} />
         ) : rows.map((n) => {
           const total = blankCount(n.notes_outline);
           const done = filledCount(n.notes_outline, n.answers);
@@ -31,7 +32,7 @@ export default function MisNotasDePredicas() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{n.title}</Text>
-                    <Text style={{ fontSize: 12, color: colors.muted }}>{[n.preacher, fmtDateOnly(n.preached_on)].filter(Boolean).join(' · ')}{total ? ` · ${done} de ${total} completados` : ''}</Text>
+                    <Text style={{ fontSize: 12, color: colors.muted }}>{[n.preacher, fmtDateOnly(n.preached_on)].filter(Boolean).join(' · ')}{total ? tx(' · {done} de {total} completados', { done, total }) : ''}</Text>
                   </View>
                   <Feather name="chevron-right" size={18} color={colors.muted} />
                 </View>

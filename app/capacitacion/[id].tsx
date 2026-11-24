@@ -10,6 +10,7 @@ import { Bridge } from '@/components/Bridge';
 import { StudyNotes } from '@/components/StudyNotes';
 import { shareText } from '@/lib/share';
 import type { TrainingItem } from '@/types';
+import { tx } from '@/lib/i18n';
 
 /** Texto simple con títulos (#), subtítulos (##), viñetas (-), números (1.) y versículos (> Cita | texto). */
 function Body({ text }: { text: string }) {
@@ -28,7 +29,7 @@ function Body({ text }: { text: string }) {
             return (
               <View key={i} style={styles.verse}>
                 <Text style={styles.verseText}>{g[1]}</Text>
-                <Text style={styles.verseRef}>{g[2]} · RV1960</Text>
+                <Text style={styles.verseRef}>{g[2]} {tx('· RV1960')}</Text>
               </View>
             );
           }
@@ -36,7 +37,7 @@ function Body({ text }: { text: string }) {
           return (
             <View key={i} style={styles.verse}>
               <Text style={styles.verseText}>{verse || ref}</Text>
-              {verse ? <Text style={styles.verseRef}>{ref} · RV1960</Text> : null}
+              {verse ? <Text style={styles.verseRef}>{ref} {tx('· RV1960')}</Text> : null}
             </View>
           );
         }
@@ -85,19 +86,19 @@ export default function CapacitacionDetalle() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <Header title={item?.title ?? 'Capacitación'} subtitle={item ? `${item.category}${item.minutes ? ` · ${item.minutes} min` : ''}` : undefined} back />
+      <Header title={item?.title ?? tx('Capacitación')} subtitle={item ? `${item.category}${item.minutes ? tx(' · {minutes} min', { minutes: item.minutes }) : ''}` : undefined} back />
       <Screen>
         {!item ? (
-          <Text style={{ color: colors.muted }}>No se encontró este material.</Text>
+          <Text style={{ color: colors.muted }}>{tx('No se encontró este material.')}</Text>
         ) : (
           <>
             {item.kind === 'video' && item.video_url ? (
-              <Button title="Ver el video" icon="play" onPress={() => Linking.openURL(item.video_url as string)} />
+              <Button title={tx('Ver el video')} icon="play" onPress={() => Linking.openURL(item.video_url as string)} />
             ) : null}
             {item.summary ? <Text style={styles.summary}>{item.summary}</Text> : null}
             {item.body ? <Body text={item.body} /> : null}
             <StudyNotes kind="training" refId={String(id)} title={item.title} />
-            <Button title="Compartir" icon="share-2" variant="outline" onPress={() => shareText(`${item.title}\n\n${(item.body ?? '').replace(/\[\[puente \d\]\]/g, '').replace(/\*\*/g, '').replace(/^#+ /gm, '').replace(/^> /gm, '')}`, item.title)} />
+            <Button title={tx('Compartir')} icon="share-2" variant="outline" onPress={() => shareText(`${item.title}\n\n${(item.body ?? '').replace(/\[\[puente \d\]\]/g, '').replace(/\*\*/g, '').replace(/^#+ /gm, '').replace(/^> /gm, '')}`, item.title)} />
           </>
         )}
       </Screen>

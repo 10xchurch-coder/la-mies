@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
 import { getCachedRoads } from './roadsCache';
 import { coverageFromTrack, detectVehicle, walkedDistance, type SideOverride, type TrackPoint } from './track';
+import { tx } from './i18n';
 
 export const LOCATION_TASK = 'lamies-salida';
 
@@ -87,7 +88,7 @@ function toPayload(p: TrackPoint) {
 
 export class SessionEndedError extends Error {
   constructor() {
-    super('La salida ya terminó');
+    super(tx('La salida ya terminó'));
   }
 }
 
@@ -147,8 +148,8 @@ export async function startTracking(sessionId: string, kind: 'soulwinning' | 'fl
     activityType: Location.ActivityType.Fitness,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
-      notificationTitle: 'La Mies · salida en curso',
-      notificationBody: 'Marcando las calles que recorrés. Tocá para abrir.',
+      notificationTitle: tx('La Mies · salida en curso'),
+      notificationBody: tx('Marcando las calles que recorrés. Tocá para abrir.'),
       notificationColor: '#1F6B45',
       killServiceOnDestroy: false,
     },
@@ -258,8 +259,8 @@ async function startTrackingAgain(active: ActiveSession): Promise<void> {
     pausesUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
-      notificationTitle: 'La Mies · salida en curso',
-      notificationBody: 'Marcando las calles que recorrés. Tocá para abrir.',
+      notificationTitle: tx('La Mies · salida en curso'),
+      notificationBody: tx('Marcando las calles que recorrés. Tocá para abrir.'),
       notificationColor: '#1F6B45',
     },
   });
@@ -297,7 +298,7 @@ export async function handleLocations(locations: Location.LocationObject[]): Pro
     try {
       await trimTracking(active.id, cutoff, true);
       await AsyncStorage.setItem(K.autoStop, JSON.stringify({ at: Date.now(), cutoff }));
-      await notify('Salida terminada', 'Parece que vas en un vehículo. Cortamos la salida en el último punto que caminaste.');
+      await notify(tx('Salida terminada'), tx('Parece que vas en un vehículo. Cortamos la salida en el último punto que caminaste.'));
     } catch {
       // sin señal: lo intentamos la próxima vez que se abra la app
       await AsyncStorage.setItem(K.autoStop, JSON.stringify({ at: Date.now(), cutoff, pending: true }));
@@ -312,7 +313,7 @@ export async function handleLocations(locations: Location.LocationObject[]): Pro
     if (e instanceof SessionEndedError) {
       await stopUpdates();
       await clearLocal();
-      await notify('Salida terminada', 'La salida se cerró sola porque estuviste un buen rato en el mismo lugar. Tus calles ya quedaron guardadas.');
+      await notify(tx('Salida terminada'), tx('La salida se cerró sola porque estuviste un buen rato en el mismo lugar. Tus calles ya quedaron guardadas.'));
       return;
     }
     throw e;

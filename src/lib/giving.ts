@@ -1,10 +1,11 @@
 // Ofrendas por persona: cuentas y textos. Acá no hay nada de la base ni de la pantalla, para poder probarse solo.
 // Son el registro de quién dio. No cambian el saldo de los fondos (eso se carga en Finanzas, como siempre).
 
+import { tx, txLocale } from './i18n';
 export type GivingMethod = 'cash' | 'transfer' | 'card' | 'check' | 'other';
 
 export const METHOD_LABEL: Record<GivingMethod, string> = {
-  cash: 'Efectivo', transfer: 'Transferencia', card: 'Tarjeta', check: 'Cheque', other: 'Otro',
+  get cash() { return tx('Efectivo'); }, get transfer() { return tx('Transferencia'); }, card: 'Tarjeta', get check() { return tx('Cheque'); }, other: 'Otro',
 };
 export const METHODS: { value: GivingMethod; label: string }[] = (Object.keys(METHOD_LABEL) as GivingMethod[]).map((m) => ({ value: m, label: METHOD_LABEL[m] }));
 export const methodLabel = (m: string | null | undefined): string => METHOD_LABEL[m as GivingMethod] ?? 'Otro';
@@ -53,7 +54,7 @@ export function totalsByPerson(rows: Pick<GivingRow, 'contact_id' | 'person_name
   for (const r of rows) {
     if (r.voided_at) continue;
     const key = `${r.contact_id ?? `sin-ficha:${r.person_name}`}|${r.currency}`;
-    const x = m.get(key) ?? { key, contact_id: r.contact_id, name: r.person_name || 'Sin nombre', currency: r.currency, c: 0, count: 0 };
+    const x = m.get(key) ?? { key, contact_id: r.contact_id, name: r.person_name || tx('Sin nombre'), currency: r.currency, c: 0, count: 0 };
     x.c += cents(r.amount); x.count += 1;
     m.set(key, x);
   }
@@ -64,7 +65,7 @@ export function totalsByPerson(rows: Pick<GivingRow, 'contact_id' | 'person_name
 const esc = (s: string | number | null | undefined) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const money = (n: number, currency: string) => {
   const v = Number(n) || 0;
-  return `${currency === 'USD' ? 'US$' : '$'} ${v.toLocaleString('es-AR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
+  return `${currency === 'USD' ? 'US$' : '$'} ${v.toLocaleString(txLocale(), { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 })}`;
 };
 const dayAR = (iso: string) => iso.slice(0, 10).split('-').reverse().join('/');
 
@@ -74,7 +75,7 @@ export function statementHtml(o: { church: string; motto?: string | null; city?:
   const rows = s.lines.map((l) => `<tr><td>${esc(dayAR(l.on_date))}</td><td>${esc(l.fund)}</td><td>${esc(methodLabel(l.method))}</td><td>${esc(l.note)}</td><td class="n">${esc(money(l.amount, l.currency))}</td></tr>`).join('');
   const funds = s.byFund.map((f) => `<tr><td>${esc(f.fund)}</td><td class="n">${f.count}</td><td class="n">${esc(money(f.total, f.currency))}</td></tr>`).join('');
   const totals = s.totals.map((t) => `<p class="total">Total del año: <b>${esc(money(t.total, t.currency))}</b></p>`).join('');
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(`Ofrendas ${s.year} - ${o.person}`)}</title>
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${esc(tx('Ofrendas {year} - {person}', { year: s.year, person: o.person }))}</title>
 <style>
 body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:32px;font-size:13px}
 h1{font-size:22px;margin:0}h2{font-size:15px;margin:22px 0 6px}
@@ -99,11 +100,11 @@ ${totals}
 
 /** Revisa lo que se escribió antes de guardar. Devuelve el problema en palabras simples, o null si está bien. */
 export function givingProblem(o: { contactId: string | null; fundId: string | null; amount: number | null; date: string | null }, today = new Date()): string | null {
-  if (!o.contactId) return 'Elegí a la persona.';
-  if (!o.fundId) return 'Elegí el fondo.';
-  if (!o.amount || o.amount <= 0) return 'Escribí el monto.';
-  if (!o.date) return 'Escribí la fecha así: 05/11/2026.';
+  if (!o.contactId) return tx('Elegí a la persona.');
+  if (!o.fundId) return tx('Elegí el fondo.');
+  if (!o.amount || o.amount <= 0) return tx('Escribí el monto.');
+  if (!o.date) return tx('Escribí la fecha así: 05/11/2026.');
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-  if (new Date(`${o.date}T00:00:00`).getTime() > t.getTime()) return 'La fecha no puede ser de un día que todavía no llegó.';
+  if (new Date(`${o.date}T00:00:00`).getTime() > t.getTime()) return tx('La fecha no puede ser de un día que todavía no llegó.');
   return null;
 }

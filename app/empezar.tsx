@@ -16,6 +16,7 @@ import { supabase, errorMessage } from '@/lib/supabase';
 import { refreshChurchExtras } from '@/lib/useChurchExtras';
 import { useAuth } from '@/store/auth';
 import { colors, themed } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 const EMPTY: SignupForm = { church: '', city: '', province: '', country: 'AR', pastor: '', email: '', whatsapp: '', size: '' };
 const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.code, label: c.label }));
@@ -64,7 +65,7 @@ export default function Empezar() {
   const submit = async () => {
     setTried(true);
     setMsg(null);
-    if (Object.keys(problems).length) { setMsg('Revisá lo que está marcado en rojo.'); return; }
+    if (Object.keys(problems).length) { setMsg(tx('Revisá lo que está marcado en rojo.')); return; }
     setBusy(true);
     try {
       if (session) { await create(f); return; }
@@ -80,7 +81,7 @@ export default function Empezar() {
       if (error) throw error;
       // Si el correo ya tenía cuenta, Supabase no avisa: devuelve un usuario sin identidades y no manda nada.
       if (!data.session && data.user && (data.user.identities?.length ?? 0) === 0) {
-        setMsg('Ya hay una cuenta con ese correo. Si es tuya, tocá "Ya tengo cuenta" acá abajo. Para anotar una iglesia nueva hace falta un correo que no tenga cuenta.');
+        setMsg(tx('Ya hay una cuenta con ese correo. Si es tuya, tocá "Ya tengo cuenta" acá abajo. Para anotar una iglesia nueva hace falta un correo que no tenga cuenta.'));
         return;
       }
       if (!data.session) {
@@ -99,17 +100,17 @@ export default function Empezar() {
 
   if (loading || auto) return <Loading />;
 
-  const help = helpLinks({ church: f.church.trim() || null, step: 'Anotar mi iglesia' });
+  const help = helpLinks({ church: f.church.trim() || null, step: tx('Anotar mi iglesia') });
 
   if (session && hasChurch) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Header title="Empezar con La Mies" />
+        <Header title={tx('Empezar con La Mies')} />
         <Screen>
           <Card style={{ gap: 10 }}>
-            <Text style={styles.h2}>Tu cuenta ya es de {church?.name ?? 'una iglesia'}</Text>
-            <Text style={styles.p}>Cada cuenta es de una sola iglesia. Para anotar otra iglesia hace falta una cuenta nueva, con otro correo.</Text>
-            <Button title="Ir a mi iglesia" onPress={() => router.replace('/')} />
+            <Text style={styles.h2}>{tx('Tu cuenta ya es de {name}', { name: church?.name ?? tx('una iglesia') })}</Text>
+            <Text style={styles.p}>{tx('Cada cuenta es de una sola iglesia. Para anotar otra iglesia hace falta una cuenta nueva, con otro correo.')}</Text>
+            <Button title={tx('Ir a mi iglesia')} onPress={() => router.replace('/')} />
           </Card>
         </Screen>
       </View>
@@ -121,61 +122,61 @@ export default function Empezar() {
       <Screen style={{ paddingTop: 36, gap: 16, maxWidth: 560, width: '100%', alignSelf: 'center' }}>
         <View style={{ alignItems: 'center', gap: 8 }}>
           <View style={styles.logo}><Feather name="feather" size={30} color="#FFFFFF" /></View>
-          <Text style={styles.title}>Sumá tu iglesia a La Mies</Text>
+          <Text style={styles.title}>{tx('Sumá tu iglesia a La Mies')}</Text>
           <Text style={[styles.p, { textAlign: 'center' }]}>
-            Llenás esta hoja una sola vez. Después la app te lleva de la mano, paso a paso, hasta dejarla lista para tu iglesia.
+            {tx('Llenás esta hoja una sola vez. Después la app te lleva de la mano, paso a paso, hasta dejarla lista para tu iglesia.')}
           </Text>
         </View>
 
         <Card style={{ gap: 12 }}>
-          <Text style={styles.h2}>1. Tu iglesia</Text>
-          <Field label="Nombre de la iglesia" value={f.church} onChangeText={set('church')} autoCapitalize="words" placeholder="Iglesia Bautista Esperanza" maxLength={120} />
+          <Text style={styles.h2}>{tx('1. Tu iglesia')}</Text>
+          <Field label={tx('Nombre de la iglesia')} value={f.church} onChangeText={set('church')} autoCapitalize="words" placeholder={tx('Iglesia Bautista Esperanza')} maxLength={120} />
           {show('church') ? <Text style={styles.bad}>{show('church')}</Text> : null}
-          <Field label="Ciudad" value={f.city} onChangeText={set('city')} autoCapitalize="words" maxLength={80} />
+          <Field label={tx('Ciudad')} value={f.city} onChangeText={set('city')} autoCapitalize="words" maxLength={80} />
           {show('city') ? <Text style={styles.bad}>{show('city')}</Text> : null}
-          <Field label="Provincia" hint="(o departamento, o estado)" value={f.province} onChangeText={set('province')} autoCapitalize="words" maxLength={80} />
-          <Text style={styles.label}>País</Text>
+          <Field label={tx('Provincia')} hint={tx('(o departamento, o estado)')} value={f.province} onChangeText={set('province')} autoCapitalize="words" maxLength={80} />
+          <Text style={styles.label}>{tx('País')}</Text>
           <Choice options={COUNTRY_OPTIONS} value={f.country} onChange={set('country')} columns={3} />
-          <Text style={styles.label}>¿Cuántos se reúnen, más o menos?</Text>
+          <Text style={styles.label}>{tx('¿Cuántos se reúnen, más o menos?')}</Text>
           <Choice options={SIZES} value={f.size || null} onChange={set('size')} />
         </Card>
 
         <Card style={{ gap: 12 }}>
-          <Text style={styles.h2}>2. Vos, el pastor</Text>
-          <Field label="Tu nombre y apellido" value={f.pastor} onChangeText={set('pastor')} autoCapitalize="words" autoComplete="name" maxLength={80} />
+          <Text style={styles.h2}>{tx('2. Vos, el pastor')}</Text>
+          <Field label={tx('Tu nombre y apellido')} value={f.pastor} onChangeText={set('pastor')} autoCapitalize="words" autoComplete="name" maxLength={80} />
           {show('pastor') ? <Text style={styles.bad}>{show('pastor')}</Text> : null}
-          <Field label="Tu WhatsApp" hint="(con el código de área; es para que el equipo te pueda ayudar)" value={f.whatsapp} onChangeText={set('whatsapp')} keyboardType="phone-pad" autoComplete="tel" placeholder={f.country === 'AR' ? '376 400-0000' : '+595 981 000000'} maxLength={40} />
+          <Field label={tx('Tu WhatsApp')} hint={tx('(con el código de área; es para que el equipo te pueda ayudar)')} value={f.whatsapp} onChangeText={set('whatsapp')} keyboardType="phone-pad" autoComplete="tel" placeholder={f.country === 'AR' ? '376 400-0000' : '+595 981 000000'} maxLength={40} />
           {show('whatsapp') ? <Text style={styles.bad}>{show('whatsapp')}</Text> : null}
           {!session ? (
             <>
-              <Field label="Tu correo" hint="(con este correo vas a entrar a la app)" value={f.email} onChangeText={set('email')} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
+              <Field label={tx('Tu correo')} hint={tx('(con este correo vas a entrar a la app)')} value={f.email} onChangeText={set('email')} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
               {show('email') ? <Text style={styles.bad}>{show('email')}</Text> : null}
-              <PasswordField label="Elegí una contraseña" value={password} onChangeText={setPassword} personal={[f.pastor, f.email.split('@')[0] ?? '']} />
+              <PasswordField label={tx('Elegí una contraseña')} value={password} onChangeText={setPassword} personal={[f.pastor, f.email.split('@')[0] ?? '']} />
             </>
           ) : (
-            <Text style={styles.p}>Vas a seguir con la cuenta de {session.user.email}.</Text>
+            <Text style={styles.p}>{tx('Vas a seguir con la cuenta de {email}.', { email: session.user.email })}</Text>
           )}
         </Card>
 
         {msg ? <Text style={styles.msg}>{msg}</Text> : null}
-        <Button title="Crear mi iglesia en La Mies" icon="check-circle" onPress={submit} loading={busy} disabled={!session && !password} />
+        <Button title={tx('Crear mi iglesia en La Mies')} icon="check-circle" onPress={submit} loading={busy} disabled={!session && !password} />
 
         <Card style={{ gap: 6 }}>
-          <Text style={styles.h3}>¿Qué pasa después?</Text>
-          <Text style={styles.p}>1. Te mandamos un correo para confirmar que es tuyo.</Text>
-          <Text style={styles.p}>2. Entrás, y la app te muestra 8 pasos cortos: reuniones, tu gente, tus líderes y el código para los hermanos.</Text>
-          <Text style={styles.p}>3. Si tenés una lista de miembros en una planilla, la subís vos o nos la mandás y la cargamos nosotros. Si no tenés lista, no pasa nada.</Text>
-          <Text style={styles.small}>Los datos de tu iglesia los ve solo tu iglesia. El equipo de La Mies ve tu nombre, tu correo y tu WhatsApp para poder ayudarte.</Text>
+          <Text style={styles.h3}>{tx('¿Qué pasa después?')}</Text>
+          <Text style={styles.p}>{tx('1. Te mandamos un correo para confirmar que es tuyo.')}</Text>
+          <Text style={styles.p}>{tx('2. Entrás, y la app te muestra 8 pasos cortos: reuniones, tu gente, tus líderes y el código para los hermanos.')}</Text>
+          <Text style={styles.p}>{tx('3. Si tenés una lista de miembros en una planilla, la subís vos o nos la mandás y la cargamos nosotros. Si no tenés lista, no pasa nada.')}</Text>
+          <Text style={styles.small}>{tx('Los datos de tu iglesia los ve solo tu iglesia. El equipo de La Mies ve tu nombre, tu correo y tu WhatsApp para poder ayudarte.')}</Text>
         </Card>
 
         <View style={{ alignItems: 'center', gap: 4 }}>
           {!session ? (
             <Pressable onPress={() => router.replace('/login')} accessibilityRole="button" style={styles.link}>
-              <Text style={styles.linkText}>Ya tengo cuenta: entrar</Text>
+              <Text style={styles.linkText}>{tx('Ya tengo cuenta: entrar')}</Text>
             </Pressable>
           ) : null}
           <Pressable onPress={() => { Linking.openURL(help.whatsapp ?? help.mailto).catch(() => undefined); }} accessibilityRole="button" style={styles.link}>
-            <Text style={styles.linkText}>Necesito ayuda</Text>
+            <Text style={styles.linkText}>{tx('Necesito ayuda')}</Text>
           </Pressable>
           <Text style={styles.small}>{help.email}</Text>
         </View>

@@ -15,6 +15,7 @@ import { themed } from '../theme';
 export type CardHandle = React.ComponentRef<typeof View>;
 
 import { BACKGROUNDS } from '../lib/backgroundColors';
+import { tx } from '@/lib/i18n';
 export { BACKGROUNDS };
 export const BACKGROUND_NAMES = Object.keys(BACKGROUNDS);
 
@@ -57,7 +58,7 @@ export const VerseCard = forwardRef<CardHandle, {
       <View style={{ gap: compact ? 2 : 6 }}>
         <View style={styles.top}>
           <Feather name="sun" size={compact ? 11 : 13} color="rgba(255,255,255,0.85)" />
-          <Text style={[styles.label, compact && { fontSize: 10 }]}>Versículo del día</Text>
+          <Text style={[styles.label, compact && { fontSize: 10 }]}>{tx('Versículo del día')}</Text>
         </View>
         <Text style={[styles.ref, compact && { fontSize: 17 }]}>{item.reference}</Text>
       </View>
@@ -70,7 +71,7 @@ export const VerseCard = forwardRef<CardHandle, {
         </Text>
         {item.message && !hideMessage ? <Text style={[styles.msg, compact && { fontSize: 13, lineHeight: 18 }]} numberOfLines={compact ? 2 : undefined}>{item.message}</Text> : null}
       </View>
-      {compact ? <Text style={[styles.foot, { fontSize: 10 }]}>{church ?? 'La Mies'} · RV1960</Text> : <BrandFooter />}
+      {compact ? <Text style={[styles.foot, { fontSize: 10 }]}>{church ?? tx('La Mies')} {tx('· RV1960')}</Text> : <BrandFooter />}
     </View>
   );
 });

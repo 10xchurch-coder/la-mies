@@ -4,6 +4,7 @@ import React, { useRef } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { Button } from '@/components/ui';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 type CameraMod = {
   CameraView: React.ComponentType<Record<string, unknown>>;
@@ -32,9 +33,9 @@ function Live({ cam, onCode, onClose }: { cam: CameraMod; onCode: (text: string)
   if (!perm.granted) {
     return (
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 14, color: colors.text }}>Para leer las entradas hace falta permitir la cámara.</Text>
-        <Button title="Permitir la cámara" onPress={() => { ask(); }} />
-        <Button title="Cerrar" variant="ghost" onPress={onClose} />
+        <Text style={{ fontSize: 14, color: colors.text }}>{tx('Para leer las entradas hace falta permitir la cámara.')}</Text>
+        <Button title={tx('Permitir la cámara')} onPress={() => { ask(); }} />
+        <Button title={tx('Cerrar')} variant="ghost" onPress={onClose} />
       </View>
     );
   }
@@ -50,7 +51,7 @@ function Live({ cam, onCode, onClose }: { cam: CameraMod; onCode: (text: string)
             onCode(t);
           }} />
       </View>
-      <Button title="Cerrar la cámara" variant="ghost" onPress={onClose} />
+      <Button title={tx('Cerrar la cámara')} variant="ghost" onPress={onClose} />
     </View>
   );
 }

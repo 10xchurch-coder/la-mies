@@ -8,6 +8,7 @@ import { LA_MIES_TEAM } from '@/lib/alta';
 import { churchStatus } from '@/lib/altaData';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 /** true: la iglesia de quien entró está suspendida. */
 export function useChurchSuspended(): boolean {
@@ -29,13 +30,13 @@ export function SuspendedScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', padding: 28, gap: 14 }}>
       <Feather name="pause-circle" size={56} color={colors.amberText} />
-      <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center' }}>La app de {church?.name ?? 'tu iglesia'} está en pausa</Text>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{tx('La app de {name} está en pausa', { name: church?.name ?? tx('tu iglesia') })}</Text>
       <Text style={{ fontSize: 15, color: colors.text, textAlign: 'center', lineHeight: 22, maxWidth: 420 }}>
-        El equipo de La Mies la puso en pausa por ahora. No se borró nada. Si sos el pastor, escribinos y lo vemos juntos.
+        {tx('El equipo de La Mies la puso en pausa por ahora. No se borró nada. Si sos el pastor, escribinos y lo vemos juntos.')}
       </Text>
       <Text selectable style={{ fontSize: 15, fontWeight: '700', color: colors.green }}>{LA_MIES_TEAM.email}</Text>
-      <Button title="Escribir al equipo" icon="mail" onPress={() => { Linking.openURL(`mailto:${LA_MIES_TEAM.email}?subject=${encodeURIComponent('Iglesia en pausa')}`).catch(() => undefined); }} />
-      <Button title="Salir de la cuenta" variant="ghost" onPress={() => { signOut().catch(() => undefined); }} />
+      <Button title={tx('Escribir al equipo')} icon="mail" onPress={() => { Linking.openURL(`mailto:${LA_MIES_TEAM.email}?subject=${encodeURIComponent(tx('Iglesia en pausa'))}`).catch(() => undefined); }} />
+      <Button title={tx('Salir de la cuenta')} variant="ghost" onPress={() => { signOut().catch(() => undefined); }} />
     </View>
   );
 }
