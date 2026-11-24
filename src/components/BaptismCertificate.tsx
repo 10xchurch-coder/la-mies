@@ -8,7 +8,7 @@ export type Cert = { full_name: string; baptized_on: string; church_name: string
 const MONTHS = txList(['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']);
 export function longDate(iso: string): string {
   const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
-  return `${d} de ${MONTHS[m - 1]} de ${y}`;
+  return tx('{d} de {month} de {y}', { d, month: MONTHS[m - 1], y });
 }
 
 const SERIF = Platform.select({ ios: 'Georgia', android: 'serif', default: 'Georgia, "Times New Roman", serif' });

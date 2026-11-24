@@ -54,7 +54,7 @@ export function badgesFor(p: Progress): Badge[] {
     title,
     icon,
     earned: have >= need,
-    progress: have >= need ? undefined : `${Math.min(have, need)} de ${need}`,
+    progress: have >= need ? undefined : tx('{have} de {need}', { have: Math.min(have, need), need }),
   });
   return [
     b('first', tx('Primera salida'), 'play', p.sessions, 1),
