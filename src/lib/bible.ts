@@ -3,6 +3,7 @@
 import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
 import { EN_BOOKS, KJV, loadKjvBook } from './bibleStudyData';
+import { getLang } from './i18n';
 
 export type BibleVersionId = 'rv1909' | 'kjv';
 
@@ -34,12 +35,14 @@ export const VERSIONS: BibleVersion[] = [
 
 export const DEFAULT_VERSION: BibleVersionId = 'rv1909';
 
+/** La versión pedida. Si la persona todavía no eligió ninguna, va la del idioma de la app: King James en inglés, Reina-Valera en castellano. */
 export function versionOf(id: string | undefined): BibleVersion {
-  return VERSIONS.find((v) => v.id === id) ?? VERSIONS[0];
+  return VERSIONS.find((v) => v.id === id) ?? (getLang() === 'en' ? VERSIONS.find((v) => v.lang === 'en') : undefined) ?? VERSIONS[0];
 }
 
 export const OT_COUNT = 39;
-export const bookName = (i: number): string => BOOKS[i]?.[0] ?? '';
+/** El nombre del libro en el idioma de la app ("Juan" / "John"). */
+export const bookName = (i: number): string => (getLang() === 'en' ? EN_BOOKS[i] : undefined) ?? BOOKS[i]?.[0] ?? '';
 export const chaptersIn = (i: number): number => BOOKS[i]?.[1] ?? 0;
 /** El nombre del libro como lo dice esa versión ("John" en la King James, "Juan" en las demás). */
 export const bookNameIn = (version: BibleVersion, i: number): string => version.bookNames?.[i] ?? bookName(i);
@@ -49,6 +52,9 @@ const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerC
 const BY_NAME = new Map(BOOKS.map((b, i) => [plain(b[0]), i]));
 // En los planes con un salmo por día, la lectura dice "Salmo 5" (en singular).
 BY_NAME.set('salmo', BOOKS.findIndex((b) => b[0] === 'Salmos'));
+// También por su nombre en inglés ("John"), para que una cita armada con la app en inglés se siga entendiendo.
+EN_BOOKS.forEach((name, i) => { if (!BY_NAME.has(plain(name))) BY_NAME.set(plain(name), i); });
+BY_NAME.set('psalm', BOOKS.findIndex((b) => b[0] === 'Salmos'));
 
 /** Posición del libro por su nombre ("Juan", "1 Corintios", "genesis"), o -1. */
 export function findBook(name: string): number {

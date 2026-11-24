@@ -23,6 +23,7 @@ import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
 import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
+import { loadLang, useLang } from '@/lib/i18nStore';
 import { loadTabs } from '@/lib/tabsPref';
 import { loadMenu } from '@/lib/menuPref';
 import { useOtaUpdates } from '@/lib/otaUpdates';
@@ -127,12 +128,13 @@ function Gate() {
 export default function RootLayout() {
   const [themeReady, setThemeReady] = useState(false);
   const mode = useThemeMode();
+  const lang = useLang();
   useOtaUpdates();
   useEffect(() => startOfflineSync(), []);
   useEffect(() => startNetSync(), []);
   useEffect(() => { if (Platform.OS === 'web') registerWebShell(); }, []);
   useEffect(() => {
-    Promise.all([loadThemeMode(), loadTabs(), loadMenu(), loadDeskPref()]).finally(() => setThemeReady(true));
+    Promise.all([loadThemeMode(), loadTabs(), loadMenu(), loadDeskPref(), loadLang()]).finally(() => setThemeReady(true));
   }, []);
   useEffect(() => {
     if (Platform.OS === 'web' && typeof document !== 'undefined') {
@@ -147,10 +149,10 @@ export default function RootLayout() {
         <OutingProvider>
           <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
           <ErrorBoundary>
-            {/* La clave hace que toda la app se vuelva a dibujar con los colores nuevos al cambiar de modo. */}
-            <Gate key={mode} />
-            <ActionSheetHost key={`sheet-${mode}`} />
-            <RulesGate key={`rules-${mode}`} />
+            {/* La clave hace que toda la app se vuelva a dibujar con los colores nuevos al cambiar de modo, y con los textos nuevos al cambiar de idioma. */}
+            <Gate key={`${mode}-${lang}`} />
+            <ActionSheetHost key={`sheet-${mode}-${lang}`} />
+            <RulesGate key={`rules-${mode}-${lang}`} />
             <OfflineBadge />
           </ErrorBoundary>
         </OutingProvider>

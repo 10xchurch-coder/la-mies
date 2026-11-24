@@ -8,6 +8,7 @@ import { setSignupDraft } from '@/lib/signupDraft';
 import { supabase, errorMessage, supabaseConfigured } from '@/lib/supabase';
 import { WEB_URL } from '@/lib/share';
 import { colors, themed } from '@/theme';
+import { LangSwitch } from '@/components/LangChoice';
 
 export default function Login() {
   const router = useRouter();
@@ -118,6 +119,7 @@ export default function Login() {
           <Text style={styles.title}>La Mies</Text>
           <Text style={styles.subtitle}>Evangelismo casa por casa</Text>
         </View>
+        <LangSwitch />
         {!supabaseConfigured ? (
           <Text style={styles.warn}>Falta configurar la conexión (archivo .env). Mirá el README.</Text>
         ) : null}

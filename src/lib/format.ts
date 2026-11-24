@@ -1,7 +1,14 @@
 // Fechas, horas y números en castellano rioplatense, sin depender de Intl.
+// Si la app está en inglés (src/lib/i18n.ts), las fechas y los números salen como se escriben en inglés: este es el único lugar que lo decide.
+import { getLang } from './i18n';
 
-const DAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
-const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const DAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']; // i18n-skip
+const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']; // i18n-skip
+const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const en = () => getLang() === 'en';
+/** Un número con decimales: con coma en castellano ("2,3") y con punto en inglés ("2.3"). */
+const dec = (n: number, digits = 1) => (en() ? n.toFixed(digits) : n.toFixed(digits).replace('.', ','));
 
 function pad(n: number): string {
   return n < 10 ? `0${n}` : String(n);
@@ -15,12 +22,13 @@ export function fmtTime(d: Date | string | number): string {
 /** "sáb 24 oct" */
 export function fmtDay(d: Date | string | number): string {
   const x = new Date(d);
+  if (en()) return `${DAYS_EN[x.getDay()]}, ${MONTHS_EN[x.getMonth()]} ${x.getDate()}`; // "Sat, Oct 24"
   return `${DAYS[x.getDay()]} ${x.getDate()} ${MONTHS[x.getMonth()]}`;
 }
 
 /** "sáb 24 oct 2026" */
 export function fmtDayYear(d: Date | string | number): string {
-  return `${fmtDay(d)} ${new Date(d).getFullYear()}`;
+  return `${fmtDay(d)}${en() ? ',' : ''} ${new Date(d).getFullYear()}`;
 }
 
 export function isSameDay(a: Date, b: Date): boolean {
@@ -56,13 +64,14 @@ export function fmtDuration(ms: number): string {
 /** "2,3 km" / "850 m" */
 export function fmtDistance(m: number): string {
   if (m < 1000) return `${Math.round(m)} m`;
-  return `${(m / 1000).toFixed(1).replace('.', ',')} km`;
+  return `${dec(m / 1000)} km`;
 }
 
 /** Hace que una fecha "YYYY-MM-DD" de la base se lea bien. */
 export function fmtDateOnly(s: string | null | undefined): string {
   if (!s) return '';
   const [y, m, d] = s.split('-').map(Number);
+  if (en()) return `${MONTHS_EN[(m || 1) - 1]} ${d}, ${y}`; // "Oct 24, 2026"
   return `${d} ${MONTHS[(m || 1) - 1]} ${y}`;
 }
 
@@ -190,7 +199,7 @@ export function youtubeId(url: string | null | undefined): string | null {
 export function fmtBytes(n: number | null | undefined): string {
   if (!n) return '';
   if (n < 1024 * 1024) return `${Math.round(n / 1024)} KB`;
-  return `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
+  return `${dec(n / 1024 / 1024)} MB`;
 }
 
 // ---------- Fechas de nacimiento ----------
@@ -261,6 +270,8 @@ export function fmtMoney(n: number | string | null | undefined, currency = 'ARS'
 export function parseMoney(t: string): number | null {
   let s = t.replace(/[^0-9.,]/g, '');
   if (!s) return null;
+  // En inglés la coma separa los miles ("1,500" o "1,500.50"). En castellano no cambia nada de lo de siempre.
+  if (en() && (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s))) s = s.replace(/,/g, '');
   if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
   else if ((s.match(/\./g) ?? []).length > 1 || /\.\d{3}$/.test(s)) s = s.replace(/\./g, '');
   const v = Number(s);

@@ -46,6 +46,7 @@ const PREFIX_CALLS = new Set(['startsWith', 'includes', 'indexOf', 'endsWith']);
 
 const DAYS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTHS_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']; // solo la lista entera: 'mar' suelto también es martes
 const CALENDAR = new Set([...DAYS, ...MONTHS, ...DAYS.map(cap), ...MONTHS.map(cap)]);
 const WORDS = new Set([...CONFIG.words, ...CALENDAR]);
 function cap(s) { return s[0].toUpperCase() + s.slice(1); }
@@ -64,6 +65,9 @@ function techy(s) {
   if (/^[a-z-]+(;\s?[a-z-]+)+;?$/.test(s)) return true; // permisos de un iframe
   if (/\b(sans-serif|serif|monospace)\b/.test(s) || /^\d+px\b/.test(s) || /^[a-z-]+\([^)]*\)$/.test(s)) return true; // estilos
   if (/&[a-z]+;/.test(s)) return true;
+  if (/<\/?[a-z][a-z0-9]*[\s>]/i.test(s)) return true; // HTML (hojas para imprimir): se revisa a mano
+  if (/^[a-z-]+:[^;]+;[a-z-]+:/.test(s) || /\{\s*[a-z-]+:[^}]+\}/.test(s)) return true; // estilos de la web
+  if (/^\{\w+\}[/?]/.test(s)) return true;
   if (BIBLE_REF.test(s)) return true; // "Romanos 6:4" es una cita, no un texto
   if (!/\s/.test(s) && /\.(csv|png|jpe?g|zip|pdf|txt|json|xlsx|webp|mp3|m4a)$/i.test(s)) return true;
   return false;
@@ -585,7 +589,7 @@ export function run({ write = false } = {}) {
       const vals = n.elements.map((e) => e.text);
       if (!vals.some((v) => isHuman(v)) || vals.every((v) => skipTexts.has(v.trim()))) return;
       const pl = place(n);
-      const calendar = vals.every((v) => CALENDAR.has(v));
+      const calendar = vals.every((v) => CALENDAR.has(v)) || vals.join() === MONTHS_SHORT.join();
       const phrases = vals.every((v) => v.trim().split(/\s+/).length >= 4 && isHuman(v));
       const blocked = pl.kind === 'no' || underAsConst(n) || ts.isAsExpression(n.parent) || vals.some((v) => compared.has(v) || hitsMarker(v)) || literalTyped(n.elements[0]);
       if ((calendar || phrases) && !blocked) {
