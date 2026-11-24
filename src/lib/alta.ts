@@ -177,9 +177,9 @@ export const SMALL_OFF: FeatureKey[] = ['asistencia_chips', 'evento_plan', 'even
 export const isSmall = (size: string | null | undefined): boolean => size === '1-30' || size === '31-80';
 export const isBig = (size: string | null | undefined): boolean => size === '201-500' || size === '500+';
 export const PRESETS: { key: PresetKey; label: string; hint: string }[] = [
-  { key: 'basico', get label() { return tx('Lo básico'); }, hint: 'Asistencia, Biblia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.' },
-  { key: 'completa', get label() { return tx('Iglesia completa'); }, hint: 'Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo lo que pide algo aparte.' },
-  { key: 'elijo', get label() { return tx('Elijo yo'); }, hint: 'Empezás con lo que hay ahora y prendés o apagás cada parte.' },
+  { key: 'basico', get label() { return tx('Lo básico'); }, get hint() { return tx('Asistencia, Biblia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.'); } },
+  { key: 'completa', get label() { return tx('Iglesia completa'); }, get hint() { return tx('Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo lo que pide algo aparte.'); } },
+  { key: 'elijo', get label() { return tx('Elijo yo'); }, get hint() { return tx('Empezás con lo que hay ahora y prendés o apagás cada parte.'); } },
 ];
 /** Qué queda apagado con cada modelo, según el tamaño que la iglesia dijo al anotarse. "Elijo yo" no cambia nada. */
 export function presetOff(key: PresetKey, current: readonly string[] | null | undefined = [], size?: string | null): FeatureKey[] {

@@ -1,7 +1,7 @@
 Textos que el programa scripts/i18n-codemod.mjs NO tocó porque no está seguro. Hay que mirarlos a mano.
 Si un texto de acá se ve en pantalla, se puede envolver a mano con tx(...) donde se muestra.
 
-   34  el tipo es una lista cerrada de valores
+   64  el tipo es una lista cerrada de valores
    30  texto fuera de una función (se crea una sola vez al abrir la app)
     8  ese texto se compara en algún archivo (===, case, includes o una expresión regular)
     7  lista de textos fuera de una función (¿se muestran o son valores?)
@@ -37,8 +37,8 @@ src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, c
 src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
 src/lib/api.ts:1210  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
-src/lib/bible.ts:32  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
-src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
+src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
+src/lib/bible.ts:34  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
 src/lib/churchSetup.ts:99  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tu iglesia | Reuniones | Clases | Funciones | Código para los hermanos
 src/lib/demoCore.ts:7  [texto fuera de una función (se crea una sola vez al abrir la app)]  Es una demostración
 src/lib/demoCore.ts:8  [en otro lado se busca "Esto es una demostración" con startsWith/includes]  Esto es una demostración: acá no se guardan cambios.
@@ -46,41 +46,71 @@ src/lib/demoCore.ts:9  [en otro lado se busca "Esto es una demostración" con st
 src/lib/demoCore.ts:14  [texto fuera de una función (se crea una sola vez al abrir la app)]  Quiero La Mies para mi iglesia
 src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hija
 src/lib/families.ts:65  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  hijo
-src/lib/features.ts:27  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
-src/lib/features.ts:30  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
-src/lib/features.ts:33  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
-src/lib/features.ts:36  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
-src/lib/features.ts:40  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:43  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:46  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:49  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:52  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:55  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:58  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:61  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:64  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:67  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:70  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:74  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:77  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:80  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:83  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:86  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:89  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:92  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:95  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:98  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:101  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:104  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:107  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:110  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:113  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:116  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:119  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:123  [el tipo es una lista cerrada de valores]  Dinero e informes
-src/lib/features.ts:126  [el tipo es una lista cerrada de valores]  Dinero e informes
-src/lib/features.ts:129  [el tipo es una lista cerrada de valores]  Dinero e informes
-src/lib/features.ts:134  [lista de textos fuera de una función (¿se muestran o son valores?)]  Evangelismo y visitas | Reuniones y enseñanza | Comunidad | Dinero e informes
+src/lib/features.ts:37  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:41  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:45  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:49  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:53  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:57  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:61  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:65  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:69  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:73  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:77  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:81  [el tipo es una lista cerrada de valores]  Evangelismo y visitas
+src/lib/features.ts:87  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:91  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:95  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:99  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:103  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:107  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:111  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:115  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:119  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:123  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:127  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:131  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:135  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:139  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:143  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
+src/lib/features.ts:149  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:153  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:157  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:161  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:165  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:169  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:173  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:177  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:181  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:185  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:189  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:195  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:199  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:203  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:207  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:211  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:215  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:219  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:223  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:227  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:231  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:235  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:239  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:243  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:247  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:251  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:255  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:259  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:263  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:267  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:271  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:275  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:279  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:285  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:289  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:293  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:297  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:303  [lista de textos fuera de una función (¿se muestran o son valores?)]  Evangelismo y visitas | Reuniones y enseñanza | La Biblia y crecer | Comunidad | Dinero e informes
 src/lib/files.ts:325  [texto fuera de una función (se crea una sola vez al abrir la app)]  La foto
 src/lib/files.ts:326  [texto fuera de una función (se crea una sola vez al abrir la app)]  El video
 src/lib/files.ts:327  [texto fuera de una función (se crea una sola vez al abrir la app)]  El audio
@@ -96,6 +126,6 @@ src/lib/personas.ts:167  [lista de textos fuera de una función (¿se muestran o
 src/screens/crecimiento.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Evangelismo personal
 src/screens/crecimiento.tsx:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
 src/screens/crecimiento.tsx:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
-src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Toda la iglesia
-src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Solo el pastor
-src/screens/oracion.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Personas elegidas
+src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Toda la iglesia
+src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Solo el pastor
+src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Personas elegidas

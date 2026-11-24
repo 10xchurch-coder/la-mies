@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { Card, SectionTitle, Toggle } from '@/components/ui';
 import { FEATURE_GROUPS, childrenOf, featureOn, searchFeatures, topFeatures, type Feature, type FeatureKey } from '@/lib/features';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function FeatureSwitches({ off, onChange, disabled, search, showHides, foldParts, after }: {
   /** Lo que está apagado ahora. */
@@ -29,7 +30,7 @@ export function FeatureSwitches({ off, onChange, disabled, search, showHides, fo
 
   const hides = (f: Feature) => (showHides ? (
     <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: -4, marginBottom: 6 }}>
-      <Text style={{ fontWeight: '700' }}>Si lo apagás se oculta: </Text>{f.hides}
+      <Text style={{ fontWeight: '700' }}>{tx('Si lo apagás se oculta:')} </Text>{f.hides}
     </Text>
   ) : null);
 
@@ -40,15 +41,15 @@ export function FeatureSwitches({ off, onChange, disabled, search, showHides, fo
       {search ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 46, paddingHorizontal: 14, borderRadius: 12, borderWidth: 1.5, borderColor: colors.input, backgroundColor: colors.bg }}>
           <Feather name="search" size={18} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Buscar una función: ofrendas, chat, Biblia…" placeholderTextColor={colors.muted}
-            accessibilityLabel="Buscar una función" autoCorrect={false} style={{ flex: 1, fontSize: 15, color: colors.text }} />
-          {q ? <Pressable onPress={() => setQ('')} hitSlop={10} accessibilityLabel="Borrar la búsqueda"><Feather name="x" size={18} color={colors.muted} /></Pressable> : null}
+          <TextInput value={q} onChangeText={setQ} placeholder={tx('Buscar una función: ofrendas, chat, Biblia…')} placeholderTextColor={colors.muted}
+            accessibilityLabel={tx('Buscar una función')} autoCorrect={false} style={{ flex: 1, fontSize: 15, color: colors.text }} />
+          {q ? <Pressable onPress={() => setQ('')} hitSlop={10} accessibilityLabel={tx('Borrar la búsqueda')}><Feather name="x" size={18} color={colors.muted} /></Pressable> : null}
         </View>
       ) : null}
-      {searching && !groups.length ? <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center', paddingVertical: 8 }}>No encontré ninguna función con “{q.trim()}”.</Text> : null}
+      {searching && !groups.length ? <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center', paddingVertical: 8 }}>{tx('No encontré ninguna función con “{q}”.', { q: q.trim() })}</Text> : null}
       {groups.map(({ g, items }) => (
         <View key={g} style={{ gap: 8 }}>
-          <SectionTitle>{g}</SectionTitle>
+          <SectionTitle>{tx(g)}</SectionTitle>
           {items.map((f) => {
             const on = featureOn(off, f.key);
             const parts = childrenOf(f.key);
@@ -61,7 +62,7 @@ export function FeatureSwitches({ off, onChange, disabled, search, showHides, fo
                 {hides(f)}
                 {parts.length && on && !partsOpen ? (
                   <Pressable onPress={() => setOpen([...open, f.key])} accessibilityRole="button" hitSlop={6} style={{ paddingVertical: 6 }}>
-                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>Ver sus {parts.length} partes ({partsOn === 1 ? '1 prendida' : `${partsOn} prendidas`}) ▾</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '700', color: colors.green }}>{tx('Ver sus {n} partes ({v1}) ▾', { n: parts.length, v1: partsOn === 1 ? tx('1 prendida') : tx('{partsOn} prendidas', { partsOn }) })}</Text>
                   </Pressable>
                 ) : null}
                 {parts.length && on && partsOpen ? (
@@ -76,7 +77,7 @@ export function FeatureSwitches({ off, onChange, disabled, search, showHides, fo
                 ) : null}
                 {parts.length && !on ? (
                   <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17, paddingBottom: 4 }}>
-                    Con esto apagado también quedan apagadas sus {parts.length} partes ({parts.map((c) => c.label.toLowerCase()).join(', ')}).
+                    {tx('Con esto apagado también quedan apagadas sus {n} partes ({map}).', { n: parts.length, map: parts.map((c) => c.label.toLowerCase()).join(', ') })}
                   </Text>
                 ) : null}
                 {on && after ? after(f.key) : null}

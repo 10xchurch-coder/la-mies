@@ -88,17 +88,17 @@ export default function Funciones() {
                 {tx('No se borra nada. Si lo volvés a prender, todo está como estaba.')}
               </Text>
               <Text style={{ fontSize: 14, color: colors.greenText, lineHeight: 20 }}>
-                Cada cambio se guarda solo y les llega a todos los hermanos en un par de minutos, sin instalar nada.
+                {tx('Cada cambio se guarda solo y les llega a todos los hermanos en un par de minutos, sin instalar nada.')}
               </Text>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>Ahora hay {on} de {FEATURES.length} prendidas.</Text>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.greenText }}>{tx('Ahora hay {on} de {n} prendidas.', { on, n: FEATURES.length })}</Text>
             </Card>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Feather name="eye" size={20} color={colors.pink} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Ver la app como queda</Text>
-                <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Mirá el menú igual que lo ve un hermano, con lo que prendiste y apagaste.</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Ver la app como queda')}</Text>
+                <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Mirá el menú igual que lo ve un hermano, con lo que prendiste y apagaste.')}</Text>
               </View>
-              <Button title="Ver" small variant="outline" onPress={() => router.push('/miembro-vista' as Href)} />
+              <Button title={tx('Ver')} small variant="outline" onPress={() => router.push('/miembro-vista' as Href)} />
             </Card>
             {off.length ? (
               <Button title={busy === 'todo' ? tx('Prendiendo…') : tx('Prender todo ({n} apagada{pl})', { n: off.length, pl: off.length > 1 ? 's' : '' })} icon="refresh-cw" variant="outline" small onPress={allOn} disabled={!!busy} />
@@ -106,9 +106,9 @@ export default function Funciones() {
             <FeatureSwitches off={off} onChange={change} disabled={!!busy} search showHides
               after={(k) => (k === 'biblia' ? <BibleChurchSettings versions={bible.versions} def={bible.def} onChange={changeBible} disabled={!!busy} /> : null)} />
             <View style={{ gap: 8 }}>
-              <SectionTitle>Siempre encendido</SectionTitle>
+              <SectionTitle>{tx('Siempre encendido')}</SectionTitle>
               <Card style={{ gap: 10 }}>
-                <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>Esto no se puede apagar, porque sin esto la app no funciona.</Text>
+                <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{tx('Esto no se puede apagar, porque sin esto la app no funciona.')}</Text>
                 {CORE_PARTS.map((c) => (
                   <View key={c.label} style={{ flexDirection: 'row', gap: 10 }}>
                     <Feather name="lock" size={15} color={colors.muted} style={{ marginTop: 2 }} />

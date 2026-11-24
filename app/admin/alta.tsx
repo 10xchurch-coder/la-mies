@@ -281,7 +281,7 @@ export default function Alta() {
       const sizeLabel = SIZES.find((x) => x.value === size)?.label;
       return (
         <>
-          <Text style={p}>Primero elegí por dónde empezar. Después mirás la lista y cambiás lo que quieras. Lleva dos minutos.</Text>
+          <Text style={p}>{tx('Primero elegí por dónde empezar. Después mirás la lista y cambiás lo que quieras. Lleva dos minutos.')}</Text>
           {PRESETS.map((x) => (
             <Pressable key={x.key} onPress={() => applyPreset(x.key)} disabled={busy} accessibilityRole="button" accessibilityState={{ selected: preset === x.key }}
               style={{ gap: 4, padding: 12, borderRadius: 12, borderWidth: 2, borderColor: preset === x.key ? colors.green : colors.border, backgroundColor: preset === x.key ? colors.greenSoft : colors.bg }}>
@@ -292,17 +292,17 @@ export default function Alta() {
           {preset ? (
             <>
               <View style={{ gap: 4, padding: 12, borderRadius: 12, backgroundColor: colors.amberSoft }}>
-                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>Así queda: {countOn(now)} de {FEATURES.length} prendidas</Text>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{tx('Así queda: {countOn} de {n} prendidas', { countOn: countOn(now), n: FEATURES.length })}</Text>
                 <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19 }}>
-                  Tocá cada interruptor: “quiero usar esto”, “esto no”.{sizeLabel && preset !== 'elijo' ? ` Lo armamos pensando en una iglesia de ${sizeLabel.toLowerCase()} personas.` : ''} Lo apagado no aparece en el menú, no se borra nada y lo cambiás cuando quieras.
+                  {tx('Tocá cada interruptor: “quiero usar esto”, “esto no”.{v1} Lo apagado no aparece en el menú, no se borra nada y lo cambiás cuando quieras.', { v1: sizeLabel && preset !== 'elijo' ? tx(' Lo armamos pensando en una iglesia de {sizeLabel} personas.', { sizeLabel: sizeLabel.toLowerCase() }) : '' })}
                 </Text>
               </View>
               <FeatureSwitches off={now} onChange={stage} disabled={busy} foldParts
                 after={(k) => (k === 'biblia' && bible ? <BibleChurchSettings versions={bible.versions} def={bible.def} onChange={(versions, def) => setBibleDraft({ versions, def })} disabled={busy} /> : null)} />
-              <Button title="Guardar y seguir" icon="check" onPress={saveFeatures} loading={busy} />
+              <Button title={tx('Guardar y seguir')} icon="check" onPress={saveFeatures} loading={busy} />
             </>
           ) : null}
-          <Text style={small}>Después lo cambiás cuando quieras en Ajustes → Funciones de la iglesia.</Text>
+          <Text style={small}>{tx('Después lo cambiás cuando quieras en Ajustes → Funciones de la iglesia.')}</Text>
         </>
       );
     }

@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Button } from '@/components/ui';
 import { colors } from '@/theme';
+import { tx } from '@/lib/i18n';
 
 export function FeatureOff({ name, canManage, onHome, onManage, publicPage }: {
   /** El nombre de la función apagada, si se sabe ("Ofrendas por persona"). */
@@ -23,18 +24,18 @@ export function FeatureOff({ name, canManage, onHome, onManage, publicPage }: {
           <Feather name="toggle-left" size={32} color={colors.muted} />
         </View>
         <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center' }}>
-          {publicPage ? 'Esta iglesia no usa esta parte' : 'Tu iglesia no usa esta parte'}
+          {publicPage ? tx('Esta iglesia no usa esta parte') : tx('Tu iglesia no usa esta parte')}
         </Text>
         <Text style={{ fontSize: 15, color: colors.muted, textAlign: 'center', lineHeight: 22 }}>
-          {name ? `“${name}” está apagado. ` : ''}
+          {name ? tx('“{name}” está apagado. ', { name }) : ''}
           {publicPage
-            ? 'Si tenés una duda, hablá con alguien de la iglesia.'
+            ? tx('Si tenés una duda, hablá con alguien de la iglesia.')
             : canManage
-              ? 'No se borró nada. Si la querés usar, la prendés en Funciones de la iglesia y todo vuelve como estaba.'
-              : 'No se borró nada. Si te parece que hace falta, hablá con tu pastor.'}
+              ? tx('No se borró nada. Si la querés usar, la prendés en Funciones de la iglesia y todo vuelve como estaba.')
+              : tx('No se borró nada. Si te parece que hace falta, hablá con tu pastor.')}
         </Text>
-        {onHome ? <Button title="Volver al inicio" icon="home" onPress={onHome} style={{ alignSelf: 'stretch' }} /> : null}
-        {canManage && onManage ? <Button title="Abrir Funciones de la iglesia" icon="toggle-right" variant="outline" onPress={onManage} style={{ alignSelf: 'stretch' }} /> : null}
+        {onHome ? <Button title={tx('Volver al inicio')} icon="home" onPress={onHome} style={{ alignSelf: 'stretch' }} /> : null}
+        {canManage && onManage ? <Button title={tx('Abrir Funciones de la iglesia')} icon="toggle-right" variant="outline" onPress={onManage} style={{ alignSelf: 'stretch' }} /> : null}
       </View>
     </View>
   );

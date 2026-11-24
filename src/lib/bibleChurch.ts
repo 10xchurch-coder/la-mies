@@ -2,6 +2,7 @@
 // Sin nada de la app ni de la base, para poder probarse sola. Cuando se sume una versión nueva a la app
 // (ver VERSIONS en lib/bible), aparece sola en la lista para que cada iglesia la permita o no.
 
+import { tx } from './i18n';
 export type BibleChurchConfig = {
   /** Las versiones permitidas (ids de VERSIONS). null: todas las que trae la app, también las que se sumen después. */
   versions: string[] | null;
@@ -59,6 +60,6 @@ export function pickVersion<T extends V>(all: readonly T[], cfg: BibleChurchConf
 /** Lo que se manda a guardar: las permitidas (en el orden de la app) y la de inicio. Avisa si no queda ninguna. */
 export function bibleConfigToSave(all: readonly string[], versions: readonly string[], def: string | null | undefined): { versions: string[]; default: string } {
   const ok = all.filter((id) => versions.includes(id));
-  if (!ok.length) throw new Error('Dejá prendida al menos una versión de la Biblia.');
+  if (!ok.length) throw new Error(tx('Dejá prendida al menos una versión de la Biblia.'));
   return { versions: ok, default: def && ok.includes(def) ? def : ok[0] };
 }
