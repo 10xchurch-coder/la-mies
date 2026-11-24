@@ -6,7 +6,7 @@ Fecha: 24 de noviembre de 2026. Reemplaza la nota anterior (que era solo la cuen
 
 En Ajustes hay una opción **Idioma / Language** (Español / English). Al tocarla, toda la app cambia en el momento, sin cerrarla. También hay un botoncito para cambiar de idioma en Entrar y en Crear cuenta. El idioma queda guardado en el teléfono.
 
-**Estado (24 de noviembre de 2026, segunda pasada):** el programa ya se corrió en `main` y todas las pantallas pasan por el traductor. En la rama `feat/ingles2` se tradujeron los textos de las pantallas nuevas (hoy son 5.115 textos, todos con inglés), se arreglaron a mano los casos anotados más abajo y se miró la app en inglés a lo ancho de un teléfono.
+**Estado (24 de noviembre de 2026, segunda pasada):** el programa ya se corrió en `main` y todas las pantallas pasan por el traductor. En la rama `feat/ingles2` se tradujeron los textos de las pantallas nuevas (en ese momento eran 5.115 textos), se arreglaron a mano los casos anotados más abajo y se miró la app en inglés a lo ancho de un teléfono.
 
 ## Cómo funciona
 
@@ -177,6 +177,14 @@ Las pantallas no se tocan: ya están envueltas.
 **Lo que se revisó de las pantallas nuevas:** ubicación en familia, alta de iglesias e importadores (los títulos de las columnas se reconocen igual en los dos idiomas), demostración (el aviso se sigue reconociendo por su texto en castellano, que es el que manda la base), presentación y bosquejo (los libros en castellano se entienden con la app en inglés, y ahora también "John 3:16"), personas, comparar Biblias y palabras originales. Hay pruebas nuevas en `tests/i18n.test.ts` para todo esto.
 
 **A lo ancho de un teléfono, en inglés:** se abrieron 54 pantallas en los dos idiomas buscando textos cortados o que se salen. No hay ninguno cortado; los botones del menú ocupan dos renglones igual que en castellano. Se acortó el texto del buscador del inicio.
+
+## Tercera pasada (Funciones por iglesia y La Mies Central)
+
+- Se tradujeron los 470 textos nuevos. Hoy son 5.568 textos, todos con inglés.
+- **Funciones** (`src/lib/features.ts`): las claves, las rutas, los padres y los grupos no cambian con el idioma (hay una prueba). Solo cambian la etiqueta, la ayuda y "qué se oculta", que se leen al mostrarse. El grupo se traduce donde se muestra (`tx(g)`).
+- **Central**: los estados que guarda la base (`open`, `progress`, `done`) son claves en inglés y no se tocaron. Los títulos de las planillas (CSV) salen en el idioma de quien las baja; nadie las vuelve a leer. Arreglos chicos: la lista "Qué vemos y qué no" y el grupo dentro del CSV ahora se traducen.
+- **Queda en castellano:** el informe de Central para imprimir (se arma como página web) y "Del 3 al 9" ya no: ese se arregló.
+- **A lo ancho (1366 y teléfono), en inglés:** Funciones, el paso de funciones de Primeros pasos, Pedir ayuda y las 8 pantallas de Central abren sin errores y sin más textos cortados que en castellano. Se acortaron 5 traducciones (dos botones de Pedir ayuda que ocupaban tres renglones en el teléfono y tres títulos del menú y de una tarjeta).
 
 ## Riesgos (para el que lo aplica)
 

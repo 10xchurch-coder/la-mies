@@ -39,33 +39,33 @@ src/lib/api.ts:1210  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
 src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
 src/lib/bible.ts:34  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
-src/lib/central.ts:75  [el tipo es una lista cerrada de valores]  Gente
 src/lib/central.ts:76  [el tipo es una lista cerrada de valores]  Gente
 src/lib/central.ts:77  [el tipo es una lista cerrada de valores]  Gente
-src/lib/central.ts:78  [el tipo es una lista cerrada de valores]  Reuniones
+src/lib/central.ts:78  [el tipo es una lista cerrada de valores]  Gente
 src/lib/central.ts:79  [el tipo es una lista cerrada de valores]  Reuniones
 src/lib/central.ts:80  [el tipo es una lista cerrada de valores]  Reuniones
 src/lib/central.ts:81  [el tipo es una lista cerrada de valores]  Reuniones
 src/lib/central.ts:82  [el tipo es una lista cerrada de valores]  Reuniones
 src/lib/central.ts:83  [el tipo es una lista cerrada de valores]  Reuniones
-src/lib/central.ts:84  [el tipo es una lista cerrada de valores]  Decisiones
+src/lib/central.ts:84  [el tipo es una lista cerrada de valores]  Reuniones
 src/lib/central.ts:85  [el tipo es una lista cerrada de valores]  Decisiones
 src/lib/central.ts:86  [el tipo es una lista cerrada de valores]  Decisiones
 src/lib/central.ts:87  [el tipo es una lista cerrada de valores]  Decisiones
-src/lib/central.ts:88  [el tipo es una lista cerrada de valores]  Evangelismo
+src/lib/central.ts:88  [el tipo es una lista cerrada de valores]  Decisiones
 src/lib/central.ts:89  [el tipo es una lista cerrada de valores]  Evangelismo
 src/lib/central.ts:90  [el tipo es una lista cerrada de valores]  Evangelismo
 src/lib/central.ts:91  [el tipo es una lista cerrada de valores]  Evangelismo
 src/lib/central.ts:92  [el tipo es una lista cerrada de valores]  Evangelismo
-src/lib/central.ts:93  [el tipo es una lista cerrada de valores]  Uso de la app
+src/lib/central.ts:93  [el tipo es una lista cerrada de valores]  Evangelismo
 src/lib/central.ts:94  [el tipo es una lista cerrada de valores]  Uso de la app
 src/lib/central.ts:95  [el tipo es una lista cerrada de valores]  Uso de la app
-src/lib/central.ts:96  [el tipo es una lista cerrada de valores]  Soporte
+src/lib/central.ts:96  [el tipo es una lista cerrada de valores]  Uso de la app
 src/lib/central.ts:97  [el tipo es una lista cerrada de valores]  Soporte
-src/lib/central.ts:99  [lista de textos fuera de una función (¿se muestran o son valores?)]  Gente | Reuniones | Decisiones | Evangelismo | Uso de la app | Soporte
-src/lib/central.ts:383  [texto fuera de una función (se crea una sola vez al abrir la app)]  Qué vemos y qué no
-src/lib/central.ts:384  [lista de textos fuera de una función (¿se muestran o son valores?)]  Los datos de la iglesia: nombre, ciudad, cuándo entró y cómo va con los primeros pasos. | El pastor: el nombre y el contacto que dio al anotarse. | Cantidades: 
-src/lib/central.ts:391  [lista de textos fuera de una función (¿se muestran o son valores?)]  Nombres, teléfonos, domicilios o notas de las personas de otra iglesia. | Pedidos de oración, chats, mensajes o la caja de sugerencias de otra iglesia. | Quién 
+src/lib/central.ts:98  [el tipo es una lista cerrada de valores]  Soporte
+src/lib/central.ts:100  [lista de textos fuera de una función (¿se muestran o son valores?)]  Gente | Reuniones | Decisiones | Evangelismo | Uso de la app | Soporte
+src/lib/central.ts:384  [texto fuera de una función (se crea una sola vez al abrir la app)]  Qué vemos y qué no
+src/lib/central.ts:385  [lista de textos fuera de una función (¿se muestran o son valores?)]  Los datos de la iglesia: nombre, ciudad, cuándo entró y cómo va con los primeros pasos. | El pastor: el nombre y el contacto que dio al anotarse. | Cantidades: 
+src/lib/central.ts:392  [lista de textos fuera de una función (¿se muestran o son valores?)]  Nombres, teléfonos, domicilios o notas de las personas de otra iglesia. | Pedidos de oración, chats, mensajes o la caja de sugerencias de otra iglesia. | Quién 
 src/lib/churchSetup.ts:99  [lista de textos fuera de una función (¿se muestran o son valores?)]  Tu iglesia | Reuniones | Clases | Funciones | Código para los hermanos
 src/lib/demoCore.ts:7  [texto fuera de una función (se crea una sola vez al abrir la app)]  Es una demostración
 src/lib/demoCore.ts:8  [en otro lado se busca "Esto es una demostración" con startsWith/includes]  Esto es una demostración: acá no se guardan cambios.
