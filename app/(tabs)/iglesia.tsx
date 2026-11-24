@@ -246,6 +246,7 @@ export default function Iglesia() {
         { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },
         { icon: 'eye', label: 'Ver como miembro', to: '/miembro-vista' as Href, show: can('admin.permisos') },
         { icon: 'download', label: 'Copia de todos los datos', to: '/admin/copia' as Href, show: can('admin.permisos') },
+        { icon: 'flag', label: 'Primeros pasos', to: '/admin/alta' as Href, show: extras.is_new && can('admin.iglesia') },
         { icon: 'globe', label: 'Iglesias de la red', to: '/admin/red' as Href, show: !!profile?.is_network_admin },
       ],
     },

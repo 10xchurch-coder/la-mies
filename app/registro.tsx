@@ -3,6 +3,7 @@ import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
 import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { draftFromMeta } from '@/lib/alta';
 import { inviteFromSearch, isPastorInvite } from '@/lib/churchSetup';
 import { acceptPastorInvite } from '@/lib/churchSetupData';
 import { takeSignupDraft } from '@/lib/signupDraft';
@@ -49,6 +50,8 @@ export default function Registro() {
   useEffect(() => {
     if (!session || tried.current) return;
     tried.current = true;
+    // La cuenta se creó desde "Empezar" (una iglesia nueva): sigue allá, donde se crea su iglesia.
+    if (draftFromMeta(session.user?.user_metadata)) { router.replace('/empezar' as Href); return; }
     if (meta.display_name) setName(meta.display_name);
     if (meta.phone) setPhone(phoneInputValue(meta.phone));
     if (meta.join_code) setCode(meta.join_code);

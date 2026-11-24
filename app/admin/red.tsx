@@ -4,6 +4,7 @@ import React, { useCallback, useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect } from 'expo-router';
+import { AltaSignups } from '@/components/AltaSignups';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Empty, Field, Loading, SectionTitle, Tag } from '@/components/ui';
 import { inviteLink, inviteMessage, joinCodeProblem, suggestJoinCode, TIMEZONES, timezoneLabel } from '@/lib/churchSetup';
@@ -104,6 +105,8 @@ export default function Red() {
             </View>
           </Card>
         ) : null}
+
+        <AltaSignups />
 
         <SectionTitle>Iglesias</SectionTitle>
         {rows === null ? <Loading /> : rows.map((c) => (

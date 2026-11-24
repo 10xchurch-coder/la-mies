@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
+import { SuspendedScreen, useChurchSuspended } from '@/components/SuspendedGate';
 import { OutingBanner } from '@/components/OutingBanner';
 import { SharingBanner } from '@/components/SharingBanner';
 import { MemberViewBanner } from '@/components/MemberViewBanner';
@@ -73,7 +74,8 @@ function useNotificationLinks() {
 
 // Pantallas que se pueden ver sin haber entrado.
 // 'e' = la página pública de un evento: se abre sin cuenta. 'visita' = la tarjeta de visita del QR de la puerta.
-const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita']);
+// 'empezar' = una iglesia nueva se anota sola.
+const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita', 'empezar']);
 
 /** Sin sesión no se ve nada de la iglesia: siempre a Entrar. Con sesión pero sin iglesia: a unirse.
  *  (Antes, abrir un link directo, por ejemplo al devocional, mostraba la pantalla sin sesión y fallaban los botones.) */
@@ -113,7 +115,9 @@ function Gate() {
   useNotificationLinks();
   useAuthGuard();
   useFeatureGuard();
+  const suspended = useChurchSuspended();
   if (loading || optIn === null || cachedRequired === null) return <Loading />;
+  if (session && suspended) return <SuspendedScreen />;
   // Solo se pide Face ID / huella a quien maneja finanzas o administración, o al que lo activó.
   const lock = Platform.OS !== 'web' && !!session && (required || optIn);
   return (

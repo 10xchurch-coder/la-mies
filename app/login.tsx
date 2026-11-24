@@ -134,6 +134,9 @@ export default function Login() {
           <Text style={{ color: colors.text, fontSize: 15, fontWeight: '700', textAlign: 'center' }}>¿Es tu primera vez?</Text>
           <Button title="Crear mi cuenta" icon="user-plus" variant="outline" onPress={() => { setSignupDraft(email.trim(), password); router.push('/registro'); }} />
           <Text style={{ color: colors.muted, fontSize: 13, textAlign: 'center' }}>Necesitás el código de tu iglesia.</Text>
+          <Pressable onPress={() => router.push('/empezar' as never)} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: colors.green, fontWeight: '600', textAlign: 'center' }}>¿Sos pastor y tu iglesia todavía no usa La Mies? Empezá acá</Text>
+          </Pressable>
         </View>
         <View style={{ alignItems: 'center', gap: 4, marginTop: 24 }}>
           <Text style={styles.verse}>Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos</Text>
