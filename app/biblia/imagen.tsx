@@ -5,7 +5,6 @@ import { Alert, PixelRatio, Platform, Pressable, ScrollView, Text, View, useWind
 import { useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
-import { requireOptionalNativeModule } from 'expo';
 import { Header } from '@/components/Screen';
 import { Button } from '@/components/ui';
 import { bookName, chapterText, cleanPlace, verseSpan, versionOf } from '@/lib/bible';
@@ -15,7 +14,6 @@ import { BIBLE_FONTS, fontOf, type BibleFontId } from '@/lib/bibleLook';
 import { ART_SHAPES, DEFAULT_ART, artFontSize, blurRadius, brightLayer, photoOpacity, readLayer, shapeOf, step, type ArtLook } from '@/lib/verseArt';
 import { colors } from '@/theme';
 
-const canSavePhotos = Platform.OS !== 'web' && !!requireOptionalNativeModule('ExpoMediaLibrary');
 const ART_FONTS = BIBLE_FONTS.filter((f) => f.id !== 'sistema');
 
 type Props = { W: number; look: ArtLook; photo: string; own: string | null; text: string; refText: string; fontId: BibleFontId; fontOk: boolean };
@@ -154,14 +152,7 @@ export default function ImagenVersiculo() {
       }
       const { captureRef } = await import('react-native-view-shot');
       const uri = await captureRef(shotRef as unknown as number, { format: 'jpg', quality: 0.95, result: 'tmpfile' });
-      if (how === 'save' && canSavePhotos) {
-        const Media = await import('expo-media-library');
-        const perm = await Media.requestPermissionsAsync(true);
-        if (!perm.granted) { Alert.alert('Falta permiso', 'Para guardar la imagen, dejá que La Mies agregue fotos a tu teléfono.'); return; }
-        await Media.saveToLibraryAsync(uri);
-        Alert.alert('Guardada', 'La imagen quedó en tus fotos.');
-        return;
-      }
+      // En el teléfono, "Guardar" abre el menú de compartir: ahí está "Guardar imagen". Así la app no pide permiso para ver tus fotos.
       const Sharing = await import('expo-sharing');
       await Sharing.shareAsync(uri.startsWith('file://') ? uri : `file://${uri}`, { mimeType: 'image/jpeg', dialogTitle: refText, UTI: 'public.jpeg' });
     } catch {
