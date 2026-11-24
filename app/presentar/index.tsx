@@ -11,7 +11,7 @@ import { PresentSlide } from '@/components/PresentSlide';
 import { useChurchLogo } from '@/components/BrandFooter';
 import { Button, Card, Empty, Field, Loading, Tag, Toggle } from '@/components/ui';
 import { createPresentSet, deletePresentSet, getPresentSet, listPresentSets, listSongs, savePresentSet } from '@/lib/api';
-import { VERSIONS, versionOf } from '@/lib/bible';
+import { allowedVersions, versionOf } from '@/lib/bible';
 import { useBibleReady } from '@/lib/bibleReady';
 import { pickPresentMedia, presentUrl, removePresentFiles } from '@/lib/files';
 import {
@@ -915,9 +915,9 @@ function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing 
           {ok ? <Text style={{ fontSize: 13, color: colors.greenText }}>{slideCount} {slideCount === 1 ? tx('diapositiva') : tx('diapositivas')}</Text> : null}
           <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>{tx('Versículos en cada diapositiva')}</Text>
           <Chips options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))} value={item.perSlide} onChange={(perSlide) => patch({ perSlide } as Partial<PresentItem>)} />
-          {VERSIONS.length > 1 ? (
-            <Chips options={VERSIONS.map((v) => ({ value: v.id as string, label: v.short }))} value={item.version} onChange={(version) => patch({ version } as Partial<PresentItem>)} />
-          ) : <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Texto: {name}, la Biblia que trae la app.', { name: VERSIONS[0].name })}</Text>}
+          {allowedVersions().length > 1 ? (
+            <Chips options={allowedVersions().map((v) => ({ value: v.id as string, label: v.short }))} value={item.version} onChange={(version) => patch({ version } as Partial<PresentItem>)} />
+          ) : <Text style={{ fontSize: 12, color: colors.muted }}>{tx('Texto: {name}, la Biblia que trae la app.', { name: allowedVersions()[0].name })}</Text>}
         </View>
       );
     }

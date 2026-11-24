@@ -4,6 +4,7 @@ import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
 import { EN_BOOKS, KJV, loadKjvBook } from './bibleStudyData';
 import { getLang, tx } from './i18n';
+import { OPEN_BIBLE, allowedOf, cleanBibleConfig, pickVersion, type BibleChurchConfig } from './bibleChurch';
 
 export type BibleVersionId = 'rv1909' | 'kjv';
 
@@ -35,9 +36,24 @@ export const VERSIONS: BibleVersion[] = [
 
 export const DEFAULT_VERSION: BibleVersionId = 'rv1909';
 
-/** La versión pedida. Si la persona todavía no eligió ninguna, va la del idioma de la app: King James en inglés, Reina-Valera en castellano. */
+// ---- Lo que permite la iglesia (ver lib/bibleChurch). La app lo carga al entrar y cada vez que el pastor lo cambia. ----
+let churchBible: BibleChurchConfig = OPEN_BIBLE;
+/** Guarda qué versiones permite la iglesia de esta persona. Con null vuelve a "todas". */
+export function setChurchBible(raw: unknown): void {
+  churchBible = cleanBibleConfig(raw, VERSIONS.map((v) => v.id));
+}
+export const getChurchBible = (): BibleChurchConfig => churchBible;
+/** Las versiones que se pueden elegir en esta iglesia. Todos los botones para elegir versión salen de acá. */
+export const allowedVersions = (): BibleVersion[] => allowedOf(VERSIONS, churchBible);
+/** ¿Hay más de una para elegir? Si no, no se muestran los botones de versión ni "comparar". */
+export const canChooseVersion = (): boolean => allowedVersions().length > 1;
+
+/**
+ * La versión pedida, siempre una que la iglesia permite. Si la persona todavía no eligió ninguna, va la del idioma de la app
+ * (King James en inglés) si la iglesia la permite; si no, la que la iglesia puso de inicio. Lo mismo si tenía una que ya no se permite.
+ */
 export function versionOf(id: string | undefined): BibleVersion {
-  return VERSIONS.find((v) => v.id === id) ?? (getLang() === 'en' ? VERSIONS.find((v) => v.lang === 'en') : undefined) ?? VERSIONS[0];
+  return pickVersion(VERSIONS, churchBible, VERSIONS.some((v) => v.id === id) ? id : undefined, getLang());
 }
 
 export const OT_COUNT = 39;

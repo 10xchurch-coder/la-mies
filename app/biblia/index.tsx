@@ -10,11 +10,13 @@ import { Card, SectionTitle } from '@/components/ui';
 import { OT_COUNT, bookNameIn, chaptersIn, versionOf, type BibleVersion } from '@/lib/bible';
 import { BOOKS } from '@/lib/biblePlan';
 import { DEFAULT_PREFS, loadBiblePrefs, saveBiblePrefs, type BiblePrefs } from '@/lib/bibleStore';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
 
 export default function Biblia() {
   const router = useRouter();
+  const { on: fOn } = useFeatures();
   const [prefs, setPrefs] = useState<BiblePrefs>(DEFAULT_PREFS);
   const [saved, setSaved] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
@@ -79,6 +81,7 @@ export default function Biblia() {
             </Card>
           </Pressable>
         ) : null}
+        {fOn('biblia_buscar') ? (
         <Pressable onPress={() => router.push({ pathname: '/biblia/buscar', params: { v: version.id } })} accessibilityRole="button" accessibilityLabel={tx('Buscar en la Biblia')}>
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="search" size={20} color={colors.blueText} />
@@ -89,7 +92,9 @@ export default function Biblia() {
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Card>
         </Pressable>
-        <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel={tx('Mis notas y resaltados')}>
+            ) : null}
+        {fOn('biblia_marcas') ? (
+            <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel={tx('Mis notas y resaltados')}>
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="edit-3" size={20} color={colors.blueText} />
             <View style={{ flex: 1 }}>
@@ -99,6 +104,7 @@ export default function Biblia() {
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Card>
         </Pressable>
+            ) : null}
         <BibleVersionChips value={version.id} onChange={pickVersion} />
         <SectionTitle>{tx('Antiguo Testamento')}</SectionTitle>
         {books(0, OT_COUNT)}

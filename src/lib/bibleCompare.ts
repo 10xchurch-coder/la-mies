@@ -1,6 +1,6 @@
 // Leer dos versiones de la Biblia a la vez: qué segunda versión mostrar y cómo poner los versículos uno al lado del otro.
 // Sin nada de la app ni de la base, para poder probarse sola.
-import { VERSIONS, type BibleVersion } from './bible';
+import { allowedVersions, type BibleVersion } from './bible';
 import { numberingDiffers } from './bibleStudy';
 
 /** Desde este ancho entran dos columnas cómodas (tablet o computadora). Es el mismo corte que usa el resto de la app. */
@@ -8,11 +8,11 @@ export const COMPARE_WIDE = 700;
 
 /**
  * La segunda versión para comparar. `wanted` es lo que la persona eligió la última vez (o nada si no compara).
- * Si eligió la misma que está leyendo, o una que ya no existe, va la primera versión distinta. null si no compara o no hay otra.
+ * Si eligió la misma que está leyendo, o una que ya no existe o que la iglesia no permite, va la primera versión distinta. null si no compara o no hay otra.
  */
 export function compareVersion(primary: string, wanted: string | undefined | null): BibleVersion | null {
   if (!wanted) return null;
-  const others = VERSIONS.filter((v) => v.id !== primary);
+  const others = allowedVersions().filter((v) => v.id !== primary);
   return others.find((v) => v.id === wanted) ?? others[0] ?? null;
 }
 

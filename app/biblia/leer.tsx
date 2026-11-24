@@ -17,7 +17,7 @@ import { BibleWordsSheet, wordsTitle } from '@/components/BibleWordsSheet';
 import { Header } from '@/components/Screen';
 import { Button } from '@/components/ui';
 import { myBiblePlan, type BiblePlanRow } from '@/lib/api';
-import { VERSIONS, bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
+import { allowedVersions, bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, cleanPlace, neighbor, shareVerses, versionOf } from '@/lib/bible';
 import { alignVerses, compareColumns, compareNotice, compareVersion, COMPARE_WIDE } from '@/lib/bibleCompare';
 import { loadBibleFont } from '@/lib/bibleFonts';
 import { useBibleReady } from '@/lib/bibleReady';
@@ -27,6 +27,7 @@ import { markChapterRead, loadRead, onPlanMarked, recentPlanNote } from '@/lib/b
 import { DEFAULT_PREFS, SIZES, loadBiblePrefs, saveBiblePrefs } from '@/lib/bibleStore';
 import { shareText } from '@/lib/share';
 import { speakAvailable, speakParts, stopSpeaking } from '@/lib/speak';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors, getThemeMode } from '@/theme';
 import { tx } from '@/lib/i18n';
 
@@ -49,6 +50,8 @@ export default function LeerBiblia() {
   const [picked, setPicked] = useState<number[]>([]);
   const [copied, setCopied] = useState(false);
   const [marks, setMarksState] = useState<Record<number, BibleMark>>({});
+  // Las ayudas de estudio que la iglesia dejó prendidas (referencias, palabras originales, notas, imagen, audio).
+  const { on: fOn } = useFeatures();
   const [refsOpen, setRefsOpen] = useState(false);
   const [wordsOpen, setWordsOpen] = useState(false);
   // Comparar dos versiones: cuál es la segunda (nada = no se compara) y si en el teléfono van en dos columnas.
@@ -194,7 +197,7 @@ export default function LeerBiblia() {
     <View style={{ flex: 1, backgroundColor: look.bg }}>
       <Header title={single ? bookNameIn(version, book) : `${bookNameIn(version, book)} ${chapter}`} subtitle={second ? `${version.short} y ${second.short}` : version.name} back
         right={<View style={{ flexDirection: 'row', gap: 8 }}>
-          {speakAvailable ? headBtn(speaking >= 0 ? 'square' : 'volume-2', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, speaking >= 0) : null}
+          {speakAvailable && fOn('biblia_audio') ? headBtn(speaking >= 0 ? 'square' : 'volume-2', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, speaking >= 0) : null}
           {headBtn('more-horizontal', tx('Letra, fondo, tamaño y comparar dos versiones'), () => setMenu(true))}
         </View>} />
       <ScrollView key={`${book}-${chapter}`} style={{ flex: 1, backgroundColor: look.bg }} contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 14, paddingBottom: insets.bottom + 28, width: '100%', maxWidth: second && width >= COMPARE_WIDE ? 1180 : 760, alignSelf: 'center' }}>
@@ -304,17 +307,22 @@ export default function LeerBiblia() {
             </Pressable>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            {fOn('biblia_referencias') ? (
             <Pressable onPress={() => setRefsOpen(true)} accessibilityRole="button" accessibilityLabel={tx('Referencias: versículos que hablan de lo mismo')}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 999, backgroundColor: colors.blueSoft }}>
               <Feather name="link" size={14} color={colors.blueText} />
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>{tx('Referencias')}</Text>
             </Pressable>
+            ) : null}
+            {fOn('biblia_originales') ? (
             <Pressable onPress={() => setWordsOpen(true)} accessibilityRole="button" accessibilityLabel={tx('{wordsTitle}: el versículo en hebreo o griego, con los números de Strong', { wordsTitle: wordsTitle(version) })}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 999, backgroundColor: colors.blueSoft }}>
               <Feather name="book-open" size={14} color={colors.blueText} />
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>{wordsTitle(version)}</Text>
             </Pressable>
+            ) : null}
           </View>
+          {fOn('biblia_marcas') ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             {MARK_COLORS.map((c) => {
               const on = sorted.every((v) => marks[v]?.color === c.id);
@@ -328,12 +336,13 @@ export default function LeerBiblia() {
               <Feather name="slash" size={16} color={colors.muted} />
             </Pressable>
           </View>
+          ) : null}
           <View style={{ flexDirection: 'row' }}>
-            {barBtn('edit-3', marks[sorted[0]]?.note ? tx('Ver nota') : tx('Nota'), openNote)}
+            {fOn('biblia_marcas') ? barBtn('edit-3', marks[sorted[0]]?.note ? tx('Ver nota') : tx('Nota'), openNote) : null}
             {barBtn(copied ? 'check' : 'copy', copied ? tx('Copiado') : tx('Copiar'), () => { Clipboard.setStringAsync(text()).then(() => setCopied(true)).catch(() => undefined); })}
             {barBtn('share-2', tx('Compartir'), () => { shareText(text(), `${bookName(book)} ${chapter}`).catch(() => undefined); })}
-            {barBtn('star', allSaved ? tx('Guardado') : tx('Guardar'), () => apply({ saved: !allSaved }))}
-            {barBtn('image', tx('Imagen'), () => router.push({ pathname: '/biblia/imagen', params: { libro: String(book), cap: String(chapter), vs: sorted.join(','), v: version.id } }))}
+            {fOn('biblia_marcas') ? barBtn('star', allSaved ? tx('Guardado') : tx('Guardar'), () => apply({ saved: !allSaved })) : null}
+            {!fOn('biblia_imagen') ? null : barBtn('image', tx('Imagen'), () => router.push({ pathname: '/biblia/imagen', params: { libro: String(book), cap: String(chapter), vs: sorted.join(','), v: version.id } }))}
           </View>
         </View>
       ) : null}
@@ -357,12 +366,12 @@ export default function LeerBiblia() {
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('BIBLIA')}</Text>
               <BibleVersionChips value={version.id} onChange={(v) => router.replace({ pathname: '/biblia/leer', params: { libro: String(book), cap: String(chapter), v: v.id } })} />
             </View>
-            {VERSIONS.length > 1 ? (
+            {allowedVersions().length > 1 ? (
               <View style={{ gap: 8 }}>
                 <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('COMPARAR DOS VERSIONES')}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {chip(tx('No comparar'), !second, () => setCompareId(undefined))}
-                  {VERSIONS.filter((v) => v.id !== version.id).map((v) => chip(`Con ${v.name}`, second?.id === v.id, () => setCompareId(v.id)))}
+                  {allowedVersions().filter((v) => v.id !== version.id).map((v) => chip(`Con ${v.name}`, second?.id === v.id, () => setCompareId(v.id)))}
                 </View>
                 {second ? (
                   width >= COMPARE_WIDE ? (
