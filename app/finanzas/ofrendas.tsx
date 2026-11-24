@@ -10,6 +10,7 @@ import { fmtDateAR, fmtDateShort, fmtMoney, isoDate, maskDateAR, parseDateAR, pa
 import { givingProblem, methodLabel, METHODS, totalsByPerson, yearsOf, type GivingMethod, type GivingRow } from '@/lib/giving';
 import { addGiving, churchExtras, givingFunds, listGiving, searchGivingPeople, setMyGiving, voidGiving, type GivingFund, type GivingPerson } from '@/lib/givingData';
 import { errorMessage } from '@/lib/supabase';
+import { refreshChurchExtras } from '@/lib/useChurchExtras';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 
@@ -166,7 +167,7 @@ export default function Ofrendas() {
               ))}
             </Card>
 
-            <SectionTitle>Todas las de {String(year)}</SectionTitle>
+            <SectionTitle>{`Todas las de ${year}`}</SectionTitle>
             {rows.map((r) => (
               <Card key={r.id} style={{ gap: 6, padding: 12, opacity: r.voided_at ? 0.55 : 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -201,7 +202,7 @@ export default function Ofrendas() {
             <Card style={{ padding: 12 }}>
               <Toggle label="Cada hermano ve sus propias ofrendas" value={myOn}
                 hint="Prendido: en el menú de cada uno aparece “Mis ofrendas”, con lo suyo y nada más. Apagado: nadie ve nada."
-                onChange={(v) => { setMyOn(v); setMyGiving(v).catch((e) => { setMyOn(!v); Alert.alert('No se pudo', errorMessage(e)); }); }} />
+                onChange={(v) => { setMyOn(v); setMyGiving(v).then(refreshChurchExtras).catch((e) => { setMyOn(!v); Alert.alert('No se pudo', errorMessage(e)); }); }} />
             </Card>
           </>
         ) : null}

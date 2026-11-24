@@ -2,7 +2,9 @@ import { PhoneField, phoneInputValue } from '@/components/PhoneField';
 import { formatPhone, phoneProblem } from '@/lib/phone';
 import React, { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, Text } from 'react-native';
-import { useRouter, type Href } from 'expo-router';
+import { useLocalSearchParams, useRouter, type Href } from 'expo-router';
+import { isPastorInvite } from '@/lib/churchSetup';
+import { acceptPastorInvite } from '@/lib/churchSetupData';
 import { takeSignupDraft } from '@/lib/signupDraft';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Field, Loading } from '@/components/ui';
@@ -21,12 +23,16 @@ export default function Registro() {
   const [draft] = useState(() => takeSignupDraft());
   const [email, setEmail] = useState(draft?.email ?? '');
   const [password, setPassword] = useState(draft?.password ?? '');
-  const [code, setCode] = useState('');
+  // El enlace de la invitación de pastor trae el código ya escrito.
+  const { invitacion } = useLocalSearchParams<{ invitacion?: string }>();
+  const [code, setCode] = useState(typeof invitacion === 'string' ? invitacion : '');
   const [phone, setPhone] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   const join = async (c = code, n = name, ph = phone) => {
+    // Invitación de pastor (iglesia nueva): queda como pastor de esa iglesia y sigue con los primeros pasos. Lo valida la base.
+    if (isPastorInvite(c)) { await acceptPastorInvite(c, n.trim(), formatPhone(ph)); await refreshProfile(); router.replace('/admin/alta' as Href); return; }
     const { error } = await supabase.rpc('join_church', { p_code: c.trim(), p_display_name: n.trim(), p_phone: formatPhone(ph) });
     if (error) throw error;
     await refreshProfile();

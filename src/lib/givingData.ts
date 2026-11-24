@@ -43,13 +43,18 @@ export async function myGiving(): Promise<StatementLine[]> {
   return rows.map((r) => ({ on_date: r.on_date, amount: Number(r.amount), currency: r.currency, method: r.method, fund: r.fund, note: r.note }));
 }
 
-export type ChurchExtras = { my_giving_on: boolean; motto: string | null; setup_pending: boolean; setup_step: number };
-const NONE: ChurchExtras = { my_giving_on: false, motto: null, setup_pending: false, setup_step: 0 };
+export type ChurchExtras = {
+  my_giving_on: boolean; motto: string | null; setup_pending: boolean; setup_step: number;
+  /** La iglesia se dio de alta con la pantalla de iglesias nuevas (no es la primera, que se cargó a mano). */
+  is_new: boolean;
+};
+const NONE: ChurchExtras = { my_giving_on: false, motto: null, setup_pending: false, setup_step: 0, is_new: false };
 /** Los ajustes de la iglesia que agrega esta parte (Mis ofrendas, lema, primeros pasos). Si no hay fila, todo apagado. */
 export async function churchExtras(): Promise<ChurchExtras> {
-  const { data, error } = await supabase.from('admin_church_settings').select('my_giving_on, motto, setup_pending, setup_step').maybeSingle();
+  const { data, error } = await supabase.from('admin_church_settings').select('my_giving_on, motto, setup_pending, setup_step, setup_done_at').maybeSingle();
   if (error || !data) return NONE;
-  return data as ChurchExtras;
+  const d = data as { my_giving_on: boolean; motto: string | null; setup_pending: boolean; setup_step: number; setup_done_at: string | null };
+  return { my_giving_on: !!d.my_giving_on, motto: d.motto, setup_pending: !!d.setup_pending, setup_step: d.setup_step ?? 0, is_new: !!d.setup_pending || !!d.setup_done_at };
 }
 export const setMyGiving = async (on: boolean) => { ok(await supabase.rpc('admin_set_my_giving', { p_on: on })); };
 
