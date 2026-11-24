@@ -56,6 +56,7 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'misioneros', label: 'Misioneros', icon: 'globe', to: '/misioneros', perms: [] },
     { key: 'sugerencias', label: 'Sugerencias', icon: 'message-square', to: '/sugerencias', perms: ['com.moderar'] },
     { key: 'mensajes', label: 'Mensajes', icon: 'mail', to: '/mensajes', perms: [] },
+    { key: 'ubicacion-familia', label: 'Ubicación en familia', icon: 'map-pin', to: '/familia-ubicacion', perms: [] },
   ] },
   { title: 'Informes y evangelismo', tone: 'teal', items: [
     { key: 'reporte', label: 'Informe semanal', icon: 'file-text', to: '/reporte', perms: ['inf.panel'] },

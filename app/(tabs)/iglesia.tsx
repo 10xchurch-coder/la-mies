@@ -197,6 +197,7 @@ export default function Iglesia() {
         { icon: 'users', label: 'Directorio', to: '/directorio', show: !tabs.includes('directorio') },
         ministryTile,
         { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
+        { icon: 'map-pin', label: 'Ubicación en familia', to: '/familia-ubicacion' as Href, show: true },
         { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
         { icon: 'credit-card', label: 'Ofrendar', to: '/dar', show: true },
         { icon: 'gift', label: 'Mis ofrendas', to: '/mis-ofrendas' as Href, show: extras.my_giving_on },

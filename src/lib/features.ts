@@ -8,7 +8,7 @@ export type FeatureKey =
   | 'discipulado'
   | 'asistencia' | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'ministerios' | 'predicas' | 'vivo' | 'presentar' | 'devocional' | 'biblioteca'
   | 'chat' | 'oracion' | 'eventos' | 'directorio' | 'cumples' | 'anuncios' | 'sugerencias' | 'misioneros' | 'mensajes_pastor' | 'bautismos'
-  | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes'
+  | 'musica' | 'cancionero' | 'radio' | 'rifas' | 'mensajes' | 'ubicacion_familia'
   | 'finanzas' | 'ofrendar' | 'informes';
 
 export type FeatureGroup = 'Evangelismo y visitas' | 'Reuniones y enseñanza' | 'Comunidad' | 'Dinero e informes';
@@ -109,6 +109,9 @@ export const FEATURES: Feature[] = [
   { key: 'mensajes', label: 'Mensajes entre hermanos', group: 'Comunidad',
     hint: 'Conversaciones privadas entre dos hermanos (texto, fotos y voz). Solo las ven ellos dos; se puede bloquear y denunciar.',
     routes: ['/mensajes'] },
+  { key: 'ubicacion_familia', label: 'Ubicación en familia', group: 'Comunidad',
+    hint: 'Cada hermano puede compartir dónde está con su familia y con quien él elija. Viene apagado: lo prende cada uno, y solo lo ven las personas que eligió.',
+    routes: ['/familia-ubicacion'] },
   { key: 'rifas', label: 'Sorteos', group: 'Comunidad',
     hint: 'Sorteos digitales: entran los que estuvieron presentes y la app saca al azar.',
     routes: ['/rifas'] },

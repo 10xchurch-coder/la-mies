@@ -2,6 +2,7 @@ import '@/lib/webAlert'; // en la web, los avisos y confirmaciones se muestran c
 import '@/lib/locationTask'; // registra la tarea de GPS en segundo plano
 import '@/lib/busTask'; // y la del colectivo en vivo
 import '@/lib/chatLive'; // y la de la ubicación en tiempo real de los chats
+import '@/lib/famLocTask'; // y la de la ubicación en familia
 import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
@@ -15,6 +16,7 @@ import { AuthProvider, useAuth } from '@/store/auth';
 import { OutingProvider } from '@/store/outing';
 import { LockGate } from '@/components/LockGate';
 import { OutingBanner } from '@/components/OutingBanner';
+import { SharingBanner } from '@/components/SharingBanner';
 import { MemberViewBanner } from '@/components/MemberViewBanner';
 import { PhotoCropperHost } from '@/components/PhotoCropper';
 import { loadDeskPref } from '@/components/desk/DeskShell';
@@ -118,6 +120,7 @@ function Gate() {
     <LockGate enabled={lock}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       {session ? <OutingBanner /> : null}
+      {session ? <SharingBanner /> : null}
       {session ? <MemberViewBanner /> : null}
       <PhotoCropperHost />
     </LockGate>

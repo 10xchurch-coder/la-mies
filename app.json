@@ -19,8 +19,8 @@
         "UIBackgroundModes": [
           "location"
         ],
-        "NSLocationWhenInUseUsageDescription": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo y, si sos el chofer, para que los hermanos de tu ruta vean dónde está el colectivo.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "Para que no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida de evangelismo o un viaje del colectivo que vos iniciaste está activo.",
+        "NSLocationWhenInUseUsageDescription": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo, para que los hermanos de tu ruta vean dónde está el colectivo si sos el chofer y, si vos lo prendés, para que tu familia y las personas que elijas vean dónde estás.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "La Mies usa la ubicación también con la app cerrada o el teléfono bloqueado solo en dos casos: mientras está activa una salida de evangelismo o un viaje del colectivo que vos iniciaste, y si vos prendés \"Compartir mi ubicación\", para que tu familia y las personas que elijas vean dónde estás. Lo podés pausar o apagar cuando quieras.",
         "NSFaceIDUsageDescription": "La Mies usa Face ID para desbloquear la app.",
         "ITSAppUsesNonExemptEncryption": false
       },
@@ -72,8 +72,8 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Para que no se corte cuando bloqueás el teléfono, La Mies necesita la ubicación también en segundo plano, solo mientras una salida de evangelismo o un viaje del colectivo que vos iniciaste está activo.",
-          "locationWhenInUsePermission": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo y, si sos el chofer, para que los hermanos de tu ruta vean dónde está el colectivo.",
+          "locationAlwaysAndWhenInUsePermission": "La Mies usa la ubicación también con la app cerrada o el teléfono bloqueado solo en dos casos: mientras está activa una salida de evangelismo o un viaje del colectivo que vos iniciaste, y si vos prendés \"Compartir mi ubicación\", para que tu familia y las personas que elijas vean dónde estás. Lo podés pausar o apagar cuando quieras.",
+          "locationWhenInUsePermission": "La Mies usa tu ubicación para marcar las calles que recorrés durante una salida de evangelismo, para que los hermanos de tu ruta vean dónde está el colectivo si sos el chofer y, si vos lo prendés, para que tu familia y las personas que elijas vean dónde estás.",
           "isIosBackgroundLocationEnabled": true,
           "isAndroidBackgroundLocationEnabled": true,
           "isAndroidForegroundServiceEnabled": true
