@@ -73,7 +73,7 @@ export const typeInfo = (t: PresentItemType) => ITEM_TYPES.find((x) => x.type ==
 
 /** Una diapositiva lista para mostrar. */
 export type Slide =
-  | { kind: 'text'; text: string; label: string | null; footer: string | null }
+  | { kind: 'text'; text: string; label: string | null; footer: string | null; /** Renglón chico arriba del texto (en la prédica, el punto al que pertenece un sub-punto). */ head?: string }
   | { kind: 'notice'; title: string; body: string }
   | { kind: 'countdown'; minutes: number; message: string }
   | { kind: 'image'; media: MediaRef }
@@ -256,7 +256,7 @@ export function sermonSlides(outline: string, version: BibleVersion, perSlide = 
   if (o.title) out.push({ kind: 'notice', title: o.title, body: '' });
   for (const p of o.parts) {
     if (p.kind === 'point') {
-      out.push({ kind: 'text', text: p.text, label: p.parent, footer: p.refs.length ? p.refs.map(refLabel).join(' · ') : null });
+      out.push({ kind: 'text', text: p.text, label: null, footer: p.refs.length ? p.refs.map(refLabel).join(' · ') : null, ...(p.parent ? { head: p.parent } : {}) });
     }
     for (const r of p.refs) {
       const total = chapterText(version, r.book, r.chapter).length;
@@ -344,29 +344,40 @@ export function clock(totalSeconds: number): string {
 
 /**
  * El tamaño de letra más grande con el que el texto entra en un cuadro de w x h (calculado a ojo por cantidad
- * de letras; las líneas largas se cortan solas).
+ * de letras; las líneas largas se cortan solas). Las MAYÚSCULAS son más anchas y se cuentan así.
+ * Si achicando un poco la letra ninguna línea se corta, se prefiere eso: una estrofa se lee mejor con sus renglones enteros.
  */
 export function fitFont(text: string, w: number, h: number, max = h / 5): number {
   const lines = (text || ' ').split('\n');
+  const letters = (text.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/g) ?? []).length;
+  const upper = (text.match(/[A-ZÁÉÍÓÚÜÑ]/g) ?? []).length;
+  const charW = 0.56 + 0.16 * (letters ? upper / letters : 0);
   const fits = (fs: number) => {
-    const perLine = Math.max(1, Math.floor(w / (fs * 0.55)));
+    const perLine = Math.max(1, Math.floor(w / (fs * charW)));
     const rows = lines.reduce((n, l) => n + Math.max(1, Math.ceil(l.length / perLine)), 0);
     return rows * fs * 1.3 <= h;
   };
   let lo = 8;
-  let hi = Math.max(lo, Math.floor(max));
-  if (fits(hi)) return hi;
-  while (hi - lo > 1) {
-    const mid = (lo + hi) >> 1;
-    if (fits(mid)) lo = mid; else hi = mid;
+  // Una palabra sola (o un link largo) no se corta: la letra se achica hasta que entre a lo ancho.
+  const word = (text || ' ').split(/\s+/).reduce((n, x) => Math.max(n, x.length), 1);
+  let hi = Math.max(lo, Math.min(Math.floor(max), Math.floor(w / (word * charW))));
+  if (!fits(hi)) {
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (fits(mid)) lo = mid; else hi = mid;
+    }
+    hi = lo;
   }
-  return lo;
+  // `hi` entra. ¿Y sin cortar ningún renglón?
+  const longest = lines.reduce((n, l) => Math.max(n, l.length), 1);
+  const whole = Math.min(hi, Math.floor(w / (longest * charW)), Math.floor(h / (lines.length * 1.3)));
+  return whole >= hi * 0.72 && whole >= 8 ? whole : hi;
 }
 
 // ---------- Lo que viaja a la pantalla ----------
 
 export type LiveSlide =
-  | { kind: 'text'; text: string; label: string | null; footer: string | null }
+  | { kind: 'text'; text: string; label: string | null; footer: string | null; /** Renglón chico arriba del texto (en la prédica, el punto al que pertenece un sub-punto). */ head?: string }
   | { kind: 'notice'; title: string; body: string }
   /** endsAt: hora (reloj del operador) en que llega a cero. */
   | { kind: 'countdown'; endsAt: number; message: string }
@@ -389,7 +400,7 @@ export type StageInfo = {
 /** Una diapositiva en pocas palabras, para la vista de escenario. */
 export function slideWords(s: Slide): { text: string; label: string | null } {
   switch (s.kind) {
-    case 'text': return { text: s.text, label: s.label ?? s.footer };
+    case 'text': return { text: s.text, label: s.label ?? s.head ?? s.footer };
     case 'notice': return { text: [s.title, s.body].filter(Boolean).join('\n'), label: null };
     case 'countdown': return { text: `Cuenta regresiva · ${s.minutes} min`, label: null };
     case 'image': return { text: `Foto: ${s.media.name}`, label: null };

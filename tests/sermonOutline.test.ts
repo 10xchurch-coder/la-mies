@@ -115,7 +115,8 @@ test('sermonSlides: título, un punto por diapositiva y los versículos con su t
   assert.deepEqual(s[1], { kind: 'text', text: '1. Dios ama a todos', label: null, footer: 'Juan 3:16–17' });
   assert.ok(s[2].kind === 'text' && s[2].footer === `Juan 3:16 (${rv.short})` && s[2].text.length > 20);
   assert.ok(s[3].kind === 'text' && s[3].footer === `Juan 3:17 (${rv.short})`);
-  assert.deepEqual(s[4], { kind: 'text', text: 'Nadie queda afuera', label: '1. Dios ama a todos', footer: null });
+  // El sub-punto lleva arriba, en chico, el punto al que pertenece.
+  assert.deepEqual(s[4], { kind: 'text', text: 'Nadie queda afuera', label: null, footer: null, head: '1. Dios ama a todos' });
   assert.ok(s[5].kind === 'text' && s[5].footer === `Romanos 5:8 (${rv.short})`);
   assert.equal(s.length, 6);
   // De a dos versículos por diapositiva.

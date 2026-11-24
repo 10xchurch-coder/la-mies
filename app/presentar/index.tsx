@@ -557,7 +557,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
         const on = it.id === sel;
         const isLive = liveAt?.id === it.id && live.mode === 'slide';
         return (
-          <Pressable key={it.id} onPress={() => { setSel(it.id); setEdit(false); }} accessibilityRole="button" accessibilityState={{ selected: on }}
+          <Pressable key={it.id} testID="presentar-parte" onPress={() => { setSel(it.id); setEdit(false); }} accessibilityRole="button" accessibilityState={{ selected: on }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 12, borderWidth: 2, borderColor: isLive ? LIVE_RED : on ? colors.green : colors.border, backgroundColor: on ? colors.greenSoft : colors.bg }}>
             <Text style={{ width: 18, fontSize: 12, fontWeight: '700', color: colors.muted, textAlign: 'center' }}>{i + 1}</Text>
             <Feather name={typeInfo(it.type).icon as IconName} size={18} color={on ? colors.greenText : colors.muted} />

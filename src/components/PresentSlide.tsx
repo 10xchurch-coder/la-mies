@@ -140,11 +140,13 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
       </View>
     );
   }
-  // Texto: la letra de una canción, un pasaje o texto libre.
-  const size = fitFont(s.text, width * 0.88, height * (s.footer ? 0.7 : 0.84), height / 6.5);
+  // Texto: la letra de una canción, un pasaje, un punto de la prédica o texto libre.
+  const head = typeof s.head === 'string' && s.head.trim() ? s.head.trim() : null;
+  const size = fitFont(s.text, width * 0.88, height * ((s.footer ? 0.7 : 0.84) - (head ? 0.14 : 0)), height / 6.5);
   const foot = Math.max(7, height * 0.05);
   return (
     <View style={[box, { paddingHorizontal: width * 0.06 }]}>
+      {head ? <Text numberOfLines={2} style={{ color: '#FFD54A', fontSize: foot, lineHeight: foot * 1.25, fontWeight: '700', textAlign: 'center', marginBottom: height * 0.04 }}>{head}</Text> : null}
       <Text style={{ color: WHITE, fontSize: size, lineHeight: size * 1.3, fontWeight: '700', textAlign: 'center' }}>{s.text}</Text>
       {s.footer ? <Text style={{ color: SOFT, fontSize: foot, fontWeight: '600', textAlign: 'center', marginTop: height * 0.05 }}>{s.footer}</Text> : null}
     </View>
