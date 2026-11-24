@@ -75,6 +75,7 @@ export default function Personas() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header
+        back
         title={tx('Personas')}
         subtitle={tx('{member} miembros · {visitor} visitas · {street} contactos', { member: counts.member, visitor: counts.visitor, street: counts.street })}
         right={

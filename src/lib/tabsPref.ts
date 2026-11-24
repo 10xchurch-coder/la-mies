@@ -5,11 +5,12 @@ import type { Feather } from '@expo/vector-icons';
 import type React from 'react';
 import { tx } from './i18n';
 
-export type TabKey = 'mapa' | 'personas' | 'iglesia' | 'chat' | 'yo' | 'predicas' | 'eventos' | 'oracion' | 'crecimiento' | 'directorio';
+export type TabKey = 'mapa' | 'personas' | 'iglesia' | 'chat' | 'yo' | 'predicas' | 'eventos' | 'oracion' | 'crecimiento' | 'directorio' | 'biblia';
 type IconName = React.ComponentProps<typeof Feather>['name'];
 
 export const TAB_OPTIONS: { key: TabKey; title: string; icon: IconName; fixed?: boolean }[] = [
   { key: 'mapa', get title() { return tx('Mapa'); }, icon: 'map' },
+  { key: 'biblia', get title() { return tx('Biblia'); }, icon: 'book-open' },
   { key: 'personas', get title() { return tx('Personas'); }, icon: 'users' },
   { key: 'iglesia', get title() { return tx('Iglesia'); }, icon: 'home', fixed: true },
   { key: 'chat', get title() { return tx('Chat'); }, icon: 'message-circle' },
@@ -21,9 +22,12 @@ export const TAB_OPTIONS: { key: TabKey; title: string; icon: IconName; fixed?: 
   { key: 'directorio', get title() { return tx('Directorio'); }, icon: 'book' },
 ];
 export const ALL_TABS = TAB_OPTIONS.map((t) => t.key);
-export const DEFAULT_TABS: TabKey[] = ['mapa', 'personas', 'iglesia', 'chat', 'yo'];
+export const DEFAULT_TABS: TabKey[] = ['mapa', 'biblia', 'iglesia', 'chat', 'yo'];
+/** La barra de antes (con Personas donde ahora va la Biblia). Quien la tenía guardada tal cual pasa a la nueva. */
+const OLD_DEFAULT: TabKey[] = ['mapa', 'personas', 'iglesia', 'chat', 'yo'];
+export const upgradeTabs = (list: TabKey[]): TabKey[] => (list.join() === OLD_DEFAULT.join() ? DEFAULT_TABS : list);
 /** Nombre del archivo de cada pestaña: las que también son pantallas sueltas usan una copia "t-…" para no mezclarse. */
-export const tabRoute = (k: TabKey): string => (['chat', 'eventos', 'oracion', 'directorio', 'crecimiento', 'predicas'].includes(k) ? `t-${k}` : k);
+export const tabRoute = (k: TabKey): string => (['chat', 'eventos', 'oracion', 'directorio', 'crecimiento', 'predicas', 'biblia'].includes(k) ? `t-${k}` : k);
 export const tabKeyOfRoute = (r: string): TabKey | null => ALL_TABS.find((k) => tabRoute(k) === r) ?? null;
 export const tabInfo = (k: TabKey) => TAB_OPTIONS.find((t) => t.key === k)!;
 
@@ -52,7 +56,7 @@ export async function loadTabs(): Promise<void> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
     if (raw) {
-      current = normalizeTabs(JSON.parse(raw));
+      current = upgradeTabs(normalizeTabs(JSON.parse(raw)));
       listeners.forEach((l) => l());
     }
   } catch {

@@ -181,6 +181,7 @@ export default function Iglesia() {
       title: tx('Crecer'), tone: 'blue',
       tiles: [
         { icon: 'sunrise', label: tx('Crecimiento'), to: '/crecimiento' as Href, show: !tabs.includes('crecimiento') },
+        { icon: 'book-open', label: tx('Plan de lectura'), to: '/plan-lectura' as Href, show: true },
         { icon: 'heart', label: tx('Oración'), to: '/oracion', show: !tabs.includes('oracion') },
         { icon: 'play-circle', label: tx('Prédicas'), to: '/predicas' as Href, show: !tabs.includes('predicas') },
         { icon: 'edit-3', label: tx('Mis notas de prédicas'), to: '/predica/mis-notas' as Href, show: true },
@@ -214,6 +215,7 @@ export default function Iglesia() {
     {
       title: tx('Personas y seguimiento'), tone: 'amber',
       tiles: [
+        { icon: 'users', label: tx('Personas'), to: '/(tabs)/personas' as Href, show: !tabs.includes('personas'), strong: true },
         { icon: 'user-check', label: tx('Para seguir'), to: '/seguimiento', show: true },
         { icon: 'book-open', label: tx('Discipulado'), to: '/discipulado' as Href, show: isLeader },
         { icon: 'heart', label: tx('Decisiones'), to: '/decisiones' as Href, show: isLeader },
@@ -499,7 +501,8 @@ export default function Iglesia() {
             </View>
           </View>
         ) : null}
-        {!on('plan_lectura') ? null : (() => {
+        {/* El plan de lectura vive en Crecimiento. Acá queda solo si la iglesia apagó Crecimiento. */}
+        {!on('plan_lectura') || on('crecimiento') ? null : (() => {
           const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
           const title = !st ? tx('Plan de lectura de la Biblia') : st.today ? tx('Lectura de hoy: {today}', { today: st.today }) : tx('Hoy no hay lectura nueva');
           const hint = !st ? tx('Elegí un plan y la app te dice qué leer cada día')
@@ -531,7 +534,8 @@ export default function Iglesia() {
             </Pressable>
           );
         })()}
-        {!on('biblia') ? null : (
+        {/* La Biblia está en la barra de abajo. Acá queda solo para quien la sacó de su barra. */}
+        {!on('biblia') || tabs.includes('biblia') ? null : (
           <Pressable onPress={() => router.push('/biblia' as Href)} accessibilityRole="button" accessibilityLabel={tx('Biblia. Leé la Biblia en la app, sin internet')}>
             <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>

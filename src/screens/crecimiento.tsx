@@ -8,7 +8,11 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Card, Empty, Loading, SectionTitle } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
-import { listTraining } from '@/lib/api';
+import { listTraining, myBiblePlan, type BiblePlanRow } from '@/lib/api';
+import { planStatus } from '@/lib/biblePlan';
+import { parseReading } from '@/lib/bible';
+import { isoDate as isoDay } from '@/lib/format';
+import { useFeatures } from '@/lib/useFeatures';
 import type { TrainingItem } from '@/types';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
@@ -48,7 +52,10 @@ export default function Crecimiento() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [train, setTrain] = useState<TrainingItem[]>([]);
   const [q, setQ] = useState('');
+  const { on } = useFeatures();
+  const [biblePlan, setBiblePlan] = useState<BiblePlanRow | null>(null);
   const load = useCallback(() => {
+    myBiblePlan().then(setBiblePlan).catch(() => undefined);
     listTraining().then(setTrain).catch(() => undefined);
     supabase.from('growth_articles').select('id, slug, section, title, summary, sort_order, body').order('sort_order').then(({ data }) => setRows((data as Row[]) ?? []));
   }, []);
@@ -147,6 +154,40 @@ export default function Crecimiento() {
                 </Card>
               </Pressable>
             ))}
+            {/* El plan de lectura de la Biblia (antes estaba en la pantalla de inicio). */}
+            {!on('plan_lectura') ? null : (() => {
+              const st = biblePlan ? planStatus(biblePlan.plan, biblePlan.started_on, biblePlan.done, isoDay(new Date())) : null;
+              const title = !st ? tx('Plan de lectura de la Biblia') : st.today ? tx('Lectura de hoy: {today}', { today: st.today }) : tx('Hoy no hay lectura nueva');
+              const hint = !st ? tx('Elegí un plan y la app te dice qué leer cada día')
+                : st.todayDone && !st.behind.length ? tx('¡Listo por hoy! Vas al día.')
+                  : st.behind.length ? `Te ${st.behind.length === 1 ? tx('queda 1 lectura atrasada') : tx('quedan {n} lecturas atrasadas', { n: st.behind.length })}` : tx('Tocá para tildarla cuando la leas');
+              const at = st?.today ? parseReading(st.today) : null;
+              return (
+                <>
+                  <SectionTitle>{tx('Plan de lectura')}</SectionTitle>
+                  <Pressable onPress={() => router.push('/plan-lectura' as Href)} accessibilityRole="button" accessibilityLabel={`${title}. ${hint}`}>
+                    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+                      <View style={{ width: 50, height: 50, borderRadius: 14, backgroundColor: colors.blueSoft, alignItems: 'center', justifyContent: 'center' }}>
+                        <Feather name={st?.todayDone ? 'check' : 'book-open'} size={24} color={colors.blueText} />
+                      </View>
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{title}</Text>
+                        <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{hint}</Text>
+                      </View>
+                      {at && on('biblia') ? (
+                        <Pressable onPress={() => router.push({ pathname: '/biblia/leer', params: { libro: String(at.book), cap: String(at.chapter) } })} hitSlop={6}
+                          accessibilityRole="button" accessibilityLabel={tx('Leer {today} en la Biblia', { today: st?.today })}
+                          style={{ paddingHorizontal: 12, height: 34, borderRadius: 17, backgroundColor: colors.blueSoft, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Feather name="book-open" size={15} color={colors.blueText} />
+                          <Text style={{ fontSize: 13, fontWeight: '800', color: colors.blueText }}>{tx('Leer')}</Text>
+                        </Pressable>
+                      ) : null}
+                      <Feather name="chevron-right" size={18} color={colors.muted} />
+                    </Card>
+                  </Pressable>
+                </>
+              );
+            })()}
             <SectionTitle>{tx('Carpetas')}</SectionTitle>
             {FOLDERS.map((f) => {
               const count = f.section === EVANG ? evangCount : (rows ?? []).filter((r) => r.section === f.section).length;

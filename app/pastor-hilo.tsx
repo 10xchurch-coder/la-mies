@@ -1,9 +1,13 @@
 // Conversación privada entre un miembro y el pastor. El miembro ve solo la suya; el pastor, la de quien elija.
-import React, { useCallback, useRef, useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, Text, View } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Field, Loading } from '@/components/ui';
+import { showActions } from '@/components/ActionSheet';
+import { ReactionChips } from '@/components/ReactionChips';
+import { REACTIONS, myReaction, useReactions } from '@/lib/reactions';
 import { pastorThread, readPastorThread, sendPastorMessage } from '@/lib/api';
 import { fmtRelativeDay, fmtTime } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -21,11 +25,21 @@ export default function PastorHilo() {
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ids = useMemo(() => (rows ?? []).map((m) => m.id).reverse(), [rows]);
+  const reactErr = useCallback((e: unknown) => Alert.alert(tx('No se pudo reaccionar'), errorMessage(e)), []);
+  const rx = useReactions('pastor', ids, profile?.display_name ?? tx('Vos'), reactErr);
+  const rxReload = useRef(rx.reload);
+  rxReload.current = rx.reload;
+  const onLong = (m: PastorMessage) => showActions(tx('Mensaje'), undefined, [
+    { text: tx('Copiar'), icon: 'copy', onPress: () => { Clipboard.setStringAsync(m.body).catch(() => undefined); } },
+    { text: tx('Cancelar'), icon: 'x' },
+  ], { options: REACTIONS, current: myReaction(rx.map[m.id]), onPick: (e) => { rx.toggle(m.id, e); } });
 
   const load = useCallback(() => {
     if (isPastor && !target) { setRows([]); return; }
     pastorThread(target).then((r) => {
       setRows(r);
+      rxReload.current();
       if (r.some((m) => !m.mine && !m.read_at)) readPastorThread(target).catch(() => undefined);
     }).catch(() => setRows((old) => old ?? []));
   }, [isPastor, target]);
@@ -76,10 +90,12 @@ export default function PastorHilo() {
             <View key={m.id} style={{ gap: 6 }}>
               {showDay ? <Text style={{ textAlign: 'center', fontSize: 12, color: colors.muted, marginTop: 6 }}>{day}</Text> : null}
               <View style={{ alignItems: m.mine ? 'flex-end' : 'flex-start' }}>
-                <View style={{ maxWidth: '86%', padding: 10, borderRadius: 14, backgroundColor: m.mine ? colors.green : colors.graySoft }}>
-                  <Text selectable style={{ fontSize: 15, lineHeight: 21, color: m.mine ? '#fff' : colors.text }}>{m.body}</Text>
+                <Pressable onLongPress={() => onLong(m)} delayLongPress={300} accessibilityHint={tx('Mantené apretado para reaccionar')}
+                  style={{ maxWidth: '86%', padding: 10, borderRadius: 14, backgroundColor: m.mine ? colors.green : colors.graySoft }}>
+                  <Text style={{ fontSize: 15, lineHeight: 21, color: m.mine ? '#fff' : colors.text }}>{m.body}</Text>
                   <Text style={{ fontSize: 11, marginTop: 4, textAlign: 'right', color: m.mine ? '#DDF1E4' : colors.muted }}>{fmtTime(m.created_at)}</Text>
-                </View>
+                </Pressable>
+                <View style={{ marginTop: 4 }}><ReactionChips list={rx.map[m.id]} mine={m.mine} onToggle={(e) => { rx.toggle(m.id, e); }} /></View>
               </View>
             </View>
           );

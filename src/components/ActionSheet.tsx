@@ -8,12 +8,15 @@ import { colors } from '../theme';
 import { tx } from '@/lib/i18n';
 
 export type SheetAction = { text: string; onPress?: () => void; icon?: React.ComponentProps<typeof Feather>['name']; destructive?: boolean; hint?: string };
-type Req = { title: string; message?: string; actions: SheetAction[] };
+/** Fila de reacciones arriba de las opciones (para los mensajes de los chats). */
+export type SheetReactions = { options: readonly string[]; current: string | null; onPick: (emoji: string) => void };
+type Req = { title: string; message?: string; actions: SheetAction[]; reactions?: SheetReactions };
 
 let push: ((r: Req | null) => void) | null = null;
 
-export function showActions(title: string, message: string | undefined, actions: SheetAction[]): void {
-  if (Platform.OS === 'ios') {
+export function showActions(title: string, message: string | undefined, actions: SheetAction[], reactions?: SheetReactions): void {
+  // Con reacciones se usa siempre la hoja propia (la nativa de iPhone no puede mostrar la fila de caritas).
+  if (Platform.OS === 'ios' && !reactions) {
     // En iPhone, un Modal no se puede abrir encima de otro Modal (por ejemplo, los comentarios del devocional):
     // quedaba invisible y bloqueaba la pantalla. La hoja nativa de iOS siempre aparece arriba de todo.
     const list = actions.filter((a) => a.text !== 'Cancelar' && a.text !== tx('Cancelar'));
@@ -24,7 +27,7 @@ export function showActions(title: string, message: string | undefined, actions:
     );
     return;
   }
-  push?.({ title, message, actions });
+  push?.({ title, message, actions, reactions });
 }
 
 export function ActionSheetHost() {
@@ -45,8 +48,22 @@ export function ActionSheetHost() {
             <Text style={{ fontSize: 17, fontWeight: '800', color: colors.text }}>{req?.title}</Text>
             {req?.message ? <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>{req.message}</Text> : null}
           </View>
+          {req?.reactions ? (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 12, paddingBottom: 10 }}>
+              {req.reactions.options.map((e) => {
+                const on = req.reactions?.current === e;
+                return (
+                  <Pressable key={e} accessibilityRole="button" accessibilityLabel={tx('Reaccionar con {e}', { e })} accessibilityState={{ selected: on }}
+                    onPress={() => { const pick = req.reactions?.onPick; close(); setTimeout(() => pick?.(e), 50); }}
+                    style={({ pressed }) => ({ width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? colors.greenSoft : pressed ? colors.bgSoft : 'transparent', borderWidth: on ? 1.5 : 0, borderColor: colors.green })}>
+                    <Text style={{ fontSize: 27 }}>{e}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
           <ScrollView>
-            {req?.actions.map((a, i) => (
+            {req?.actions.filter((a) => !(req.reactions && (a.text === 'Cancelar' || a.text === tx('Cancelar')))).map((a, i) => (
               <Pressable
                 key={i}
                 accessibilityRole="button"

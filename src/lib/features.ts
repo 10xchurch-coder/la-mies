@@ -149,7 +149,7 @@ export const FEATURES: Feature[] = [
   { key: 'biblia', get label() { return tx('La Biblia en la app'); }, group: 'La Biblia y crecer',
     get hint() { return tx('Leer la Biblia dentro de la app, sin internet. Abajo elegís qué versiones puede usar tu gente.'); },
     get hides() { return tx('La Biblia de la app y los botones que la abren.'); },
-    routes: ['/biblia'] },
+    routes: ['/biblia', '/t-biblia'] },
   { key: 'biblia_buscar', parent: 'biblia', get label() { return tx('Buscar en la Biblia'); }, group: 'La Biblia y crecer',
     get hint() { return tx('Buscar una palabra, una frase o una cita, y ver todos los versículos donde aparece una palabra.'); },
     get hides() { return tx('"Buscar en la Biblia" y la concordancia.'); },

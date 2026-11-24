@@ -8,7 +8,7 @@ import { ALL_TABS, tabInfo, tabRoute, useTabs, type TabKey } from '@/lib/tabsPre
 import { colors, toneOf, type Tone } from '@/theme';
 
 // Cada pestaña se enciende con el color de su área.
-const TAB_TONE: Partial<Record<TabKey, Tone>> = { mapa: 'teal', personas: 'amber', chat: 'violet', directorio: 'violet', crecimiento: 'blue', predicas: 'blue', oracion: 'pink', eventos: 'green' };
+const TAB_TONE: Partial<Record<TabKey, Tone>> = { mapa: 'teal', biblia: 'blue', personas: 'amber', chat: 'violet', directorio: 'violet', crecimiento: 'blue', predicas: 'blue', oracion: 'pink', eventos: 'green' };
 import { featureOfPath, featureOn } from '@/lib/features';
 import { useAuth } from '@/store/auth';
 

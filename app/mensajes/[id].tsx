@@ -1,6 +1,6 @@
 // Una conversación privada con otro hermano: texto, fotos, documentos y mensajes de voz.
 // Mantener apretado un mensaje: copiar, borrar el propio o denunciar el del otro. Arriba a la derecha: bloquear.
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -10,6 +10,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Header } from '@/components/Screen';
 import { showActions } from '@/components/ActionSheet';
 import { AttachSheet, type AttachItem } from '@/components/AttachSheet';
+import { ReactionChips } from '@/components/ReactionChips';
+import { REACTIONS, myReaction, useReactions } from '@/lib/reactions';
 import { VoiceBubble, VoiceRecorder, isVoice, voiceAvailable } from '@/components/ChatVoice';
 import { dmBlock, dmDelete, dmPeople, dmRead, dmReport, dmSend, dmSendAttachment, dmThread, type DmMessage } from '@/lib/dm';
 import { downloadUrl, pickChatDocument, pickChatImage, signedUrl, uploadChatVoice, type ChatAttachment } from '@/lib/files';
@@ -34,7 +36,7 @@ function DmImage({ path, onOpen }: { path: string; onOpen: (url: string) => void
 
 export default function Conversacion() {
   const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
-  const { church } = useAuth();
+  const { church, profile } = useAuth();
   const insets = useSafeAreaInsets();
   const [rows, setRows] = useState<DmMessage[] | null>(null);
   const [other, setOther] = useState<{ name: string; blocked: boolean } | null>(null);
@@ -44,11 +46,17 @@ export default function Conversacion() {
   const [recording, setRecording] = useState(false);
   const [viewer, setViewer] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const ids = useMemo(() => (rows ?? []).map((m) => m.id).reverse(), [rows]);
+  const reactErr = useCallback((e: unknown) => Alert.alert(tx('No se pudo reaccionar'), errorMessage(e)), []);
+  const rx = useReactions('dm', ids, profile?.display_name ?? tx('Vos'), reactErr);
+  const rxReload = useRef(rx.reload);
+  rxReload.current = rx.reload;
 
   const load = useCallback(() => {
     if (!id) return;
     dmThread(id).then((r) => {
       setRows(r);
+      rxReload.current();
       if (r.some((m) => !m.mine && !m.read_at)) dmRead(id).catch(() => undefined);
     }).catch(() => setRows((old) => old ?? []));
   }, [id]);
@@ -121,7 +129,7 @@ export default function Conversacion() {
       ? [{ text: tx('Borrar para los dos'), icon: 'trash-2' as const, destructive: true, onPress: () => dmDelete(m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))) }]
       : [{ text: tx('Denunciar'), icon: 'flag' as const, destructive: true, onPress: () => report(m) }]),
     { text: tx('Cancelar'), icon: 'x' as const },
-  ]);
+  ], other?.blocked ? undefined : { options: REACTIONS, current: myReaction(rx.map[m.id]), onPick: (e) => { rx.toggle(m.id, e); } });
 
   const data = rows ? [...rows].reverse() : [];
   const renderItem = ({ item: m, index }: { item: DmMessage; index: number }) => {
@@ -146,6 +154,7 @@ export default function Conversacion() {
               {m.mine ? <Feather name={m.read_at ? 'check-circle' : 'check'} size={12} color={m.read_at ? '#2E9BD6' : colors.muted} /> : null}
             </View>
           </Pressable>
+          <ReactionChips list={rx.map[m.id]} mine={m.mine} onToggle={other?.blocked ? undefined : (e) => { rx.toggle(m.id, e); }} />
         </View>
       </View>
     );
@@ -163,7 +172,7 @@ export default function Conversacion() {
             <Text style={{ fontSize: 14, color: colors.muted, textAlign: 'center' }}>{tx('Mandale un saludo a {title}.', { title })}</Text>
           </View>
         ) : (
-          <FlatList inverted data={data} keyExtractor={(m) => m.id} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled" />
+          <FlatList inverted data={data} extraData={rx.map} keyExtractor={(m) => m.id} renderItem={renderItem} contentContainerStyle={{ padding: 12 }} keyboardShouldPersistTaps="handled" />
         )}
         {other?.blocked ? (
           <View style={{ padding: 14, paddingBottom: 14 + insets.bottom, gap: 8, alignItems: 'center', backgroundColor: colors.bg }}>

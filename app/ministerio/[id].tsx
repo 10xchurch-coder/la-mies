@@ -19,6 +19,9 @@ import { colors } from '@/theme';
 import type { Contact, Duty, Ministry, MinistryMember, MinistryMessage, MinistryPerson, Profile } from '@/types';
 
 import { moderate } from '@/lib/moderation';
+import { showActions } from '@/components/ActionSheet';
+import { ReactionChips } from '@/components/ReactionChips';
+import { REACTIONS, myReaction, useReactions } from '@/lib/reactions';
 import { tx } from '@/lib/i18n';
 
 type Tab = 'chat' | 'duties' | 'people' | 'tips';
@@ -80,6 +83,14 @@ export default function MinisterioDetalle() {
   const nameOf = (uid: string | null) => people.find((p) => p.id === uid)?.display_name ?? tx('Alguien');
   const tips = useMemo(() => msgs.filter((x) => x.kind === 'recommendation'), [msgs]);
   const chat = useMemo(() => msgs.filter((x) => x.kind !== 'recommendation'), [msgs]);
+  // Reacciones: mantené apretado un mensaje y elegí una carita.
+  const chatIds = useMemo(() => chat.map((x) => x.id), [chat]);
+  const reactErr = useCallback((e: unknown) => Alert.alert(tx('No se pudo reaccionar'), errorMessage(e)), []);
+  const rx = useReactions('ministry', chatIds, profile?.display_name ?? tx('Vos'), reactErr);
+  const onLong = (item: MinistryMessage, mine: boolean) => showActions(tx('Mensaje'), undefined, [
+    ...(mine ? [] : [{ text: tx('Denunciar o bloquear'), icon: 'flag' as const, onPress: () => moderate({ kind: 'ministry_message', targetId: item.id, authorId: item.user_id, authorName: nameOf(item.user_id), excerpt: item.body, onChange: load }) }]),
+    { text: tx('Cancelar'), icon: 'x' as const },
+  ], { options: REACTIONS, current: myReaction(rx.map[item.id]), onPick: (e) => { rx.toggle(item.id, e); } });
 
   const send = async (kind: MinistryMessage['kind']) => {
     const body = text.trim();
@@ -161,25 +172,32 @@ export default function MinisterioDetalle() {
               data={chat}
               inverted
               keyExtractor={(x) => x.id}
+              extraData={rx.map}
               contentContainerStyle={{ padding: 12, gap: 8 }}
               renderItem={({ item }) => {
                 const mine = item.user_id === profile?.id;
                 if (item.kind === 'announcement') {
                   return (
-                    <View style={{ padding: 12, borderRadius: 12, backgroundColor: colors.amberSoft, borderWidth: 1, borderColor: '#F3D2A8', gap: 4 }}>
-                      <Text style={{ fontSize: 11, fontWeight: '800', color: colors.amberText }}>{tx('ANUNCIO ·')} {nameOf(item.user_id)} · {fmtRelativeDay(item.created_at)} {fmtTime(item.created_at)}</Text>
-                      <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{item.body}</Text>
+                    <View>
+                      <Pressable onLongPress={() => onLong(item, mine)} delayLongPress={300} style={{ padding: 12, borderRadius: 12, backgroundColor: colors.amberSoft, borderWidth: 1, borderColor: '#F3D2A8', gap: 4 }}>
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: colors.amberText }}>{tx('ANUNCIO ·')} {nameOf(item.user_id)} · {fmtRelativeDay(item.created_at)} {fmtTime(item.created_at)}</Text>
+                        <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{item.body}</Text>
+                      </Pressable>
+                      <View style={{ marginTop: 4 }}><ReactionChips list={rx.map[item.id]} mine={false} onToggle={(e) => { rx.toggle(item.id, e); }} /></View>
                     </View>
                   );
                 }
                 return (
-                  <Pressable onLongPress={mine ? undefined : () => moderate({ kind: 'ministry_message', targetId: item.id, authorId: item.user_id, authorName: nameOf(item.user_id), excerpt: item.body, onChange: load })}
+                  <View>
+                  <Pressable onLongPress={() => onLong(item, mine)} delayLongPress={300} accessibilityHint={tx('Mantené apretado para reaccionar')}
                     style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '85%', padding: 10, borderRadius: 14, backgroundColor: mine ? colors.greenSoft : colors.bgSoft, gap: 2 }}>
                     {!mine ? <Text style={{ fontSize: 11, fontWeight: '800', color: colors.green }}>{nameOf(item.user_id)}</Text> : null}
                     <Text style={{ fontSize: 15, lineHeight: 21, color: colors.text }}>{item.body}</Text>
                     <Text style={{ fontSize: 10, color: colors.muted, alignSelf: 'flex-end' }}>{fmtRelativeDay(item.created_at)} {fmtTime(item.created_at)}</Text>
                     {!mine ? <Text onPress={() => moderate({ kind: 'ministry_message', targetId: item.id, authorId: item.user_id, authorName: nameOf(item.user_id), excerpt: item.body, onChange: load })} style={{ fontSize: 10, color: colors.muted }}>{tx('Denunciar o bloquear')}</Text> : null}
                   </Pressable>
+                  <View style={{ marginTop: 4 }}><ReactionChips list={rx.map[item.id]} mine={mine} onToggle={(e) => { rx.toggle(item.id, e); }} /></View>
+                  </View>
                 );
               }}
             />

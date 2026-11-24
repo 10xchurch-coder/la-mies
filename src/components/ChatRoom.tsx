@@ -14,6 +14,8 @@ import { AttachSheet, type AttachItem } from '@/components/AttachSheet';
 import { LocationBubble } from '@/components/LocationBubble';
 import { PollCard, PollComposer } from '@/components/ChatPoll';
 import { Ticks } from '@/components/Ticks';
+import { ReactionChips } from '@/components/ReactionChips';
+import { REACTIONS, myReaction, useReactions } from '@/lib/reactions';
 import {
   chatDelete, chatList, chatMarkRead, chatMyPrivacy, chatReceipts, chatSend, chatSendAttachment, chatSendLocation, chatTable, pollResults, roomKey, ticksFor, votePoll,
   type ChatMessage, type ChatPrivacy, type ChatRoomKind, type PollOption, type Receipt, type RoomRef,
@@ -80,6 +82,15 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
   const lastTyping = useRef(0);
   const myId = profile?.id ?? '';
   const [, force] = useState(0);
+  const rxReload = useRef<() => void>(() => undefined);
+  // Reacciones: mantené apretado un mensaje y elegí una carita.
+  const ids = useMemo(() => (rows ?? []).map((m) => m.id), [rows]);
+  const reactErr = useCallback((e: unknown) => Alert.alert(tx('No se pudo reaccionar'), errorMessage(e)), []);
+  const rx = useReactions(room, ids, profile?.display_name ?? tx('Vos'), reactErr);
+  rxReload.current = rx.reload;
+  const reactTo = (id: string, emoji: string) => {
+    rx.toggle(id, emoji).then(() => presenceRef.current?.send({ type: 'broadcast', event: 'react', payload: { id: myId } }).catch(() => undefined));
+  };
 
   const loadPolls = useCallback(() => {
     const ids = (rowsRef.current ?? []).filter((m) => m.kind === 'poll').map((m) => m.id).slice(0, 40);
@@ -106,6 +117,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
         return [...r, ...old.filter((m) => !ids.has(m.id) && oldest && m.created_at < oldest)];
       });
       setTimeout(loadPolls, 0);
+      rxReload.current();
       markRead();
     }).catch(() => setRows((old) => old ?? []));
   }, [ref, loadPolls, markRead]);
@@ -144,6 +156,8 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
     }).on('broadcast', { event: 'typing' }, ({ payload }) => {
       const p = payload as { id?: string; name?: string };
       if (p?.id && p.id !== myId) setTyping((t) => ({ ...t, [p.id as string]: { name: p.name ?? tx('Alguien'), at: Date.now() } }));
+    }).on('broadcast', { event: 'react' }, ({ payload }) => {
+      if ((payload as { id?: string })?.id !== myId) rxReload.current();
     }).subscribe((status) => {
       if (status === 'SUBSCRIBED' && privacy.show_online) ch.track({ name: profile?.display_name ?? tx('Alguien') }).catch(() => undefined);
     });
@@ -248,7 +262,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       ...(!m.mine ? [{ text: tx('Denunciar o bloquear'), icon: 'flag' as const, onPress: () => moderate({ kind: modKind, targetId: m.id, authorId: m.user_id, authorName: m.name, excerpt: excerpt(m), onChange: load }) }] : []),
       { text: tx('Cancelar'), icon: 'x' as const },
     ];
-    showActions(tx('Mensaje'), undefined, acts);
+    showActions(tx('Mensaje'), undefined, acts, readOnly ? undefined : { options: REACTIONS, current: myReaction(rx.map[m.id]), onPick: (e) => reactTo(m.id, e) });
   };
 
   const content = (m: ChatMessage) => {
@@ -304,7 +318,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
           inverted
           data={rows}
           keyExtractor={(m) => m.id}
-          extraData={[polls, receipts]}
+          extraData={[polls, receipts, rx.map]}
           onEndReached={loadOlder}
           onEndReachedThreshold={0.3}
           contentContainerStyle={{ padding: 10, gap: 3 }}
@@ -329,6 +343,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
                     </View>
                   </View>
                 </Pressable>
+                <ReactionChips list={rx.map[m.id]} mine={m.mine} indent={38} onToggle={readOnly ? undefined : (e) => reactTo(m.id, e)} />
               </View>
             );
           }}
