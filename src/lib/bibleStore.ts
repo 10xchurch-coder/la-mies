@@ -3,7 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const KEY = 'lamies.biblia';
 
-export type BiblePrefs = { version?: string; book: number; chapter: number; size: number; font?: string; theme?: string; spacing?: string };
+export type BiblePrefs = { version?: string; book: number; chapter: number; size: number; font?: string; theme?: string; spacing?: string;
+  /** La segunda versión para leer dos a la vez (id de VERSIONS). Si falta, no se compara. */
+  compare?: string;
+  /** En el teléfono: true para ver las dos versiones en dos columnas en vez de una debajo de la otra. */
+  compareCols?: boolean };
 export const DEFAULT_PREFS: BiblePrefs = { book: 42, chapter: 1, size: 19 };
 export const SIZES = [14, 15, 17, 19, 22, 26, 30];
 
@@ -20,6 +24,8 @@ export async function loadBiblePrefs(): Promise<BiblePrefs> {
       font: typeof p.font === 'string' ? p.font : undefined,
       theme: typeof p.theme === 'string' ? p.theme : undefined,
       spacing: typeof p.spacing === 'string' ? p.spacing : undefined,
+      compare: typeof p.compare === 'string' && p.compare ? p.compare : undefined,
+      compareCols: p.compareCols === true ? true : undefined,
     };
   } catch {
     return DEFAULT_PREFS;

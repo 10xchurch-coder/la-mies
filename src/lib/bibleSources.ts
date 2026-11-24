@@ -42,6 +42,14 @@ export const BIBLE_SOURCES: BibleSource[] = [
     source: 'OpenBible.info, www.openbible.info/labs/cross-references (archivo del 4 de noviembre de 2024, copia en scrollmapper/bible_databases).',
     credit: 'Referencias cruzadas: OpenBible.info, licencia CC BY.',
   },
+  {
+    title: 'Palabras originales (hebreo y griego, con números de Strong)',
+    what: 'Lo que aparece al tocar “Palabras originales”: cada palabra del versículo en hebreo o griego, su número de Strong y qué quiere decir. Las explicaciones están en inglés.',
+    licence: 'CC BY 4.0 (Creative Commons Atribución)',
+    detail: 'Cada archivo de la fuente dice: “Data created by www.STEPBible.org based on work at Tyndale House Cambridge (CC BY 4.0)”. Se pueden usar y compartir si se dice de dónde vienen y qué se cambió. Acá solo se cambió el formato: al hebreo se le quitaron los acentos de canto y a todo la puntuación; no se cambió ninguna palabra ni número. Del griego se usan las palabras del texto tradicional (el de la Reina-Valera y la King James). La explicación larga está solo para el griego (léxico de Abbott-Smith, de dominio público, adaptado por Tyndale House). La del hebreo no se incluye: la fuente avisa que esa parte es de Online Bible y necesita un permiso aparte. Tampoco se incluyen las traducciones palabra por palabra ni la gramática, que vienen de otros proyectos.',
+    source: 'STEPBible-Data, STEPBible.github.io/STEPBible-Data (archivos TAHOT, TAGNT, TBESH y TBESG; copia del 2 de noviembre de 2026).',
+    credit: 'Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0. Fuente: STEPBible.github.io/STEPBible-Data',
+  },
 ];
 
 /** Textos que NO están en la app porque tienen dueño y hace falta permiso. */
