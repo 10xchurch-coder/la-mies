@@ -1,13 +1,15 @@
-// La Biblia: elegir un libro y un capítulo, o seguir donde se quedó.
+// La Biblia: elegir un libro y un capítulo, o seguir donde se quedó. También: buscar, cambiar de versión (español o inglés)
+// y ver de dónde sale cada texto.
 import React, { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
+import { BibleVersionChips } from '@/components/BibleVersionChips';
 import { Card, SectionTitle } from '@/components/ui';
-import { OT_COUNT, bookName, chaptersIn, versionOf } from '@/lib/bible';
+import { OT_COUNT, bookNameIn, chaptersIn, versionOf, type BibleVersion } from '@/lib/bible';
 import { BOOKS } from '@/lib/biblePlan';
-import { DEFAULT_PREFS, loadBiblePrefs, type BiblePrefs } from '@/lib/bibleStore';
+import { DEFAULT_PREFS, loadBiblePrefs, saveBiblePrefs, type BiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
 
 export default function Biblia() {
@@ -16,6 +18,9 @@ export default function Biblia() {
   const [saved, setSaved] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const version = versionOf(prefs.version);
+  const bookName = (i: number) => bookNameIn(version, i);
+  /** Cambia la Biblia en la que se lee y se busca. Las notas y resaltados siguen ahí: van por versículo, no por versión. */
+  const pickVersion = (v: BibleVersion) => { const next = { ...prefs, version: v.id }; setPrefs(next); saveBiblePrefs(next); };
 
   useFocusEffect(useCallback(() => {
     loadBiblePrefs().then((p) => { setPrefs(p); setSaved(true); });
@@ -73,6 +78,16 @@ export default function Biblia() {
             </Card>
           </Pressable>
         ) : null}
+        <Pressable onPress={() => router.push({ pathname: '/biblia/buscar', params: { v: version.id } })} accessibilityRole="button" accessibilityLabel="Buscar en la Biblia">
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Feather name="search" size={20} color={colors.blueText} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Buscar en la Biblia</Text>
+              <Text style={{ fontSize: 13, color: colors.muted }}>Una palabra, una frase o una cita como “{bookName(42)} 3:16”</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color={colors.muted} />
+          </Card>
+        </Pressable>
         <Pressable onPress={() => router.push('/biblia/marcas')} accessibilityRole="button" accessibilityLabel="Mis notas y resaltados">
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Feather name="edit-3" size={20} color={colors.blueText} />
@@ -83,11 +98,15 @@ export default function Biblia() {
             <Feather name="chevron-right" size={20} color={colors.muted} />
           </Card>
         </Pressable>
+        <BibleVersionChips value={version.id} onChange={pickVersion} />
         <SectionTitle>Antiguo Testamento</SectionTitle>
         {books(0, OT_COUNT)}
         <SectionTitle>Nuevo Testamento</SectionTitle>
         {books(OT_COUNT, BOOKS.length)}
-        <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{version.notice}</Text>
+        <Pressable onPress={() => router.push('/biblia/textos')} accessibilityRole="button" accessibilityLabel="Acerca de los textos: de dónde sale cada Biblia" hitSlop={8}>
+          <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{version.notice}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '700', color: colors.blueText, textAlign: 'center', marginTop: 4 }}>Acerca de los textos</Text>
+        </Pressable>
       </Screen>
     </View>
   );

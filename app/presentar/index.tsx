@@ -12,6 +12,7 @@ import { useChurchLogo } from '@/components/BrandFooter';
 import { Button, Card, Empty, Field, Loading, Tag, Toggle } from '@/components/ui';
 import { createPresentSet, deletePresentSet, getPresentSet, listPresentSets, listSongs, savePresentSet } from '@/lib/api';
 import { VERSIONS, versionOf } from '@/lib/bible';
+import { useBibleReady } from '@/lib/bibleReady';
 import { pickPresentMedia, presentUrl, removePresentFiles } from '@/lib/files';
 import {
   BLACK, ITEM_TYPES, SECS_MAX, SECS_MIN, SPEEDS, autoMs, cleanItems, clock, itemSlides, itemTitle, newId, newItem, parsePassage, step, typeInfo,
@@ -193,7 +194,10 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const patch = (id: string, part: Partial<PresentItem>) => change((items ?? []).map((i) => (i.id === id ? ({ ...i, ...part } as PresentItem) : i)));
   const rename = (n: string) => { touch(n, items ?? []); setName(n); };
 
-  const slides = useMemo(() => new Map((items ?? []).map((i) => [i.id, itemSlides(i, versionOf(i.type === 'passage' ? i.version : undefined))])), [items]);
+  // Los pasajes en una versión que se baja de a un libro (King James) se arman de nuevo cuando el libro llega.
+  const bibleReady = useBibleReady((items ?? []).flatMap((i) => { const r = i.type === 'passage' ? parsePassage(i.ref) : null; return r && i.type === 'passage' ? [[i.version, r.book] as [string, number]] : []; }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const slides = useMemo(() => new Map((items ?? []).map((i) => [i.id, itemSlides(i, versionOf(i.type === 'passage' ? i.version : undefined))])), [items, bibleReady]);
 
   // --- Hablar con la pantalla y con el control remoto ---
   const link = useRef<PresentLink | null>(null);

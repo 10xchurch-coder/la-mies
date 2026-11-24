@@ -2,8 +2,9 @@
 // Sin nada de la app ni de la base, para poder probarse sola.
 import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
+import { EN_BOOKS, KJV, loadKjvBook } from './bibleStudyData';
 
-export type BibleVersionId = 'rv1909';
+export type BibleVersionId = 'rv1909' | 'kjv';
 
 export type BibleVersion = {
   id: BibleVersionId;
@@ -14,11 +15,21 @@ export type BibleVersion = {
   /** Aviso de derechos que se muestra al pie del capítulo. */
   notice: string;
   books: (() => BookText)[];
+  /** Idioma del texto. Si falta, es español. */
+  lang?: 'es' | 'en';
+  /** Nombres de los libros en el idioma de la versión. Si faltan, van los de siempre (en español). */
+  bookNames?: string[];
+  /**
+   * Si está, hay que pedir cada libro antes de leerlo (ver ensureBook): hasta entonces `books[i]()` devuelve [].
+   * Es para que en la web el texto se baje recién cuando se abre, y la app no tarde más en arrancar.
+   */
+  load?: (book: number) => Promise<void>;
 };
 
 /** Las versiones que ya están en la app. Las demás se suman acá cuando haya permiso y texto. */
 export const VERSIONS: BibleVersion[] = [
   { id: 'rv1909', name: 'Reina-Valera 1909', short: 'RV1909', notice: 'Reina-Valera 1909 · Dominio público', books: RV1909 },
+  { id: 'kjv', name: 'King James Version (inglés)', short: 'KJV', notice: 'King James Version · Dominio público', books: KJV, lang: 'en', bookNames: EN_BOOKS, load: loadKjvBook },
 ];
 
 export const DEFAULT_VERSION: BibleVersionId = 'rv1909';
@@ -30,6 +41,8 @@ export function versionOf(id: string | undefined): BibleVersion {
 export const OT_COUNT = 39;
 export const bookName = (i: number): string => BOOKS[i]?.[0] ?? '';
 export const chaptersIn = (i: number): number => BOOKS[i]?.[1] ?? 0;
+/** El nombre del libro como lo dice esa versión ("John" en la King James, "Juan" en las demás). */
+export const bookNameIn = (version: BibleVersion, i: number): string => version.bookNames?.[i] ?? bookName(i);
 
 /** Sin tildes, mayúsculas ni espacios de más, para comparar nombres. */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -42,7 +55,18 @@ export function findBook(name: string): number {
   return BY_NAME.get(plain(name)) ?? -1;
 }
 
-/** Los capítulos de un libro. Devuelve [] si el libro o el capítulo no existen. */
+/** Deja listo un libro de esa versión para leerlo. En la RV1909 no hace nada (ya viene cargada). Nunca falla: si no se pudo, el libro queda vacío. */
+export async function ensureBook(version: BibleVersion, book: number): Promise<void> {
+  if (!version.load || !Number.isInteger(book) || book < 0 || book >= BOOKS.length) return;
+  try { await version.load(book); } catch { /* sin conexión en la web: se reintenta la próxima vez que se pida */ }
+}
+/** Lo mismo para varios libros a la vez. */
+export async function ensureBooks(version: BibleVersion, books: Iterable<number>): Promise<void> {
+  if (!version.load) return;
+  await Promise.all([...new Set(books)].map((b) => ensureBook(version, b)));
+}
+
+/** Los versículos de un capítulo. Devuelve [] si el libro o el capítulo no existen (o si el libro todavía no se pidió, ver ensureBook). */
 export function chapterText(version: BibleVersion, book: number, chapter: number): string[] {
   if (book < 0 || book >= BOOKS.length || chapter < 1 || chapter > chaptersIn(book)) return [];
   return version.books[book]()[chapter - 1] ?? [];
@@ -86,7 +110,8 @@ export function shareVerses(version: BibleVersion, book: number, chapter: number
   if (!v.length) return '';
   const body = v.length === 1 ? text[v[0] - 1] : v.map((n) => `${n} ${text[n - 1]}`).join(' ');
   const single = BOOKS[book][1] === 1;
-  const ref = single ? `${bookName(book)} ${verseSpan(v)}` : `${bookName(book)} ${chapter}:${verseSpan(v)}`;
+  const name = bookNameIn(version, book);
+  const ref = single ? `${name} ${verseSpan(v)}` : `${name} ${chapter}:${verseSpan(v)}`;
   return `“${body}”\n— ${ref} (${version.short})`;
 }
 
