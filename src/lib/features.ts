@@ -33,10 +33,10 @@ export const FEATURES: Feature[] = [
     routes: ['/colectivo', '/colectivo-vivo'] },
 
   { key: 'asistencia', label: 'Asistencia a las reuniones', group: 'Reuniones y enseñanza',
-    hint: 'Tomar asistencia, quiénes faltaron y la fidelidad de cada uno.',
-    routes: ['/asistencia', '/ausencias', '/fidelidad', '/suspender', '/escritorio/asistencia', '/admin/reuniones'] },
+    hint: 'Tomar asistencia (a mano o con el chip de cada uno), quiénes faltaron y la fidelidad de cada uno.',
+    routes: ['/asistencia', '/asistencia-chip', '/chips', '/ausencias', '/fidelidad', '/suspender', '/escritorio/asistencia', '/admin/reuniones'] },
   { key: 'ninos', label: 'Entrada y retiro de los chicos', group: 'Reuniones y enseñanza',
-    hint: 'La guardería y las clases de los chicos, con código para retirarlos.',
+    hint: 'La guardería y las clases de los chicos, con una etiqueta para el chico y otra para el adulto que lo retira.',
     routes: ['/ninos'] },
   { key: 'clases', label: 'Escuela dominical', group: 'Reuniones y enseñanza',
     hint: 'Las clases, sus maestros, los turnos y la asistencia de cada clase.',

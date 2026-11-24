@@ -568,6 +568,10 @@ export default function PersonaDetalle() {
 
           {isStaff ? <DatesEditor key={`${c.baptized_on}-${c.member_since}`} c={c} onSave={(p) => update(p, 'Fechas guardadas')} /> : null}
 
+          {can('personas.asistencia') ? (
+            <Button title="Darle un chip para la asistencia" icon="credit-card" variant="outline" small onPress={() => router.push({ pathname: '/chips', params: { persona: c.id, nombre: c.name } } as never)} />
+          ) : null}
+
           {isStaff && c.baptized_on && c.baptized_here !== false ? (
             <Button title="Certificado de bautismo" icon="award" variant="outline" small onPress={() => router.push(`/certificado/${c.id}` as never)} />
           ) : null}

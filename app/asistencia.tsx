@@ -204,12 +204,16 @@ export default function Asistencia() {
         </>
         )}
         {service && !isOff && rows !== null ? (
-          <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center' }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, rowGap: 8, justifyContent: 'center' }}>
             {present === 0 ? (
               <Pressable onPress={askOff} disabled={marking} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.link}>No hubo esta reunión</Text>
               </Pressable>
             ) : null}
+            {/* Entrada con chip: cada hermano apoya su chip en este teléfono y queda presente (usa la misma función que esta pantalla). */}
+            <Pressable onPress={() => router.push({ pathname: '/asistencia-chip', params: { servicio: service.id, fecha: date } } as never)} accessibilityRole="button" hitSlop={8}>
+              <Text style={styles.link}>Entrada con chip</Text>
+            </Pressable>
             <Pressable onPress={() => router.push({ pathname: '/suspender', params: { servicio: service.id } } as never)} accessibilityRole="button" hitSlop={8}>
               <Text style={styles.link}>Suspender una fecha próxima</Text>
             </Pressable>

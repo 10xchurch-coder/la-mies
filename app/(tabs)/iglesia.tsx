@@ -160,6 +160,7 @@ export default function Iglesia() {
       title: 'Reuniones', tone: 'green',
       tiles: [
         { icon: 'check-square', label: 'Tomar asistencia', to: '/asistencia', show: takes, strong: true },
+        { icon: 'radio', label: 'Entrada con chip', to: '/asistencia-chip' as Href, show: takes },
         { icon: 'smile', label: 'Entrada de los chicos', to: '/ninos' as Href, show: takes || can('personas.asistencia') },
         { icon: 'calendar', label: 'Calendario', to: '/eventos', show: !tabs.includes('eventos') },
         { icon: 'video', label: 'En vivo', to: '/vivo' as Href, show: true },
