@@ -118,7 +118,7 @@ export const FEATURES: Feature[] = [
 
   { key: 'finanzas', label: 'Finanzas de la iglesia', group: 'Dinero e informes',
     hint: 'Ingresos, gastos, fondos y comprobantes. Si tu iglesia lleva las cuentas en otro lado, apagalo.',
-    routes: ['/finanzas'] },
+    routes: ['/finanzas', '/mis-ofrendas'] },
   { key: 'ofrendar', label: 'Ofrendar', group: 'Dinero e informes',
     hint: 'Los datos de la cuenta de la iglesia para dar la ofrenda.',
     routes: ['/dar'] },

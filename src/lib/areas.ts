@@ -10,7 +10,7 @@ const BY_SEGMENT: Record<string, AreaTone> = {
   devocional: 'blue', 'plan-lectura': 'blue', biblia: 'blue', capacitacion: 'blue', material: 'blue', materiales: 'blue', notas: 'blue', progreso: 'blue', certificado: 'blue', 'oraciones-respondidas': 'blue', preguntas: 'blue',
   // Comunidad
   chat: 'violet', directorio: 'violet', ministerios: 'violet', ministerio: 'violet', anuncios: 'violet', misioneros: 'violet', dar: 'violet', sugerencias: 'violet',
-  mensajes: 'violet', 'pastor-hilo': 'violet', 'pastor-bandeja': 'violet', avisos: 'violet',
+  'mis-ofrendas': 'violet', mensajes: 'violet', 'pastor-hilo': 'violet', 'pastor-bandeja': 'violet', avisos: 'violet',
   // Personas y seguimiento
   discipulado: 'amber', decisiones: 'amber', bienvenida: 'amber', 'tarjeta-visita': 'amber', visita: 'amber', 'clase-miembros': 'amber',
   seguimiento: 'amber', ausencias: 'amber', inactivos: 'amber', cumples: 'amber', fidelidad: 'amber', persona: 'amber', contacto: 'amber', personas: 'amber',

@@ -30,6 +30,8 @@ import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent, DailySocial } from '@/types';
 import { useAuth } from '@/store/auth';
 import { useFeatures } from '@/lib/useFeatures';
+import { useChurchExtras } from '@/lib/useChurchExtras';
+import { SetupBanner } from '@/components/SetupBanner';
 import { pathOn } from '@/lib/features';
 import { setDeskPref } from '@/components/desk/DeskShell';
 import { canUseDesk, norm } from '@/lib/desk';
@@ -51,6 +53,7 @@ export function greeting(d = new Date()): string {
 export default function Iglesia() {
   const router = useRouter();
   const { profile, church, isStaff, isLeader, financeLevel, can, perms } = useAuth();
+  const extras = useChurchExtras();
   const [live, setLive] = useState<{ id: string; title: string | null } | null>(null);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
   const [takesAttendance, setTakesAttendance] = useState(false);
@@ -196,6 +199,7 @@ export default function Iglesia() {
         { icon: 'volume-2', label: 'Anuncios', to: '/anuncios', show: isLeader },
         { icon: 'globe', label: 'Misioneros', to: '/misioneros' as Href, show: true },
         { icon: 'credit-card', label: 'Ofrendar', to: '/dar', show: true },
+        { icon: 'gift', label: 'Mis ofrendas', to: '/mis-ofrendas' as Href, show: extras.my_giving_on },
         { icon: 'message-square', label: 'Sugerencias', to: '/sugerencias', show: true },
         { icon: 'send', label: dmNew + pmUnread ? `Mensajes (${dmNew + pmUnread})` : 'Mensajes', to: '/mensajes' as Href, show: true, strong: dmNew + pmUnread > 0 },
         // Si la iglesia apagó los mensajes entre hermanos, queda el botón directo al pastor.
@@ -234,11 +238,14 @@ export default function Iglesia() {
       title: 'Administración', tone: 'pink', closed: true,
       tiles: [
         { icon: 'dollar-sign', label: 'Finanzas', to: '/finanzas' as Href, show: financeLevel >= 1 },
+        { icon: 'gift', label: 'Ofrendas por persona', to: '/finanzas/ofrendas' as Href, show: financeLevel >= 1 },
         { icon: 'clock', label: 'Reuniones', to: '/admin/reuniones', show: isStaff },
         { icon: 'key', label: 'Roles y permisos', to: '/admin/roles', show: isStaff },
         { icon: 'shield', label: 'Cuentas y seguridad', to: '/admin/cuentas', show: isStaff },
         { icon: 'toggle-right', label: 'Funciones de la iglesia', to: '/admin/funciones' as Href, show: can('admin.permisos') },
         { icon: 'eye', label: 'Ver como miembro', to: '/miembro-vista' as Href, show: can('admin.permisos') },
+        { icon: 'download', label: 'Copia de todos los datos', to: '/admin/copia' as Href, show: can('admin.permisos') },
+        { icon: 'globe', label: 'Iglesias de la red', to: '/admin/red' as Href, show: !!profile?.is_network_admin },
       ],
     },
   ];
@@ -353,7 +360,7 @@ export default function Iglesia() {
           {logo ? <Image source={{ uri: logo }} style={styles.logo} contentFit="contain" accessibilityLabel="Logo de la iglesia" /> : null}
           <View style={{ flex: 1 }}>
             <Text style={styles.churchName} numberOfLines={1}>{church?.name ?? 'Iglesia'}</Text>
-            <Text style={styles.motto}>Más como Cristo cada día</Text>
+            <Text style={styles.motto}>{extras.motto ?? (extras.is_new ? '' : 'Más como Cristo cada día')}</Text>
           </View>
           {(Platform.OS === 'web' || Math.min(winW, winH) >= 700) && canUseDesk(perms) ? (
             <Pressable accessibilityRole="link" accessibilityLabel="Abrir el escritorio" onPress={() => { setDeskPref(true); router.push('/escritorio' as Href); }}
@@ -366,6 +373,7 @@ export default function Iglesia() {
       </View>
       <Screen>
         <Text style={styles.hello}>{greeting()}{firstName ? `, ${firstName}` : ''}</Text>
+        <SetupBanner />
         {menu.top ? menuBlock : null}
         {on('predicas') && tomorrow ? (
           <Pressable onPress={() => router.push(`/predica/${tomorrow.id}` as Href)} accessibilityRole="button">

@@ -68,11 +68,13 @@ export const DESK_NAV: DeskGroup[] = [
   ] },
   { title: 'Administración', tone: 'pink', items: [
     { key: 'finanzas', label: 'Finanzas', icon: 'dollar-sign', to: '/finanzas', perms: ['fin.ver'] },
+    { key: 'ofrendas', label: 'Ofrendas por persona', icon: 'gift', to: '/finanzas/ofrendas', perms: ['fin.ver'] },
     { key: 'cuentas', label: 'Cuentas', icon: 'key', to: '/admin/cuentas', perms: ['admin.permisos'] },
     { key: 'roles', label: 'Roles y permisos', icon: 'shield', to: '/admin/roles', perms: ['admin.permisos'] },
     { key: 'funciones', label: 'Funciones de la iglesia', icon: 'toggle-right', to: '/admin/funciones', perms: ['admin.permisos'] },
     { key: 'reglas', label: 'Seguimiento y mensajes', icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
     { key: 'importar', label: 'Importar personas', icon: 'upload', to: '/importar', perms: ['personas.editar'] },
+    { key: 'copia', label: 'Copia de todos los datos', icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
     { key: 'ajustes', label: 'Ajustes', icon: 'settings', to: '/ajustes', perms: [] },
   ] },
 ];
