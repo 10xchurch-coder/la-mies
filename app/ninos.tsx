@@ -12,7 +12,8 @@ import { Header, Screen } from '@/components/Screen';
 import { Face } from '@/components/Face';
 import { Button, Card, Choice, Field, Loading, SectionTitle } from '@/components/ui';
 import { TicketScanner, scannerAvailable } from '@/components/TicketScanner';
-import { checkinsToday, searchPeople, type CheckinRow } from '@/lib/api';
+import { checkinsToday, childPickupAdults, searchPeople, type CheckinRow, type PickupAdult } from '@/lib/api';
+import { roleLabel } from '@/lib/families';
 import { checkInChildTags, childTags, pickupChild, type ChildTags } from '@/lib/chips';
 import { nfcBuilt, nfcState, readChip, writeChip } from '@/lib/nfc';
 import { adultProof, childPayload, parseTag, pickupCheck, pickupPayload } from '@/lib/tags';
@@ -42,7 +43,18 @@ export default function Ninos() {
   const t = useRef<ReturnType<typeof setTimeout> | null>(null);
   const web = Platform.OS === 'web';
 
-  const load = useCallback(() => { checkinsToday().then(setRows).catch((e) => { setRows([]); Alert.alert('No se pudo', errorMessage(e)); }); }, []);
+  // Los grandes de la familia de cada chico que pueden retirarlo (se cargan en la ficha, en "Familia").
+  const [pickup, setPickup] = useState<Record<string, PickupAdult[]>>({});
+  const load = useCallback(() => {
+    checkinsToday().then((list) => {
+      setRows(list);
+      childPickupAdults(list.filter((r) => !r.out_at).map((r) => r.child_id)).then((adults) => {
+        const by: Record<string, PickupAdult[]> = {};
+        for (const x of adults) (by[x.child_id] ??= []).push(x);
+        setPickup(by);
+      }).catch(() => undefined);
+    }).catch((e) => { setRows([]); Alert.alert('No se pudo', errorMessage(e)); });
+  }, []);
   useFocusEffect(useCallback(() => { load(); nfcState().then(setNfc); }, [load]));
 
   const onQ = (v: string) => {
@@ -240,6 +252,9 @@ export default function Ninos() {
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 15, fontWeight: '700', color: colors.text }}>{r.name}{r.age != null ? ` (${r.age})` : ''}</Text>
                     <Text style={{ fontSize: 12, color: colors.muted }}>{r.room} · entró {fmtTime(r.in_at)}{r.brought_by ? ` · lo trajo ${r.brought_by}` : ''}{r.out_at ? ` · salió ${fmtTime(r.out_at)}` : ''}</Text>
+                    {!r.out_at && pickup[r.child_id]?.length ? (
+                      <Text style={{ fontSize: 12, color: colors.greenText, fontWeight: '700' }}>Puede retirar: {pickup[r.child_id].map((x) => `${x.name} (${roleLabel(x.role).toLowerCase()})`).join(', ')}</Text>
+                    ) : null}
                     {!r.out_at ? <Text onPress={() => again(r)} accessibilityRole="button" style={{ fontSize: 12, fontWeight: '700', color: colors.blueText, paddingTop: 2 }}>Ver sus etiquetas</Text> : null}
                   </View>
                   {r.out_at ? <Feather name="check" size={18} color={colors.green} /> : (

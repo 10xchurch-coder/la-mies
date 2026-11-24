@@ -11,6 +11,7 @@ import { Feather } from '@expo/vector-icons';
 import { chooseWhatsApp, messageText, openWhatsApp, type MessageKind } from '@/lib/messages';
 import { showActions } from '@/components/ActionSheet';
 import { Header, Screen } from '@/components/Screen';
+import { FamilyCard } from '@/components/FamilyCard';
 import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { Avatar, Button, Card, Choice, Field, Loading, SectionTitle, Segmented, Tag, Toggle } from '@/components/ui';
@@ -470,6 +471,8 @@ export default function PersonaDetalle() {
               </View>
             </Card>
           ) : null}
+
+          <FamilyCard key={c.id} contactId={c.id} person={{ name: c.name, sex: c.sex, age: displayAge(c) }} canEdit={canEdit} canSetPickup={can('personas.editar')} />
 
           {ministries.length ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
