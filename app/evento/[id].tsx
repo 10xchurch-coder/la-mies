@@ -9,9 +9,9 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
 import { EventImage } from '@/components/EventImage';
-import { canPlan } from '@/lib/eventPlan';
+import { canPlan, myShifts, type Shift } from '@/lib/eventPlan';
 import { deleteEvent, deleteRegistration, eventRegistrationCount, eventRegistrations, getEvent, listCancellations, rsvpRows, saveRegistration, setRsvp } from '@/lib/api';
-import { addDays, dayName, fmtDateShort, fmtMoney, isoDate } from '@/lib/format';
+import { addDays, dayName, fmtDateShort, fmtDay, fmtMoney, fmtTime, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -51,6 +51,9 @@ export default function Evento() {
   // Los organizadores del evento (su equipo) también lo planifican, aunque no manejen el calendario.
   const [teamMember, setTeamMember] = useState(false);
   useEffect(() => { if (id) canPlan(id).then(setTeamMember).catch(() => undefined); }, [id]);
+  // Mis turnos para servir en este evento (si me dieron alguno).
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  useEffect(() => { if (id && session?.user.id) myShifts(id, session.user.id).then(setShifts).catch(() => undefined); }, [id, session?.user.id]);
   const mayPlan = staff || teamMember;
 
   const on = fecha ?? (ev ? isoDate(new Date(ev.starts_at)) : '');
@@ -221,6 +224,24 @@ export default function Evento() {
             <Text style={{ fontSize: 13, color: colors.muted, paddingVertical: 12 }}>{staff ? 'Podés agregar lugar, costo, transporte, qué llevar y el programa con "Editar".' : 'No hay más detalles por ahora.'}</Text>
           ) : null}
         </Card>
+
+        {shifts.length ? (
+          <>
+            <SectionTitle>Tus turnos para servir</SectionTitle>
+            <Card style={{ gap: 10 }}>
+              {shifts.map((x) => (
+                <View key={x.id} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+                  <Feather name="user-check" size={18} color={colors.green} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: colors.text }}>{x.place}</Text>
+                    <Text style={{ fontSize: 13, color: colors.muted }}>{fmtDay(x.starts_at)} · {fmtTime(x.starts_at)}{x.ends_at ? ` a ${fmtTime(x.ends_at)}` : ''}{x.note ? ` · ${x.note}` : ''}</Text>
+                  </View>
+                </View>
+              ))}
+              <Text style={{ fontSize: 12, color: colors.muted }}>Te va a llegar un aviso unas 2 horas antes de cada turno.</Text>
+            </Card>
+          </>
+        ) : null}
 
         {ev.registration && !ev.weekly ? (
           <>

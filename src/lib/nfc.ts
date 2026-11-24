@@ -35,11 +35,11 @@ const friendly = (e: unknown): Error => {
 };
 
 /** Lee el texto grabado en un chip. Null si el chip está vacío. Tira 'cancelado' si la persona cerró el lector. */
-export async function readChip(): Promise<string | null> {
+export async function readChip(message = 'Acercá la credencial a la parte de arriba del teléfono'): Promise<string | null> {
   const m = await mod();
   const { default: Nfc, NfcTech, Ndef } = m;
   try {
-    await Nfc.requestTechnology(NfcTech.Ndef, { alertMessage: 'Acercá la credencial a la parte de arriba del teléfono' });
+    await Nfc.requestTechnology(NfcTech.Ndef, { alertMessage: message });
     const tag = await Nfc.getTag();
     for (const rec of tag?.ndefMessage ?? []) {
       try {
@@ -71,4 +71,10 @@ export async function writeChip(text: string): Promise<void> {
   } finally {
     Nfc.cancelTechnologyRequest().catch(() => undefined);
   }
+}
+
+/** Deja de esperar un chip (para cuando se cierra la pantalla que estaba leyendo sin parar). */
+export function cancelChip(): void {
+  if (!nfcBuilt || !lib) return;
+  lib.default.cancelTechnologyRequest().catch(() => undefined);
 }
