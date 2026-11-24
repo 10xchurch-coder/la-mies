@@ -31,6 +31,11 @@ export const DESK_NAV: DeskGroup[] = [
   { title: 'Personas y seguimiento', tone: 'amber', items: [
     { key: 'personas', label: 'Personas', icon: 'users', to: '/escritorio/personas', perms: ['personas.ver_todas', 'personas.editar'] },
     { key: 'seguimiento', label: 'Para seguir', icon: 'user-check', to: '/seguimiento', perms: [] },
+    { key: 'discipulado', label: 'Discipulado', icon: 'book-open', to: '/discipulado', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'decisiones', label: 'Decisiones', icon: 'heart', to: '/decisiones', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'bienvenida', label: 'Visitas nuevas', icon: 'gift', to: '/bienvenida', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'tarjeta-visita', label: 'Tarjeta de visita (QR)', icon: 'grid', to: '/tarjeta-visita', perms: ['personas.ver_todas', 'inf.panel'] },
+    { key: 'clase-miembros', label: 'Clase de miembros', icon: 'award', to: '/clase-miembros', perms: ['personas.ver_todas', 'inf.panel'] },
     { key: 'ausencias', label: 'Faltaron', icon: 'user-x', to: '/ausencias', perms: ['personas.ver_todas', 'inf.panel'] },
     { key: 'inactivos', label: 'Inactivos', icon: 'user-minus', to: '/inactivos', perms: ['personas.ver_todas', 'personas.editar'] },
     { key: 'fidelidad', label: 'Fidelidad', icon: 'activity', to: '/fidelidad', perms: ['personas.ver_todas', 'inf.panel'] },

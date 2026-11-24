@@ -203,6 +203,11 @@ export default function Iglesia() {
       title: 'Personas y seguimiento', tone: 'amber',
       tiles: [
         { icon: 'user-check', label: 'Para seguir', to: '/seguimiento', show: true },
+        { icon: 'book-open', label: 'Discipulado', to: '/discipulado' as Href, show: isLeader },
+        { icon: 'heart', label: 'Decisiones', to: '/decisiones' as Href, show: isLeader },
+        { icon: 'gift', label: 'Visitas nuevas', to: '/bienvenida' as Href, show: isLeader },
+        { icon: 'grid', label: 'Tarjeta de visita (QR)', to: '/tarjeta-visita' as Href, show: isLeader },
+        { icon: 'award', label: 'Clase de miembros', to: '/clase-miembros' as Href, show: isLeader },
         { icon: 'user-x', label: 'Faltaron', to: '/ausencias', show: isLeader || !!(profile && church?.absence_recipients?.includes(profile.id)) },
         { icon: 'user', label: 'Hermanos', to: '/admin/miembros', show: isStaff },
         { icon: 'user-minus', label: 'Inactivos', to: '/inactivos' as Href, show: isStaff },
