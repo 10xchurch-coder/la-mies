@@ -145,8 +145,9 @@ export function run({ write = false } = {}) {
 
   const keys = new Map(); // clave -> { n, files:Set, holes:[], done:n ya envueltos }
   const review = []; // { file, line, why, text }
+  const pending = new Map(); // textos anotados para revisar: clave -> archivo
   const changed = [];
-  const stats = { files: files.length, wrapped: 0, already: 0, getters: 0, lists: 0, merged: 0, locales: 0 };
+  const stats = { files: files.length, wrapped: 0, already: 0, getters: 0, lists: 0, merged: 0, locales: 0, dynamic: 0 };
 
   // Paso A: textos que se usan para comparar pedazos (startsWith, includes) en cualquier archivo.
   const markers = new Set();
@@ -155,7 +156,7 @@ export function run({ write = false } = {}) {
     const visit = (n) => {
       if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && PREFIX_CALLS.has(n.expression.name.text)) {
         const a = n.arguments[0];
-        if (a && ts.isStringLiteralLike(a) && a.text.trim().length >= 4 && !ts.isArrayLiteralExpression(n.expression.expression)) markers.add(a.text.trim());
+        if (a && ts.isStringLiteralLike(a) && a.text.trim().length >= 4 && /[A-ZÁÉÍÓÚÑ\[¿¡]/.test(a.text) && !ts.isArrayLiteralExpression(n.expression.expression)) markers.add(a.text.trim());
       }
       ts.forEachChild(n, visit);
     };
@@ -167,7 +168,10 @@ export function run({ write = false } = {}) {
     const file = relative(ROOT, sf.fileName).split(sep).join('/');
     const text = sf.text;
     const lineOf = (n) => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1;
-    const note = (n, why, t) => review.push({ file, line: lineOf(n), why, text: String(t).trim().replace(/\s+/g, ' ').slice(0, 160) });
+    const note = (n, why, t, extra) => {
+      review.push({ file, line: lineOf(n), why, text: String(t).trim().replace(/\s+/g, ' ').slice(0, 160) });
+      for (const k of extra ?? []) if (isHuman(k) && !pending.has(k)) pending.set(k, file);
+    };
     const skipTexts = new Set([...(CONFIG.skipTexts['*'] ?? []), ...(CONFIG.skipTexts[file] ?? [])]);
     const lines = text.split('\n');
     const lineSkipped = (n) => {
@@ -342,11 +346,66 @@ export function run({ write = false } = {}) {
         return null;
       }
       if (insideDb(n)) { note(n, 'va a la base: no se tocó', s); return null; }
-      if (literalTyped(n)) { if (isHuman(s)) note(n, 'el tipo es una lista cerrada de valores', s); return null; }
+      if (literalTyped(n)) { if (isHuman(s)) note(n, 'el tipo es una lista cerrada de valores', s, [value]); return null; }
       const m = hitsMarker(s);
       if (m && !opts.jsxText) { note(n, `en otro lado se busca "${m}" con startsWith/includes`, s); return null; }
-      if (compared.has(value) && !(pl.kind === 'shown' && pl.direct)) { note(n, 'el mismo texto se compara en este archivo (===, case o clave)', s); return null; }
+      if (compared.has(value) && !(pl.kind === 'shown' && pl.direct)) { note(n, 'el mismo texto se compara en este archivo (===, case o clave)', s, [value]); return null; }
       return pl;
+    };
+
+    /** Los textos posibles de una expresión cuando su tipo es una lista cerrada ('Tarjeta' | 'Llavero'); null si no lo es o ninguno es para la gente. */
+    const literalValues = (e) => {
+      let ty;
+      try { ty = checker.getTypeAtLocation(e); } catch { return null; }
+      const parts = ty.isUnion() ? ty.types : [ty];
+      const vals = [];
+      for (const p of parts) {
+        if (!(p.flags & ts.TypeFlags.StringLiteral)) return null; // también corta si puede venir vacío (null): tx espera un texto
+        vals.push(p.value);
+      }
+      return vals.length && vals.length <= 60 && vals.some((v) => isHuman(v)) ? vals : null;
+    };
+    /** Si la variable es el elemento de un .map sobre una lista de textos escrita fuera de una función, devuelve esos textos. */
+    const originArray = (e) => {
+      if (!ts.isIdentifier(e)) return null;
+      let sym;
+      try { sym = checker.getSymbolAtLocation(e); } catch { return null; }
+      const d = sym?.declarations?.[0];
+      if (!d || !ts.isParameter(d) || !ts.isFunctionLike(d.parent) || d.parent.parameters[0] !== d) return null;
+      const call = d.parent.parent;
+      if (!ts.isCallExpression(call) || !ts.isPropertyAccessExpression(call.expression) || !['map', 'forEach', 'filter', 'find', 'flatMap'].includes(call.expression.name.text)) return null;
+      const src = call.expression.expression;
+      if (!ts.isIdentifier(src)) return null;
+      let s2;
+      try { s2 = checker.getSymbolAtLocation(src); if (s2 && s2.flags & ts.SymbolFlags.Alias) s2 = checker.getAliasedSymbol(s2); } catch { return null; }
+      const vd = s2?.declarations?.[0];
+      if (!vd || !ts.isVariableDeclaration(vd) || !vd.initializer) return null;
+      let init = vd.initializer;
+      while (ts.isAsExpression(init) || ts.isParenthesizedExpression(init)) init = init.expression;
+      if (ts.isCallExpression(init) && ts.isIdentifier(init.expression) && init.expression.text === FN_LIST) return null; // ya se traduce sola
+      if (!ts.isArrayLiteralExpression(init) || !init.elements.length || !init.elements.every((x) => ts.isStringLiteralLike(x))) return null;
+      const vals = init.elements.map((x) => x.text);
+      return vals.some((v) => isHuman(v)) ? vals : null;
+    };
+    /** Valores (no textos escritos ahí mismo) que se muestran y cuyo contenido es un texto fijo en castellano: se traducen al mostrarlos. */
+    const dynValues = (e) => {
+      if (!(ts.isIdentifier(e) || ts.isPropertyAccessExpression(e) || ts.isElementAccessExpression(e))) return null;
+      if (ts.isIdentifier(e) && (e.text === 'undefined' || OURS.has(e.text))) return null;
+      return literalValues(e) ?? originArray(e);
+    };
+    const dynamic = (n) => {
+      const p = n.parent;
+      if ((ts.isPropertyAccessExpression(p) && (p.expression === n || p.name === n)) || (ts.isElementAccessExpression(p) && p.expression === n) || (ts.isCallExpression(p) && p.expression === n)) return;
+      if (ts.isJsxAttribute(p) || ts.isShorthandPropertyAssignment(p) || ts.isJsxOpeningElement(p) || ts.isJsxSelfClosingElement(p) || ts.isJsxClosingElement(p) || ts.isBindingElement(p) || ts.isParameter(p) || ts.isVariableDeclaration(p) && p.name === n) return;
+      if (ts.isJsxExpression(p) && handled.has(p)) return; // lo resuelve la frase armada
+      if (insideOurs(n) || lineSkipped(n) || atModuleLevel(n)) return;
+      const pl = place(n);
+      if (pl.kind !== 'shown') return;
+      if (pl.viaTemplate && !ts.isJsxExpression(p)) return; // dentro de una plantilla lo resuelve la plantilla
+      const vals = dynValues(n);
+      if (!vals) return;
+      edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `${FN}(${text.slice(n.getStart(sf), n.getEnd())})` });
+      need.add(FN); vals.filter((v) => isHuman(v)).forEach((v) => useKey(v, holesOf(v))); stats.dynamic++; stats.wrapped++;
     };
 
     const holeName = (e, used) => {
@@ -369,7 +428,12 @@ export function run({ write = false } = {}) {
       used.set(k, { src, node: e });
       return k;
     };
-    const varsText = (used) => `{ ${[...used].map(([k, v]) => { const code = textOf(v.node); return code === k ? k : `${k}: ${code}`; }).join(', ')} }`;
+    const varsText = (used) => `{ ${[...used].map(([k, v]) => {
+      let code = textOf(v.node);
+      const vals = dynValues(v.node);
+      if (vals) { code = `${FN}(${code})`; vals.filter((x) => isHuman(x)).forEach((x) => useKey(x, holesOf(x))); stats.dynamic++; }
+      return code === k ? k : `${k}: ${code}`;
+    }).join(', ')} }`;
 
     // ---------- Recorrido (primero lo de adentro) ----------
     const handled = new Set(); // nodos de texto que ya resolvió un padre (frase armada)
@@ -386,11 +450,13 @@ export function run({ write = false } = {}) {
         const a = n.arguments[0];
         if (a && ts.isStringLiteralLike(a)) useKey(a.text, holesOf(a.text), true);
         else if (a && ts.isArrayLiteralExpression(a)) a.elements.forEach((e) => { if (ts.isStringLiteralLike(e)) useKey(e.text, [], true); });
+        else if (a && n.expression.text !== FN_LIST) { const vals = dynValues(a); if (vals) { vals.filter((v) => isHuman(v)).forEach((v) => useKey(v, holesOf(v))); stats.already++; } }
         return;
       }
       if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) { stringLit(n); return; }
       if (ts.isTemplateExpression(n)) { template(n); return; }
       if (ts.isArrayLiteralExpression(n)) { arrayLit(n); return; }
+      if (ts.isIdentifier(n) || ts.isPropertyAccessExpression(n) || ts.isElementAccessExpression(n)) { dynamic(n); return; }
     };
     const holesOf = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
 
@@ -483,7 +549,7 @@ export function run({ write = false } = {}) {
           edits.push({ start: a.getStart(sf), end: a.getEnd(), text: `get ${nameSrc}() { return ${FN}(${src}); }` });
           need.add(FN); useKey(n.text, holesOf(n.text)); stats.getters++; stats.wrapped++; return;
         }
-        note(n, 'texto fuera de una función (se crea una sola vez al abrir la app)', n.text); return;
+        note(n, 'texto fuera de una función (se crea una sola vez al abrir la app)', n.text, [n.text]); return;
       }
       edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `${FN}(${src})` });
       need.add(FN); useKey(n.text, holesOf(n.text)); stats.wrapped++;
@@ -526,7 +592,7 @@ export function run({ write = false } = {}) {
         edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `${FN_LIST}(${textOf(n)})` });
         need.add(FN_LIST); vals.forEach((v) => useKey(v, holesOf(v))); stats.lists++; stats.wrapped += vals.length; return;
       }
-      if (pl.kind !== 'no') note(n, 'lista de textos fuera de una función (¿se muestran o son valores?)', vals.filter((v) => isHuman(v)).slice(0, 6).join(' | '));
+      if (pl.kind !== 'no') note(n, 'lista de textos fuera de una función (¿se muestran o son valores?)', vals.filter((v) => isHuman(v)).slice(0, 6).join(' | '), vals);
     };
 
     visit(sf);
@@ -555,5 +621,5 @@ export function run({ write = false } = {}) {
       if (write) writeFileSync(sf.fileName, out);
     }
   }
-  return { keys, review, changed, stats };
+  return { keys, review, changed, stats, pending };
 }

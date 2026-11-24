@@ -23,5 +23,5 @@ const lines = [
 ];
 if (!dry) writeFileSync(join(ROOT, 'docs', 'INGLES-revisar.txt'), lines.join('\n'));
 console.log(`${dry ? 'PRUEBA (no se escribió nada). ' : ''}Archivos revisados: ${stats.files}. Archivos ${dry ? 'que cambiarían' : 'cambiados'}: ${changed.length}.`);
-console.log(`Textos envueltos ahora: ${stats.wrapped} (frases armadas: ${stats.merged}, propiedades fuera de función: ${stats.getters}, listas: ${stats.lists}). Ya estaban envueltos: ${stats.already}. 'es-AR' cambiados: ${stats.locales}.`);
+console.log(`Textos envueltos ahora: ${stats.wrapped} (frases armadas: ${stats.merged}, propiedades fuera de función: ${stats.getters}, listas: ${stats.lists}, valores traducidos al mostrarse: ${stats.dynamic}). Ya estaban envueltos: ${stats.already}. 'es-AR' cambiados: ${stats.locales}.`);
 console.log(`Claves distintas: ${keys.size}. Para revisar a mano: ${review.length}${dry ? '' : ' (docs/INGLES-revisar.txt)'}.`);
