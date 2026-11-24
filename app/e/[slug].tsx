@@ -52,6 +52,8 @@ export default function EventoPublico() {
   );
 
   const { church, event: e, types, speakers, sessions, updates, stream, ticket } = data;
+  // Solo se abre un enlace de pago que empiece con https:// (la base también lo exige).
+  const payUrl = ticket?.pay_url && /^https:\/\/\S+$/i.test(ticket.pay_url) ? ticket.pay_url : null;
   const tz = church.tz;
   const fmt = (iso: string, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('es-AR', { timeZone: tz, ...o }).format(new Date(iso));
   const dayLong = (iso: string) => fmt(iso, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -143,6 +145,20 @@ export default function EventoPublico() {
               <View style={{ padding: 12, borderRadius: 12, backgroundColor: ticket.paid ? C.greenSoft : C.amberSoft, gap: 4 }}>
                 <Text style={{ fontSize: 15, fontWeight: '800', color: C.text }}>{ticket.paid ? 'Entrada paga ✓' : `Falta pagar ${fmtMoney(Math.max(Number(ticket.to_pay) - Number(ticket.paid_amount), 0))}`}</Text>
                 {!ticket.paid && e.pay_info ? <Text selectable style={{ fontSize: 14, lineHeight: 20, color: C.text }}>{e.pay_info}</Text> : null}
+                {/* Botón "Pagar": abre el enlace de pago que pegó la iglesia (por ejemplo, de Mercado Pago). La app no cobra.
+                    El pago lo confirma una persona del equipo con "Marcar que pagó".
+                    ACÁ SE ENCHUFA LA CONFIRMACIÓN AUTOMÁTICA más adelante: cuando la iglesia tenga sus credenciales de Mercado Pago,
+                    este botón pasa a pedir un cobro propio de esta entrada (con ticket.token como referencia) a una función del servidor,
+                    y el aviso de pago (webhook) marca la entrada como paga sola. Ver la nota en supabase/migrations/0076. */}
+                {!ticket.paid && payUrl ? (
+                  <>
+                    <Pressable onPress={() => Linking.openURL(payUrl)} accessibilityRole="link" accessibilityLabel="Pagar la entrada"
+                      style={{ height: 50, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: C.green, marginTop: 6 }}>
+                      <Text style={{ fontSize: 17, fontWeight: '800', color: '#FFF' }}>Pagar</Text>
+                    </Pressable>
+                    <Text style={{ fontSize: 13, lineHeight: 18, color: C.text }}>Se abre la página de pago. Cuando la iglesia vea tu pago, acá va a decir “Entrada paga”. Puede tardar un rato. Guardá el comprobante.</Text>
+                  </>
+                ) : null}
               </View>
             ) : null}
             <Text style={{ fontSize: 13, color: C.muted, textAlign: 'center' }}>Guardá esta página o sacale una captura. Con este mismo enlace volvés a ver tu entrada.</Text>
