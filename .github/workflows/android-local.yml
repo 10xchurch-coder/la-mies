@@ -1,0 +1,42 @@
+# Compila la app de Android (AAB para Google Play) en GitHub, sin gastar las compilaciones del plan gratis de Expo.
+# Deja el archivo en la rama "tienda" (la-mies.aab) para subirlo a Google Play.
+name: App Android (en GitHub)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-local
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Compilar acá
+        run: |
+          eas build --platform android --profile production --local --non-interactive --output la-mies.aab
+          ls -la la-mies.aab
+      - name: Dejar el AAB en la rama tienda
+        run: |
+          mkdir tienda && cp la-mies.aab tienda/ && cd tienda && git init -q
+          git config user.name "la-mies-bot"; git config user.email "bot@users.noreply.github.com"
+          git checkout -q -b tienda && git add la-mies.aab && git commit -qm "AAB para Google Play"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tienda
