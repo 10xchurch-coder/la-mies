@@ -122,12 +122,11 @@ test('el mensaje para compartir el código', () => {
   assert.ok(withStores.includes('https://apple.ejemplo/app') && withStores.includes('https://play.ejemplo/app'));
 });
 
-test('"Necesito ayuda": un solo lugar para el contacto, sin nombres ni teléfonos personales', () => {
+test('"Necesito ayuda": un solo lugar para el contacto', () => {
   assert.equal(LA_MIES_TEAM.email, 'info@iglesiavictoria.com');
-  assert.equal(LA_MIES_TEAM.whatsapp, '');
   const h = helpLinks({ church: 'Iglesia Esperanza', step: 'Traé a tu gente' });
   assert.ok(h.mailto.startsWith('mailto:info@iglesiavictoria.com?subject='));
-  assert.equal(h.whatsapp, null);
+  assert.ok(h.whatsapp?.startsWith('https://wa.me/5493764857649?text='));
   assert.ok(h.text.includes('Iglesia Esperanza') && h.text.includes('Traé a tu gente'));
   const w = helpLinks({ team: { name: 'equipo', email: 'a@b.co', whatsapp: '+54 9 11 0000-0000' } });
   assert.ok(w.whatsapp?.startsWith('https://wa.me/5491100000000?text='));

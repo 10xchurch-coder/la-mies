@@ -9,7 +9,7 @@ import { tx } from './i18n';
 export const LA_MIES_TEAM = {
   get name() { return tx('el equipo de La Mies'); },
   email: 'info@iglesiavictoria.com',
-  whatsapp: '', // FALTA DECIDIR: el número de WhatsApp del equipo (hoy no hay ninguno cargado)
+  whatsapp: '+54 9 376 485-7649', // por ahora, el número que dio el dueño
 };
 
 /** FALTA COMPLETAR: los enlaces de las tiendas. Mientras estén vacíos, la app muestra solo la dirección web. */
