@@ -94,7 +94,7 @@ export const FEATURES: Feature[] = [
     routes: ['/ausencias'] },
   { key: 'fidelidad', parent: 'asistencia', label: 'Fidelidad y camino', group: 'Reuniones y enseñanza',
     hint: 'Cuánto viene cada uno y en qué paso está de su camino en la iglesia.',
-    hides: '"Fidelidad y camino".',
+    hides: 'El botón "Fidelidad y camino" del menú.',
     routes: ['/fidelidad'] },
   { key: 'asistencia_chips', parent: 'asistencia', label: 'Entrada con chip', group: 'Reuniones y enseñanza',
     hint: 'Cada persona tiene un chip (tarjeta, llavero o pulsera) y marca su asistencia sola al llegar.',
@@ -106,11 +106,11 @@ export const FEATURES: Feature[] = [
     routes: ['/culto'] },
   { key: 'presentar', get label() { return tx('Modo presentación'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('Mostrar en el proyector las letras de las canciones, pasajes de la Biblia, fotos, videos y una cuenta regresiva.'); },
-    hides: '"Modo presentación".',
+    hides: 'El botón "Modo presentación" y sus pantallas para el proyector.',
     routes: ['/presentar'] },
   { key: 'ninos', get label() { return tx('Entrada y retiro de los chicos'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('La guardería y las clases de los chicos, con una etiqueta para el chico y otra para el adulto que lo retira.'); },
-    hides: '"Entrada de los chicos".',
+    hides: 'El botón "Entrada de los chicos" y sus etiquetas.',
     routes: ['/ninos'] },
   { key: 'clases', get label() { return tx('Escuela dominical'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('Las clases, sus maestros, los turnos y la asistencia de cada clase.'); },
@@ -134,7 +134,7 @@ export const FEATURES: Feature[] = [
     routes: ['/predicas', '/t-predicas', '/predica'] },
   { key: 'predica_notas', parent: 'predicas', label: 'Notas de las prédicas', group: 'Reuniones y enseñanza',
     hint: 'Cada hermano completa y guarda sus notas de cada mensaje.',
-    hides: '"Mis notas de prédicas".',
+    hides: 'El botón "Mis notas de prédicas" y las notas dentro de cada mensaje.',
     routes: ['/predica/mis-notas'] },
   { key: 'vivo', get label() { return tx('Culto en vivo'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('La transmisión del culto, con comentarios y notas.'); },
@@ -142,7 +142,7 @@ export const FEATURES: Feature[] = [
     routes: ['/vivo'] },
   { key: 'preguntas', get label() { return tx('Caja de preguntas'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('Los hermanos mandan preguntas de la Biblia, con su nombre o sin él, y el pastor las responde.'); },
-    hides: '"Preguntas".',
+    hides: 'El botón "Preguntas" y el aviso de cada pregunta nueva.',
     routes: ['/preguntas'] },
 
   // ---------- La Biblia y crecer ----------
@@ -222,7 +222,7 @@ export const FEATURES: Feature[] = [
     routes: ['/oracion', '/t-oracion'] },
   { key: 'oracion_respondidas', parent: 'oracion', label: 'Oraciones respondidas', group: 'Comunidad',
     hint: 'Contar lo que Dios hizo, para que toda la iglesia dé gracias.',
-    hides: '"Oraciones respondidas".',
+    hides: 'El botón "Oraciones respondidas".',
     routes: ['/oraciones-respondidas'] },
   { key: 'chat', get label() { return tx('Chat de la iglesia'); }, group: 'Comunidad',
     get hint() { return tx('El chat de toda la iglesia.'); },
@@ -250,7 +250,7 @@ export const FEATURES: Feature[] = [
     routes: ['/cumples'] },
   { key: 'sugerencias', get label() { return tx('Sugerencias'); }, group: 'Comunidad',
     get hint() { return tx('Ideas y opiniones de los hermanos para el pastor.'); },
-    hides: '"Sugerencias".',
+    hides: 'El botón "Sugerencias" y el aviso de cada sugerencia nueva.',
     routes: ['/sugerencias'] },
   { key: 'misioneros', get label() { return tx('Misioneros'); }, group: 'Comunidad',
     get hint() { return tx('Los misioneros que sostiene la iglesia, con su informe de cada mes.'); },
@@ -266,19 +266,19 @@ export const FEATURES: Feature[] = [
     routes: ['/certificado'] },
   { key: 'rifas', get label() { return tx('Sorteos'); }, group: 'Comunidad',
     get hint() { return tx('Sorteos digitales: entran los que estuvieron presentes y la app saca al azar.'); },
-    hides: '"Sorteos".',
+    hides: 'El botón "Sorteos" y el botón de sortear dentro de un evento.',
     routes: ['/rifas'] },
   { key: 'cancionero', get label() { return tx('Cancionero'); }, group: 'Comunidad',
     get hint() { return tx('Las canciones que cantamos, con la letra y el enlace para escucharlas.'); },
-    hides: '"Cancionero".',
+    hides: 'El botón "Cancionero" del menú.',
     routes: ['/canciones'] },
   { key: 'musica', get label() { return tx('Música de la iglesia'); }, group: 'Comunidad',
     get hint() { return tx('Las listas de Spotify y YouTube Music con la música que cantamos y escuchamos.'); },
-    hides: '"Música".',
+    hides: 'El botón "Música" del menú.',
     routes: ['/musica', '/admin/musica'] },
   { key: 'radio', get label() { return tx('Radio de la iglesia'); }, group: 'Comunidad',
     get hint() { return tx('La radio FM y la radio por internet para escuchar desde la app.'); },
-    hides: '"Radio".',
+    hides: 'El botón "Radio" del menú.',
     routes: ['/radio', '/admin/radio'] },
 
   // ---------- Dinero e informes ----------
@@ -292,7 +292,7 @@ export const FEATURES: Feature[] = [
     routes: ['/finanzas/ofrendas', '/finanzas/ofrenda-estado', '/mis-ofrendas'] },
   { key: 'ofrendar', get label() { return tx('Ofrendar'); }, group: 'Dinero e informes',
     get hint() { return tx('Los datos de la cuenta de la iglesia para dar la ofrenda.'); },
-    hides: '"Ofrendar".',
+    hides: 'El botón "Ofrendar" con los datos de la cuenta.',
     routes: ['/dar'] },
   { key: 'informes', get label() { return tx('Informes y progreso'); }, group: 'Dinero e informes',
     get hint() { return tx('El informe semanal, los informes escritos y cómo viene la iglesia mes a mes.'); },
@@ -397,4 +397,10 @@ export function searchFeatures(q: string): Set<FeatureKey> {
     }
   }
   return out;
+}
+
+/** ¿Cambió algo de lo que decide qué se ve? (el orden de la lista no importa) */
+export function switchesChanged(a: { disabled_features?: readonly string[] | null; bible?: unknown } | null | undefined, b: { disabled_features?: readonly string[] | null; bible?: unknown } | null | undefined): boolean {
+  const list = (x: readonly string[] | null | undefined) => [...(x ?? [])].sort().join(',');
+  return list(a?.disabled_features) !== list(b?.disabled_features) || JSON.stringify(a?.bible ?? null) !== JSON.stringify(b?.bible ?? null);
 }

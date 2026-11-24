@@ -18,6 +18,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { FinAccount, FinCategory, FinFund, FinKind } from '@/types';
 import { tx, txLocale } from '@/lib/i18n';
+import { featureOn } from '@/lib/features';
 
 const TITLE: Record<FinKind, string> = { get income() { return tx('Ingreso'); }, get expense() { return tx('Gasto'); }, get transfer() { return tx('Pasar plata'); } };
 
@@ -59,7 +60,8 @@ export default function Movimiento() {
   const [bankBal, setBankBal] = useState<{ balance: number; path: string } | null>(null);   // saldo leído de la captura del banco
   const [busy, setBusy] = useState(false);
 
-  const trackDonors = !!church?.fin_track_donors;
+  // Si la iglesia apagó "Ofrendas por persona", tampoco se anota quién dio cada ingreso.
+  const trackDonors = !!church?.fin_track_donors && featureOn(church?.disabled_features, 'ofrendas_persona');
 
   useEffect(() => {
     Promise.all([finFunds(), finAccounts(), finCategories()]).then(([f, a, c]) => {

@@ -17,6 +17,7 @@ import { colors, themed } from '@/theme';
 import { CONTENT_MAX_WIDTH, useLayout } from '@/lib/layout';
 import type { Cancellation, ChurchService, SheetRow } from '@/types';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 const norm = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -212,9 +213,9 @@ export default function Asistencia() {
               </Pressable>
             ) : null}
             {/* Entrada con chip: cada hermano apoya su chip en este teléfono y queda presente (usa la misma función que esta pantalla). */}
-            <Pressable onPress={() => router.push({ pathname: '/asistencia-chip', params: { servicio: service.id, fecha: date } } as never)} accessibilityRole="button" hitSlop={8}>
+            <IfOn feature="asistencia_chips"><Pressable onPress={() => router.push({ pathname: '/asistencia-chip', params: { servicio: service.id, fecha: date } } as never)} accessibilityRole="button" hitSlop={8}>
               <Text style={styles.link}>{tx('Entrada con chip')}</Text>
-            </Pressable>
+            </Pressable></IfOn>
             <Pressable onPress={() => router.push({ pathname: '/suspender', params: { servicio: service.id } } as never)} accessibilityRole="button" hitSlop={8}>
               <Text style={styles.link}>{tx('Suspender una fecha próxima')}</Text>
             </Pressable>

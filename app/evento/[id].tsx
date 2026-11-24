@@ -17,6 +17,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ChurchEvent, EventRegistration } from '@/types';
 import { tx, txLocale } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
@@ -257,7 +258,7 @@ export default function Evento() {
                 <View style={{ gap: 6 }}>
                   <Tag text={tx('Estás inscripto{v1}', { v1: mine.people > 1 ? tx(' ({people} personas)', { people: mine.people }) : '' })} tone="green" />
                   {ev.reg_price ? <Text style={{ fontSize: 13, color: colors.muted }}>{mine.paid_amount >= ev.reg_price * mine.people ? tx('Pagado ✓') : tx('Falta pagar {fmtMoney}', { fmtMoney: fmtMoney(ev.reg_price * mine.people - mine.paid_amount) })}</Text> : null}
-                  <Button title={tx('Mi entrada (QR)')} icon="tag" onPress={() => router.push({ pathname: '/evento/boleto', params: { id: ev.id, fecha: on } } as never)} />
+                  <IfOn feature="evento_puerta"><Button title={tx('Mi entrada (QR)')} icon="tag" onPress={() => router.push({ pathname: '/evento/boleto', params: { id: ev.id, fecha: on } } as never)} /></IfOn>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <Button title={tx('Cambiar')} variant="outline" small onPress={openForm} style={{ flex: 1 }} />
                     <Button title={tx('Darme de baja')} variant="ghost" small onPress={() => deleteRegistration(mine.id).then(load)} style={{ flex: 1 }} />
@@ -321,18 +322,18 @@ export default function Evento() {
           </>
         ) : null}
 
-        {staff && ev.weekly ? (
+        <IfOn feature="asistencia">{staff && ev.weekly ? (
           <Button title={tx('Suspender una fecha / no hubo')} icon="slash" variant="outline" onPress={() => router.push({ pathname: '/suspender', params: { evento: ev.id } } as never)} />
-        ) : null}
-        {!ev.weekly && mayPlan ? (
+        ) : null}</IfOn>
+        <IfOn feature="evento_plan">{!ev.weekly && mayPlan ? (
           <Button title={tx('Planificar este evento')} icon="clipboard" onPress={() => router.push({ pathname: '/evento/plan', params: { id: ev.id } } as never)} />
-        ) : null}
-        {!ev.weekly && (staff || mayPlan || can('personas.asistencia')) ? (
+        ) : null}</IfOn>
+        <IfOn feature="evento_puerta">{!ev.weekly && (staff || mayPlan || can('personas.asistencia')) ? (
           <Button title={tx('Puerta: anotar y marcar entradas')} variant="outline" icon="log-in" onPress={() => router.push({ pathname: '/evento/puerta', params: { id: ev.id, fecha: on } } as never)} />
-        ) : null}
-        {!ev.weekly && staff ? (
+        ) : null}</IfOn>
+        <IfOn feature="rifas">{!ev.weekly && staff ? (
           <Button title={tx('Hacer un sorteo de este evento')} icon="gift" variant="outline" onPress={() => router.push({ pathname: '/rifas/nueva', params: { evento: ev.id, fecha: on } } as never)} />
-        ) : null}
+        ) : null}</IfOn>
         {staff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Button title={tx('Editar')} icon="edit-2" variant="outline" onPress={() => router.push({ pathname: '/evento/editar', params: { id: ev.id } })} style={{ flex: 1 }} />

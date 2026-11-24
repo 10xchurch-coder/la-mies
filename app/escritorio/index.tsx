@@ -202,7 +202,7 @@ export default function DeskHome() {
             </Panel>
           ) : null}
 
-          {(seesPeople || seesPanel) && on('asistencia') ? (
+          {(seesPeople || seesPanel) && on('ausencias') ? (
             <Panel title={tx('Faltaron el último fin de semana')} hint={absences ? tx('{n} en total · {n2} hace tres semanas o más', { n: absences.length, n2: absent3.length }) : tx('Cargando…')} action={tx('Ver todos')} onAction={() => router.push('/ausencias')}>
               {absences && !absences.length ? <EmptyLine text={tx('Nadie faltó. ¡Gloria a Dios!')} /> : null}
               {absentShown.map((a) => (
@@ -263,7 +263,7 @@ export default function DeskHome() {
                 </>
               );
             })() : null}
-            {(seesPeople || seesPanel) && on('asistencia') && absentRest.length ? (
+            {(seesPeople || seesPanel) && on('ausencias') && absentRest.length ? (
               <>
                 {absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length ? <Todo icon="message-circle" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 1).length} text={tx('faltaron este fin de semana: escribirles')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '1' } })} /> : null}
                 {absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length ? <Todo icon="calendar" n={absentRest.filter((a) => (a.weeks_missed ?? 1) === 2).length} text={tx('faltaron 2 semanas seguidas: coordinar visita')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '2' } })} /> : null}
@@ -289,9 +289,9 @@ export default function DeskHome() {
                 <Text style={{ fontSize: 13, fontWeight: '700', color: colors.amberText }}>{tx('Borrar estos recordatorios')}</Text>
               </Pressable>
             ) : null}
-            {(seesPeople || seesPanel) && on('asistencia') ? <Todo icon="user-x" n={absent3.length} text={tx('personas faltaron tres semanas o más')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '3' } })} /> : null}
-            {isPastor ? <Todo icon="mail" n={pmUnread} text={tx('mensajes privados sin leer')} onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
-            {moderates ? <Todo icon="message-square" n={newSuggestions} text={tx('sugerencias sin leer')} onPress={() => router.push('/sugerencias')} /> : null}
+            {(seesPeople || seesPanel) && on('ausencias') ? <Todo icon="user-x" n={absent3.length} text={tx('personas faltaron tres semanas o más')} onPress={() => router.push({ pathname: '/ausencias', params: { semanas: '3' } })} /> : null}
+            {isPastor && on('mensajes_pastor') ? <Todo icon="mail" n={pmUnread} text={tx('mensajes privados sin leer')} onPress={() => router.push('/pastor-bandeja' as Href)} /> : null}
+            {moderates && on('sugerencias') ? <Todo icon="message-square" n={newSuggestions} text={tx('sugerencias sin leer')} onPress={() => router.push('/sugerencias')} /> : null}
             {on('cumples') ? <Todo icon="gift" n={bdays.filter((b) => daysTo(b.next_on) <= 7).length} text={tx('cumpleaños en los próximos 7 días')} onPress={() => router.push('/cumples' as Href)} /> : null}
           </Panel>
 
@@ -340,7 +340,7 @@ export default function DeskHome() {
             ))}
           </Panel> : null}
 
-          {seesMoney && funds.length ? (
+          {seesMoney && on('finanzas') && funds.length ? (
             <Panel title={tx('Fondos')} hint={tx('Saldo de hoy')} action={tx('Finanzas')} onAction={() => router.push('/finanzas')}>
               {funds.map((f) => (
                 <View key={f.fund_id} style={styles.tRow}>

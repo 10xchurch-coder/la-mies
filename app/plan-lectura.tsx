@@ -13,6 +13,7 @@ import { addDays, isoDate } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
 import { colors } from '@/theme';
 import { tx, txLocale } from '@/lib/i18n';
+import { useFeatures } from '@/lib/useFeatures';
 
 /** El texto de una lectura, con cada pasaje tocable para abrirlo en la Biblia: "Génesis 50; Éxodo 1–2" tiene dos. */
 function ReadingText({ text, style, onOpen }: { text: string; style: object; onOpen: (at: { book: number; chapter: number }) => void }) {
@@ -33,6 +34,7 @@ const dayText = (startedOn: string, d: number) =>
 
 export default function PlanLectura() {
   const router = useRouter();
+  const { on: fOn } = useFeatures();
   const [row, setRow] = useState<BiblePlanRow | null | undefined>(undefined);
   const [showAll, setShowAll] = useState(false);
   const today = isoDate(new Date());
@@ -122,7 +124,7 @@ export default function PlanLectura() {
               {status.today ? line(status.day, true) : <Text style={{ fontSize: 16, color: colors.text, paddingVertical: 6 }}>{tx('Hoy no hay lectura nueva. {pl}', { pl: status.behind.length ? tx('Aprovechá para ponerte al día.') : tx('Vas al día.') })}</Text>}
               {(() => {
                 const at = status.today ? parseReading(status.today) : null;
-                return at ? <Button title={tx('Leerla en la Biblia')} icon="book-open" variant="outline" small onPress={() => openBible(at)} /> : null;
+                return at && fOn('biblia') ? <Button title={tx('Leerla en la Biblia')} icon="book-open" variant="outline" small onPress={() => openBible(at)} /> : null;
               })()}
             </Card>
 

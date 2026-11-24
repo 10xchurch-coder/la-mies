@@ -11,6 +11,8 @@ import { visitCardPublic, visitCardSubmit } from '@/lib/personasApi';
 import { formatPhone, phoneProblem } from '@/lib/phone';
 import { errorMessage } from '@/lib/supabase';
 import { tx } from '@/lib/i18n';
+import { publicPartOn } from '@/lib/funcionesData';
+import { FeatureOff } from '@/components/FeatureOff';
 
 // Colores propios y fijos (claros): la página la ve gente de afuera, con o sin modo oscuro.
 const C = { bg: '#F6F7F5', card: '#FFFFFF', text: '#17201A', muted: '#5F6B63', line: '#E3E7E2', green: '#1F6B45', greenSoft: '#E3F1E8', red: '#B3261E' };
@@ -22,9 +24,12 @@ export default function TarjetaDeVisita() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  // La iglesia puede apagar la tarjeta de visita: entonces esta página avisa en vez de mostrar el formulario.
+  const [partOff, setPartOff] = useState(false);
 
   useEffect(() => {
     visitCardPublic(token).then(setChurch).catch(() => setChurch(null));
+    publicPartOn('visita', token).then((on) => setPartOff(!on));
   }, [token]);
 
   const submit = async () => {
@@ -42,6 +47,7 @@ export default function TarjetaDeVisita() {
     }
   };
 
+  if (partOff) return <FeatureOff publicPage name="Tarjeta de visita" />;
   if (church === undefined) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: C.bg }}><ActivityIndicator color={C.green} size="large" /></View>;
   if (!church) return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 30, backgroundColor: C.bg }}>

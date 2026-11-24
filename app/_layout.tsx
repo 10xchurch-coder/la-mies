@@ -9,8 +9,11 @@ import React, { useEffect, useState } from 'react';
 import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
 import { Stack, usePathname, useRouter, useSegments, type Href } from 'expo-router';
-import { pathOn } from '@/lib/features';
-import { Alert, Platform } from 'react-native';
+import { featureInfo, featureOfPath, pathOn } from '@/lib/features';
+import { setChurchBible } from '@/lib/bible';
+import { useChurchSync } from '@/lib/useChurchSync';
+import { FeatureOff } from '@/components/FeatureOff';
+import { Platform, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -98,30 +101,31 @@ function useAuthGuard() {
   }, [loading, session, profile, first, router]);
 }
 
-/** Si la dirección es de una función que la iglesia apagó (por ejemplo, abriendo un aviso viejo), se vuelve al inicio. */
+/**
+ * Si la dirección es de una función que la iglesia apagó (un aviso viejo, un enlace guardado, un favorito),
+ * en vez de la pantalla se ve "Tu iglesia no usa esta parte". Devuelve la función apagada, o null si se puede abrir.
+ */
 function useFeatureGuard() {
-  const { church } = useAuth();
+  const { church, session } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const disabled = church?.disabled_features;
-  useEffect(() => {
-    if (!church || !disabled?.length) return;
-    if (!pathOn(disabled, pathname)) {
-      router.replace('/');
-      Alert.alert(tx('Función apagada'), tx('Tu iglesia no usa esta parte de la app.'));
-    }
-  }, [church, disabled, pathname, router]);
+  if (!session || !church || !disabled?.length || pathOn(disabled, pathname)) return null;
+  return featureOfPath(pathname);
 }
 
 function Gate() {
-  const { loading, session, realPerms: perms } = useAuth();
+  const { loading, session, realPerms: perms, church, can } = useAuth();
+  const router = useRouter();
+  // La Biblia que permite la iglesia: se deja lista antes de dibujar cualquier pantalla.
+  setChurchBible(church?.bible ?? null);
+  useChurchSync();
   const optIn = useLockOptIn();
   const cachedRequired = useLockRequiredCache();
   const required = perms.length ? needsAppLock(perms) : !!cachedRequired;
   useEffect(() => { if (perms.length) rememberLockRequired(needsAppLock(perms)); }, [perms]);
   useNotificationLinks();
   useAuthGuard();
-  useFeatureGuard();
+  const offKey = useFeatureGuard();
   const suspended = useChurchSuspended();
   if (loading || optIn === null || cachedRequired === null) return <Loading />;
   if (session && suspended) return <SuspendedScreen />;
@@ -132,6 +136,12 @@ function Gate() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
       {session ? <HideOnOutput><OutingBanner /><SharingBanner /><MemberViewBanner /></HideOnOutput> : null}
       {session ? <DemoRibbon /> : null}
+      {offKey ? (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg, zIndex: 50 }]}>
+          <FeatureOff name={featureInfo(offKey).label} canManage={can('admin.permisos')}
+            onHome={() => router.replace('/')} onManage={() => router.replace('/admin/funciones' as Href)} />
+        </View>
+      ) : null}
       <PhotoCropperHost />
     </LockGate>
   );

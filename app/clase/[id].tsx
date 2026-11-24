@@ -16,6 +16,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { ClassRow, ClassSchedule, ClassTeacher, Contact, Material, Profile } from '@/types';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 const DOW: Record<string, number> = { sun: 0, sat: 6, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5 };
 
@@ -184,8 +185,8 @@ export default function Clase() {
         ) : null}
 
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button title={tx('Lecciones')} icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/clase/lecciones', params: { id } } as never)} style={{ flex: 1 }} />
-          <Button title={tx('Versículos')} icon="award" variant="outline" small onPress={() => router.push({ pathname: '/clase/versiculos', params: { id } } as never)} style={{ flex: 1 }} />
+          <IfOn feature="clase_lecciones"><Button title={tx('Lecciones')} icon="book-open" variant="outline" small onPress={() => router.push({ pathname: '/clase/lecciones', params: { id } } as never)} style={{ flex: 1 }} /></IfOn>
+          <IfOn feature="clase_versiculos"><Button title={tx('Versículos')} icon="award" variant="outline" small onPress={() => router.push({ pathname: '/clase/versiculos', params: { id } } as never)} style={{ flex: 1 }} /></IfOn>
         </View>
 
         <SectionTitle>{tx('Próximas clases')}</SectionTitle>

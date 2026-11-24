@@ -9,6 +9,7 @@ import { Header, Screen } from '@/components/Screen';
 import { Empty, Loading } from '@/components/ui';
 import { listNotifications, markRead } from '@/lib/api';
 import { fmtRelativeDay, fmtTime } from '@/lib/format';
+import { useFeatures } from '@/lib/useFeatures';
 import { colors } from '@/theme';
 import type { NotificationRow } from '@/types';
 import { tx } from '@/lib/i18n';
@@ -18,13 +19,16 @@ const ICON: Record<string, IconName> = { duty: 'calendar', class: 'book-open', m
 
 export default function Avisos() {
   const router = useRouter();
+  const { pathOk, disabled } = useFeatures();
+  const off = disabled.join(',');
   const [rows, setRows] = useState<NotificationRow[] | null>(null);
   const [showOld, setShowOld] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      listNotifications().then(setRows).catch(() => setRows([]));
-    }, []),
+      // Los avisos viejos de una función que la iglesia apagó no se muestran (los nuevos ya ni se crean).
+      listNotifications().then((list) => setRows(list.filter((n) => !n.link || pathOk(n.link)))).catch(() => setRows([]));
+    }, [off]),
   );
 
   const open = async (n: NotificationRow) => {

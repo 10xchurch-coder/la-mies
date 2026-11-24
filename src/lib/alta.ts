@@ -162,19 +162,32 @@ export const STATE_LABEL: Record<StepState, string> = { get done() { return tx('
 
 // ---------- Los modelos de funciones ----------
 export type PresetKey = 'basico' | 'completa' | 'elijo';
-/** "Lo básico": lo que casi toda iglesia usa desde el primer día. */
-export const BASIC_ON: FeatureKey[] = ['asistencia', 'devocional', 'oracion', 'eventos', 'directorio', 'cumples', 'anuncios', 'seguimiento', 'ofrendar'];
-/** "Iglesia completa": todo, menos lo que pide equipo o cuentas aparte (radio, transmisión en vivo, música). */
-export const FULL_OFF: FeatureKey[] = ['vivo', 'musica', 'radio'];
-export const PRESETS: { key: PresetKey; label: string; hint: string }[] = [
-  { key: 'basico', get label() { return tx('Lo básico'); }, get hint() { return tx('Asistencia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.'); } },
-  { key: 'completa', get label() { return tx('Iglesia completa'); }, get hint() { return tx('Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo radio, culto en vivo y música.'); } },
-  { key: 'elijo', get label() { return tx('Elijo yo'); }, get hint() { return tx('Prendé y apagá cada parte una por una.'); } },
+/** "Lo básico": lo que casi toda iglesia usa desde el primer día (con sus partes más simples). */
+export const BASIC_ON: FeatureKey[] = [
+  'asistencia', 'ausencias', 'seguimiento',
+  'biblia', 'biblia_buscar', 'biblia_referencias', 'biblia_originales', 'biblia_marcas', 'biblia_imagen', 'biblia_audio', 'devocional', 'plan_lectura',
+  'oracion', 'oracion_respondidas', 'eventos', 'directorio', 'hogares', 'cumples', 'anuncios', 'ofrendar',
 ];
-/** Qué queda apagado con cada modelo. "Elijo yo" no cambia nada. */
-export function presetOff(key: PresetKey, current: readonly string[] | null | undefined = []): FeatureKey[] {
-  if (key === 'basico') return FEATURES.map((f) => f.key).filter((k) => !BASIC_ON.includes(k));
-  if (key === 'completa') return [...FULL_OFF];
+/** Una iglesia grande, aun empezando por lo básico, casi siempre necesita esto. */
+export const BASIC_BIG_ON: FeatureKey[] = ['ninos', 'clases', 'ministerios'];
+/** "Iglesia completa": todo, menos lo que pide equipo o cuentas aparte (radio, transmisión en vivo, música) y anotar quién dio cada ofrenda. */
+export const FULL_OFF: FeatureKey[] = ['vivo', 'musica', 'radio', 'ofrendas_persona'];
+/** En una iglesia chica, además, queda apagado lo que es para mucha gente (chips, puerta y credenciales de eventos grandes). Se prende cuando haga falta. */
+export const SMALL_OFF: FeatureKey[] = ['asistencia_chips', 'evento_plan', 'evento_puerta', 'evento_credenciales', 'evento_contador'];
+export const isSmall = (size: string | null | undefined): boolean => size === '1-30' || size === '31-80';
+export const isBig = (size: string | null | undefined): boolean => size === '201-500' || size === '500+';
+export const PRESETS: { key: PresetKey; label: string; hint: string }[] = [
+  { key: 'basico', get label() { return tx('Lo básico'); }, hint: 'Asistencia, Biblia, devocional, oración, eventos, anuncios, cumpleaños, directorio, seguimiento y ofrendar. Lo demás queda apagado.' },
+  { key: 'completa', get label() { return tx('Iglesia completa'); }, hint: 'Casi todo prendido: clases, ministerios, finanzas, evangelismo y más. Queda apagado solo lo que pide algo aparte.' },
+  { key: 'elijo', get label() { return tx('Elijo yo'); }, hint: 'Empezás con lo que hay ahora y prendés o apagás cada parte.' },
+];
+/** Qué queda apagado con cada modelo, según el tamaño que la iglesia dijo al anotarse. "Elijo yo" no cambia nada. */
+export function presetOff(key: PresetKey, current: readonly string[] | null | undefined = [], size?: string | null): FeatureKey[] {
+  if (key === 'basico') {
+    const on = isBig(size) ? [...BASIC_ON, ...BASIC_BIG_ON] : BASIC_ON;
+    return FEATURES.map((f) => f.key).filter((k) => !on.includes(k));
+  }
+  if (key === 'completa') return isSmall(size) ? [...FULL_OFF, ...SMALL_OFF] : [...FULL_OFF];
   return cleanDisabled(current ?? []);
 }
 /** Los cambios que hay que pedir para pasar de lo que hay a lo que se quiere (uno por función que cambia). */

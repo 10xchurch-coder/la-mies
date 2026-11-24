@@ -15,6 +15,7 @@ import { colors } from '@/theme';
 import type { PrayerRow, Profile } from '@/types';
 import { moderate } from '@/lib/moderation';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
 
 const VIS_LABEL = { church: 'Toda la iglesia', pastor: 'Solo el pastor', people: 'Personas elegidas' } as const;
 
@@ -113,7 +114,7 @@ export default function Oracion() {
         ) : (
           <Button title={tx('Pedir oración')} icon="plus" onPress={() => setWriting(true)} />
         )}
-        <Button title={tx('Oraciones respondidas')} icon="sun" variant="outline" small onPress={() => router.push('/oraciones-respondidas' as Href)} />
+        <IfOn feature="oracion_respondidas"><Button title={tx('Oraciones respondidas')} icon="sun" variant="outline" small onPress={() => router.push('/oraciones-respondidas' as Href)} /></IfOn>
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="heart" title={tx('No hay pedidos')} text={tx('Cuando alguien pida oración, aparece acá.')} /> : null}
         {(rows ?? []).map((r) => (
           <Card key={r.id} style={{ gap: 8, padding: 12 }}>
