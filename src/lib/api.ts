@@ -1210,6 +1210,8 @@ export async function savePresentSet(id: string, name: string, items: unknown[])
 }
 export async function deletePresentSet(id: string): Promise<void> {
   ok(await supabase.from('present_sets').delete().eq('id', id));
+}
+
 // ---------------------------------------------------------------------------
 // Familias (migración 0075). Una familia es solo un vínculo entre personas:
 // la asistencia y el seguimiento siguen siendo de cada uno.
