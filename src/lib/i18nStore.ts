@@ -11,7 +11,11 @@ async function ensureDict(l: Lang): Promise<boolean> {
   if (hasDict(l)) return true;
   try {
     // Un import() por idioma: en la web cada uno sale como un archivo aparte que se baja solo si hace falta.
-    if (l === 'en') registerDict('en', (await import('../i18n/en.json')).default as Record<string, string>);
+    if (l === 'en') {
+      // Según dónde corra (web o teléfono), la lista viene en `default` o suelta.
+      const mod = (await import('../i18n/en.json')) as unknown as { default?: Record<string, string> } & Record<string, string>;
+      registerDict('en', mod.default ?? mod);
+    }
     return hasDict(l);
   } catch {
     return false;
