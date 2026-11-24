@@ -11,13 +11,18 @@ import { tx } from '@/lib/i18n';
 
 export const APP_VERSION = `${Constants.expoConfig?.version ?? '?'} (${Constants.expoConfig?.android?.versionCode ?? Constants.expoConfig?.ios?.buildNumber ?? '?'})`;
 
+/** La pantalla donde pasó (solo la dirección, sin lo que va después del "?"). En el teléfono no se sabe desde acá. */
+function currentRoute(): string | null {
+  try { return Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.pathname.slice(0, 120) : null; } catch { return null; }
+}
+
 export async function reportError(err: unknown, info?: Record<string, unknown>): Promise<void> {
   try {
     const e = err instanceof Error ? err : new Error(String(err));
     await supabase.rpc('log_app_error', {
       p_message: e.message,
       p_stack: (e.stack ?? '').slice(0, 8000),
-      p_info: info ?? null,
+      p_info: { ...(info ?? {}), ruta: currentRoute() },
       p_platform: Platform.OS,
       p_version: APP_VERSION,
     });

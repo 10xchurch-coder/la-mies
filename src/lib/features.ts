@@ -137,6 +137,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = ['Evangelismo y visitas', 'Reunion
 export const CORE_ROUTES = [
   '/', '/login', '/demo', '/registro', '/registro-enviado', '/recuperar', '/empezar', '/ajustes', '/seguridad', '/avisos', '/panel', '/importar',
   '/persona', '/contacto', '/personas', '/iglesia', '/yo', '/admin', '/escritorio', '/miembro-vista', '/inactivos',
+  '/central', // La Mies Central: solo el equipo de La Mies; ninguna iglesia lo puede apagar
 ];
 
 const BY_KEY = new Map(FEATURES.map((f) => [f.key, f]));

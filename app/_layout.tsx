@@ -10,6 +10,7 @@ import { ActionSheetHost } from '@/components/ActionSheet';
 import { RulesGate } from '@/components/RulesGate';
 import { Stack, usePathname, useRouter, useSegments, type Href } from 'expo-router';
 import { pathOn } from '@/lib/features';
+import { pingCentral } from '@/lib/centralData';
 import { Alert, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
@@ -26,7 +27,7 @@ import { loadDeskPref } from '@/components/desk/DeskShell';
 import { rememberLockRequired, useLockOptIn, useLockRequiredCache } from '@/lib/lockPref';
 import { needsAppLock } from '@/lib/perms';
 import { Loading } from '@/components/ui';
-import { ErrorBoundary, reportError } from '@/components/ErrorScreen';
+import { APP_VERSION, ErrorBoundary, reportError } from '@/components/ErrorScreen';
 import { loadThemeMode } from '@/lib/themeStore';
 import { loadLang, useLang } from '@/lib/i18nStore';
 import { loadTabs } from '@/lib/tabsPref';
@@ -114,7 +115,9 @@ function useFeatureGuard() {
 }
 
 function Gate() {
-  const { loading, session, realPerms: perms } = useAuth();
+  const { loading, session, realPerms: perms, profile } = useAuth();
+  // Para La Mies Central: contar cuántos usan la app, con qué versión e idioma (nunca qué hace cada uno).
+  useEffect(() => { if (session && profile?.church_id) pingCentral(session.user.id, APP_VERSION); }, [session, profile?.church_id]);
   const optIn = useLockOptIn();
   const cachedRequired = useLockRequiredCache();
   const required = perms.length ? needsAppLock(perms) : !!cachedRequired;

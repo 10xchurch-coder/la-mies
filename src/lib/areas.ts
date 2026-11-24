@@ -18,7 +18,7 @@ const BY_SEGMENT: Record<string, AreaTone> = {
   reporte: 'teal', 'progreso-iglesia': 'teal', panel: 'teal', equipo: 'teal', salidas: 'teal', salida: 'teal', 'salida-chat': 'teal', salieron: 'teal', informes: 'teal',
   zonas: 'teal', zona: 'teal', vereda: 'teal', mapa: 'teal', tablero: 'teal', resumen: 'teal', recortar: 'teal', ubicacion: 'teal',
   // Administración
-  finanzas: 'pink', admin: 'pink', 'miembro-vista': 'pink', importar: 'pink', ajustes: 'pink', seguridad: 'pink',
+  finanzas: 'pink', admin: 'pink', central: 'pink', 'miembro-vista': 'pink', importar: 'pink', ajustes: 'pink', seguridad: 'pink',
 };
 const ADMIN_PEOPLE = new Set(['miembros', 'miembro', 'inactivos']);
 // Pantallas que viven en /admin pero son de "Crecer" (así figuran en el menú).

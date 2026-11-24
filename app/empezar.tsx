@@ -7,6 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Choice, Field, Loading } from '@/components/ui';
 import { PasswordField } from '@/components/PasswordField';
+import { logHelp } from '@/lib/centralData';
 import { COUNTRIES, draftFromMeta, helpLinks, signupProblems, SIZES, timezoneForCountry, type SignupDraft, type SignupForm } from '@/lib/alta';
 import { selfServeCreate } from '@/lib/altaData';
 import { checkPassword, leakedCount, LEAKED_MSG } from '@/lib/password';
@@ -175,7 +176,7 @@ export default function Empezar() {
               <Text style={styles.linkText}>{tx('Ya tengo cuenta: entrar')}</Text>
             </Pressable>
           ) : null}
-          <Pressable onPress={() => { Linking.openURL(help.whatsapp ?? help.mailto).catch(() => undefined); }} accessibilityRole="button" style={styles.link}>
+          <Pressable onPress={() => { logHelp({ step: 'Anotar mi iglesia', screen: '/empezar', church: f.church.trim() || null }); Linking.openURL(help.whatsapp ?? help.mailto).catch(() => undefined); }} accessibilityRole="button" style={styles.link}>
             <Text style={styles.linkText}>{tx('Necesito ayuda')}</Text>
           </Pressable>
           <Text style={styles.small}>{help.email}</Text>

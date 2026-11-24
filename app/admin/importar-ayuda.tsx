@@ -6,6 +6,7 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Loading } from '@/components/ui';
 import { helpLinks } from '@/lib/alta';
+import { logHelp } from '@/lib/centralData';
 import { altaState, requestImportHelp } from '@/lib/altaData';
 import { downloadText } from '@/lib/download';
 import { fmtDayYear } from '@/lib/format';
@@ -39,7 +40,7 @@ export default function ImportarAyuda() {
   if (asked === undefined) return <Loading />;
 
   const h = helpLinks({ church: church?.name, step: tx('Quiero que me carguen la lista de personas') });
-  const write = () => { Linking.openURL(h.whatsapp ?? h.mailto).catch(() => Alert.alert(tx('Escribinos'), h.email)); };
+  const write = () => { logHelp({ step: 'Quiero que me carguen la lista de personas', screen: '/admin/importar-ayuda' }); Linking.openURL(h.whatsapp ?? h.mailto).catch(() => Alert.alert(tx('Escribinos'), h.email)); };
   const ask = async (on: boolean) => {
     setBusy(true);
     try {

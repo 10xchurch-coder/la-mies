@@ -10,6 +10,8 @@ export type DeskItem = {
   to: string;
   /** Alcanza con tener uno de estos permisos. Vacío: lo ve cualquiera que entra al escritorio. */
   perms: string[];
+  /** Además de los permisos, hace falta esta marca (no es un permiso de la iglesia): 'central' = equipo de La Mies, 'net' = dueño de la red. */
+  when?: string;
 };
 export type DeskTone = 'green' | 'blue' | 'amber' | 'violet' | 'teal' | 'pink';
 export type DeskGroup = { title: string; tone: DeskTone; items: DeskItem[] };
@@ -77,7 +79,19 @@ export const DESK_NAV: DeskGroup[] = [
     { key: 'reglas', get label() { return tx('Seguimiento y mensajes'); }, icon: 'message-circle', to: '/admin/seguimiento', perms: ['admin.iglesia'] },
     { key: 'importar', get label() { return tx('Importar personas'); }, icon: 'upload', to: '/importar', perms: ['personas.editar'] },
     { key: 'copia', get label() { return tx('Copia de todos los datos'); }, icon: 'download', to: '/admin/copia', perms: ['admin.permisos'] },
+    { key: 'ayuda-lamies', label: 'Pedir ayuda a La Mies', icon: 'life-buoy', to: '/admin/ayuda', perms: ['admin.iglesia', 'admin.permisos'] },
     { key: 'ajustes', get label() { return tx('Ajustes'); }, icon: 'settings', to: '/ajustes', perms: [] },
+  ] },
+  // Solo para el equipo de La Mies (la iglesia que hospeda la app). Las demás iglesias no lo ven ni lo pueden apagar.
+  { title: 'La Mies Central', tone: 'pink', items: [
+    { key: 'central', label: 'Resumen de la red', icon: 'globe', to: '/central', perms: [], when: 'central' },
+    { key: 'central-iglesias', label: 'Iglesias', icon: 'home', to: '/central/iglesias', perms: [], when: 'central' },
+    { key: 'central-ayuda', label: 'Pedidos de ayuda', icon: 'life-buoy', to: '/central/ayuda', perms: [], when: 'central' },
+    { key: 'central-ideas', label: 'Ideas para La Mies', icon: 'zap', to: '/central/ideas', perms: [], when: 'central' },
+    { key: 'central-errores', label: 'Errores de la app', icon: 'alert-triangle', to: '/central/errores', perms: [], when: 'central' },
+    { key: 'central-informes', label: 'Informes de la red', icon: 'bar-chart', to: '/central/informes', perms: [], when: 'central' },
+    { key: 'central-equipo', label: 'Equipo de La Mies', icon: 'shield', to: '/central/equipo', perms: [], when: 'central' },
+    { key: 'red', label: 'Crear iglesias e invitar pastores', icon: 'plus-circle', to: '/admin/red', perms: [], when: 'net' },
   ] },
 ];
 
@@ -86,10 +100,10 @@ export function canUseDesk(perms: string[]): boolean {
   return perms.some((p) => p === 'personas.ver_todas' || p === 'personas.editar' || p === 'inf.panel' || p === 'fin.ver' || p.startsWith('admin.'));
 }
 
-/** El menú del costado, solo con lo que esta persona puede abrir. */
-export function deskNavFor(perms: string[], disabled?: Disabled): DeskGroup[] {
+/** El menú del costado, solo con lo que esta persona puede abrir. `flags`: marcas que no son permisos de la iglesia (ver DeskItem.when). */
+export function deskNavFor(perms: string[], disabled?: Disabled, flags: readonly string[] = []): DeskGroup[] {
   return DESK_NAV
-    .map((g) => ({ title: g.title, tone: g.tone, items: g.items.filter((i) => (!i.perms.length || i.perms.some((p) => perms.includes(p))) && pathOn(disabled, i.to)) }))
+    .map((g) => ({ title: g.title, tone: g.tone, items: g.items.filter((i) => (!i.when || flags.includes(i.when)) && (!i.perms.length || i.perms.some((p) => perms.includes(p))) && pathOn(disabled, i.to)) }))
     .filter((g) => g.items.length > 0);
 }
 

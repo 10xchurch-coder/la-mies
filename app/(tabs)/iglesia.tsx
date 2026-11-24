@@ -29,6 +29,7 @@ import { fmtRelativeDay } from '@/lib/format';
 import { VerseCard } from '@/components/VerseCard';
 import type { DailyContent, DailySocial } from '@/types';
 import { useAuth } from '@/store/auth';
+import { useCentralRole } from '@/lib/centralData';
 import { useFeatures } from '@/lib/useFeatures';
 import { useChurchExtras } from '@/lib/useChurchExtras';
 import { SetupBanner } from '@/components/SetupBanner';
@@ -54,6 +55,7 @@ export function greeting(d = new Date()): string {
 export default function Iglesia() {
   const router = useRouter();
   const { profile, church, isStaff, isLeader, financeLevel, can, perms } = useAuth();
+  const centralRole = useCentralRole();
   const extras = useChurchExtras();
   const [live, setLive] = useState<{ id: string; title: string | null } | null>(null);
   const [upcoming, setUpcoming] = useState<UpcomingItem[]>([]);
@@ -248,7 +250,9 @@ export default function Iglesia() {
         { icon: 'eye', label: tx('Ver como miembro'), to: '/miembro-vista' as Href, show: can('admin.permisos') },
         { icon: 'download', label: tx('Copia de todos los datos'), to: '/admin/copia' as Href, show: can('admin.permisos') },
         { icon: 'flag', label: tx('Primeros pasos'), to: '/admin/alta' as Href, show: extras.is_new && can('admin.iglesia') },
+        { icon: 'life-buoy', label: 'Pedir ayuda a La Mies', to: '/admin/ayuda' as Href, show: can('admin.iglesia') || can('admin.permisos') },
         { icon: 'globe', label: tx('Iglesias de la red'), to: '/admin/red' as Href, show: !!profile?.is_network_admin },
+        { icon: 'grid', label: 'La Mies Central', to: '/central' as Href, show: !!centralRole },
       ],
     },
   ];
