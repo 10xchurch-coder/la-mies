@@ -13,7 +13,7 @@ let asWritten = true;
 export function setDailyVerseWritten(v: boolean | null | undefined): void { asWritten = v !== false; }
 
 /** La sigla que va al lado del versículo del día. */
-export const bibleOf = (item: { bible?: string | null } | null | undefined): string => item?.bible ?? WRITTEN_SHORT;
+export const bibleOf = (item: object | null | undefined): string => (item as { bible?: string | null } | null | undefined)?.bible ?? WRITTEN_SHORT;
 
 /** Junta los versículos de una cita ("Juan 3:16-17") en una versión. null si no se puede. */
 export function verseTextIn(version: BibleVersion, reference: string): string | null {
