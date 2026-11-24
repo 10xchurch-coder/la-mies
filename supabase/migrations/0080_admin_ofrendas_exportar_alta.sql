@@ -224,17 +224,22 @@ $$;
 revoke all on function public.admin_token_hash(text) from public, anon, authenticated;
 
 -- Crear una iglesia nueva con su primer código para los miembros.
+-- Ojo: el sello automático de church_services pone la iglesia de quien está logueado. Por eso, mientras se arma
+-- la iglesia nueva, la función queda un momento "sin sesión": así las reuniones de inicio quedan en la iglesia NUEVA.
 create or replace function public.admin_create_church(p_name text, p_city text, p_timezone text, p_join_code text default null, p_country text default 'AR')
 returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
+  v_uid  uuid := auth.uid();
   v_name text := btrim(coalesce(p_name, ''));
   v_tz   text := btrim(coalesce(p_timezone, ''));
   v_code text := upper(btrim(coalesce(p_join_code, '')));
   v_country text := upper(btrim(coalesce(p_country, 'AR')));
+  v_claims text := current_setting('request.jwt.claims', true);
+  v_sub    text := current_setting('request.jwt.claim.sub', true);
   v_id   uuid;
 begin
-  if auth.uid() is null then raise exception 'No hay sesión'; end if;
+  if v_uid is null then raise exception 'No hay sesión'; end if;
   if public.admin_is_net() is not true then raise exception 'Solo el administrador de la red crea iglesias'; end if;
   if length(v_name) < 3 or length(v_name) > 120 then raise exception 'Escribí el nombre de la iglesia'; end if;
   if not exists (select 1 from pg_timezone_names where name = v_tz) then raise exception 'Zona horaria desconocida'; end if;
@@ -248,15 +253,20 @@ begin
     raise exception 'Ese código ya lo usa otra iglesia. Elegí otro.';
   end if;
 
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('request.jwt.claim.sub', '', true);
   insert into public.churches (name, city, country, timezone)
     values (v_name, nullif(btrim(coalesce(p_city, '')), ''), v_country, v_tz)
     returning id into v_id;
   perform public.ensure_default_services(v_id);
   perform public.fin_ensure_defaults(v_id);
   insert into public.church_join_codes (church_id, code) values (v_id, v_code);
-  insert into public.admin_church_settings (church_id, setup_pending, created_by) values (v_id, true, auth.uid());
+  insert into public.admin_church_settings (church_id, setup_pending, created_by) values (v_id, true, v_uid);
   insert into public.audit_log (church_id, actor_id, action, target, details)
-    values (v_id, auth.uid(), 'admin_create_church', v_id::text, jsonb_build_object('name', v_name));
+    values (v_id, v_uid, 'admin_create_church', v_id::text, jsonb_build_object('name', v_name));
+  perform set_config('request.jwt.claims', coalesce(v_claims, ''), true);
+  perform set_config('request.jwt.claim.sub', coalesce(v_sub, ''), true);
+  if auth.uid() is distinct from v_uid then raise exception 'No se pudo volver a la sesión'; end if;
   return jsonb_build_object('church_id', v_id, 'join_code', v_code);
 end $$;
 
