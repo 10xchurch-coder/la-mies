@@ -42,7 +42,7 @@ export default function Clases() {
       <Header title={isLeader ? 'Clases' : 'Mis clases'} subtitle="Escuela dominical · sábado y domingo" back />
       <Screen>
         {can('ens.editar') ? <Button title="Planificar el mes (sugerencia automática)" icon="shuffle" variant="outline" onPress={() => router.push('/clase/planificar')} /> : null}
-        {classes && !classes.length ? <Empty icon="book" title="No hay clases cargadas" text="El pastor o la secretaría las crea desde la base de datos (ya vienen Cuna, 2 a 6 y 6 a 12)." /> : null}
+        {classes && !classes.length ? <Empty icon="book" title="No hay clases cargadas" text="El pastor o la secretaría las crea desde Primeros pasos o desde Clases." /> : null}
         {(classes ?? []).map((k) => {
           const mine = teachers.some((t) => t.class_id === k.id && t.profile_id === profile?.id);
           const next = sched.filter((s) => s.class_id === k.id);

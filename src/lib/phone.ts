@@ -75,7 +75,7 @@ export function phoneProblem(text: string | null | undefined, required = false):
   if (!/^[123]/.test(d)) return 'Empezá por el código de área (por ejemplo 376).';
   if (d.length < 10) {
     const n = 10 - d.length;
-    return `Le ${n === 1 ? 'falta 1 número' : `faltan ${n} números`}. Con el código de área son 10 (por ejemplo 376 485-7649).`;
+    return `Le ${n === 1 ? 'falta 1 número' : `faltan ${n} números`}. Con el código de área son 10 (por ejemplo 376 412-3456).`;
   }
   return null;
 }

@@ -81,7 +81,7 @@ export default function DeskPeople() {
   const groupName = useMemo(() => new Map(groups.map((g) => [g.id, g.name])), [groups]);
   const engOf = useMemo(() => new Map(eng.map((e) => [e.contact_id, e])), [eng]);
   const last = useMemo(() => new Map<string, string | null>(eng.map((e) => [e.contact_id, e.last_attended])), [eng]);
-  const pct = useMemo(() => new Map(eng.filter((e) => e.possible > 0).map((e) => [e.contact_id, Number(e.pct)])), [eng]);
+  const pct = useMemo(() => new Map(eng.filter((e) => e.possible > 0).map((e) => [e.contact_id, Number(e.pct) * 100])), [eng]);
 
   const all = rows ?? [];
   const shown = useMemo(
@@ -227,9 +227,9 @@ export default function DeskPeople() {
                   case 'pct': return e && e.possible > 0 ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                       <View style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.graySoft, overflow: 'hidden' }}>
-                        <View style={{ width: `${Math.min(100, Number(e.pct))}%`, height: '100%', borderRadius: 3, backgroundColor: Number(e.pct) >= 80 ? colors.green : Number(e.pct) >= 50 ? colors.blue : colors.amber }} />
+                        <View style={{ width: `${Math.min(100, Number(e.pct) * 100)}%`, height: '100%', borderRadius: 3, backgroundColor: Number(e.pct) * 100 >= 80 ? colors.green : Number(e.pct) * 100 >= 50 ? colors.blue : colors.amber }} />
                       </View>
-                      <Text style={[styles.td, { width: 38, textAlign: 'right' }]}>{Math.round(Number(e.pct))}%</Text>
+                      <Text style={[styles.td, { width: 38, textAlign: 'right' }]}>{Math.round(Number(e.pct) * 100)}%</Text>
                     </View>
                   ) : <Text style={[styles.td, { color: colors.muted }]}>—</Text>;
                   default: return null;

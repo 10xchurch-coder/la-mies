@@ -44,7 +44,7 @@ export function PhoneField({ label = 'Celular', hint, value, onChangeText, requi
           {...props}
           style={s.input}
           value={shown}
-          placeholder={foreign ? '+1 515 555 0100' : '376 485-7649'}
+          placeholder={foreign ? '+1 515 555 0100' : '376 412-3456'}
           onChangeText={(t) => onChangeText(foreign ? t : formatNational(typedDigits(t)))}
           onBlur={(e) => { setTouched(true); onBlur?.(e); }}
         />
