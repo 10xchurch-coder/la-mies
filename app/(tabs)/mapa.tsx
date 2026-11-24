@@ -27,6 +27,7 @@ import { useOuting } from '@/store/outing';
 import { ensureAlwaysLocationIOS, ensureNoBatteryOptimization } from '@/lib/battery';
 import { useKeyboardHeight } from '@/lib/keyboard';
 import { COVERAGE_LEGEND, FLYERS_LEGEND, colors, themed } from '@/theme';
+import { DEMO_CENTER, isDemoNow } from '@/lib/demo';
 import type { Contact, CoverageRow, HouseRow, MeetingPoint, OutingKind, Profile, RoadRow, Zone } from '@/types';
 
 /** Un color por compañero para su recorrido. */
@@ -139,6 +140,8 @@ export default function Mapa() {
   // Al entrar: centrar en mi ubicación y cargar la zona.
   useEffect(() => {
     (async () => {
+      // En la demostración el mapa abre en el pueblo inventado de la iglesia de ejemplo (no pide la ubicación).
+      if (isDemoNow()) { const r = regionAround(DEMO_CENTER, 520); setRegion(r); loadArea(r); return; }
       try {
         const perm = await Location.requestForegroundPermissionsAsync();
         if (perm.status === 'granted') {

@@ -134,7 +134,7 @@ export const FEATURE_GROUPS: FeatureGroup[] = ['Evangelismo y visitas', 'Reunion
 
 /** Lo que no se puede apagar (sin esto la app no funciona o no se podría volver a prender nada). */
 export const CORE_ROUTES = [
-  '/', '/login', '/registro', '/registro-enviado', '/recuperar', '/empezar', '/ajustes', '/seguridad', '/avisos', '/panel', '/importar',
+  '/', '/login', '/demo', '/registro', '/registro-enviado', '/recuperar', '/empezar', '/ajustes', '/seguridad', '/avisos', '/panel', '/importar',
   '/persona', '/contacto', '/personas', '/iglesia', '/yo', '/admin', '/escritorio', '/miembro-vista', '/inactivos',
 ];
 

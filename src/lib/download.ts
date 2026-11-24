@@ -1,6 +1,7 @@
 // Descargar: listas (CSV para Excel) e informes o mapas (imagen). En la web baja el archivo o abre "Imprimir / Guardar como PDF";
 // en el teléfono abre el menú para guardarlo en Archivos o Fotos, o mandarlo por WhatsApp o correo.
 import { Platform } from 'react-native';
+import { demoBlocked } from './demo';
 
 /** "Informe semanal 15/11" -> "informe-semanal-15-11" (sin tildes ni símbolos, para el nombre del archivo). */
 export function fileSlug(name: string): string {
@@ -9,6 +10,7 @@ export function fileSlug(name: string): string {
 
 /** Baja un texto (CSV, etc.) como archivo. */
 export async function downloadText(fileName: string, content: string, mime = 'text/csv'): Promise<void> {
+  if (demoBlocked('Bajar esta lista')) return;
   if (Platform.OS === 'web') {
     const url = URL.createObjectURL(new Blob([content], { type: `${mime};charset=utf-8` }));
     const a = document.createElement('a');
