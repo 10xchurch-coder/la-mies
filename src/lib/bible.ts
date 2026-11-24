@@ -2,8 +2,9 @@
 // Sin nada de la app ni de la base, para poder probarse sola.
 import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
+import { EN_BOOKS, KJV } from './bibleStudyData';
 
-export type BibleVersionId = 'rv1909';
+export type BibleVersionId = 'rv1909' | 'kjv';
 
 export type BibleVersion = {
   id: BibleVersionId;
@@ -14,11 +15,16 @@ export type BibleVersion = {
   /** Aviso de derechos que se muestra al pie del capítulo. */
   notice: string;
   books: (() => BookText)[];
+  /** Idioma del texto. Si falta, es español. */
+  lang?: 'es' | 'en';
+  /** Nombres de los libros en el idioma de la versión. Si faltan, van los de siempre (en español). */
+  bookNames?: string[];
 };
 
 /** Las versiones que ya están en la app. Las demás se suman acá cuando haya permiso y texto. */
 export const VERSIONS: BibleVersion[] = [
   { id: 'rv1909', name: 'Reina-Valera 1909', short: 'RV1909', notice: 'Reina-Valera 1909 · Dominio público', books: RV1909 },
+  { id: 'kjv', name: 'King James Version (inglés)', short: 'KJV', notice: 'King James Version · Dominio público', books: KJV, lang: 'en', bookNames: EN_BOOKS },
 ];
 
 export const DEFAULT_VERSION: BibleVersionId = 'rv1909';
@@ -30,6 +36,8 @@ export function versionOf(id: string | undefined): BibleVersion {
 export const OT_COUNT = 39;
 export const bookName = (i: number): string => BOOKS[i]?.[0] ?? '';
 export const chaptersIn = (i: number): number => BOOKS[i]?.[1] ?? 0;
+/** El nombre del libro como lo dice esa versión ("John" en la King James, "Juan" en las demás). */
+export const bookNameIn = (version: BibleVersion, i: number): string => version.bookNames?.[i] ?? bookName(i);
 
 /** Sin tildes, mayúsculas ni espacios de más, para comparar nombres. */
 const plain = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -86,7 +94,8 @@ export function shareVerses(version: BibleVersion, book: number, chapter: number
   if (!v.length) return '';
   const body = v.length === 1 ? text[v[0] - 1] : v.map((n) => `${n} ${text[n - 1]}`).join(' ');
   const single = BOOKS[book][1] === 1;
-  const ref = single ? `${bookName(book)} ${verseSpan(v)}` : `${bookName(book)} ${chapter}:${verseSpan(v)}`;
+  const name = bookNameIn(version, book);
+  const ref = single ? `${name} ${verseSpan(v)}` : `${name} ${chapter}:${verseSpan(v)}`;
   return `“${body}”\n— ${ref} (${version.short})`;
 }
 
