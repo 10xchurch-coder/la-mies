@@ -587,6 +587,7 @@ export function run({ write = false } = {}) {
           edits.push({ start: a.getStart(sf), end: a.getEnd(), text: `get ${nameSrc}() { return ${FN}(${src}); }` });
           need.add(FN); useKey(K(n.text), holesOf(n.text)); stats.getters++; stats.wrapped++; return;
         }
+        if (CONFIG.identityLists?.includes(file) && !/\s/.test(n.text.trim())) return;
         note(n, 'texto fuera de una función (se crea una sola vez al abrir la app)', n.text, [n.text]); return;
       }
       edits.push({ start: n.getStart(sf), end: n.getEnd(), text: `${FN}(${src})` });
@@ -620,6 +621,7 @@ export function run({ write = false } = {}) {
 
     const arrayLit = (n) => {
       if (!atModuleLevel(n) || !n.elements.length || !n.elements.every((e) => ts.isStringLiteralLike(e))) return;
+      if (CONFIG.identityLists?.includes(file)) return; // listas que son valores para comparar (títulos de planilla, abreviaturas): ni se tocan ni se anotan
       if (insideOurs(n.elements[0]) || lineSkipped(n)) return;
       const vals = n.elements.map((e) => e.text);
       if (!vals.some((v) => isHuman(v)) || vals.every((v) => skipTexts.has(v.trim()))) return;
