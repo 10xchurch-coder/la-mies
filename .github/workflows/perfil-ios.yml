@@ -1,0 +1,45 @@
+# Reemplaza en Expo el perfil de firma de iPhone (provisioning profile) por uno nuevo bajado de Apple.
+# Se usa cuando se prende una capacidad nueva en Apple (por ejemplo NFC) y el perfil guardado quedó viejo.
+name: Perfil iPhone
+
+on:
+  workflow_dispatch:
+    inputs:
+      perfil:
+        description: "El perfil nuevo, en base64"
+        required: true
+      portal_id:
+        description: "Id del perfil en Apple Developer"
+        required: true
+
+jobs:
+  perfil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Cambiar el perfil en Expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          PERFIL: ${{ inputs.perfil }}
+          PORTAL_ID: ${{ inputs.portal_id }}
+        run: |
+          cat > p.mjs <<'JS'
+          const gql = async (query, variables) => {
+            const r = await fetch('https://api.expo.dev/graphql', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.EXPO_TOKEN}` }, body: JSON.stringify({ query, variables }) });
+            const j = await r.json();
+            if (j.errors) { console.log('Error:', JSON.stringify(j.errors.map((e) => e.message))); process.exit(1); }
+            return j.data;
+          };
+          const d = await gql(`query($n: String!) { app { byFullName(fullName: $n) { id iosAppCredentials { id appleAppIdentifier { bundleIdentifier } iosAppBuildCredentialsList { id iosDistributionType provisioningProfile { id developerPortalIdentifier status expiration updatedAt } } } } } }`, { n: '@hopeforargentinas-team/la-mies' });
+          const list = d.app.byFullName.iosAppCredentials.flatMap((c) => c.iosAppBuildCredentialsList.map((b) => ({ bundle: c.appleAppIdentifier.bundleIdentifier, ...b })));
+          console.log('Antes:', JSON.stringify(list));
+          const target = list.find((b) => b.iosDistributionType === 'APP_STORE' && b.bundle === 'com.hopeforargentina.lamies');
+          if (!target?.provisioningProfile) { console.log('No se encontró el perfil de App Store.'); process.exit(1); }
+          const u = await gql(`mutation($id: ID!, $in: AppleProvisioningProfileInput!) { appleProvisioningProfile { updateAppleProvisioningProfile(id: $id, appleProvisioningProfileInput: $in) { id developerPortalIdentifier status expiration updatedAt } } }`,
+            { id: target.provisioningProfile.id, in: { appleProvisioningProfile: process.env.PERFIL.trim(), developerPortalIdentifier: process.env.PORTAL_ID } });
+          console.log('Después:', JSON.stringify(u.appleProvisioningProfile.updateAppleProvisioningProfile));
+          JS
+          node p.mjs
