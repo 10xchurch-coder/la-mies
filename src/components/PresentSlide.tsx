@@ -86,12 +86,12 @@ function WebVideo({ slide }: { slide: Extract<LiveSlide, { kind: 'video' }> }) {
   );
 }
 
-function Note({ icon, text, height }: { icon: React.ComponentProps<typeof Feather>['name']; text: string; height: number }) {
-  const fs = Math.max(9, Math.min(22, height * 0.09));
+function Note({ icon, text, height, big }: { icon: React.ComponentProps<typeof Feather>['name']; text: string; height: number; big?: boolean }) {
+  const fs = big ? Math.max(12, Math.min(34, height * 0.045)) : Math.max(9, Math.min(22, height * 0.09));
   return (
     <View style={{ alignItems: 'center', gap: fs * 0.4, paddingHorizontal: 8 }}>
       <Feather name={icon} size={fs * 2} color={SOFT} />
-      <Text style={{ color: SOFT, fontSize: fs, fontWeight: '700', textAlign: 'center' }}>{text}</Text>
+      <Text style={{ color: SOFT, fontSize: fs, lineHeight: fs * 1.4, fontWeight: '700', textAlign: 'center' }}>{text}</Text>
     </View>
   );
 }
@@ -116,7 +116,15 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
   }
   if (s.kind === 'video') {
     if (!output) return <View style={box}><Note icon="film" text={s.playing ? 'Video en pantalla' : 'Video en pausa'} height={height} /></View>;
-    if (Platform.OS !== 'web') return <View style={box}><Note icon="film" text="Los videos se ven desde la computadora. Abrí la pantalla de salida en el navegador." height={height} /></View>;
+    // En la tablet y el teléfono la app todavía no puede reproducir videos: se avisa claro, sin asustar a la iglesia.
+    if (Platform.OS !== 'web') {
+      return (
+        <View style={box}>
+          <Note icon="film" big height={height}
+            text={'Acá va un video.\nEn la tablet o el teléfono todavía no se pueden ver.\nPara mostrarlo, abrí la pantalla de salida en una computadora (en el navegador).'} />
+        </View>
+      );
+    }
     return <View style={box}><WebVideo key={s.url} slide={s} /></View>;
   }
   if (s.kind === 'countdown') {
@@ -132,11 +140,13 @@ export function PresentSlide({ live, width, height, output, clockOffset = 0, log
       </View>
     );
   }
-  // Texto: la letra de una canción, un pasaje o texto libre.
-  const size = fitFont(s.text, width * 0.88, height * (s.footer ? 0.7 : 0.84), height / 6.5);
+  // Texto: la letra de una canción, un pasaje, un punto de la prédica o texto libre.
+  const head = typeof s.head === 'string' && s.head.trim() ? s.head.trim() : null;
+  const size = fitFont(s.text, width * 0.88, height * ((s.footer ? 0.7 : 0.84) - (head ? 0.14 : 0)), height / 6.5);
   const foot = Math.max(7, height * 0.05);
   return (
     <View style={[box, { paddingHorizontal: width * 0.06 }]}>
+      {head ? <Text numberOfLines={2} style={{ color: '#FFD54A', fontSize: foot, lineHeight: foot * 1.25, fontWeight: '700', textAlign: 'center', marginBottom: height * 0.04 }}>{head}</Text> : null}
       <Text style={{ color: WHITE, fontSize: size, lineHeight: size * 1.3, fontWeight: '700', textAlign: 'center' }}>{s.text}</Text>
       {s.footer ? <Text style={{ color: SOFT, fontSize: foot, fontWeight: '600', textAlign: 'center', marginTop: height * 0.05 }}>{s.footer}</Text> : null}
     </View>

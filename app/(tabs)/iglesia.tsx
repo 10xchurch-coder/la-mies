@@ -1,6 +1,6 @@
 // La iglesia: la pantalla con la que abre la app. Saludo según la hora, el versículo del día,
 // los anuncios, lo que me toca esta semana y los accesos, en grupos: para vos, liderazgo y administración.
-import { hasRole } from '@/lib/perms';
+import { canPresent, hasRole } from '@/lib/perms';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { socialLinks } from '@/lib/social';
@@ -170,7 +170,7 @@ export default function Iglesia() {
         { icon: 'truck', label: 'Colectivo', to: '/colectivo' as Href, show: hasRole(profile, 'captain') || can('personas.asistencia') },
         { icon: 'navigation-2', label: 'Colectivo en vivo', to: '/colectivo-vivo' as Href, show: bus.routes > 0 },
         { icon: 'award', label: 'Sorteos', to: '/rifas' as Href, show: true },
-        { icon: 'monitor', label: 'Modo presentación', to: '/presentar' as Href, show: isLeader },
+        { icon: 'monitor', label: 'Modo presentación', to: '/presentar' as Href, show: canPresent(perms, profile) },
         { icon: 'list', label: 'Orden del culto', to: '/culto' as Href, show: true },
       ],
     },

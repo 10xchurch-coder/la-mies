@@ -35,6 +35,7 @@ import { startOfflineSync } from '@/lib/offline';
 import { startNetSync } from '@/lib/netFetch';
 import { registerWebShell } from '@/lib/webShell';
 import { OfflineBadge } from '@/components/OfflineBadge';
+import { HideOnOutput } from '@/components/PresentChrome';
 import { colors, useThemeMode } from '@/theme';
 
 // Errores que no pasan por la pantalla (promesas, tareas de fondo): quedan anotados en la base.
@@ -127,9 +128,7 @@ function Gate() {
   return (
     <LockGate enabled={lock}>
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
-      {session ? <OutingBanner /> : null}
-      {session ? <SharingBanner /> : null}
-      {session ? <MemberViewBanner /> : null}
+      {session ? <HideOnOutput><OutingBanner /><SharingBanner /><MemberViewBanner /></HideOnOutput> : null}
       {session ? <DemoRibbon /> : null}
       <PhotoCropperHost />
     </LockGate>
@@ -163,7 +162,7 @@ export default function RootLayout() {
             <Gate key={mode} />
             <ActionSheetHost key={`sheet-${mode}`} />
             <RulesGate key={`rules-${mode}`} />
-            <OfflineBadge />
+            <HideOnOutput><OfflineBadge /></HideOnOutput>
           </ErrorBoundary>
         </OutingProvider>
       </AuthProvider>

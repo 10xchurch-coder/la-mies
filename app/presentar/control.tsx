@@ -9,11 +9,13 @@ import { useChurchLogo } from '@/components/BrandFooter';
 import { Button, Card, Empty, Loading } from '@/components/ui';
 import { BLACK, isNewer, type LiveState, type RemoteCommand } from '@/lib/present';
 import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
+import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 
 export default function Control() {
-  const { church, isLeader } = useAuth();
+  const { church, perms, profile } = useAuth();
+  const isLeader = canPresent(perms, profile);
   const { width } = useWindowDimensions();
   const logo = useChurchLogo();
   const [live, setLive] = useState<LiveState>(BLACK);
@@ -44,7 +46,7 @@ export default function Control() {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <Header title="Control remoto" back />
-        <Empty icon="lock" title="Solo para líderes" text="Si tenés que manejar la pantalla, pedile permiso al pastor." />
+        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
       </View>
     );
   }

@@ -15,10 +15,13 @@ import { VERSIONS, versionOf } from '@/lib/bible';
 import { useBibleReady } from '@/lib/bibleReady';
 import { pickPresentMedia, presentUrl, removePresentFiles } from '@/lib/files';
 import {
-  BLACK, ITEM_TYPES, SECS_MAX, SECS_MIN, SPEEDS, autoMs, cleanItems, clock, itemSlides, itemTitle, newId, newItem, parsePassage, step, typeInfo,
-  type LiveSlide, type LiveState, type MediaRef, type PresentItem, type PresentItemType, type RemoteCommand, type Slide, type SongItem,
+  BLACK, ITEM_TYPES, SECS_MAX, SECS_MIN, SPEEDS, autoMs, autoNext, autoOf, cleanItems, clock, itemSlides, itemTitle, newId, newItem, parsePassage, stageOf, step, typeInfo,
+  type AnnouncementsItem, type LiveSlide, type LiveState, type MediaRef, type PresentItem, type PresentItemType, type RemoteCommand, type Slide,
 } from '@/lib/present';
+import { getServicePlanEntries, listServicePlans, loadAnnouncementCards, type ServicePlanRow } from '@/lib/presentData';
+import { planToItems } from '@/lib/presentExtras';
 import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
+import { canPresent } from '@/lib/perms';
 import { searchKey } from '@/lib/songs';
 import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
@@ -30,26 +33,26 @@ const isWeb = Platform.OS === 'web' && typeof window !== 'undefined';
 const LIVE_RED = '#D93025';
 
 /** Abre la pantalla de salida: en la computadora, en otra ventana para llevar al proyector. */
-function openOutput() {
+function openOutput(which: 'salida' | 'escenario' = 'salida') {
   if (isWeb) {
     // La app en la web vive dentro de una carpeta (/la-mies): hay que sumarla a la dirección.
     const base = (process.env.EXPO_BASE_URL ?? '').replace(/\/$/, '');
-    const w = window.open(`${base}/presentar/salida`, 'lamies-salida', 'popup=yes,width=1280,height=720');
+    const w = window.open(`${base}/presentar/${which}`, `lamies-${which}`, 'popup=yes,width=1280,height=720');
     if (!w) Alert.alert('El navegador no dejó abrir la ventana', 'Permití las ventanas emergentes para esta página y probá de nuevo.');
     return;
   }
-  router.push('/presentar/salida' as Href);
+  router.push(`/presentar/${which}` as Href);
 }
 
 export default function Presentar() {
-  const { church, isLeader } = useAuth();
+  const { church, perms, profile } = useAuth();
   const [setId, setSetId] = useState<string | null>(null);
   if (!church) return <Loading />;
-  if (!isLeader) {
+  if (!canPresent(perms, profile)) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <Header title="Modo presentación" back />
-        <Empty icon="lock" title="Solo para líderes" text="Si tenés que manejar la pantalla, pedile permiso al pastor." />
+        <Empty icon="lock" title="Necesitás permiso" text="El pastor te puede dar el permiso para manejar la pantalla. Pedíselo: lo activa desde Roles y permisos." />
       </View>
     );
   }
@@ -127,9 +130,10 @@ function Sets({ onOpen }: { onOpen: (id: string) => void }) {
         <Card style={{ gap: 10 }}>
           <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>Usar este aparato para otra cosa</Text>
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
-            Una persona maneja la lista desde un aparato. Otro aparato puede ser la pantalla (conectado al proyector o a la tele) o un control para pasar las diapositivas desde el teléfono.
+            Una persona maneja la lista desde un aparato. Otro aparato puede ser la pantalla (conectado al proyector o a la tele), la vista de escenario (para los que cantan y el que predica: muestra lo que sigue y la hora) o un control para pasar las diapositivas desde el teléfono.
           </Text>
-          <Button title="Ser la pantalla de salida" icon="monitor" variant="outline" onPress={openOutput} />
+          <Button title="Ser la pantalla de salida" icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
+          <Button title="Ser la vista de escenario" icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
           <Button title="Ser el control remoto" icon="smartphone" variant="outline" onPress={() => router.push('/presentar/control' as Href)} />
         </Card>
       </ScrollView>
@@ -154,24 +158,47 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const [sel, setSel] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [liveAt, setLiveAt] = useState<{ id: string; slide: number } | null>(null);
+  const [liveAt, setLiveAtState] = useState<{ id: string; slide: number } | null>(null);
+  // También en una referencia: si llegan dos "siguiente" seguidos (tecla rápida, control remoto), el segundo
+  // tiene que partir de donde dejó el primero y no de lo que todavía muestra la pantalla.
+  const liveAtRef = useRef<{ id: string; slide: number } | null>(null);
+  const setLiveAt = (p: { id: string; slide: number } | null) => { liveAtRef.current = p; setLiveAtState(p); };
   const [live, setLive] = useState<LiveState>(BLACK);
   const [paused, setPaused] = useState(false);
   const [status, setStatus] = useState<LinkStatus>('conectando');
   const [saving, setSaving] = useState<'ok' | 'saving' | 'error'>('ok');
   const [sound, setSound] = useState<{ id: string; name: string; playing: boolean } | null>(null);
+  const [retry, setRetry] = useState(0);
+  const [plans, setPlans] = useState<ServicePlanRow[] | null>(null);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [planBusy, setPlanBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState<string | null>(null);
+  // Lo último de la lista y del nombre, para los cambios que terminan más tarde (subir un archivo, traer los anuncios):
+  // así no pisan lo que se cambió mientras tanto.
+  const itemsRef = useRef<PresentItem[]>([]);
+  const nameRef = useRef('');
+  const alive = useRef(true);
+  const cardsReq = useRef<Record<string, number>>({});
+  useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
 
   // --- Cargar ---
   useEffect(() => {
     getPresentSet(setId).then((s) => {
       if (!s) { setMissing(true); return; }
       const list = cleanItems(s.items);
+      itemsRef.current = list;
+      nameRef.current = s.name;
       setName(s.name);
       setItems(list);
       setSel(list[0]?.id ?? null);
+      // Los anuncios se traen de nuevo cada vez que se abre la lista (si no hay conexión, quedan los guardados).
+      list.filter((i) => i.type === 'announcements').forEach((i) => refreshCards(i.id, true));
     }).catch(() => setMissing(true));
     listSongs().then(setSongs).catch(() => setSongs([]));
-  }, [setId]);
+    // El orden del culto es otra parte de la app: si todavía no está, el botón no aparece.
+    listServicePlans(churchId).then((p) => { if (alive.current) setPlans(p); }).catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setId, churchId]);
 
   // --- Guardar solo, un momento después de cada cambio ---
   const pending = useRef<{ name: string; items: PresentItem[] } | null>(null);
@@ -183,16 +210,52 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       const p = pending.current;
       if (!p) return;
       pending.current = null;
-      savePresentSet(setId, p.name, p.items).then(() => setSaving('ok')).catch(() => { pending.current = pending.current ?? p; setSaving('error'); });
+      savePresentSet(setId, p.name, p.items)
+        .then(() => { if (alive.current && !pending.current) setSaving('ok'); })
+        .catch(() => {
+          pending.current = pending.current ?? p;
+          if (!alive.current) return;
+          setSaving('error');
+          // Se prueba de nuevo solo en unos segundos (por ejemplo, si se cortó el wifi un momento).
+          setTimeout(() => { if (alive.current) setRetry((n) => n + 1); }, 6000);
+        });
     }, 1200);
     return () => clearTimeout(t);
-  }, [items, name, setId]);
+  }, [items, name, setId, retry]);
+  // Si cierran la pestaña con algo sin guardar, se manda igual.
+  useEffect(() => {
+    if (!isWeb) return;
+    const flush = () => { const p = pending.current; if (p) { pending.current = null; savePresentSet(setId, p.name, p.items).catch(() => undefined); } };
+    window.addEventListener('pagehide', flush);
+    return () => window.removeEventListener('pagehide', flush);
+  }, [setId]);
   // Al salir, lo que faltaba guardar se guarda igual.
   useEffect(() => () => { const p = pending.current; if (p) savePresentSet(setId, p.name, p.items).catch(() => undefined); }, [setId]);
 
-  const change = (list: PresentItem[]) => { touch(name, list); setItems(list); };
-  const patch = (id: string, part: Partial<PresentItem>) => change((items ?? []).map((i) => (i.id === id ? ({ ...i, ...part } as PresentItem) : i)));
-  const rename = (n: string) => { touch(n, items ?? []); setName(n); };
+  const change = (list: PresentItem[]) => { itemsRef.current = list; touch(nameRef.current, list); setItems(list); };
+  const patch = (id: string, part: Partial<PresentItem>) => change(itemsRef.current.map((i) => (i.id === id ? ({ ...i, ...part } as PresentItem) : i)));
+  const rename = (n: string) => { nameRef.current = n; touch(n, itemsRef.current); setName(n); };
+
+  /** Trae de la app los anuncios y los eventos de una parte "Anuncios de la app". `quiet`: sin avisar si falla. */
+  const refreshCards = async (id: string, quiet = false) => {
+    const it = itemsRef.current.find((i) => i.id === id);
+    if (!it || it.type !== 'announcements') return;
+    if (!quiet) setRefreshing(id);
+    const mine = (cardsReq.current[id] = (cardsReq.current[id] ?? 0) + 1);
+    try {
+      const cards = await loadAnnouncementCards(it);
+      // Si mientras tanto se pidió otra vez (cambiaron los días), vale el último pedido.
+      if (!alive.current || cardsReq.current[id] !== mine) return;
+      const now = itemsRef.current.find((i) => i.id === id);
+      if (!now || now.type !== 'announcements') return;
+      const same = JSON.stringify(now.cards) === JSON.stringify(cards);
+      // Si no cambió nada no se vuelve a guardar la lista.
+      if (same && quiet) return;
+      patch(id, { cards, loadedAt: Date.now() } as Partial<PresentItem>);
+    } catch (e) {
+      if (!quiet && alive.current) Alert.alert('No se pudieron traer los anuncios', errorMessage(e));
+    } finally { if (alive.current && !quiet && cardsReq.current[id] === mine) setRefreshing(null); }
+  };
 
   // Los pasajes en una versión que se baja de a un libro (King James) se arman de nuevo cuando el libro llega.
   const bibleReady = useBibleReady((items ?? []).flatMap((i) => { const r = i.type === 'passage' ? parsePassage(i.ref) : null; return r && i.type === 'passage' ? [[i.version, r.book] as [string, number]] : []; }));
@@ -205,15 +268,27 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   const lastSlide = useRef<LiveState | null>(null);
   const actions = useRef<Record<RemoteCommand, () => void>>({ next: () => undefined, prev: () => undefined, black: () => undefined, logo: () => undefined });
   useEffect(() => {
-    const l = openPresentLink(churchId, { onStatus: setStatus, onCommand: (c) => actions.current[c]() });
+    const l: PresentLink = openPresentLink(churchId, {
+      onStatus: (st) => {
+        setStatus(st);
+        // Apenas vuelve la conexión, los otros aparatos reciben lo que está en pantalla (sin esperar el próximo aviso).
+        if (st === 'conectado' && liveRef.current.at > 0) setTimeout(() => link.current?.sendState({ ...liveRef.current, at: Date.now() }), 0);
+      },
+      onCommand: (c) => actions.current[c](),
+    });
     link.current = l;
     // Si se recargó la página en medio del culto, se sigue con lo que ya está en pantalla (no se pone en negro).
     const last = l.lastLocal();
-    if (last && Date.now() - last.at < 6 * 3600 * 1000) { liveRef.current = last; setLive(last); if (last.mode === 'slide') lastSlide.current = last; }
+    if (last && Date.now() - last.at < 6 * 3600 * 1000) {
+      liveRef.current = last; setLive(last); if (last.mode === 'slide') lastSlide.current = last;
+      // Y se recuerda en qué diapositiva de esta lista se estaba, para que "Siguiente" siga desde ahí.
+      const at = readPos(setId);
+      if (at && at.stamp === last.stamp) setLiveAt({ id: at.id, slide: at.slide });
+    }
     // Se repite cada 5 segundos por si un aparato se conectó tarde o se le cortó la señal.
     const beat = setInterval(() => { if (liveRef.current.at > 0) l.sendState({ ...liveRef.current, at: Date.now() }); }, 5000);
     return () => { clearInterval(beat); l.close(); link.current = null; };
-  }, [churchId]);
+  }, [churchId, setId]);
 
   const push = useCallback((s: LiveState) => {
     liveRef.current = s;
@@ -241,14 +316,23 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     setLiveAt({ id, slide: index });
     setSel(id);
     setPaused(false);
-    push({ v: 1, mode: 'slide', slide: out, stamp: newId(), at: Date.now() });
-  }, [push]);
+    // Para la vista de escenario: qué parte es y qué diapositiva sigue.
+    const list = itemsRef.current;
+    const stage = stageOf(
+      list.map((i) => ({ title: itemTitle(i), slides: slidesRef.current.get(i.id) ?? [], loop: !!autoOf(i)?.loop })),
+      { item: list.findIndex((i) => i.id === id), slide: index },
+    );
+    const stamp = newId();
+    writePos(setId, { id, slide: index, stamp });
+    push({ v: 1, mode: 'slide', slide: out, stamp, at: Date.now(), ...(stage ? { stage } : {}) });
+  }, [push, setId]);
 
   const move = (dir: 1 | -1) => {
     const list = items ?? [];
     const counts = list.map((i) => slides.get(i.id)?.length ?? 0);
-    const at = liveAt ? list.findIndex((i) => i.id === liveAt.id) : -1;
-    let next = step(counts, at >= 0 && liveAt ? { item: at, slide: liveAt.slide } : null, dir);
+    const cur = liveAtRef.current;
+    const at = cur ? list.findIndex((i) => i.id === cur.id) : -1;
+    let next = step(counts, at >= 0 && cur ? { item: at, slide: cur.slide } : null, dir);
     // Si todavía no hay nada en pantalla, arranca por la parte elegida.
     if (at < 0 && dir === 1) {
       const chosen = list.findIndex((i) => i.id === sel);
@@ -257,12 +341,18 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     if (next) show(list[next.item].id, next.slide);
   };
   const toggleMode = (mode: 'black' | 'logo') => {
-    if (live.mode === mode) {
+    if (liveRef.current.mode === mode) {
       // Tocar de nuevo vuelve a lo que estaba.
-      if (lastSlide.current) push({ ...lastSlide.current, stamp: newId(), at: Date.now() });
+      if (lastSlide.current) {
+        const stamp = newId();
+        if (liveAtRef.current) writePos(setId, { ...liveAtRef.current, stamp });
+        push({ ...lastSlide.current, stamp, at: Date.now() });
+      }
       return;
     }
-    push({ v: 1, mode, slide: null, stamp: newId(), at: Date.now() });
+    // En negro o con el logo, la vista de escenario sigue mostrando lo que viene.
+    const stage = lastSlide.current?.stage;
+    push({ v: 1, mode, slide: null, stamp: newId(), at: Date.now(), ...(stage ? { stage } : {}) });
   };
   actions.current = { next: () => move(1), prev: () => move(-1), black: () => toggleMode('black'), logo: () => toggleMode('logo') };
 
@@ -281,6 +371,8 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       if (!c) return;
       e.preventDefault();
       e.stopPropagation();
+      // Con la tecla apretada, Negro y Logo no parpadean (se toma una sola vez).
+      if (e.repeat && (c === 'black' || c === 'logo')) return;
       actions.current[c]();
     };
     window.addEventListener('keydown', onKey, true);
@@ -289,17 +381,20 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
 
   // --- Avance automático de la letra ---
   const liveItem = liveAt ? (items ?? []).find((i) => i.id === liveAt.id) ?? null : null;
-  const autoSong: SongItem | null = liveItem?.type === 'song' && liveItem.auto && live.mode === 'slide' ? liveItem : null;
-  const autoId = autoSong?.id;
-  const autoWait = autoSong ? autoMs(autoSong.secs, autoSong.speed) : 0;
+  const auto = live.mode === 'slide' ? autoOf(liveItem) : null;
+  const autoId = auto ? liveItem?.id : undefined;
+  const autoWait = auto?.ms ?? 0;
+  const autoLoop = !!auto?.loop;
   const liveSlideIndex = liveAt?.slide ?? -1;
+  const autoTotal = autoId ? slides.get(autoId)?.length ?? 0 : 0;
   useEffect(() => {
     if (!autoId || paused) return;
-    const total = slidesRef.current.get(autoId)?.length ?? 0;
-    if (liveSlideIndex + 1 >= total) return; // la última queda quieta
-    const t = setTimeout(() => show(autoId, liveSlideIndex + 1), autoWait);
+    // La última de una canción queda quieta; los anuncios vuelven a empezar.
+    const next = autoNext(autoTotal, liveSlideIndex, autoLoop);
+    if (next === null) return;
+    const t = setTimeout(() => show(autoId, next), autoWait);
     return () => clearTimeout(t);
-  }, [autoId, autoWait, liveSlideIndex, paused, live.stamp, show]);
+  }, [autoId, autoWait, autoLoop, autoTotal, liveSlideIndex, paused, live.stamp, show]);
 
   // --- Música y pistas (suenan en este aparato, el del operador) ---
   const player = useRef<AudioPlayer | null>(null);
@@ -339,16 +434,37 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
   // --- Cambios en la lista ---
   const add = (type: PresentItemType) => {
     const it = newItem(type);
-    change([...(items ?? []), it]);
+    change([...itemsRef.current, it]);
     setSel(it.id);
     setEdit(true);
     setAdding(false);
+    if (type === 'announcements') refreshCards(it.id);
+  };
+  /** Trae un orden del culto y suma sus partes al final de la lista. */
+  const importPlan = async (plan: ServicePlanRow) => {
+    setPlanBusy(true);
+    try {
+      const entries = await getServicePlanEntries(plan.id);
+      if (!alive.current) return;
+      const fresh = entries ? planToItems(entries, songs ?? []) : [];
+      if (!fresh.length) { Alert.alert('Ese orden del culto está vacío', 'Cargale las partes y probá de nuevo.'); return; }
+      change([...itemsRef.current, ...fresh]);
+      setSel(fresh[0].id);
+      setEdit(false);
+      setPlanOpen(false);
+      fresh.filter((i) => i.type === 'announcements').forEach((i) => refreshCards(i.id, true));
+      const noLyrics = fresh.filter((i) => i.type === 'song' && !i.songId).length;
+      Alert.alert(
+        fresh.length === 1 ? 'Se sumó 1 parte' : `Se sumaron ${fresh.length} partes`,
+        noLyrics ? `${noLyrics === 1 ? 'Hay 1 canción que no encontré' : `Hay ${noLyrics} canciones que no encontré`} en el Cancionero. Tocala y elegila a mano.` : 'Revisá la lista antes de empezar.',
+      );
+    } finally { if (alive.current) setPlanBusy(false); }
   };
   const removeItem = (it: PresentItem) => {
     Alert.alert('¿Quitar de la lista?', itemTitle(it), [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Quitar', style: 'destructive', onPress: () => {
-        const list = (items ?? []).filter((i) => i.id !== it.id);
+        const list = itemsRef.current.filter((i) => i.id !== it.id);
         change(list);
         removePresentFiles(mediaOf(it).map((m) => m.path));
         if (sound?.id === it.id) stopSound();
@@ -359,7 +475,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     ]);
   };
   const shift = (id: string, dir: 1 | -1) => {
-    const list = [...(items ?? [])];
+    const list = [...itemsRef.current];
     const i = list.findIndex((x) => x.id === id);
     const j = i + dir;
     if (i < 0 || j < 0 || j >= list.length) return;
@@ -402,9 +518,12 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
         <Button title="Negro" icon="square" variant={live.mode === 'black' ? 'primary' : 'outline'} onPress={() => toggleMode('black')} style={{ flex: 1 }} />
         <Button title="Logo" icon="home" variant={live.mode === 'logo' ? 'primary' : 'outline'} onPress={() => toggleMode('logo')} style={{ flex: 1 }} />
       </View>
-      {autoSong ? (
+      {auto ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={{ flex: 1, fontSize: 13, color: colors.muted }}>{paused ? 'La letra está en pausa.' : `La letra pasa sola cada ${Math.round(autoWait / 100) / 10} segundos.`}</Text>
+          <Text style={{ flex: 1, fontSize: 13, color: colors.muted }}>
+            {paused ? (autoLoop ? 'Los anuncios están en pausa.' : 'La letra está en pausa.')
+              : `${autoLoop ? 'Los anuncios pasan solos' : 'La letra pasa sola'} cada ${Math.round(autoWait / 100) / 10} segundos.`}
+          </Text>
           <Button small title={paused ? 'Seguir' : 'Pausar'} icon={paused ? 'play' : 'pause'} variant="outline" onPress={() => setPaused((p) => !p)} />
         </View>
       ) : null}
@@ -422,11 +541,12 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
           <Button small title="Parar" variant="danger" onPress={stopSound} />
         </View>
       ) : null}
-      <Button title="Abrir pantalla de salida" icon="monitor" variant="outline" onPress={openOutput} />
+      <Button title="Abrir pantalla de salida" icon="monitor" variant="outline" onPress={() => openOutput('salida')} />
+      <Button title="Abrir vista de escenario" icon="eye" variant="outline" onPress={() => openOutput('escenario')} />
       <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
         {isWeb
-          ? 'Se abre otra ventana: llevala al proyector y poné pantalla completa. Teclado: flechas o espacio para pasar, B para negro, L para el logo.'
-          : 'En este aparato la pantalla ocupa todo. Para manejar desde acá y mostrar en otro, abrí la pantalla de salida en el otro aparato.'}
+          ? 'Se abre otra ventana: llevala al proyector y poné pantalla completa. Teclado: flechas o espacio para pasar, B para negro, L para el logo. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.'
+          : 'En este aparato la pantalla ocupa todo: tocá la derecha para pasar y la izquierda para volver. Para manejar desde acá y mostrar en otro aparato, abrí la pantalla de salida en el otro. La vista de escenario es para los que cantan: muestra lo que sigue y la hora.'}
       </Text>
     </Card>
   );
@@ -447,7 +567,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
         const on = it.id === sel;
         const isLive = liveAt?.id === it.id && live.mode === 'slide';
         return (
-          <Pressable key={it.id} onPress={() => { setSel(it.id); setEdit(false); }} accessibilityRole="button" accessibilityState={{ selected: on }}
+          <Pressable key={it.id} testID="presentar-parte" onPress={() => { setSel(it.id); setEdit(false); }} accessibilityRole="button" accessibilityState={{ selected: on }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10, borderRadius: 12, borderWidth: 2, borderColor: isLive ? LIVE_RED : on ? colors.green : colors.border, backgroundColor: on ? colors.greenSoft : colors.bg }}>
             <Text style={{ width: 18, fontSize: 12, fontWeight: '700', color: colors.muted, textAlign: 'center' }}>{i + 1}</Text>
             <Feather name={typeInfo(it.type).icon as IconName} size={18} color={on ? colors.greenText : colors.muted} />
@@ -475,6 +595,25 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
           <Button small title="Cancelar" variant="ghost" onPress={() => setAdding(false)} />
         </View>
       ) : <Button title="Agregar" icon="plus" variant="outline" onPress={() => setAdding(true)} />}
+      {plans !== null && !adding ? (
+        planOpen ? (
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: colors.text }}>¿De qué día?</Text>
+            {!plans.length ? <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>Todavía no hay un orden del culto cargado para estos días.</Text> : null}
+            {plans.map((p) => (
+              <Pressable key={p.id} onPress={() => { if (!planBusy) importPlan(p); }} accessibilityRole="button"
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 10, backgroundColor: colors.bgSoft, opacity: planBusy ? 0.5 : 1 }}>
+                <Feather name="calendar" size={16} color={colors.green} />
+                <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={2}>{planDay(p.service_date)}{p.title ? ` · ${p.title}` : ''}</Text>
+              </Pressable>
+            ))}
+            <Button small title="Cancelar" variant="ghost" onPress={() => setPlanOpen(false)} />
+          </View>
+        ) : (
+          <Button title="Traer el orden del culto" icon="download" variant="outline"
+            onPress={() => { setPlanOpen(true); listServicePlans(churchId).then((p) => { if (alive.current && p) setPlans(p); }).catch(() => undefined); }} />
+        )
+      ) : null}
     </Card>
   );
 
@@ -491,7 +630,24 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
         <Button small title={edit ? 'Listo' : 'Cambiar'} icon={edit ? 'check' : 'edit-2'} variant={edit ? 'primary' : 'outline'} onPress={() => setEdit((e) => !e)} />
       </View>
 
-      {edit ? <Editor item={selected} songs={songs} churchId={churchId} patch={(p) => patch(selected.id, p)} slideCount={list.length} /> : null}
+      {edit ? <Editor item={selected} songs={songs} churchId={churchId} patch={(p) => patch(selected.id, p)} slideCount={list.length}
+        refresh={() => refreshCards(selected.id)} refreshing={refreshing === selected.id} /> : null}
+
+      {selected.type === 'announcements' ? (
+        <View style={{ gap: 6 }}>
+          {list.length ? <Button title="Empezar los anuncios" icon="play" onPress={() => show(selected.id, 0)} /> : null}
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
+            {list.length
+              ? `Pasan solos cada ${selected.secs} segundos y dan vueltas hasta que pasás a otra parte de la lista. ${cardsWhen(selected)}`
+              : refreshing === selected.id ? 'Buscando los anuncios…' : 'No hay anuncios para toda la iglesia ni eventos en estos días. Tocá "Cambiar" para elegir más días.'}
+          </Text>
+        </View>
+      ) : null}
+      {selected.type === 'video' && selected.media && !isWeb ? (
+        <Text style={{ fontSize: 13, color: colors.text, lineHeight: 19, padding: 10, borderRadius: 10, backgroundColor: colors.bgSoft }}>
+          Los videos se ven solo cuando la pantalla de salida está abierta en una computadora (en el navegador). En una tablet o un teléfono todavía no se pueden mostrar. Lo demás (letras, Biblia, fotos, cuenta regresiva y música) anda en todos los aparatos.
+        </Text>
+      ) : null}
 
       {selected.type === 'song' && list.length ? (
         <View style={{ gap: 6 }}>
@@ -538,7 +694,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
               );
             })}
           </View>
-        ) : !edit ? <Text style={{ fontSize: 14, color: colors.muted }}>Esta parte todavía no tiene nada para mostrar. Tocá "Cambiar".</Text> : null
+        ) : !edit && selected.type !== 'announcements' ? <Text style={{ fontSize: 14, color: colors.muted }}>Esta parte todavía no tiene nada para mostrar. Tocá "Cambiar".</Text> : null
       ) : null}
       {list.length ? <Text style={{ fontSize: 12, color: colors.muted }}>Tocá una diapositiva para mandarla a la pantalla.</Text> : null}
     </Card>
@@ -564,6 +720,38 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
       )}
     </View>
   );
+}
+
+/** "dom 29/11" */
+function planDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return iso;
+  const day = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'][new Date(y, m - 1, d).getDay()];
+  return `${day} ${d}/${m}`;
+}
+
+/** "Actualizado hoy a las 10:32." */
+function cardsWhen(item: AnnouncementsItem): string {
+  if (!item.loadedAt) return '';
+  const d = new Date(item.loadedAt);
+  const today = new Date().toDateString() === d.toDateString();
+  const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `Actualizado ${today ? 'hoy' : `el ${d.getDate()}/${d.getMonth() + 1}`} a las ${time}.`;
+}
+
+// En la computadora se recuerda en qué diapositiva de la lista se estaba, por si se recarga la página en medio del culto.
+type SavedPos = { id: string; slide: number; stamp: string };
+const posKey = (setId: string) => `lamies-presentar-pos-${setId}`;
+function writePos(setId: string, p: SavedPos) {
+  if (!isWeb) return;
+  try { window.sessionStorage.setItem(posKey(setId), JSON.stringify(p)); } catch { /* modo privado */ }
+}
+function readPos(setId: string): SavedPos | null {
+  if (!isWeb) return null;
+  try {
+    const p = JSON.parse(window.sessionStorage.getItem(posKey(setId)) ?? 'null') as Partial<SavedPos> | null;
+    return p && typeof p.id === 'string' && typeof p.slide === 'number' && typeof p.stamp === 'string' ? (p as SavedPos) : null;
+  } catch { return null; }
 }
 
 /** Una diapositiva en chiquito, tal como va a salir. */
@@ -636,7 +824,7 @@ function MediaField({ kind, media, churchId, onChange }: { kind: 'image' | 'vide
         {media ? <Button title="Quitar" variant="danger" onPress={() => { removePresentFiles([media.path]); onChange(null); }} /> : null}
       </View>
       <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
-        Hasta 50 MB.{kind === 'video' ? ' Usá videos en MP4. El video se ve y se escucha en la pantalla de salida (en la computadora).' : kind === 'audio' ? ' Usá MP3. Subí solo música que tu iglesia puede usar.' : ''}
+        Hasta 50 MB.{kind === 'video' ? ' Usá videos en MP4. El video se ve y se escucha solo cuando la pantalla de salida está abierta en una computadora (en el navegador); en una tablet o un teléfono todavía no.' : kind === 'audio' ? ' Usá MP3. Subí solo música que tu iglesia puede usar.' : ''}
       </Text>
     </View>
   );
@@ -679,7 +867,11 @@ function SongPicker({ songs, onPick }: { songs: Song[] | null; onPick: (s: Song)
   );
 }
 
-function Editor({ item, songs, churchId, patch, slideCount }: { item: PresentItem; songs: Song[] | null; churchId: string; patch: (p: Partial<PresentItem>) => void; slideCount: number }) {
+function Editor({ item, songs, churchId, patch, slideCount, refresh, refreshing }: {
+  item: PresentItem; songs: Song[] | null; churchId: string; patch: (p: Partial<PresentItem>) => void; slideCount: number;
+  /** Solo para "Anuncios de la app": traerlos de nuevo. */
+  refresh: () => void; refreshing: boolean;
+}) {
   const [choosing, setChoosing] = useState(false);
   const box = { gap: 12, padding: 12, borderRadius: 12, backgroundColor: colors.bgSoft } as const;
   switch (item.type) {
@@ -760,6 +952,46 @@ function Editor({ item, songs, churchId, patch, slideCount }: { item: PresentIte
         <View style={box}>
           <Field label="Título" value={item.title} onChangeText={(title) => patch({ title } as Partial<PresentItem>)} placeholder="Reunión de jóvenes" />
           <Field label="Detalle" value={item.body} onChangeText={(body) => patch({ body } as Partial<PresentItem>)} multiline placeholder="Sábado a las 19 en la iglesia" />
+        </View>
+      );
+    case 'announcements': {
+      // Al cambiar qué se muestra, se traen de nuevo.
+      const set = (p: Partial<AnnouncementsItem>) => { patch(p as Partial<PresentItem>); refresh(); };
+      return (
+        <View style={box}>
+          <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
+            La app arma sola una diapositiva por cada anuncio y por cada evento del calendario. Sirve para dejar pasando antes del culto.
+          </Text>
+          <Toggle label="Anuncios" hint="Solo los que se mandaron a toda la iglesia." value={item.anns} onChange={(anns) => set({ anns })} />
+          {item.anns ? <Stepper label="De los últimos" value={item.days} text={item.days === 1 ? '1 día' : `${item.days} días`} min={1} max={60} onChange={(days) => set({ days })} /> : null}
+          <Toggle label="Eventos del calendario" hint="Los que vienen." value={item.events} onChange={(events) => set({ events })} />
+          {item.events ? (
+            <>
+              <Stepper label="De los próximos" value={item.ahead} text={item.ahead === 1 ? '1 día' : `${item.ahead} días`} min={1} max={90} onChange={(ahead) => set({ ahead })} />
+              <Toggle label="Reuniones de todas las semanas" hint="Las que cargaste como reunión semanal en el calendario." value={item.weekly} onChange={(weekly) => set({ weekly })} />
+            </>
+          ) : null}
+          <Stepper label="Tiempo por diapositiva" value={item.secs} text={`${item.secs} seg`} min={SECS_MIN} max={SECS_MAX} onChange={(secs) => patch({ secs } as Partial<PresentItem>)} />
+          <Button small title={refreshing ? 'Buscando…' : 'Actualizar ahora'} icon="refresh-cw" variant="outline" onPress={refresh} loading={refreshing} />
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
+            {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'}. {cardsWhen(item)} Se actualizan solas cada vez que abrís esta lista.
+          </Text>
+        </View>
+      );
+    }
+    case 'sermon':
+      return (
+        <View style={box}>
+          <Field label="Bosquejo" value={item.outline} onChangeText={(outline) => patch({ outline } as Partial<PresentItem>)} multiline style={{ minHeight: 260 }} autoCorrect={false}
+            placeholder={'El amor de Dios\n1. Dios ama a todos (Juan 3:16)\n- Nadie queda afuera\n2. Dios lo demostró (Romanos 5:8)\n1 Juan 4:9-10'} />
+          <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>
+            Pegá el bosquejo. La primera línea es el título. Cada línea es una diapositiva; las que empiezan con guion (-) llevan arriba el punto al que pertenecen. Las citas (Juan 3:16-18, Ro 5:8; 1 Jn 1:9) se abren solas con el texto de la Biblia de la app. Dejá solo lo que querés que se vea.
+          </Text>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.text }}>Versículos en cada diapositiva</Text>
+          <Chips options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))} value={item.perSlide} onChange={(perSlide) => patch({ perSlide } as Partial<PresentItem>)} />
+          <Text style={{ fontSize: 12, color: colors.muted }}>
+            {slideCount} {slideCount === 1 ? 'diapositiva' : 'diapositivas'} · Texto: {versionOf(item.version).name}, la Biblia que trae la app.
+          </Text>
         </View>
       );
   }

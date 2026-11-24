@@ -8,17 +8,30 @@ import { StatusBar } from 'expo-status-bar';
 import { PresentSlide } from '@/components/PresentSlide';
 import { useChurchLogo } from '@/components/BrandFooter';
 import { Loading } from '@/components/ui';
-import { BLACK, isNewer, type LiveState } from '@/lib/present';
-import { openPresentLink, type LinkStatus } from '@/lib/presentSync';
+import { BLACK, isNewer, type LiveState, type RemoteCommand } from '@/lib/present';
+import { keepScreenOn } from '@/lib/presentAwake';
+import { openPresentLink, type LinkStatus, type PresentLink } from '@/lib/presentSync';
+import { canPresent } from '@/lib/perms';
 import { useAuth } from '@/store/auth';
 
 const isWeb = Platform.OS === 'web' && typeof document !== 'undefined';
 // Lo guardado en esta computadora sirve solo si es de hace poco (no la última diapositiva del domingo pasado).
 const FRESH_MS = 6 * 60 * 60 * 1000;
 
+function toggleFull() {
+  if (!isWeb) return;
+  try {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => undefined);
+    else document.documentElement.requestFullscreen?.().catch(() => undefined);
+  } catch { /* el navegador no deja */ }
+}
+
 export default function Salida() {
-  const { church } = useAuth();
+  const { church, perms, profile } = useAuth();
+  // La pantalla la puede mostrar cualquiera de la iglesia; manejarla desde acá (teclado, toques), solo quien tiene el permiso.
+  const isLeader = canPresent(perms, profile);
   const router = useRouter();
+  const linkRef = useRef<PresentLink | null>(null);
   const { width, height } = useWindowDimensions();
   const logo = useChurchLogo();
   const [live, setLive] = useState<LiveState>(BLACK);
@@ -41,10 +54,35 @@ export default function Salida() {
       setGot(true);
     };
     const link = openPresentLink(churchId, { onState: (s) => take(s, false), onStatus: setStatus });
+    linkRef.current = link;
     const last = link.lastLocal();
     if (last && Date.now() - last.at < FRESH_MS) take(last, true);
-    return () => link.close();
+    return () => { link.close(); linkRef.current = null; };
   }, [churchId]);
+
+  // En la tablet o el teléfono, que la pantalla no se apague sola en medio del culto.
+  useEffect(() => keepScreenOn('lamies-salida'), []);
+
+  // Teclado en esta ventana (después de tocar "Pantalla completa" el teclado queda acá y no en la del operador):
+  // las mismas teclas que en la otra ventana, y F para pantalla completa.
+  useEffect(() => {
+    if (!isWeb || !isLeader) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === 'f') { if (!e.repeat) toggleFull(); return; }
+      const c: RemoteCommand | null =
+        k === 'arrowright' || k === 'arrowdown' || k === ' ' || k === 'pagedown' ? 'next'
+        : k === 'arrowleft' || k === 'arrowup' || k === 'pageup' ? 'prev'
+        : k === 'b' ? 'black' : k === 'l' ? 'logo' : null;
+      if (!c) return;
+      e.preventDefault();
+      if (e.repeat && (c === 'black' || c === 'logo')) return;
+      linkRef.current?.sendCommand(c);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isLeader]);
 
   // La barra de ayuda se esconde sola a los segundos; vuelve al tocar o mover el mouse.
   useEffect(() => {
@@ -78,10 +116,16 @@ export default function Salida() {
 
   if (!church) return <View style={{ flex: 1, backgroundColor: '#000' }}><Loading /></View>;
 
-  const goFull = () => {
-    if (!isWeb) return;
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => undefined);
-    else document.documentElement.requestFullscreen?.().catch(() => undefined);
+  const goFull = toggleFull;
+  // En la tablet o el teléfono (un solo aparato conectado al proyector): tocar la derecha pasa, la izquierda vuelve
+  // y el medio muestra los botones. Solo para los líderes.
+  const touchNav = !isWeb && isLeader;
+  const onTap = (x: number) => {
+    if (touchNav && got) {
+      if (x > width * 0.67) { linkRef.current?.sendCommand('next'); return; }
+      if (x < width * 0.33) { linkRef.current?.sendCommand('prev'); return; }
+    }
+    setBar((b) => !b);
   };
   const leave = () => {
     if (isWeb && window.opener) { window.close(); return; }
@@ -90,7 +134,7 @@ export default function Salida() {
   const pointer = isWeb ? ({ onMouseMove: () => setBar(true) } as object) : {};
 
   return (
-    <Pressable style={{ flex: 1, backgroundColor: '#000000' }} onPress={() => setBar((b) => !b)} accessibilityLabel="Pantalla de salida" {...pointer}>
+    <Pressable style={{ flex: 1, backgroundColor: '#000000' }} onPress={(e) => onTap(e.nativeEvent?.pageX ?? width / 2)} accessibilityLabel="Pantalla de salida" {...pointer}>
       <StatusBar hidden />
       <PresentSlide live={live} width={width} height={height} output clockOffset={offset} logoUrl={logo} churchName={church.name} />
       {!got ? (
@@ -99,6 +143,7 @@ export default function Salida() {
           <Text style={{ color: '#6B716C', fontSize: 16, textAlign: 'center', lineHeight: 23, maxWidth: 520 }}>
             {isWeb ? 'Llevá esta ventana al proyector y poné pantalla completa. ' : ''}
             Acá va a aparecer lo que elijas en el Modo presentación.
+            {touchNav ? ' Tocá la derecha de la pantalla para pasar y la izquierda para volver.' : ''}
           </Text>
           {status === 'sin-conexion' ? <Text style={{ color: '#E0574E', fontSize: 14, textAlign: 'center' }}>Sin conexión con otros aparatos. En esta misma computadora anda igual.</Text> : null}
         </View>
