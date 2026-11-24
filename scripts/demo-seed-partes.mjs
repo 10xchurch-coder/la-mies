@@ -1,16 +1,15 @@
 // Segunda mitad de los datos de ejemplo: lo que no son personas. Lo usa demo-seed.mjs.
 // Los versículos son de la Reina-Valera 1960, completos.
 
-export function addParts({ people, batch, q, C, P, D, ACCOUNTS, TOWN, ROAD0, EW, NS }) {
+export function addParts({ people, batch, q, C, P, D }) {
   const ck = (n) => `demo_id('c${people.find((p) => p.prof === n).k}')`; // la ficha de una cuenta
   const free = people.filter((p) => p.adult && p.st === 'member' && !p.prof && !p.stop);
   const women = free.filter((p) => p.sex === 'f');
   const men = free.filter((p) => p.sex === 'm');
   const c = (p) => `demo_id('c${p.k}')`;
-  const poly = (a, w, b, e) => JSON.stringify([[a, w], [a, e], [b, e], [b, w]].map(([la, ln]) => [+(TOWN.lat + la).toFixed(4), +(TOWN.lng + ln).toFixed(4)]));
   const SUN = `(current_date - extract(dow from current_date)::int)`; // el último domingo (hoy, si hoy es domingo)
 
-  // ---------------- 03 · calles, clases, ministerios, finanzas ----------------
+  // ---------------- 03 · clases, ministerios, finanzas ----------------
   const teach = [
     [1, null, women[0], false], [1, null, women[1], false], [1, null, women[2], true],
     [2, 11, null, false], [2, null, women[3], false], [2, 13, null, true],
@@ -51,19 +50,7 @@ export function addParts({ people, batch, q, C, P, D, ACCOUNTS, TOWN, ROAD0, EW,
     [4, 'Filipenses 4:13', 'Todo lo puedo en Cristo que me fortalece.'],
     [5, 'Proverbios 3:5-6', 'Fíate de Jehová de todo tu corazón, Y no te apoyes en tu propia prudencia. Reconócelo en todos tus caminos, Y él enderezará tus veredas.'],
   ];
-  batch('03_calles_clases_ministerios_finanzas', `
-insert into public.roads (id, name, highway, city, coords, min_lat, min_lng, max_lat, max_lng)
-select ${ROAD0} + x.i, n.name, case when x.i in (4, 13) then 'tertiary' else 'residential' end, 'Iglesia de ejemplo', co.j,
-  least(a.lat, b.lat), least(a.lng, b.lng), greatest(a.lat, b.lat), greatest(a.lng, b.lng)
-from unnest(array[${[...EW, ...NS].map(q).join(', ')}]) with ordinality n(name, ord)
-cross join lateral (select (n.ord - 1)::int as i) x
-cross join lateral (select case when x.i < 9 then ${TOWN.lat} + (x.i - 4) * ${TOWN.dLat} else ${TOWN.lat} - 4 * ${TOWN.dLat} end as lat,
-                           case when x.i < 9 then ${TOWN.lng} - 4 * ${TOWN.dLng} else ${TOWN.lng} + (x.i - 13) * ${TOWN.dLng} end as lng) a
-cross join lateral (select case when x.i < 9 then a.lat else ${TOWN.lat} + 4 * ${TOWN.dLat} end as lat,
-                           case when x.i < 9 then ${TOWN.lng} + 4 * ${TOWN.dLng} else a.lng end as lng) b
-cross join lateral (select jsonb_agg(jsonb_build_array(round((a.lat + (b.lat - a.lat) * s / 8.0)::numeric, 6), round((a.lng + (b.lng - a.lng) * s / 8.0)::numeric, 6)) order by s) as j
-                    from generate_series(0, 8) s) co
-on conflict (id) do nothing;
+  batch('03_clases_ministerios_finanzas', `
 insert into public.classes (id, church_id, name, age_min, age_max, days, sort_order) values
   (demo_id('k1'), ${C}, 'Cuna', 0, 3, '{sun}', 10), (demo_id('k2'), ${C}, 'Párvulos', 4, 6, '{sun}', 20), (demo_id('k3'), ${C}, 'Primarios', 7, 9, '{sun}', 30),
   (demo_id('k4'), ${C}, 'Intermedios', 10, 12, '{sun}', 40), (demo_id('k5'), ${C}, 'Adolescentes', 13, 17, '{sun}', 50)
@@ -175,15 +162,17 @@ insert into public.memory_verse_done (verse_id, contact_id, church_id, learned_o
 select v.id, s.contact_id, ${C}, current_date - (7 + demo_h('ml' || v.id::text || s.contact_id::text) % 120), ${P(9)}
 from public.memory_verses v join public.class_students s on s.class_id = v.class_id
 where v.church_id = ${C} and demo_h('mv' || v.id::text || s.contact_id::text) < 560 on conflict do nothing;
-insert into public.zones (id, church_id, name, color, polygon, assigned, note, created_by) values
-  (demo_id('z1'), ${C}, 'Barrio Norte', '#2F8F5B', '${poly(0.0042, -0.0052, 0.0002, 0.0002)}'::jsonb, array[${P(8)}, ${P(6)}], 'Empezar por Los Tilos.', ${P(8)}),
-  (demo_id('z2'), ${C}, 'Barrio Sur', '#C2410C', '${poly(-0.0002, -0.0002, -0.0042, 0.0052)}'::jsonb, array[${P(7)}, ${P(14)}], null, ${P(8)})
+insert into public.zones (id, church_id, name, color, polygon, assigned, note, created_by, created_at) values
+  (demo_id('z1'), ${C}, 'Barrio Norte', '#2F8F5B', '[]'::jsonb, array[${P(8)}, ${P(6)}], null, ${P(8)}, now() - interval '75 days'),
+  (demo_id('z2'), ${C}, 'Barrio Sur', '#C2410C', '[]'::jsonb, array[${P(7)}, ${P(14)}], null, ${P(8)}, now() - interval '75 days')
 on conflict (id) do nothing;
 insert into public.bus_stops (id, church_id, group_id, household_id, sort_order, address, lat, lng, created_by)
 select demo_id('bs' || x.hid::text), ${C}, x.gid, x.hid, row_number() over (partition by x.gid order by x.lng), x.address, x.lat, x.lng, ${P(6)}
 from (select distinct hm.household_id as hid, ct.group_id as gid, ct.address, ct.lat, ct.lng
       from public.contacts ct join public.household_members hm on hm.contact_id = ct.id where ct.church_id = ${C} and ct.bus_rider) x
 on conflict do nothing;
+-- Las paradas a la esquina más cercana, en orden de recorrido, y las zonas con sus bordes sobre calles reales.
+select public.demo_place_all(${C});
 `);
 
   // ---------------- 05 · culto y comunidad ----------------
