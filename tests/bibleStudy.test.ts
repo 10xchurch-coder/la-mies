@@ -276,7 +276,7 @@ test('"Acerca de los textos" nombra cada versión y cada ayuda con su permiso y 
   for (const v of VERSIONS) assert.ok(BIBLE_SOURCES.some((s) => s.version === v.id), v.id);
   for (const s of BIBLE_SOURCES) assert.ok(s.title && s.what && s.licence && s.detail && s.source, s.title);
   // La licencia CC BY pide reconocimiento: tiene que estar escrito.
-  for (const s of BIBLE_SOURCES.filter((x) => x.licence.includes('CC BY'))) assert.ok(s.credit && /OpenBible\.info/.test(s.credit));
+  for (const s of BIBLE_SOURCES.filter((x) => x.licence.includes('CC BY'))) assert.ok(s.credit && /OpenBible\.info|STEP Bible/.test(s.credit));
   // Nada con derechos reservados entre lo incluido.
   assert.ok(!BIBLE_SOURCES.some((s) => /1960/.test(s.title)));
   assert.ok(BIBLE_NOT_INCLUDED.some((s) => /1960/.test(s.title)));
