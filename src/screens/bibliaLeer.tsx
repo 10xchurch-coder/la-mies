@@ -27,6 +27,7 @@ import { markChapterRead, loadRead, onPlanMarked, recentPlanNote } from '@/lib/b
 import { DEFAULT_PREFS, SIZES, loadBiblePrefs, saveBiblePrefs } from '@/lib/bibleStore';
 import { shareText } from '@/lib/share';
 import { speakAvailable, speakParts, stopSpeaking } from '@/lib/speak';
+import { loadNarrated, narratedUrl, playNarration, stopNarration } from '@/lib/bibleAudio';
 import { useFeatures } from '@/lib/useFeatures';
 import { colors, getThemeMode } from '@/theme';
 import { tx } from '@/lib/i18n';
@@ -64,10 +65,15 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
   // Comparar dos versiones: cuál es la segunda (nada = no se compara) y si en el teléfono van en dos columnas.
   const [compareId, setCompareId] = useState<string | undefined>(undefined);
   const [compareCols, setCompareCols] = useState(false);
+  // Cómo se acomoda el texto: seguido como en un libro, o cada versículo en su renglón.
+  const [byLine, setByLine] = useState(false);
   const { width } = useWindowDimensions();
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [speaking, setSpeaking] = useState(-1);
+  // La grabación con varias voces, si este capítulo ya la tiene. Si no, lee la voz del teléfono.
+  const [narrReady, setNarrReady] = useState(0);
+  useEffect(() => { loadNarrated().then(() => setNarrReady((n) => n + 1)); }, []);
   const [plan, setPlan] = useState<BiblePlanRow | null>(null);
   const [read, setRead] = useState<Set<string>>(new Set());
   const [note, setNote] = useState<string | null>(recentPlanNote());
@@ -102,12 +108,13 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
       setSpacing(p.spacing ?? 'normal');
       setCompareId(p.compare);
       setCompareCols(!!p.compareCols);
+      setByLine(!!p.byLine);
       setLoaded(true);
     });
   }, []);
   useEffect(() => {
-    if (loaded) saveBiblePrefs({ version: version.id, book, chapter, size, font: fontId, theme: themeId, spacing, compare: compareId, compareCols: compareCols || undefined });
-  }, [loaded, version.id, book, chapter, size, fontId, themeId, spacing, compareId, compareCols]);
+    if (loaded) saveBiblePrefs({ version: version.id, book, chapter, size, font: fontId, theme: themeId, spacing, compare: compareId, compareCols: compareCols || undefined, byLine: byLine || undefined });
+  }, [loaded, version.id, book, chapter, size, fontId, themeId, spacing, compareId, compareCols, byLine]);
   // La letra se baja recién cuando se elige. Mientras tanto se sigue leyendo con la anterior.
   useEffect(() => {
     let alive = true;
@@ -120,7 +127,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
     setCopied(false);
     setMarksState({});
     chapterMarks(book, chapter).then(setMarksState).catch(() => undefined);
-    return () => { stopSpeaking(); setSpeaking(-1); };
+    return () => { stopSpeaking(); stopNarration(); setSpeaking(-1); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book, chapter]);
   // El plan de lectura de la persona (si tiene uno) y lo que ya leyó de él.
@@ -175,7 +182,9 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
   const openNote = () => { setNoteText(marks[sorted[0]]?.note ?? ''); setNoteOpen(true); };
 
   const listen = () => {
-    if (speaking >= 0) { stopSpeaking(); setSpeaking(-1); return; }
+    if (speaking >= 0) { stopSpeaking(); stopNarration(); setSpeaking(-1); return; }
+    const url = narrReady ? narratedUrl(version.id, book, chapter) : null;
+    if (url && !sorted.length) { setSpeaking(0); playNarration(url, () => setSpeaking(-1)); return; }
     const from = sorted.length ? sorted[0] - 1 : 0;
     speakParts(verses.slice(from), (i) => setSpeaking(i < 0 ? -1 : from + i + 1));
   };
@@ -299,6 +308,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
               const bg = speaking === n ? (look.dark ? '#3A4A2A' : '#E4F3D8') : markBg(m?.color, look.dark);
               return (
                 <Text key={n} onPress={() => toggle(n)} accessibilityLabel={tx('Versículo {n}. {t}', { n, t })} suppressHighlighting>
+                  {byLine && i ? '\n' : null}
                   <Text style={{ fontSize: Math.round(fs * 0.62), color: look.muted }}>{n}{'\u00A0'}</Text>
                   <Text style={[bg ? { backgroundColor: bg } : null, on ? { textDecorationLine: 'underline', textDecorationStyle: 'dotted', textDecorationColor: look.accent } : null]}>{t}</Text>
                   {m?.note ? <Text style={{ color: look.accent }}>{' ✎'}</Text> : null}
@@ -327,7 +337,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
       {!picked.length ? (
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: (embedded ? 0 : insets.bottom) + 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 22 }}>
           {roundBtn('chevron-left', tx('Capítulo anterior'), () => prev && open(prev), false, !prev)}
-          {speakAvailable && fOn('biblia_audio') ? roundBtn(speaking >= 0 ? 'square' : 'play', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, true) : <View />}
+          {(speakAvailable || (narrReady > 0 && !!narratedUrl(version.id, book, chapter))) && fOn('biblia_audio') ? roundBtn(speaking >= 0 ? 'square' : 'play', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, true) : <View />}
           {roundBtn('chevron-right', tx('Capítulo siguiente'), goNext, false, !next)}
         </View>
       ) : null}
@@ -487,6 +497,13 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
                 )}
               </View>
             ) : null}
+            <View style={{ gap: 8 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('CÓMO SE VE EL TEXTO')}</Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {chip(tx('Seguido, como un libro'), !byLine, () => setByLine(false))}
+                {chip(tx('Cada versículo en su renglón'), byLine, () => setByLine(true))}
+              </View>
+            </View>
             <View style={{ gap: 8 }}>
               <Text style={{ fontSize: 13, fontWeight: '800', color: colors.muted }}>{tx('TAMAÑO DE LA LETRA')}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
