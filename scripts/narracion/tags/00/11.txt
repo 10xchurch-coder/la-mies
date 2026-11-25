@@ -1,0 +1,3 @@
+3 | g:hombres | Vamos, hagamos ladrillo | con fuego.
+4 | g:hombres | Vamos, edifiquémonos | de toda la tierra.
+6-7 | dios | He aquí el pueblo | de su compañero.
