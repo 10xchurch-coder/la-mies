@@ -1,0 +1,6 @@
+# Jeremías cuenta en primera persona (narrador); Jeremías = julian, los recabitas = arthur.
+2 | dios | Ve a casa de los recabitas | dales a beber vino.
+5 | h:Jeremías=julian | Bebed vino. | Bebed vino.
+6-11 | g:recabitas=arthur | No beberemos vino | en Jerusalén nos quedamos.
+13-17 | dios | Ve, y di a los varones de Judá | y no han respondido.
+18-19 | h:Jeremías | Así dice Jehová de los ejércitos, el Dios de Israel: Porque obedecisteis | delante de mí por siempre.

@@ -1,0 +1,9 @@
+# Sedequías = desmond, Jeremías = julian, Irías = sterling.
+3 | h:Sedequías=desmond | Suplica ahora por nosotros | Jehová nuestro Dios.
+7-10 | dios | Diréis así al rey de Judá | fuego a esta ciudad.
+13 | h:Irías=sterling | Tú te pasas a los caldeos. | Tú te pasas a los caldeos.
+14 | h:Jeremías=julian | Es falso | no me paso a los caldeos.
+17 | h:Sedequías | ¿Hay palabra de Jehová? | ¿Hay palabra de Jehová?
+17 | h:Jeremías | Si hay. | Si hay.
+17 | h:Jeremías | Tú serás entregado | del rey de Babilonia.
+18-20 | h:Jeremías | ¿En qué pequé contra ti | para que no muera allí.

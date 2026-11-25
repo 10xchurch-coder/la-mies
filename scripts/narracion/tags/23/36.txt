@@ -1,0 +1,10 @@
+# Jeremías = julian, los príncipes = arthur, Baruc = desmond (Sedequías no habla en este capítulo).
+2-3 | dios | Tómate un rollo de libro | su iniquidad y su pecado.
+5-7 | h:Jeremías=julian | Yo estoy preso | contra este pueblo.
+14 | g:príncipes=arthur | Toma el rollo | y ven.
+15 | g:príncipes | Siéntate ahora | a nuestros oídos.
+16 | g:príncipes | Sin duda contaremos | todas estas palabras.
+17 | g:príncipes | Cuéntanos ahora | todas estas palabras.
+18 | h:Baruc=desmond | Él me dictaba | con tinta en el libro.
+19 | g:príncipes | Ve y escóndete | dónde estáis.
+28-31 | dios | Vuelve a tomar otro rollo | les he dicho y no escucharon.
