@@ -1,0 +1,13 @@
+1-4 | dios | Entra ante Faraón | todos tus siervos.
+5 | dios | Di a Aarón | tierra de Egipto.
+8 | h:Faraón=desmond | Orad a Jehová | sacrificios a Jehová.
+9 | h:Moisés=sterling | Gloríate sobre mí | en el río?
+10 | h:Faraón | Mañana. | Mañana.
+10-11 | h:Moisés | Se hará conforme | quedarán en el río.
+16 | dios | Di a Aarón | país de Egipto.
+19 | g:encantadores | Dedo de Dios es este. | Dedo de Dios es este.
+20-23 | dios | Levántate de mañana | será esta señal.
+25 | h:Faraón | Andad, ofreced | en la tierra.
+26-27 | h:Moisés | No conviene | Él nos dirá.
+28 | h:Faraón | Yo os dejaré ir | orad por mí.
+29 | h:Moisés | He aquí, que yo salgo | sacrificio a Jehová.

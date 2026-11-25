@@ -1,0 +1,14 @@
+1 | h:Moisés=sterling | Jehová Dios de Israel, dice así | fiesta en el desierto.
+2 | h:Faraón=desmond | ¿Quién es Jehová | dejaré ir a Israel.
+3 | h:Moisés | El Dios de los hebreos | o con espada.
+4 | h:Faraón | Moisés y Aarón, ¿por qué | vuestros cargos.
+5 | h:Faraón | He aquí el pueblo | de sus cargos.
+7-9 | h:Faraón | De aquí en adelante | palabras de mentira.
+10-11 | g:cuadrilleros | Así ha dicho Faraón | vuestra tarea.
+13 | g:cuadrilleros | Acabad vuestra obra | se os daba paja.
+14 | g:cuadrilleros | ¿Por qué no habéis cumplido | como antes?
+15-16 | g:oficiales | ¿Por qué haces así | tu pueblo.
+17-18 | h:Faraón | Estáis ociosos | tarea del ladrillo.
+19 | h:Faraón | No se disminuirá nada | de cada día.
+21 | g:oficiales | Mire Jehová | para que nos maten.
+22-23 | h:Moisés | Señor, ¿por qué afliges | librado a tu pueblo.
