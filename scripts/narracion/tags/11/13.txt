@@ -1,0 +1,10 @@
+# Voces: Joás rey de Israel sterling, Eliseo julian.
+14 | h:Joás=sterling | ¡Padre mío, padre mío | su gente de a caballo!
+15 | h:Eliseo=julian | Toma un arco y unas saetas. | Toma un arco y unas saetas.
+16 | h:Eliseo | Pon tu mano sobre el arco. | Pon tu mano sobre el arco.
+17 | h:Eliseo | Abre la ventana de hacia el oriente. | Abre la ventana de hacia el oriente.
+17 | h:Eliseo | Tira; | Tira;
+17 | h:Eliseo | Saeta de la liberación de Jehová | hasta consumirlos.
+18 | h:Eliseo | Toma las saetas. | Toma las saetas.
+18 | h:Eliseo | Hiere la tierra. | Hiere la tierra.
+19 | h:Eliseo | Al herir cinco | sólo tres veces.
