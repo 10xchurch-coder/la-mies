@@ -12,6 +12,7 @@
 - Hecho: Marcos 13 a 16 (25 nov 2026), 118 pedazos, sin fallas (un pedazo de Marcos 15 se quedó colgado y se pidió de nuevo). MARCOS COMPLETO.
 - Hecho: Lucas 1 a 4 (25 nov 2026), 104 pedazos, sin fallas.
 - Hecho: Lucas 5 a 8 (25 nov 2026), 146 pedazos. En Lucas 7 falló un pedazo que era solo "y:" (versículo 16); se juntaron las dos frases del pueblo en una sola cita y salió bien. Lucas 1 a 8 gastaron unos 300 créditos entre las cuatro tareas.
+- EN CURSO: Lucas 9 a 12, 13:35 UTC del 25 nov 2026
 - Sigue: Lucas 9 (libro 41). De Lucas 9 en adelante falta todo (tags, planes y audio).
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.

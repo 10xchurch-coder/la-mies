@@ -1,0 +1,32 @@
+3-5 | jesus | No toméis nada para el camino | testimonio contra ellos.
+7 | g:algunos | Juan ha resucitado de los muertos | Juan ha resucitado de los muertos
+8 | g:otros | Elías ha aparecido | Elías ha aparecido
+8 | g:otros mas | Algún profeta de los antiguos ha resucitado. | Algún profeta de los antiguos ha resucitado.
+9 | h:Herodes | A Juan yo decapité | oigo tales cosas?
+12 | g:los doce | Despide la multitud | en lugar desierto.
+13 | jesus | Dadles vosotros de comer. | Dadles vosotros de comer.
+13 | g:los doce | No tenemos más que | para toda esta multitud.
+14 | jesus | Hacedlos sentar en grupos | de cincuenta en cincuenta.
+18 | jesus | ¿Quién dice la gente que soy yo? | ¿Quién dice la gente que soy yo?
+19 | g:los doce | Juan el Bautista | de los antiguos ha resucitado.
+20 | jesus | ¿Y vosotros, quién decís que soy yo? | ¿Y vosotros, quién decís que soy yo?
+20 | h:Pedro=desmond | El Cristo de Dios. | El Cristo de Dios.
+22 | jesus | Es necesario que el Hijo | resucite al tercer día.
+23-27 | jesus | Si alguno quiere venir | vean el reino de Dios.
+33 | h:Pedro | Maestro, bien es que | y uno para Elías
+35 | dios | Éste es mi Hijo amado; a Él oíd. | Éste es mi Hijo amado; a Él oíd.
+38-40 | h:padre del muchacho | Maestro, te ruego que | y no pudieron.
+41 | jesus | ¡Oh generación incrédula | Trae acá tu hijo.
+44 | jesus | Dejad que estas palabras | en manos de hombres.
+48 | jesus | Cualquiera que reciba | ese será grande.
+49 | h:Juan=sterling | Maestro, hemos visto | no sigue con nosotros.
+50 | jesus | No se lo prohibáis | por nosotros es.
+54 | g:Jacobo y Juan | Señor, ¿quieres que mandemos | así como hizo Elías?
+55-56 | jesus | Vosotros no sabéis | sino para salvarlas.
+57 | h:uno en el camino | Señor, te seguiré adondequiera que vayas. | Señor, te seguiré adondequiera que vayas.
+58 | jesus | Las zorras tienen guaridas | donde recostar su cabeza.
+59 | jesus | Sígueme. | Sígueme.
+59 | h:otro | Señor, déjame que primero | entierre a mi padre.
+60 | jesus | Deja que los muertos | predica el reino de Dios.
+61 | h:un tercero | Te seguiré, Señor | los que están en mi casa.
+62 | jesus | Ninguno que poniendo | apto para el reino de Dios.
