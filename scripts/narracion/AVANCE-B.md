@@ -16,5 +16,6 @@
 - Hecho: Éxodo 1 a 4 (25 nov 2026), 101 pedazos, sin fallas (un pedazo de Éxodo 4 quedó trabado y se volvió a pedir; dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar).
 - Hecho: Éxodo 5 a 8 (25 nov 2026), 79 pedazos, sin fallas (cuatro pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Los cuadrilleros son arthur, los oficiales de Israel y los encantadores julian.
 - Hecho: Éxodo 9 a 12 (25 nov 2026), 65 pedazos, sin fallas.
-- Sigue: Éxodo 13 (tags y planes de Éxodo 13 a 20 ya están subidos). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, el pueblo g:pueblo=arthur; Dios es "dios" aunque el texto diga "el Ángel de Jehová" en la zarza. Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
-- Créditos que quedan: 7791 (25 nov 2026).
+- Hecho: Éxodo 13 a 16 (25 nov 2026), 67 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). José (13:19) es arthur, Miriam soraya, los siervos de Faraón y los egipcios julian.
+- Sigue: Éxodo 17 (tags y planes de Éxodo 17 a 24 ya están subidos; Éxodo 21 a 23 son leyes y los lee todo el narrador, sin tags). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, el pueblo g:pueblo=arthur; Dios es "dios" aunque el texto diga "el Ángel de Jehová" en la zarza. Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
+- Créditos que quedan: 7719 (25 nov 2026).
