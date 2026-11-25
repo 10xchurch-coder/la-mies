@@ -1,0 +1,30 @@
+# Voces como en 1 Reyes 22: Acab sterling, Josafat arthur, Micaías desmond, Sedequías y los profetas julian.
+# El mensajero y el rey de Siria arthur, los capitanes julian (solo hay cuatro voces de hombre).
+3 | h:Acab=sterling | ¿Quieres venir conmigo a Ramot de Galaad? | ¿Quieres venir conmigo a Ramot de Galaad?
+3 | h:Josafat=arthur | Yo soy como tú | iremos contigo a la guerra.
+4 | h:Josafat | Te ruego que consultes | la palabra de Jehová.
+5 | h:Acab | ¿Iremos a la guerra | me estaré yo quieto?
+5 | g:profetas=julian | Sube, porque Dios | en mano del rey.
+6 | h:Josafat | ¿Hay aún aquí | preguntemos?
+7 | h:Acab | Aún hay aquí un hombre | hijo de Imla.
+7 | h:Josafat | No hable así el rey. | No hable así el rey.
+8 | h:Acab | Haz venir luego | hijo de Imla.
+10 | h:Sedequías=julian | Así dice Jehová: Con estos | destruirlos del todo.
+11 | g:profetas | Sube a Ramot de Galaad | en mano del rey.
+12 | h:mensajero=arthur | He aquí las palabras | que hables bien.
+13 | h:Micaías=desmond | Vive Jehová | eso hablaré.
+14 | h:Acab | Micaías, ¿iremos | me estaré yo quieto?
+14 | h:Micaías | Subid, que seréis | en vuestras manos.
+15 | h:Acab | ¿Hasta cuántas veces | sino la verdad?
+16 | h:Micaías | He visto a todo Israel | en paz a su casa.
+17 | h:Acab | ¿No te había dicho yo | sino mal?
+18-22 | h:Micaías | Oíd, pues, palabra de Jehová | el mal acerca de ti.
+23 | h:Sedequías | ¿Por qué camino | hablarte a ti?
+24 | h:Micaías | He aquí tú lo verás | para esconderte.
+25-26 | h:Acab | Tomad a Micaías | hasta que yo vuelva en paz.
+27 | h:Micaías | Si tú volvieres en paz | no ha hablado por mí.
+27 | h:Micaías | Oídlo, pueblos todos. | Oídlo, pueblos todos.
+29 | h:Acab | Yo me disfrazaré | tus vestiduras reales.
+30 | h:rey de Siria=arthur | No peleéis contra chico | contra el rey de Israel.
+31 | g:capitanes=julian | Este es el rey de Israel. | Este es el rey de Israel.
+33 | h:Acab | Vuelve tu mano | estoy mal herido.
