@@ -1,0 +1,7 @@
+2 | h:Micaía=desmond | Los mil cien siclos de plata que te fueron hurtados | yo lo había tomado.
+2 | m:madre=helena | Bendito seas de Jehová, hijo mío. | Bendito seas de Jehová, hijo mío.
+3 | m:madre | Yo ciertamente he dedicado | yo te lo devuelvo.
+9 | h:Micaía | ¿De dónde vienes? | ¿De dónde vienes?
+9 | h:levita=julian | Soy de Belén de Judá | donde encuentre lugar.
+10 | h:Micaía | Quédate en mi casa | y tu comida.
+13 | h:Micaía | Ahora sé que Jehová | por mi sacerdote.

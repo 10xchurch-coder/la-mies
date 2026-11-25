@@ -1,0 +1,13 @@
+2 | g:hijos de Dan=arthur | Id y reconoced la tierra. | Id y reconoced la tierra.
+3 | g:cinco hombres=sterling | ¿Quién te ha traído por acá? | ¿Y qué tienes tú por aquí?
+4 | h:levita=julian | De esta y de esta manera | sea su sacerdote.
+5 | g:cinco hombres | Pregunta pues, ahora a Dios | será próspero.
+6 | h:levita | Id en paz | delante de Jehová.
+8 | g:hijos de Dan | ¿Qué hay? | ¿Qué hay?
+9-10 | g:cinco hombres | Levantaos, subamos contra ellos | que haya en la tierra.
+14 | g:cinco hombres | ¿No sabéis como en estas casas | lo que habéis de hacer.
+18 | h:levita | ¿Qué hacéis vosotros? | ¿Qué hacéis vosotros?
+19 | g:cinco hombres | Calla, pon la mano | familia de Israel?
+23 | g:hijos de Dan | ¿Qué tienes que has juntado gente? | ¿Qué tienes que has juntado gente?
+24 | h:Micaía=desmond | Habéis llevado mis dioses | Qué tienes?
+25 | g:hijos de Dan | No des voces tras nosotros | la vida de los tuyos.

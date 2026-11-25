@@ -1,0 +1,11 @@
+1 | g:pueblo=arthur | Ninguno de nosotros dará su hija | por esposa.
+3 | g:pueblo | Oh Jehová, Dios de Israel | una tribu?
+5 | g:pueblo | ¿Quién de todas las tribus | cerca de Jehová?
+5 | g:pueblo | Sufrirá muerte. | Sufrirá muerte.
+6-7 | g:pueblo | Una tribu es hoy cortada | nuestras hijas por esposas.
+8 | g:pueblo | ¿Hay alguno de las tribus | a Jehová en Mizpa?
+10-11 | g:pueblo | Id y herid a filo de espada | ayuntamiento de varón.
+16 | v:ancianos=desmond | ¿Qué haremos acerca de esposas | las mujeres de Benjamín.
+17-18 | v:ancianos | Que haya herencia | esposa a los de Benjamín.
+19 | v:ancianos | He aquí cada año hay fiesta | fiesta de Jehová en Silo,
+20-22 | v:ancianos | Id, y poned emboscada | para que ahora seáis culpables.

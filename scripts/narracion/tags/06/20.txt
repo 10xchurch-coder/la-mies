@@ -1,0 +1,13 @@
+3 | g:pueblo=arthur | Decid cómo fue esta maldad. | Decid cómo fue esta maldad.
+4-7 | h:levita=sterling | Yo llegué a Gabaa | vuestro parecer y consejo.
+8-10 | g:pueblo | Ninguno de nosotros irá a su tienda | ha cometido en Israel.
+12-13 | g:pueblo | ¿Qué maldad es esta | barramos el mal de Israel.
+18 | g:pueblo | ¿Quién de nosotros subirá | contra los hijos de Benjamín?
+18 | dios | Judá subirá primero. | Judá subirá primero.
+23 | g:pueblo | ¿Tornaré a pelear | Benjamín mi hermano?
+23 | dios | Subid contra él. | Subid contra él.
+28 | g:pueblo | ¿Volveré aún a salir | me quedaré quieto?
+28 | dios | Subid, que mañana | en tu mano.
+32 | g:Benjamín=julian | Vencidos son delante de nosotros, como antes. | Vencidos son delante de nosotros, como antes.
+32 | g:pueblo | Huiremos, y los alejaremos | hasta los caminos.
+39 | g:Benjamín | Ciertamente ellos han caído | en la primera batalla.

@@ -1,0 +1,14 @@
+5 | v:suegro=arthur | Conforta tu corazón | y después os iréis.
+6 | v:suegro | Te ruego que quieras pasar aquí la noche | se alegrará tu corazón.
+8 | v:suegro | Te ruego que confortes ahora tu corazón. | Te ruego que confortes ahora tu corazón.
+9 | v:suegro | He aquí el día declina | te irás a tu casa.
+11 | h:criado=julian | Ven ahora, y vámonos | pasemos en ella la noche.
+12 | h:levita=sterling | No iremos a ninguna ciudad | pasaremos hasta Gabaa.
+13 | h:levita | Ven, lleguemos a uno | o en Ramá.
+17 | v:viejo=desmond | ¿A dónde vas, y de dónde vienes? | ¿A dónde vas, y de dónde vienes?
+18-19 | h:levita | Pasamos de Belén de Judá | no nos hace falta nada.
+20 | v:viejo | Paz sea contigo | en la plaza.
+22 | g:hombres de Belial=julian | Saca al hombre | para que lo conozcamos.
+23-24 | v:viejo | No, hermanos míos | cosa tan infame.
+28 | h:levita | Levántate, y vámonos. | Levántate, y vámonos.
+30 | g:pueblo=arthur | Jamás se ha hecho | tomad consejo y hablad.
