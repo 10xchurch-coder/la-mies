@@ -10,6 +10,7 @@
 - Hecho: Marcos 5 a 8 (25 nov 2026), 134 pedazos, sin fallas. Marcos 1 a 8 gastaron unos 215 créditos entre las cuatro tareas.
 - Hecho: Marcos 9 a 12 (25 nov 2026), 164 pedazos, sin fallas (varios reintentos por el límite de 8 trabajos a la vez).
 - Hecho: Marcos 13 a 16 (25 nov 2026), 118 pedazos, sin fallas (un pedazo de Marcos 15 se quedó colgado y se pidió de nuevo). MARCOS COMPLETO.
+- EN CURSO: Lucas 1 a 4, 12:29 UTC (25 nov 2026)
 - Sigue: Lucas 1 (libro 41). De Lucas en adelante falta todo (tags, planes y audio).
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
