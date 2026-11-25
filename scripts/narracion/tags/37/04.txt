@@ -1,0 +1,12 @@
+2 | angel | ¿Qué ves? | ¿Qué ves?
+2-3 | h:Zacarías=julian | He mirado, y he aquí un candelero | el otro a su izquierda.
+4 | h:Zacarías | ¿Qué es esto, mi Señor? | ¿Qué es esto, mi Señor?
+5 | angel | ¿No sabes qué es esto? | ¿No sabes qué es esto?
+5 | h:Zacarías | No, mi Señor. | No, mi Señor.
+6-7 | angel | Esta es la palabra de Jehová a Zorobabel | Gracia, gracia a ella.
+9-10 | dios | Las manos de Zorobabel | recorren por toda la tierra.
+11 | h:Zacarías | ¿Qué significan estos dos olivos | y a su izquierda?
+12 | h:Zacarías | ¿Qué significan las dos ramas | aceite como oro?
+13 | angel | ¿No sabes qué es esto? | ¿No sabes qué es esto?
+13 | h:Zacarías | No, mi Señor. | No, mi Señor.
+14 | angel | Estos son los dos ungidos | Señor de toda la tierra.

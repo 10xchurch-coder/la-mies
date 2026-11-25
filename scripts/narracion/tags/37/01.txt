@@ -1,0 +1,12 @@
+2-6 | dios | Jehová está muy enojado | ¿no alcanzaron a vuestros padres?
+6 | g:padres=desmond | Así como Jehová de los ejércitos pensó | así ha hecho con nosotros.
+9 | h:Zacarías=julian | ¿Qué son estos, Señor mío? | ¿Qué son estos, Señor mío?
+9 | angel | Yo te enseñaré qué son estos. | Yo te enseñaré qué son estos.
+10 | angel | Estos son los que Jehová ha enviado | a recorrer la tierra.
+11 | g:jinetes=sterling | Hemos recorrido la tierra | reposada y quieta.
+12 | angel | Oh Jehová de los ejércitos | estos setenta años?
+14-17 | angel | Clama, diciendo | escogerá todavía a Jerusalén.
+19 | h:Zacarías | ¿Qué son estos? | ¿Qué son estos?
+19 | angel | Estos son los cuernos que dispersaron | a Israel y a Jerusalén.
+21 | h:Zacarías | ¿Qué vienen a hacer estos? | ¿Qué vienen a hacer estos?
+21 | angel | Estos son los cuernos que dispersaron a Judá, tanto | para dispersarla.

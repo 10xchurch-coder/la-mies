@@ -1,0 +1,10 @@
+2 | angel | ¿Qué ves? | ¿Qué ves?
+2 | h:Zacarías=julian | Veo un rollo que vuela | diez codos de ancho.
+3-4 | angel | Esta es la maldición | su madera y sus piedras.
+5 | angel | Alza ahora tus ojos | esto que sale.
+6 | h:Zacarías | ¿Qué es? | ¿Qué es?
+6 | angel | Este es un efa que sale. | Este es un efa que sale.
+6 | angel | Esta es la semejanza de ellos | en toda la tierra.
+8 | angel | Esta es la maldad | Esta es la maldad
+10 | h:Zacarías | ¿A dónde llevan el efa? | ¿A dónde llevan el efa?
+11 | angel | Para que le sea edificada casa | sobre su base.

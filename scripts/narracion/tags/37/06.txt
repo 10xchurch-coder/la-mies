@@ -1,0 +1,5 @@
+4 | h:Zacarías=julian | Señor mío, ¿qué es esto? | Señor mío, ¿qué es esto?
+5 | angel | Estos son los cuatro espíritus | Señor de toda la tierra.
+7 | angel | Id, recorred la tierra. | Id, recorred la tierra.
+8 | angel | Mira, los que salieron | en la tierra del norte.
+10-15 | dios | Toma de los del cautiverio | la voz de Jehová vuestro Dios.

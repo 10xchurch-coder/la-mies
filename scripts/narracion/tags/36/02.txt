@@ -1,0 +1,8 @@
+2-9 | dios | Habla ahora a Zorobabel | daré paz en este lugar, dice Jehová de los ejércitos.
+11 | dios | Pregunta ahora a los sacerdotes | acerca de la ley, diciendo:
+12 | h:Hageo=julian | Si llevare alguno | ¿será santificada?
+12 | g:sacerdotes=arthur | No. | No.
+13 | h:Hageo | Si un inmundo | ¿será inmunda?
+13 | g:sacerdotes | Inmunda será. | Inmunda será.
+14-19 | h:Hageo | Así es este pueblo | os daré bendición.
+21-23 | dios | Habla a Zorobabel | yo te escogí, dice Jehová de los ejércitos.
