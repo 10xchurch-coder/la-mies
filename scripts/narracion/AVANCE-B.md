@@ -42,5 +42,6 @@
 - Hecho: Números 35 y 36 (25 nov 2026), 11 pedazos, sin fallas. 35 todo narrador; en 36 los jefes de Galaad son desmond. Números completo.
 - Hecho: Deuteronomio 1 a 3 (25 nov 2026), 25 pedazos, sin fallas. Habla Moisés (sterling) casi todo; las notas entre paréntesis las lee el narrador.
 - Hecho: Deuteronomio 4 a 7 (25 nov 2026), 28 pedazos, sin fallas (un pedazo de Deuteronomio 4 quedó trabado y se volvió a pedir; muchos pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar).
-- Sigue: Deuteronomio 8 (tags y planes de Deuteronomio 8 a 34 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Josué 1. En Deuteronomio habla Moisés (h:Moisés=sterling): todo su discurso va con su voz, incluso lo que él cita de Dios y del pueblo. Voces a mantener: Moisés sterling, Eleazar julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Hecho: Deuteronomio 8 a 11 (25 nov 2026), 24 pedazos, sin fallas (varios pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar).
+- Sigue: Deuteronomio 12 (tags y planes de Deuteronomio 12 a 34 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Josué 1. En Deuteronomio habla Moisés (h:Moisés=sterling): todo su discurso va con su voz, incluso lo que él cita de Dios y del pueblo. Voces a mantener: Moisés sterling, Eleazar julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
 - Créditos que quedan: 4245 (25 nov 2026).
