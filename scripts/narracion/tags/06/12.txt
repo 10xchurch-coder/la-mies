@@ -1,0 +1,7 @@
+1 | g:Efraín=julian | ¿Por qué fuiste a hacer guerra | tu casa contigo.
+2-3 | h:Jefté=sterling | Yo tuve, y mi pueblo | para pelear conmigo?
+4 | g:Efraín | Vosotros sois fugitivos de Efraín | en medio de Manasés.
+5 | g:Efraín | ¿pasaré? | ¿pasaré?
+5 | g:galaaditas=arthur | ¿Eres tú efrateo? | ¿Eres tú efrateo?
+5 | g:Efraín | No; | No;
+6 | g:galaaditas | Ahora, pues, di Shibolet. | Ahora, pues, di Shibolet.

@@ -1,0 +1,15 @@
+# Los embajadores hablan de parte de Jefté: va con la voz de Jefté.
+2 | g:hermanos de Jefté=julian | No heredarás en la casa | hijo de otra mujer.
+6 | g:ancianos de Galaad=arthur | Ven y sé nuestro capitán | contra los hijos de Amón.
+7 | h:Jefté=sterling | ¿No me habéis aborrecido | cuando estáis en aflicción?
+8 | g:ancianos de Galaad | Por esta misma causa | los que moramos en Galaad.
+9 | h:Jefté | Si me hacéis volver | ¿seré yo vuestra cabeza?
+10 | g:ancianos de Galaad | Jehová sea testigo | como tú dices.
+12 | h:Jefté | ¿Qué tienes tú conmigo | guerra en mi tierra?
+13 | h:rey de Amón=desmond | Por cuanto Israel tomó mi tierra | devuélvelas ahora en paz.
+15-27 | h:Jefté | Jefté ha dicho así | y los hijos de Amón.
+30-31 | h:Jefté | Si en verdad entregas | lo ofreceré en holocausto.
+35 | h:Jefté | ¡Ay, hija mía! | no podré retractarme.
+36 | m:hija de Jefté=elena | Padre mío, si has abierto | los hijos de Amón.
+37 | m:hija de Jefté | Permite que me sea hecho esto | yo y mis compañeras.
+38 | h:Jefté | Ve. | Ve.

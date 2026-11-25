@@ -1,0 +1,4 @@
+10 | g:pueblo=arthur | Nosotros hemos pecado contra ti | servido a los Baales.
+11-14 | dios | ¿No os libré yo de los egipcios | en el tiempo de vuestra aflicción.
+15 | g:pueblo | Hemos pecado; haz tú | nos libres en este día.
+18 | g:príncipes de Galaad=sterling | ¿Quién es el que comenzará | los que habitan en Galaad.
