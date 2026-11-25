@@ -1,7 +1,8 @@
+TERMINADO
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel, Oseas, Joel, Amós, Abdías, Jonás, Miqueas, Nahúm, Habacuc, Sofonías y Hageo completos; Zacarías 1 a 12.
-- Sigue: Zacarías 13 (los tags y planes de Zacarías y Malaquías ya están todos hechos y bajados al sandbox; falta generar). Después Malaquías.
-- Créditos: 2.020 el 25 nov 2026, 20:32 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: toda la parte D, de Proverbios a Malaquías (libros 19 a 38), los 20 libros completos. Revisado contra index.json de la rama audio-rvg: no falta ningún capítulo.
+- Sigue: nada. La tarea D terminó el 25 nov 2026 a las 20:35 UTC con Malaquías 4; sólo queda que el pastor escuche y avise los errores.
+- Créditos: 1.974 el 25 nov 2026, 20:35 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
