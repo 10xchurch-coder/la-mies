@@ -1,0 +1,14 @@
+3 | g:pueblo=arthur | Mejor hubiéramos muerto | toda esta multitud.
+4-5 | dios | He aquí yo os haré | cada día.
+6-7 | h:Moisés=sterling | A la tarde sabréis | contra nosotros?
+8 | h:Moisés | Jehová os dará | contra Jehová.
+9 | h:Moisés | Di a toda la congregación | vuestras murmuraciones.
+12 | dios | Yo he oído | vuestro Dios.
+15 | g:pueblo | ¿Qué es esto? | ¿Qué es esto?
+15-16 | h:Moisés | Es el pan | en su tienda.
+19 | h:Moisés | Ninguno deje | para mañana.
+23 | h:Moisés | Esto es lo que ha dicho | para mañana.
+25-26 | h:Moisés | Comedlo hoy | no se hallará.
+28-29 | dios | ¿Hasta cuándo no querréis | séptimo día.
+32 | h:Moisés | Esto es lo que Jehová ha mandado | tierra de Egipto.
+33 | h:Moisés | Toma un vaso | vuestros descendientes.
