@@ -1,0 +1,42 @@
+2 | jesus | Sabéis que dentro | para ser crucificado.
+5 | g:sacerdotes | No en el día de fiesta | alboroto en el pueblo.
+8-9 | g:discipulos | ¿Por qué este desperdicio? | dado a los pobres.
+10-13 | jesus | ¿Por qué molestáis | para memoria de ella.
+15 | h:Judas | ¿Qué me queréis dar | os lo entregaré?
+17 | g:discipulos | ¿Dónde quieres | comas la pascua?
+18 | jesus | Id a la ciudad | con mis discípulos.
+21 | jesus | De cierto os digo, que uno | me va a traicionar.
+22 | g:discipulos | ¿Soy yo, Señor? | ¿Soy yo, Señor?
+23-24 | jesus | El que mete la mano | no haber nacido.
+25 | h:Judas | ¿Soy yo, Maestro? | ¿Soy yo, Maestro?
+25 | jesus | Tú lo has dicho. | Tú lo has dicho.
+26 | jesus | Tomad, comed | esto es mi cuerpo.
+27-29 | jesus | Bebed de ella todos | reino de mi Padre.
+31-32 | jesus | Todos vosotros os escandalizaréis | vosotros a Galilea.
+33 | h:Pedro | Aunque todos se escandalicen | nunca me escandalizaré.
+34 | jesus | De cierto te digo | negarás tres veces.
+35 | h:Pedro | Aunque me sea necesario | no te negaré.
+36 | jesus | Sentaos aquí | voy allí y oro.
+38 | jesus | Mi alma está muy triste | velad conmigo.
+39 | jesus | Padre mío, si es posible | sino la tuya.
+40-41 | jesus | ¿Así que no habéis | la carne es débil.
+42 | jesus | Padre mío, si no puede | hágase tu voluntad.
+45-46 | jesus | Dormid ya | el que me traiciona.
+48 | h:Judas | Al que yo besare | prendedle.
+49 | h:Judas | ¡Salve Maestro! | ¡Salve Maestro!
+50 | jesus | Amigo, ¿a qué vienes? | Amigo, ¿a qué vienes?
+52-54 | jesus | Vuelve tu espada | que así se haga?
+55-56 | jesus | ¿Como contra un ladrón | Escrituras de los profetas.
+61 | g:testigos | Éste dijo: Puedo derribar | días reedificarlo.
+62 | v:Caifas | ¿No respondes nada? | estos contra ti?
+63 | v:Caifas | Te conjuro por el Dios | el Hijo de Dios.
+64 | jesus | Tú lo has dicho. Además | nubes del cielo.
+65-66 | v:Caifas | ¡Ha blasfemado! | ¿Qué os parece?
+66 | g:concilio | ¡Culpable es de muerte! | ¡Culpable es de muerte!
+68 | g:concilio | Profetízanos, Cristo | el que te golpeó?
+69 | m:criada | Tú también estabas | Jesús el galileo.
+70 | h:Pedro | No sé lo que dices. | No sé lo que dices.
+71 | m:otra criada | También este estaba | Jesús el Nazareno.
+72 | h:Pedro | No conozco al hombre. | No conozco al hombre.
+73 | g:presentes | Verdaderamente también tú | tu habla te descubre.
+74 | h:Pedro | No conozco al hombre. | No conozco al hombre.

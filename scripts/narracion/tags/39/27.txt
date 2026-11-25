@@ -1,0 +1,26 @@
+4 | h:Judas | Yo he pecado | la sangre inocente.
+4 | g:sacerdotes | ¿Qué a nosotros? | Míralo tú.
+6 | g:sacerdotes | No es lícito | precio de sangre.
+11 | h:Pilato | ¿Eres tú el Rey | de los judíos?
+11 | jesus | Tú lo dices. | Tú lo dices.
+13 | h:Pilato | ¿No oyes cuántas | contra ti?
+17 | h:Pilato | ¿A quién queréis | llamado el Cristo?
+19 | m:esposa de Pilato | No tengas nada | por causa de Él.
+21 | h:Pilato | ¿A cuál de los dos | que os suelte?
+21 | g:multitud | A Barrabás. | A Barrabás.
+22 | h:Pilato | ¿Qué, pues, haré | llamado el Cristo?
+22 | g:multitud | ¡Sea crucificado! | ¡Sea crucificado!
+23 | h:Pilato | Pues, ¿qué mal | ha hecho?
+23 | g:multitud | ¡Sea crucificado! | ¡Sea crucificado!
+24 | h:Pilato | Inocente soy yo | vedlo vosotros.
+25 | g:multitud | Su sangre sea | sobre nuestros hijos.
+29 | g:soldados | ¡Salve, Rey de los judíos! | ¡Salve, Rey de los judíos!
+40 | g:los que pasaban | Tú que derribas | desciende de la cruz.
+42-43 | g:sacerdotes | A otros salvó | soy el Hijo de Dios.
+46 | jesus | Elí, Elí, ¿lama sabactani? | Elí, Elí, ¿lama sabactani?
+46 | jesus | Dios mío, Dios mío | me has abandonado?
+47 | g:los que estaban alli | A Elías llama Éste. | A Elías llama Éste.
+49 | g:los que estaban alli | Deja, veamos | Elías a librarle.
+54 | h:centurion | Verdaderamente Éste | el Hijo de Dios.
+63-64 | g:sacerdotes | Señor, nos acordamos | peor que el primero.
+65 | h:Pilato | Tenéis una guardia | como sabéis.
