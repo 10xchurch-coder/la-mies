@@ -1,0 +1,5 @@
+# 7-18 es el lamento de Jeremías (narrador); lo que dice con "dije" lleva su voz, y lo que decían sus enemigos, otra.
+3-6 | h:Jeremías=julian | Jehová no ha llamado tu nombre Pasur | has profetizado mentiras.
+9 | h:Jeremías | No me acordaré más de Él | ni hablaré más en su nombre:
+10 | g:enemigos=sterling | Denunciad, y denunciaremos. | Denunciad, y denunciaremos.
+10 | g:enemigos | Quizá será persuadido, decían | nuestra venganza.
