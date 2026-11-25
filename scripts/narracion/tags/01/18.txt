@@ -1,0 +1,7 @@
+3 | h:Moisés=sterling | Peregrino he sido en tierra ajena | Peregrino he sido en tierra ajena
+4 | h:Moisés | El Dios de mi padre | espada de Faraón.
+6 | v:Jetro=arthur | Yo tu suegro Jetro | con ella.
+10-11 | v:Jetro | Bendito sea Jehová | fue sobre ellos.
+14 | v:Jetro | ¿Qué es esto que haces | hasta la tarde?
+15-16 | h:Moisés | Porque el pueblo viene | sus leyes.
+17-23 | v:Jetro | No está bien | a su lugar.

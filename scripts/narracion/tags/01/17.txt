@@ -1,0 +1,9 @@
+2 | g:pueblo=arthur | Danos agua que bebamos. | Danos agua que bebamos.
+2 | h:Moisés=sterling | ¿Por qué altercáis | tentáis a Jehová?
+3 | g:pueblo | ¿Por qué nos hiciste | nuestros ganados?
+4 | h:Moisés | ¿Qué haré con este pueblo | me apedrearán.
+5-6 | dios | Pasa delante del pueblo | beba el pueblo.
+7 | g:pueblo | ¿Está, pues, Jehová | o no?
+9 | h:Moisés | Escógenos varones | en mi mano.
+14 | dios | Escribe esto | debajo del cielo.
+16 | h:Moisés | Por cuanto Jehová | en generación.

@@ -1,0 +1,4 @@
+2-17 | dios | Yo soy Jehová tu Dios | de tu prójimo.
+19 | g:pueblo=arthur | Habla tú con nosotros | no muramos.
+20 | h:Moisés=sterling | No temáis | no pequéis.
+22-26 | dios | Así dirás a los hijos | sobre él.
