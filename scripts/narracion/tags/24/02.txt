@@ -1,0 +1,4 @@
+12 | n:niños | ¿Dónde está el trigo y el vino? | ¿Dónde está el trigo y el vino?
+15 | g:los que pasaban=sterling | ¿Es esta la ciudad | el gozo de toda la tierra?
+16 | g:enemigos=desmond | La hemos devorado | lo hemos visto.
+20-22 | m:Sión=elena | Mira, oh Jehová, y considera | mi enemigo los acabó.
