@@ -1,0 +1,15 @@
+# Voces: Elías desmond, Ocozías sterling, mensajeros arthur, capitanes julian (el tercero arthur).
+2 | h:Ocozías=sterling | Id, y consultad | de esta mi enfermedad.
+3-4 | angel | Levántate, y sube | antes morirás ciertamente.
+5 | h:Ocozías | ¿Por qué os habéis vuelto? | ¿Por qué os habéis vuelto?
+6 | g:mensajeros=arthur | Encontramos un varón | de cierto morirás.
+7 | h:Ocozías | ¿Cómo era aquel varón | tales palabras?
+8 | g:mensajeros | Un varón velludo | un cinto de cuero.
+8 | h:Ocozías | Es Elías tisbita. | Es Elías tisbita.
+9 | h:capitán=julian | Varón de Dios, el rey dice | que desciendas.
+10 | h:Elías=desmond | Si yo soy varón de Dios | te consuma con tus cincuenta.
+11 | h:capitán segundo=julian | Varón de Dios, el rey ha dicho así | Desciende pronto.
+12 | h:Elías | Si yo soy varón de Dios | te consuma con tus cincuenta.
+13-14 | h:capitán tercero=arthur | Varón de Dios, te ruego | de valor delante de tus ojos.
+15 | angel | Desciende con él | no tengas miedo de él.
+16 | h:Elías | Así dice Jehová: Por cuanto enviaste | de cierto morirás.
