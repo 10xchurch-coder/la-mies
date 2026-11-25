@@ -1,0 +1,8 @@
+# Voces: Josías julian, el sumo sacerdote Hilcías arthur, Safán sterling, la profetisa Hulda elena.
+# Lo que Hulda dice de parte de Jehová (15-20) va todo con su voz, porque es ella quien habla.
+4-6 | h:Josías=julian | Ve al sumo sacerdote Hilcías | para reparar la casa.
+8 | v:Hilcías=arthur | He hallado el libro de la ley en la casa de Jehová. | He hallado el libro de la ley en la casa de Jehová.
+9 | h:Safán=sterling | Tus siervos han recogido | cargo de la casa de Jehová.
+10 | h:Safán | Hilcías el sacerdote me ha dado un libro. | Hilcías el sacerdote me ha dado un libro.
+13 | h:Josías | Id, y consultad a Jehová | todo lo que nos fue escrito.
+15-20 | m:Hulda=elena | Así dice Jehová, el Dios de Israel: Decid | que yo traigo sobre este lugar.

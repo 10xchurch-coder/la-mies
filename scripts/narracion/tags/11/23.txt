@@ -1,0 +1,6 @@
+# Voces: Josías julian, los de la ciudad desmond.
+17 | h:Josías=julian | ¿Qué monumento es este que veo? | ¿Qué monumento es este que veo?
+17 | g:ciudad=desmond | Este es el sepulcro | sobre el altar de Betel.
+18 | h:Josías | Dejadlo; ninguno mueva sus huesos | Dejadlo; ninguno mueva sus huesos
+21 | h:Josías | Celebrad la pascua | en el libro de este pacto.
+27 | dios | También quitaré de mi presencia | Mi nombre estará allí.
