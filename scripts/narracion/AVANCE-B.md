@@ -51,5 +51,6 @@
 - Hecho: Deuteronomio 32 a 34 (25 nov 2026), 35 pedazos, sin fallas. Deuteronomio completo.
 - Hecho: Josué 1 a 4 (25 nov 2026), 54 pedazos, sin fallas. Josué es desmond, Rahab elena, los espías sterling, el rey de Jericó arthur, los oficiales julian.
 - Hecho: Josué 5 a 7 (25 nov 2026), 46 pedazos, sin fallas (siete pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). El capitán del ejército de Jehová (5:14-15) va con voz de ángel; Acán es sterling, los que reconocieron Hai julian.
-- Sigue: Josué 8 (tags y planes de Josué 8 a 24 ya están subidos y bajados en el sandbox; hay que revisarlos contra el texto antes de usarlos). Falta leer y etiquetar desde Jueces 1. Voces a mantener: Eleazar julian, Finees julian, Josué desmond, Caleb v:Caleb=arthur (ya mayor en Josué 14 y 15), el pueblo g:pueblo=arthur, Rahab elena, los espías sterling; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: 2376 (25 nov 2026).
+- Hecho: Josué 8 a 11 (25 nov 2026), 55 pedazos, sin fallas (seis pedazos de Josué 9 quedaron trabados en la cola y se volvieron a pedir; muchos pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar). Los gabaonitas son julian, los príncipes sterling, Adonisedec arthur.
+- Sigue: Josué 12 (tags y planes de Josué 12 a 24 ya revisados contra el texto, subidos y bajados en el sandbox; tags y planes de Jueces 1 a 8 también subidos y bajados). Falta leer y etiquetar desde Jueces 9. Voces a mantener: Josué desmond, Caleb v:Caleb=arthur, el pueblo g:pueblo=arthur, Finees julian; en Jueces: Débora helena, Barac sterling, Jael soraya, Gedeón sterling, Joás desmond; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: 1771 (25 nov 2026).
