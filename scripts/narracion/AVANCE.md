@@ -14,10 +14,11 @@
 - Hecho: Lucas 5 a 8 (25 nov 2026), 146 pedazos. En Lucas 7 falló un pedazo que era solo "y:" (versículo 16); se juntaron las dos frases del pueblo en una sola cita y salió bien. Lucas 1 a 8 gastaron unos 300 créditos entre las cuatro tareas.
 - Hecho: Lucas 9 a 12 (25 nov 2026), 144 pedazos, sin fallas.
 - Hecho: Lucas 13 a 16 (25 nov 2026), 53 pedazos, sin fallas.
-- EN CURSO: Lucas 17 a 20, 13:52 UTC del 25 nov 2026
-- Sigue: Lucas 17 (libro 41). Los tags y planes de Lucas 17 a 20 ya están; de Lucas 21 en adelante falta todo.
+- Hecho: Lucas 17 y 18 (25 nov 2026), 62 pedazos, sin fallas. Lucas 9 a 18 gastaron unos 360 créditos entre las cuatro tareas.
+- Sigue: Lucas 19 (libro 41). Los tags y planes de Lucas 19 y 20 ya están hechos y revisados (y bajados en el sandbox); de Lucas 21 en adelante falta todo.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
-- Créditos que quedan: 8470 (25 nov 2026, después de Lucas 8).
+- Nota: para no copiar a mano los nombres de los resultados: mkdir -p /home/claude/nombres; después de cada generate_audio_batch correr `cd /home/claude/nombres && python3 /home/claude/la-mies/scripts/narracion/probar.py LL-CC INDICE_INICIAL id1 id2 ...` (los job_id de la tanda, en orden; busca solo los archivos ya terminados y los anota en LL-CC.txt; si dice FALTAN, mirar esos con jobs_wait). Al terminar el capítulo: `bash /home/claude/la-mies/scripts/narracion/unir.sh LL CC` (llama a juntar.py con los nombres en orden).
+- Créditos que quedan: 7841 (25 nov 2026, después de Lucas 18).
