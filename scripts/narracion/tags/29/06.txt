@@ -1,0 +1,5 @@
+8 | dios | Aborrezco la grandeza de Jacob | cuanto hay en ella.
+10 | h:tío=desmond | ¿Hay aún alguno contigo? | ¿Hay aún alguno contigo?
+10 | h:el de adentro=arthur | No. | No.
+10 | h:tío | Calla que no podemos | del nombre de Jehová.
+14 | dios | Pues he aquí, levantaré yo | el arroyo del desierto.

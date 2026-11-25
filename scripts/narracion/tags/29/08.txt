@@ -1,0 +1,6 @@
+2 | dios | ¿Qué ves, Amós? | ¿Qué ves, Amós?
+2 | h:Amós=julian | Un canastillo de fruta de verano. | Un canastillo de fruta de verano.
+2-3 | dios | Ha venido el fin | echados en silencio.
+5-6 | g:mercaderes=sterling | ¿Cuándo pasará la luna nueva | los desechos del trigo?
+7 | dios | Ciertamente yo no me olvidaré | ninguna de sus obras.
+9-12 | dios | Y acontecerá en aquel día | y no la hallarán.

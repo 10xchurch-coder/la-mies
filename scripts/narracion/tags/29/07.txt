@@ -1,0 +1,10 @@
+2 | h:Amós=julian | Señor Jehová, perdona, te ruego | Porque es pequeño.
+3 | dios | No será así, | No será así,
+5 | h:Amós | Oh Señor Jehová, cesa te ruego | Porque es pequeño.
+6 | dios | No será esto tampoco, | No será esto tampoco,
+8 | dios | ¿Qué ves, Amós? | ¿Qué ves, Amós?
+8 | h:Amós | Una plomada de albañil. | Una plomada de albañil.
+8-9 | dios | He aquí, yo pongo plomada | sobre la casa de Jeroboam.
+10-11 | h:Amasías=sterling | Amós ha conspirado contra ti | de su tierra en cautiverio.
+12-13 | h:Amasías | Vidente, vete | cabecera del reino.
+14-17 | h:Amós | Yo no era profeta | lejos de su tierra.
