@@ -1,0 +1,11 @@
+5 | h:Absalón | Llama también | lo que él dirá.
+1-3 | v:Ahitofel | Déjame escoger | pueblo estará en paz.
+7 | h:Husai | El consejo que ha dado | no es bueno.
+6 | h:Absalón | Así ha dicho Ahitofel | Di tú.
+8-13 | h:Husai | Tú sabes que tu padre | se halle piedra en ella.
+14 | h:Absalón | El consejo de Husai | que el consejo de Ahitofel.
+15-16 | h:Husai | Así y así aconsejó | pueblo que está con él.
+20 | g:criados | ¿Dónde están Ahimaas y Jonatán? | ¿Dónde están Ahimaas y Jonatán?
+20 | m:mujer | Ya han pasado | vado de las aguas.
+21 | g:criados | Levantaos y daos prisa | consejo contra vosotros.
+29 | g:criados | El pueblo está hambriento | sediento en el desierto.

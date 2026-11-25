@@ -1,0 +1,30 @@
+2 | h:David | Yo también saldré con vosotros. | Yo también saldré con vosotros.
+11 | h:Joab | Y viéndolo tú | y un talabarte.
+19 | h:Ahimaas | ¿Correré ahora | mano de sus enemigos?
+31 | h:Cusi | Reciba nuevas | levantado contra ti.
+3 | g:pueblo | No saldrás | ayuda desde la ciudad.
+4 | h:David | Yo haré lo que bien os pareciere. | Yo haré lo que bien os pareciere.
+5 | h:David | Tratad benignamente | al joven Absalón.
+10 | h:hombre | He aquí que he visto | colgado de una encina.
+12-13 | h:hombre | Aunque yo recibiera | estarías en contra.
+14 | h:Joab | No perderé el tiempo contigo. | No perderé el tiempo contigo.
+18 | h:Absalón | Yo no tengo hijo | memoria de mi nombre.
+20 | h:Joab | Hoy no llevarás | hijo del rey ha muerto.
+21 | h:Joab | Ve tú, y di al rey | lo que has visto.
+22 | h:Ahimaas | Sea lo que fuere | correré ahora tras Cusi.
+22 | h:Joab | Hijo mío, ¿para qué | noticias listas?
+23 | h:Ahimaas | Sea como fuere, yo correré. | Sea como fuere, yo correré.
+23 | h:Joab | Corre. | Corre.
+25 | h:David | Si viene solo | nuevas en su boca.
+26 | h:atalaya | He aquí otro hombre | que corre solo.
+26 | h:David | Este también es mensajero. | Este también es mensajero.
+27 | h:atalaya | Me parece el correr | Ahimaas, hijo de Sadoc.
+27 | h:David | Él es un hombre de bien | con buenas nuevas.
+28 | h:Ahimaas | Paz. | Paz.
+28 | h:Ahimaas | Bendito sea Jehová | contra mi señor el rey.
+29 | h:David | ¿El joven Absalón tiene paz? | ¿El joven Absalón tiene paz?
+29 | h:Ahimaas | Vi yo un grande | no sé qué era.
+30 | h:David | Pasa, y ponte allí. | Pasa, y ponte allí.
+32 | h:David | ¿El joven Absalón tiene paz? | ¿El joven Absalón tiene paz?
+32 | h:Cusi | Como aquel joven | contra ti para mal.
+33 | h:David | ¡Hijo mío Absalón | hijo mío, hijo mío!
