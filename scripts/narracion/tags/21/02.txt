@@ -1,0 +1,5 @@
+1 | m:esposa | Yo soy la rosa | lirio de los valles.
+2 | h:esposo | Como el lirio | entre las doncellas.
+3-10 | m:esposa | Como el manzano | y me dijo:
+10-14 | h:esposo | Levántate, oh amada mía | hermoso tu semblante.
+15-17 | m:esposa | Cazadnos | montañas de Beter.
