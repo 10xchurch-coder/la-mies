@@ -1,0 +1,5 @@
+# Voces: David julian, los príncipes de Amón arthur, Joab sterling.
+2 | h:David=julian | Haré misericordia | hizo conmigo misericordia.
+3 | g:príncipes de Amón=arthur | ¿Piensas tú | espiar la tierra?
+5 | h:David | Quédense en Jericó | entonces regresen.
+12-13 | h:Joab=sterling | Si los sirios | lo que bien le parezca.

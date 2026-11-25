@@ -1,0 +1,12 @@
+# Voces: David julian, Joab sterling, Gad arthur, Ornán desmond; Jehová con la voz de Dios.
+2 | h:David=julian | Id, contad a Israel | para que yo lo sepa.
+3 | h:Joab=sterling | Añada Jehová | pernicioso a Israel?
+8 | h:David | He pecado gravemente | muy locamente.
+10 | dios | Ve, y habla a David | que yo haga contigo.
+11-12 | h:Gad=arthur | Así dice Jehová: Escoge | al que me ha enviado.
+13 | h:David | Estoy en grande angustia | en manos de hombres.
+15 | dios | ¡Basta ya! Detén tu mano. | ¡Basta ya! Detén tu mano.
+17 | h:David | ¿No soy yo | no haya plaga en tu pueblo.
+22 | h:David | Dame este lugar | la plaga del pueblo.
+23 | h:Ornán=desmond | Tómalo para ti | yo lo doy todo.
+24 | h:David | No, sino que | que nada me cueste.
