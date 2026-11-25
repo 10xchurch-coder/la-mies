@@ -23,5 +23,6 @@
 - Hecho: Éxodo 29 a 32 (25 nov 2026), 52 pedazos, sin fallas (cinco pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). 29 a 31 todo narrador; en 32 Josué es desmond.
 - Hecho: Éxodo 33 a 36 (25 nov 2026), 52 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). En 35 y 36 habla Moisés (sterling); los maestros de la obra (36:5) son julian.
 - Hecho: Éxodo 37 a 40 (25 nov 2026), 22 pedazos, sin fallas. Todo narrador. Éxodo completo.
-- Sigue: Levítico 1 (tags de 8 a 10 y planes de Levítico 1 a 16 ya están subidos). Casi todo Levítico son leyes que Dios dicta a Moisés: las lee el narrador, sin tags, salvo los relatos con diálogo (Levítico 8 a 10 y 24:10-23). Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: 6415 (25 nov 2026).
+- Hecho: Levítico 1 a 4 (25 nov 2026), 16 pedazos, sin fallas. Todo narrador.
+- Sigue: Levítico 5 (tags de 8 a 10 y planes de Levítico 1 a 16 ya están subidos). Casi todo Levítico son leyes que Dios dicta a Moisés: las lee el narrador, sin tags, salvo los relatos con diálogo (Levítico 8 a 10 y 24:10-23). Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: 6350 (25 nov 2026).
