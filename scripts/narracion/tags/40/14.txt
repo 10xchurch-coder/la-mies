@@ -1,0 +1,33 @@
+2 | g:sacerdotes | No en el día de la fiesta | alboroto del pueblo.
+4-5 | g:algunos | ¿Por qué se ha hecho | dado a los pobres.
+6-9 | jesus | Dejadla, ¿por qué | para memoria de ella.
+12 | g:discipulos | ¿Dónde quieres que vayamos | comas la pascua?
+13-15 | jesus | Id a la ciudad | para nosotros allí.
+18 | jesus | De cierto os digo: Uno de vosotros | me va a traicionar.
+# v19: los dos "¿Seré yo?" los lee el narrador (el programa no puede separar dos citas iguales en un verso)
+20-21 | jesus | Es uno de los doce | nunca haber nacido.
+22 | jesus | Tomad, comed | esto es mi cuerpo.
+24-25 | jesus | Esto es mi sangre | en el reino de Dios.
+27-28 | jesus | Todos seréis escandalizados | a Galilea.
+29 | h:Pedro=desmond | Aunque todos sean | mas yo no.
+30 | jesus | De cierto te digo que tú | me negarás tres veces.
+31 | h:Pedro | Si me fuere necesario | no te negaré.
+32 | jesus | Sentaos aquí | que yo oro.
+34 | jesus | Mi alma está muy triste | quedaos aquí y velad.
+36 | jesus | Abba, Padre | sino la tuya.
+37-38 | jesus | Simón, ¿duermes? | la carne es débil.
+41-42 | jesus | Dormid ya y descansad | el que me traiciona.
+44 | h:Judas=julian | Al que yo besare | llevadle con seguridad.
+45 | h:Judas | Maestro, Maestro. | Maestro, Maestro.
+48-49 | jesus | ¿Como contra un ladrón | se cumplan las Escrituras.
+58 | g:falsos testigos | Nosotros le oímos decir | hecho sin mano.
+60 | v:sumo sacerdote=arthur | ¿No respondes nada? | estos contra ti?
+61 | v:sumo sacerdote | ¿Eres tú el Cristo | Hijo del Bendito?
+62 | jesus | Yo soy; y veréis | las nubes del cielo.
+63-64 | v:sumo sacerdote | ¿Qué más necesidad | ¿qué os parece?
+65 | g:algunos | Profetiza | Profetiza
+67 | m:criada | Y tú también estabas | Jesús el Nazareno.
+68 | h:Pedro | No le conozco | lo que dices.
+69 | m:criada | Este es uno de ellos. | Este es uno de ellos.
+70 | g:los que estaban alli | Verdaderamente tú eres | es semejante.
+71 | h:Pedro | No conozco a este hombre | de quien habláis.

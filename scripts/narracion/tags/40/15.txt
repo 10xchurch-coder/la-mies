@@ -1,0 +1,16 @@
+2 | h:Pilato | ¿Eres tú el Rey | de los judíos?
+2 | jesus | Tú lo dices. | Tú lo dices.
+4 | h:Pilato | ¿No respondes nada? | testifican contra ti.
+9 | h:Pilato | ¿Queréis que os suelte | de los judíos?
+12 | h:Pilato | ¿Qué, pues, queréis | Rey de los judíos?
+13 | g:multitud | ¡Crucifícale! | ¡Crucifícale!
+14 | h:Pilato | ¿Pues qué mal ha hecho? | ¿Pues qué mal ha hecho?
+14 | g:multitud | ¡Crucifícale! | ¡Crucifícale!
+18 | g:soldados | ¡Salve, Rey | de los judíos!
+29-30 | g:los que pasaban | ¡Ah! Tú que derribas | desciende de la cruz.
+31-32 | g:sacerdotes | A otros salvó | veamos y creamos.
+34 | jesus | Eloi, Eloi | ¿lama sabactani?
+34 | jesus | Dios mío, Dios mío | me has abandonado?
+35 | g:los que estaban alli | He aquí, llama a Elías. | He aquí, llama a Elías.
+36 | h:uno | Dejad, veamos | a bajarle.
+39 | h:centurion=desmond | Verdaderamente este hombre | el Hijo de Dios.
