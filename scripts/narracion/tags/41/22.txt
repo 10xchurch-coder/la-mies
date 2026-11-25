@@ -1,0 +1,35 @@
+8 | jesus | Id y preparadnos la pascua | para que comamos.
+9 | g:discípulos | ¿Dónde quieres que la preparemos? | ¿Dónde quieres que la preparemos?
+10-12 | jesus | He aquí, cuando entrareis | preparad allí.
+15-16 | jesus | ¡Con cuánto anhelo | se cumpla en el reino de Dios.
+17-18 | jesus | Tomad esto, y repartidlo | el reino de Dios venga.
+19 | jesus | Esto es mi cuerpo | haced esto en memoria de mí.
+20-22 | jesus | Esta copa es el nuevo testamento | por quien Él es traicionado!
+25-30 | jesus | Los reyes de los gentiles | las doce tribus de Israel.
+31-32 | jesus | Simón, Simón, he aquí | fortalece a tus hermanos.
+33 | h:Pedro | Señor, dispuesto estoy | y aun a la muerte.
+34 | jesus | Pedro, te digo que el gallo | negado tres veces que me conoces.
+35 | jesus | Cuando os envié sin bolsa | ¿os faltó algo?
+35 | g:discípulos | Nada. | Nada.
+36-37 | jesus | Pues ahora, el que tiene bolsa | cumplimiento tiene.
+38 | g:discípulos | Señor, he aquí dos espadas. | Señor, he aquí dos espadas.
+38 | jesus | Basta. | Basta.
+40 | jesus | Orad que no entréis en tentación. | Orad que no entréis en tentación.
+42 | jesus | Padre, si quieres | sino la tuya.
+46 | jesus | ¿Por qué dormís? | orad que no entréis en tentación.
+48 | jesus | Judas, ¿con un beso | al Hijo del Hombre?
+49 | g:discípulos | Señor, ¿heriremos a espada? | Señor, ¿heriremos a espada?
+51 | jesus | Dejad hasta aquí. | Dejad hasta aquí.
+52-53 | jesus | ¿Como contra un ladrón | la potestad de las tinieblas.
+56 | m:criada | Este también con Él estaba. | Este también con Él estaba.
+57 | h:Pedro | Mujer, no le conozco. | Mujer, no le conozco.
+58 | h:otro hombre | Tú también eres de ellos. | Tú también eres de ellos.
+58 | h:Pedro | Hombre, no soy. | Hombre, no soy.
+59 | h:tercer hombre | Verdaderamente este también | porque es galileo.
+60 | h:Pedro | Hombre, no sé qué dices. | Hombre, no sé qué dices.
+64 | g:guardias | Profetiza, ¿quién es | el que te golpeó?
+67 | g:concilio | ¿Eres tú el Cristo? | Dínoslo.
+67-69 | jesus | Si os lo dijere, no creeréis | a la diestra del poder de Dios.
+70 | g:concilio | ¿Luego eres tú el Hijo de Dios? | ¿Luego eres tú el Hijo de Dios?
+70 | jesus | Vosotros decís que lo soy. | Vosotros decís que lo soy.
+71 | g:concilio | ¿Qué más testimonio necesitamos? | oído de su boca.
