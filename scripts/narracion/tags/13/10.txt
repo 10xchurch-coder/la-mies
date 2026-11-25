@@ -1,0 +1,9 @@
+# Voces: Roboam sterling, el pueblo arthur, los viejos desmond (como en 1 Reyes 12); los jóvenes julian.
+4 | g:pueblo=arthur | Tu padre agravó nuestro yugo; ahora pues | y te serviremos.
+5 | h:Roboam=sterling | Volved a mí de aquí a tres días. | Volved a mí de aquí a tres días.
+6 | h:Roboam | ¿Cómo aconsejáis vosotros que responda | a este pueblo?
+7 | v:viejos=desmond | Si te condujeres humanamente | te servirán perpetuamente.
+9 | h:Roboam | ¿Qué aconsejáis vosotros | puso sobre nosotros?
+10-11 | g:jóvenes=julian | Así dirás al pueblo | os castigaré con escorpiones.
+14 | h:Roboam | Mi padre agravó vuestro yugo | os castigaré con escorpiones.
+16 | g:pueblo | ¿Qué parte tenemos | mira ahora por tu casa!

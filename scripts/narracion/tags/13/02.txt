@@ -1,0 +1,4 @@
+# Voces: Salomón sterling, Hiram arthur (como en 1 Reyes 5). La carta de Hiram va con su voz.
+3-10 | h:Salomón=sterling | Haz conmigo como hiciste | veinte mil batos de aceite.
+11 | h:Hiram=arthur | Porque Jehová amó a su pueblo | por rey sobre ellos.
+12-16 | h:Hiram | Bendito sea Jehová | llevar hasta Jerusalén.
