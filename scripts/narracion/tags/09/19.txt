@@ -1,0 +1,22 @@
+# Solo hay cuatro voces de hombre: Abisai usa la de Joab, Mefiboset la de Simeí y los de Judá la del pueblo, para que nadie suene igual que David ni que quien le responde.
+4 | h:David | ¡Hijo mío Absalón | hijo mío, hijo mío!
+1 | g:mensajeros | He aquí el rey llora | duelo por Absalón.
+5-7 | h:Joab | Hoy has avergonzado | desde tu juventud hasta ahora.
+8 | g:pueblo | He aquí el rey está sentado a la puerta. | He aquí el rey está sentado a la puerta.
+9-10 | g:Israel | El rey nos ha librado | hacer volver al rey?
+11-13 | h:David | Hablad a los ancianos | en lugar de Joab.
+14 | g:pueblo | Vuelve tú, y todos tus siervos. | Vuelve tú, y todos tus siervos.
+19-20 | h:Simeí | No me impute | recibir a mi señor el rey.
+21 | h:Joab | ¿No ha de morir | ungido de Jehová?
+22 | h:David | ¿Qué tengo yo | rey sobre Israel?
+23 | h:David | No morirás. | No morirás.
+25 | h:David | Mefiboset, ¿por qué | fuiste conmigo?
+26-28 | h:Simeí | Rey señor mío | clamar más al rey?
+29 | h:David | ¿Para qué hablas | repartáis las tierras.
+30 | h:Simeí | Deja que él | en paz a su casa.
+33 | h:David | Pasa conmigo | conmigo en Jerusalén.
+34-37 | v:Barzilai | ¿Cuántos son | lo que bien te pareciere.
+38 | h:David | Pues pase conmigo | yo lo haré por ti.
+41 | g:Israel | ¿Por qué los hombres de Judá | varones de David con él?
+42 | g:pueblo | Porque el rey | de él algún don?
+43 | g:Israel | Nosotros tenemos | volver a nuestro rey?

@@ -1,0 +1,13 @@
+6 | h:David | Seba, hijo de Bicri, nos hará | y se nos escape.
+1 | h:Seba | No tenemos nosotros | oh Israel!
+4 | h:David | Júntame | aquí presente.
+9 | h:Joab | ¿Tienes paz, hermano mío? | ¿Tienes paz, hermano mío?
+11 | h:hombre | Cualquiera que ame | en pos de Joab.
+16 | m:mujer | Oíd, oíd | hable con él.
+17 | m:mujer | ¿Eres tú Joab? | ¿Eres tú Joab?
+17 | h:Joab | Yo soy. | Yo soy.
+17 | m:mujer | Oye las palabras de tu sierva. | Oye las palabras de tu sierva.
+17 | h:Joab | Oigo. | Oigo.
+18-19 | m:mujer | Antiguamente | heredad de Jehová?
+20-21 | h:Joab | Nunca tal | me iré de la ciudad.
+21 | m:mujer | He aquí su cabeza | desde el muro.

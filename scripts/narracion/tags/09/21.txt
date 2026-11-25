@@ -1,0 +1,7 @@
+3 | h:David | ¿Qué haré | heredad de Jehová?
+1 | dios | Es por Saúl | mató a los gabaonitas.
+4 | g:gabaonitas | No tenemos | hombre de Israel.
+4 | h:David | Haré por vosotros lo que digáis. | Haré por vosotros lo que digáis.
+5-6 | g:gabaonitas | De aquel hombre | el escogido de Jehová.
+6 | h:David | Yo los daré. | Yo los daré.
+17 | g:hombres | Nunca más | lámpara de Israel.
