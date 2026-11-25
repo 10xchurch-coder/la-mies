@@ -1,0 +1,6 @@
+2 | angel | ¿Quién es digno | desatar sus sellos?
+5 | v:ancianos=arthur | No llores; | sus siete sellos.
+9-10 | v:ancianos | Digno eres de tomar | sobre la tierra.
+12 | angel | El Cordero que fue inmolado | la gloria y la alabanza.
+13 | g:criaturas=julian | Al que está sentado | para siempre.
+14 | g:vivientes=desmond | Amén. | Amén.

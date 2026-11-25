@@ -1,0 +1,7 @@
+1 | g:vivientes=desmond | Ven y mira. | Ven y mira.
+3 | g:vivientes | Ven y mira. | Ven y mira.
+5 | g:vivientes | Ven y mira. | Ven y mira.
+6 | angel | Una medida de trigo | ni al aceite.
+7 | g:vivientes | Ven y mira. | Ven y mira.
+10 | g:almas=julian | ¿Hasta cuándo, Señor, | moran en la tierra?
+16-17 | g:reyes=sterling | Caed sobre nosotros, | sostenerse en pie?
