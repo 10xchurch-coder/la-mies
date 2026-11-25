@@ -1,0 +1,8 @@
+1 | h:Pablo=sterling | Varones hermanos y padres | ante vosotros.
+3-21 | h:Pablo | Yo de cierto soy hombre judío, nacido | a los gentiles.
+22 | g:multitud=desmond | Quita de la tierra | que viva.
+25 | h:Pablo | ¿Os es lícito | sin ser condenado?
+26 | h:centurión=julian | Mira bien | es romano.
+27 | h:tribuno=arthur | Dime, ¿eres tú romano? | Dime, ¿eres tú romano?
+28 | h:tribuno | Yo con grande suma | esta ciudadanía.
+28 | h:Pablo | Pero yo la tengo de nacimiento. | Pero yo la tengo de nacimiento.

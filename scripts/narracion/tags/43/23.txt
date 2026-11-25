@@ -1,0 +1,15 @@
+1 | h:Pablo=sterling | Varones hermanos, yo con toda | día de hoy.
+3 | h:Pablo | Dios te golpeará | me mandas golpear?
+4 | g:presentes=desmond | ¿Al sumo sacerdote de Dios insultas? | ¿Al sumo sacerdote de Dios insultas?
+5 | h:Pablo | No sabía, hermanos | de tu pueblo.
+6 | h:Pablo | Varones hermanos, yo siendo fariseo | soy juzgado.
+9 | g:escribas=julian | Ningún mal hallamos | contra Dios.
+11 | jesus | Ten ánimo, Pablo | también en Roma.
+14-15 | g:conjurados=desmond | Nosotros hemos hecho voto | antes que él llegue.
+17 | h:Pablo | Lleva a este joven | que decirle.
+18 | h:centurión=desmond | El preso Pablo | que decirte.
+19 | h:tribuno=arthur | ¿Qué es lo que tienes que decirme? | ¿Qué es lo que tienes que decirme?
+20-21 | h:sobrino=julian | Los judíos han concertado | de ti promesa.
+23-24 | h:tribuno | Preparad para la hora | Félix el gobernador.
+26-30 | h:tribuno | Claudio Lisias al | Pásalo bien.
+35 | h:Félix=desmond | Te oiré cuando vengan tus acusadores. | Te oiré cuando vengan tus acusadores.

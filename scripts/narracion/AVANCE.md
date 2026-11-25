@@ -29,6 +29,7 @@
 - Hecho: Hechos 8 a 11 (25 nov 2026), 96 pedazos, sin fallas. Quedan unos 3745 créditos.
 - Hecho: Hechos 12 a 15 (25 nov 2026), 51 pedazos, sin fallas (nueve pedazos se quedaron colgados en la fila unos diez minutos y se pidieron de nuevo).
 - Hecho: Hechos 16 a 19 (25 nov 2026), 77 pedazos, sin fallas. Hechos 8 a 19 gastaron unos 500 créditos entre las cuatro tareas; quedan unos 3385.
+- EN CURSO: Hechos 20 a 23, 19:35 UTC del 25 nov 2026
 - Sigue: Hechos 20 (libro 43). De Hechos 20 en adelante falta todo (tags, planes y audio).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
