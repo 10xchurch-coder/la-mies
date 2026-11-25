@@ -1,0 +1,18 @@
+2 | h:leproso | Señor, si quieres | puedes limpiarme.
+3 | jesus | Quiero | sé limpio.
+4 | jesus | Mira, no lo digas | testimonio a ellos.
+6 | h:centurion | Señor, mi siervo | gravemente atormentado.
+7 | jesus | Yo iré | le sanaré.
+8-9 | h:centurion | Señor, no soy digno | y lo hace.
+10-12 | jesus | De cierto os digo | crujir de dientes.
+13 | jesus | Ve, y como creíste | te sea hecho.
+19 | h:escriba | Maestro, te seguiré | que vayas.
+20 | jesus | Las zorras | recostar su cabeza.
+21 | h:discipulo | Señor, permíteme | a mi padre.
+22 | jesus | Sígueme | a sus muertos.
+25 | g:discipulos | Señor, sálvanos | perecemos.
+26 | jesus | ¿Por qué teméis | de poca fe?
+27 | g:discipulos | ¿Qué clase de hombre | le obedecen?
+29 | g:demonios | ¿Qué tenemos que ver | antes de tiempo?
+31 | g:demonios | Si nos echas fuera | hato de puercos.
+32 | jesus | Id. | Id.
