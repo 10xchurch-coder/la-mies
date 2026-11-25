@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías y Lamentaciones completos, y Ezequiel 1 a 45.
-- Sigue: Ezequiel 46 (los tags y planes de Ezequiel 46 a 48 ya están hechos y bajados al sandbox; falta generar).
-- Créditos: unos 4.550 el 25 nov 2026, 17:30 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías y Lamentaciones completos, y Ezequiel completo.
+- Sigue: Daniel 1 (los tags y planes de Daniel 1 a 4 ya están hechos y bajados al sandbox; falta generar).
+- Créditos: 4.655 el 25 nov 2026, 17:35 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
@@ -13,3 +13,7 @@
 - Nota: en Lamentaciones cuenta el profeta (narrador); cuando habla Jerusalén misma ("mira, oh Jehová, mi aflicción") lleva voz de mujer (elena). El capítulo 3 lo lee todo el narrador. En Ezequiel cuenta el profeta (narrador), lo que Jehová le dice lleva la voz de Dios, y lo que Ezequiel contesta con "dije" lleva la voz julian.
 - Nota: en Ezequiel 9 y 10 el varón vestido de lino y la voz que grita a las ruedas llevan voz de ángel.
 - Nota: en Ezequiel 40 a 47 el varón de la caña de medir lleva voz de ángel; lo que el texto dice "me dijo Jehová" o "así dice el Señor Jehová" lleva la voz de Dios.
+
+- Nota: en Ezequiel 45 y 48 sigue hablando Jehová sin presentación (voz de Dios hasta "dice el Señor Jehová"); las salidas de la ciudad (48:30 a 35) las lee el narrador.
+- Nota: en Daniel las voces quedan fijas: Daniel = julian, Nabucodonosor = sterling, los caldeos = desmond, Arioc y el príncipe de los eunucos = arthur. El capítulo 4 (la carta del rey) lo cuenta el narrador y sólo lo dicho en voz alta lleva la voz de cada uno; la voz del cielo lleva voz de ángel.
+- Nota: a veces un pedazo se queda en "queued" sin salir nunca (pasó en Ezequiel 33 y 48); se pide de nuevo sólo ese pedazo con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}` y sale enseguida.

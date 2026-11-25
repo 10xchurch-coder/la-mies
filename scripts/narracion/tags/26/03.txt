@@ -1,0 +1,9 @@
+4-6 | h:pregonero=arthur | Se ordena a vosotros | dentro de un horno de fuego ardiendo.
+9-12 | g:caldeos=desmond | Rey, para siempre vive. | la estatua de oro que tú levantaste.
+14-15 | h:Nabucodonosor=sterling | ¿Es verdad Sadrac | librar de mis manos?
+16-18 | g:Sadrac, Mesac y Abed-nego=julian | No nos cuidamos de responderte | la estatua de oro que has levantado.
+24 | h:Nabucodonosor | ¿No echaron tres varones atados dentro del fuego? | ¿No echaron tres varones atados dentro del fuego?
+24 | g:consejo=arthur | Es verdad, oh rey. | Es verdad, oh rey.
+25 | h:Nabucodonosor | He aquí yo veo cuatro varones | semejante al Hijo de Dios.
+26 | h:Nabucodonosor | Sadrac, Mesac y Abed-nego, siervos del Dios Altísimo, salid y venid. | Sadrac, Mesac y Abed-nego, siervos del Dios Altísimo, salid y venid.
+28-29 | h:Nabucodonosor | Bendito el Dios de ellos | que pueda librar como Éste.

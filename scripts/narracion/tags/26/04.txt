@@ -1,0 +1,6 @@
+# La carta la cuenta Nabucodonosor mismo: la lee el narrador, y lo que se dice en voz alta lleva la voz de cada uno.
+9-18 | h:Nabucodonosor=sterling | Beltsasar, príncipe de los magos | hay en ti espíritu de los dioses santos.
+19 | h:Nabucodonosor | Beltsasar, no te espante el sueño ni su interpretación. | Beltsasar, no te espante el sueño ni su interpretación.
+19-27 | h:Daniel=julian | Señor mío, el sueño sea | una prolongación de tu tranquilidad.
+30 | h:Nabucodonosor | ¿No es esta la gran Babilonia | para gloria de mi grandeza?
+31-32 | angel | A ti se te dice, rey Nabucodonosor | y que a quien Él quiere lo da.

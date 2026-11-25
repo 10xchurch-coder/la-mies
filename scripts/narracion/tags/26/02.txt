@@ -1,0 +1,13 @@
+3 | h:Nabucodonosor=sterling | He tenido un sueño | por saber del sueño.
+4 | g:caldeos=desmond | Rey, para siempre vive | mostraremos la interpretación.
+5-6 | h:Nabucodonosor | El asunto se me fue | mostradme el sueño y su interpretación.
+7 | g:caldeos | Diga el rey el sueño | mostraremos su interpretación.
+8-9 | h:Nabucodonosor | Yo conozco ciertamente | me podéis mostrar su interpretación.
+10-11 | g:caldeos | No hay hombre sobre la tierra | cuya morada no es con la carne.
+15 | h:Daniel=julian | ¿Cuál es la causa | tan apresuradamente?
+20-23 | h:Daniel | Sea bendito el nombre de Dios | nos has enseñado el asunto del rey.
+24 | h:Daniel | No mates a los sabios de Babilonia | mostraré al rey la interpretación.
+25 | h:Arioc=arthur | He hallado a un varón | declarará al rey la interpretación.
+26 | h:Nabucodonosor | ¿Podrás tú hacerme entender | y su interpretación?
+27-45 | h:Daniel | El misterio que el rey demanda | y fiel su interpretación.
+47 | h:Nabucodonosor | Ciertamente que el Dios vuestro | pudiste revelar este misterio.
