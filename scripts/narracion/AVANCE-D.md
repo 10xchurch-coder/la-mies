@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías y Lamentaciones completos, y Ezequiel 1 a 36.
-- Sigue: Ezequiel 37 (los tags y planes de Ezequiel 37 a 48 ya están hechos y bajados al sandbox; falta generar).
-- Créditos: 4.826 el 25 nov 2026, 17:22 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías y Lamentaciones completos, y Ezequiel 1 a 40.
+- Sigue: Ezequiel 41 (los tags y planes de Ezequiel 41 a 48 ya están hechos y bajados al sandbox; falta generar).
+- Créditos: unos 4.700 el 25 nov 2026, 17:27 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
@@ -12,4 +12,4 @@
 - Nota: en Jeremías 36 a 45 las voces siguen fijas (Jeremías = julian, Sedequías = desmond, los contrarios, Johanán e Ismael = sterling, Ebedmelec, Nabuzaradán y los príncipes de Joacim = arthur; Baruc = desmond en el 36 y Gedalías = desmond en el 40). Cuando el texto dice "dijo Jeremías: Así dice Jehová…" lo lee la voz de Jeremías (42, 44). En los oráculos contra las naciones (46 a 50) lleva la voz de Dios sólo lo que Jehová dice en primera persona; las frases sueltas de otros dentro del poema las lee el narrador.
 - Nota: en Lamentaciones cuenta el profeta (narrador); cuando habla Jerusalén misma ("mira, oh Jehová, mi aflicción") lleva voz de mujer (elena). El capítulo 3 lo lee todo el narrador. En Ezequiel cuenta el profeta (narrador), lo que Jehová le dice lleva la voz de Dios, y lo que Ezequiel contesta con "dije" lleva la voz julian.
 - Nota: en Ezequiel 9 y 10 el varón vestido de lino y la voz que grita a las ruedas llevan voz de ángel.
-- Nota: en Ezequiel 40 a 47 el varón de la caña de medir lleva voz de ángel; lo que el texto dice "me dijo Jehová" o "así dice el Señor Jehová" lleva la voz de Dios. Los tags de Ezequiel 43 a 48 todavía no están hechos.
+- Nota: en Ezequiel 40 a 47 el varón de la caña de medir lleva voz de ángel; lo que el texto dice "me dijo Jehová" o "así dice el Señor Jehová" lleva la voz de Dios.
