@@ -1,0 +1,13 @@
+# Voces: Elías desmond, Jezabel soraya, Eliseo julian.
+2 | m:Jezabel=soraya | Así me hagan los dioses | como la vida de uno de ellos.
+4 | h:Elías=desmond | Baste ya, oh Jehová | mejor que mis padres.
+5 | angel | Levántate, come. | Levántate, come.
+7 | angel | Levántate y come, porque | muy grande para ti.
+9 | dios | ¿Qué haces aquí, Elías? | ¿Qué haces aquí, Elías?
+10 | h:Elías | He sentido un vivo celo | para quitarme la vida.
+11 | dios | Sal fuera, y ponte | en el monte delante de Jehová.
+13 | dios | ¿Qué haces aquí, Elías? | ¿Qué haces aquí, Elías?
+14 | h:Elías | He sentido un vivo celo | para quitarme la vida.
+15-18 | dios | Ve, vuelve por tu camino | cuyas bocas no lo besaron.
+20 | h:Eliseo=julian | Te ruego que me dejes besar | y luego te seguiré.
+20 | h:Elías | Ve, vuelve; ¿qué te he hecho yo? | Ve, vuelve; ¿qué te he hecho yo?

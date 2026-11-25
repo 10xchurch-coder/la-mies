@@ -1,0 +1,15 @@
+# Voces: Acab sterling, Elías desmond, Nabot julian, Jezabel soraya, testigos y mensajeros arthur.
+2 | h:Acab=sterling | Dame tu viña | su valor en dinero.
+3 | h:Nabot=julian | Guárdeme Jehová | la heredad de mis padres.
+4 | h:Nabot | No te daré la heredad de mis padres. | No te daré la heredad de mis padres.
+5 | m:Jezabel=soraya | ¿Por qué está tan triste | y no comes pan?
+6 | h:Acab | Porque hablé con Nabot | Yo no te daré mi viña.
+7 | m:Jezabel | ¿Reinas tú ahora | la viña de Nabot de Jezreel.
+9-10 | m:Jezabel | Proclamad ayuno | apedreadlo para que muera.
+13 | g:testigos=arthur | Nabot ha blasfemado a Dios y al rey. | Nabot ha blasfemado a Dios y al rey.
+14 | g:mensajeros=arthur | Nabot ha sido apedreado y ha muerto. | Nabot ha sido apedreado y ha muerto.
+15 | m:Jezabel | Levántate y posee | sino que ha muerto.
+18-19 | dios | Levántate, desciende | tu misma sangre.
+20 | h:Acab | ¿Me has hallado, enemigo mío? | ¿Me has hallado, enemigo mío?
+20-24 | h:Elías=desmond | Te he encontrado | las aves del cielo.
+29 | dios | ¿No has visto cómo Acab | sobre su casa.

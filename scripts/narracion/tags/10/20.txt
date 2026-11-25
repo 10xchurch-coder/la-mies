@@ -1,0 +1,33 @@
+# Voces: Acab sterling, Benadad arthur (sus mensajeros dicen sus palabras con su voz), siervos y ancianos desmond, el profeta julian.
+2-3 | h:Benadad=arthur | Así dice Benadad: | hijos hermosos son míos.
+4 | h:Acab=sterling | Como tú dices | y todo lo que tengo.
+5-6 | h:Benadad | Así dijo Benadad: Yo te envié | y se lo llevarán.
+7 | h:Acab | Entended, y ved | no se lo he negado.
+8 | g:ancianos=desmond | No le obedezcas | lo que te pide.
+9 | h:Acab | Decid al rey mi señor | no lo puedo hacer.
+10 | h:Benadad | Así me hagan los dioses | que me sigue.
+11 | h:Acab | Decidle, que no se alabe | como el que las desciñe.
+12 | h:Benadad | Tomad posiciones. | Tomad posiciones.
+13 | h:profeta=julian | Así dice Jehová: ¿Has visto | que yo soy Jehová.
+14 | h:Acab | ¿Por mano de quién? | ¿Por mano de quién?
+14 | h:profeta | Así dice Jehová: Por mano | de las provincias.
+14 | h:Acab | ¿Quién comenzará la batalla? | ¿Quién comenzará la batalla?
+14 | h:profeta | Tú. | Tú.
+17 | g:siervos=desmond | Han salido hombres de Samaria. | Han salido hombres de Samaria.
+18 | h:Benadad | Si han salido por paz | tomadlos vivos.
+22 | h:profeta | Ve, fortalécete | vendrá contra ti.
+23-25 | g:siervos | Sus dioses son dioses | veremos si no los vencemos.
+28 | h:profeta | Así dice Jehová: Por cuanto los sirios | sabrás que yo soy Jehová.
+31 | g:siervos | He aquí, hemos oído | te salve la vida.
+32 | g:siervos | Tu siervo Benadad dice | que viva mi alma.
+32 | h:Acab | ¿Vive todavía? | Él es mi hermano.
+33 | g:siervos | ¡Tu hermano Benadad vive! | ¡Tu hermano Benadad vive!
+33 | h:Acab | Id, y traedle. | Id, y traedle.
+34 | h:Benadad | Las ciudades que mi padre | las hizo en Samaria.
+34 | h:Acab | te dejaré partir con este pacto. | te dejaré partir con este pacto.
+35 | h:profeta | Hiéreme ahora. | Hiéreme ahora.
+36 | h:profeta | Por cuanto no has obedecido | te herirá un león.
+37 | h:profeta | Hiéreme, te ruego. | Hiéreme, te ruego.
+39-40 | h:profeta | Tu siervo salió entre la tropa | él desapareció.
+40 | h:Acab | Ésa será tu sentencia | tú la has pronunciado.
+42 | h:profeta | Así dice Jehová: Por cuanto soltaste | tu pueblo por su pueblo.
