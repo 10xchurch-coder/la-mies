@@ -1,0 +1,4 @@
+# Voces en 1 Reyes: Jeroboam julian, Ahías arthur.
+2-3 | h:Jeroboam=julian | Levántate ahora, disfrázate | lo que ha de ser de este niño.
+5 | dios | He aquí que la esposa de Jeroboam | vendrá disfrazada.
+6-16 | v:Ahías=arthur | Entra, esposa de Jeroboam | ha hecho pecar a Israel.

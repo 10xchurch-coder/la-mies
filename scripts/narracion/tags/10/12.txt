@@ -1,0 +1,12 @@
+# Voces en 1 Reyes: Roboam sterling, Jeroboam julian.
+26-27 | h:Jeroboam=julian | Ahora volverá el reino | se volverán a Roboam, rey de Judá.
+5 | h:Roboam=sterling | Idos, y de aquí | volved a mí.
+4 | g:pueblo=arthur | Tu padre agravó nuestro yugo, mas ahora | y te serviremos.
+6 | h:Roboam | ¿Cómo aconsejáis vosotros que responda | a este pueblo?
+7 | v:ancianos=desmond | Si tú fueres hoy siervo | te servirán para siempre.
+9 | h:Roboam | ¿Cómo aconsejáis vosotros que respondamos | puso sobre nosotros?
+10-11 | g:jóvenes=arthur | Así hablarás a este pueblo | os castigaré con escorpiones.
+14 | h:Roboam | Mi padre agravó vuestro yugo | os castigaré con escorpiones.
+16 | g:pueblo | ¿Qué parte tenemos | ¡Provee ahora en tu casa, David!
+23-24 | dios | Habla a Roboam | esto lo he hecho yo.
+28 | h:Jeroboam | Bastante habéis subido | de la tierra de Egipto.

@@ -1,0 +1,19 @@
+# Voces en 1 Reyes: Jeroboam julian, el varón de Dios de Judá sterling, el viejo profeta de Betel desmond.
+2 | h:varón de Dios=sterling | Altar, altar | huesos de hombres.
+4 | h:Jeroboam=julian | ¡Agárrenlo! | ¡Agárrenlo!
+12 | v:viejo profeta=desmond | ¿Por cuál camino se fue? | ¿Por cuál camino se fue?
+30 | g:todos=arthur | ¡Ay, hermano mío! | ¡Ay, hermano mío!
+3 | h:varón de Dios | Esta es la señal | se derramará.
+6 | h:Jeroboam | Te pido que ruegues | me sea restaurada.
+7 | h:Jeroboam | Ven conmigo a casa, y comerás | te daré un presente.
+8-9 | h:varón de Dios | Aunque me dieses | por el mismo camino que viniste.
+13 | v:viejo profeta | Enalbardadme el asno. | Enalbardadme el asno.
+14 | v:viejo profeta | ¿Eres tú el varón de Dios | que vino de Judá?
+14 | h:varón de Dios | Yo soy. | Yo soy.
+15 | v:viejo profeta | Ven conmigo a casa, y come pan. | Ven conmigo a casa, y come pan.
+16-17 | h:varón de Dios | No podré volver contigo | por el camino que viniste.
+18 | v:viejo profeta | Yo también soy profeta | y beba agua.
+21-22 | v:viejo profeta | Así dice Jehová: Por cuanto | en el sepulcro de tus padres.
+26 | v:viejo profeta | El varón de Dios es | que Jehová le había dicho.
+27 | v:viejo profeta | Enalbardadme un asno. | Enalbardadme un asno.
+31-32 | v:viejo profeta | Cuando yo muera | en las ciudades de Samaria.
