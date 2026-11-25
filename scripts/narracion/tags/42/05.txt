@@ -1,0 +1,9 @@
+6 | jesus | ¿Quieres ser sano? | ¿Quieres ser sano?
+7 | h:enfermo | no tengo hombre que me meta | otro desciende antes que yo.
+8 | jesus | Levántate, toma tu lecho y anda. | Levántate, toma tu lecho y anda.
+10 | g:judíos | Sábado es | llevar tu lecho.
+11 | h:enfermo | El que me sanó | Toma tu lecho y anda.
+12 | g:judíos | ¿Quién es el que te dijo | Toma tu lecho y anda?
+14 | jesus | Mira, has sido sanado | alguna cosa peor.
+17 | jesus | Mi Padre hasta ahora trabaja | y yo trabajo.
+19-47 | jesus | De cierto, de cierto os digo: No puede el Hijo | ¿cómo creeréis a mis palabras?

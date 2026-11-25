@@ -1,0 +1,23 @@
+3-4 | g:hermanos | Sal de aquí | manifiéstate al mundo.
+6-8 | jesus | Mi tiempo aún no ha venido | aún no se ha cumplido.
+11 | g:judíos | ¿Dónde está Aquél? | ¿Dónde está Aquél?
+12 | g:unos | Es bueno | Es bueno
+12 | g:otros | No, sino que engaña al pueblo. | No, sino que engaña al pueblo.
+15 | g:judíos | ¿Cómo sabe Éste letras | no habiendo aprendido?
+16-19 | jesus | Mi doctrina no es mía | ¿Por qué procuráis matarme?
+20 | g:multitud | Demonio tienes | ¿quién procura matarte?
+21-24 | jesus | Una obra hice | juzgad justo juicio.
+25-27 | g:unos | ¿No es Éste a quien buscan | nadie sabrá de dónde sea.
+28-29 | jesus | Vosotros me conocéis | y Él me envió.
+31 | g:multitud | El Cristo, cuando venga | que los que Éste ha hecho?
+33-34 | jesus | Aún un poco de tiempo | vosotros no podréis venir.
+35-36 | g:judíos | ¿A dónde se ha de ir Éste | vosotros no podréis venir?
+37-38 | jesus | Si alguno tiene sed | ríos de agua viva.
+40 | g:multitud | Verdaderamente Éste es el Profeta. | Verdaderamente Éste es el Profeta.
+41 | g:otros | Éste es el Cristo. | Éste es el Cristo.
+41-42 | g:unos | ¿De Galilea ha de venir el Cristo? | de donde era David, ha de venir el Cristo?
+45 | g:fariseos | ¿Por qué no le trajisteis? | ¿Por qué no le trajisteis?
+46 | h:alguaciles | ¡Jamás hombre alguno | como este hombre!
+47-49 | g:fariseos | ¿También vosotros | maldita es.
+51 | v:Nicodemo | ¿Acaso juzga nuestra ley | saber lo que hace?
+52 | g:fariseos | ¿Eres tú también galileo? | nunca se ha levantado profeta.

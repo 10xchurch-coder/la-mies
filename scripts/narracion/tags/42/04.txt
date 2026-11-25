@@ -1,0 +1,25 @@
+7 | jesus | Dame de beber | Dame de beber
+9 | m:samaritana | ¿Cómo es que tú | que soy mujer samaritana?
+10 | jesus | Si conocieses el don de Dios | Él te daría agua viva.
+11-12 | m:samaritana | Señor, no tienes con qué sacarla | sus hijos y su ganado?
+13-14 | jesus | Cualquiera que bebiere | salte para vida eterna.
+15 | m:samaritana | Señor, dame esa agua | ni venga acá a sacarla.
+16 | jesus | Ve, llama a tu marido, y ven acá. | Ve, llama a tu marido, y ven acá.
+17 | m:samaritana | No tengo marido. | No tengo marido.
+17-18 | jesus | Bien has dicho: No tengo marido; | esto has dicho con verdad.
+19-20 | m:samaritana | Señor, me parece | donde se debe adorar.
+21-24 | jesus | Mujer, créeme | es necesario que le adoren.
+25 | m:samaritana | Sé que el Mesías | nos declarará todas las cosas.
+26 | jesus | Yo soy, el que habla contigo. | Yo soy, el que habla contigo.
+29 | m:samaritana | Venid, ved a un hombre | ¿No será Éste el Cristo?
+31 | g:discipulos | Rabí, come. | Rabí, come.
+32 | jesus | Yo tengo una comida | que vosotros no sabéis.
+33 | g:discipulos | ¿Le habrá traído alguien de comer? | ¿Le habrá traído alguien de comer?
+34-38 | jesus | Mi comida es que haga | habéis entrado en sus labores.
+39 | m:samaritana | Me ha dicho todo lo que he hecho. | Me ha dicho todo lo que he hecho.
+42 | g:samaritanos | Ahora creemos | el Salvador del mundo.
+48 | jesus | Si no viereis señales | no creeréis.
+49 | h:oficial del rey | Señor, desciende | antes que mi hijo muera.
+50 | jesus | Ve, tu hijo vive. | Ve, tu hijo vive.
+51 | g:siervos | Tu hijo vive. | Tu hijo vive.
+52 | g:siervos | Ayer a la hora séptima | le dejó la fiebre.

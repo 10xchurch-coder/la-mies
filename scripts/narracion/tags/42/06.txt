@@ -1,0 +1,25 @@
+5 | jesus | ¿De dónde compraremos pan | para que coman estos?
+7 | h:Felipe | Doscientos denarios | tome un poco.
+9 | h:Andrés | Un muchacho está aquí | entre tantos?
+10 | jesus | Haced recostar los hombres. | Haced recostar los hombres.
+12 | jesus | Recoged los pedazos | no se pierda nada.
+14 | g:multitud | Verdaderamente Éste es el Profeta | había de venir al mundo.
+20 | jesus | Yo soy, no temáis. | Yo soy, no temáis.
+25 | g:multitud | Rabí, ¿cuándo llegaste acá? | Rabí, ¿cuándo llegaste acá?
+26-27 | jesus | De cierto, de cierto os digo: Me buscáis | señaló Dios el Padre.
+28 | g:multitud | ¿Qué debemos hacer | las obras de Dios?
+29 | jesus | Esta es la obra de Dios | que Él ha enviado.
+30-31 | g:multitud | ¿Qué señal, pues, haces tú | Pan del cielo les dio a comer.
+32-33 | jesus | De cierto, de cierto os digo: No os dio Moisés | da vida al mundo.
+34 | g:multitud | Señor, danos siempre este pan. | Señor, danos siempre este pan.
+35-40 | jesus | Yo soy el pan de vida; el que a mí viene | le resucitaré en el día postrero.
+42 | g:judíos=sterling | ¿No es Éste Jesús | Yo he descendido del cielo?
+43-51 | jesus | No murmuréis entre vosotros. | por la vida del mundo.
+52 | g:judíos | ¿Cómo puede Éste darnos | a comer su carne?
+53-58 | jesus | De cierto, de cierto os digo: Si no coméis | vivirá eternamente.
+60 | g:discipulos | Dura es esta palabra | ¿quién la puede oír?
+61-64 | jesus | ¿Esto os escandaliza? | algunos de vosotros que no creen.
+65 | jesus | Por eso os he dicho | dado de mi Padre.
+67 | jesus | ¿Queréis iros vosotros también? | ¿Queréis iros vosotros también?
+68-69 | h:Pedro=desmond | Señor, ¿a quién iremos? | el Hijo del Dios viviente.
+70 | jesus | ¿No os he escogido | uno de vosotros es diablo?
