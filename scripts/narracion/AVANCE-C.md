@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Crónicas 30 (tags y planes ya hechos y subidos de 2 Crónicas 30 a 36, revisados contra el texto; los planes ya están en el sandbox; el 27 no lleva tags).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 29 (25 nov 2026; undécima vuelta: 2 Crónicas 18 a 29, 160 pedazos hasta ahora, sin fallas; algunos pedidos salieron "Rate limit" y se volvieron a pedir).
-- Créditos después de 2 Crónicas 29: 4119 (se comparten entre las cuatro tareas).
+- Sigue: 2 Crónicas 35 y 36 (tags y planes ya hechos, revisados y en el sandbox) y después Esdras 1 a 10 (tags y planes ya hechos y subidos el 25 nov, revisados contra el texto; los planes de Esdras ya están en el sandbox; el 2 no lleva tags). Después de Esdras faltan los tags de Nehemías.
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 34 (25 nov 2026; undécima vuelta: 2 Crónicas 18 a 34, 209 pedazos, unas 70.600 letras, sin fallas; tres pedidos del cap. 30 quedaron más de nueve minutos "en cola" y se volvieron a pedir; algunos pedidos salieron "Rate limit" y se volvieron a pedir).
+- Créditos al terminar la undécima vuelta: 3938 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
@@ -17,3 +17,5 @@
 - Nota técnica 2: en la copia de la nube la rama local main puede estar vieja; trabajar desde origin/main (`git checkout -b narr-c origin/main`) y subir con `git push origin HEAD:main`.
 
 - Nota técnica 3: para pedir más rápido, en el sandbox están `nar/C-pack.py` (junta los pedidos de varios capítulos en tandas de 8, con index = capítulo×100 + pedazo) y `nar/C-rp.py`; se pide con `requests: {"ref": "sandbox:~/nar/C-r.json#/t/N"}`. Son archivos solo de la tarea C.
+- Voces fijas en Esdras (ya en los tags): Ciro sterling, Zorobabel julian, Rehum arthur, Artajerjes sterling, Tatnai arthur, Darío desmond, Esdras julian, Secanías arthur. Las cartas y decretos van con la voz de quien los escribe; lo que Esdras cuenta en primera persona lo lee el narrador.
+- Nota técnica 4: si quedan pedidos trabados "en cola", ocupan lugares de los 8; conviene pedir de a 5 (`nar/C-r5.json` se arma igual que C-r.json pero en tandas de 5) y volver a pedir los trabados al final.
