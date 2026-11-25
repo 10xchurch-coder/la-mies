@@ -6,5 +6,5 @@
 - Hecho: Mateo 17 a 20 (25 nov 2026), 105 pedazos, sin fallas. Gastó unos 44 créditos.
 - Hecho: Mateo 21 a 24 (25 nov 2026), 88 pedazos, sin fallas. Gastó unos 45 créditos (las otras tareas gastan a la vez).
 - Hecho: Mateo 25 a 28 (25 nov 2026), 157 pedazos, sin fallas. Gastó unos 79 créditos (las otras tareas gastan a la vez). MATEO COMPLETO.
-- Sigue: Marcos 1 (libro 40).
+- Sigue: Marcos 1 (libro 40). Los tags y planes de Marcos 1 y 2 ya están escritos y subidos (51 pedazos); falta generar. Marcos 3 en adelante falta todo.
 - Créditos que quedan: 10617 (25 nov 2026).
