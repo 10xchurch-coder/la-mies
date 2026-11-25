@@ -1,0 +1,12 @@
+3 | g:aviso | Aquélla es Betsabé | Urías heteo.
+5 | m:Betsabé | Yo estoy encinta. | Yo estoy encinta.
+6 | h:David | Envíame a Urías heteo. | Envíame a Urías heteo.
+8 | h:David | Desciende a tu casa | lava tus pies.
+10 | g:aviso | Urías no ha descendido | descendido a su casa.
+10 | h:David | ¿No has venido | a tu casa?
+11 | h:Urías | El arca, e Israel | no haré tal cosa.
+12 | h:David | Quédate aquí | te despacharé.
+15 | h:David | Poned a Urías | herido y muera.
+19-21 | h:Joab | Cuando acabares | heteo ha muerto.
+23-24 | h:mensajero a david | Ciertamente prevalecieron | Urías heteo.
+25 | h:David | Así dirás a Joab | Y tú aliéntalo.

@@ -1,0 +1,14 @@
+1 | h:David | ¿Ha quedado alguno | amor a Jonatán?
+2 | h:David | ¿Eres tú Siba? | ¿Eres tú Siba?
+2 | h:Siba | Tu siervo. | Tu siervo.
+3 | h:David | ¿No ha quedado nadie | misericordia de Dios?
+3 | h:Siba | Aún ha quedado | de los pies.
+4 | h:David | ¿Y dónde está él? | ¿Y dónde está él?
+4 | h:Siba | He aquí, está | en Lodebar.
+6 | h:David | Mefiboset. | Mefiboset.
+6 | h:Mefiboset | He aquí tu siervo. | He aquí tu siervo.
+7 | h:David | No tengas temor | mi mesa, siempre.
+8 | h:Mefiboset | ¿Quién es tu siervo | muerto como yo?
+9-10 | h:David | Todo lo que fue | pan a mi mesa.
+11 | h:Siba | Conforme a todo | hará tu siervo.
+11 | h:David | comerá a mi mesa | hijos del rey.
