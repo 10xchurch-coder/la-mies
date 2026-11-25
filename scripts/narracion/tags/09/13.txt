@@ -1,0 +1,20 @@
+7 | h:David | Ve ahora a casa | hazle de comer.
+20 | h:Absalón | ¿Ha estado contigo | angusties por esto.
+4 | h:Jonadab | Hijo del rey, ¿por qué | descubrirás a mí?
+4 | h:Amnón | Yo amo a Tamar | Absalón, mi hermano.
+5 | h:Jonadab | Acuéstate en tu cama | coma de su mano.
+6 | h:Amnón | Yo te ruego que venga mi hermana | coma yo de su mano.
+9 | h:Amnón | Echad fuera de aquí a todos. | Echad fuera de aquí a todos.
+10 | h:Amnón | Trae la comida | coma de tu mano.
+11 | h:Amnón | Ven, hermana mía | acuéstate conmigo.
+12-13 | m:Tamar | No, hermano mío | no me negará a ti.
+15 | h:Amnón | Levántate y vete. | Levántate y vete.
+16 | m:Tamar | No hay razón | que me has hecho.
+17 | h:Amnón | Échame a esta | puerta tras ella.
+24 | h:Absalón | He aquí, tu siervo tiene | con tu siervo.
+25 | h:David | No, hijo mío | te seamos carga.
+26 | h:Absalón | Si no, te ruego | Amnón mi hermano.
+26 | h:David | ¿Para qué ha de ir contigo? | ¿Para qué ha de ir contigo?
+28 | h:Absalón | Mirad; cuando | sed valientes.
+32-33 | h:Jonadab | No piense mi señor | Amnón ha sido muerto.
+35 | h:Jonadab | He allí los hijos | siervo ha dicho.

@@ -1,0 +1,18 @@
+9 | h:David | Ve en paz. | Ve en paz.
+2 | h:Absalón | ¿De qué ciudad eres? | ¿De qué ciudad eres?
+21 | h:Itai | Vive Jehová, y vive | también tu siervo.
+2 | g:siervos | Tu siervo es de una | tribus de Israel.
+3 | h:Absalón | Mira, tus palabras | de parte del rey.
+4 | h:Absalón | ¡Quién me pusiera | les haría justicia!
+7-8 | h:Absalón | Yo te ruego me permitas | yo serviré a Jehová.
+10 | h:Absalón | Cuando oyereis | reina en Hebrón.
+13 | g:siervos | El corazón de todo Israel | va tras Absalón.
+14 | h:David | Levantaos, y huyamos | a filo de espada.
+15 | g:siervos | He aquí, tus siervos están | el rey requiera.
+19-20 | h:David | ¿Para qué vienes | verdad sean contigo.
+22 | h:David | Ven, pues, y pasa. | Ven, pues, y pasa.
+25-26 | h:David | Vuelve el arca | bien le pareciere.
+27-28 | h:David | ¿No eres tú el vidente? | que me dé aviso.
+31 | g:siervos | Ahitofel está entre | conspiraron con Absalón.
+31 | h:David | Entontece ahora | consejo de Ahitofel.
+33-36 | h:David | Si te pasas conmigo | todo lo que oyereis.

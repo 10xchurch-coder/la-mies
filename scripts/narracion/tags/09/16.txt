@@ -1,0 +1,15 @@
+2 | h:David | ¿Qué es esto? | ¿Qué es esto?
+2 | h:Siba | Los asnos son | cansen en el desierto.
+7-8 | h:Simeí | ¡Fuera, fuera | eres hombre sanguinario.
+9 | h:Abisai | ¿Por qué maldice | le quitaré la cabeza.
+3 | h:David | ¿Dónde está el hijo de tu señor? | ¿Dónde está el hijo de tu señor?
+3 | h:Siba | He aquí él se ha quedado | el reino de mi padre.
+4 | h:David | He aquí, sea tuyo | lo que tiene Mefiboset.
+4 | h:Siba | Rey señor mío, halle | gracia delante de ti.
+10 | h:David | ¿Qué tengo yo | Por qué lo haces así?
+11-12 | h:David | He aquí, mi hijo | maldiciones de hoy.
+16 | h:Husai | Viva el rey, viva el rey. | Viva el rey, viva el rey.
+17 | h:Absalón | ¿Este es tu agradecimiento | con tu amigo?
+18-19 | h:Husai | No; antes al que | así seré delante de ti.
+20 | h:Absalón | Consultad qué debemos hacer. | Consultad qué debemos hacer.
+21 | v:Ahitofel | Entra a las concubinas | que están contigo.

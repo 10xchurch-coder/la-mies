@@ -1,0 +1,22 @@
+5 | h:David | ¿Qué tienes? | ¿Qué tienes?
+30 | h:Absalón | Mirad, el campo | prendedle fuego
+2-3 | h:Joab | Yo te ruego que finjas | con él de esta manera.
+4 | m:mujer de Tecoa | Oh rey, salva. | Oh rey, salva.
+5-7 | m:mujer de Tecoa | Yo a la verdad | remanente sobre la tierra.
+8 | h:David | Vete a tu casa | orden acerca de ti.
+9 | m:mujer de Tecoa | Rey señor mío, la maldad | sean sin culpa.
+10 | h:David | Al que hablare | no te tocará más.
+11 | m:mujer de Tecoa | Te ruego, oh rey | destruir a mi hijo.
+11 | h:David | Vive Jehová, que no caerá | tu hijo en tierra.
+12 | m:mujer de Tecoa | Te ruego que hable | a mi señor el rey.
+12 | h:David | Habla. | Habla.
+13-17 | m:mujer de Tecoa | ¿Por qué, pues, has pensado | tu Dios sea contigo.
+18 | h:David | Yo te ruego que no me encubras | yo te preguntare.
+18 | m:mujer de Tecoa | Hable mi señor el rey. | Hable mi señor el rey.
+19 | h:David | ¿No está contigo la mano | todas estas cosas?
+19-20 | m:mujer de Tecoa | Vive tu alma | que hay en la tierra.
+21 | h:David | He aquí yo hice esto | al joven Absalón.
+22 | h:Joab | Hoy tu siervo sabe | petición de su siervo.
+24 | h:David | Que se vaya a su casa | no vea mi rostro.
+31 | h:Joab | ¿Por qué han prendido | a mi campo?
+32 | h:Absalón | He aquí, yo he enviado | máteme.
