@@ -1,0 +1,5 @@
+# Jeremías = julian, los capitanes y el pueblo = sterling. De 9 a 22 habla Jeremías al pueblo (dice la palabra de Jehová y sigue él).
+2-3 | g:pueblo=sterling | Sea acepta nuestra súplica | lo que hemos de hacer.
+4 | h:Jeremías=julian | Os he oído | no os reservaré palabra.
+5-6 | g:pueblo | Jehová sea testigo | tengamos bien.
+9-22 | h:Jeremías | Así dice Jehová, el Dios de Israel, al cual me enviasteis | entrar para peregrinar allí.
