@@ -34,6 +34,7 @@
 - Hecho: Hechos 28 y Romanos 1 a 3 (25 nov 2026), 23 pedazos, sin fallas. HECHOS COMPLETO.
 - Hecho: Romanos 4 a 7 (25 nov 2026), 16 pedazos, sin fallas.
 - Hecho: Romanos 8 a 10 (25 nov 2026), 14 pedazos, sin fallas. Hechos 20 a Romanos 10 gastaron unos 425 créditos entre las cuatro tareas; quedan unos 2660.
+- EN CURSO: Romanos 11 a 16, 20:29 UTC (25 nov)
 - Sigue: Romanos 11 (libro 44). El plan de Romanos 11 ya está (y bajado en el sandbox); de Romanos 12 en adelante falta todo (planes y audio; las cartas no llevan tags).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
