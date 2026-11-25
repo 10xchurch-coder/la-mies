@@ -1,0 +1,3 @@
+3 | g:siervos=arthur | ¿Por qué traspasas | mandamiento del rey?
+8-9 | h:Amán=julian | Hay un pueblo esparcido | tesoros del rey.
+11 | h:Asuero=sterling | La plata te es dada | bien te pareciere.

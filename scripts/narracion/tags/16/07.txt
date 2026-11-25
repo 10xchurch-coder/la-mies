@@ -1,0 +1,7 @@
+2 | h:Asuero=sterling | ¿Cuál es tu petición, reina Esther | te será concedida.
+3-4 | m:Ester=elena | Oh rey, si he hallado gracia | el daño del rey.
+5 | h:Asuero | ¿Quién es, y dónde está | hacer tal cosa?
+6 | m:Ester | El enemigo y adversario | malvado Amán.
+8 | h:Asuero | ¿Querrá también forzar | estando yo en casa?
+9 | h:Harbona=arthur | He aquí también la horca | en casa de Amán.
+9 | h:Asuero | Colgadlo en ella. | Colgadlo en ella.

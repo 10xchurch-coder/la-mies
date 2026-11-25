@@ -1,0 +1,11 @@
+3 | h:Asuero=sterling | ¿Qué honra o qué distinción | por esto?
+3 | g:siervos=arthur | Nada se ha hecho por él. | Nada se ha hecho por él.
+4 | h:Asuero | ¿Quién está en el patio? | ¿Quién está en el patio?
+5 | g:siervos | He aquí Amán está en el patio. | He aquí Amán está en el patio.
+5 | h:Asuero | Que entre. | Que entre.
+6 | h:Asuero | ¿Qué se hará al hombre | desea el rey?
+6 | h:Amán=julian | ¿A quién deseará el rey | más que a mí?
+7-9 | h:Amán | Para el varón cuya honra | cuya honra desea el rey.
+10 | h:Asuero | Date prisa, toma la vestidura | lo que has dicho.
+11 | h:Amán | Así se hará al varón | honra desea el rey.
+13 | m:Zeres=soraya | Si Mardoqueo, delante de quien | delante de él.

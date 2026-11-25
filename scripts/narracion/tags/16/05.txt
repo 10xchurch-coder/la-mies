@@ -1,0 +1,7 @@
+3 | h:Asuero=sterling | ¿Qué tienes, reina Esther | se te dará.
+4 | m:Ester=elena | Si le place al rey, venga hoy | le he preparado.
+5 | h:Asuero | Daos prisa, llamad a Amán | Esther ha dicho.
+6 | h:Asuero | ¿Cuál es tu petición | te será concedido.
+7-8 | m:Ester | Mi petición y mi deseo | el rey ha mandado.
+12-13 | h:Amán=julian | También la reina Esther | a la puerta del rey.
+14 | m:Zeres=soraya | Hagan una horca alta | al banquete.
