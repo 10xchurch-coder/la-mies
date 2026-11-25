@@ -8,6 +8,7 @@
 - Hecho: Mateo 25 a 28 (25 nov 2026), 157 pedazos, sin fallas. Gastó unos 79 créditos (las otras tareas gastan a la vez). MATEO COMPLETO.
 - Hecho: Marcos 1 a 4 (25 nov 2026), 98 pedazos, sin fallas.
 - Hecho: Marcos 5 a 8 (25 nov 2026), 134 pedazos, sin fallas. Marcos 1 a 8 gastaron unos 215 créditos entre las cuatro tareas.
-- Sigue: Marcos 9 (libro 40). Los tags y planes de Marcos 9 a 16 ya están escritos y subidos (279 pedazos); falta generar. Lucas en adelante falta todo.
+- Hecho: Marcos 9 a 12 (25 nov 2026), 164 pedazos, sin fallas (varios reintentos por el límite de 8 trabajos a la vez).
+- Sigue: Marcos 13 (libro 40). Los tags y planes de Marcos 13 a 16 ya están escritos y subidos; falta generar. Lucas en adelante falta todo.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
-- Créditos que quedan: 9980 (25 nov 2026).
+- Créditos que quedan: 9503 (25 nov 2026).
