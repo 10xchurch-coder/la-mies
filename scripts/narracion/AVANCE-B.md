@@ -19,5 +19,6 @@
 - Hecho: Éxodo 13 a 16 (25 nov 2026), 67 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). José (13:19) es arthur, Miriam soraya, los siervos de Faraón y los egipcios julian.
 - Hecho: Éxodo 17 a 20 (25 nov 2026), 60 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
 - Hecho: Éxodo 21 a 24 (25 nov 2026), 28 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
-- Sigue: Éxodo 25 (tags y planes de Éxodo 25 a 36 ya están subidos; 25 a 31 los lee todo el narrador, sin tags; 32 a 36 llevan tags; 37 a 40 no tienen diálogo). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
-- Créditos que quedan: 7265 (25 nov 2026).
+- Hecho: Éxodo 25 a 28 (25 nov 2026), 22 pedazos, sin fallas (dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Todo narrador.
+- Sigue: Éxodo 29 (tags y planes de Éxodo 29 a 36 ya están subidos; 29 a 31 los lee todo el narrador, sin tags; 32 a 36 llevan tags; 37 a 40 no tienen diálogo). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
+- Créditos que quedan: 7210 (25 nov 2026).
