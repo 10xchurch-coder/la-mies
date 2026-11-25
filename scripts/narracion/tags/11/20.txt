@@ -1,0 +1,15 @@
+# Voces: Ezequías sterling, Isaías desmond. La palabra que Jehová le da a Isaías (5-6) va con la voz de Dios.
+1 | h:Isaías=desmond | Así dice Jehová: Pon tu casa | morirás y no vivirás.
+3 | h:Ezequías=sterling | Te ruego, oh Jehová | las cosas que te agradan.
+5-6 | dios | Vuelve, y di a Ezequías | por amor a David mi siervo.
+7 | h:Isaías | Tomen una masa de higos. | Tomen una masa de higos.
+8 | h:Ezequías | ¿Qué señal tendré | al tercer día?
+9 | h:Isaías | Esta señal tendrás | retrocederá diez grados?
+10 | h:Ezequías | Fácil cosa es | vuelva atrás diez grados.
+14 | h:Isaías | ¿Qué dijeron aquellos varones | de dónde vinieron a ti?
+14 | h:Ezequías | De lejanas tierras | de Babilonia.
+15 | h:Isaías | ¿Qué vieron en tu casa? | ¿Qué vieron en tu casa?
+15 | h:Ezequías | Vieron todo lo que hay | que no les mostrase.
+16-18 | h:Isaías | Oye palabra de Jehová | del rey de Babilonia.
+19 | h:Ezequías | La palabra de Jehová que has hablado, es buena. | La palabra de Jehová que has hablado, es buena.
+19 | h:Ezequías | ¿Mas no habrá paz y verdad en mis días? | ¿Mas no habrá paz y verdad en mis días?

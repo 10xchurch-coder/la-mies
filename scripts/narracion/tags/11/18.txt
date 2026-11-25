@@ -1,0 +1,7 @@
+# Voces: Ezequías sterling, el Rabsaces (habla por el rey de Asiria) arthur, Eliaquim y sus compañeros julian.
+14 | h:Ezequías=sterling | Yo he pecado | todo lo que me impusieres.
+19-25 | h:Rabsaces=arthur | Decid ahora a Ezequías | Sube contra esta tierra, y destrúyela.
+26 | g:Eliaquim=julian | Te ruego que hables | que está sobre el muro.
+27 | h:Rabsaces | ¿Me ha enviado mi señor | su propia orina con vosotros?
+28-35 | h:Rabsaces | Oíd la palabra del gran rey | de mi mano a Jerusalén?
+36 | h:Ezequías | No le respondáis. | No le respondáis.
