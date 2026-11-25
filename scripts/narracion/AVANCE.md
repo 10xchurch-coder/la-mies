@@ -11,8 +11,10 @@
 - Hecho: Marcos 9 a 12 (25 nov 2026), 164 pedazos, sin fallas (varios reintentos por el límite de 8 trabajos a la vez).
 - Hecho: Marcos 13 a 16 (25 nov 2026), 118 pedazos, sin fallas (un pedazo de Marcos 15 se quedó colgado y se pidió de nuevo). MARCOS COMPLETO.
 - Hecho: Lucas 1 a 4 (25 nov 2026), 104 pedazos, sin fallas.
-- EN CURSO: Lucas 5 a 8, 12:42 UTC (25 nov 2026)
-- Sigue: Lucas 5 (libro 41). Lucas 5 a 8 ya tienen tags y planes; de Lucas 9 en adelante falta todo.
+- Hecho: Lucas 5 a 8 (25 nov 2026), 146 pedazos. En Lucas 7 falló un pedazo que era solo "y:" (versículo 16); se juntaron las dos frases del pueblo en una sola cita y salió bien. Lucas 1 a 8 gastaron unos 300 créditos entre las cuatro tareas.
+- Sigue: Lucas 9 (libro 41). De Lucas 9 en adelante falta todo (tags, planes y audio).
+- Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
+- Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
-- Créditos que quedan: 9174 (25 nov 2026, después de Marcos 16).
+- Créditos que quedan: 8470 (25 nov 2026, después de Lucas 8).
