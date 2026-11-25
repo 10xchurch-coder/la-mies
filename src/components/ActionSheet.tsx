@@ -6,6 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 import { tx } from '@/lib/i18n';
+import { EMOJI_GROUPS, FIRST_EMOJIS, recentEmojis, useEmoji as rememberEmoji } from '@/lib/emojis';
 
 export type SheetAction = { text: string; onPress?: () => void; icon?: React.ComponentProps<typeof Feather>['name']; destructive?: boolean; hint?: string };
 /** Fila de reacciones arriba de las opciones (para los mensajes de los chats). */
@@ -39,7 +40,67 @@ export function ActionSheetHost() {
       push = null;
     };
   }, []);
+  // Para los mensajes de los chats: las caritas usadas hace poco y, con el +, todas.
+  const [recent, setRecent] = useState<string[]>(FIRST_EMOJIS);
+  const [allOpen, setAllOpen] = useState(false);
+  useEffect(() => { if (req?.reactions) { setAllOpen(false); recentEmojis().then(setRecent).catch(() => undefined); } }, [req]);
   const close = () => setReq(null);
+  const pickEmoji = (e: string) => { const pick = req?.reactions?.onPick; rememberEmoji(e); close(); setTimeout(() => pick?.(e), 50); };
+  if (req?.reactions) {
+    const r = req.reactions;
+    const actions = req.actions.filter((a) => a.text !== 'Cancelar' && a.text !== tx('Cancelar'));
+    const row = [...new Set([...(r.current ? [r.current] : []), ...recent])];
+    return (
+      <Modal visible transparent animationType="fade" onRequestClose={close}>
+        <Pressable onPress={close} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', padding: 18, paddingBottom: insets.bottom + 18 }}>
+          <Pressable onPress={() => undefined} style={{ width: '100%', maxWidth: 420, gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bg, borderRadius: 30, paddingLeft: 6, paddingRight: 6, height: 58, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="always" style={{ flex: 1 }} contentContainerStyle={{ alignItems: 'center' }}>
+                {row.map((e) => (
+                  <Pressable key={e} onPress={() => pickEmoji(e)} accessibilityRole="button" accessibilityLabel={tx('Reaccionar con {e}', { e })} accessibilityState={{ selected: r.current === e }}
+                    style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: r.current === e ? colors.greenSoft : 'transparent' }}>
+                    <Text style={{ fontSize: 29 }}>{e}</Text>
+                  </Pressable>
+                ))}
+              </ScrollView>
+              <Pressable onPress={() => setAllOpen((v) => !v)} accessibilityRole="button" accessibilityLabel={tx('Ver todas las caritas')}
+                style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: colors.input, alignItems: 'center', justifyContent: 'center', marginLeft: 4 }}>
+                <Feather name={allOpen ? 'x' : 'plus'} size={22} color={colors.text} />
+              </Pressable>
+            </View>
+            {allOpen ? (
+              <View style={{ backgroundColor: colors.bg, borderRadius: 22, maxHeight: 360, overflow: 'hidden' }}>
+                <ScrollView contentContainerStyle={{ padding: 12, gap: 6 }}>
+                  {EMOJI_GROUPS.map((gr) => (
+                    <View key={gr.title} style={{ gap: 2 }}>
+                      <Text style={{ fontSize: 12, fontWeight: '800', color: colors.muted, marginTop: 4 }}>{gr.title.toUpperCase()}</Text>
+                      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                        {gr.list.map((e, i) => (
+                          <Pressable key={`${e}${i}`} onPress={() => pickEmoji(e)} accessibilityRole="button" accessibilityLabel={tx('Reaccionar con {e}', { e })} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={{ fontSize: 27 }}>{e}</Text>
+                          </Pressable>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : actions.length ? (
+              <View style={{ backgroundColor: colors.bg, borderRadius: 22, overflow: 'hidden', alignSelf: 'flex-end', minWidth: 250, maxWidth: '100%' }}>
+                {actions.map((a, i) => (
+                  <Pressable key={i} accessibilityRole="button" onPress={() => { close(); setTimeout(() => a.onPress?.(), 50); }}
+                    style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 14, backgroundColor: pressed ? colors.bgSoft : 'transparent', borderTopWidth: a.destructive && i ? 1 : 0, borderTopColor: colors.border })}>
+                    {a.icon ? <Feather name={a.icon} size={21} color={a.destructive ? '#C62828' : colors.text} /> : null}
+                    <Text style={{ flex: 1, fontSize: 17, color: a.destructive ? '#C62828' : colors.text }}>{a.text}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            ) : null}
+          </Pressable>
+        </Pressable>
+      </Modal>
+    );
+  }
   return (
     <Modal visible={!!req} transparent animationType="fade" onRequestClose={close}>
       <Pressable onPress={close} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}>

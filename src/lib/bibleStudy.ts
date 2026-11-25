@@ -318,3 +318,64 @@ export async function searchBibleAsync(version: BibleVersion, q: Query, alive: (
   }
   return alive() ? out : null;
 }
+
+// ---------- Búsqueda que perdona: lo más parecido a lo que la persona se acuerda ----------
+
+/** Palabras que no ayudan a encontrar un pasaje (artículos, preposiciones…), en español y en inglés. */
+const STOP = new Set(('a al algo ante como con contra cual cuando de del desde donde el ella ellos en entre era es esa ese eso esta este esto fue ha la las le les lo los mas me mi mis no nos o para pero por que se si sin su sus te tu tus un una uno unos unas y ya yo el ella nosotros vosotros ' +
+  'the a an and of to in is it that for on with as was at by he she his her they them be this from or not i you your my we our').split(' '));
+
+export type SmartHit = { book: number; chapter: number; verse: number; /** Cuántas de las palabras buscadas tiene. */ matched: number };
+export type SmartResult = { hits: SmartHit[]; /** Las palabras que se tuvieron en cuenta (sin tildes). */ words: string[] };
+
+/** La raíz de una palabra para perdonar plurales y terminaciones: "pastores" y "pastor", "amó" y "amar". */
+export function stemOf(w: string): string {
+  return w.length <= 4 ? w : w.slice(0, Math.max(4, w.length - 2));
+}
+
+/**
+ * Busca lo más parecido: no hace falta que estén todas las palabras ni que estén bien terminadas.
+ * Mira cada versículo junto con el siguiente (uno se suele acordar de un pedazo que cruza dos versículos).
+ * Devuelve los mejores primero; null si la persona ya pidió otra búsqueda.
+ */
+export async function smartSearchAsync(version: BibleVersion, text: string, alive: () => boolean = () => true, limit = 30): Promise<SmartResult | null> {
+  const all = [...new Set(fold(text ?? '').split(' ').filter(Boolean))];
+  let words = all.filter((w) => !STOP.has(w) && w.length > 1);
+  if (!words.length) words = all;
+  if (!words.length) return { hits: [], words };
+  const exact = words.map((w) => ` ${w} `);
+  const stems = words.map((w) => ` ${stemOf(w)}`);
+  const need = words.length <= 2 ? words.length : Math.max(2, Math.ceil(words.length * 0.6));
+  const found: (SmartHit & { score: number })[] = [];
+  for (let b = 0; b < BOOKS.length; b++) {
+    if (b % 6 === 0) { await new Promise<void>((r) => setTimeout(r, 0)); if (!alive()) return null; }
+    await ensureBook(version, b);
+    const chapters = foldedBook(version, b);
+    for (let c = 0; c < chapters.length; c++) {
+      const ch = chapters[c];
+      for (let v = 0; v < ch.length; v++) {
+        let matched = 0; let score = 0; let here = 0;
+        const two = v + 1 < ch.length ? ch[v] + ch[v + 1] : ch[v];
+        for (let i = 0; i < words.length; i++) {
+          const inThis = ch[v].indexOf(stems[i]) >= 0;
+          if (!inThis && two.indexOf(stems[i]) < 0) continue;
+          matched++;
+          if (inThis) here++;
+          score += (inThis ? 1 : 0.6) + (two.indexOf(exact[i]) >= 0 ? 0.5 : 0) + Math.min(words[i].length, 10) * 0.03;
+        }
+        // Tiene que empezar en este versículo: si todo está en el siguiente, ese se cuenta solo.
+        if (matched >= need && here > 0) found.push({ book: b, chapter: c + 1, verse: v + 1, matched, score });
+      }
+    }
+  }
+  if (!alive()) return null;
+  found.sort((x, y) => y.matched - x.matched || y.score - x.score || x.book - y.book || x.chapter - y.chapter || x.verse - y.verse);
+  // Dos versículos seguidos casi siempre son el mismo pasaje: queda el mejor.
+  const out: SmartHit[] = [];
+  for (const f of found) {
+    if (out.some((o) => o.book === f.book && o.chapter === f.chapter && Math.abs(o.verse - f.verse) <= 1)) continue;
+    out.push({ book: f.book, chapter: f.chapter, verse: f.verse, matched: f.matched });
+    if (out.length >= limit) break;
+  }
+  return { hits: out, words };
+}

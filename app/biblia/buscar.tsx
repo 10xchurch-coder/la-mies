@@ -9,8 +9,8 @@ import { Header, Screen } from '@/components/Screen';
 import { BibleHits } from '@/components/BibleHits';
 import { BibleVersionChips } from '@/components/BibleVersionChips';
 import { Button, Card, Empty } from '@/components/ui';
-import { bookNameIn, chaptersIn, versionOf, type BibleVersion } from '@/lib/bible';
-import { makeQuery, parseRef, searchBibleAsync, type Query, type SearchResult } from '@/lib/bibleStudy';
+import { bookNameIn, chapterText, chaptersIn, versionOf, type BibleVersion } from '@/lib/bible';
+import { makeQuery, parseRef, searchBibleAsync, smartSearchAsync, type Query, type SearchResult, type SmartHit } from '@/lib/bibleStudy';
 import { loadBiblePrefs, saveBiblePrefs } from '@/lib/bibleStore';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
@@ -24,6 +24,8 @@ export default function BuscarBiblia() {
   const [busy, setBusy] = useState(false);
   const [found, setFound] = useState<{ result: SearchResult; query: Query; asked: string } | null>(null);
   const [nothing, setNothing] = useState(false);
+  // Lo más parecido, cuando no está con todas las palabras exactas (o siempre que ayude).
+  const [close, setClose] = useState<SmartHit[]>([]);
   const run = useRef(0);
   const en = version.lang === 'en';
 
@@ -40,12 +42,22 @@ export default function BuscarBiblia() {
     const q = makeQuery(text, asPhrase);
     const id = ++run.current;
     setNothing(false);
+    setClose([]);
     if (!q) { setFound(null); setBusy(false); return; }
     setBusy(true);
     const result = await searchBibleAsync(ver, q, () => run.current === id);
     if (!result) return;
     setFound({ result, query: q, asked: text.trim() });
-    setNothing(!result.verses);
+    // Si no hay nada con todas las palabras (o hay muy poco), se muestra lo más parecido.
+    let similar: SmartHit[] = [];
+    if (!asPhrase && result.verses < 3) {
+      const smart = await smartSearchAsync(ver, text, () => run.current === id);
+      if (!smart) return;
+      const have = new Set(result.books.flatMap((b) => b.hits.map((h) => `${b.book}-${h.chapter}-${h.verse}`)));
+      similar = smart.hits.filter((h) => !have.has(`${h.book}-${h.chapter}-${h.verse}`));
+    }
+    setClose(similar);
+    setNothing(!result.verses && !similar.length);
     setBusy(false);
   };
   const changeVersion = (v: BibleVersion) => {
@@ -118,6 +130,20 @@ export default function BuscarBiblia() {
               onOpen={(book, h) => openPlace(book, h.chapter, h.verse)}
               onWord={(w) => router.push({ pathname: '/biblia/concordancia', params: { p: w, v: version.id } })} />
           </>
+        ) : null}
+        {close.length && !busy ? (
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: colors.text }}>{found?.result.verses ? tx('También puede ser') : tx('Lo más parecido')}</Text>
+            {!found?.result.verses ? <Text style={{ fontSize: 13, color: colors.muted }}>{tx('No está con esas palabras exactas. Estos son los versículos que más se parecen a lo que escribiste.')}</Text> : null}
+            {close.map((h) => (
+              <Pressable key={`${h.book}-${h.chapter}-${h.verse}`} onPress={() => openPlace(h.book, h.chapter, h.verse)} accessibilityRole="button">
+                <Card style={{ gap: 4 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '800', color: colors.blueText }}>{bookNameIn(version, h.book)} {h.chapter}:{h.verse}</Text>
+                  <Text style={{ fontSize: 15, lineHeight: 22, color: colors.text }} numberOfLines={4}>{chapterText(version, h.book, h.chapter)[h.verse - 1]}</Text>
+                </Card>
+              </Pressable>
+            ))}
+          </View>
         ) : null}
         {!found && !busy && !place && !nothing ? (
           <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19 }}>
