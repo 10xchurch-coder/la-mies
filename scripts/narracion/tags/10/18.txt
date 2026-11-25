@@ -1,0 +1,28 @@
+# Voces en 1 Reyes: Elías desmond, Acab sterling, Abdías arthur, el pueblo julian.
+1 | dios | Ve, muéstrate a Acab | sobre la faz de la tierra.
+5 | h:Acab=sterling | Ve por el país | sin bestias.
+7 | h:Abdías=arthur | ¿No eres tú mi señor Elías? | ¿No eres tú mi señor Elías?
+8 | h:Elías=desmond | Yo soy; ve, di a tu amo | He aquí Elías.
+24 | g:pueblo=julian | Bien dicho. | Bien dicho.
+26 | g:profetas de Baal=arthur | ¡Baal, respóndenos! | ¡Baal, respóndenos!
+43 | h:criado=julian | No hay nada. | No hay nada.
+9-14 | h:Abdías | ¿En qué he pecado | para que él me mate?
+15 | h:Elías | Vive Jehová de los ejércitos | me mostraré a él.
+17 | h:Acab | ¿Eres tú el que has turbado a Israel? | ¿Eres tú el que has turbado a Israel?
+18-19 | h:Elías | Yo no he turbado a Israel | de la mesa de Jezabel.
+21 | h:Elías | ¿Hasta cuándo claudicaréis | id en pos de él.
+22-24 | h:Elías | Sólo yo he quedado | ese sea Dios.
+25 | h:Elías | Escogeos un buey | mas no pongáis fuego debajo.
+27 | h:Elías | Gritad en alta voz | hay que despertarle.
+30 | h:Elías | Acercaos a mí. | Acercaos a mí.
+33 | h:Elías | Llenad cuatro cántaros | y sobre la leña.
+34 | h:Elías | Hacedlo otra vez; | Hacedlo otra vez;
+34 | h:Elías | Hacedlo la tercera vez; | Hacedlo la tercera vez;
+36-37 | h:Elías | Jehová, Dios de Abraham | el corazón de ellos.
+39 | g:pueblo | ¡Jehová es el Dios! ¡Jehová | es el Dios! ¡Jehová es el Dios!
+40 | h:Elías | Prended a los profetas de Baal | que no escape ninguno.
+41 | h:Elías | Sube, come y bebe | de una grande lluvia.
+43 | h:Elías | Sube ahora, y mira hacia el mar. | Sube ahora, y mira hacia el mar.
+43 | h:Elías | Vuelve siete veces. | Vuelve siete veces.
+44 | h:criado | Yo veo una pequeña nube | que sube del mar.
+44 | h:Elías | Ve, y di a Acab | para que la lluvia no te detenga.
