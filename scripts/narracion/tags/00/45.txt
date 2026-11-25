@@ -1,0 +1,9 @@
+1 | h:José=sterling | Haced salir | a todos.
+3 | h:José | Yo soy José: | mi padre?
+4 | h:José | Acercaos ahora a mí. | Acercaos ahora a mí.
+4-13 | h:José | Yo soy José vuestro hermano | acá a mi padre.
+16 | g:noticia=julian | Los hermanos de José han venido. | Los hermanos de José han venido.
+17-20 | h:Faraón=desmond | Di a tus hermanos | será vuestro.
+24 | h:José | No riñáis por el camino. | No riñáis por el camino.
+26 | g:hermanos=julian | José vive aún | tierra de Egipto.
+28 | v:Jacob=arthur | Basta | yo muera.

@@ -11,5 +11,6 @@
   Ojo: Génesis 31 a 33 se generó dos veces (unos 87 pedazos de más), porque la corrida anterior de la tarea B seguía trabajando cuando empezó la siguiente.
 - Hecho: Génesis 35 a 38 (25 nov 2026), 97 pedazos, sin fallas. Desde Génesis 37 Jacob lleva voz de hombre mayor (arthur); José es sterling, Judá desmond, Rubén julian.
 - Hecho: Génesis 39 a 42 (25 nov 2026), 93 pedazos, sin fallas. Faraón es desmond, el copero julian.
-- Sigue: Génesis 43 (falta escribir los tags). Mantener: Jacob v:Jacob=arthur, José sterling, Judá desmond, Rubén julian.
+- En curso (corrida que empezó 12:44 UTC del 25 nov): Génesis 43 a 46 y siguientes. Si otra corrida de B empieza antes de las 13:30 UTC, no repetir estos.
+- Sigue: Génesis 43 (tags y planes listos hasta el 46). Mantener: Jacob v:Jacob=arthur, José sterling, Judá desmond, Rubén julian.
 - Créditos que quedan: 8941 (25 nov 2026).

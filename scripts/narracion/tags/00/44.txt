@@ -1,0 +1,8 @@
+1-2 | h:José=sterling | Llena de alimento | de su trigo.
+4-5 | h:José | Levántate, y sigue | lo que hicisteis.
+7-9 | g:hermanos=julian | ¿Por qué dice mi señor | siervos de mi señor.
+10 | h:mayordomo=arthur | También ahora | sin culpa.
+15 | h:José | ¿Qué obra es esta | sabe adivinar?
+16 | h:Judá=desmond | ¿Qué diremos | hallada la copa.
+17 | h:José | Nunca yo tal haga | a vuestro padre.
+18-34 | h:Judá | Ay señor mío | a mi padre.

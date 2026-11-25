@@ -1,0 +1,15 @@
+2 | v:Jacob=arthur | Volved, y comprad | poco de alimento.
+3-5 | h:Judá=desmond | Aquel varón nos protestó | hermano con vosotros.
+6 | v:Jacob | ¿Por qué me hicisteis | otro hermano?
+7 | g:hermanos=julian | Aquel varón nos preguntó | a vuestro hermano?
+8-10 | h:Judá | Envía al joven | vuelto dos veces.
+11-14 | v:Jacob | Pues que así es | séalo.
+16 | h:José=sterling | Mete en casa | al mediodía.
+18 | g:hermanos | Por el dinero | nuestros asnos.
+20-22 | g:hermanos | Ay, señor mío | nuestros costales.
+23 | h:mayordomo=arthur | Paz a vosotros | vuestro dinero.
+27 | h:José | ¿Vuestro padre | ¿Vive todavía?
+28 | g:hermanos | Bien va | aún vive.
+29 | h:José | ¿Es este vuestro | me hablasteis?
+29 | h:José | Dios tenga misericordia | hijo mío.
+31 | h:José | Poned pan. | Poned pan.

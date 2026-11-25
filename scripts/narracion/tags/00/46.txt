@@ -1,0 +1,5 @@
+2 | dios | Jacob, Jacob. | Jacob, Jacob.
+2 | v:Jacob=arthur | Heme aquí. | Heme aquí.
+3-4 | dios | Yo soy Dios | sobre tus ojos.
+30 | v:Jacob | Muera yo ahora | aún vives.
+31-34 | h:José=sterling | Subiré y haré saber | una abominación.
