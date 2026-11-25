@@ -1,0 +1,19 @@
+1 | v:Jacob=arthur | ¿Por qué os estáis mirando? | ¿Por qué os estáis mirando?
+7 | h:José=sterling | ¿De dónde habéis venido? | ¿De dónde habéis venido?
+7 | g:hermanos=desmond | De la tierra de Canaán | comprar alimentos.
+22 | h:Rubén=julian | ¿No os hablé | es requerida.
+2 | v:Jacob | He aquí, yo he oído | no muramos.
+4 | v:Jacob | No sea acaso | algún desastre.
+9 | h:José | Espías sois | habéis venido.
+10-11 | g:hermanos | No, señor mío | no son espías.
+12 | h:José | No; sino que | habéis venido.
+13 | g:hermanos | Tus siervos somos | otro no parece.
+14-16 | h:José | Eso es lo que | que sois espías.
+18-20 | h:José | Haced esto | no moriréis.
+21 | g:hermanos | Verdaderamente hemos pecado | esta angustia.
+28 | h:uno de los hermanos=julian | Mi dinero | en mi saco.
+28 | g:hermanos | ¿Qué es esto | hecho Dios?
+30-34 | g:hermanos | Aquel varón | negociaréis en la tierra.
+36 | v:Jacob | Me habéis privado | todas estas cosas.
+37 | h:Rubén | Harás morir | volveré a ti.
+38 | v:Jacob | No descenderá | a la sepultura.

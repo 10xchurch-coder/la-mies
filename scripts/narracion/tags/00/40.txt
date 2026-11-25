@@ -1,0 +1,7 @@
+7 | h:José=sterling | ¿Por qué estáis | tristes hoy?
+9-11 | h:copero=julian | Yo soñaba | en mano de Faraón.
+16-17 | h:panadero=desmond | También yo soñaba | de sobre mi cabeza.
+8 | g:oficiales=arthur | Hemos tenido un sueño | quien lo interprete.
+8 | h:José | ¿No son de Dios | Contádmelo ahora.
+12-15 | h:José | Esta es su interpretación | en la cárcel.
+18-19 | h:José | Esta es la interpretación | de sobre ti.

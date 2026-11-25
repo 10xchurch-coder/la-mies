@@ -1,0 +1,11 @@
+9-13 | h:copero=julian | Me acuerdo hoy | colgar al otro.
+15 | h:Faraón=desmond | Yo he tenido un sueño | para interpretarlos.
+16 | h:José=sterling | No está en mí | paz a Faraón.
+17-24 | h:Faraón | En mi sueño | me lo interprete.
+25-36 | h:José | El sueño de Faraón | perecerá de hambre.
+38 | h:Faraón | ¿Hemos de hallar | Espíritu de Dios?
+39-40 | h:Faraón | Pues que Dios | mayor que tú.
+41 | h:Faraón | He aquí yo te he puesto | tierra de Egipto.
+43 | g:pregoneros=arthur | Doblad la rodilla | Doblad la rodilla
+44 | h:Faraón | Yo Faraón | tierra de Egipto.
+55 | h:Faraón | Id a José | él os dijere.
