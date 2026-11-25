@@ -1,0 +1,32 @@
+1 | v:Isaac | Mi hijo. | Mi hijo.
+1 | h:Esaú | Heme aquí. | Heme aquí.
+2-4 | v:Isaac | He aquí ya soy viejo | antes que yo muera.
+6-10 | m:Rebeca | He aquí yo he oído | antes de su muerte.
+11-12 | h:Jacob | He aquí Esaú mi hermano | no bendición.
+13 | m:Rebeca | Hijo mío, sea sobre mí | tráemelos.
+18 | h:Jacob | Padre mío. | Padre mío.
+18 | v:Isaac | Heme aquí, ¿quién eres | hijo mío?
+19 | h:Jacob | Yo soy Esaú | tu alma.
+20 | v:Isaac | ¿Cómo es que | hijo mío?
+20 | h:Jacob | Porque Jehová tu Dios | delante de mí.
+21 | v:Isaac | Acércate ahora, y te palparé | Esaú o no.
+22 | v:Isaac | La voz es la voz | manos de Esaú.
+24 | v:Isaac | ¿Eres tú mi hijo Esaú? | ¿Eres tú mi hijo Esaú?
+24 | h:Jacob | Yo soy. | Yo soy.
+25 | v:Isaac | Acércamela | mi alma;
+26 | v:Isaac | Acércate ahora, y bésame | hijo mío.
+27-29 | v:Isaac | Mira, el olor | te bendijeren.
+31 | h:Esaú | Levántese mi padre | su alma.
+32 | v:Isaac | ¿Quién eres tú? | ¿Quién eres tú?
+32 | h:Esaú | Yo soy tu hijo | primogénito, Esaú.
+33 | v:Isaac | ¿Quién es el que vino | será bendito.
+34 | h:Esaú | Bendíceme también | padre mío.
+35 | v:Isaac | Vino tu hermano | tu bendición.
+36 | h:Esaú | Bien llamaron | mi bendición.
+36 | h:Esaú | ¿No has guardado | para mí?
+37 | v:Isaac | He aquí yo le he puesto | hijo mío?
+38 | h:Esaú | ¿No tienes más | padre mío.
+39-40 | v:Isaac | He aquí será tu habitación | de tu cerviz.
+41 | h:Esaú | Llegarán los días | hermano Jacob.
+42-45 | m:Rebeca | He aquí, Esaú tu hermano | en un día?
+46 | m:Rebeca | Fastidio tengo | quiero la vida?
