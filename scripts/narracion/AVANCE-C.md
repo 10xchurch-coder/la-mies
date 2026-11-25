@@ -1,6 +1,6 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Reyes 17 (tags y planes ya listos para 2 Reyes 17 a 25; falta generar el audio).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22) y 2 Reyes 1 a 16 (25 nov 2026; octava vuelta en curso: 2 Reyes 13 a 16, 45 pedazos, sin fallas).
+- Sigue: 2 Reyes 21 (tags y planes ya listos para 2 Reyes 21 a 25 y 1 Crónicas 1 a 4; falta generar el audio).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22) y 2 Reyes 1 a 20 (25 nov 2026; octava vuelta en curso: 2 Reyes 13 a 20, 121 pedazos, sin fallas).
 - Créditos al empezar la octava vuelta: 7099 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
