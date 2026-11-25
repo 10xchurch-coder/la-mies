@@ -7,7 +7,8 @@
 - Hecho: Génesis 19 a 22 (25 nov 2026), 99 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
 - Hecho: Génesis 23 a 26 (25 nov 2026), 112 pedazos, sin fallas.
 - Hecho: Génesis 27 a 30 (25 nov 2026), 161 pedazos, sin fallas (muchos pedidos se rechazaron por el límite de 8 a la vez compartido con las otras tareas y se volvieron a mandar).
-- Hecho: Génesis 31 a 33 (25 nov 2026), 87 pedazos, sin fallas.
 - Hecho: Génesis 31 a 34 (25 nov 2026), 101 pedazos, sin fallas (muchos pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar).
+  Ojo: Génesis 31 a 33 se generó dos veces (unos 87 pedazos de más), porque la corrida anterior de la tarea B seguía trabajando cuando empezó la siguiente.
+- EN CURSO: la corrida que empezó a las 11:43 UTC del 25 nov está haciendo Génesis 35 a 38 y después 39 a 42. Si otra corrida lee esto antes de las 12:45 UTC, que no repita esos capítulos.
 - Sigue: Génesis 35.
 - Créditos que quedan: 9117 (25 nov 2026).
