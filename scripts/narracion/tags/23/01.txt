@@ -1,0 +1,11 @@
+# Jeremías cuenta en primera persona (narrador); lo que él dice en una cita lleva su voz (julian en todo el libro).
+5 | dios | Antes que te formase | profeta a las naciones.
+6 | h:Jeremías=julian | ¡Ah, Señor Jehová! | porque soy niño.
+7-8 | dios | No digas, soy niño | para librarte, dice Jehová.
+9-10 | dios | He aquí he puesto mis palabras | para edificar y para plantar.
+11 | dios | ¿Qué ves tú, Jeremías? | tú, Jeremías?
+11 | h:Jeremías | Yo veo una vara | de almendro.
+12 | dios | Bien has visto | para ponerla por obra.
+13 | dios | ¿Qué ves tú? | ves tú?
+13 | h:Jeremías | Yo veo una olla | hacia el norte.
+14-19 | dios | Del norte se desatará | para librarte.
