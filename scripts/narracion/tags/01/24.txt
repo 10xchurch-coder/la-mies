@@ -1,0 +1,6 @@
+1-2 | dios | Sube ante Jehová | subirá con él.
+3 | g:pueblo=arthur | Ejecutaremos todas | ha dicho.
+7 | g:pueblo | Haremos todas | y obedeceremos.
+8 | h:Moisés=sterling | He aquí la sangre | estas cosas.
+12 | dios | Sube a mí al monte | para enseñarlos.
+14 | h:Moisés | Esperadnos aquí | venga a ellos.
