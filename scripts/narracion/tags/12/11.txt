@@ -1,0 +1,6 @@
+# Voces: David julian (como en 2 Samuel), todo Israel sterling, los jebuseos arthur.
+1-2 | g:Israel=sterling | He aquí nosotros somos | sobre Israel mi pueblo.
+5 | g:jebuseos=arthur | No entrarás acá. | No entrarás acá.
+6 | h:David=julian | El que primero hiera | será jefe y capitán.
+17 | h:David | ¡Quién me diera | que está a la puerta!
+19 | h:David | Guárdeme mi Dios | la han traído?

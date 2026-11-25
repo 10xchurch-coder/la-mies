@@ -1,0 +1,4 @@
+# Voces: David julian, el pueblo sterling.
+# El salmo que David dio (8 a 36) va con la voz de David, igual que su cántico de 2 Samuel 22.
+8-36 | h:David=julian | Dad gracias a Jehová, invocad | desde la eternidad hasta la eternidad.
+36 | g:pueblo=sterling | Amén | Amén

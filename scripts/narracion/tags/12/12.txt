@@ -1,0 +1,4 @@
+# Voces: David julian, Amasai desmond, los príncipes de los filisteos arthur.
+17 | h:David=julian | Si venís a mí | lo vea y lo demande.
+18 | h:Amasai=desmond | Por ti, oh David | tu Dios te ayuda.
+19 | g:príncipes=arthur | Con peligro de nuestras cabezas | a su señor Saúl.
