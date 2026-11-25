@@ -20,7 +20,7 @@
 - Hecho: Juan 1 (25 nov 2026), 60 pedazos, sin fallas.
 - Hecho: Juan 2 a 5 (25 nov 2026), 111 pedazos, sin fallas.
 - Hecho: Juan 6 a 8 (25 nov 2026), 157 pedazos, sin fallas (algunos pedidos de nuevo por el límite de 8 trabajos a la vez). Juan 2 a 8 gastaron unos 335 créditos entre las cuatro tareas.
-- EN CURSO: Juan 9 a 12, 16:40 UTC del 25 nov
+- EN CURSO: Juan 9 a 12, 16:30 UTC del 25 nov
 - Sigue: Juan 9 (libro 42). De Juan 9 en adelante falta todo (tags, planes y audio).
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
