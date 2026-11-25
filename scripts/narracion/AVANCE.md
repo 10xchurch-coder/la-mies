@@ -49,8 +49,9 @@
 - Hecho: 1 Tesalonicenses 1 a 5 (25 nov 2026), 14 pedazos, sin fallas. 1 TESALONICENSES COMPLETO.
 - Hecho: 2 Tesalonicenses 1 a 3 (25 nov 2026), 9 pedazos, sin fallas. 2 TESALONICENSES COMPLETO.
 - Hecho: 1 Timoteo 1 a 6 (25 nov 2026), 16 pedazos, sin fallas. 1 TIMOTEO COMPLETO.
-- EN CURSO: 2 Timoteo 1 a 4, 22:39 UTC (25 nov 2026)
-- Sigue: 2 Timoteo 1 (libro 54). Los planes de 2 Timoteo, Tito y Filemón (libros 54 a 56) ya están en main y bajados en el sandbox; falta el audio. Hebreos y Apocalipsis hay que mirarlos por si hay diálogo; Santiago a Judas son cartas.
+- Hecho: 2 Timoteo 1 a 4 (25 nov 2026), 13 pedazos, sin fallas. 2 TIMOTEO COMPLETO.
+- EN CURSO: Tito 1 a 3 y Filemón, 22:41 UTC (25 nov 2026)
+- Sigue: Tito 1 (libro 55). Los planes de Tito y Filemón (libros 55 y 56) ya están en main y bajados en el sandbox; falta el audio. Hebreos y Apocalipsis hay que mirarlos por si hay diálogo; Santiago a Judas son cartas.
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
