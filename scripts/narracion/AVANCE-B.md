@@ -6,5 +6,6 @@
 - Hecho: Génesis 17 y 18 (25 nov 2026), 66 pedazos, sin fallas (algunos pedidos se rechazaron por el límite de 8 a la vez y se volvieron a mandar).
 - Hecho: Génesis 19 a 22 (25 nov 2026), 99 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
 - Hecho: Génesis 23 a 26 (25 nov 2026), 112 pedazos, sin fallas.
-- Sigue: Génesis 27. Los tags y el plan de Génesis 27 ya están escritos y subidos; falta generar.
-- Créditos que quedan: 10502 (25 nov 2026).
+- Hecho: Génesis 27 a 30 (25 nov 2026), 161 pedazos, sin fallas (muchos pedidos se rechazaron por el límite de 8 a la vez compartido con las otras tareas y se volvieron a mandar).
+- Sigue: Génesis 31.
+- Créditos que quedan: 9490 (25 nov 2026).
