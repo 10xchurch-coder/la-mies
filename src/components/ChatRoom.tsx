@@ -38,12 +38,12 @@ function sizeText(n: number | null): string {
   return n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`;
 }
 
-function ChatImage({ path, onOpen }: { path: string; onOpen: (url: string) => void }) {
+function ChatImage({ path, onOpen, onLong }: { path: string; onOpen: (url: string) => void; onLong?: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => { signedUrl('chat', path).then(setUrl).catch(() => setUrl(null)); }, [path]);
   if (!url) return <View style={styles.imgBox}><ActivityIndicator color={colors.green} /></View>;
   return (
-    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto grande')}>
+    <Pressable onPress={() => onOpen(url)} onLongPress={onLong} delayLongPress={300} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto grande')}>
       <Image source={{ uri: url }} style={styles.img} contentFit="cover" transition={150} />
     </Pressable>
   );
@@ -267,13 +267,13 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
 
   const content = (m: ChatMessage) => {
     if (m.kind === 'poll') return <PollCard question={m.body} rows={polls[m.id]} mine={false} onVote={vote} onLong={() => options(m)} />;
-    if (m.kind === 'location' || m.kind === 'live') return <LocationBubble m={m} onStop={() => stopLiveShare(room, m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />;
+    if (m.kind === 'location' || m.kind === 'live') return <LocationBubble m={m} onLong={() => options(m)} onStop={() => stopLiveShare(room, m.id).then(load).catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e)))} />;
     return (
       <>
         {m.kind === 'announcement' ? <Text style={styles.annTag}>{tx('📢 ANUNCIO')}</Text> : null}
-        {m.kind === 'image' && m.attachment_path ? <ChatImage path={m.attachment_path} onOpen={setViewer} /> : null}
-        {m.kind === 'file' && isVoice(m.attachment_name) && m.attachment_path ? <VoiceBubble path={m.attachment_path} /> : m.kind === 'file' ? (
-          <Pressable onPress={() => openFile(m)} accessibilityRole="button" accessibilityLabel={tx('Abrir {attachment_name}', { attachment_name: m.attachment_name ?? tx('documento') })} style={styles.file}>
+        {m.kind === 'image' && m.attachment_path ? <ChatImage path={m.attachment_path} onOpen={setViewer} onLong={() => options(m)} /> : null}
+        {m.kind === 'file' && isVoice(m.attachment_name) && m.attachment_path ? <VoiceBubble path={m.attachment_path} onLong={() => options(m)} /> : m.kind === 'file' ? (
+          <Pressable onPress={() => openFile(m)} onLongPress={() => options(m)} delayLongPress={300} accessibilityRole="button" accessibilityLabel={tx('Abrir {attachment_name}', { attachment_name: m.attachment_name ?? tx('documento') })} style={styles.file}>
             <Feather name="file-text" size={26} color={colors.green} />
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? tx('Documento')}</Text>

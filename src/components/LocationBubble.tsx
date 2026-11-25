@@ -10,7 +10,7 @@ import type { ChatMessage } from '../lib/chat';
 import { colors, themed } from '../theme';
 import { tx } from '@/lib/i18n';
 
-export function LocationBubble({ m, onStop }: { m: ChatMessage; onStop: () => void }) {
+export function LocationBubble({ m, onStop, onLong }: { m: ChatMessage; onStop: () => void; onLong?: () => void }) {
   const [, tick] = useState(0);
   const live = m.kind === 'live';
   const until = m.live_until ? new Date(m.live_until).getTime() : 0;
@@ -26,7 +26,7 @@ export function LocationBubble({ m, onStop }: { m: ChatMessage; onStop: () => vo
   const open = () => Linking.openURL(mapsUrl(m.lat as number, m.lng as number, m.body || undefined)).catch(() => undefined);
   return (
     <View style={styles.wrap}>
-      <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={tx('Abrir la ubicación en el mapa')} style={styles.map}>
+      <Pressable onPress={open} onLongPress={onLong} delayLongPress={300} accessibilityRole="button" accessibilityLabel={tx('Abrir la ubicación en el mapa')} style={styles.map}>
         {mapAvailable ? (
           <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <MapView style={StyleSheet.absoluteFill} initialRegion={regionAround({ lat: m.lat, lng: m.lng }, 220)} region={regionAround({ lat: m.lat, lng: m.lng }, 220)}

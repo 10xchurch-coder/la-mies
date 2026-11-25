@@ -23,12 +23,12 @@ import { tx } from '@/lib/i18n';
 
 const REASONS = ['Es ofensivo o me falta el respeto', 'Me incomoda o me asusta', 'Pide plata o es un engaño', 'Otra cosa'];
 
-function DmImage({ path, onOpen }: { path: string; onOpen: (url: string) => void }) {
+function DmImage({ path, onOpen, onLong }: { path: string; onOpen: (url: string) => void; onLong?: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => { signedUrl('chat', path).then(setUrl).catch(() => setUrl(null)); }, [path]);
   if (!url) return <View style={styles.imgBox}><ActivityIndicator color={colors.violet} /></View>;
   return (
-    <Pressable onPress={() => onOpen(url)} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto')}>
+    <Pressable onPress={() => onOpen(url)} onLongPress={onLong} delayLongPress={300} accessibilityRole="imagebutton" accessibilityLabel={tx('Ver la foto')}>
       <Image source={{ uri: url }} style={styles.img} contentFit="cover" />
     </Pressable>
   );
@@ -141,8 +141,8 @@ export default function Conversacion() {
         {showDay ? <Text style={styles.day}>{day}</Text> : null}
         <View style={{ alignItems: m.mine ? 'flex-end' : 'flex-start' }}>
           <Pressable onLongPress={() => onLong(m)} delayLongPress={300} accessibilityHint={tx('Mantené apretado para más opciones')} style={[styles.bubble, m.mine ? styles.mine : styles.theirs]}>
-            {m.kind === 'image' && m.attachment_path ? <DmImage path={m.attachment_path} onOpen={setViewer} /> : null}
-            {m.kind === 'file' && m.attachment_path && isVoice(m.attachment_name) ? <VoiceBubble path={m.attachment_path} /> : m.kind === 'file' ? (
+            {m.kind === 'image' && m.attachment_path ? <DmImage path={m.attachment_path} onOpen={setViewer} onLong={() => onLong(m)} /> : null}
+            {m.kind === 'file' && m.attachment_path && isVoice(m.attachment_name) ? <VoiceBubble path={m.attachment_path} onLong={() => onLong(m)} /> : m.kind === 'file' ? (
               <Pressable onPress={() => openFile(m)} onLongPress={() => onLong(m)} style={styles.file} accessibilityRole="button" accessibilityLabel={tx('Abrir {attachment_name}', { attachment_name: m.attachment_name ?? tx('el documento') })}>
                 <Feather name="file-text" size={24} color={colors.violet} />
                 <Text style={{ flex: 1, fontSize: 14, fontWeight: '700', color: colors.text }} numberOfLines={2}>{m.attachment_name ?? tx('Documento')}</Text>

@@ -101,20 +101,20 @@ export function VoiceRecorder({ onSend, onCancel }: { onSend: (uri: string, seco
 }
 
 /** El globo de un mensaje de voz: tocar para escuchar o pausar. El audio se baja recién al tocar. */
-export function VoiceBubble({ path }: { path: string }) {
+export function VoiceBubble({ path, onLong }: { path: string; onLong?: () => void }) {
   const [url, setUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  if (url) return <VoicePlayer url={url} />;
+  if (url) return <VoicePlayer url={url} onLong={onLong} />;
   const load = async () => {
     setLoading(true);
     const u = await signedUrl('chat', path).catch(() => null);
     setLoading(false);
     if (u) setUrl(u); else Alert.alert(tx('No se pudo abrir'), tx('Probá de nuevo cuando tengas señal.'));
   };
-  return <VoiceRow playing={false} loading={loading} label={tx('Mensaje de voz')} onPress={load} />;
+  return <VoiceRow playing={false} loading={loading} label={tx('Mensaje de voz')} onPress={load} onLong={onLong} />;
 }
 
-function VoicePlayer({ url }: { url: string }) {
+function VoicePlayer({ url, onLong }: { url: string; onLong?: () => void }) {
   const player = useAudioPlayer({ uri: url });
   const st = useAudioPlayerStatus(player);
   const first = useRef(true);
@@ -125,12 +125,12 @@ function VoicePlayer({ url }: { url: string }) {
     player.play();
   };
   const label = st.isLoaded ? `${clock(st.currentTime)} / ${clock(st.duration || 0)}` : tx('Cargando…');
-  return <VoiceRow playing={st.playing} loading={!st.isLoaded} label={label} progress={st.duration ? st.currentTime / st.duration : 0} onPress={toggle} />;
+  return <VoiceRow playing={st.playing} loading={!st.isLoaded} label={label} progress={st.duration ? st.currentTime / st.duration : 0} onPress={toggle} onLong={onLong} />;
 }
 
-function VoiceRow({ playing, loading, label, progress = 0, onPress }: { playing: boolean; loading: boolean; label: string; progress?: number; onPress: () => void }) {
+function VoiceRow({ playing, loading, label, progress = 0, onPress, onLong }: { playing: boolean; loading: boolean; label: string; progress?: number; onPress: () => void; onLong?: () => void }) {
   return (
-    <Pressable onPress={onPress} disabled={loading} accessibilityRole="button" accessibilityLabel={playing ? tx('Pausar el mensaje de voz') : tx('Escuchar el mensaje de voz')}
+    <Pressable onPress={onPress} onLongPress={onLong} delayLongPress={300} disabled={loading} accessibilityRole="button" accessibilityLabel={playing ? tx('Pausar el mensaje de voz') : tx('Escuchar el mensaje de voz')}
       style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 210, paddingVertical: 4 }}>
       <View style={{ width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.violet }}>
         {loading ? <ActivityIndicator color="#FFF" /> : <Feather name={playing ? 'pause' : 'play'} size={19} color="#FFF" />}
