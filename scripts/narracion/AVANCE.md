@@ -18,6 +18,7 @@
 - Hecho: Lucas 19 a 22 (25 nov 2026), 143 pedazos, sin fallas (cuatro pedazos se quedaron colgados en la fila y se pidieron de nuevo).
 - Hecho: Lucas 23 y 24 (25 nov 2026), 69 pedazos, sin fallas. LUCAS COMPLETO. Lucas 19 a 24 gastaron unos 390 créditos entre las cuatro tareas.
 - Hecho: Juan 1 (25 nov 2026), 60 pedazos, sin fallas.
+- EN CURSO: Juan 2 a 5, 15:33 UTC (25 nov 2026)
 - Sigue: Juan 2 (libro 42). Los tags y el plan de Juan 2 ya están hechos y revisados (y bajado en el sandbox); de Juan 3 en adelante falta todo.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
