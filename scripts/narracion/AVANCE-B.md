@@ -31,5 +31,6 @@
 - Hecho: Levítico 21 a 24 (25 nov 2026), 20 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). Todo narrador salvo la orden de Dios en 24:14-22.
 - Hecho: Levítico 25 a 27 (25 nov 2026), 22 pedazos, sin fallas. Todo narrador. Levítico completo.
 - Hecho: Números 1 a 4 (25 nov 2026), 30 pedazos, sin fallas (cuatro pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Todo narrador.
-- Sigue: Números 5 (planes de Números 5 a 24 ya están subidos, con tags en Números 9 a 17 y 20 a 24). Números 5 a 8, 18 y 19 son leyes: los lee el narrador, sin tags. Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, los espías julian, Balaam h:Balaam=julian, Balac h:Balac=desmond, el asna m:asna=elena, el Ángel de Jehová "angel"; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: 5880 (25 nov 2026).
+- Hecho: Números 5 a 8 (25 nov 2026), 28 pedazos, sin fallas. Todo narrador.
+- Sigue: Números 9 (tags y planes de Números 9 a 24 ya están subidos y bajados en el sandbox; 18 y 19 son leyes, sin tags). Falta leer y etiquetar desde Números 25. Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, los espías julian, Balaam h:Balaam=julian, Balac h:Balac=desmond, el asna m:asna=elena, el Ángel de Jehová "angel"; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: 5642 (25 nov 2026).
