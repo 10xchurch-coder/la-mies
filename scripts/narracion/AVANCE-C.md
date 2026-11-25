@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Crónicas 18 (tags y planes ya hechos y subidos de 2 Crónicas 18 a 36, revisados contra el texto; los planes de 18 a 36 ya están en el sandbox; el 27 no lleva tags).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 17 (25 nov 2026; décima vuelta: 1 Crónicas 25 a 29 y 2 Crónicas 1 a 17, 152 pedazos, unas 70.000 letras, sin fallas; dos pedidos salieron "Rate limit" y se volvieron a pedir).
-- Créditos al terminar la décima vuelta: 4881 (se comparten entre las cuatro tareas).
+- Sigue: 2 Crónicas 22 (tags y planes ya hechos y subidos de 2 Crónicas 22 a 36, revisados contra el texto; los planes ya están en el sandbox; el 27 no lleva tags).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 21 (25 nov 2026; undécima vuelta: 2 Crónicas 18 a 21, 83 pedazos hasta ahora, sin fallas; algunos pedidos salieron "Rate limit" y se volvieron a pedir).
+- Créditos después de 2 Crónicas 21: 4217 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
