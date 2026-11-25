@@ -118,7 +118,7 @@ export const placeEventText = (firstName: string, e: PlaceEvent): string =>
 // Lo que manda el teléfono
 // ---------------------------------------------------------------------------
 export const SEND_EVERY_MS = 60_000;
-export const SEND_MIN_METERS = 80;
+export const SEND_MIN_METERS = 25;
 
 /** ¿Vale la pena mandar esta posición? Si me moví, o si pasó un rato (para que se vea "hace 3 min" y la batería). */
 export function shouldSend(last: { t: number; lat: number; lng: number } | null, pos: LatLng, now: number = Date.now()): boolean {
@@ -168,4 +168,96 @@ export function regionFor(points: LatLng[]): { latitude: number; longitude: numb
     latitude: (minLat + maxLat) / 2, longitude: (minLng + maxLng) / 2,
     latitudeDelta: Math.max(0.01, (maxLat - minLat) * 1.5), longitudeDelta: Math.max(0.01, (maxLng - minLng) * 1.5),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Historial (30 días): paradas y recorrido de un día
+// ---------------------------------------------------------------------------
+export type TrackPoint = { t: number; lat: number; lng: number };
+export type Stop = { from: number; to: number; lat: number; lng: number };
+
+/** Deja un punto si me moví lo suficiente o pasó un rato (para no mandar 50 puntos del mismo lugar). */
+export function thinTrack<T extends TrackPoint>(pts: T[], minMeters = 20, minMs = 120_000): T[] {
+  const out: T[] = [];
+  for (const p of pts) {
+    const last = out[out.length - 1];
+    if (!last || p.t - last.t >= minMs || haversine(last, p) >= minMeters) out.push(p);
+  }
+  if (pts.length && out[out.length - 1] !== pts[pts.length - 1]) out.push(pts[pts.length - 1]);
+  return out;
+}
+
+/** Lugares donde se quedó un rato (por defecto 8 minutos o más, dentro de ~120 m). */
+export function findStops(pts: TrackPoint[], radius = 120, minMs = 8 * 60_000): Stop[] {
+  const stops: Stop[] = [];
+  let i = 0;
+  while (i < pts.length) {
+    let sumLat = pts[i].lat, sumLng = pts[i].lng, n = 1, j = i + 1;
+    while (j < pts.length && haversine({ lat: sumLat / n, lng: sumLng / n }, pts[j]) <= radius) {
+      sumLat += pts[j].lat; sumLng += pts[j].lng; n += 1; j += 1;
+    }
+    const from = pts[i].t, to = pts[j - 1].t;
+    if (to - from >= minMs) {
+      stops.push({ from, to, lat: sumLat / n, lng: sumLng / n });
+      i = j;
+    } else {
+      i += 1;
+    }
+  }
+  return stops;
+}
+
+/** Cuántos metros recorrió (sin contar los saltos raros del GPS). */
+export function trackMeters(pts: TrackPoint[]): number {
+  let m = 0;
+  for (let k = 1; k < pts.length; k += 1) {
+    const d = haversine(pts[k - 1], pts[k]);
+    const s = Math.max(1, (pts[k].t - pts[k - 1].t) / 1000);
+    if (d / s < 70) m += d; // más de 250 km/h es un salto del GPS
+  }
+  return m;
+}
+
+export type HistPt = TrackPoint & { speed?: number | null };
+export type Segment =
+  | { kind: 'parada'; from: number; to: number; lat: number; lng: number }
+  | { kind: 'viaje'; from: number; to: number; meters: number; topKmh: number; points: HistPt[] };
+
+/** Arma el día como Life360: paradas (se quedó un rato) y viajes entre una parada y la otra. */
+export function daySegments(pts: HistPt[]): Segment[] {
+  if (!pts.length) return [];
+  const stops = findStops(pts);
+  const out: Segment[] = [];
+  const trip = (a: number, b: number) => {
+    const part = pts.filter((p) => p.t >= a && p.t <= b);
+    if (part.length < 2) return;
+    const meters = trackMeters(part);
+    if (meters < 300) return; // moverse por la casa no es un viaje
+    let top = 0;
+    for (let k = 0; k < part.length; k += 1) {
+      const sp = part[k].speed;
+      if (sp != null && sp >= 0 && sp < 70) top = Math.max(top, sp);
+      else if (k > 0) {
+        const dt = (part[k].t - part[k - 1].t) / 1000;
+        if (dt >= 5) { const v = haversine(part[k - 1], part[k]) / dt; if (v < 70) top = Math.max(top, v); }
+      }
+    }
+    out.push({ kind: 'viaje', from: part[0].t, to: part[part.length - 1].t, meters, topKmh: Math.round(top * 3.6), points: part });
+  };
+  let cursor = pts[0].t;
+  for (const st of stops) {
+    trip(cursor, st.from);
+    out.push({ kind: 'parada', ...st });
+    cursor = st.to;
+  }
+  trip(cursor, pts[pts.length - 1].t);
+  return out;
+}
+
+export const kmText = (m: number): string => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`);
+export function durText(ms: number): string {
+  const min = Math.max(1, Math.round(ms / 60_000));
+  if (min < 60) return tx('{min} min', { min });
+  const h = Math.floor(min / 60), r = min % 60;
+  return r ? tx('{h} h {r} min', { h, r }) : `${h} h`;
 }

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   BG_MIN_BUILD, activeViewers, agoText, applyChoices, backgroundAllowed, canSee, isPaused, isStale, leaveDistance, pauseUntil,
-  placeChange, placeEventText, placeEvents, regionFor, sharingLine, shouldSend, type Place, type ViewerRow,
+  placeChange, placeEventText, placeEvents, regionFor, sharingLine, shouldSend, findStops, trackMeters, thinTrack, daySegments, durText, kmText, type Place, type ViewerRow,
 } from '../src/lib/famLoc';
 
 const YO = 'yo';
@@ -132,7 +132,7 @@ test('batería: quieto manda poco; si se mueve, manda', () => {
   assert.equal(shouldSend(null, { lat: 1, lng: 1 }, now), true);
   assert.equal(shouldSend(last, { lat: -27.4, lng: -55.9 }, now), false);             // quieto, 1 minuto
   assert.equal(shouldSend({ ...last, t: now - 6 * 60_000 }, { lat: -27.4, lng: -55.9 }, now), true); // quieto, 6 minutos
-  assert.equal(shouldSend(last, { lat: -27.402, lng: -55.9 }, now), true);            // ~220 m
+  assert.equal(shouldSend(last, { lat: -27.4003, lng: -55.9 }, now), true);           // ~33 m
   assert.equal(shouldSend({ ...last, t: now - 5_000 }, { lat: -27.41, lng: -55.9 }, now), false);   // demasiado seguido
 });
 
@@ -176,4 +176,33 @@ test('app.json: los textos de permiso de ubicación nombran compartir con la fam
   for (const t of texts) assert.match(t, /evangelismo/i); // lo de antes sigue dicho
   assert.equal(cfg.ios.infoPlist.NSLocationWhenInUseUsageDescription, loc[1].locationWhenInUsePermission);
   assert.equal(cfg.ios.infoPlist.NSLocationAlwaysAndWhenInUseUsageDescription, loc[1].locationAlwaysAndWhenInUsePermission);
+});
+
+test('historial: paradas, recorrido y puntos de más', () => {
+  const t0 = 1_700_000_000_000;
+  const pts = [] as { t: number; lat: number; lng: number }[];
+  for (let k = 0; k < 12; k += 1) pts.push({ t: t0 + k * 60_000, lat: -27.4, lng: -55.9 });          // casa 11 min
+  for (let k = 1; k <= 10; k += 1) pts.push({ t: t0 + (11 + k) * 60_000, lat: -27.4 + k * 0.002, lng: -55.9 }); // viaje ~2.2 km
+  for (let k = 1; k <= 3; k += 1) pts.push({ t: t0 + (21 + k) * 60_000, lat: -27.38, lng: -55.9 });  // 3 min: no es parada
+  const stops = findStops(pts);
+  assert.equal(stops.length, 1);
+  assert.ok(Math.abs(stops[0].lat + 27.4) < 0.001);
+  const m = trackMeters(pts);
+  assert.ok(m > 2000 && m < 2500, String(m));
+  const thin = thinTrack(pts.slice(0, 12));
+  assert.ok(thin.length < 12 && thin[thin.length - 1] === pts[11]);
+});
+
+test('historial: el día queda en paradas y viajes', () => {
+  const t0 = 1_700_000_000_000;
+  const pts = [] as { t: number; lat: number; lng: number; speed?: number | null }[];
+  for (let k = 0; k < 12; k += 1) pts.push({ t: t0 + k * 60_000, lat: -27.4, lng: -55.9 });
+  for (let k = 1; k <= 10; k += 1) pts.push({ t: t0 + (11 + k) * 60_000, lat: -27.4 + k * 0.002, lng: -55.9, speed: 10 });
+  for (let k = 1; k <= 12; k += 1) pts.push({ t: t0 + (21 + k) * 60_000, lat: -27.38, lng: -55.9 });
+  const seg = daySegments(pts);
+  assert.deepEqual(seg.map((s) => s.kind), ['parada', 'viaje', 'parada']);
+  const v = seg[1];
+  assert.ok(v.kind === 'viaje' && v.topKmh === 36);
+  assert.equal(kmText(30800), '30,8 km');
+  assert.equal(durText(62 * 60_000), '1 h 2 min');
 });

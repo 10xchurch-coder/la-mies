@@ -1,5 +1,5 @@
-// Mientras comparto mi ubicación, en el inicio se ve siempre este aviso: nadie comparte sin darse cuenta.
-// También mantiene al día este teléfono: manda la posición con la app abierta y se apaga si se apagó en la base.
+// Antes mostraba un aviso violeta en el inicio; el pastor pidió sacarlo (queda el aviso del sistema en Android).
+// Sigue manteniendo al día este teléfono: manda la posición con la app abierta y se apaga si se apagó en la base.
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter, useSegments, type Href } from 'expo-router';
@@ -35,23 +35,7 @@ export function SharingBanner() {
     return () => { alive = false; off?.(); };
   }, [sending]);
 
-  const first = (segments[0] ?? '') as string;
-  if (!on || !me?.enabled || !me.available || first !== '(tabs)') return null;
-  const paused = isPaused(me.paused_until);
-  const n = me.viewers.length;
-  return (
-    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 92 + (outing.active ? 54 : 0) }]}>
-      <Pressable onPress={() => router.push('/familia-ubicacion' as Href)} accessibilityRole="button"
-        accessibilityLabel={paused ? tx('Tu ubicación está en pausa. Tocá para ver.') : tx('Estás compartiendo tu ubicación con {n} personas. Tocá para ver.', { n })}
-        style={({ pressed }) => [styles.pill, paused && { backgroundColor: '#6B7280' }, pressed && { opacity: 0.9 }]}>
-        <Feather name={paused ? 'pause-circle' : 'map-pin'} size={16} color="#FFF" />
-        <Text style={styles.text}>
-          {paused ? tx('Ubicación en pausa hasta las {fmtTime}', { fmtTime: fmtTime(me.paused_until as string) }) : n === 1 ? tx('Compartís tu ubicación con 1 persona') : tx('Compartís tu ubicación con {n} personas', { n })}
-        </Text>
-        <Feather name="chevron-right" size={18} color="#FFF" />
-      </Pressable>
-    </View>
-  );
+  return null;
 }
 
 const styles = StyleSheet.create({

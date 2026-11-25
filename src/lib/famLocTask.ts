@@ -15,13 +15,15 @@ import * as TaskManager from 'expo-task-manager';
 import * as Battery from 'expo-battery';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
-import { backgroundAllowed, isPaused, shouldSend } from './famLoc';
-import { locMe, locPush, type LocMe, type PushStatus } from './famLocApi';
+import { backgroundAllowed, isPaused, shouldSend, thinTrack } from './famLoc';
+import { locMe, locPushMany, type LocMe, type PushStatus } from './famLocApi';
 import { tx } from './i18n';
 
 export const FAMILY_TASK = 'lamies-familia';
 const KEY = 'lamies.famloc.device'; // { userId }: este teléfono manda la ubicación de esta cuenta
 const LAST = 'lamies.famloc.last';  // { t, lat, lng }: lo último que se mandó
+const OPTS = 'lamies.famloc.opts';  // versión de la configuración del GPS (si cambia, se reinicia la tarea)
+const OPTS_VERSION = '2';
 
 /** El número de compilación de la app instalada (no el de la actualización que bajó sola). 0 si no se puede saber. */
 export function nativeBuild(): number {
@@ -92,7 +94,15 @@ async function batteryPct(): Promise<number | null> {
 
 /** Manda una posición si corresponde. Si la base dice que está apagado, este teléfono deja de mandar. */
 export async function sendFix(loc: Location.LocationObject, force = false): Promise<PushStatus | null> {
-  const pos = { lat: loc.coords.latitude, lng: loc.coords.longitude };
+  return sendFixes([loc], force);
+}
+
+/**
+ * Manda todos los puntos que juntó el teléfono (se guardan 30 días en el historial).
+ * Saca los repetidos del mismo lugar; el último queda como "dónde está ahora".
+ */
+export async function sendFixes(locs: Location.LocationObject[], force = false): Promise<PushStatus | null> {
+  if (!locs.length) return null;
   let last: { t: number; lat: number; lng: number } | null = null;
   try {
     const raw = await AsyncStorage.getItem(LAST);
@@ -100,12 +110,20 @@ export async function sendFix(loc: Location.LocationObject, force = false): Prom
   } catch {
     last = null;
   }
-  if (!force && !shouldSend(last, pos)) return null;
-  const status = await locPush({
-    ...pos, accuracy: loc.coords.accuracy, speed: loc.coords.speed, heading: loc.coords.heading,
-    battery: await batteryPct(), at: loc.timestamp,
-  });
-  if (status === 'ok' || status === 'paused') await AsyncStorage.setItem(LAST, JSON.stringify({ t: Date.now(), ...pos }));
+  const sorted = [...locs].sort((a, b) => a.timestamp - b.timestamp)
+    .filter((l) => (l.coords.accuracy ?? 0) <= 150) // los puntos muy imprecisos ensucian el recorrido
+    .filter((l) => !last || l.timestamp > last.t - 1000);
+  if (!sorted.length) return null;
+  const newest = sorted[sorted.length - 1];
+  const pos = { lat: newest.coords.latitude, lng: newest.coords.longitude };
+  if (!force && sorted.length === 1 && !shouldSend(last, pos)) return null;
+  const battery = await batteryPct();
+  const pts = thinTrack(sorted.map((l) => ({ t: l.timestamp, lat: l.coords.latitude, lng: l.coords.longitude, l })), 15, 60_000);
+  const status = await locPushMany(pts.map(({ l }) => ({
+    lat: l.coords.latitude, lng: l.coords.longitude, accuracy: l.coords.accuracy, speed: l.coords.speed, heading: l.coords.heading,
+    battery, at: l.timestamp,
+  })));
+  if (status === 'ok' || status === 'paused') await AsyncStorage.setItem(LAST, JSON.stringify({ t: newest.timestamp, ...pos }));
   if (status === 'off') await stopDevice();
   return status;
 }
@@ -115,14 +133,13 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(FAMILY_TASK)) {
   TaskManager.defineTask(FAMILY_TASK, async ({ data, error }) => {
     if (error) return;
     const locations = (data as { locations?: Location.LocationObject[] } | undefined)?.locations ?? [];
-    const loc = locations[locations.length - 1];
-    if (!loc) return;
+    if (!locations.length) return;
     const [owner, user] = await Promise.all([deviceUser(), currentUser()]);
     if (!owner || !user || owner !== user || !canBackground) {
       await stopDevice();
       return;
     }
-    await sendFix(loc);
+    await sendFixes(locations);
   });
 }
 
@@ -131,7 +148,7 @@ function disclosure(): Promise<boolean> {
     Alert.alert(
       tx('Compartir tu ubicación'),
       canBackground
-        ? tx('La Mies recopila la ubicación de este teléfono para que las personas que vos elegiste vean dónde estás en el mapa, incluso con la app cerrada o la pantalla apagada. Podés pausarlo o apagarlo cuando quieras. En el aviso que sigue elegí "Permitir todo el tiempo" (en iPhone, "Siempre").')
+        ? tx('La Mies recopila la ubicación de este teléfono, incluso con la app cerrada o la pantalla apagada, para que las personas que vos elegiste vean dónde estás y por dónde anduviste en los últimos 30 días. Podés pausarlo o apagarlo cuando quieras; al apagarlo se borra el historial. En el aviso que sigue elegí "Permitir todo el tiempo" (en iPhone, "Siempre").')
         : tx('La Mies usa la ubicación de este aparato para que las personas que vos elegiste vean dónde estás en el mapa, mientras tenés la app abierta. Podés pausarlo o apagarlo cuando quieras.'),
       [
         { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
@@ -147,13 +164,17 @@ async function startTask(): Promise<boolean> {
   try {
     const bg = await Location.getBackgroundPermissionsAsync();
     if (bg.status !== 'granted') return false;
-    if (await Location.hasStartedLocationUpdatesAsync(FAMILY_TASK)) return true;
+    const started = await Location.hasStartedLocationUpdatesAsync(FAMILY_TASK);
+    const version = await AsyncStorage.getItem(OPTS).catch(() => null);
+    if (started && version === OPTS_VERSION) return true;
+    if (started) await Location.stopLocationUpdatesAsync(FAMILY_TASK); // configuración vieja: se vuelve a prender con la nueva
     await Location.startLocationUpdatesAsync(FAMILY_TASK, {
-      accuracy: Location.Accuracy.Balanced,
-      distanceInterval: 100,            // un punto nuevo cada ~100 metros
-      timeInterval: 3 * 60 * 1000,      // Android: no más seguido que cada 3 minutos
-      deferredUpdatesInterval: 3 * 60 * 1000, // los puntos se juntan y llegan en tandas
-      deferredUpdatesDistance: 100,
+      // Como Life360: GPS de verdad y un punto cada ~25 m, para que el historial muestre las calles por donde anduvo.
+      accuracy: Location.Accuracy.High,
+      distanceInterval: 25,
+      timeInterval: 60 * 1000,          // Android: como mucho un punto por minuto si está quieto
+      deferredUpdatesInterval: 2 * 60 * 1000, // los puntos se juntan y suben en tandas (cuida la batería)
+      deferredUpdatesDistance: 200,
       pausesUpdatesAutomatically: false,
       activityType: Location.ActivityType.Other,
       showsBackgroundLocationIndicator: false,
@@ -161,8 +182,10 @@ async function startTask(): Promise<boolean> {
         notificationTitle: tx('La Mies · compartís tu ubicación'),
         notificationBody: tx('Te ven las personas que vos elegiste. Tocá para pausar o apagar.'),
         notificationColor: '#6D4BC3',
+        killServiceOnDestroy: false,
       },
     });
+    await AsyncStorage.setItem(OPTS, OPTS_VERSION).catch(() => undefined);
     return true;
   } catch {
     return false;
@@ -224,7 +247,7 @@ export async function watchWhileOpen(): Promise<() => void> {
     const perm = await Location.getForegroundPermissionsAsync();
     if (perm.status !== 'granted') return () => undefined;
     const sub = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.Balanced, distanceInterval: 50, timeInterval: 60_000 },
+      { accuracy: Location.Accuracy.High, distanceInterval: 25, timeInterval: 30_000 },
       (loc) => { sendFix(loc).catch(() => undefined); },
     );
     return () => sub.remove();

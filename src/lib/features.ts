@@ -259,7 +259,7 @@ export const FEATURES: Feature[] = [
   { key: 'ubicacion_familia', get label() { return tx('Ubicación en familia'); }, group: 'Comunidad',
     get hint() { return tx('Cada hermano puede compartir dónde está con su familia y con quien él elija. Viene apagado: lo prende cada uno, y solo lo ven las personas que eligió.'); },
     get hides() { return tx('"Ubicación en familia". Nadie puede compartir ni ver ubicaciones (también lo frena el servidor).'); },
-    routes: ['/familia-ubicacion'] },
+    routes: ['/familia-ubicacion', '/familia-historial'] },
   { key: 'bautismos', get label() { return tx('Certificados'); }, group: 'Comunidad',
     get hint() { return tx('El certificado de bautismo y el de miembro, para ver, guardar, compartir o imprimir.'); },
     get hides() { return tx('Los certificados y los botones para imprimirlos en la ficha de la persona.'); },

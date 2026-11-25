@@ -17,6 +17,9 @@ export type LocMe = {
   viewers: LocViewer[];
   family_left: { id: string; name: string }[];
   family_count: number;
+  family?: { id: string; name: string; photo_path: string | null }[];
+  family_asks?: { id: string; name: string }[];
+  family_sent?: { id: string; name: string }[];
   pastor_count: number;
   places: LocPlace[];
   home: { lat: number; lng: number } | null;
@@ -71,6 +74,38 @@ export async function locPush(f: Fix): Promise<PushStatus | null> {
   });
   if (error) return null;
   return data as PushStatus;
+}
+
+/** Varios puntos juntos: se guardan todos en el historial (30 días) y el último queda como posición actual. */
+export async function locPushMany(points: Fix[]): Promise<PushStatus | null> {
+  if (!points.length) return null;
+  const { data, error } = await supabase.rpc('loc_push_many', { p_points: points.map((f) => ({
+    lat: f.lat, lng: f.lng, accuracy: f.accuracy ?? null, speed: f.speed ?? null, heading: f.heading ?? null,
+    battery: f.battery == null ? null : Math.round(f.battery), at: f.at ?? Date.now(),
+  })) });
+  if (error) return null;
+  return data as PushStatus;
+}
+
+export type HistPoint = { t: number; latitude: number; longitude: number; speed: number | null };
+
+/** Por dónde anduvo una persona entre dos horas (hasta 30 días atrás). */
+export async function locHistory(owner: string, from: Date, to: Date): Promise<HistPoint[]> {
+  const rows = (ok(await supabase.rpc('loc_history', { p_owner: owner, p_from: from.toISOString(), p_to: to.toISOString() })) ?? []) as [number, number, number, number | null][];
+  return rows.map((r) => ({ t: Number(r[0]) * 1000, latitude: Number(r[1]), longitude: Number(r[2]), speed: r[3] == null ? null : Number(r[3]) }));
+}
+
+/** Sumar a alguien a mi familia: 'unidos', 'pedido' (espera que acepte) o 'ya'. */
+export async function locFamilyAdd(id: string): Promise<'unidos' | 'pedido' | 'ya'> {
+  return ok(await supabase.rpc('loc_family_add', { p_other: id })) as 'unidos' | 'pedido' | 'ya';
+}
+
+export async function locFamilyAnswer(from: string, yes: boolean): Promise<void> {
+  ok(await supabase.rpc('loc_family_answer', { p_from: from, p_yes: yes }));
+}
+
+export async function locFamilyRemove(id: string): Promise<void> {
+  ok(await supabase.rpc('loc_family_remove', { p_other: id }));
 }
 
 export async function locHelp(pos: { lat: number; lng: number } | null): Promise<number> {

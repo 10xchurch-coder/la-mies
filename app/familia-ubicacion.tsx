@@ -11,7 +11,7 @@ import { Face } from '@/components/Face';
 import { PickerModal } from '@/components/Picker';
 import { agoText, batteryText, isPaused, isStale, pauseUntil, regionFor, sharingLine, type PauseKind } from '@/lib/famLoc';
 import {
-  churchPeople, locHelp, locHelpClear, locPause, locPlaceArchive, locPlaceSave, locSet, locTrail, locViewerAdd, locViewerRemove, locVisible,
+  churchPeople, locFamilyAdd, locFamilyAnswer, locFamilyRemove, locHelp, locHelpClear, locPause, locPlaceArchive, locPlaceSave, locSet, locTrail, locViewerAdd, locViewerRemove, locVisible,
   type LocPerson,
 } from '@/lib/famLocApi';
 import { canBackground, hereNow, refreshFamLoc, startDevice, stopDevice, useFamLoc } from '@/lib/famLocTask';
@@ -37,19 +37,6 @@ function openDirections(lat: number, lng: number) {
 export default function FamiliaUbicacion() {
   const { profile } = useAuth();
   const router = useRouter();
-  // Mi propia ficha, para poder armar mi familia desde acá cuando todavía no hay nadie.
-  const [myCard, setMyCard] = useState<string | null>(null);
-  useEffect(() => {
-    if (!profile?.id) return;
-    supabase.from('contacts').select('id').eq('profile_id', profile.id).eq('archived', false).limit(1)
-      .then(({ data }) => setMyCard((data?.[0] as { id?: string } | undefined)?.id ?? null), () => undefined);
-  }, [profile?.id]);
-  const familyHelp = (
-    <View style={{ gap: 6 }}>
-      <Text style={styles.small}>{tx('“Mi familia” se prende sola cuando tu esposa, tu esposo o tus hijos están cargados como tu familia y tienen cuenta en la app. Mientras tanto, podés sumar a cualquiera por su nombre.')}</Text>
-      {myCard ? <Button title={tx('Armar mi familia')} icon="users" variant="outline" onPress={() => router.push(`/contacto/${myCard}` as never)} /> : null}
-    </View>
-  );
   const { ayuda } = useLocalSearchParams<{ ayuda?: string }>();
   const { me, mode, loaded } = useFamLoc();
   const [people, setPeople] = useState<LocPerson[] | null>(null);
@@ -60,6 +47,7 @@ export default function FamiliaUbicacion() {
   const [family, setFamily] = useState(true);
   const [pastors, setPastors] = useState(false);
   const [picking, setPicking] = useState(false);
+  const [pickingFam, setPickingFam] = useState(false);
   const [church, setChurch] = useState<{ id: string; title: string }[]>([]);
   // Lugar nuevo
   const [draft, setDraft] = useState<{ name: PlaceName; other: string; radius: string; pos: { lat: number; lng: number } | null } | null>(null);
@@ -154,10 +142,22 @@ export default function FamiliaUbicacion() {
   };
 
   // --- Quién me ve ---
-  const openPicker = () => {
-    setPicking(true);
+  const loadChurch = () => {
     if (!church.length) churchPeople().then((ps) => setChurch(ps.filter((p) => p.id !== profile?.id).map((p) => ({ id: p.id, title: p.name })))).catch(() => undefined);
   };
+  const openPicker = () => { setPicking(true); loadChurch(); };
+  const openFamPicker = () => { setPickingFam(true); loadChurch(); };
+  const addFamily = (id: string) => run(`fam-${id}`, async () => {
+    const r = await locFamilyAdd(id);
+    if (r === 'pedido') Alert.alert(tx('Listo'), tx('Le llegó un aviso para que acepte. Cuando acepte, queda en tu familia.'));
+  });
+  const removeFamily = (id: string, name: string) => {
+    Alert.alert(tx('¿Sacar a {split} de tu familia?', { split: name.split(' ')[0] }), tx('Deja de estar unido a tu familia en la app.'), [
+      { text: tx('Cancelar'), style: 'cancel' },
+      { text: tx('Sacar'), style: 'destructive', onPress: () => run(`famx-${id}`, () => locFamilyRemove(id)) },
+    ]);
+  };
+  const openHistory = (id: string, name: string) => router.push({ pathname: '/familia-historial', params: { id, name } } as never);
   const removeViewer = (id: string, name: string) => {
     Alert.alert(tx('¿Sacar a {split}?', { split: name.split(' ')[0] }), tx('Deja de ver dónde estás en este momento. No le llega ningún aviso.'), [
       { text: tx('Cancelar'), style: 'cancel' },
@@ -182,6 +182,49 @@ export default function FamiliaUbicacion() {
   };
 
   const viewerIds = new Set(me.viewers.map((v) => v.id));
+  const fam = me.family ?? [];
+  const famIds = new Set([...fam.map((f) => f.id), ...(me.family_sent ?? []).map((f) => f.id)]);
+  const familyBlock = me.available ? (
+    <>
+      <SectionTitle>{tx('Mi familia')}</SectionTitle>
+      <Card style={{ gap: 4 }}>
+        {(me.family_asks ?? []).map((a) => (
+          <View key={`ask-${a.id}`} style={[styles.row, { flexWrap: 'wrap' }]}>
+            <View style={{ flex: 1, minWidth: 160 }}>
+              <Text style={styles.rowName}>{a.name}</Text>
+              <Text style={styles.small}>{tx('Te quiere sumar a su familia.')}</Text>
+            </View>
+            <Button title={tx('Aceptar')} small onPress={() => run(`si-${a.id}`, () => locFamilyAnswer(a.id, true))} loading={busy === `si-${a.id}`} />
+            <Button title={tx('No')} small variant="ghost" onPress={() => run(`no-${a.id}`, () => locFamilyAnswer(a.id, false))} />
+          </View>
+        ))}
+        {fam.map((f) => (
+          <View key={f.id} style={styles.row}>
+            <Face name={f.name} path={f.photo_path} size={36} />
+            <Text style={[styles.rowName, { flex: 1 }]}>{f.name}</Text>
+            <Pressable onPress={() => removeFamily(f.id, f.name)} accessibilityRole="button" accessibilityLabel={tx('Sacar a {name}', { name: f.name })} hitSlop={8}>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.red }}>{tx('Sacar')}</Text>
+            </Pressable>
+          </View>
+        ))}
+        {(me.family_sent ?? []).map((f) => (
+          <View key={`sent-${f.id}`} style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.rowName}>{f.name}</Text>
+              <Text style={styles.small}>{tx('Esperando que acepte.')}</Text>
+            </View>
+            <Pressable onPress={() => run(`famx-${f.id}`, () => locFamilyRemove(f.id))} accessibilityRole="button" hitSlop={8}>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.muted }}>{tx('Cancelar')}</Text>
+            </Pressable>
+          </View>
+        ))}
+        {!fam.length && !(me.family_sent ?? []).length && !(me.family_asks ?? []).length ? (
+          <Text style={styles.small}>{tx('Sumá a tu esposa, tu esposo o tus hijos que tienen cuenta en la app. Tocás su nombre y listo.')}</Text>
+        ) : null}
+        <Button title={tx('Sumar a alguien de mi familia')} icon="user-plus" variant="outline" small onPress={openFamPicker} />
+      </Card>
+    </>
+  ) : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -196,15 +239,14 @@ export default function FamiliaUbicacion() {
               {tx('Está apagado. Si lo prendés, las personas que vos elijas ven dónde estás en el mapa. Nadie más lo ve, ni el pastor, si vos no lo elegís. Lo podés pausar o apagar cuando quieras.')}
             </Text>
             <Toggle label={tx('Mi familia')} value={family && me.family_count > 0} disabled={me.family_count === 0} onChange={setFamily}
-              hint={me.family_count === 0 ? tx('Todavía no hay nadie de tu familia con cuenta en la app. Pedí en la iglesia que carguen tu familia.') : me.family_count === 1 ? tx('1 familiar con cuenta en la app.') : tx('{family_count} familiares con cuenta en la app.', { family_count: me.family_count })} />
+              hint={me.family_count === 0 ? tx('Todavía no sumaste a nadie a tu familia. Hacelo abajo, en «Mi familia».') : me.family_count === 1 ? tx('1 familiar con cuenta en la app.') : tx('{family_count} familiares con cuenta en la app.', { family_count: me.family_count })} />
             <Toggle label={tx('Los pastores')} value={pastors && me.pastor_count > 0} disabled={me.pastor_count === 0} onChange={setPastors}
               hint={me.pastor_count === 0 ? tx('No hay otro pastor con cuenta en tu iglesia.') : tx('Solo si vos querés. Viene sin marcar.')} />
-            {me.family_count === 0 ? familyHelp : null}
             <Text style={styles.small}>{tx('Después podés sumar a otras personas de la iglesia por su nombre, y sacar a cualquiera.')}</Text>
             <Button title={tx('Compartir mi ubicación')} icon="map-pin" onPress={turnOn} loading={busy === 'on'} />
             <Text style={styles.small}>
               {canBackground
-                ? tx('Funciona también con la app cerrada. Gasta poca batería: manda un punto cada tanto, no todo el tiempo.')
+                ? tx('Funciona también con la app cerrada y guarda tu recorrido de los últimos 30 días. Usa el GPS, así que gasta algo más de batería.')
                 : tx('Por ahora tu ubicación se manda solo mientras tenés la app abierta. Con la próxima versión de la app se va a poder compartir también con el teléfono guardado.')}
             </Text>
           </Card>
@@ -241,6 +283,7 @@ export default function FamiliaUbicacion() {
                 <Button title={tx('Hasta mañana')} icon="moon" variant="outline" small style={{ flex: 1 }} onPress={() => pause('manana')} loading={busy === 'pausa-manana'} />
               </View>
             )}
+            {profile?.id ? <Button title={tx('Mi historial (30 días)')} icon="clock" variant="outline" small onPress={() => openHistory(profile.id, tx('Mi historial'))} /> : null}
             <Button title={tx('Dejar de compartir')} icon="square" variant="danger" small onPress={turnOff} loading={busy === 'off'} />
           </Card>
         )}
@@ -255,6 +298,8 @@ export default function FamiliaUbicacion() {
             <Button title={tx('Pedir ayuda')} icon="alert-triangle" variant="danger" onPress={help} loading={busy === 'ayuda'} />
           )
         ) : null}
+
+        {familyBlock}
 
         {me.available ? (
           <>
@@ -305,6 +350,7 @@ export default function FamiliaUbicacion() {
                 {person.lat != null && person.lng != null ? (
                   <Button title={tx('Cómo llegar')} icon="navigation" onPress={() => openDirections(person.lat as number, person.lng as number)} />
                 ) : null}
+                <Button title={tx('Ver por dónde anduvo (30 días)')} icon="clock" variant="outline" onPress={() => openHistory(person.profile_id, person.name)} />
                 {trail.length > 1 ? <Text style={styles.small}>{tx('La línea violeta es por donde anduvo en las últimas 24 horas.')}</Text> : null}
               </Card>
             ) : null}
@@ -351,8 +397,7 @@ export default function FamiliaUbicacion() {
                 hint={me.family_count === 0 ? tx('Todavía no hay nadie de tu familia con cuenta en la app.') : tx('Tus familiares que tienen cuenta en la app.')} />
               <Toggle label={tx('Los pastores')} value={me.share_pastors} disabled={busy === 'grupos' || me.pastor_count === 0} onChange={(v) => setGroups(me.share_family, v)}
                 hint={me.pastor_count === 0 ? tx('No hay otro pastor con cuenta en tu iglesia.') : undefined} />
-              {me.family_count === 0 ? familyHelp : null}
-              {me.family_left.filter((f) => !viewerIds.has(f.id)).map((f) => (
+                {me.family_left.filter((f) => !viewerIds.has(f.id)).map((f) => (
                 <View key={f.id} style={styles.row}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.rowName}>{f.name}</Text>
@@ -409,12 +454,15 @@ export default function FamiliaUbicacion() {
           <View style={{ gap: 6 }}>
             <Tag text={tx('Tu ubicación es tuya')} tone="gray" />
             <Text style={styles.small}>
-              {tx('Solo se guarda tu última ubicación y el camino de las últimas 24 horas. Solo lo ven las personas de tu lista. Nadie puede prenderlo por vos. En pausa no se guarda nada, y al apagarlo se borra. Los chicos sin cuenta no se siguen: cada uno comparte su propio teléfono.')}
+              {tx('Se guarda por dónde anduviste en los últimos 30 días. Solo lo ven las personas de tu lista. Nadie puede prenderlo por vos. En pausa no se guarda nada, y al dejar de compartir se borra todo. Los chicos sin cuenta no se siguen: cada uno comparte su propio teléfono.')}
             </Text>
           </View>
         ) : null}
       </Screen>
 
+      <PickerModal visible={pickingFam} title={tx('¿Quién es de tu familia?')} items={church.filter((c) => !famIds.has(c.id))}
+        onClose={() => setPickingFam(false)}
+        onPick={(id) => { setPickingFam(false); if (id) addFamily(id); }} />
       <PickerModal visible={picking} title={tx('¿Con quién querés compartir?')} items={church.filter((c) => !viewerIds.has(c.id))}
         onClose={() => setPicking(false)}
         onPick={(id) => { setPicking(false); if (id) run(`sumar-${id}`, () => locViewerAdd(id)); }} />
