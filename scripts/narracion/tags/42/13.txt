@@ -1,0 +1,17 @@
+6 | h:Pedro | Señor, ¿tú me lavas los pies? | Señor, ¿tú me lavas los pies?
+7 | jesus | Lo que yo hago | lo entenderás después.
+8 | h:Pedro | No me lavarás los pies jamás. | No me lavarás los pies jamás.
+8 | jesus | Si no te lavare | parte conmigo.
+9 | h:Pedro | Señor, no sólo mis pies | y mi cabeza.
+10 | jesus | El que ha sido lavado | aunque no todos.
+11 | jesus | No sois limpios todos. | No sois limpios todos.
+12-20 | jesus | ¿Sabéis lo que os he hecho? | recibe al que me envió.
+21 | jesus | De cierto, de cierto os digo, que uno | me va a traicionar.
+25 | h:Juan | Señor, ¿quién es? | Señor, ¿quién es?
+26 | jesus | A quien yo diere | aquél es.
+27 | jesus | Lo que vas a hacer, hazlo pronto. | Lo que vas a hacer, hazlo pronto.
+31-35 | jesus | Ahora es glorificado | los unos con los otros.
+36 | h:Pedro | Señor, ¿a dónde vas? | Señor, ¿a dónde vas?
+36 | jesus | A donde yo voy, no me puedes | me seguirás después.
+37 | h:Pedro | Señor, ¿por qué no te puedo | pondré por ti.
+38 | jesus | ¿Tu vida pondrás por mí? | negado tres veces.
