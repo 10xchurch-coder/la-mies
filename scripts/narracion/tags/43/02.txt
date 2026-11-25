@@ -1,0 +1,7 @@
+7-11 | g:multitud=arthur | Mirad, ¿no son galileos | las obras maravillosas de Dios.
+12 | g:multitud | ¿Qué significa esto? | ¿Qué significa esto?
+13 | g:otros=julian | Están llenos de mosto. | Están llenos de mosto.
+14-36 | h:Pedro=desmond | Varones judíos | Señor y Cristo.
+37 | g:multitud | Varones hermanos, ¿qué haremos? | Varones hermanos, ¿qué haremos?
+38-39 | h:Pedro | Arrepentíos, y bautícese | nuestro Dios llamare.
+40 | h:Pedro | Sed salvos de esta perversa generación. | Sed salvos de esta perversa generación.

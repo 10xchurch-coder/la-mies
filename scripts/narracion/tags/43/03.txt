@@ -1,0 +1,3 @@
+4 | h:Pedro=desmond | Míranos. | Míranos.
+6 | h:Pedro | No tengo plata ni oro | levántate y anda.
+12-26 | h:Pedro | Varones israelitas | cada uno de su maldad.

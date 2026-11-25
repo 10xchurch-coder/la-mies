@@ -1,0 +1,21 @@
+3 | h:Pedro=desmond | A pescar voy | A pescar voy
+3 | g:discípulos=julian | Nosotros también vamos contigo. | Nosotros también vamos contigo.
+5 | jesus | Hijitos, ¿tenéis algo de comer? | Hijitos, ¿tenéis algo de comer?
+5 | g:discípulos | No. | No.
+6 | jesus | Echad la red | y hallaréis.
+7 | h:Juan=sterling | ¡Es el Señor! | ¡Es el Señor!
+10 | jesus | Traed de los peces | pescasteis ahora.
+12 | jesus | Venid, comed. | Venid, comed.
+15 | jesus | Simón, hijo de Jonás, ¿me amas más que estos? | Simón, hijo de Jonás, ¿me amas más que estos?
+15 | h:Pedro | Sí Señor, tú sabes que te amo. | Sí Señor, tú sabes que te amo.
+15 | jesus | Apacienta mis corderos. | Apacienta mis corderos.
+16 | jesus | Simón, hijo de Jonás, ¿me amas? | Simón, hijo de Jonás, ¿me amas?
+16 | h:Pedro | Sí, Señor; tú sabes que te amo. | Sí, Señor; tú sabes que te amo.
+16 | jesus | Apacienta mis ovejas. | Apacienta mis ovejas.
+17 | jesus | Simón, hijo de Jonás, ¿me amas? | Simón, hijo de Jonás, ¿me amas?
+17 | h:Pedro | Señor, tú sabes todas las cosas | tú sabes que te amo.
+17-18 | jesus | Apacienta mis ovejas. | a donde no quieras.
+19 | jesus | Sígueme. | Sígueme.
+20 | h:Juan | Señor, ¿quién es el que | te va a traicionar?
+21 | h:Pedro | Señor, ¿y este qué? | Señor, ¿y este qué?
+22 | jesus | Si quiero que él quede | Tú sígueme.
