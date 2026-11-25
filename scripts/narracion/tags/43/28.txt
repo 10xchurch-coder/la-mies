@@ -1,0 +1,4 @@
+4 | g:bárbaros=desmond | Ciertamente este hombre es homicida | no deja vivir.
+17-20 | h:Pablo=sterling | Yo, varones hermanos | con esta cadena.
+21-22 | g:judíos de Roma=arthur | Nosotros ni hemos recibido | contra ella.
+25-28 | h:Pablo | Bien habló el Espíritu Santo | y ellos oirán.
