@@ -1,0 +1,12 @@
+2 | h:Pablo=sterling | ¿Recibisteis el Espíritu Santo cuando creísteis? | ¿Recibisteis el Espíritu Santo cuando creísteis?
+2 | g:discípulos=julian | Ni siquiera hemos oído | que hay Espíritu Santo.
+3 | h:Pablo | ¿En qué, pues, fuisteis bautizados? | ¿En qué, pues, fuisteis bautizados?
+3 | g:discípulos | En el bautismo de Juan. | En el bautismo de Juan.
+4 | h:Pablo | Juan bautizó con | en Cristo Jesús.
+13 | g:exorcistas=julian | Os conjuramos por Jesús | el que Pablo predica.
+15 | h:espíritu malo=desmond | A Jesús conozco | ¿quiénes sois?
+21 | h:Pablo | Después que haya estado allí | ver también a Roma.
+25-27 | h:Demetrio=arthur | Varones, sabéis | toda Asia y el mundo.
+28 | g:artífices=desmond | ¡Grande es Diana de los efesios! | ¡Grande es Diana de los efesios!
+34 | g:multitud=desmond | ¡Grande es Diana de los efesios! | ¡Grande es Diana de los efesios!
+35-40 | h:escribano=julian | Varones efesios | razón de este concurso.

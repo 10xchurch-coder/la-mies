@@ -1,0 +1,11 @@
+9 | h:macedonio=desmond | Pasa a Macedonia y ayúdanos. | Pasa a Macedonia y ayúdanos.
+15 | m:Lidia | Si habéis juzgado | entrad en mi casa
+17 | m:muchacha | Estos hombres son siervos | el camino de salvación.
+18 | h:Pablo=sterling | Te mando en el nombre | que salgas de ella.
+20-21 | g:amos=arthur | Estos hombres, siendo judíos | pues somos romanos.
+28 | h:Pablo | No te hagas ningún daño | todos estamos aquí.
+30 | h:carcelero=julian | Señores, ¿qué debo hacer para ser salvo? | Señores, ¿qué debo hacer para ser salvo?
+31 | h:Pablo | Cree en el Señor Jesucristo | y tu casa.
+35 | g:alguaciles=arthur | Deja ir a aquellos hombres. | Deja ir a aquellos hombres.
+36 | h:carcelero | Los magistrados han enviado | e id en paz.
+37 | h:Pablo | Nos azotaron públicamente | y nos saquen.

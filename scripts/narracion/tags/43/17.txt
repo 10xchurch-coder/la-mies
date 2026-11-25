@@ -1,0 +1,6 @@
+6-7 | g:turba=arthur | Estos que han trastornado | otro rey, Jesús.
+18 | g:filósofos=julian | ¿Qué querrá decir este palabrero? | ¿Qué querrá decir este palabrero?
+18 | g:otros=desmond | Parece que es predicador | de dioses extraños
+19-20 | g:filósofos | ¿Podremos saber | significan estas cosas.
+22-31 | h:Pablo=sterling | Varones atenienses | resucitado de los muertos.
+32 | g:otros | Te oiremos acerca de esto | en otra ocasión.
