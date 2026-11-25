@@ -1,0 +1,8 @@
+7 | angel | Levántate pronto. | Levántate pronto.
+8 | angel | Cíñete, y átate tus sandalias. | Cíñete, y átate tus sandalias.
+8 | angel | Envuélvete en tu manto, y sígueme. | Envuélvete en tu manto, y sígueme.
+11 | h:Pedro=desmond | Ahora entiendo en verdad | de los judíos esperaba.
+15 | g:reunidos=julian | Estás loca. | Estás loca.
+15 | g:reunidos | Es su ángel. | Es su ángel.
+17 | h:Pedro | Haced saber esto | a los hermanos.
+22 | g:pueblo=arthur | ¡Voz de un dios, y no de hombre! | ¡Voz de un dios, y no de hombre!

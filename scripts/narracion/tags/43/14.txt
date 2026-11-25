@@ -1,0 +1,3 @@
+10 | h:Pablo=sterling | Levántate derecho sobre tus pies. | Levántate derecho sobre tus pies.
+11 | g:gente=arthur | Los dioses en semejanza | descendido a nosotros.
+15-17 | h:Pablo | Señores, ¿por qué hacéis | nuestros corazones.
