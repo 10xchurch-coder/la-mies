@@ -38,8 +38,8 @@
 - Hecho: 1 Corintios 1 a 4 (25 nov 2026), 13 pedazos, sin fallas. Quedan unos 1967 créditos.
 - Hecho: 1 Corintios 5 a 8 (25 nov 2026), 13 pedazos, sin fallas. Quedan unos 1934 créditos.
 - Hecho: 1 Corintios 9 a 12 (25 nov 2026), 17 pedazos, sin fallas. Quedan unos 1893 créditos.
-- EN CURSO: Primera a los Corintios 13 a 16, 20:41 UTC (25 nov)
-- Sigue: Primera a los Corintios 13 (libro 45). Los planes de 1 Corintios hasta el 16 y de 2 Corintios 1 a 13 ya están (los de 1 Corintios bajados en el sandbox; los de 2 Corintios no); falta el audio. De Gálatas en adelante falta todo (las cartas no llevan tags).
+- Hecho: 1 Corintios 13 a 16 (25 nov 2026), 18 pedazos, sin fallas. 1 CORINTIOS COMPLETO. Romanos 11 a 1 Corintios 16 gastaron unos 295 créditos entre las cuatro tareas; quedan unos 1849.
+- Sigue: Segunda a los Corintios 1 (libro 46). Los planes de 2 Corintios 1 a 13 ya están en main (todavía no bajados en el sandbox); falta el audio. De Gálatas en adelante falta todo (planes y audio; las cartas no llevan tags).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
@@ -47,5 +47,5 @@
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
 - Nota: para no copiar a mano los nombres de los resultados: mkdir -p /home/claude/nombres; después de cada generate_audio_batch correr `cd /home/claude/nombres && python3 /home/claude/la-mies/scripts/narracion/probar.py LL-CC INDICE_INICIAL id1 id2 ...` (los job_id de la tanda, en orden; busca solo los archivos ya terminados y los anota en LL-CC.txt; si dice FALTAN, mirar esos con jobs_wait). Al terminar el capítulo: `bash /home/claude/la-mies/scripts/narracion/unir.sh LL CC` (llama a juntar.py con los nombres en orden).
 - Nota: para pedir de nuevo solo algunos pedazos, generate_audio_batch acepta una lista con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/P/params"}}` (T = N entre 8, P = el resto).
-- Créditos que quedan: 1893 (25 nov 2026, después de 1 Corintios 12).
+- Créditos que quedan: 1849 (25 nov 2026, después de 1 Corintios 16).
 - Nota: en esta máquina la rama local main puede estar vieja; trabajar en una rama nueva hecha desde origin/main y subir con `git push origin HEAD:main`.
