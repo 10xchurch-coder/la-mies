@@ -1,0 +1,21 @@
+3 | g:soldados=julian | ¡Salve, Rey de los judíos! | ¡Salve, Rey de los judíos!
+4 | h:Pilato=sterling | He aquí, os lo traigo fuera | ninguna falta hallo en Él.
+5 | h:Pilato | ¡He aquí el hombre! | ¡He aquí el hombre!
+6 | g:judíos=arthur | ¡Crucifícale, crucifícale! | ¡Crucifícale, crucifícale!
+6 | h:Pilato | Tomadle vosotros, y crucificadle | no hallo falta en Él.
+7 | g:judíos | Nosotros tenemos una ley | el Hijo de Dios.
+9 | h:Pilato | ¿De dónde eres tú? | ¿De dónde eres tú?
+10 | h:Pilato | ¿A mí no me hablas? | potestad para soltarte?
+11 | jesus | Ninguna potestad tendrías | mayor pecado tiene.
+12 | g:judíos | Si a Éste sueltas | se declara contra César.
+14 | h:Pilato | He aquí vuestro Rey. | He aquí vuestro Rey.
+15 | g:judíos | ¡Fuera, fuera, crucifícale! | ¡Fuera, fuera, crucifícale!
+15 | h:Pilato | ¿A vuestro Rey he de crucificar? | ¿A vuestro Rey he de crucificar?
+15 | g:judíos | No tenemos rey sino a César. | No tenemos rey sino a César.
+21 | g:judíos | No escribas: El Rey de los judíos | Yo soy Rey de los judíos.
+22 | h:Pilato | Lo que he escrito, he escrito. | Lo que he escrito, he escrito.
+24 | g:soldados | No la partamos | a ver de quién será
+26 | jesus | Mujer, he ahí tu hijo. | Mujer, he ahí tu hijo.
+27 | jesus | He ahí tu madre. | He ahí tu madre.
+28 | jesus | Tengo sed. | Tengo sed.
+30 | jesus | Consumado es. | Consumado es.

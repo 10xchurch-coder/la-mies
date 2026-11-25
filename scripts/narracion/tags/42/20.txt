@@ -1,0 +1,17 @@
+2 | m:María Magdalena | Se han llevado del sepulcro al Señor | dónde le han puesto.
+13 | angel | Mujer, ¿por qué lloras? | Mujer, ¿por qué lloras?
+13 | m:María Magdalena | Porque se han llevado a mi Señor | dónde le han puesto.
+15 | jesus | Mujer, ¿por qué lloras? | ¿A quién buscas?
+15 | m:María Magdalena | Señor, si tú le has llevado | y yo lo llevaré.
+16 | jesus | María. | María.
+16 | m:María Magdalena | ¡Raboni! | ¡Raboni!
+17 | jesus | No me toques | a vuestro Dios.
+19 | jesus | Paz a vosotros. | Paz a vosotros.
+21 | jesus | Paz a vosotros: Como me envió | así también yo os envío.
+22-23 | jesus | Recibid el Espíritu Santo. | les son retenidos.
+25 | g:discípulos | Hemos visto al Señor. | Hemos visto al Señor.
+25 | h:Tomás | Si no viere en sus manos | no creeré.
+26 | jesus | Paz a vosotros. | Paz a vosotros.
+27 | jesus | Mete tu dedo aquí | sino creyente.
+28 | h:Tomás | ¡Señor mío, y Dios mío! | ¡Señor mío, y Dios mío!
+29 | jesus | Tomás, porque me has visto | y creyeron.

@@ -1,0 +1,29 @@
+4 | jesus | ¿A quién buscáis? | ¿A quién buscáis?
+5 | g:alguaciles=julian | A Jesús de Nazaret. | A Jesús de Nazaret.
+5 | jesus | Yo soy. | Yo soy.
+7 | jesus | ¿A quién buscáis? | ¿A quién buscáis?
+7 | g:alguaciles | A Jesús de Nazaret. | A Jesús de Nazaret.
+8 | jesus | Os he dicho que yo soy | dejad ir a estos
+9 | jesus | De los que me diste | no perdí ninguno.
+11 | jesus | Mete tu espada | ¿no la he de beber?
+17 | m:criada | ¿No eres tú también de los discípulos | de este hombre?
+17 | h:Pedro=desmond | No soy. | No soy.
+20-21 | jesus | Yo manifiestamente | lo que yo he dicho.
+22 | h:alguacil=julian | ¿Así respondes al sumo sacerdote? | ¿Así respondes al sumo sacerdote?
+23 | jesus | Si he hablado mal | ¿por qué me hieres?
+25 | g:siervos=arthur | ¿No eres tú también uno de sus discípulos? | ¿No eres tú también uno de sus discípulos?
+25 | h:Pedro | No soy. | No soy.
+26 | h:siervo=julian | ¿No te vi yo | en el huerto con Él?
+29 | h:Pilato=sterling | ¿Qué acusación traéis | contra este hombre?
+30 | g:judíos=arthur | Si Éste no fuera malhechor | no te lo habríamos entregado.
+31 | h:Pilato | Tomadle vosotros | según vuestra ley.
+31 | g:judíos | A nosotros no nos es lícito | dar muerte a nadie
+33 | h:Pilato | ¿Eres tú el Rey de los judíos? | ¿Eres tú el Rey de los judíos?
+34 | jesus | ¿Dices tú esto de ti mismo | otros de mí?
+35 | h:Pilato | ¿Soy yo judío? | ¿Qué has hecho?
+36 | jesus | Mi reino no es de este mundo | mi reino no es de aquí.
+37 | h:Pilato | ¿Acaso, eres tú rey? | ¿Acaso, eres tú rey?
+37 | jesus | Tú dices que yo soy rey. | oye mi voz.
+38 | h:Pilato | ¿Qué es la verdad? | ¿Qué es la verdad?
+38-39 | h:Pilato | Ninguna falta hallo en Él. | al Rey de los judíos?
+40 | g:judíos | No a Éste | sino a Barrabás.
