@@ -1,0 +1,3 @@
+3 | dios | ¿Qué ves tú, Jeremías? | ¿Qué ves tú, Jeremías?
+3 | h:Jeremías=julian | Higos, higos buenos | no se pueden comer.
+5-10 | dios | Como a estos buenos higos | a ellos y a sus padres.
