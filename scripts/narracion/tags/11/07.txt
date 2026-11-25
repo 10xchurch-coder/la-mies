@@ -1,0 +1,15 @@
+# Voces: Eliseo julian, el príncipe desmond, los leprosos arthur, los sirios y el siervo desmond, el rey de Israel sterling.
+# En 18 y 19 se repite lo que dijeron Eliseo y el príncipe, cada uno con su voz.
+1 | h:Eliseo=julian | Oíd palabra de Jehová | a la puerta de Samaria.
+2 | h:príncipe=desmond | Mira, si Jehová hiciese ahora | ¿sería esto así?
+2 | h:Eliseo | He aquí tú lo verás | no comerás de ello.
+3-4 | g:leprosos=arthur | ¿Para qué nos estamos | la muerte, moriremos.
+6 | g:sirios=desmond | He aquí el rey de Israel ha pagado | vengan contra nosotros.
+9 | g:leprosos | No hacemos bien | en casa del rey.
+10 | g:leprosos | Nosotros fuimos al campamento | las tiendas como estaban.
+12 | h:rey de Israel=sterling | Yo os declararé | entraremos en la ciudad.
+13 | h:siervo=desmond | Tomen ahora cinco | veamos qué hay.
+14 | h:rey de Israel | Id y ved. | Id y ved.
+18 | h:Eliseo | Dos medidas de cebada | a la puerta de Samaria.
+19 | h:príncipe | Mira, si Jehová hiciese ventanas | suceder tal cosa?
+19 | h:Eliseo | He aquí tú lo verás | no comerás de ello.

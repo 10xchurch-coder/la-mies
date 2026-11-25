@@ -1,0 +1,15 @@
+# Voces: Eliseo julian, el rey de Israel sterling, Giezi arthur (en este capítulo, porque habla con el rey), Benadad arthur, Hazael desmond.
+1 | h:Eliseo=julian | Levántate, vete tú | por siete años.
+4 | h:rey de Israel=sterling | Te ruego que me cuentes | que ha hecho Eliseo.
+5 | h:Giezi=arthur | Rey señor mío | Eliseo hizo vivir.
+6 | h:rey de Israel | Haz que le devuelvan | hasta ahora.
+7 | g:siervos=desmond | El varón de Dios ha venido aquí. | El varón de Dios ha venido aquí.
+8 | h:Benadad=arthur | Toma en tu mano | de esta enfermedad?
+9 | h:Hazael=desmond | Tu hijo Benadad | de esta enfermedad?
+10 | h:Eliseo | Ve y dile: Ciertamente sanarás. | él ciertamente morirá.
+12 | h:Hazael | ¿Por qué llora mi señor? | ¿Por qué llora mi señor?
+12 | h:Eliseo | Porque sé el mal | a sus mujeres encinta.
+13 | h:Hazael | ¿Acaso es tu siervo | tan enorme cosa?
+13 | h:Eliseo | Jehová me ha mostrado que tú | rey de Siria.
+14 | h:Benadad | ¿Qué te ha dicho Eliseo? | ¿Qué te ha dicho Eliseo?
+14 | h:Hazael | Me dijo que seguramente sanarás. | Me dijo que seguramente sanarás.

@@ -1,0 +1,22 @@
+# Voces: Eliseo julian, Naamán desmond, el rey de Siria y los criados de Naamán arthur, el rey de Israel y Giezi sterling, la muchacha naomi.
+# Lo que Eliseo manda decir por un mensajero (8 y 10) va con la voz de Eliseo. La carta (6) va con la voz del rey de Siria.
+3 | m:muchacha=naomi | Si rogase mi señor | lo sanaría de su lepra.
+4 | h:Naamán=desmond | Así y así ha dicho | de la tierra de Israel.
+5 | h:rey de Siria=arthur | Anda, ve | al rey de Israel.
+6 | h:rey de Siria | Ahora, cuando esta carta | lo sanes de su lepra.
+7 | h:rey de Israel=sterling | ¿Soy yo Dios | ocasión contra mí.
+8 | h:Eliseo=julian | ¿Por qué has rasgado | profeta en Israel.
+10 | h:Eliseo | Ve y lávate | serás limpio.
+11-12 | h:Naamán | He aquí yo decía | ¿no seré limpio?
+13 | g:criados=arthur | Padre mío, si el profeta | Lávate, y serás limpio?
+15 | h:Naamán | He aquí ahora conozco | presente de tu siervo.
+16 | h:Eliseo | Vive Jehová, delante | que no lo recibiré.
+17-18 | h:Naamán | Te ruego, pues | perdone en esto a tu siervo.
+19 | h:Eliseo | Vete en paz. | Vete en paz.
+20 | h:Giezi=sterling | He aquí, mi señor estorbó | tomaré de él alguna cosa.
+21 | h:Naamán | ¿Está todo bien? | ¿Está todo bien?
+22 | h:Giezi | Todo está bien. | dos mudas de ropa.
+23 | h:Naamán | Te ruego que tomes dos talentos. | Te ruego que tomes dos talentos.
+25 | h:Eliseo | ¿De dónde vienes, Giezi? | ¿De dónde vienes, Giezi?
+25 | h:Giezi | Tu siervo no ha ido | a ninguna parte.
+26-27 | h:Eliseo | ¿No fue contigo mi corazón | tu simiente para siempre.

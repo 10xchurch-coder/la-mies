@@ -1,0 +1,30 @@
+# Voces: Eliseo julian, hijos de los profetas desmond y arthur, el rey de Siria arthur, su siervo desmond, el criado de Eliseo y el rey de Israel sterling, la mujer soraya.
+# En el versículo 33 habla el rey de Israel (por su mensajero).
+1-2 | g:hijos de los profetas=desmond | He aquí, el lugar | lugar en que habitemos.
+2 | h:Eliseo=julian | Andad. | Andad.
+3 | h:uno=arthur | Te rogamos que quieras | con tus siervos.
+3 | h:Eliseo | Yo iré. | Yo iré.
+5 | h:uno | ¡Ah, señor mío, que era prestada! | ¡Ah, señor mío, que era prestada!
+6 | h:Eliseo | ¿Dónde cayó? | ¿Dónde cayó?
+7 | h:Eliseo | Tómalo. | Tómalo.
+8 | h:rey de Siria=arthur | En tal y tal lugar | mi campamento.
+9 | h:Eliseo | Mira que no pases | los sirios van allí.
+11 | h:rey de Siria | ¿No me declararéis | es del rey de Israel?
+12 | h:siervo=desmond | No, rey, señor mío | cámara más secreta.
+13 | h:rey de Siria | Id, y mirad dónde está | envíe a tomarlo.
+13 | h:siervo | He aquí él está en Dotán. | He aquí él está en Dotán.
+15 | h:criado=sterling | ¡Ah, señor mío! ¿Qué haremos? | ¡Ah, señor mío! ¿Qué haremos?
+16 | h:Eliseo | No tengas miedo | los que están con ellos.
+17 | h:Eliseo | Te ruego, oh Jehová | para que vea.
+18 | h:Eliseo | Te ruego que hieras | a esta gente.
+19 | h:Eliseo | Este no es el camino | al hombre que buscáis.
+20 | h:Eliseo | Jehová, abre los ojos | para que vean.
+21 | h:rey de Israel=sterling | ¿Los mataré, padre mío? | ¿Los mataré?
+22 | h:Eliseo | No los mates | se vuelvan a su señor.
+26 | m:mujer=soraya | Salva, rey señor mío. | Salva, rey señor mío.
+27 | h:rey de Israel | Si no te salva Jehová | o del lagar?
+28 | h:rey de Israel | ¿Qué tienes? | ¿Qué tienes?
+28-29 | m:mujer | Esta mujer me dijo | ha escondido a su hijo.
+31 | h:rey de Israel | Así me haga Dios | sobre él hoy.
+32 | h:Eliseo | ¿Veis como este hijo | los pies de su señor?
+33 | h:rey de Israel | Ciertamente este mal | esperar más a Jehová?
