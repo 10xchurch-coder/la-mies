@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: Job 31 a 42 (tags y planes de los 42 capítulos hechos y revisados; los planes ya están todos en el sandbox y los grupos de a 4 capítulos armados en nar/C-k1.json a C-k9.json: caps. 7-10, 11-14, ... 39-42). Después de Job faltan los tags de Salmos.
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29), 2 Crónicas completo (1 a 36), Esdras completo (1 a 10), Nehemías completo (1 a 13), Ester completo (1 a 10) y Job 1 a 30 (25 nov 2026; decimocuarta vuelta: Job 7 a 30, 88 pedazos, unas 46.600 letras, sin fallas).
-- Créditos durante la decimocuarta vuelta: 1470 (se comparten entre las cuatro tareas).
+- Sigue: Job 35 a 42 (tags y planes de los 42 capítulos hechos y revisados; los planes ya están todos en el sandbox y los grupos de a 4 capítulos armados en nar/C-k1.json a C-k9.json: caps. 7-10, 11-14, ... 39-42). Después de Job faltan los tags de Salmos.
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29), 2 Crónicas completo (1 a 36), Esdras completo (1 a 10), Nehemías completo (1 a 13), Ester completo (1 a 10) y Job 1 a 34 (25 nov 2026; decimocuarta vuelta: Job 7 a 34, 106 pedazos, unas 57.600 letras, sin fallas).
+- Créditos durante la decimocuarta vuelta: 1440 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
