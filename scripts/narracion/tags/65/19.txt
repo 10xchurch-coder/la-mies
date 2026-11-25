@@ -1,0 +1,9 @@
+1-2 | g:multitud=julian | ¡Aleluya! Salvación | de la mano de ella.
+3 | g:multitud | ¡Aleluya! | ¡Aleluya!
+4 | v:ancianos=arthur | Amén: Aleluya. | Amén: Aleluya.
+5 | angel | Load a nuestro Dios | como grandes.
+6-7 | g:multitud | ¡Aleluya, porque reina | se ha preparado.
+9 | angel | Escribe: Bienaventurados | bodas del Cordero.
+9 | angel | Estas son palabras | verdaderas de Dios.
+10 | angel | Mira, no lo hagas; | espíritu de la profecía.
+17-18 | angel | Venid, y congregaos | pequeños y grandes.
