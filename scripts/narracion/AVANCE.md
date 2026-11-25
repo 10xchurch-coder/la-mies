@@ -39,6 +39,7 @@
 - Hecho: 1 Corintios 5 a 8 (25 nov 2026), 13 pedazos, sin fallas. Quedan unos 1934 créditos.
 - Hecho: 1 Corintios 9 a 12 (25 nov 2026), 17 pedazos, sin fallas. Quedan unos 1893 créditos.
 - Hecho: 1 Corintios 13 a 16 (25 nov 2026), 18 pedazos, sin fallas. 1 CORINTIOS COMPLETO. Romanos 11 a 1 Corintios 16 gastaron unos 295 créditos entre las cuatro tareas; quedan unos 1849.
+- EN CURSO: 2 Corintios 1 a 4, 25 nov 21:32 UTC
 - Sigue: Segunda a los Corintios 1 (libro 46). Los planes de 2 Corintios 1 a 13 ya están en main (todavía no bajados en el sandbox); falta el audio. De Gálatas en adelante falta todo (planes y audio; las cartas no llevan tags).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
