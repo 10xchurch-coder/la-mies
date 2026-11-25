@@ -1,0 +1,33 @@
+# Voces: Acab (el rey de Israel) sterling, Josafat arthur, Micaías desmond, Sedequías y los profetas julian.
+# La visión que cuenta Micaías (17 y 19-23) va toda con su voz, porque es él quien habla.
+3 | h:Acab=sterling | ¿No sabéis que Ramot | del rey de Siria?
+4 | h:Acab | ¿Quieres venir conmigo | contra Ramot de Galaad?
+4 | h:Josafat=arthur | Yo soy como tú | como tus caballos.
+5 | h:Josafat | Yo te ruego | la palabra de Jehová.
+6 | h:Acab | ¿Iré a la guerra | o la dejaré?
+6 | g:profetas=julian | Sube; porque el Señor | en mano del rey.
+7 | h:Josafat | ¿Hay aún aquí | consultemos?
+8 | h:Acab | Aún hay un varón | sino solamente mal.
+8 | h:Josafat | No hable el rey así. | No hable el rey así.
+9 | h:Acab | Trae pronto a Micaías | hijo de Imla.
+11 | h:Sedequías=julian | Así dice Jehová: Con estos | hasta acabarlos.
+12 | g:profetas | Sube a Ramot de Galaad | en mano del rey.
+13 | h:mensajero=julian | He aquí las palabras | y anuncia el bien.
+14 | h:Micaías=desmond | Vive Jehová, que lo que | eso diré.
+15 | h:Acab | Micaías, ¿iremos a pelear | o la dejaremos?
+15 | h:Micaías | Sube, que serás prosperado | en mano del rey.
+16 | h:Acab | ¿Hasta cuántas veces | en el nombre de Jehová?
+17 | h:Micaías | Yo vi a todo Israel | a su casa en paz.
+18 | h:Acab | ¿No te había dicho yo | sino solamente mal?
+19-23 | h:Micaías | Oye, pues, palabra de Jehová | el mal acerca de ti.
+24 | h:Sedequías | ¿Por dónde se fue | para hablarte a ti?
+25 | h:Micaías | He aquí, tú lo verás | para esconderte.
+26-27 | h:Acab | Toma a Micaías | hasta que yo vuelva en paz.
+28 | h:Micaías | Si llegares a volver en paz | no ha hablado por mí.
+28 | h:Micaías | Oíd, pueblos todos. | Oíd, pueblos todos.
+30 | h:Acab | Yo me disfrazaré | ponte tus vestiduras.
+31 | h:Benadad=arthur | No peleéis ni con grande | contra el rey de Israel.
+32 | g:capitanes=julian | Ciertamente este es el rey de Israel | Ciertamente este es el rey de Israel
+34 | h:Acab | Da la vuelta | pues estoy herido.
+36 | g:pregón=julian | ¡Cada uno a su ciudad | cada cual a su tierra!
+49 | h:Ocozías=sterling | Vayan mis siervos | en los navíos.
