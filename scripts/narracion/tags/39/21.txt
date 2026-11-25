@@ -1,0 +1,20 @@
+2-3 | jesus | Id a la aldea | los enviará.
+9 | g:multitud | ¡Hosanna al Hijo de David! | en las alturas!
+10 | g:ciudad | ¿Quién es Éste? | ¿Quién es Éste?
+11 | g:multitud | Éste es Jesús | de Galilea.
+13 | jesus | Escrito está | cueva de ladrones.
+15 | n:muchachos | ¡Hosanna al Hijo de David! | ¡Hosanna al Hijo de David!
+16 | g:sacerdotes | ¿Oyes lo que | estos dicen?
+16 | jesus | Sí; ¿nunca | la alabanza?
+19 | jesus | Nunca más nazca | por siempre.
+20 | g:discipulos | ¡Cómo es que | la higuera!
+21-22 | jesus | De cierto os digo que si | lo recibiréis.
+23 | g:sacerdotes | ¿Con qué autoridad | esta autoridad?
+24-25 | jesus | Yo también os preguntaré | de los hombres?
+25-26 | g:sacerdotes | Si dijéremos del cielo | por profeta.
+27 | g:sacerdotes | No sabemos. | No sabemos.
+27-31 | jesus | Tampoco yo os digo | voluntad de su padre?
+31 | g:sacerdotes | El primero. | El primero.
+31-40 | jesus | De cierto os digo, que los publicanos | aquellos labradores?
+41 | g:sacerdotes | A los malos | a su tiempo.
+42-44 | jesus | ¿Nunca leísteis en las Escrituras | le desmenuzará.
