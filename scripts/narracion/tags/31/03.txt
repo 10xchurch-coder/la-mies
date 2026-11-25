@@ -1,0 +1,3 @@
+2 | dios | Levántate y ve a Nínive | el mensaje que yo te diré.
+4 | h:Jonás=julian | De aquí a cuarenta días | Nínive será destruida.
+7-9 | h:rey de Nínive=desmond | Hombres y animales | y no pereceremos?

@@ -1,0 +1,9 @@
+2 | dios | Levántate, y ve a Nínive | ha subido delante de mí.
+6 | v:maestre=arthur | ¿Qué tienes, dormilón? | y no pereceremos.
+7 | g:marineros=sterling | Venid, y echemos suertes | nos ha venido este mal.
+8 | g:marineros | Decláranos ahora | de qué pueblo eres?
+9 | h:Jonás=julian | Soy hebreo | el mar y la tierra seca.
+10 | g:marineros | ¿Por qué has hecho esto? | ¿Por qué has hecho esto?
+11 | g:marineros | ¿Qué te haremos, para que el mar se nos aquiete? | ¿Qué te haremos, para que el mar se nos aquiete?
+12 | h:Jonás | Tomadme, y echadme al mar | tempestad sobre vosotros.
+14 | g:marineros | Te rogamos oh Jehová | has hecho como has querido.

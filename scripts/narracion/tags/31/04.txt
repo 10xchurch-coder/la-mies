@@ -1,0 +1,6 @@
+2-3 | h:Jonás=julian | Te ruego, oh Jehová | mejor me es la muerte que la vida.
+4 | dios | ¿Haces tú bien en enojarte tanto? | ¿Haces tú bien en enojarte tanto?
+8 | h:Jonás | Mejor sería para mí la muerte que la vida. | Mejor sería para mí la muerte que la vida.
+9 | dios | ¿Tanto te enojas por la calabacera? | ¿Tanto te enojas por la calabacera?
+9 | h:Jonás | Mucho me enojo, hasta la muerte. | Mucho me enojo, hasta la muerte.
+10-11 | dios | Tuviste tú lástima | y mucho ganado?
