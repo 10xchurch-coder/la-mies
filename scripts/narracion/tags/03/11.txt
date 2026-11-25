@@ -1,0 +1,8 @@
+4-6 | g:pueblo=arthur | ¡Quién nos diera a comer carne! | ven nuestros ojos.
+11-15 | h:Moisés=sterling | ¿Por qué has hecho mal | no vea mi mal.
+16-20 | dios | Reúneme a setenta varones | salimos acá de Egipto?
+21-22 | h:Moisés | Seiscientos mil de a pie | tengan abasto?
+23 | dios | ¿Acaso se ha acortado | mi palabra, o no.
+27 | h:joven=julian | Eldad y Medad profetizan | en el campamento.
+28 | h:Josué=desmond | Señor mío, Moisés, impídelos. | Señor mío, Moisés, impídelos.
+29 | h:Moisés | ¿Tienes tú celos por mí? | espíritu sobre ellos!
