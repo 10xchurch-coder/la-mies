@@ -1,0 +1,17 @@
+2 | h:Jacob=julian | El campamento de Dios es este; | El campamento de Dios es este;
+4-5 | h:Jacob | Así diréis a mi señor | gracia en tus ojos.
+6 | g:mensajeros | Vinimos a tu hermano | hombres con él.
+8 | h:Jacob | Si viniere Esaú | campamento escapará.
+9-12 | h:Jacob | Oh Dios de mi padre | por la multitud.
+16 | h:Jacob | Pasad delante de mí | entre manada y manada.
+17-18 | h:Jacob | Si Esaú mi hermano | viene tras nosotros.
+19-20 | h:Jacob | Conforme a esto | viene tras nosotros.
+20 | h:Jacob | Apaciguaré su ira | le seré acepto.
+26 | angel | Déjame, que raya el alba. | Déjame, que raya el alba.
+26 | h:Jacob | No te dejaré | me bendices.
+27 | angel | ¿Cuál es tu nombre? | ¿Cuál es tu nombre?
+27 | h:Jacob | Jacob. | Jacob.
+28 | angel | No se dirá más | has vencido.
+29 | h:Jacob | Declárame ahora | tu nombre.
+29 | angel | ¿Por qué preguntas | mi nombre?
+30 | h:Jacob | Vi a Dios cara a cara | librada mi alma.

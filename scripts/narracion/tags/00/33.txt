@@ -1,0 +1,10 @@
+5 | h:Jacob=julian | Son los niños | a tu siervo.
+5 | h:Esaú | ¿Quiénes son estos? | ¿Quiénes son estos?
+8 | h:Esaú | ¿Qué te propones | he encontrado?
+8 | h:Jacob | El hallar gracia | de mi señor.
+9 | h:Esaú | Suficiente tengo | lo que es tuyo.
+10-11 | h:Jacob | No, yo te ruego | tengo lo suficiente.
+12 | h:Esaú | Anda, y vamos | delante de ti.
+13-14 | h:Jacob | Mi señor sabe | a mi señor a Seir.
+15 | h:Esaú | Permíteme ahora | vienen conmigo.
+15 | h:Jacob | ¿Para qué esto? | ojos de mi señor.
