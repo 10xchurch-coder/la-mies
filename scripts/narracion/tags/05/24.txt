@@ -1,0 +1,10 @@
+# Josué dice todo, también lo que cita de parte de Dios.
+2-15 | h:Josué=desmond | Así dice Jehová, el Dios de Israel | yo y mi casa serviremos a Jehová.
+16-18 | g:pueblo=arthur | Nunca tal acontezca | porque Él es nuestro Dios.
+19-20 | h:Josué | No podréis servir a Jehová | después que os ha hecho bien.
+21 | g:pueblo | No, sino que serviremos a Jehová. | No, sino que serviremos a Jehová.
+22 | h:Josué | Vosotros sois testigos contra vosotros mismos | a Jehová para servirle.
+22 | g:pueblo | Testigos somos. | Testigos somos.
+23 | h:Josué | Quitad, pues, ahora los dioses ajenos | a Jehová, el Dios de Israel.
+24 | g:pueblo | A Jehová nuestro Dios serviremos | a su voz obedeceremos.
+27 | h:Josué | He aquí esta piedra | no mintáis contra vuestro Dios.

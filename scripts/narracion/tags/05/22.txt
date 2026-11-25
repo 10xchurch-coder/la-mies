@@ -1,0 +1,7 @@
+2-5 | h:Josué=desmond | Vosotros habéis guardado todo | con toda vuestra alma.
+8 | h:Josué | Volveos a vuestras tiendas | el despojo de vuestros enemigos.
+# Hablan Finees y los diez príncipes.
+16-20 | g:príncipes=sterling | Toda la congregación de Jehová dice así | no pereció solo en su iniquidad.
+22-29 | g:rubenitas=arthur | Jehová Dios de dioses, Jehová Dios de dioses | delante de su tabernáculo.
+31 | h:Finees=julian | Hoy hemos entendido | de la mano de Jehová.
+34 | g:rubenitas | Será un testimonio entre nosotros | que Jehová es Dios.

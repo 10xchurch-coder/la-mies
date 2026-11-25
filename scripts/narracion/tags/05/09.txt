@@ -1,0 +1,9 @@
+6 | g:gabaonitas=julian | Nosotros venimos de tierra muy lejana | alianza con nosotros.
+7 | g:pueblo=arthur | Quizá vosotros habitáis | hacer alianza con vosotros?
+8 | g:gabaonitas | Nosotros somos tus siervos. | Nosotros somos tus siervos.
+8 | h:Josué=desmond | ¿Quiénes sois vosotros y de dónde venís? | ¿Quiénes sois vosotros y de dónde venís?
+9-13 | g:gabaonitas | Tus siervos han venido | lo muy largo del camino.
+19-20 | g:príncipes=sterling | Nosotros les hemos jurado | juramento que les hemos hecho.
+21 | g:príncipes | Dejadlos vivir; pero sean | príncipes les habían prometido.
+22-23 | h:Josué | ¿Por qué nos habéis engañado | para la casa de mi Dios.
+24-25 | g:gabaonitas | Como fue dado a entender | hacer de nosotros, hazlo.
