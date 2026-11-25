@@ -1,5 +1,6 @@
 // Datos de estudio de la Biblia que viajan dentro de la app (se leen sin internet).
 // - KJV: King James Version (dominio público), generada por scripts/bible-import-kjv.py.
+// - RVG: Reina Valera Gómez (con permiso de su editor), generada por scripts/bible-import-rvg.py desde el archivo de Word que mandó.
 // - Referencias cruzadas de openbible.info (CC BY), generadas por scripts/bible-import-xrefs.py.
 // Un archivo por libro. A diferencia de la RV1909, estos se piden con import(): en el teléfono ya vienen dentro de la app,
 // y en la web cada libro se baja recién cuando hace falta, así la app no tarda más en abrir.
@@ -80,6 +81,74 @@ const KJV_FILES: (() => Promise<Mod<BookText>>)[] = [
   () => import('../data/bible/kjv/64.json'),
   () => import('../data/bible/kjv/65.json'),
 ];
+const RVG_FILES: (() => Promise<Mod<BookText>>)[] = [
+  () => import('../data/bible/rvg/00.json'),
+  () => import('../data/bible/rvg/01.json'),
+  () => import('../data/bible/rvg/02.json'),
+  () => import('../data/bible/rvg/03.json'),
+  () => import('../data/bible/rvg/04.json'),
+  () => import('../data/bible/rvg/05.json'),
+  () => import('../data/bible/rvg/06.json'),
+  () => import('../data/bible/rvg/07.json'),
+  () => import('../data/bible/rvg/08.json'),
+  () => import('../data/bible/rvg/09.json'),
+  () => import('../data/bible/rvg/10.json'),
+  () => import('../data/bible/rvg/11.json'),
+  () => import('../data/bible/rvg/12.json'),
+  () => import('../data/bible/rvg/13.json'),
+  () => import('../data/bible/rvg/14.json'),
+  () => import('../data/bible/rvg/15.json'),
+  () => import('../data/bible/rvg/16.json'),
+  () => import('../data/bible/rvg/17.json'),
+  () => import('../data/bible/rvg/18.json'),
+  () => import('../data/bible/rvg/19.json'),
+  () => import('../data/bible/rvg/20.json'),
+  () => import('../data/bible/rvg/21.json'),
+  () => import('../data/bible/rvg/22.json'),
+  () => import('../data/bible/rvg/23.json'),
+  () => import('../data/bible/rvg/24.json'),
+  () => import('../data/bible/rvg/25.json'),
+  () => import('../data/bible/rvg/26.json'),
+  () => import('../data/bible/rvg/27.json'),
+  () => import('../data/bible/rvg/28.json'),
+  () => import('../data/bible/rvg/29.json'),
+  () => import('../data/bible/rvg/30.json'),
+  () => import('../data/bible/rvg/31.json'),
+  () => import('../data/bible/rvg/32.json'),
+  () => import('../data/bible/rvg/33.json'),
+  () => import('../data/bible/rvg/34.json'),
+  () => import('../data/bible/rvg/35.json'),
+  () => import('../data/bible/rvg/36.json'),
+  () => import('../data/bible/rvg/37.json'),
+  () => import('../data/bible/rvg/38.json'),
+  () => import('../data/bible/rvg/39.json'),
+  () => import('../data/bible/rvg/40.json'),
+  () => import('../data/bible/rvg/41.json'),
+  () => import('../data/bible/rvg/42.json'),
+  () => import('../data/bible/rvg/43.json'),
+  () => import('../data/bible/rvg/44.json'),
+  () => import('../data/bible/rvg/45.json'),
+  () => import('../data/bible/rvg/46.json'),
+  () => import('../data/bible/rvg/47.json'),
+  () => import('../data/bible/rvg/48.json'),
+  () => import('../data/bible/rvg/49.json'),
+  () => import('../data/bible/rvg/50.json'),
+  () => import('../data/bible/rvg/51.json'),
+  () => import('../data/bible/rvg/52.json'),
+  () => import('../data/bible/rvg/53.json'),
+  () => import('../data/bible/rvg/54.json'),
+  () => import('../data/bible/rvg/55.json'),
+  () => import('../data/bible/rvg/56.json'),
+  () => import('../data/bible/rvg/57.json'),
+  () => import('../data/bible/rvg/58.json'),
+  () => import('../data/bible/rvg/59.json'),
+  () => import('../data/bible/rvg/60.json'),
+  () => import('../data/bible/rvg/61.json'),
+  () => import('../data/bible/rvg/62.json'),
+  () => import('../data/bible/rvg/63.json'),
+  () => import('../data/bible/rvg/64.json'),
+  () => import('../data/bible/rvg/65.json'),
+];
 const XREF_FILES: (() => Promise<Mod<BookRefs>>)[] = [
   () => import('../data/bible/xrefs/00.json'),
   () => import('../data/bible/xrefs/01.json'),
@@ -151,12 +220,21 @@ const XREF_FILES: (() => Promise<Mod<BookRefs>>)[] = [
 
 const NONE: never[] = [];
 const kjvBooks: (BookText | undefined)[] = [];
+const rvgBooks: (BookText | undefined)[] = [];
 const refBooks: (BookRefs | undefined)[] = [];
 
 /** King James Version, un libro por posición (mismo orden que BOOKS). Devuelve [] si el libro todavía no se pidió. */
 export const KJV: (() => BookText)[] = KJV_FILES.map((_, i) => () => kjvBooks[i] ?? NONE);
 /** Referencias cruzadas, un libro por posición. La numeración es la de la King James. [] si todavía no se pidió. */
 export const XREFS: (() => BookRefs)[] = XREF_FILES.map((_, i) => () => refBooks[i] ?? NONE);
+
+/** Reina Valera Gómez (usada con permiso), un libro por posición. Misma numeración que la King James. [] si todavía no se pidió. */
+export const RVG: (() => BookText)[] = RVG_FILES.map((_, i) => () => rvgBooks[i] ?? NONE);
+/** Trae un libro de la Reina Valera Gómez (si ya está, no hace nada). */
+export async function loadRvgBook(book: number): Promise<void> {
+  if (rvgBooks[book] || !RVG_FILES[book]) return;
+  rvgBooks[book] = pick(await RVG_FILES[book]());
+}
 
 /** Trae un libro de la King James (si ya está, no hace nada). */
 export async function loadKjvBook(book: number): Promise<void> {

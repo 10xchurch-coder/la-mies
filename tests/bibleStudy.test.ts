@@ -21,7 +21,7 @@ before(async () => {
 });
 
 test('la King James trae los 66 libros, 31102 versículos y ninguno vacío', () => {
-  assert.equal(VERSIONS.length, 2);
+  assert.equal(VERSIONS.length, 3);
   assert.equal(kjv.id, 'kjv');
   assert.equal(EN_BOOKS.length, 66);
   let verses = 0;
@@ -31,6 +31,21 @@ test('la King James trae los 66 libros, 31102 versículos y ninguno vacío', () 
     for (const ch of book) { assert.ok(ch.length > 0); assert.ok(ch.every((t) => t.length > 0 && !/[<>&]/.test(t))); verses += ch.length; }
   });
   assert.equal(verses, 31102);
+});
+
+test('la Reina Valera Gómez trae los 66 libros con la misma numeración que la King James', async () => {
+  const rvg = versionOf('rvg');
+  assert.equal(rvg.id, 'rvg');
+  await ensureBooks(rvg, ALL);
+  let verses = 0;
+  BOOKS.forEach((_, i) => {
+    const a = rvg.books[i](); const b = kjv.books[i]();
+    assert.equal(a.length, b.length);
+    a.forEach((ch, c) => { assert.equal(ch.length, b[c].length); assert.ok(ch.every((t) => t.length > 0 && !/[<>&]/.test(t))); verses += ch.length; });
+  });
+  assert.equal(verses, 31102);
+  assert.equal(chapterText(rvg, B('Juan'), 3)[15], 'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en Él cree no se pierda, mas tenga vida eterna.');
+  assert.equal(chapterText(rvg, B('Filemón'), 1)[0].startsWith('Pablo, prisionero de Jesucristo'), true);
 });
 
 test('textos conocidos de la King James', () => {

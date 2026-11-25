@@ -28,6 +28,14 @@ export const BIBLE_SOURCES: BibleSource[] = [
     source: 'Proyecto scrollmapper/bible_databases en GitHub (texto “SpaRV”, marcado “Public Domain”).',
   },
   {
+    version: 'rvg',
+    get title() { return tx('Reina Valera Gómez'); },
+    get what() { return tx('La Biblia en español revisada por el Dr. Humberto Gómez.'); },
+    get licence() { return tx('Usada con permiso'); },
+    get detail() { return tx('Tiene dueño. Está en la app con permiso de su editor. No se cambió ninguna palabra del texto.'); },
+    get source() { return tx('Archivo de Word con el texto completo, entregado por el editor (noviembre de 2026).'); },
+  },
+  {
     version: 'kjv',
     get title() { return tx('King James Version'); },
     get what() { return tx('La Biblia en inglés (texto de 1769), para quien lee en inglés.'); },

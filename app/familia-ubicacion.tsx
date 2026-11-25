@@ -2,7 +2,7 @@
 // Viene apagado. Nadie lo prende por otro, y solo ven mi posición las personas que yo elegí.
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Circle, MapView, Marker, Polyline } from '@/components/map';
 import { Header, Screen } from '@/components/Screen';
@@ -15,7 +15,7 @@ import {
   type LocPerson,
 } from '@/lib/famLocApi';
 import { canBackground, hereNow, refreshFamLoc, startDevice, stopDevice, useFamLoc } from '@/lib/famLocTask';
-import { errorMessage } from '@/lib/supabase';
+import { errorMessage, supabase } from '@/lib/supabase';
 import { fmtTime } from '@/lib/format';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
 import { useAuth } from '@/store/auth';
@@ -36,6 +36,20 @@ function openDirections(lat: number, lng: number) {
 
 export default function FamiliaUbicacion() {
   const { profile } = useAuth();
+  const router = useRouter();
+  // Mi propia ficha, para poder armar mi familia desde acá cuando todavía no hay nadie.
+  const [myCard, setMyCard] = useState<string | null>(null);
+  useEffect(() => {
+    if (!profile?.id) return;
+    supabase.from('contacts').select('id').eq('profile_id', profile.id).eq('archived', false).limit(1)
+      .then(({ data }) => setMyCard((data?.[0] as { id?: string } | undefined)?.id ?? null), () => undefined);
+  }, [profile?.id]);
+  const familyHelp = (
+    <View style={{ gap: 6 }}>
+      <Text style={styles.small}>{tx('“Mi familia” se prende sola cuando tu esposa, tu esposo o tus hijos están cargados como tu familia y tienen cuenta en la app. Mientras tanto, podés sumar a cualquiera por su nombre.')}</Text>
+      {myCard ? <Button title={tx('Armar mi familia')} icon="users" variant="outline" onPress={() => router.push(`/contacto/${myCard}` as never)} /> : null}
+    </View>
+  );
   const { ayuda } = useLocalSearchParams<{ ayuda?: string }>();
   const { me, mode, loaded } = useFamLoc();
   const [people, setPeople] = useState<LocPerson[] | null>(null);
@@ -184,7 +198,8 @@ export default function FamiliaUbicacion() {
             <Toggle label={tx('Mi familia')} value={family && me.family_count > 0} disabled={me.family_count === 0} onChange={setFamily}
               hint={me.family_count === 0 ? tx('Todavía no hay nadie de tu familia con cuenta en la app. Pedí en la iglesia que carguen tu familia.') : me.family_count === 1 ? tx('1 familiar con cuenta en la app.') : tx('{family_count} familiares con cuenta en la app.', { family_count: me.family_count })} />
             <Toggle label={tx('Los pastores')} value={pastors && me.pastor_count > 0} disabled={me.pastor_count === 0} onChange={setPastors}
-              hint={tx('Solo si vos querés. Viene sin marcar.')} />
+              hint={me.pastor_count === 0 ? tx('No hay otro pastor con cuenta en tu iglesia.') : tx('Solo si vos querés. Viene sin marcar.')} />
+            {me.family_count === 0 ? familyHelp : null}
             <Text style={styles.small}>{tx('Después podés sumar a otras personas de la iglesia por su nombre, y sacar a cualquiera.')}</Text>
             <Button title={tx('Compartir mi ubicación')} icon="map-pin" onPress={turnOn} loading={busy === 'on'} />
             <Text style={styles.small}>
@@ -334,7 +349,9 @@ export default function FamiliaUbicacion() {
               <View style={styles.sep} />
               <Toggle label={tx('Mi familia')} value={me.share_family} disabled={busy === 'grupos' || me.family_count === 0} onChange={(v) => setGroups(v, me.share_pastors)}
                 hint={me.family_count === 0 ? tx('Todavía no hay nadie de tu familia con cuenta en la app.') : tx('Tus familiares que tienen cuenta en la app.')} />
-              <Toggle label={tx('Los pastores')} value={me.share_pastors} disabled={busy === 'grupos' || me.pastor_count === 0} onChange={(v) => setGroups(me.share_family, v)} />
+              <Toggle label={tx('Los pastores')} value={me.share_pastors} disabled={busy === 'grupos' || me.pastor_count === 0} onChange={(v) => setGroups(me.share_family, v)}
+                hint={me.pastor_count === 0 ? tx('No hay otro pastor con cuenta en tu iglesia.') : undefined} />
+              {me.family_count === 0 ? familyHelp : null}
               {me.family_left.filter((f) => !viewerIds.has(f.id)).map((f) => (
                 <View key={f.id} style={styles.row}>
                   <View style={{ flex: 1 }}>

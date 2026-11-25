@@ -80,7 +80,7 @@ export function BibleWordsSheet({ visible, onClose, version, book, chapter, vers
   const visibleHits = flat.slice(0, shown);
   // El texto de los versículos que se ven, en la versión que se está leyendo (la King James se baja de a un libro).
   useBibleReady(visibleHits.map((r) => [version.id, r.book]));
-  const offNumbers = version.id !== 'kjv';
+  const offNumbers = version.id === 'rv1909';
 
   const title = open ? tx('Strong {strongLabel}', { strongLabel: strongLabel(strong) }) : wordsTitle(version);
   const sub = open

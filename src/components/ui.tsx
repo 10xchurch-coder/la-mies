@@ -127,7 +127,7 @@ export function Toggle({ label, hint, value, onChange, disabled }: { label: stri
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 }}>
       <View style={{ flex: 1, gap: 3 }}>
-        <Text style={{ fontSize: 15, fontWeight: '600', color: colors.text }}>{label}</Text>
+        <Text style={{ fontSize: 15, fontWeight: '600', color: disabled ? colors.muted : colors.text }}>{label}</Text>
         {hint ? <Text style={{ fontSize: 12, color: colors.muted, lineHeight: 17 }}>{hint}</Text> : null}
       </View>
       <Switch value={value} onValueChange={onChange} disabled={disabled} trackColor={{ true: colors.green, false: colors.input }} thumbColor="#FFFFFF" />

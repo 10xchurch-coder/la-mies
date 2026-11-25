@@ -2,11 +2,11 @@
 // Sin nada de la app ni de la base, para poder probarse sola.
 import { BOOKS, planDayChapters, planDays, type PlanId } from './biblePlan';
 import { RV1909, type BookText } from './bibleData';
-import { EN_BOOKS, KJV, loadKjvBook } from './bibleStudyData';
+import { EN_BOOKS, KJV, RVG, loadKjvBook, loadRvgBook } from './bibleStudyData';
 import { getLang, tx } from './i18n';
 import { OPEN_BIBLE, allowedOf, cleanBibleConfig, pickVersion, type BibleChurchConfig } from './bibleChurch';
 
-export type BibleVersionId = 'rv1909' | 'kjv';
+export type BibleVersionId = 'rv1909' | 'rvg' | 'kjv';
 
 export type BibleVersion = {
   id: BibleVersionId;
@@ -31,6 +31,7 @@ export type BibleVersion = {
 /** Las versiones que ya están en la app. Las demás se suman acá cuando haya permiso y texto. */
 export const VERSIONS: BibleVersion[] = [
   { id: 'rv1909', get name() { return tx('Reina-Valera 1909'); }, get short() { return tx('RV1909'); }, notice: 'Reina-Valera 1909 · Dominio público', books: RV1909 },
+  { id: 'rvg', get name() { return tx('Reina Valera Gómez'); }, short: 'RVG', get notice() { return tx('Reina Valera Gómez · Usada con permiso'); }, books: RVG, load: loadRvgBook },
   { id: 'kjv', get name() { return tx('King James Version (inglés)'); }, short: 'KJV', notice: 'King James Version · Dominio público', books: KJV, lang: 'en', bookNames: EN_BOOKS, load: loadKjvBook },
 ];
 

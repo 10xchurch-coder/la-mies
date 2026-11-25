@@ -40,7 +40,7 @@ export function alignVerses(a: readonly string[] | null | undefined, b: readonly
 
 /** ¿Hay que avisar que en este capítulo los números no coinciden entre las dos versiones que se comparan? */
 export function compareNotice(book: number, chapter: number, a: string, b: string): boolean {
-  return a !== b && numberingDiffers(book, chapter);
+  return (a === 'rv1909') !== (b === 'rv1909') && numberingDiffers(book, chapter);
 }
 
 /** ¿Van dos columnas? En pantalla ancha siempre; en el teléfono solo si la persona lo pidió. */

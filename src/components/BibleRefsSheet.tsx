@@ -58,7 +58,7 @@ export function BibleRefsSheet({ visible, onClose, version, book, chapter, verse
         <ScrollView contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: insets.bottom + 18, gap: 10, width: '100%', maxWidth: 620, alignSelf: 'center' }}>
           {loading ? <ActivityIndicator color={colors.blue} style={{ marginVertical: 24 }} /> : null}
           {!total && !loading ? <Text style={{ fontSize: 15, color: colors.text, paddingVertical: 16 }}>{tx('No hay referencias para {pl}.', { pl: verses.length > 1 ? tx('estos versículos') : tx('este versículo') })}</Text> : null}
-          {total && version.id !== 'kjv' && numberingDiffers(book, chapter) ? (
+          {total && version.id === 'rv1909' && numberingDiffers(book, chapter) ? (
             <Text style={{ fontSize: 12, color: colors.muted }}>{tx('En este capítulo los números de versículo no son iguales en todas las Biblias. Alguna referencia puede caer un versículo antes o después.')}</Text>
           ) : null}
           {groups.map((g) => {

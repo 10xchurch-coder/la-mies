@@ -27,18 +27,18 @@ app/fidelidad.tsx:26  [texto fuera de una función (se crea una sola vez al abri
 app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  Salen a evangelizar
 app/fidelidad.tsx:27  [texto fuera de una función (se crea una sola vez al abrir la app)]  usan la app para salir
 app/fidelidad.tsx:28  [texto fuera de una función (se crea una sola vez al abrir la app)]  Sirven en un ministerio
-app/mensajes/[id].tsx:22  [lista de textos fuera de una función (¿se muestran o son valores?)]  Es ofensivo o me falta el respeto | Me incomoda o me asusta | Pide plata o es un engaño | Otra cosa
+app/mensajes/[id].tsx:24  [lista de textos fuera de una función (¿se muestran o son valores?)]  Es ofensivo o me falta el respeto | Me incomoda o me asusta | Pide plata o es un engaño | Otra cosa
 app/presentar/index.tsx:729  [palabra suelta en minúscula (¿texto o clave?)]  mié
 app/presentar/index.tsx:729  [palabra suelta en minúscula (¿texto o clave?)]  sáb
 app/seguridad.tsx:46  [va a la base: no se tocó]  La Mies …
 src/components/BaptismCertificate.tsx:17  [texto fuera de una función (se crea una sola vez al abrir la app)]  Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó de los muertos por la gloria del Padre, así también nos
 src/components/BibleWordsSheet.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0.
-src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
-src/components/ChatRoom.tsx:381  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
-src/lib/api.ts:1210  [va a la base: no se tocó]  Lista del culto
+src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
+src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
+src/lib/api.ts:1211  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
 src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
-src/lib/bible.ts:34  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
+src/lib/bible.ts:35  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
 src/lib/central.ts:76  [el tipo es una lista cerrada de valores]  Gente
 src/lib/central.ts:77  [el tipo es una lista cerrada de valores]  Gente
 src/lib/central.ts:78  [el tipo es una lista cerrada de valores]  Gente
@@ -150,9 +150,9 @@ src/lib/personas.ts:9  [texto fuera de una función (se crea una sola vez al abr
 src/lib/personas.ts:11  [lista de textos fuera de una función (¿se muestran o son valores?)]  La salvación y el bautismo | Qué es la iglesia | Lo que creemos | Cómo vivimos y servimos
 src/lib/personas.ts:12  [texto fuera de una función (se crea una sola vez al abrir la app)]  Recibido como miembro
 src/lib/personas.ts:167  [lista de textos fuera de una función (¿se muestran o son valores?)]  Me invitó un amigo o familiar | Me visitaron en mi casa | Vivo cerca | Por internet o redes | Otro
-src/screens/crecimiento.tsx:19  [texto fuera de una función (se crea una sola vez al abrir la app)]  Evangelismo personal
-src/screens/crecimiento.tsx:70  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
-src/screens/crecimiento.tsx:76  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
+src/screens/crecimiento.tsx:23  [texto fuera de una función (se crea una sola vez al abrir la app)]  Evangelismo personal
+src/screens/crecimiento.tsx:77  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
+src/screens/crecimiento.tsx:83  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Presentaciones del evangelio
 src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Toda la iglesia
 src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Solo el pastor
 src/screens/oracion.tsx:20  [texto fuera de una función (se crea una sola vez al abrir la app)]  Personas elegidas
