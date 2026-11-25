@@ -1,0 +1,22 @@
+1 | m:Raquel | Dame hijos | me muero.
+2 | h:Jacob=julian | ¿Soy yo | tu vientre?
+3 | m:Raquel | He aquí mi sierva | hijos de ella.
+6 | m:Raquel | Me juzgó Dios | me dio un hijo.
+8 | m:Raquel | Con grandes luchas | he vencido.
+11 | m:Lea | Vino la ventura. | Vino la ventura.
+13 | m:Lea | ¡Qué dicha la mía! | bienaventurada
+14 | m:Raquel | Te ruego | de tu hijo.
+15 | m:Lea | ¿Es poco | de mi hijo?
+15 | m:Raquel | Pues dormirá | de tu hijo.
+16 | m:Lea | A mí has de entrar | de mi hijo.
+18 | m:Lea | Dios me ha dado mi recompensa | a mi marido
+20 | m:Lea | Dios me ha dado una buena dote | seis hijos
+23 | m:Raquel | Dios ha quitado mi afrenta | Dios ha quitado mi afrenta
+24 | m:Raquel | Jehová me añadirá otro hijo. | Jehová me añadirá otro hijo.
+25-26 | h:Jacob | Envíame | te he hecho.
+27 | v:Labán | Halle yo | por tu causa.
+28 | v:Labán | Señálame | lo daré.
+29-30 | h:Jacob | Tú sabes cómo | propia casa?
+31 | v:Labán | ¿Qué te daré? | ¿Qué te daré?
+31-33 | h:Jacob | No me des nada | como de hurto.
+34 | v:Labán | Mira, que sea | tú dices.

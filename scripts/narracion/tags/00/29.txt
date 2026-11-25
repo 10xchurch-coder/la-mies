@@ -1,0 +1,19 @@
+4 | h:Jacob=julian | Hermanos míos | de dónde sois?
+4 | g:pastores | De Harán somos. | De Harán somos.
+5 | h:Jacob | ¿Conocéis a Labán | hijo de Nacor?
+5 | g:pastores | Sí, le conocemos. | Sí, le conocemos.
+6 | h:Jacob | ¿Tiene paz? | ¿Tiene paz?
+6 | g:pastores | Paz; y he aquí | con el ganado.
+7 | h:Jacob | He aquí el día | apacentarlas.
+8 | g:pastores | No podemos | abrevemos las ovejas.
+14 | v:Labán | Ciertamente hueso | carne mía eres.
+15 | v:Labán | ¿Por ser tú | tu salario.
+18 | h:Jacob | Yo te serviré | hija menor.
+19 | v:Labán | Mejor es | quédate conmigo.
+21 | h:Jacob | Dame mi esposa | con ella.
+25 | h:Jacob | ¿Qué es esto | me has engañado?
+26-27 | v:Labán | No se hace así | otros siete años.
+32 | m:Lea | Ciertamente Jehová | mi marido.
+33 | m:Lea | Por cuanto oyó | también este.
+34 | m:Lea | Ahora esta vez | tres hijos
+35 | m:Lea | Esta vez alabaré a Jehová | Esta vez alabaré a Jehová
