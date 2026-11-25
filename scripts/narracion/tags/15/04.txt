@@ -1,0 +1,9 @@
+# Voces: Nehemías julian, Sanbalat arthur, Tobías sterling. Las oraciones cortas que Nehemías escribe (4 y 5) las lee el narrador.
+14 | h:Nehemías=julian | No temáis delante | por vuestras casas.
+2 | h:Sanbalat=arthur | ¿Qué hacen estos | fueron quemados?
+3 | h:Tobías=sterling | Aun lo que ellos edifican | muro de piedra.
+10 | g:Judá=desmond | Las fuerzas de los | edificar el muro.
+11 | g:enemigos=arthur | No sabrán ni verán | cesar la obra.
+12 | g:judíos=sterling | De todos los lugares | vendrán sobre vosotros.
+19-20 | h:Nehemías | La obra es grande | peleará por nosotros.
+22 | h:Nehemías | Cada uno con su criado | de día en la obra.

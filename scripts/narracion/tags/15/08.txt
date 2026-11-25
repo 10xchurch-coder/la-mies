@@ -1,0 +1,6 @@
+# Voces: Nehemías julian, el pueblo desmond, los levitas arthur, el pregón sterling.
+9 | h:Nehemías=julian | Día santo es a Jehová | ni lloréis:
+6 | g:pueblo=desmond | ¡Amén! ¡Amén! | ¡Amén! ¡Amén!
+10 | h:Nehemías | Id, comed grosuras | es vuestra fortaleza.
+11 | g:levitas=arthur | Callad, que es día santo | no os entristezcáis.
+15 | g:pregón=sterling | Salid al monte | como está escrito.

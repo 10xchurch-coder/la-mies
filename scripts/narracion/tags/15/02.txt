@@ -1,0 +1,11 @@
+# Voces: Nehemías julian, el rey Artajerjes sterling, Sanbalat arthur.
+3 | h:Nehemías=julian | Viva el rey para siempre. | consumidas por el fuego?
+2 | h:Artajerjes=sterling | ¿Por qué está triste | quebranto de corazón.
+4 | h:Artajerjes | ¿Qué cosa pides? | ¿Qué cosa pides?
+5 | h:Nehemías | Si le place al rey | para que yo la reedifique.
+6 | h:Artajerjes | ¿Cuánto durará | cuándo volverás?
+7-8 | h:Nehemías | Si place al rey | donde yo estaré.
+17 | h:Nehemías | Vosotros veis | no seamos más oprobio.
+18 | g:pueblo=desmond | Levantémonos y edifiquemos. | Levantémonos y edifiquemos.
+19 | h:Sanbalat=arthur | ¿Qué es esto | contra el rey?
+20 | h:Nehemías | El Dios del cielo | memoria en Jerusalén.

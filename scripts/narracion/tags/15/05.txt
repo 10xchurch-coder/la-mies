@@ -1,0 +1,10 @@
+# Voces: Nehemías julian; los del pueblo que se quejan desmond, arthur y sterling; los nobles arthur.
+7 | h:Nehemías=julian | ¿Tomáis cada uno | vuestros hermanos?
+2 | g:unos=desmond | Nosotros, nuestros hijos | comer y vivir.
+3 | g:otros=arthur | Hemos empeñado | causa del hambre.
+4-5 | g:terceros=sterling | Hemos pedido dinero | son de otros.
+8 | h:Nehemías | Nosotros conforme | vendidos a nosotros?
+9-11 | h:Nehemías | No está bien | demandáis de ellos.
+12 | g:nobles=arthur | Lo devolveremos | como tú dices.
+13 | h:Nehemías | Así sacuda Dios | sacudido y vaciado.
+13 | g:congregación=desmond | ¡Amén! | ¡Amén!

@@ -1,0 +1,8 @@
+# Voces: Nehemías julian, Sanbalat arthur (también su carta), los enemigos sterling, Semaías desmond.
+3 | h:Nehemías=julian | Yo hago una gran obra | para ir a vosotros.
+2 | h:Sanbalat=arthur | Ven y reunámonos | campo de Ono.
+6-7 | h:Sanbalat | Se ha oído entre | consultemos juntos.
+8 | h:Nehemías | No hay tal cosa | tú lo inventas.
+9 | g:enemigos=sterling | Se debilitarán | no será hecha.
+10 | h:Semaías=desmond | Reunámonos en la casa | vendrán a matarte.
+11 | h:Nehemías | ¿Un hombre como yo | ¡No entraré!
