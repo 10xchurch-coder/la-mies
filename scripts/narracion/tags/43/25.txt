@@ -1,0 +1,8 @@
+8 | h:Pablo=sterling | Ni contra la ley de los judíos | he pecado en nada.
+9 | h:Festo=arthur | ¿Quieres subir a Jerusalén | delante de mí?
+10-11 | h:Pablo | Ante el tribunal de César estoy | A César apelo.
+12 | h:Festo | A César has apelado; a César irás. | A César has apelado; a César irás.
+14-21 | h:Festo | Un hombre ha sido dejado preso | le enviara a César.
+22 | h:Agripa=julian | Yo también quisiera oír a ese hombre. | Yo también quisiera oír a ese hombre.
+22 | h:Festo | Mañana le oirás. | Mañana le oirás.
+24-27 | h:Festo | Rey Agripa, y todos los varones | haya en su contra.

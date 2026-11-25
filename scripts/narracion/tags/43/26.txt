@@ -1,0 +1,8 @@
+1 | h:Agripa=julian | Se te permite hablar por ti mismo. | Se te permite hablar por ti mismo.
+2-23 | h:Pablo=sterling | Me tengo por dichoso | al pueblo y a los gentiles.
+24 | h:Festo=arthur | Estás loco, Pablo | te vuelven loco.
+25-27 | h:Pablo | No estoy loco | Yo sé que crees.
+28 | h:Agripa | Por poco me persuades a ser cristiano. | Por poco me persuades a ser cristiano.
+29 | h:Pablo | ¡Quisiera Dios | excepto estas cadenas!
+31 | g:rey y gobernador=desmond | Ninguna cosa digna de muerte | hace este hombre.
+32 | h:Agripa | Podía este hombre | apelado a César.
