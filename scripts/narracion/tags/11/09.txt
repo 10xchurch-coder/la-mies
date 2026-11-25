@@ -1,0 +1,31 @@
+# Voces: Eliseo julian, el joven profeta arthur, Jehú desmond, los capitanes julian, el atalaya arthur, Joram sterling, los de a caballo julian, Jezabel soraya.
+1-3 | h:Eliseo=julian | Ciñe tus lomos | huye, y no esperes.
+5 | h:profeta=arthur | Oh capitán, una palabra tengo que decirte. | Oh capitán, una palabra tengo que decirte.
+5 | h:Jehú=desmond | ¿A cuál de todos nosotros? | ¿A cuál de todos nosotros?
+5 | h:profeta | A ti, oh capitán. | A ti, oh capitán.
+6-10 | h:profeta | Así dice Jehová, el Dios de Israel | no habrá quien la sepulte.
+11 | g:capitanes=julian | ¿Todo está bien? | aquel loco?
+11 | h:Jehú | Vosotros conocéis | sus palabras.
+12 | g:capitanes | Mentira; decláranoslo ahora. | Mentira; decláranoslo ahora.
+12 | h:Jehú | Así y así me habló | rey sobre Israel.
+13 | g:capitanes | Jehú es rey. | Jehú es rey.
+15 | h:Jehú | Si es vuestra voluntad | las nuevas en Jezreel.
+17 | h:atalaya=arthur | Yo veo una cuadrilla. | Yo veo una cuadrilla.
+17 | h:Joram=sterling | Toma uno de a caballo | ¿Hay paz?
+18 | h:jinete=julian | El rey dice así: ¿Hay paz? | El rey dice así: ¿Hay paz?
+18 | h:Jehú | ¿Qué tienes tú que ver con la paz? | Vuélvete tras mí.
+18 | h:atalaya | El mensajero llegó hasta ellos, y no vuelve. | El mensajero llegó hasta ellos, y no vuelve.
+19 | h:jinete | El rey dice así: ¿Hay paz? | El rey dice así: ¿Hay paz?
+19 | h:Jehú | ¿Qué tienes tú que ver con la paz? | Vuélvete tras mí.
+20 | h:atalaya | También este llegó | viene impetuosamente.
+21 | h:Joram | Unce. | Unce.
+22 | h:Joram | ¿Hay paz, Jehú? | ¿Hay paz, Jehú?
+22 | h:Jehú | ¿Qué paz, mientras | sus hechicerías?
+23 | h:Joram | ¡Traición, Ocozías! | ¡Traición, Ocozías!
+25-26 | h:Jehú | Tómalo y échalo | conforme a la palabra de Jehová.
+27 | h:Jehú | Herid también a este en el carro. | Herid también a este en el carro.
+31 | m:Jezabel=soraya | ¿Sucedió bien a Zimri | mató a su señor?
+32 | h:Jehú | ¿Quién está conmigo? | ¿Quién?
+33 | h:Jehú | Echadla abajo. | Echadla abajo.
+34 | h:Jehú | Id ahora a ver | es hija de rey.
+36-37 | h:Jehú | Esta es la palabra de Jehová | Esta es Jezabel.

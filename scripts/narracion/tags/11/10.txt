@@ -1,0 +1,22 @@
+# Voces: Jehú desmond (también sus cartas), los principales arthur, el mensajero y los hermanos de Ocozías sterling, Jonadab julian.
+2-3 | h:Jehú=desmond | Inmediatamente que esta carta | la casa de vuestro señor.
+4 | g:principales=arthur | He aquí dos reyes | resistiremos nosotros?
+5 | g:principales | Somos tus siervos | bien te parezca.
+6 | h:Jehú | Si son míos | a mí a Jezreel.
+8 | h:mensajero=sterling | Han traído las cabezas de los hijos del rey. | Han traído las cabezas de los hijos del rey.
+8 | h:Jehú | Ponedlas en dos montones | hasta la mañana.
+9-10 | h:Jehú | Vosotros sois justos | su siervo Elías.
+13 | h:Jehú | ¿Quién sois vosotros? | ¿Quién sois vosotros?
+13 | g:hermanos=sterling | Somos hermanos de Ocozías | los hijos de la reina.
+14 | h:Jehú | Prendedlos vivos. | Prendedlos vivos.
+15 | h:Jehú | ¿Es recto tu corazón | recto con el tuyo?
+15 | h:Jonadab=julian | Lo es. | Lo es.
+15 | h:Jehú | Pues que lo es, dame la mano. | Pues que lo es, dame la mano.
+16 | h:Jehú | Ven conmigo | mi celo por Jehová.
+18-19 | h:Jehú | Acab sirvió poco | el que falte, no vivirá.
+20 | h:Jehú | Convocad una asamblea solemne para Baal. | Convocad una asamblea solemne para Baal.
+22 | h:Jehú | Saca vestiduras | los siervos de Baal.
+23 | h:Jehú | Mirad y ved | sólo los siervos de Baal.
+24 | h:Jehú | Cualquiera que dejare | por la vida de él.
+25 | h:Jehú | Entren, y mátenlos; que no escape ninguno. | Entren, y mátenlos; que no escape ninguno.
+30 | dios | Por cuanto has hecho bien | hasta la cuarta generación.

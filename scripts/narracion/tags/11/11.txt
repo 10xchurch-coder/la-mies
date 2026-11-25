@@ -1,0 +1,5 @@
+# Voces: el sacerdote Joiada arthur (mayor), el pueblo desmond, Atalía helena.
+5-8 | v:Joiada=arthur | Esto es lo que habéis de hacer | cuando saliere y cuando entrare.
+12 | g:pueblo=desmond | ¡Viva el rey! | ¡Viva el rey!
+14 | m:Atalía=helena | ¡Traición, traición! | ¡Traición, traición!
+15 | v:Joiada | Sacadla fuera | matadle a espada.
