@@ -1,0 +1,9 @@
+7-9 | h:Juan el Bautista | ¡Oh generación de víboras! | echado en el fuego.
+10 | g:la gente | ¿Qué, pues, haremos? | ¿Qué, pues, haremos?
+11 | h:Juan el Bautista | El que tiene dos túnicas | haga lo mismo.
+12 | g:publicanos | Maestro, ¿qué haremos? | Maestro, ¿qué haremos?
+13 | h:Juan el Bautista | No exijáis más | os está ordenado.
+14 | g:soldados | Y nosotros, ¿qué haremos? | Y nosotros, ¿qué haremos?
+14 | h:Juan el Bautista | No hagáis extorsión | con vuestro salario.
+16-17 | h:Juan el Bautista | Yo a la verdad os bautizo | nunca se apagará.
+22 | dios | Tú eres mi Hijo amado | en ti tengo complacencia.
