@@ -1,0 +1,13 @@
+1 | dios | Abraham. | Abraham.
+1 | v:Abraham | Heme aquí. | Heme aquí.
+2 | dios | Toma ahora | yo te diré.
+5 | v:Abraham | Esperaos aquí | a vosotros.
+7 | h:Isaac | Padre mío. | Padre mío.
+7 | v:Abraham | Heme aquí, mi hijo. | Heme aquí, mi hijo.
+7 | h:Isaac | He aquí el fuego | para el holocausto?
+8 | v:Abraham | Dios se proveerá | hijo mío.
+11 | angel | Abraham, Abraham. | Abraham, Abraham.
+11 | v:Abraham | Heme aquí. | Heme aquí.
+12 | angel | No extiendas | tu único;
+16-18 | angel | Por mí mismo | a mi voz.
+20-22 | h:mensajero | He aquí que también | a Betuel.
