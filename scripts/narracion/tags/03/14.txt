@@ -1,0 +1,9 @@
+2-3 | g:pueblo=arthur | ¡Quisiera Dios que hubiéramos muerto en la tierra | volvernos a Egipto?
+4 | g:pueblo | Hagamos un capitán | volvámonos a Egipto.
+7-9 | g:Josué y Caleb=desmond | La tierra por donde pasamos | no los temáis.
+11-12 | dios | ¿Hasta cuándo me ha de irritar | más fuerte que ellos.
+13-19 | h:Moisés=sterling | Lo oirán luego los egipcios | Egipto hasta aquí.
+20-25 | dios | Yo lo he perdonado | camino del Mar Rojo.
+27-35 | dios | ¿Hasta cuándo oiré | ahí morirán.
+40 | g:pueblo | Aquí estamos | porque hemos pecado.
+41-43 | h:Moisés | ¿Por qué quebrantáis | no será con vosotros.
