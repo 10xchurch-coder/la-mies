@@ -52,8 +52,9 @@
 - Hecho: 2 Timoteo 1 a 4 (25 nov 2026), 13 pedazos, sin fallas. 2 TIMOTEO COMPLETO.
 - Hecho: Tito 1 a 3 y Filemón (25 nov 2026), 11 pedazos, sin fallas. TITO Y FILEMÓN COMPLETOS.
 - Hecho: Hebreos 1 a 13 (25 nov 2026), 49 pedazos, sin fallas. HEBREOS COMPLETO.
-- EN CURSO: Santiago a Judas (libros 58 a 64), 23:36 UTC del 25 nov
-- Sigue: Santiago 1 (libro 58). Los planes de Santiago a Judas (sin tags) y los tags y planes de Apocalipsis 1 a 19 ya están en main; falta el audio. Faltan los tags de Apocalipsis 20 a 22.
+- Hecho: Santiago, 1 y 2 Pedro, 1, 2 y 3 Juan y Judas (25 nov 2026), 74 pedazos, sin fallas (un pedazo salió con "Out of credits" habiendo créditos y se pidió de nuevo). SANTIAGO A JUDAS COMPLETOS.
+- EN CURSO: Apocalipsis 1 a 8, 23:50 UTC del 25 nov
+- Sigue: Apocalipsis 1 (libro 65). Los tags y planes de Apocalipsis 1 a 22 ya están en main y bajados en el sandbox (grupos a_g65a = 1 a 8, a_g65b = 9 a 16, a_g65c = 17 a 22); falta el audio.
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
