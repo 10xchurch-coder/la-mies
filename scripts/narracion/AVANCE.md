@@ -16,6 +16,7 @@
 - Hecho: Lucas 13 a 16 (25 nov 2026), 53 pedazos, sin fallas.
 - Hecho: Lucas 17 y 18 (25 nov 2026), 62 pedazos, sin fallas. Lucas 9 a 18 gastaron unos 360 créditos entre las cuatro tareas.
 - Sigue: Lucas 19 (libro 41). Los tags y planes de Lucas 19 y 20 ya están hechos y revisados (y bajados en el sandbox); de Lucas 21 en adelante falta todo.
+- EN CURSO: Lucas 19 a 22, 14:32 UTC del 25 nov 2026
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
