@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Crónicas 13 (tags y planes ya hechos, revisados contra el texto y bajados al sandbox hasta 2 Crónicas 18).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 12 (25 nov 2026; décima vuelta: 1 Crónicas 25 a 29 y 2 Crónicas 1 a 12, 143 pedazos, sin fallas; los pedidos que salen "Rate limit" se vuelven a pedir).
-- Créditos al empezar la décima vuelta: 5230 (se comparten entre las cuatro tareas).
+- Sigue: 2 Crónicas 18 (tags y planes ya hechos y subidos de 2 Crónicas 18 a 36, revisados contra el texto; los planes de 18 a 36 ya están en el sandbox; el 27 no lleva tags).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 17 (25 nov 2026; décima vuelta: 1 Crónicas 25 a 29 y 2 Crónicas 1 a 17, 152 pedazos, unas 70.000 letras, sin fallas; dos pedidos salieron "Rate limit" y se volvieron a pedir).
+- Créditos al terminar la décima vuelta: 4881 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
@@ -13,4 +13,7 @@
 - Voces fijas en 2 Reyes 17 a 25: Ezequías sterling, Isaías desmond, el rey de Asiria y el Rabsaces arthur, Eliaquim julian, Josías julian, Hilcías arthur, Safán sterling, Hulda elena, Gedalías desmond.
 - Voces fijas en 1 Crónicas: David julian, Natán desmond, Joab sterling, Gad arthur, Ornán desmond, Saúl arthur. El salmo de 1 Crónicas 16 (8 a 36) va con la voz de David, como su cántico de 2 Samuel 22.
 - Voces fijas en 2 Crónicas 1 a 18 (ya en los tags): Salomón sterling, Hiram arthur, la reina de Seba elena, Roboam sterling, Abías julian, Asa desmond, Acab sterling, Josafat arthur, Micaías desmond, Sedequías julian.
+- Voces fijas en 2 Crónicas 19 a 36 (ya en los tags): Josafat arthur, Jehú el vidente desmond, Jahaziel desmond, Elías desmond, Joiada arthur, Atalía helena, Joás de Judá julian, Zacarías sterling, Amasías julian, Joás de Israel sterling, Acaz arthur, Oded desmond, Ezequías sterling, Senaquerib arthur, Josías julian, Hilcías arthur, Safán sterling, Hulda elena, Necao arthur, Ciro sterling.
 - Nota técnica 2: en la copia de la nube la rama local main puede estar vieja; trabajar desde origin/main (`git checkout -b narr-c origin/main`) y subir con `git push origin HEAD:main`.
+
+- Nota técnica 3: para pedir más rápido, en el sandbox están `nar/C-pack.py` (junta los pedidos de varios capítulos en tandas de 8, con index = capítulo×100 + pedazo) y `nar/C-rp.py`; se pide con `requests: {"ref": "sandbox:~/nar/C-r.json#/t/N"}`. Son archivos solo de la tarea C.
