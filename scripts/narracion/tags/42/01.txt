@@ -1,0 +1,30 @@
+15 | h:Juan el Bautista | Éste es de quien yo decía | porque era primero que yo.
+19 | g:sacerdotes y levitas | ¿Tú quién eres? | ¿Tú quién eres?
+20 | h:Juan el Bautista | Yo no soy el Cristo. | Yo no soy el Cristo.
+21 | g:sacerdotes y levitas | ¿Qué, pues? | ¿Eres tú Elías?
+21 | h:Juan el Bautista | No soy. | No soy.
+21 | g:sacerdotes y levitas | ¿Eres tú el Profeta? | ¿Eres tú el Profeta?
+21 | h:Juan el Bautista | No. | No.
+22 | g:sacerdotes y levitas | ¿Quién eres? | ¿Qué dices de ti mismo?
+23 | h:Juan el Bautista | Yo soy la voz de uno | como dijo el profeta Isaías.
+25 | g:sacerdotes y levitas | ¿Por qué, pues, bautizas | ni el Profeta?
+26-27 | h:Juan el Bautista | Yo bautizo en agua | la correa del calzado.
+29-31 | h:Juan el Bautista | He aquí el Cordero de Dios, que quita | vine yo bautizando en agua.
+32-34 | h:Juan el Bautista | Vi al Espíritu descender | Éste es el Hijo de Dios.
+36 | h:Juan el Bautista | He aquí el Cordero de Dios. | He aquí el Cordero de Dios.
+38 | jesus | ¿Qué buscáis? | ¿Qué buscáis?
+38 | g:dos discípulos | Rabí | Rabí
+38 | g:dos discípulos | ¿dónde moras? | ¿dónde moras?
+39 | jesus | Venid y ved. | Venid y ved.
+41 | h:Andrés | Hemos hallado al Mesías | Hemos hallado al Mesías
+42 | jesus | Tú eres Simón hijo de Jonás | tú serás llamado Cefas
+43 | jesus | Sígueme. | Sígueme.
+45 | h:Felipe | Hemos hallado a Aquél | el hijo de José.
+46 | h:Natanael | ¿De Nazaret puede salir algo bueno? | ¿De Nazaret puede salir algo bueno?
+46 | h:Felipe | Ven y ve. | Ven y ve.
+47 | jesus | He aquí un verdadero israelita | en quien no hay engaño.
+48 | h:Natanael | ¿De dónde me conoces? | ¿De dónde me conoces?
+48 | jesus | Antes que Felipe te llamara | debajo de la higuera, te vi.
+49 | h:Natanael | Rabí, tú eres el Hijo de Dios | Tú eres el Rey de Israel.
+50 | jesus | ¿Porque te dije | Cosas mayores que estas verás.
+51 | jesus | De cierto, de cierto os digo | sobre el Hijo del Hombre.

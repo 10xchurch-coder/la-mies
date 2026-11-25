@@ -1,0 +1,10 @@
+3 | m:María | No tienen vino. | No tienen vino.
+4 | jesus | ¿Qué tengo yo contigo, mujer? | Aún no ha venido mi hora.
+5 | m:María | Haced todo lo que Él os dijere. | Haced todo lo que Él os dijere.
+7 | jesus | Llenad de agua estas tinajas. | Llenad de agua estas tinajas.
+8 | jesus | Sacad ahora | llevadla al maestresala.
+10 | h:maestresala | Todo hombre sirve primero | el buen vino hasta ahora.
+16 | jesus | Quitad de aquí esto | una casa de mercado.
+18 | g:judíos | ¿Qué señal nos muestras | ya que haces esto?
+19 | jesus | Destruid este templo | en tres días lo levantaré.
+20 | g:judíos | En cuarenta y seis años | lo levantarás en tres días?

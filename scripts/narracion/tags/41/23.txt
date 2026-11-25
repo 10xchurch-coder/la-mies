@@ -1,0 +1,19 @@
+2 | g:acusadores | Hemos hallado que Éste | Él mismo es Cristo, un Rey.
+3 | h:Pilato | ¿Eres tú el Rey de los judíos? | ¿Eres tú el Rey de los judíos?
+3 | jesus | Tú lo dices. | Tú lo dices.
+4 | h:Pilato | Ninguna falta hallo en este hombre. | Ninguna falta hallo en este hombre.
+5 | g:acusadores | Alborota al pueblo | desde Galilea hasta aquí.
+14-16 | h:Pilato | Me habéis presentado a Éste | Le castigaré, pues, y le soltaré.
+18 | g:multitud | Fuera con Éste | suéltanos a Barrabás.
+21 | g:multitud | ¡Crucifícale, crucifícale! | ¡Crucifícale, crucifícale!
+22 | h:Pilato | ¿Por qué? ¿Qué mal ha hecho | le castigaré, pues, y le soltaré.
+28-31 | jesus | Hijas de Jerusalén | ¿en el seco, qué se hará?
+34 | jesus | Padre, perdónalos | no saben lo que hacen.
+35 | g:príncipes | A otros salvó | el escogido de Dios.
+37 | g:soldados | Si tú eres el Rey de los judíos | sálvate a ti mismo.
+39 | h:malhechor | Si tú eres el Cristo | sálvate a ti mismo y a nosotros.
+40-41 | h:otro malhechor | ¿No temes tú a Dios | mas Éste ningún mal hizo.
+42 | h:otro malhechor | Señor, acuérdate de mí | cuando vengas en tu reino.
+43 | jesus | De cierto te digo: Hoy | conmigo en el paraíso.
+46 | jesus | Padre, en tus manos | encomiendo mi espíritu.
+47 | h:centurión | Verdaderamente este hombre era justo. | Verdaderamente este hombre era justo.
