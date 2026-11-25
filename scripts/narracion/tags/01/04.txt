@@ -1,0 +1,20 @@
+1 | h:Moisés=sterling | He aquí que ellos | aparecido Jehová.
+2 | dios | ¿Qué es eso | en tu mano?
+2 | h:Moisés | Una vara. | Una vara.
+3 | dios | Échala en tierra. | Échala en tierra.
+4 | dios | Extiende tu mano | por la cola.
+5 | dios | Por esto creerán | Dios de Jacob.
+6 | dios | Mete ahora tu mano en tu seno. | Mete ahora tu mano en tu seno.
+7 | dios | Vuelve a meter tu mano en tu seno; | Vuelve a meter tu mano en tu seno;
+8-9 | dios | Si aconteciere | la tierra seca.
+10 | h:Moisés | Oh mi Señor | torpe de lengua.
+11-12 | dios | ¿Quién dio la boca | has de decir.
+13 | h:Moisés | ¡Ay Señor! | has de enviar.
+14-17 | dios | ¿No es Aarón | las señales.
+18 | h:Moisés | Iré ahora | aún viven.
+18 | v:Jetro=arthur | Ve en paz. | Ve en paz.
+19 | dios | Ve, y vuélvete | tu muerte.
+21-23 | dios | Cuando hubiereis vuelto | tu primogénito.
+25 | m:Séfora | A la verdad | esposo de sangre.
+26 | m:Séfora | Eres esposo de sangre | la circuncisión.
+27 | dios | Ve a recibir a Moisés al desierto. | Ve a recibir a Moisés al desierto.

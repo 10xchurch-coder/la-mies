@@ -1,0 +1,12 @@
+6 | m:hija de Faraón | De los niños de los hebreos es este. | De los niños de los hebreos es este.
+7 | m:hermana | ¿Iré a llamarte | este niño?
+8 | m:hija de Faraón | Ve. | Ve.
+9 | m:hija de Faraón | Lleva este niño | te lo pagaré.
+10 | m:hija de Faraón | Porque de las aguas lo saqué. | Porque de las aguas lo saqué.
+13 | h:Moisés=sterling | ¿Por qué hieres a tu prójimo? | ¿Por qué hieres a tu prójimo?
+14 | h:hebreo=julian | ¿Quién te ha puesto | al egipcio?
+14 | h:Moisés | Ciertamente esta cosa es descubierta. | Ciertamente esta cosa es descubierta.
+18 | v:Reuel=arthur | ¿Por qué habéis venido hoy tan pronto? | ¿Por qué habéis venido hoy tan pronto?
+19 | m:hijas de Reuel | Un varón egipcio | abrevó el rebaño.
+20 | v:Reuel | ¿Y dónde está? | coma pan.
+22 | h:Moisés | Peregrino soy en tierra ajena. | Peregrino soy en tierra ajena.

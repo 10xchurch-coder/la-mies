@@ -1,0 +1,12 @@
+3 | h:Moisés=sterling | Iré yo ahora | no se quema.
+4 | dios | ¡Moisés, Moisés! | ¡Moisés, Moisés!
+4 | h:Moisés | Heme aquí. | Heme aquí.
+5 | dios | No te acerques | tierra santa es.
+6 | dios | Yo soy el Dios de tu padre | Dios de Jacob.
+7-10 | dios | Bien he visto | los hijos de Israel.
+11 | h:Moisés | ¿Quién soy yo | los hijos de Israel?
+12 | dios | Ciertamente yo seré contigo | sobre esta montaña.
+13 | h:Moisés | He aquí cuando yo llegue | ¿Qué les responderé?
+14 | dios | YO SOY EL QUE SOY. | YO SOY EL QUE SOY.
+14 | dios | Así dirás a los hijos de Israel: YO SOY | enviado a vosotros.
+15-22 | dios | Así dirás a los hijos de Israel: Jehová | a los egipcios.
