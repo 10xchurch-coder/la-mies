@@ -1,0 +1,39 @@
+# Voces: Eliseo julian, la viuda naomi, la sunamita elena, su marido (hombre mayor) arthur, Giezi sterling, los niños benji, hijos de los profetas desmond.
+1 | m:viuda=naomi | Tu siervo mi marido ha muerto | dos hijos míos por siervos.
+2 | h:Eliseo=julian | ¿Qué puedo hacer por ti? | qué tienes en casa.
+2 | m:viuda | Tu sierva ninguna cosa | una vasija de aceite.
+3-4 | h:Eliseo | Ve, y pide para ti | ponla aparte.
+6 | m:viuda | Tráeme aún otra vasija. | Tráeme aún otra vasija.
+6 | n:hijo | No hay más vasijas. | No hay más vasijas.
+7 | h:Eliseo | Ve, vende el aceite | de lo que quede.
+9-10 | m:sunamita=elena | He aquí ahora, yo percibo | se recoja en ella.
+12 | h:Eliseo | Llama a esta sunamita. | Llama a esta sunamita.
+13 | h:Eliseo | Dile: He aquí tú has estado | o al capitán del ejército?
+13 | m:sunamita | Yo habito en medio de mi pueblo. | Yo habito en medio de mi pueblo.
+14 | h:Eliseo | ¿Qué, pues, haremos por ella? | ¿Qué, pues, haremos por ella?
+14 | h:Giezi=sterling | He aquí ella no tiene hijo | su marido es viejo.
+15 | h:Eliseo | Llámala. | Llámala.
+16 | h:Eliseo | A este tiempo según | abrazarás un hijo.
+16 | m:sunamita | No, señor mío | burla de tu sierva.
+19 | n:niño | ¡Ay, mi cabeza, mi cabeza! | ¡Ay, mi cabeza, mi cabeza!
+19 | v:padre=arthur | Llévalo a su madre. | Llévalo a su madre.
+22 | m:sunamita | Te ruego que envíes | y vuelva.
+23 | v:padre | ¿Para qué has de ir | ni sábado.
+23 | m:sunamita | Paz. | Paz.
+24 | m:sunamita | Guía y anda | yo te lo diga.
+25-26 | h:Eliseo | He aquí la sunamita. | ¿Le va bien a tu hijo?
+26 | m:sunamita | Bien. | Bien.
+27 | h:Eliseo | Déjala, porque | no me lo ha revelado.
+28 | m:sunamita | ¿Pedí yo hijo | No me engañes?
+29 | h:Eliseo | Ciñe tus lomos | el rostro del niño.
+30 | m:sunamita | Vive Jehová, y vive tu alma | que no te dejaré.
+31 | h:Giezi | El niño no despierta. | El niño no despierta.
+36 | h:Eliseo | Llama a esta sunamita. | Llama a esta sunamita.
+36 | h:Eliseo | Toma tu hijo. | Toma tu hijo.
+38 | h:Eliseo | Pon la olla grande | para los hijos de los profetas.
+40 | g:hijos de los profetas=desmond | ¡Varón de Dios, hay muerte en la olla! | ¡Varón de Dios, hay muerte en la olla!
+41 | h:Eliseo | Traed harina. | Traed harina.
+41 | h:Eliseo | Da de comer a la gente. | Da de comer a la gente.
+42 | h:Eliseo | Da a la gente para que coman. | Da a la gente para que coman.
+43 | h:sirviente=sterling | ¿Cómo he de poner | cien hombres?
+43 | h:Eliseo | Da a la gente para que coman, porque | Comerán, y sobrará.

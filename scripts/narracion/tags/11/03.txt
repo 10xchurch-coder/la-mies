@@ -1,0 +1,15 @@
+# Voces: Joram (el rey de Israel) sterling, Josafat arthur, Eliseo julian, el siervo y los moabitas desmond.
+# En el versículo 8 pregunta Josafat y responde Joram.
+7 | h:Joram=sterling | El rey de Moab se ha rebelado | a la guerra contra Moab?
+7 | h:Josafat=arthur | Iré, porque yo soy | como tus caballos.
+8 | h:Josafat | ¿Por qué camino iremos? | ¿Por qué camino iremos?
+8 | h:Joram | Por el camino del desierto de Idumea. | Por el camino del desierto de Idumea.
+10 | h:Joram | ¡Ah! que Jehová ha llamado | en manos de los moabitas.
+11 | h:Josafat | ¿No hay aquí profeta | a Jehová por él?
+11 | h:siervo=desmond | Aquí está Eliseo | en las manos de Elías.
+12 | h:Josafat | Este tendrá palabra de Jehová. | Este tendrá palabra de Jehová.
+13 | h:Eliseo=julian | ¿Qué tengo yo contigo? | los profetas de tu madre.
+13 | h:Joram | No; porque Jehová ha juntado | en manos de los moabitas.
+14-15 | h:Eliseo | Vive Jehová de los ejércitos | traedme un tañedor.
+16-19 | h:Eliseo | Así dice Jehová: Haced | toda tierra fértil.
+23 | g:moabitas=desmond | ¡Esto es sangre de espada! | ¡Moab, al despojo!

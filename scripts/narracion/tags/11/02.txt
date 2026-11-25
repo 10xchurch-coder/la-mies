@@ -1,0 +1,25 @@
+# Voces: Elías desmond, Eliseo julian, hijos de los profetas arthur, hombres de la ciudad sterling, muchachos benji.
+2 | h:Elías=desmond | Quédate ahora aquí | me ha enviado a Betel.
+2 | h:Eliseo=julian | Vive Jehová, y vive tu alma | que no te dejaré.
+3 | g:hijos de los profetas=arthur | ¿Sabes que Jehová | de sobre tu cabeza?
+3 | h:Eliseo | Sí, yo lo sé; callad. | Sí, yo lo sé; callad.
+4 | h:Elías | Eliseo, quédate aquí ahora | me ha enviado a Jericó.
+4 | h:Eliseo | Vive Jehová, y vive tu alma | que no te dejaré.
+5 | g:hijos de los profetas | ¿Sabes que Jehová | de sobre tu cabeza?
+5 | h:Eliseo | Sí, yo lo sé; callad. | Sí, yo lo sé; callad.
+6 | h:Elías | Te ruego que te quedes aquí | me ha enviado al Jordán.
+6 | h:Eliseo | Vive Jehová, y vive tu alma | que no te dejaré.
+9 | h:Elías | Pide lo que quieres | quitado de tu lado.
+9 | h:Eliseo | Te ruego que una doble porción | sea sobre mí.
+10 | h:Elías | Cosa difícil has pedido. | mas si no, no.
+12 | h:Eliseo | ¡Padre mío, padre mío | gente de a caballo!
+14 | h:Eliseo | ¿Dónde está Jehová | el Dios de Elías?
+15 | g:hijos de los profetas | El espíritu de Elías | reposa sobre Eliseo.
+16 | g:hijos de los profetas | He aquí hay con tus siervos | o en algún valle.
+16 | h:Eliseo | No enviéis. | No enviéis.
+17 | h:Eliseo | Enviad. | Enviad.
+18 | h:Eliseo | ¿No os dije yo | que no fueseis?
+19 | g:hombres de la ciudad=sterling | He aquí el lugar | la tierra es estéril.
+20 | h:Eliseo | Traedme una vasija nueva | poned sal en ella.
+21 | h:Eliseo | Así dice Jehová: Yo sané | muerte ni esterilidad.
+23 | n:muchachos | ¡Calvo, sube; calvo, sube! | ¡Calvo, sube; calvo, sube!
