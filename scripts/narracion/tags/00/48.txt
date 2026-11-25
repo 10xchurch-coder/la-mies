@@ -1,0 +1,12 @@
+1 | g:aviso=julian | He aquí tu padre está enfermo. | He aquí tu padre está enfermo.
+2 | g:aviso | He aquí tu hijo José viene a ti. | He aquí tu hijo José viene a ti.
+3-7 | v:Jacob=arthur | El Dios Omnipotente | que es Belén.
+8 | v:Jacob | ¿Quiénes son estos? | ¿Quiénes son estos?
+9 | h:José=sterling | Son mis hijos | dado aquí.
+9 | v:Jacob | Acércalos ahora | los bendeciré.
+11 | v:Jacob | No pensaba yo | tu simiente.
+15-16 | v:Jacob | El Dios en cuya presencia | medio de la tierra.
+18 | h:José | No así, padre mío | sobre su cabeza.
+19 | v:Jacob | Lo sé, hijo mío | multitud de naciones.
+20 | v:Jacob | En ti bendecirá | como a Manasés.
+21-22 | v:Jacob | He aquí, yo muero | con mi arco.

@@ -1,0 +1,15 @@
+1 | h:José=sterling | Mi padre y mis hermanos | tierra de Gosén.
+3 | h:Faraón=desmond | ¿Cuál es vuestro oficio? | ¿Cuál es vuestro oficio?
+3 | g:hermanos=julian | Pastores de ovejas | nuestros padres.
+4 | g:hermanos | Para morar | tierra de Gosén.
+5-6 | h:Faraón | Tu padre y tus hermanos | de mi ganado.
+8 | h:Faraón | ¿Cuántos son | de tu vida?
+9 | v:Jacob=arthur | Los días de los años de mi peregrinación | de su peregrinación.
+15 | g:pueblo=julian | Danos pan | acabado el dinero?
+16 | h:José | Dad vuestros ganados | si se ha acabado el dinero.
+18-19 | g:pueblo | No encubriremos | asolada la tierra.
+23-24 | h:José | He aquí hoy | vuestros niños.
+25 | g:pueblo | La vida nos has dado | siervos de Faraón.
+29-30 | v:Jacob | Si he hallado | sepulcro de ellos.
+30 | h:José | Yo haré como tú dices. | Yo haré como tú dices.
+31 | v:Jacob | Júramelo. | Júramelo.
