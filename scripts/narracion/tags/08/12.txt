@@ -1,0 +1,7 @@
+1-3 | v:Samuel=arthur | He aquí, yo he oído vuestra voz | y yo os restituiré.
+4 | g:pueblo=desmond | Nunca nos has calumniado | de ningún hombre.
+5 | v:Samuel | Jehová es testigo contra vosotros | cosa ninguna.
+5 | g:pueblo | Él es testigo. | Él es testigo.
+6-17 | v:Samuel | Jehová es quien favoreció | pidiendo para vosotros rey.
+19 | g:pueblo | Ora por tus siervos | pedir rey para nosotros.
+20-25 | v:Samuel | No temáis | vuestro rey pereceréis.

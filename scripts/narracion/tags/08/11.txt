@@ -1,0 +1,10 @@
+1 | g:Jabes=julian | Haz alianza con nosotros, y te serviremos. | Haz alianza con nosotros, y te serviremos.
+2 | h:Nahas=sterling | Con esta condición | sobre todo Israel.
+3 | g:Jabes | Danos tregua de siete días | saldremos a ti.
+5 | h:Saúl=desmond | ¿Qué tiene el pueblo, que lloran? | ¿Qué tiene el pueblo, que lloran?
+7 | h:Saúl | Cualquiera que no saliere | hecho a sus bueyes.
+9 | h:Saúl | Así diréis a los de Jabes | seréis librados.
+10 | g:Jabes | Mañana saldremos a vosotros | bien os pareciere.
+12 | g:pueblo=sterling | ¿Quiénes son los que decían | para que los matemos.
+13 | h:Saúl | No morirá hoy ninguno | salvación en Israel.
+14 | v:Samuel=arthur | Venid, vamos a Gilgal | renovemos allí el reino.
