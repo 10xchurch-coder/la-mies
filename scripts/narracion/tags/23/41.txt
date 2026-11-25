@@ -1,0 +1,3 @@
+# Ismael = sterling, los diez hombres = arthur.
+6 | h:Ismael=sterling | Venid a Gedalías, hijo de Ahicam. | Venid a Gedalías, hijo de Ahicam.
+8 | g:diez hombres=arthur | No nos mates | y aceite y miel.

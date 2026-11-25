@@ -1,0 +1,7 @@
+# Nabuzaradán = arthur, Gedalías = desmond, Johanán y los capitanes = sterling.
+2-4 | h:Nabuzaradán=arthur | Jehová tu Dios habló | más cómodo te parezca ir.
+5 | h:Nabuzaradán | Vuélvete a Gedalías | te parezca más cómodo ir.
+9-10 | h:Gedalías=desmond | No tengáis temor | ciudades que habéis tomado.
+14 | g:capitanes=sterling | ¿No sabes de cierto | para matarte?
+15 | h:Johanán=sterling | Yo iré ahora | el remanente de Judá?
+16 | h:Gedalías | No hagas esto | dices de Ismael.

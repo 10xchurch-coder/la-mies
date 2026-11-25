@@ -1,0 +1,14 @@
+# Jeremías = julian, Sedequías = desmond, los príncipes (contrarios) = sterling, Ebedmelec = arthur.
+2-3 | h:Jeremías=julian | Así dice Jehová: El que se quede | del rey de Babilonia, y la tomará.
+4 | g:príncipes=sterling | Te pedimos que se dé muerte | sino el mal.
+5 | h:Sedequías=desmond | He aquí, él está en vuestras manos | contra vosotros.
+9 | h:Ebedmelec=arthur | Mi señor el rey | no hay más pan en la ciudad.
+10 | h:Sedequías | Toma en tu poder | antes que muera.
+12 | h:Ebedmelec | Pon ahora esos trapos | debajo de las sogas.
+14 | h:Sedequías | Voy a preguntarte algo | no me ocultes nada.
+15 | h:Jeremías | Si te lo declaro | no me escucharás.
+16 | h:Sedequías | Vive Jehová que nos hizo | que buscan tu vida.
+17-18 | h:Jeremías | Así dice Jehová, Dios de los ejércitos | no escaparás de sus manos.
+19 | h:Sedequías | Tengo temor de los judíos | me escarnezcan.
+20-23 | h:Jeremías | No te entregarán | quemará a fuego.
+24-26 | h:Sedequías | Que nadie sepa de estas palabras | no me muriese allí.
