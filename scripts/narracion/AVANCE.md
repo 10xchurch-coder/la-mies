@@ -26,7 +26,8 @@
 - Hecho: Juan 21 (25 nov 2026), 43 pedazos, sin fallas. JUAN COMPLETO.
 - Hecho: Hechos 1 a 3 (25 nov 2026), 40 pedazos, sin fallas.
 - Hecho: Hechos 4 a 7 (25 nov 2026), 58 pedazos, sin fallas. Juan 17 a Hechos 7 gastaron unos 380 créditos entre las cuatro tareas.
-- Sigue: Hechos 8 (libro 43). De Hechos 8 en adelante falta todo (tags, planes y audio).
+- Hecho: Hechos 8 a 11 (25 nov 2026), 96 pedazos, sin fallas. Quedan unos 3745 créditos.
+- Sigue: Hechos 12 (libro 43). Hechos 12 a 15 ya tienen tags y planes; de Hechos 16 en adelante falta todo.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
