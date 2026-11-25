@@ -1,0 +1,8 @@
+1 | g:pueblo=arthur | ¿Quién será el primero | contra los cananeos?
+2 | dios | Judá subirá | la tierra en sus manos.
+3 | g:Judá=desmond | Sube conmigo a mi suerte | iré contigo a tu suerte.
+7 | h:Adoni-bezec=julian | Setenta reyes | así me ha pagado Dios.
+12 | v:Caleb=arthur | El que hiriere a Quiriat-sefer | a Acsa mi hija por esposa.
+14 | v:Caleb | ¿Qué quieres? | ¿Qué quieres?
+15 | m:Acsa=naomi | Dame una bendición | dame también fuentes de aguas.
+24 | g:espías=sterling | Muéstranos ahora la entrada | haremos contigo misericordia.

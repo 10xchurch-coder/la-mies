@@ -1,0 +1,20 @@
+# Donde el texto dice "el Ángel" va voz de ángel; donde dice "Jehová" va la voz de Dios.
+8-10 | h:profeta=arthur | Así dice Jehová, el Dios de Israel | no habéis obedecido a mi voz.
+12 | angel | Jehová es contigo | esforzado y valiente.
+13 | h:Gedeón=sterling | Ah, Señor mío, si Jehová | en manos de los madianitas.
+14 | dios | Ve con esta tu fortaleza | ¿No te envío yo?
+15 | h:Gedeón | Ah, Señor mío, ¿con qué salvaré | en la casa de mi padre.
+16 | dios | Ciertamente yo seré contigo | como a un solo hombre.
+17-18 | h:Gedeón | Yo te ruego, que si he hallado gracia | lo ponga delante de ti.
+18 | dios | Yo esperaré hasta que vuelvas. | Yo esperaré hasta que vuelvas.
+20 | angel | Toma la carne | y vierte el caldo.
+22 | h:Gedeón | Ah, Señor Jehová | cara a cara.
+23 | dios | Paz a ti | no morirás.
+25-26 | dios | Toma el becerro de tu padre | que habrás de cortar.
+29 | g:hombres de la ciudad=julian | ¿Quién ha hecho esto? | ¿Quién ha hecho esto?
+29 | g:hombres de la ciudad | Gedeón, el hijo de Joás lo ha hecho. | Gedeón, el hijo de Joás lo ha hecho.
+30 | g:hombres de la ciudad | Saca a tu hijo para que muera | que estaba junto a él.
+31 | v:Joás=desmond | ¿Contenderéis vosotros por Baal? | el que derribó su altar.
+32 | v:Joás | Pleitee Baal contra | derribó su altar.
+36-37 | h:Gedeón | Si has de salvar a Israel | como lo has dicho.
+39 | h:Gedeón | No se encienda tu ira | el rocío sobre la tierra.

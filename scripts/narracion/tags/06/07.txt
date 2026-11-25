@@ -1,0 +1,11 @@
+2-3 | dios | El pueblo que está contigo es mucho | desde el monte de Galaad.
+4 | dios | Aún es mucho el pueblo | el tal no irá.
+5 | dios | Cualquiera que lamiere las aguas | sobre sus rodillas para beber.
+7 | dios | Con estos trescientos hombres | cada uno a su lugar.
+9-11 | dios | Levántate, y desciende al campamento | descenderás contra el campamento.
+13 | h:madianita=julian | He aquí yo soñé un sueño | la tienda quedó tendida.
+14 | h:compañero=desmond | Esto no es otra cosa | con todo el campamento.
+15 | h:Gedeón=sterling | Levantaos, que Jehová | Madián en vuestras manos.
+17-18 | h:Gedeón | Miradme a mí | ¡La espada de Jehová y de Gedeón!
+20 | g:trescientos=arthur | ¡La espada de Jehová y de Gedeón! | ¡La espada de Jehová y de Gedeón!
+24 | h:Gedeón | Descended al encuentro | hasta Bet-bara y el Jordán.

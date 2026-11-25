@@ -1,0 +1,16 @@
+1 | g:Efraín=julian | ¿Por qué nos has hecho así | contra los madianitas?
+2-3 | h:Gedeón=sterling | ¿Qué he hecho yo ahora | en comparación con vosotros?
+5 | h:Gedeón | Yo os ruego que deis | reyes de Madián.
+6 | g:Sucot=desmond | ¿Está ya la mano de Zeba y Zalmuna | dar pan a tu ejército?
+7 | h:Gedeón | Pues cuando Jehová | abrojos del desierto.
+9 | h:Gedeón | Cuando yo vuelva en paz | derribaré esta torre.
+15 | h:Gedeón | He aquí a Zeba y a Zalmuna | a tus hombres cansados?
+18 | h:Gedeón | ¿Qué aspecto tenían | matasteis en Tabor?
+18 | g:Zeba y Zalmuna=arthur | Como tú, así eran ellos | parecía hijo de rey.
+19 | h:Gedeón | Mis hermanos eran | yo no os mataría!
+20 | h:Gedeón | Levántate, y mátalos. | Levántate, y mátalos.
+21 | g:Zeba y Zalmuna | Levántate tú, y mátanos | tal es su valentía.
+22 | g:israelitas=julian | Sé nuestro señor | de mano de Madián.
+23 | h:Gedeón | No seré señor sobre vosotros | Jehová será vuestro Señor.
+24 | h:Gedeón | Deseo haceros una petición | zarcillos de su despojo.
+25 | g:israelitas | De buena gana los daremos. | De buena gana los daremos.
