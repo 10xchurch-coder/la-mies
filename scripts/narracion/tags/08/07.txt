@@ -1,0 +1,5 @@
+3 | h:Samuel=arthur | Si de todo vuestro corazón | de mano de los filisteos.
+5 | h:Samuel | Reunid a todo Israel | por vosotros a Jehová.
+6 | g:Israel=desmond | Hemos pecado contra Jehová. | Hemos pecado contra Jehová.
+8 | g:Israel | No ceses de clamar | de mano de los filisteos.
+12 | h:Samuel | Hasta aquí nos ayudó Jehová. | Hasta aquí nos ayudó Jehová.

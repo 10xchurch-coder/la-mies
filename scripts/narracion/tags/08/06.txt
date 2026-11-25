@@ -1,0 +1,6 @@
+2 | g:filisteos=julian | ¿Qué haremos con el arca de Jehová? | a su lugar.
+3 | v:sacerdotes=arthur | Si enviáis | de vosotros su mano.
+4 | g:filisteos | ¿Y cuál será la expiación que le pagaremos? | ¿Y cuál será la expiación que le pagaremos?
+4-9 | v:sacerdotes | Cinco hemorroides de oro | sucedido por accidente.
+20 | g:Bet-semes=desmond | ¿Quién podrá estar | desde nosotros?
+21 | h:mensajeros=sterling | Los filisteos han devuelto | llevadla a vosotros.

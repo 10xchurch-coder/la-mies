@@ -1,0 +1,5 @@
+7 | g:filisteos=julian | No quede con nosotros | nuestro dios Dagón.
+8 | g:filisteos | ¿Qué haremos con el arca del Dios de Israel? | ¿Qué haremos con el arca del Dios de Israel?
+8 | g:príncipes=desmond | Pásese el arca del Dios de Israel a Gat. | Pásese el arca del Dios de Israel a Gat.
+10 | g:filisteos | Han traído a nosotros | y a nuestro pueblo.
+11 | g:filisteos | Enviad el arca | a nosotros y a nuestro pueblo

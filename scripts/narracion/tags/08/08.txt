@@ -1,0 +1,7 @@
+5 | v:ancianos=desmond | He aquí tú has envejecido | todas las naciones.
+6 | v:ancianos | Danos ahora un rey que nos juzgue. | Danos ahora un rey que nos juzgue.
+7-9 | dios | Oye la voz del pueblo | reinar sobre ellos.
+11-18 | v:Samuel=arthur | Este será el proceder | no os oirá en aquel día.
+19-20 | g:pueblo=desmond | No, sino que habrá rey | hará nuestras guerras.
+22 | dios | Oye su voz, y pon rey sobre ellos. | Oye su voz, y pon rey sobre ellos.
+22 | v:Samuel | Idos cada uno a su ciudad. | Idos cada uno a su ciudad.
