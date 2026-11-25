@@ -1,0 +1,15 @@
+# Samuel es niño todavía: voz de niño.
+4 | n:Samuel | Heme aquí. | Heme aquí.
+5 | n:Samuel | Heme aquí; ¿para qué me llamaste? | Heme aquí; ¿para qué me llamaste?
+5 | v:Elí=arthur | Yo no he llamado; vuelve y acuéstate. | Yo no he llamado; vuelve y acuéstate.
+6 | n:Samuel | Heme aquí; ¿para qué me has llamado? | Heme aquí; ¿para qué me has llamado?
+6 | v:Elí | Hijo mío, yo no he llamado | vuelve, y acuéstate.
+8 | n:Samuel | Heme aquí; ¿para qué me has llamado? | Heme aquí; ¿para qué me has llamado?
+9 | v:Elí | Ve y acuéstate | que tu siervo oye.
+10 | dios | ¡Samuel, Samuel! | ¡Samuel, Samuel!
+10 | n:Samuel | Habla, que tu siervo oye. | Habla, que tu siervo oye.
+11-14 | dios | He aquí yo haré una cosa | ni con ofrendas.
+16 | v:Elí | Hijo mío, Samuel. | Hijo mío, Samuel.
+16 | n:Samuel | Heme aquí. | Heme aquí.
+17 | v:Elí | ¿Qué es la palabra | lo que habló contigo.
+18 | v:Elí | Él es Jehová | bien le parezca.

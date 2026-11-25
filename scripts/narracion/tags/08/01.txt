@@ -1,0 +1,10 @@
+8 | h:Elcana=sterling | Ana, ¿por qué lloras? | mejor que diez hijos?
+11 | m:Ana=elena | Oh Jehová de los ejércitos | navaja sobre su cabeza.
+14 | v:Elí=arthur | ¿Hasta cuándo estarás ebria? | Aleja de ti tu vino.
+15-16 | m:Ana | No, señor mío | he hablado hasta ahora.
+17 | v:Elí | Ve en paz | que le has hecho.
+18 | m:Ana | Halle tu sierva gracia | delante de tus ojos.
+20 | m:Ana | Por cuanto se lo pedí a Jehová. | Por cuanto se lo pedí a Jehová.
+22 | m:Ana | Yo no subiré | se quede allá para siempre.
+23 | h:Elcana | Haz lo que bien te pareciere | afirme su palabra.
+26-28 | m:Ana | ¡Oh, señor mío! | será prestado a Jehová.

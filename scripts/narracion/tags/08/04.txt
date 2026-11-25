@@ -1,0 +1,11 @@
+3 | v:ancianos=desmond | ¿Por qué nos ha herido hoy | de nuestros enemigos.
+6 | g:filisteos=julian | ¿Qué voz de gran júbilo | campamento de los hebreos?
+7 | g:filisteos | Dios ha venido al campamento. | Dios ha venido al campamento.
+7-9 | g:filisteos | ¡Ay de nosotros! pues antes | sed hombres, y pelead.
+14 | v:Elí=arthur | ¿Qué estruendo de alboroto es este? | ¿Qué estruendo de alboroto es este?
+16 | h:mensajero=sterling | Yo vengo de la batalla | escapado hoy del combate.
+16 | v:Elí | ¿Qué ha acontecido, hijo mío? | ¿Qué ha acontecido, hijo mío?
+17 | h:mensajero | Israel huyó delante | el arca de Dios fue tomada.
+20 | m:mujeres=naomi | No tengas temor | dado a luz un hijo.
+21 | m:nuera=elena | ¡Traspasada es la gloria de Israel! | ¡Traspasada es la gloria de Israel!
+22 | m:nuera | Traspasada es la gloria de Israel; porque | el arca de Dios fue tomada.
