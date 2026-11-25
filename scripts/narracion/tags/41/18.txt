@@ -1,0 +1,19 @@
+2-5 | jesus | Había un juez en una ciudad | al fin me fastidie.
+6-8 | jesus | Oíd lo que dijo el juez injusto. | ¿hallará fe en la tierra?
+10-14 | jesus | Dos hombres subieron al templo | será enaltecido.
+16-17 | jesus | Dejad los niños venir a mí | no entrará en él.
+18 | h:príncipe | Maestro bueno, ¿qué haré | la vida eterna?
+19-20 | jesus | ¿Por qué me llamas bueno? | a tu padre y a tu madre.
+21 | h:príncipe | Todo esto lo he guardado desde mi juventud. | Todo esto lo he guardado desde mi juventud.
+22 | jesus | Aún te falta una cosa | y ven, sígueme.
+24-25 | jesus | ¡Cuán difícilmente entrarán | un rico en el reino de Dios.
+26 | g:los que oyeron | ¿Quién, entonces, podrá ser salvo? | ¿Quién, entonces, podrá ser salvo?
+27 | jesus | Lo que es imposible | es posible con Dios.
+28 | h:Pedro=desmond | He aquí, nosotros lo hemos dejado todo | y te hemos seguido.
+29-30 | jesus | De cierto os digo, que nadie | la vida eterna.
+31-33 | jesus | He aquí subimos a Jerusalén | al tercer día resucitará.
+38 | h:ciego=arthur | ¡Jesús, Hijo de David, ten misericordia de mí! | ¡Jesús, Hijo de David, ten misericordia de mí!
+39 | h:ciego | ¡Hijo de David, ten misericordia de mí! | ¡Hijo de David, ten misericordia de mí!
+41 | jesus | ¿Qué quieres que te haga? | ¿Qué quieres que te haga?
+41 | h:ciego | Señor, que reciba la vista. | Señor, que reciba la vista.
+42 | jesus | Recibe la vista, tu fe te ha salvado. | Recibe la vista, tu fe te ha salvado.

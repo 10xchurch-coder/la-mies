@@ -1,0 +1,16 @@
+2 | g:sacerdotes y escribas | Dinos: ¿Con qué autoridad | te ha dado esta autoridad?
+3-4 | jesus | Yo también os preguntaré | o de los hombres?
+5-6 | g:sacerdotes y escribas | Si decimos, del cielo | Juan era profeta.
+8 | jesus | Yo tampoco os digo | hago estas cosas.
+9-16 | jesus | Un hombre plantó una viña | dará su viña a otros.
+16 | g:pueblo | ¡No lo permita Dios! | ¡No lo permita Dios!
+17-18 | jesus | ¿Qué, pues, es lo que está escrito | le desmenuzará.
+21-22 | g:espías | Maestro, sabemos que dices | tributo a César, o no?
+23-24 | jesus | ¿Por qué me tentáis? | la imagen y la inscripción?
+24 | g:espías | De César. | De César.
+25 | jesus | Pues dad a César | lo que es de Dios.
+28-33 | g:saduceos | Maestro, Moisés nos escribió | la tuvieron por esposa.
+34-38 | jesus | Los hijos de este mundo | todos viven para Él.
+39 | g:escribas | Maestro, bien has dicho. | Maestro, bien has dicho.
+41-44 | jesus | ¿Cómo dicen que Cristo | ¿cómo entonces es su hijo?
+46-47 | jesus | Guardaos de los escribas | recibirán mayor condenación.
