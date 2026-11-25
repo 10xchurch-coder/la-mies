@@ -1,0 +1,20 @@
+2-3 | g:muchos | ¿De dónde tiene | sus hermanas?
+4 | jesus | No hay profeta | y en su casa.
+10-11 | jesus | Dondequiera que entréis | para aquella ciudad.
+14 | h:Herodes | Juan el Bautista ha resucitado | obran en él.
+15 | g:otros | Es Elías. | Es Elías.
+15 | g:otros mas | Es un profeta | de los profetas.
+16 | h:Herodes | Es Juan, al que | de los muertos.
+18 | h:Juan el Bautista | No te es lícito | de tu hermano.
+22 | h:Herodes | Pídeme lo que quieras | te lo daré.
+23 | h:Herodes | Todo lo que me pidas | de mi reino.
+24 | m:hija de Herodías | ¿Qué pediré? | ¿Qué pediré?
+24 | m:Herodías | La cabeza de Juan el Bautista. | La cabeza de Juan el Bautista.
+25 | m:hija de Herodías | Quiero que ahora | Juan el Bautista.
+31 | jesus | Venid vosotros aparte | descansad un poco.
+35-36 | g:discipulos | El lugar es desierto | no tienen qué comer.
+37 | jesus | Dadles vosotros de comer. | Dadles vosotros de comer.
+37 | g:discipulos | ¿Que vayamos | demos de comer?
+38 | jesus | ¿Cuántos panes tenéis? | Id y vedlo.
+38 | g:discipulos | Cinco, y dos peces. | Cinco, y dos peces.
+50 | jesus | Tened buen ánimo | no temáis.

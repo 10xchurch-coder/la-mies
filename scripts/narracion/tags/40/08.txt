@@ -1,0 +1,20 @@
+2-3 | jesus | Tengo compasión | venido de lejos.
+4 | g:discipulos | ¿De dónde podrá | en el desierto?
+5 | jesus | ¿Cuántos panes tenéis? | ¿Cuántos panes tenéis?
+5 | g:discipulos | Siete. | Siete.
+12 | jesus | ¿Por qué pide señal | a esta generación.
+15 | jesus | Mirad, guardaos | levadura de Herodes.
+16 | g:discipulos | Es porque no tenemos pan. | Es porque no tenemos pan.
+17-19 | jesus | ¿Por qué discutís | pedazos alzasteis?
+19 | g:discipulos | Doce. | Doce.
+20 | jesus | Y cuando los siete | pedazos alzasteis?
+20 | g:discipulos | Siete. | Siete.
+21 | jesus | ¿Cómo es que aún | no entendéis?
+24 | h:ciego | Veo a los hombres | que caminan.
+26 | jesus | No entres en la aldea | a nadie en la aldea.
+27 | jesus | ¿Quién dicen los hombres | que soy yo?
+28 | g:discipulos | Juan el Bautista; y otros | Alguno de los profetas.
+29 | jesus | ¿Y vosotros, quién | que soy yo?
+29 | h:Pedro | Tú eres el Cristo. | Tú eres el Cristo.
+33 | jesus | Quítate de delante | las de los hombres.
+34-38 | jesus | Si alguno quiere | santos ángeles.
