@@ -48,5 +48,6 @@
 - Hecho: Deuteronomio 20 a 23 (25 nov 2026), 22 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). Habla Moisés todo.
 - Hecho: Deuteronomio 24 a 27 (25 nov 2026), 22 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). Habla Moisés todo.
 - Hecho: Deuteronomio 28 a 31 (25 nov 2026), 40 pedazos, sin fallas.
-- Sigue: Deuteronomio 32 (tags y planes de Deuteronomio 32 a 34 y de Josué 1 a 24 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Jueces 1. En Deuteronomio habla Moisés (h:Moisés=sterling); en 32 y 34 también habla Dios. Voces a mantener: Moisés sterling, Eleazar julian, Finees julian, Josué desmond, Caleb v:Caleb=arthur (ya mayor en Josué 14 y 15), el pueblo g:pueblo=arthur, Rahab elena, los espías sterling; Dios es "dios"; el capitán del ejército de Jehová (Josué 5) va con voz de ángel. Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: unos 2700 (25 nov 2026).
+- Hecho: Deuteronomio 32 a 34 (25 nov 2026), 35 pedazos, sin fallas. Deuteronomio completo.
+- Sigue: Josué 1 (tags y planes de Josué 1 a 24 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Jueces 1. Voces a mantener: Eleazar julian, Finees julian, Josué desmond, Caleb v:Caleb=arthur (ya mayor en Josué 14 y 15), el pueblo g:pueblo=arthur, Rahab elena, los espías sterling; Dios es "dios"; el capitán del ejército de Jehová (Josué 5) va con voz de ángel. Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: unos 2650 (25 nov 2026).
