@@ -1,0 +1,12 @@
+2-3 | jesus | Id a la aldea | lo devolverá.
+5 | g:los que estaban alli | ¿Qué hacéis desatando | el pollino?
+9-10 | g:multitud | ¡Hosanna! ¡Bendito | ¡Hosanna en las alturas!
+14 | jesus | Nunca más coma | por siempre.
+17 | jesus | ¿No está escrito | cueva de ladrones.
+21 | h:Pedro=desmond | Maestro, he aquí | se ha secado.
+22-26 | jesus | Tened fe en Dios. | vuestras ofensas.
+28 | g:sacerdotes | ¿Con qué autoridad | hacer estas cosas?
+29-30 | jesus | Yo también os haré | Respondedme.
+31-32 | g:sacerdotes | Si dijéremos: Del cielo | tememos al pueblo
+33 | g:sacerdotes | No sabemos. | No sabemos.
+33 | jesus | Tampoco yo os diré | hago estas cosas.

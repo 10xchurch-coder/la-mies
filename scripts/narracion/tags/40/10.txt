@@ -1,0 +1,30 @@
+2 | g:fariseos | ¿Es lícito al marido | de su esposa?
+3 | jesus | ¿Qué os mandó Moisés? | ¿Qué os mandó Moisés?
+4 | g:fariseos | Moisés permitió | y repudiarla.
+5-9 | jesus | Por la dureza | no lo separe el hombre.
+11-12 | jesus | Cualquiera que se divorcia | comete adulterio.
+14-15 | jesus | Dejad los niños | no entrará en él.
+17 | h:joven rico | Maestro bueno, ¿qué haré | la vida eterna?
+18-19 | jesus | ¿Por qué me llamas bueno? | y a tu madre.
+20 | h:joven rico | Maestro, todo esto | desde mi juventud.
+21 | jesus | Una cosa te falta | y sígueme.
+23 | jesus | ¡Cuán difícilmente | tienen riquezas!
+24-25 | jesus | Hijos, ¡cuán difícil | en el reino de Dios.
+26 | g:discipulos | ¿Quién, entonces, | ser salvo?
+27 | jesus | Con los hombres es imposible | son posibles.
+28 | h:Pedro=desmond | He aquí, nosotros | te hemos seguido.
+29-31 | jesus | De cierto os digo | los postreros, primeros.
+33-34 | jesus | He aquí subimos | día resucitará.
+35 | g:Jacobo y Juan | Maestro, querríamos | lo que pidiéremos.
+36 | jesus | ¿Qué queréis que os haga? | ¿Qué queréis que os haga?
+37 | g:Jacobo y Juan | Concédenos | a tu izquierda.
+38 | jesus | No sabéis lo que pedís | yo soy bautizado?
+39 | g:Jacobo y Juan | Podemos. | Podemos.
+39-40 | jesus | A la verdad, beberéis | está preparado.
+42-45 | jesus | Sabéis que los que | rescate por muchos.
+47 | h:Bartimeo=arthur | ¡Jesús, Hijo de David | misericordia de mí!
+48 | h:Bartimeo | ¡Hijo de David | misericordia de mí!
+49 | g:los que llamaban | Ten confianza | te llama.
+51 | jesus | ¿Qué quieres que te haga? | ¿Qué quieres que te haga?
+51 | h:Bartimeo | Señor, que reciba la vista. | Señor, que reciba la vista.
+52 | jesus | Vete, tu fe te ha salvado. | Vete, tu fe te ha salvado.
