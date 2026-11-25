@@ -1,0 +1,11 @@
+# Voces fijas en Daniel: Daniel = julian, Darío = arthur, los que lo acusan = sterling.
+5 | g:gobernadores=sterling | No hallaremos contra este Daniel | a la ley de su Dios.
+6-8 | g:gobernadores | Rey Darío, para siempre vive: | la cual no puede ser revocada.
+12 | g:gobernadores | ¿No has firmado un edicto | sea echado en el foso de los leones?
+12 | h:Darío=arthur | Verdad es, conforme | la cual no se abroga.
+13 | g:gobernadores | Ese Daniel, que es | hace su petición.
+15 | g:gobernadores | Sepas, oh rey | puede ser cambiado.
+16 | h:Darío | El Dios tuyo, a quien tú continuamente sirves, Él te librará. | El Dios tuyo, a quien tú continuamente sirves, Él te librará.
+20 | h:Darío | Daniel, siervo del Dios viviente | librar de los leones?
+21-22 | h:Daniel=julian | Oh rey, para siempre vive. | yo no he hecho ningún mal.
+25-27 | h:Darío | Paz os sea multiplicada: | del poder de los leones.
