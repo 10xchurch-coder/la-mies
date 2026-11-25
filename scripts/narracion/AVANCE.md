@@ -9,6 +9,7 @@
 - Hecho: Marcos 1 a 4 (25 nov 2026), 98 pedazos, sin fallas.
 - Hecho: Marcos 5 a 8 (25 nov 2026), 134 pedazos, sin fallas. Marcos 1 a 8 gastaron unos 215 créditos entre las cuatro tareas.
 - Hecho: Marcos 9 a 12 (25 nov 2026), 164 pedazos, sin fallas (varios reintentos por el límite de 8 trabajos a la vez).
+- EN CURSO: Marcos 13 a 16, empezado 25 nov 2026 11:42 UTC por la corrida de las 11:28. (Dos corridas de la tarea A se pisaron y las dos hicieron Marcos 9 a 12. Para que no pase más: si hay una línea EN CURSO de hace menos de 70 minutos, la corrida nueva empieza por el grupo que le sigue y deja esa línea; cada corrida anota su grupo EN CURSO antes de generar y borra la línea al terminar.)
 - Sigue: Marcos 13 (libro 40). Los tags y planes de Marcos 13 a 16 ya están escritos y subidos; falta generar. Lucas en adelante falta todo.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Créditos que quedan: 9503 (25 nov 2026).
