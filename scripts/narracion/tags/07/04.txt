@@ -1,0 +1,11 @@
+1 | h:Boaz=desmond | Eh, fulano, ven acá y siéntate. | Eh, fulano, ven acá y siéntate.
+2 | h:Boaz | Sentaos aquí. | Sentaos aquí.
+3-4 | h:Boaz | Noemí, que ha vuelto | y yo después de ti.
+4 | h:pariente=sterling | Yo redimiré. | Yo redimiré.
+5 | h:Boaz | El mismo día que compres | sobre su heredad.
+6 | h:pariente | No puedo redimir para mí | yo no podré redimir.
+8 | h:pariente | Tómalo tú. | Tómalo tú.
+9-10 | h:Boaz | Vosotros sois testigos hoy de que tomo | Vosotros sois testigos hoy.
+11-12 | g:pueblo=arthur | Testigos somos. | dio a luz a Judá.
+14-15 | m:mujeres=soraya | Bendito sea Jehová | lo ha dado a luz.
+17 | m:vecinas=naomi | A Noemí le ha nacido un hijo; | A Noemí le ha nacido un hijo;

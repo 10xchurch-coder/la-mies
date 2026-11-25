@@ -1,0 +1,10 @@
+1-4 | m:Noemí=helena | Hija mía, ¿no he de buscar | lo que debes hacer.
+5 | m:Ruth=elena | Haré todo lo que tú me dices. | Haré todo lo que tú me dices.
+9 | h:Boaz=desmond | ¿Quién eres? | ¿Quién eres?
+9 | m:Ruth | Yo soy Ruth tu sierva | pariente redentor.
+10-13 | h:Boaz | Bendita seas tú de Jehová | Descansa, pues, hasta la mañana.
+14 | h:Boaz | Que no se sepa | mujer a la era.
+15 | h:Boaz | Dame el lienzo | y sostenlo.
+16 | m:Noemí | ¿Qué, pues, hija mía? | ¿Qué, pues, hija mía?
+17 | m:Ruth | Estas seis medidas | con las manos vacías.
+18 | m:Noemí | Reposa, hija mía | concluya el asunto hoy.

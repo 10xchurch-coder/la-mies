@@ -1,0 +1,18 @@
+2 | m:Ruth=elena | Te ruego que me dejes ir al campo | hallare gracia.
+2 | m:Noemí=helena | Ve, hija mía. | Ve, hija mía.
+4 | h:Boaz=desmond | Jehová sea con vosotros. | Jehová sea con vosotros.
+4 | g:segadores=arthur | Jehová te bendiga. | Jehová te bendiga.
+5 | h:Boaz | ¿De quién es esta joven? | ¿De quién es esta joven?
+6-7 | h:mayordomo=julian | Es la joven de Moab | se detuvo en casa.
+8-9 | h:Boaz | Oye, hija mía | que sacan los criados.
+10 | m:Ruth | ¿Por qué he hallado gracia | siendo yo extranjera?
+11-12 | h:Boaz | Por cierto se me ha contado | bajo sus alas.
+13 | m:Ruth | Señor mío, halle yo gracia | una de tus criadas.
+14 | h:Boaz | Acércate aquí | en el vinagre.
+15-16 | h:Boaz | Que recoja también espigas | y no la reprendáis.
+19 | m:Noemí | ¿Dónde has espigado hoy? | el que te ha reconocido.
+19 | m:Ruth | El nombre del varón | es Boaz.
+20 | m:Noemí | Sea él bendito de Jehová | para con los finados.
+20 | m:Noemí | Nuestro pariente es aquel varón | uno de nuestros redentores.
+21 | m:Ruth | Además de esto me ha dicho | toda mi siega.
+22 | m:Noemí | Mejor es, hija mía | en otro campo.
