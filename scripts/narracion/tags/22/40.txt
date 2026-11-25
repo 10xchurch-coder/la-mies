@@ -1,0 +1,7 @@
+1 | dios | Consolaos, consolaos, pueblo mío | pueblo mío
+3-5 | h:voz que clama | Preparad el camino | Jehová ha hablado.
+6 | h:voz que clama | Da voces. | Da voces.
+6 | h:Isaías=desmond | ¿Qué he de decir? | ¿Qué he de decir?
+6-8 | h:voz que clama | Toda carne es hierba | permanece para siempre.
+25 | dios | ¿A quién, pues, me haréis semejante | me haréis igual?
+27 | g:Israel | Mi camino está escondido | pasó mi juicio?

@@ -1,0 +1,5 @@
+4-10 | h:Rabsaces=sterling | Decid ahora a Ezequías | destrúyela.
+11 | g:Eliaquim=arthur | Te rogamos que hables | sobre el muro.
+12 | h:Rabsaces | ¿Me envió mi señor | orina con vosotros?
+13-20 | h:Rabsaces | Oíd las palabras del gran rey | de mi mano a Jerusalén?
+21 | h:Ezequías=julian | No le respondáis. | No le respondáis.

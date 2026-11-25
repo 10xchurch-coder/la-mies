@@ -1,0 +1,8 @@
+3 | h:Isaías=desmond | ¿Qué dicen estos hombres | venido a ti?
+3 | h:Ezequías=julian | De tierra muy lejana | de Babilonia.
+4 | h:Isaías | ¿Qué han visto en tu casa? | ¿Qué han visto en tu casa?
+4 | h:Ezequías | Todo lo que hay en mi casa | no les haya mostrado.
+5 | h:Isaías | Oye la palabra de Jehová | Jehová de los ejércitos:
+6-7 | dios | He aquí, vienen días | rey de Babilonia.
+8 | h:Ezequías | La palabra de Jehová que has hablado | es buena.
+8 | h:Ezequías | A lo menos, haya paz | en mis días.

@@ -1,0 +1,7 @@
+3-4 | g:Eliaquim=arthur | Ezequías dice así | que aún ha quedado.
+6 | h:Isaías=desmond | Diréis así a vuestro señor | Así dice Jehová:
+6-7 | dios | No temas por las palabras | caiga a espada.
+10-13 | h:Senaquerib=sterling | Diréis así a Ezequías | de Hena, y de Iva?
+16-20 | h:Ezequías=julian | Oh Jehová de los ejércitos | sólo tú eres Jehová.
+21-22 | h:Isaías | Jehová, el Dios de Israel, dice así | habló acerca de él:
+22-35 | dios | La virgen, la hija de Sión | David mi siervo.
