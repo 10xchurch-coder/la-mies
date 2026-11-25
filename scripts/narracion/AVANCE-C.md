@@ -1,6 +1,6 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Reyes 21 (tags y planes ya listos para 2 Reyes 21 a 25 y 1 Crónicas 1 a 4; falta generar el audio).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22) y 2 Reyes 1 a 20 (25 nov 2026; octava vuelta en curso: 2 Reyes 13 a 20, 121 pedazos, sin fallas).
+- Sigue: 1 Crónicas 1 (planes ya listos para 1 Crónicas 1 a 4; falta generar el audio).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22) y 2 Reyes completo (1 a 25) (25 nov 2026; octava vuelta en curso: 2 Reyes 13 a 25, 172 pedazos, sin fallas; algunos pedidos salieron "Rate limit" y se volvieron a pedir).
 - Créditos al empezar la octava vuelta: 7099 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
@@ -11,3 +11,4 @@
 - Voces fijas en 2 Reyes 1 a 8: Elías desmond, Eliseo julian, el rey de Israel (Ocozías, después Joram) sterling, Josafat arthur, Giezi sterling (arthur en el cap. 8, donde habla con el rey), Naamán desmond, el rey de Siria (Benadad) arthur, Hazael desmond, la sunamita elena.
 
 - Voces fijas en 2 Reyes 9 a 16: Jehú desmond, Joram sterling, Jezabel soraya, Jonadab julian, el sacerdote Joiada arthur, Atalía helena, Joás de Judá julian, Joás de Israel sterling, Eliseo julian, Amasías julian, Acaz arthur.
+- Voces fijas en 2 Reyes 17 a 25: Ezequías sterling, Isaías desmond, el rey de Asiria y el Rabsaces arthur, Eliaquim julian, Josías julian, Hilcías arthur, Safán sterling, Hulda elena, Gedalías desmond.
