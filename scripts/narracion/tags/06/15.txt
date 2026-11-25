@@ -1,0 +1,15 @@
+1 | h:Sansón=sterling | Entraré a mi esposa a la cámara. | Entraré a mi esposa a la cámara.
+2 | v:suegro=arthur | Pensé que la aborrecías | en su lugar.
+3 | h:Sansón | Yo seré sin culpa | si mal les hiciere.
+6 | g:filisteos=julian | ¿Quién hizo esto? | ¿Quién hizo esto?
+6 | g:filisteos | Sansón, el yerno del timnateo | la dio a su compañero.
+7 | h:Sansón | ¿Así lo habíais de hacer? | y después cesaré.
+10 | g:Judá=desmond | ¿Por qué habéis subido contra nosotros? | ¿Por qué habéis subido contra nosotros?
+10 | g:filisteos | A prender a Sansón | como él nos ha hecho.
+11 | g:Judá | ¿No sabes tú | nos has hecho esto?
+11 | h:Sansón | Yo les he hecho | como ellos me hicieron.
+12 | g:Judá | Nosotros hemos venido | en mano de los filisteos.
+12 | h:Sansón | Juradme que | no me mataréis.
+13 | g:Judá | No, solamente te prenderemos | mas no te mataremos.
+16 | h:Sansón | Con la quijada de un asno, un montón | herí mil hombres.
+18 | h:Sansón | Tú has dado esta gran salvación | en mano de los incircuncisos?
