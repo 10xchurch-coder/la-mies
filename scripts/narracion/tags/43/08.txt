@@ -1,0 +1,12 @@
+10 | g:pueblo=sterling | Este es el gran poder de Dios. | Este es el gran poder de Dios.
+19 | h:Simón el mago=arthur | Dadme también a mí | reciba el Espíritu Santo.
+20-23 | h:Pedro=desmond | Tu dinero perezca contigo | veo que estás.
+24 | h:Simón el mago | Rogad vosotros por mí | venga sobre mí.
+26 | angel | Levántate y ve hacia el sur | el cual es desierto.
+29 | dios | Acércate y júntate a este carro. | Acércate y júntate a este carro.
+30 | h:Felipe=julian | ¿Entiendes lo que lees? | ¿Entiendes lo que lees?
+31 | h:eunuco=sterling | ¿Cómo podré, | alguien me enseñe?
+34 | h:eunuco | Te ruego ¿de quién | o de algún otro?
+36 | h:eunuco | He aquí agua; | yo sea bautizado?
+37 | h:Felipe | Si crees de todo corazón, bien puedes. | Si crees de todo corazón, bien puedes.
+37 | h:eunuco | Creo que Jesucristo es el Hijo de Dios. | Creo que Jesucristo es el Hijo de Dios.

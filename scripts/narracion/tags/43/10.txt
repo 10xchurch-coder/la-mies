@@ -1,0 +1,14 @@
+3 | angel | Cornelio. | Cornelio.
+4 | h:Cornelio=sterling | ¿Qué es, Señor? | ¿Qué es, Señor?
+4-6 | angel | Tus oraciones y tus limosnas | lo que debes hacer.
+13 | dios | Levántate, Pedro, mata y come. | Levántate, Pedro, mata y come.
+14 | h:Pedro=desmond | Señor, no; | he comido jamás.
+15 | dios | Lo que Dios limpió, | no lo llames tú común.
+19-20 | dios | He aquí, tres hombres | yo los he enviado.
+21 | h:Pedro | He aquí, yo soy | habéis venido?
+22 | g:enviados=julian | Cornelio, el centurión | oír de ti palabras.
+26 | h:Pedro | Levántate; yo mismo | también soy hombre.
+28-29 | h:Pedro | Vosotros sabéis | me habéis hecho venir?
+30-33 | h:Cornelio | Hace cuatro días | Dios te ha encomendado.
+34-43 | h:Pedro | A la verdad entiendo | pecados por su nombre.
+47 | h:Pedro | ¿Puede alguno | también como nosotros?

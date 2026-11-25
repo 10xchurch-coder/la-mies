@@ -1,0 +1,14 @@
+4 | jesus | Saulo, Saulo, ¿por qué me persigues? | Saulo, Saulo, ¿por qué me persigues?
+5 | h:Saulo=sterling | ¿Quién eres, Señor? | ¿Quién eres, Señor?
+5 | jesus | Yo soy Jesús a quien | contra los aguijones.
+6 | h:Saulo | Señor, ¿qué quieres que yo haga? | Señor, ¿qué quieres que yo haga?
+6 | jesus | Levántate y entra en la ciudad | lo que debes hacer.
+10 | jesus | Ananías. | Ananías.
+10 | h:Ananías=julian | Heme aquí, Señor. | Heme aquí, Señor.
+11-12 | jesus | Levántate, y ve a la calle | para que recobre la vista.
+13-14 | h:Ananías | Señor, he oído de muchos | invocan tu nombre.
+15-16 | jesus | Ve; porque instrumento | padecer por mi nombre.
+17 | h:Ananías | Hermano Saulo, | lleno del Espíritu Santo.
+21 | g:oyentes=arthur | ¿No es este el que asolaba | príncipes de los sacerdotes?
+34 | h:Pedro=desmond | Eneas, Jesucristo te sana | haz tu cama.
+40 | h:Pedro | Tabita, levántate. | Tabita, levántate.
