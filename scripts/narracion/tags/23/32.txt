@@ -1,0 +1,7 @@
+# Jeremías cuenta en primera persona (narrador); su encargo a Baruc y su oración llevan su voz. Sedequías = desmond en todo el libro.
+3-5 | h:Sedequías=desmond | Porque tú profetizas | no os irá bien.
+7 | dios | He aquí que Hanameel | derecho a ella para comprarla.
+8 | h:Hanameel=sterling | Compra ahora mi heredad | cómprala para ti.
+14-15 | h:Jeremías=julian | Así dice Jehová de los ejércitos, el Dios de Israel: Toma estas cartas | viñas en esta tierra.
+17-25 | h:Jeremías | ¡Oh Señor Jehová! he aquí | en manos de los caldeos.
+27-44 | dios | He aquí que yo soy Jehová | su cautividad, dice Jehová.
