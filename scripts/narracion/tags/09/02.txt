@@ -1,0 +1,14 @@
+1 | h:David | ¿Subiré a alguna | ciudades de Judá?
+1 | dios | Sube. | Sube.
+1 | h:David | ¿A dónde subiré? | ¿A dónde subiré?
+1 | dios | A Hebrón. | A Hebrón.
+4 | g:varones de Judá | Los de Jabes | sepultaron a Saúl.
+5-7 | h:David | Benditos seáis | rey sobre ellos.
+14 | h:Abner | Levántense ahora | delante de nosotros.
+14 | h:Joab | Levántense. | Levántense.
+20 | h:Abner | ¿No eres tú Asael? | ¿No eres tú Asael?
+20 | h:Asael | Sí. | Sí.
+21 | h:Abner | Apártate a la derecha | sus despojos.
+22 | h:Abner | Apártate de en pos | hermano Joab?
+26 | h:Abner | ¿Consumirá la espada | a sus hermanos?
+27 | h:Joab | Vive Dios | a sus hermanos.

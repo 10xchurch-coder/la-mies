@@ -1,0 +1,12 @@
+3 | h:David | ¿De dónde vienes? | ¿De dónde vienes?
+3 | h:amalecita | Me he escapado | campamento de Israel.
+4 | h:David | ¿Qué ha acontecido? | que me lo digas.
+4 | h:amalecita | El pueblo huyó | su hijo murieron.
+5 | h:David | ¿Cómo sabes | Jonatán su hijo?
+6-10 | h:amalecita | Casualmente vine | acá a mi señor.
+13 | h:David | ¿De dónde eres tú? | ¿De dónde eres tú?
+13 | h:amalecita | Yo soy hijo | extranjero, amalecita.
+14 | h:David | ¿Cómo no tuviste | ungido de Jehová?
+15 | h:David | Acércate y mátalo. | Acércate y mátalo.
+16 | h:David | Tu sangre sea | ungido de Jehová.
+19-27 | h:David | ¡Ha perecido | armas de guerra!
