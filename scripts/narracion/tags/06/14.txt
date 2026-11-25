@@ -1,0 +1,11 @@
+2 | h:Sansón=sterling | Yo he visto en Timnat | me la toméis por esposa.
+3 | v:Manoa=desmond | ¿No hay mujer entre las hijas | de los filisteos incircuncisos?
+3 | h:Sansón | Tómala para mí | agradó a mis ojos.
+12-13 | h:Sansón | Yo os propondré ahora un enigma | las treinta mudas de ropa.
+13 | g:compañeros=julian | Expón tu enigma, y lo oiremos. | Expón tu enigma, y lo oiremos.
+14 | h:Sansón | Del comedor salió comida | del fuerte salió dulzura.
+15 | g:compañeros | Induce a tu marido | ¿No es así?
+16 | m:esposa de Sansón=soraya | Solamente me aborreces | a los hijos de mi pueblo.
+16 | h:Sansón | He aquí que ni a mi padre | lo había de declarar a ti?
+18 | g:compañeros | ¿Qué cosa más dulce que la miel? | más fuerte que el león?
+18 | h:Sansón | Si no araseis con mi novilla | descubierto mi enigma.
