@@ -1,0 +1,6 @@
+# Voces como en 2 Reyes 22: Josías julian, Hilcías arthur, Safán sterling, la profetisa Hulda elena.
+15 | h:Hilcías=arthur | Yo he hallado el libro | en la casa de Jehová.
+16-17 | h:Safán=sterling | Tus siervos han cumplido | los que hacen la obra.
+18 | h:Safán | El sacerdote Hilcías me dio un libro. | El sacerdote Hilcías me dio un libro.
+21 | h:Josías=julian | Andad, y consultad | escrito en este libro.
+23-28 | m:Hulda=elena | Jehová, el Dios de Israel, dice así: Decid | y sobre sus moradores.

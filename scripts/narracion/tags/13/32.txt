@@ -1,0 +1,5 @@
+# Voces como en 2 Reyes 18 y 19: Ezequías sterling; el mensaje y las cartas de Senaquerib arthur; el pueblo julian.
+4 | g:pueblo=julian | ¿Por qué han de hallar | cuando vinieren?
+7-8 | h:Ezequías=sterling | Esforzaos y sed valientes | pelear nuestras batallas.
+10-15 | h:Senaquerib=arthur | Así ha dicho Senaquerib | librar de mi mano?
+17 | h:Senaquerib | Como los dioses | a su pueblo de mis manos.
