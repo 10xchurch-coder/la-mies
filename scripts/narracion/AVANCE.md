@@ -44,8 +44,9 @@
 - Hecho: 2 Corintios 9 a 13 (25 nov 2026), 17 pedazos, sin fallas. 2 CORINTIOS COMPLETO.
 - Hecho: Gálatas 1 a 6 (25 nov 2026), 21 pedazos, sin fallas. GÁLATAS COMPLETO.
 - Hecho: Efesios 1 a 6 (25 nov 2026), 22 pedazos, sin fallas. EFESIOS COMPLETO. 2 Corintios a Efesios gastaron unos 200 créditos entre las cuatro tareas; quedan unos 1140.
-- EN CURSO: Filipenses 1 a 4, 22:32 UTC (25 nov 2026)
-- Sigue: Filipenses 1 (libro 49). Los planes de Filipenses, Colosenses y 1 y 2 Tesalonicenses ya están en main (todavía no bajados en el sandbox); falta el audio. De 1 Timoteo en adelante falta todo (las cartas no llevan tags; Hebreos y Apocalipsis sí hay que mirarlos por si hay diálogo).
+- Hecho: Filipenses 1 a 4 (25 nov 2026), 15 pedazos, sin fallas. FILIPENSES COMPLETO.
+- EN CURSO: Colosenses 1 a 4, 22:33 UTC (25 nov 2026)
+- Sigue: Colosenses 1 (libro 50). Los planes de Colosenses a Filemón (libros 50 a 56) ya están en main y bajados en el sandbox; falta el audio. Hebreos y Apocalipsis hay que mirarlos por si hay diálogo; Santiago a Judas son cartas.
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
