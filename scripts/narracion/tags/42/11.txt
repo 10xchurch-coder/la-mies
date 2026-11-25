@@ -1,0 +1,30 @@
+3 | m:Marta | Señor, he aquí | está enfermo.
+4 | jesus | Esta enfermedad | glorificado por ella.
+7 | jesus | Vamos a Judea otra vez. | Vamos a Judea otra vez.
+8 | g:discípulos | Rabí, ahora procuraban | vas allá?
+9-10 | jesus | ¿No tiene el día | no hay luz en él.
+11 | jesus | Nuestro amigo Lázaro | despertarle del sueño.
+12 | g:discípulos | Señor, si duerme | sano estará.
+14-15 | jesus | Lázaro ha muerto | mas vamos a él.
+16 | h:Tomás | Vamos también nosotros | muramos con Él.
+21-22 | m:Marta | Señor, si hubieras estado aquí | Dios te lo dará.
+23 | jesus | Tu hermano resucitará. | Tu hermano resucitará.
+24 | m:Marta | Yo sé que resucitará | en el día postrero.
+25-26 | jesus | Yo soy la resurrección | ¿Crees esto?
+27 | m:Marta | Sí, Señor | venir al mundo.
+28 | m:Marta | El Maestro está aquí | y te llama.
+31 | g:judíos | Va al sepulcro | a llorar allí.
+32 | m:María | Señor, si hubieses estado aquí | no habría muerto.
+34 | jesus | ¿Dónde le pusisteis? | ¿Dónde le pusisteis?
+34 | g:judíos | Señor, ven y ve. | Señor, ven y ve.
+36 | g:judíos | ¡Mirad cuánto le amaba! | ¡Mirad cuánto le amaba!
+37 | g:algunos | ¿No podía Éste | este no muriera?
+39 | jesus | Quitad la piedra. | Quitad la piedra.
+39 | m:Marta | Señor, hiede ya | es de cuatro días.
+40 | jesus | ¿No te he dicho | la gloria de Dios?
+41-42 | jesus | Padre, gracias te doy | tú me has enviado.
+43 | jesus | ¡Lázaro, ven fuera! | ¡Lázaro, ven fuera!
+44 | jesus | Desatadle, y dejadle ir. | Desatadle, y dejadle ir.
+47-48 | g:concilio | ¿Qué haremos? | nuestra nación.
+49-50 | v:Caifás | Vosotros no sabéis nada | toda la nación perezca.
+56 | g:gente | ¿Qué os parece? | a la fiesta?

@@ -1,0 +1,32 @@
+2 | g:discípulos | Rabí, ¿quién pecó | para que naciese ciego?
+3-5 | jesus | No es que haya pecado | yo soy la luz del mundo.
+7 | jesus | Ve, lávate en el estanque de Siloé | Ve, lávate en el estanque de Siloé
+8 | g:vecinos | ¿No es este el que | y mendigaba?
+9 | g:vecinos | Este es | A él se parece.
+9 | h:ciego | Yo soy. | Yo soy.
+10 | g:vecinos | ¿Cómo fueron abiertos | tus ojos?
+11 | h:ciego | El hombre que se llama Jesús | y recibí la vista.
+12 | g:vecinos | ¿Dónde está Él? | ¿Dónde está Él?
+12 | h:ciego | No sé. | No sé.
+15 | h:ciego | Puso lodo sobre mis ojos | y veo.
+16 | g:fariseos | Este hombre no es de Dios | no guarda el sábado.
+16 | g:otros fariseos | ¿Cómo puede un hombre pecador | tales milagros?
+17 | g:fariseos | ¿Tú, qué dices | abrió tus ojos?
+17 | h:ciego | Que es profeta. | Que es profeta.
+19 | g:fariseos | ¿Es este vuestro hijo | ve ahora?
+20-21 | v:padre=arthur | Sabemos que este es nuestro hijo | él hablará por sí mismo.
+23 | v:padre | Edad tiene, preguntadle a él. | Edad tiene, preguntadle a él.
+24 | g:fariseos | Da gloria a Dios | este hombre es pecador.
+25 | h:ciego | Si es pecador | ahora veo.
+26 | g:fariseos | ¿Qué te hizo? | te abrió los ojos?
+27 | h:ciego | Ya os lo he dicho antes | haceros sus discípulos?
+28-29 | g:fariseos | Tú eres su discípulo | no sabemos de dónde sea.
+30-33 | h:ciego | Por cierto, cosa maravillosa | nada podría hacer.
+34 | g:fariseos | Naciste enteramente | tú nos enseñas?
+35 | jesus | ¿Crees tú en el Hijo de Dios? | ¿Crees tú en el Hijo de Dios?
+36 | h:ciego | ¿Quién es, Señor | crea en Él?
+37 | jesus | Le has visto | Él es.
+38 | h:ciego | Creo, Señor | Creo, Señor
+39 | jesus | Para juicio yo he venido | sean cegados.
+40 | g:fariseos | ¿Acaso nosotros | somos ciegos?
+41 | jesus | Si fuerais ciegos | vuestro pecado permanece.
