@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: Esdras 8 a 10 (tags y planes ya hechos y en el sandbox) y después Nehemías 1 a 13 (tags y planes hechos y subidos el 25 nov, ya en el sandbox; los caps. 3, 10, 11 y 12 no llevan tags).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29), 2 Crónicas completo (1 a 36) y Esdras 1 a 7 (25 nov 2026; duodécima vuelta en marcha).
-- Créditos durante la duodécima vuelta: unos 3400 (se comparten entre las cuatro tareas).
+- Sigue: Nehemías 2 a 13 (tags y planes hechos y subidos el 25 nov, ya en el sandbox; los caps. 3, 10, 11 y 12 no llevan tags). Después de Nehemías faltan los tags de Ester.
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29), 2 Crónicas completo (1 a 36), Esdras completo (1 a 10) y Nehemías 1 (25 nov 2026; duodécima vuelta en marcha).
+- Créditos durante la duodécima vuelta: unos 3370 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
