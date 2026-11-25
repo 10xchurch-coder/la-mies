@@ -1,0 +1,18 @@
+3 | h:Cis=sterling | Toma ahora contigo | ve a buscar las asnas.
+5 | h:Saúl=desmond | Ven, volvámonos | preocupado por nosotros.
+6 | h:criado=julian | He aquí ahora hay en esta ciudad | hayamos de ir.
+7 | h:Saúl | Vamos ahora: ¿mas qué llevaremos | ¿Qué tenemos?
+8 | h:criado | He aquí se halla en mi mano | nuestro camino.
+10 | h:Saúl | Bien dices; anda, vamos. | Bien dices; anda, vamos.
+11 | h:Saúl | ¿Está en este lugar el vidente? | ¿Está en este lugar el vidente?
+12-13 | m:doncellas=naomi | Sí; he aquí está delante de ti | porque ahora le hallaréis.
+16 | dios | Mañana a esta misma hora | ha llegado hasta mí.
+17 | dios | He aquí este es el varón | reinará sobre mi pueblo.
+18 | h:Saúl | Te ruego que me enseñes | la casa del vidente.
+19-20 | v:Samuel=arthur | Yo soy el vidente | la casa de tu padre?
+21 | h:Saúl | ¿No soy yo hijo de Benjamín | me hablas de esta manera?
+23 | v:Samuel | Trae acá la porción | guardases aparte.
+24 | v:Samuel | He aquí lo que estaba reservado | Yo he invitado al pueblo.
+26 | v:Samuel | Levántate, para que te despida. | Levántate, para que te despida.
+27 | v:Samuel | Di al criado que vaya delante | Di al criado que vaya delante
+27 | v:Samuel | mas espera tú un poco | la palabra de Dios.

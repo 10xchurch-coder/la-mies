@@ -1,0 +1,12 @@
+1-8 | v:Samuel=arthur | ¿No te ha ungido Jehová | lo que has de hacer.
+11 | g:pueblo=sterling | ¿Qué ha sucedido al hijo de Cis? | ¿También Saúl entre los profetas?
+12 | h:alguno=julian | ¿Y quién es el padre de ellos? | ¿Y quién es el padre de ellos?
+14 | h:tío=julian | ¿A dónde fuisteis? | ¿A dónde fuisteis?
+14 | h:Saúl=desmond | A buscar las asnas | fuimos a Samuel.
+15 | h:tío | Yo te ruego me declares | qué os dijo Samuel.
+16 | h:Saúl | Nos declaró expresamente | habían sido halladas.
+18-19 | v:Samuel | Así dice Jehová, el Dios de Israel | por vuestros millares.
+22 | dios | He aquí que él está escondido entre el bagaje. | He aquí que él está escondido entre el bagaje.
+24 | v:Samuel | ¿Habéis visto al que ha elegido | en todo el pueblo?
+24 | g:pueblo | ¡Viva el rey! | ¡Viva el rey!
+27 | g:hijos de Belial=julian | ¿Cómo nos ha de salvar este? | ¿Cómo nos ha de salvar este?
