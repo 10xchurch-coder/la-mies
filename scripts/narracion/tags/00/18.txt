@@ -1,0 +1,26 @@
+3-5 | v:Abraham | Mi Señor | de vuestro siervo.
+5 | angel | Haz así | como has dicho.
+6 | v:Abraham | Toma presto | debajo del rescoldo.
+9 | angel | ¿Dónde está Sara | tu esposa?
+9 | v:Abraham | Aquí en la tienda. | Aquí en la tienda.
+10 | dios | De cierto volveré | tu esposa Sara.
+12 | m:Sara | ¿Después que he envejecido | ya viejo?
+13-14 | dios | ¿Por qué se ha reído | Sara tendrá un hijo.
+15 | m:Sara | No me reí; | No me reí;
+15 | dios | No es así | te has reído.
+17-19 | dios | ¿Encubriré | acerca de él.
+20-21 | dios | Por cuanto el clamor | lo sabré.
+23-25 | v:Abraham | ¿Destruirás | lo que es justo?
+26 | dios | Si hallare | por amor a ellos.
+27-28 | v:Abraham | He aquí ahora que he comenzado | toda la ciudad?
+28 | dios | No la destruiré | cuarenta y cinco.
+29 | v:Abraham | Quizá se hallarán allí cuarenta. | Quizá se hallarán allí cuarenta.
+29 | dios | No lo haré | a los cuarenta.
+30 | v:Abraham | No se enoje | quizá se hallarán allí treinta.
+30 | dios | No lo haré si | allí treinta.
+31 | v:Abraham | He aquí ahora que he emprendido | allí veinte.
+31 | dios | No la destruiré, | No la destruiré,
+31 | dios | por amor a los veinte. | por amor a los veinte.
+32 | v:Abraham | No se enoje | allí diez.
+32 | dios | No la destruiré, | No la destruiré,
+32 | dios | por amor a los diez. | por amor a los diez.
