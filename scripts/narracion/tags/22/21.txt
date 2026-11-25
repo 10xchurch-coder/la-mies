@@ -1,0 +1,6 @@
+6 | dios | Ve, pon un guardia | lo que vea.
+8-9 | h:guardia | ¡Un león! Mi señor | par de jinetes.
+9 | h:guardia | ¡Ha caído, ha caído Babilonia | quebró en tierra.
+11 | g:Seir | Guardia, ¿qué de la noche? | ¿qué de la noche?
+12 | h:guardia | La mañana viene | volved, venid.
+16-17 | dios | De aquí a un año | será reducido
