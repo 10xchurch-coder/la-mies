@@ -1,0 +1,13 @@
+1 | h:serpiente | ¿Conque Dios | árbol del huerto?
+2-3 | m:Eva | Del fruto de los árboles | para que no muráis.
+4-5 | h:serpiente | Ciertamente no moriréis | el bien y el mal.
+9 | dios | ¿Dónde estás tú? | ¿Dónde estás tú?
+10 | h:Adán | Oí tu voz | me escondí.
+11 | dios | ¿Quién te enseñó | no comieses?
+12 | h:Adán | La mujer que me diste | yo comí.
+13 | dios | ¿Qué es lo que has hecho? | ¿Qué es lo que has hecho?
+13 | m:Eva | La serpiente me engañó | y comí.
+14-15 | dios | Por cuanto esto hiciste | en el calcañar.
+16 | dios | Multiplicaré | señoreará sobre ti.
+17-19 | dios | Por cuanto obedeciste | al polvo volverás.
+22 | dios | He aquí el hombre | viva para siempre:
