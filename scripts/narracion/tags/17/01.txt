@@ -1,0 +1,12 @@
+# Voces en Job: Job julian, Elifaz arthur, Bildad desmond, Zofar sterling, Eliú sterling, Satanás sterling (caps. 1 y 2). Cada discurso va con la voz de quien habla.
+5 | h:Job=julian | Quizá habrán pecado | en sus corazones.
+7 | dios | ¿De dónde vienes? | ¿De dónde vienes?
+7 | h:Satanás=sterling | De rodear la tierra | andar por ella.
+8 | dios | ¿Has considerado a mi siervo | apartado del mal?
+9-11 | h:Satanás | ¿Acaso teme Job | en tu cara.
+12 | dios | He aquí, todo lo que tiene | tu mano sobre él.
+14-15 | h:mensajero1=arthur | Los bueyes estaban arando | traerte la noticia.
+16 | h:mensajero2=desmond | El fuego de Dios cayó | traerte la noticia.
+17 | h:mensajero3=arthur | Los caldeos hicieron | traerte la noticia.
+18-19 | h:mensajero4=desmond | Tus hijos y tus hijas | traerte la noticia.
+21 | h:Job | Desnudo salí del vientre | el nombre de Jehová.

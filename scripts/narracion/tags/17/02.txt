@@ -1,0 +1,7 @@
+2 | dios | ¿De dónde vienes? | ¿De dónde vienes?
+2 | h:Satanás=sterling | De rodear la tierra | andar por ella.
+3 | dios | ¿Has considerado a mi siervo | arruinara sin causa?
+4-5 | h:Satanás | Piel por piel | en tu rostro.
+6 | dios | He aquí, él está en tu mano | guarda su vida.
+9 | m:esposa=helena | ¿Aún retienes tu integridad? | Maldice a Dios y muérete.
+10 | h:Job=julian | Como suele hablar | no lo recibiremos?
