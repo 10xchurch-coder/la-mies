@@ -32,8 +32,9 @@
 - Hecho: Hechos 20 a 23 (25 nov 2026), 80 pedazos, sin fallas. Quedan unos 2935 créditos.
 - Hecho: Hechos 24 a 27 (25 nov 2026), 58 pedazos, sin fallas.
 - Hecho: Hechos 28 y Romanos 1 a 3 (25 nov 2026), 23 pedazos, sin fallas. HECHOS COMPLETO.
-- EN CURSO: Romanos 4 a 7, 19:47 UTC del 25 nov 2026
-- Sigue: Romanos 4 (libro 44). Los planes de Romanos 4 a 11 ya están; de Romanos 12 en adelante falta todo (planes y audio; las cartas no llevan tags).
+- Hecho: Romanos 4 a 7 (25 nov 2026), 16 pedazos, sin fallas.
+- EN CURSO: Romanos 8 a 10, 19:48 UTC del 25 nov 2026
+- Sigue: Romanos 8 (libro 44). Los planes de Romanos 4 a 11 ya están; de Romanos 12 en adelante falta todo (planes y audio; las cartas no llevan tags).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
