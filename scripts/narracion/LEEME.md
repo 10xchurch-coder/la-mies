@@ -21,3 +21,12 @@ El pastor pidió toda la Biblia narrada: un narrador, Jesús con su voz, y cada 
 ## Voces (ids en armar.py)
 Narrador: Andre. Jesús: Xavier. Dios Padre: Marcus. Ángeles: Gideon. Hombres: Desmond, Sterling, Arthur, Julian. Mayores: Desmond, Arthur.
 Mujeres: Elena, Naomi, Helena, Soraya. Niños: Benji.
+
+## Cuatro tareas a la vez (desde el 25 nov 2026, el pastor pidió ir más rápido)
+Cada tarea narra su parte y anota en su propio archivo, para no pisarse:
+- A: Mateo → Apocalipsis (libros 39 a 65) → `AVANCE.md`
+- B: Génesis → 1 Samuel (libros 00 a 08) → `AVANCE-B.md`
+- C: 2 Samuel → Salmos (libros 09 a 18) → `AVANCE-C.md`
+- D: Proverbios → Malaquías (libros 19 a 38) → `AVANCE-D.md`
+Si `git push` a main falla porque otra tarea subió antes: `git pull --rebase origin main` y de nuevo. `subir.sh` ya reintenta solo.
+Cuando una tarea termina su parte, escribe TERMINADO arriba de su archivo.

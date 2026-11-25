@@ -1,4 +1,4 @@
-# Avance de la narración (RVG)
+# Avance de la narración (RVG) — tarea A: Mateo a Apocalipsis
 - Hecho: Mateo 1 y 2 (24 nov 2026).
 - Hecho: Mateo 3 a 8 (25 nov 2026), 84 pedazos, sin fallas. Gastó unos 69 créditos.
 - Hecho: Mateo 9 a 12 (25 nov 2026), 87 pedazos, sin fallas. Gastó unos 59 créditos.
