@@ -1,0 +1,14 @@
+2 | h:Herodes | Éste es Juan el Bautista | se manifiestan en él.
+4 | h:Juan | No te es lícito tenerla. | No te es lícito tenerla.
+8 | m:hija | Dame aquí | Juan el Bautista.
+15 | g:discipulos | Este es un lugar desierto | de comer.
+16 | jesus | No tienen necesidad | vosotros de comer.
+17 | g:discipulos | No tenemos aquí | dos peces.
+18 | jesus | Traédmelos acá. | Traédmelos acá.
+26 | g:discipulos | ¡Un fantasma! | ¡Un fantasma!
+27 | jesus | ¡Tened ánimo | no temáis!
+28 | h:Pedro | Señor, si eres tú | sobre las aguas.
+29 | jesus | Ven. | Ven.
+30 | h:Pedro | ¡Señor, sálvame! | ¡Señor, sálvame!
+31 | jesus | ¡Hombre de poca fe! | ¿Por qué dudaste?
+33 | g:discipulos | Verdaderamente | Hijo de Dios.
