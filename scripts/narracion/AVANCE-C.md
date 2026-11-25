@@ -1,6 +1,6 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 2 Crónicas 5 (tags y planes ya hechos, revisados contra el texto y bajados al sandbox hasta 2 Crónicas 18).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 4 (25 nov 2026; décima vuelta: 1 Crónicas 25 a 29 y 2 Crónicas 1 a 4, 53 pedazos, sin fallas; los pedidos que salen "Rate limit" se vuelven a pedir).
+- Sigue: 2 Crónicas 10 (tags y planes ya hechos, revisados contra el texto y bajados al sandbox hasta 2 Crónicas 18).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25), 1 Crónicas completo (1 a 29) y 2 Crónicas 1 a 9 (25 nov 2026; décima vuelta: 1 Crónicas 25 a 29 y 2 Crónicas 1 a 9, 104 pedazos, sin fallas; los pedidos que salen "Rate limit" se vuelven a pedir).
 - Créditos al empezar la décima vuelta: 5230 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.

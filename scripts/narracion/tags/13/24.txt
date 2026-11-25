@@ -1,0 +1,5 @@
+# Voces como en 2 Reyes 12: Joás de Judá julian; Zacarías, hijo de Joiada, sterling.
+5 | h:Joás=julian | Salid por las ciudades | diligencia en el asunto.
+6 | h:Joás | ¿Por qué no has procurado | congregación de Israel?
+20 | h:Zacarías=sterling | Así dice Dios: | también os ha abandonado.
+22 | h:Zacarías | Jehová lo vea, y lo demande. | Jehová lo vea, y lo demande.

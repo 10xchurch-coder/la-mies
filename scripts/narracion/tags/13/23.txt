@@ -1,0 +1,5 @@
+# Voces como en 2 Reyes 11: el sacerdote Joiada arthur, Atalía helena; los que aclaman al rey julian.
+3-7 | h:Joiada=arthur | He aquí el hijo del rey | y cuando saliere.
+11 | g:pueblo=julian | ¡Viva el rey! | ¡Viva el rey!
+13 | m:Atalía=helena | ¡Traición, traición! | ¡Traición, traición!
+14 | h:Joiada | Sacadla fuera del recinto | a filo de espada.

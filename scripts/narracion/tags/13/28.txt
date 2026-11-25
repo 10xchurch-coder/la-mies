@@ -1,0 +1,4 @@
+# Voces: el profeta Oded desmond, los principales de Efraín julian, Acaz arthur (como en 2 Reyes 16).
+9-11 | h:Oded=desmond | He aquí, Jehová, el Dios de vuestros padres | está sobre vosotros.
+13 | g:principales=julian | No metáis acá a los cautivos | furor sobre Israel.
+23 | h:Acaz=arthur | Pues que los dioses | para que me ayuden

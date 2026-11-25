@@ -1,0 +1,3 @@
+# Voces: los sacerdotes (Azarías y los otros) arthur; los que hablan en el entierro julian.
+18 | g:sacerdotes=arthur | No a ti, oh Uzías | delante de Jehová Dios.
+23 | g:pueblo=julian | Leproso es. | Leproso es.

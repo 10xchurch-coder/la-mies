@@ -1,0 +1,10 @@
+# Voces como en 2 Reyes 14: Amasías julian, Joás de Israel sterling; el varón de Dios desmond, el profeta arthur.
+# La cita de la ley de Moisés del verso 4 la lee el narrador.
+7-8 | h:varón de Dios=desmond | Rey, no vaya contigo | o para derribar.
+9 | h:Amasías=julian | ¿Qué, pues, se hará | al ejército de Israel?
+9 | h:varón de Dios | De Jehová es darte mucho más que esto. | De Jehová es darte mucho más que esto.
+15 | h:profeta=arthur | ¿Por qué has buscado | de tus manos?
+16 | h:Amasías | ¿Te han puesto a ti | que te maten?
+16 | h:profeta | Yo sé que Dios | a mi consejo.
+17 | h:Amasías | Ven, y veámonos cara a cara. | Ven, y veámonos cara a cara.
+18-19 | h:Joás de Israel=sterling | El cardo que estaba | y Judá contigo?

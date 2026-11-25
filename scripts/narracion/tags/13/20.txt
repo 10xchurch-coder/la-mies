@@ -1,0 +1,7 @@
+# Voces: Josafat arthur, Jahaziel desmond, los que avisan y los cantores julian, el profeta Eliezer sterling.
+2 | g:mensajeros=julian | Viene contra ti | que es Engadi.
+6-12 | h:Josafat=arthur | Oh Jehová, Dios de nuestros padres | volvemos nuestros ojos.
+15-17 | h:Jahaziel=desmond | Oíd, todo Judá | será con vosotros.
+20 | h:Josafat | Oídme, Judá | seréis prosperados.
+21 | g:cantores=julian | Glorificad a Jehová | es para siempre.
+37 | h:Eliezer=sterling | Por cuanto has hecho compañía | destruirá tus obras.
