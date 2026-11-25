@@ -1,0 +1,17 @@
+1 | g:pueblo=arthur | Levántate, haznos dioses | le haya acontecido.
+2 | h:Aarón=julian | Apartad los zarcillos | y traédmelos.
+4 | g:pueblo | Estos son tus dioses | de la tierra de Egipto.
+5 | h:Aarón | Mañana será fiesta | a Jehová.
+7-8 | dios | Anda, desciende | de la tierra de Egipto.
+9-10 | dios | Yo he visto | sobre gran gente.
+11-13 | h:Moisés=sterling | Jehová, ¿por qué | heredad para siempre.
+17 | h:Josué=desmond | Alarido de pelea | en el campamento.
+18 | h:Moisés | No es voz de grito | oigo yo.
+21 | h:Moisés | ¿Qué te ha hecho | tan gran pecado?
+22-24 | h:Aarón | No se enoje | este becerro.
+26 | h:Moisés | ¿Quién es de Jehová? | Júntese conmigo.
+27 | h:Moisés | Así dice Jehová | a su prójimo.
+29 | h:Moisés | Hoy os habéis | sobre vosotros.
+30 | h:Moisés | Vosotros habéis | vuestro pecado.
+31-32 | h:Moisés | Te ruego, pues | que has escrito.
+33-34 | dios | Al que pecare | en ellos su pecado.
