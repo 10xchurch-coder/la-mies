@@ -21,12 +21,12 @@
 - Hecho: Juan 2 a 5 (25 nov 2026), 111 pedazos, sin fallas.
 - Hecho: Juan 6 a 8 (25 nov 2026), 157 pedazos, sin fallas (algunos pedidos de nuevo por el límite de 8 trabajos a la vez). Juan 2 a 8 gastaron unos 335 créditos entre las cuatro tareas.
 - Hecho: Juan 9 a 12 (25 nov 2026), 171 pedazos, sin fallas.
-- EN CURSO: Juan 13 a 16, 16:47 UTC del 25 nov
-- Sigue: Juan 13 (libro 42). De Juan 17 en adelante falta todo (tags, planes y audio).
+- Hecho: Juan 13 a 16 (25 nov 2026), 69 pedazos, sin fallas. Juan 9 a 16 gastaron unos 230 créditos entre las cuatro tareas.
+- Sigue: Juan 17 (libro 42). De Juan 17 en adelante falta todo (tags, planes y audio).
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
 - Nota: para no copiar a mano los nombres de los resultados: mkdir -p /home/claude/nombres; después de cada generate_audio_batch correr `cd /home/claude/nombres && python3 /home/claude/la-mies/scripts/narracion/probar.py LL-CC INDICE_INICIAL id1 id2 ...` (los job_id de la tanda, en orden; busca solo los archivos ya terminados y los anota en LL-CC.txt; si dice FALTAN, mirar esos con jobs_wait). Al terminar el capítulo: `bash /home/claude/la-mies/scripts/narracion/unir.sh LL CC` (llama a juntar.py con los nombres en orden).
 - Nota: para pedir de nuevo solo algunos pedazos, generate_audio_batch acepta una lista con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/P/params"}}` (T = N entre 8, P = el resto).
-- Créditos que quedan: 6295 (25 nov 2026, después de Juan 8).
+- Créditos que quedan: 5283 (25 nov 2026, después de Juan 16).
