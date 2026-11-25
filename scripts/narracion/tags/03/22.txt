@@ -1,0 +1,20 @@
+4 | g:Moab=arthur | Ahora lamerá esta gente | grama del campo.
+5-6 | h:Balac=desmond | Un pueblo ha salido | será maldito.
+8 | h:Balaam=julian | Reposad aquí esta noche | Jehová me hablare.
+9 | dios | ¿Qué varones son estos | están contigo?
+10-11 | h:Balaam | Balac, hijo de Zipor | y echarlo.
+12 | dios | No vayas con ellos | porque es bendito.
+13 | h:Balaam | Volveos a vuestra tierra | ir con vosotros.
+14 | g:príncipes=arthur | Balaam no quiso venir | con nosotros.
+16-17 | g:príncipes | Así dice Balac | a este pueblo.
+18-19 | h:Balaam | Aunque Balac me diese | a decir Jehová.
+20 | dios | Si los hombres han venido | que yo te diga.
+28 | m:asna=elena | ¿Qué te he hecho | estas tres veces?
+29 | h:Balaam | Porque te has burlado | te mataría!
+30 | m:asna | ¿No soy yo tu asna | hacerlo así contigo?
+30 | h:Balaam | No. | No.
+32-33 | angel | ¿Por qué has herido | dejado vivir.
+34 | h:Balaam | He pecado | yo me volveré.
+35 | angel | Ve con esos hombres | que yo te diga.
+37 | h:Balac | ¿No envié yo | yo honrarte?
+38 | h:Balaam | He aquí yo he venido | esa hablaré.

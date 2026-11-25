@@ -28,5 +28,6 @@
 - Hecho: Levítico 9 a 12 (25 nov 2026), 33 pedazos, sin fallas. En 9 y 10 hablan Moisés (sterling), Aarón (julian) y Dios; 11 y 12 todo narrador.
 - Hecho: Levítico 13 a 16 (25 nov 2026), 35 pedazos, sin fallas (cinco pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Todo narrador.
 - Hecho: Levítico 17 a 20 (25 nov 2026), 19 pedazos, sin fallas (dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Todo narrador.
-- Sigue: Levítico 21 (planes de Levítico 21 a 27 y de Números 1 a 20 ya están subidos, con tags en Levítico 24 y Números 9 a 17 y 20). Casi todo Levítico y Números 1 a 8, 18 y 19 son leyes y censos que Dios dicta a Moisés: los lee el narrador, sin tags, salvo los relatos con diálogo. Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, los espías julian; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: 6050 (25 nov 2026).
+- Hecho: Levítico 21 a 24 (25 nov 2026), 20 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar). Todo narrador salvo la orden de Dios en 24:14-22.
+- Sigue: Levítico 25 (planes de Levítico 25 a 27 y de Números 1 a 24 ya están subidos, con tags en Números 9 a 17 y 20 a 24). Números 1 a 8, 18 y 19 son leyes y censos: los lee el narrador, sin tags. Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, los espías julian, Balaam h:Balaam=julian, Balac h:Balac=desmond, el asna m:asna=elena, el Ángel de Jehová "angel"; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: 6000 (25 nov 2026).

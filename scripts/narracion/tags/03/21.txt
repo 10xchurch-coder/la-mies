@@ -1,0 +1,8 @@
+2 | g:pueblo=arthur | Si en efecto entregares | destruiré sus ciudades.
+5 | g:pueblo | ¿Por qué nos hiciste subir | pan tan liviano.
+7 | g:pueblo | Hemos pecado | estas serpientes.
+8 | dios | Hazte una serpiente ardiente | mirare a ella, vivirá.
+16 | dios | Reúne al pueblo | les daré agua.
+17-18 | g:pueblo | Sube, oh pozo | con sus báculos.
+22 | g:embajadores=julian | Déjame pasar por tu tierra | pasemos tu término.
+34 | dios | No le tengas miedo | habitaba en Hesbón.

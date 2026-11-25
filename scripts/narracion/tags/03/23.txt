@@ -1,0 +1,16 @@
+1 | h:Balaam=julian | Edifícame aquí siete altares | siete carneros.
+3 | h:Balaam | Ponte junto a tu holocausto | te la haré saber.
+4 | h:Balaam | Siete altares he ordenado | y un carnero.
+5 | dios | Vuelve a Balac, y has de hablar así. | Vuelve a Balac, y has de hablar así.
+7-10 | h:Balaam | De Aram me trajo | sea como la suya.
+11 | h:Balac=desmond | ¿Qué me has hecho? | bendecido por completo.
+12 | h:Balaam | ¿No observaré yo | para decirlo?
+13 | h:Balac | Te ruego que vengas conmigo | me los maldecirás.
+15 | h:Balaam | Ponte aquí junto | a Jehová allí.
+16 | dios | Vuelve a Balac, y así has de decir. | Vuelve a Balac, y así has de decir.
+17 | h:Balac | ¿Qué ha dicho Jehová? | ¿Qué ha dicho Jehová?
+18-24 | h:Balaam | Balac, levántate y oye | sangre de los muertos.
+25 | h:Balac | Ya que no lo maldices | tampoco lo bendigas.
+26 | h:Balaam | ¿No te he dicho | tengo que hacer?
+27 | h:Balac | Te ruego que vengas, te llevaré | me lo maldigas.
+29 | h:Balaam | Edifícame aquí siete altares | siete carneros.
