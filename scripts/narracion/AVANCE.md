@@ -25,12 +25,13 @@
 - Hecho: Juan 17 a 20 (25 nov 2026), 144 pedazos, sin fallas.
 - Hecho: Juan 21 (25 nov 2026), 43 pedazos, sin fallas. JUAN COMPLETO.
 - Hecho: Hechos 1 a 3 (25 nov 2026), 40 pedazos, sin fallas.
-- EN CURSO: Hechos 4 a 7, 17:53 UTC del 25 nov 2026
-- Sigue: Hechos 4 (libro 43). De Hechos 8 en adelante falta todo (tags, planes y audio).
+- Hecho: Hechos 4 a 7 (25 nov 2026), 58 pedazos, sin fallas. Juan 17 a Hechos 7 gastaron unos 380 créditos entre las cuatro tareas.
+- Sigue: Hechos 8 (libro 43). De Hechos 8 en adelante falta todo (tags, planes y audio).
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
 - Nota: Higgsfield deja solo 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit", volver a pedir solo los que faltaron.
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
 - Nota: para no copiar a mano los nombres de los resultados: mkdir -p /home/claude/nombres; después de cada generate_audio_batch correr `cd /home/claude/nombres && python3 /home/claude/la-mies/scripts/narracion/probar.py LL-CC INDICE_INICIAL id1 id2 ...` (los job_id de la tanda, en orden; busca solo los archivos ya terminados y los anota en LL-CC.txt; si dice FALTAN, mirar esos con jobs_wait). Al terminar el capítulo: `bash /home/claude/la-mies/scripts/narracion/unir.sh LL CC` (llama a juntar.py con los nombres en orden).
 - Nota: para pedir de nuevo solo algunos pedazos, generate_audio_batch acepta una lista con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/P/params"}}` (T = N entre 8, P = el resto).
-- Créditos que quedan: 5283 (25 nov 2026, después de Juan 16).
+- Créditos que quedan: 4337 (25 nov 2026, después de Hechos 7).
+- Nota: en esta máquina la rama local main puede estar vieja; trabajar en una rama nueva hecha desde origin/main y subir con `git push origin HEAD:main`.
