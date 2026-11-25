@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel y Daniel completos, y Oseas 1 a 8.
-- Sigue: Oseas 9 (los tags y planes de Oseas 9 a 14 ya están hechos y bajados al sandbox; falta generar).
-- Créditos: 3.767 el 25 nov 2026, 18:36 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel y Oseas completos, y Joel 1.
+- Sigue: Joel 2 (los tags y planes de Joel, Amós, Abdías, Jonás y Miqueas ya están hechos y bajados al sandbox; falta generar).
+- Créditos: 3.102 el 25 nov 2026, 19:27 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
@@ -19,3 +19,4 @@
 - Nota: a veces un pedazo se queda en "queued" sin salir nunca (pasó en Ezequiel 33 y 48); se pide de nuevo sólo ese pedazo con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}` y sale enseguida.
 - Nota: en Daniel 5 y 6: Belsasar = desmond, la reina voz de mujer, Darío = arthur, los que acusan a Daniel = sterling. De Daniel 7 al 12 cuenta Daniel mismo (narrador); lo que dicen los ángeles (Gabriel, el varón vestido de lino) lleva voz de ángel, todo el capítulo 11 incluido, y lo que Daniel dice con "dije" lleva la voz julian.
 - Nota: en Oseas cuenta el profeta (narrador). En los capítulos 1 a 3 lleva la voz de Dios lo que Jehová dice (todo el capítulo 2); del 4 al 14 sólo lo que Jehová dice en primera persona. Lo que Oseas dice con "dije" lleva la voz julian.
+- Nota: el 25 nov a las 19:14 UTC seis pedazos de Oseas 9 quedaron en "queued" sin salir (se pidieron de nuevo y salieron); mientras sigan colgados ocupan lugares del tope de 8 trabajos, por eso las tandas entran de a pocos pedazos: se piden de nuevo los que rebotan con "Rate limit reached".
