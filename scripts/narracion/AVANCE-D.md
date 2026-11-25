@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel, Oseas, Joel, Amós, Abdías y Jonás completos, y Miqueas 1 a 5.
-- Sigue: Miqueas 6 (los tags y planes de Miqueas, Nahúm y Habacuc ya están hechos y bajados al sandbox; falta generar).
-- Créditos: unos 2.850 el 25 nov 2026, 19:42 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel, Oseas, Joel, Amós, Abdías, Jonás, Miqueas y Nahúm completos.
+- Sigue: Habacuc 1 (los tags y planes de Habacuc ya están hechos y bajados al sandbox; falta generar). Después Sofonías, Hageo, Zacarías y Malaquías.
+- Créditos: 2.801 el 25 nov 2026, 19:44 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
@@ -19,6 +19,7 @@
 - Nota: a veces un pedazo se queda en "queued" sin salir nunca (pasó en Ezequiel 33 y 48); se pide de nuevo sólo ese pedazo con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}` y sale enseguida.
 - Nota: en Daniel 5 y 6: Belsasar = desmond, la reina voz de mujer, Darío = arthur, los que acusan a Daniel = sterling. De Daniel 7 al 12 cuenta Daniel mismo (narrador); lo que dicen los ángeles (Gabriel, el varón vestido de lino) lleva voz de ángel, todo el capítulo 11 incluido, y lo que Daniel dice con "dije" lleva la voz julian.
 - Nota: en Oseas cuenta el profeta (narrador). En los capítulos 1 a 3 lleva la voz de Dios lo que Jehová dice (todo el capítulo 2); del 4 al 14 sólo lo que Jehová dice en primera persona. Lo que Oseas dice con "dije" lleva la voz julian.
-- Nota: el 25 nov a las 19:14 UTC seis pedazos de Oseas 9 quedaron en "queued" sin salir (se pidieron de nuevo y salieron); mientras sigan colgados ocupan lugares del tope de 8 trabajos, por eso las tandas entran de a pocos pedazos: se piden de nuevo los que rebotan con "Rate limit reached".
+- Nota: el 25 nov a las 19:14 UTC seis pedazos de Oseas 9 quedaron en "queued" sin salir nunca; se pidieron de nuevo y salieron enseguida. Cuando una tanda rebota en parte con "Rate limit reached" (las cuatro tareas comparten el tope de 8), se piden de nuevo sólo los pedazos que rebotaron.
 - Nota: en Joel y Amós cuenta el profeta (narrador) y lleva la voz de Dios lo que Jehová dice en primera persona (en Amós 1 y 2 todos los oráculos seguidos, con el "así dice Jehová" de adentro incluido). Amós = julian, Amasías = sterling.
 - Nota: en Jonás las voces quedan fijas: Jonás = julian, el maestre de la nave = arthur, los marineros = sterling, el rey de Nínive = desmond.
+- Nota: en Miqueas, Nahúm y Habacuc cuenta el profeta (narrador) y lleva la voz de Dios sólo lo que Jehová dice en primera persona; en Miqueas 3 lo que el profeta dice con "dije" lleva la voz julian y en Miqueas 7 Sión habla con voz de mujer (elena). La oración de Habacuc 3 la lee toda el narrador.
