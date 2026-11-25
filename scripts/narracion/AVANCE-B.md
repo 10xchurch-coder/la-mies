@@ -20,5 +20,6 @@
 - Hecho: Éxodo 17 a 20 (25 nov 2026), 60 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
 - Hecho: Éxodo 21 a 24 (25 nov 2026), 28 pedazos, sin fallas (un pedido rechazado por el límite de 8 a la vez se volvió a mandar).
 - Hecho: Éxodo 25 a 28 (25 nov 2026), 22 pedazos, sin fallas (dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). Todo narrador.
-- Sigue: Éxodo 29 (tags y planes de Éxodo 29 a 36 ya están subidos; 29 a 31 los lee todo el narrador, sin tags; 32 a 36 llevan tags; 37 a 40 no tienen diálogo). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
-- Créditos que quedan: 7210 (25 nov 2026).
+- Hecho: Éxodo 29 a 32 (25 nov 2026), 52 pedazos, sin fallas (cinco pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). 29 a 31 todo narrador; en 32 Josué es desmond.
+- Sigue: Éxodo 33 (tags y planes de Éxodo 33 a 36 ya están subidos; 37 a 40 no tienen diálogo y los lee todo el narrador). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro v:Jetro=arthur, Aarón julian, Josué desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos, para que no repitan la voz de Faraón o Moisés.
+- Créditos que quedan: 7117 (25 nov 2026).
