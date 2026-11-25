@@ -1,0 +1,5 @@
+# Voces: Zorobabel julian, la carta de Rehum arthur, la respuesta del rey Artajerjes sterling.
+3 | h:Zorobabel=julian | No nos conviene | rey de Persia.
+11-16 | h:Rehum=arthur | Al rey Artajerjes | no será tuya.
+17-22 | h:Artajerjes=sterling | Paz ahora. | perjuicio de los reyes?
+2 | g:enemigos | Permitidnos edificar | nos hizo subir aquí.

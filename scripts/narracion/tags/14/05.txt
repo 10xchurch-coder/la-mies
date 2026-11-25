@@ -1,0 +1,4 @@
+# Voces: Tatnai arthur (sus preguntas y su carta al rey Darío; lo que cita dentro de la carta va con su misma voz).
+3 | h:Tatnai=arthur | ¿Quién os dio mandamiento | restablecer estos muros?
+4 | h:Tatnai | ¿Cuáles son los nombres | edifican este edificio?
+7-17 | h:Tatnai | Al rey Darío toda paz. | la voluntad del rey sobre esto.
