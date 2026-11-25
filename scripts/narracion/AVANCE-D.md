@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea D: Proverbios a Malaquías (libros 19 a 38)
-- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel, Oseas, Joel y Amós completos.
-- Sigue: Abdías (los tags y planes de Abdías, Jonás y Miqueas ya están hechos y bajados al sandbox; falta generar).
-- Créditos: unos 2.950 el 25 nov 2026, 19:36 UTC (las cuatro tareas comparten los créditos).
+- Hecho y publicado: Proverbios, Eclesiastés, Cantares, Isaías, Jeremías, Lamentaciones, Ezequiel, Daniel, Oseas, Joel, Amós, Abdías y Jonás completos.
+- Sigue: Miqueas 1 (los tags y planes de Miqueas, Nahúm y Habacuc ya están hechos y bajados al sandbox; falta generar).
+- Créditos: unos 2.900 el 25 nov 2026, 19:40 UTC (las cuatro tareas comparten los créditos).
 - Nota: en Proverbios sólo llevan otra voz las citas largas (la sabiduría, la mujer extraña, los pecadores, el padre, la madre de Lemuel); las frases sueltas de un solo verso las lee el narrador. Eclesiastés lo lee todo el narrador (es el Predicador hablando de principio a fin).
 - Nota: Higgsfield sólo deja 8 trabajos a la vez entre las cuatro tareas; si una tanda sale con "Rate limit reached", se piden de nuevo sólo los pedazos que faltaron.
 - Nota: en Cantares habla la esposa (voz de mujer), el esposo (voz de hombre) y las hijas de Jerusalén (otra voz de mujer); sólo el título lo lee el narrador. En Isaías lleva la voz de Dios lo que el texto presenta claramente como palabras de Jehová; el resto del oráculo lo lee el narrador.
@@ -21,3 +21,4 @@
 - Nota: en Oseas cuenta el profeta (narrador). En los capítulos 1 a 3 lleva la voz de Dios lo que Jehová dice (todo el capítulo 2); del 4 al 14 sólo lo que Jehová dice en primera persona. Lo que Oseas dice con "dije" lleva la voz julian.
 - Nota: el 25 nov a las 19:14 UTC seis pedazos de Oseas 9 quedaron en "queued" sin salir (se pidieron de nuevo y salieron); mientras sigan colgados ocupan lugares del tope de 8 trabajos, por eso las tandas entran de a pocos pedazos: se piden de nuevo los que rebotan con "Rate limit reached".
 - Nota: en Joel y Amós cuenta el profeta (narrador) y lleva la voz de Dios lo que Jehová dice en primera persona (en Amós 1 y 2 todos los oráculos seguidos, con el "así dice Jehová" de adentro incluido). Amós = julian, Amasías = sterling.
+- Nota: en Jonás las voces quedan fijas: Jonás = julian, el maestre de la nave = arthur, los marineros = sterling, el rey de Nínive = desmond.
