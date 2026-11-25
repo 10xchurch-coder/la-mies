@@ -1,0 +1,4 @@
+4 | m:sabiduria | Quien sea simple | venga acá.
+5-6 | m:sabiduria | Venid, comed | del entendimiento.
+16 | m:insensata | Ven acá. | Ven acá.
+17 | m:insensata | Las aguas hurtadas | es sabroso.
