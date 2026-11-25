@@ -1,0 +1,21 @@
+# Voces en 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
+16 | h:David=julian | ¿Qué quieres? | ¿Qué quieres?
+2 | g:siervos=desmond | Busquen a mi señor | mi señor el rey.
+5 | h:Adonías=arthur | Yo seré rey. | Yo seré rey.
+11-14 | v:Natán=desmond | ¿No has oído | confirmaré tus palabras.
+17-21 | m:Betsabé | Señor mío, tú juraste | tenidos por culpables.
+23 | g:aviso=arthur | He aquí el profeta Natán | He aquí el profeta Natán
+24-27 | v:Natán | Rey señor mío, ¿has dicho | después de él?
+28 | h:David | Llamadme a Betsabé. | Llamadme a Betsabé.
+29-30 | h:David | Vive Jehová, que ha redimido | así lo haré hoy.
+31 | m:Betsabé | Viva mi señor | para siempre.
+32 | h:David | Llamadme al sacerdote | hijo de Joiada.
+33-35 | h:David | Tomad con vosotros | sobre Judá.
+36-37 | h:Benaía=arthur | Amén. | mi señor el rey David.
+39 | g:pueblo=sterling | ¡Viva el rey Salomón! | ¡Viva el rey Salomón!
+41 | h:Joab=desmond | ¿Por qué se alborota | con estruendo?
+42 | h:Adonías | Entra, porque | buenas nuevas.
+43-48 | h:Jonatán=sterling | Ciertamente nuestro señor | viéndolo mis ojos.
+51 | g:siervos | He aquí que Adonías | a su siervo.
+52 | h:Salomón=sterling | Si demuestra | morirá.
+53 | h:Salomón | Vete a tu casa. | Vete a tu casa.

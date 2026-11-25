@@ -1,0 +1,26 @@
+# Voces en 1 Reyes: David julian, Salomón sterling, Benaía arthur.
+2-9 | h:David=julian | Yo sigo el camino | con sangre a la sepultura.
+13 | m:Betsabé | ¿Es tu venida de paz? | ¿Es tu venida de paz?
+13 | h:Adonías=arthur | Sí, de paz. | Sí, de paz.
+14 | h:Adonías | Una palabra tengo que decirte. | Una palabra tengo que decirte.
+14 | m:Betsabé | Di. | Di.
+15-16 | h:Adonías | Tú sabes que el reino | no me la niegues.
+16 | m:Betsabé | Habla. | Habla.
+17 | h:Adonías | Yo te ruego | Abisag sunamita.
+18 | m:Betsabé | Bien; yo hablaré por ti al rey. | Bien; yo hablaré por ti al rey.
+20 | m:Betsabé | Tengo una pequeña | no me la niegues.
+20 | h:Salomón=sterling | Pide, madre mía | no te la negaré.
+21 | m:Betsabé | Que Abisag | hermano Adonías.
+22 | h:Salomón | ¿Por qué pides | hijo de Sarvia.
+23-24 | h:Salomón | Así me haga Dios | Adonías morirá hoy.
+26 | h:Salomón | Vete a Anatot | afligido mi padre.
+29 | h:Salomón | Ve y arremete contra él. | Ve y arremete contra él.
+30 | h:Benaía=arthur | El rey ha dicho que salgas. | El rey ha dicho que salgas.
+30 | h:Joab=desmond | No, sino que aquí moriré. | No, sino que aquí moriré.
+30 | h:Benaía | Así habló Joab | así me respondió.
+31-33 | h:Salomón | Haz como él ha dicho | de parte de Jehová.
+36-37 | h:Salomón | Edifícate | sobre tu cabeza.
+38 | h:Simeí=desmond | La palabra es buena; como | así lo hará tu siervo.
+39 | g:aviso=arthur | He aquí que tus siervos están en Gat. | He aquí que tus siervos están en Gat.
+42-43 | h:Salomón | ¿No te hice jurar | que yo te impuse?
+44-45 | h:Salomón | Tú sabes todo el mal | delante de Jehová.

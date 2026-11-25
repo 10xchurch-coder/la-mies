@@ -7,6 +7,7 @@ Deja  planes/LL-CC.json -> {"batches": [[pedido, ...], ...], "orden": [...]}  (t
 
 Cada línea de tags:   VERSO[-VERSO] | QUIÉN | primeras palabras de la cita | últimas palabras de la cita
 QUIÉN: jesus, dios, angel, o con prefijo  h:Nombre (hombre)  v:Nombre (hombre mayor)  m:Nombre (mujer)  n:Nombre (niño)  g:grupo
+Se puede fijar la voz de alguien con  h:Nombre=voz  (por ejemplo h:Salomón=sterling) la primera vez que aparece en el archivo.
 Las palabras tienen que estar tal cual en el texto. Si no se encuentran, el programa avisa y no arma nada.
 """
 import hashlib, json, os, re, sys
@@ -34,6 +35,10 @@ USADAS = {}   # en este capítulo: quién -> voz, para que dos personas distinta
 
 def voz(quien):
     q = quien.strip().lower()
+    if '=' in q:   # "h:Salomón=sterling" fija la voz de esa persona en el capítulo (para que no cambie de un capítulo a otro)
+        q, _, fija = [x.strip() for x in q.partition('=')]
+        if fija not in V: raise SystemExit(f'No conozco la voz "{fija}"')
+        USADAS[q] = fija
     if q in FIJOS: return FIJOS[q]
     if q in USADAS: return USADAS[q]
     tipo, _, nombre = q.partition(':')
