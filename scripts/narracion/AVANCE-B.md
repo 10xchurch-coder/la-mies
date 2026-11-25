@@ -44,5 +44,6 @@
 - Hecho: Deuteronomio 4 a 7 (25 nov 2026), 28 pedazos, sin fallas (un pedazo de Deuteronomio 4 quedó trabado y se volvió a pedir; muchos pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar).
 - Hecho: Deuteronomio 8 a 11 (25 nov 2026), 24 pedazos, sin fallas (varios pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar).
 - Hecho: Deuteronomio 12 a 15 (25 nov 2026), 22 pedazos, sin fallas (algunos pedidos rechazados por el límite de 8 a la vez compartido se volvieron a mandar). Habla Moisés todo.
-- Sigue: Deuteronomio 16 (tags y planes de Deuteronomio 16 a 34 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Josué 1. En Deuteronomio habla Moisés (h:Moisés=sterling): todo su discurso va con su voz, incluso lo que él cita de Dios y del pueblo. Voces a mantener: Moisés sterling, Eleazar julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Hecho: Deuteronomio 16 a 19 (25 nov 2026), 21 pedazos, sin fallas. Habla Moisés todo.
+- Sigue: Deuteronomio 20 (tags y planes de Deuteronomio 20 a 34 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Josué 1. En Deuteronomio habla Moisés (h:Moisés=sterling): todo su discurso va con su voz, incluso lo que él cita de Dios y del pueblo. Voces a mantener: Moisés sterling, Eleazar julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
 - Créditos que quedan: 4245 (25 nov 2026).
