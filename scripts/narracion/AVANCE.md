@@ -51,6 +51,7 @@
 - Hecho: 1 Timoteo 1 a 6 (25 nov 2026), 16 pedazos, sin fallas. 1 TIMOTEO COMPLETO.
 - Hecho: 2 Timoteo 1 a 4 (25 nov 2026), 13 pedazos, sin fallas. 2 TIMOTEO COMPLETO.
 - Hecho: Tito 1 a 3 y Filemón (25 nov 2026), 11 pedazos, sin fallas. TITO Y FILEMÓN COMPLETOS.
+- EN CURSO: Hebreos 1 a 13, 23:31 UTC del 25 nov
 - Sigue: Hebreos 1 (libro 57). Los planes de Hebreos 1 a 13 ya están en main (sin tags; todavía no bajados en el sandbox); falta el audio. Después Santiago a Judas (cartas, sin tags) y Apocalipsis, que sí lleva tags (Jesús, ángeles, ancianos, voces del cielo).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
