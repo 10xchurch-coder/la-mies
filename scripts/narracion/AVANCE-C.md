@@ -1,7 +1,7 @@
 # Avance de la narración (RVG) — tarea C: 2 Samuel a Salmos (libros 09 a 18)
-- Sigue: 1 Crónicas 1 (planes ya listos para 1 Crónicas 1 a 4; falta generar el audio).
-- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22) y 2 Reyes completo (1 a 25) (25 nov 2026; octava vuelta en curso: 2 Reyes 13 a 25, 172 pedazos, sin fallas; algunos pedidos salieron "Rate limit" y se volvieron a pedir).
-- Créditos al empezar la octava vuelta: 7099 (se comparten entre las cuatro tareas).
+- Sigue: 1 Crónicas 5 (todavía sin tags ni planes; el capítulo 5 no tiene diálogo).
+- Hecho y publicado: 2 Samuel completo (1 a 24), 1 Reyes completo (1 a 22), 2 Reyes completo (1 a 25) y 1 Crónicas 1 a 4 (25 nov 2026; octava vuelta: 2 Reyes 13 a 25 y 1 Crónicas 1 a 4, 193 pedazos, unas 73.000 letras, sin fallas; nueve pedidos salieron "Rate limit" y se volvieron a pedir).
+- Créditos al terminar la octava vuelta: 6733 (se comparten entre las cuatro tareas).
 - Nota de voces: David sale siempre con la voz Julian en 2 Samuel y Absalón con Sterling (se pone a David primero en el archivo de tags para que no le quiten la voz).
 - Nota técnica: Higgsfield deja 8 pedidos a la vez entre las cuatro tareas; si un pedido de la tanda sale "Rate limit", se vuelve a pedir solo ese con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/I/params"}}`.
 - Nota de voces 2: como solo hay cuatro voces de hombre, ahora se puede fijar la voz en el archivo de tags con `h:Nombre=voz` (agregado en armar.py, no cambia nada de lo anterior). En 1 Reyes: David julian, Salomón sterling, Natán desmond, Benaía arthur.
