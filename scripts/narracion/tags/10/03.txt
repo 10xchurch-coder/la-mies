@@ -1,0 +1,13 @@
+# Voces en 1 Reyes: Salomón sterling. La primera mujer (la que habla en el verso 17) es la madre del niño vivo.
+6-9 | h:Salomón=sterling | Tú hiciste gran misericordia | pueblo tan grande?
+5 | dios | Pide lo que quieras que yo te dé. | Pide lo que quieras que yo te dé.
+11-14 | dios | Porque has pedido esto | yo alargaré tus días.
+17-21 | m:mujer1 | ¡Ah, señor mío! Yo y esta | había dado a luz.
+22 | m:mujer2 | No; mi hijo es el que vive, y tu hijo es el muerto. | No; mi hijo es el que vive, y tu hijo es el muerto.
+22 | m:mujer1 | No; tu hijo es el muerto, y mi hijo es el que vive. | No; tu hijo es el muerto, y mi hijo es el que vive.
+23 | h:Salomón | Esta dice | mi hijo es el que vive.
+24 | h:Salomón | Traedme una espada. | Traedme una espada.
+25 | h:Salomón | Partid por medio | mitad a la otra.
+26 | m:mujer1 | ¡Ah, señor mío! dad a esta | no lo matéis.
+26 | m:mujer2 | Ni a mí ni a ti; partidlo. | Ni a mí ni a ti; partidlo.
+27 | h:Salomón | Dad a esta el niño vivo | ella es su madre.
