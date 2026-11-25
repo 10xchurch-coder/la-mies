@@ -1,0 +1,10 @@
+3-4 | h:Pedro=desmond | Ananías, ¿por qué | sino a Dios.
+8 | h:Pedro | Dime, ¿vendisteis | la heredad?
+8 | m:Safira | Sí, en tanto. | Sí, en tanto.
+9 | h:Pedro | ¿Por qué os pusisteis | te sacarán a ti.
+20 | angel | Id, y puestos en pie | de esta vida.
+23 | g:oficiales=julian | De cierto, la cárcel | a nadie hallamos dentro.
+25 | h:mensajero=sterling | He aquí, los varones | enseñan al pueblo.
+28 | v:sumo sacerdote=arthur | ¿No os ordenamos | la sangre de este hombre.
+29-32 | h:Pedro | Es necesario obedecer | a los que le obedecen.
+35-39 | v:Gamaliel=sterling | Varones israelitas, mirad | luchando contra Dios.

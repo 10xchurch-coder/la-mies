@@ -1,0 +1,5 @@
+7 | g:concilio=arthur | ¿Con qué poder | habéis hecho vosotros esto?
+8-12 | h:Pedro=desmond | Príncipes del pueblo | debamos ser salvos.
+16-17 | g:concilio | ¿Qué haremos con estos hombres? | en este nombre.
+19-20 | h:Pedro | Juzgad si es justo | visto y oído.
+24-30 | g:creyentes=julian | Señor, tú eres Dios | tu santo Hijo Jesús.

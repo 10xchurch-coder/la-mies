@@ -1,0 +1,5 @@
+1 | v:sumo sacerdote=arthur | ¿Es esto así? | ¿Es esto así?
+2-53 | h:Esteban=sterling | Varones hermanos y padres, oíd | y no la guardasteis.
+56 | h:Esteban | He aquí, veo los cielos abiertos | a la diestra de Dios.
+59 | h:Esteban | Señor Jesús, recibe mi espíritu. | Señor Jesús, recibe mi espíritu.
+60 | h:Esteban | Señor, no les tomes | en cuenta este pecado.
