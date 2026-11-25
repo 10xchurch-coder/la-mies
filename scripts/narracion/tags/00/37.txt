@@ -1,0 +1,19 @@
+# Desde aquí Jacob ya es anciano: voz mayor (arthur). José: sterling. Judá: desmond. Rubén: julian.
+6-7 | h:José=sterling | Oíd ahora | se inclinaban al mío.
+10 | v:Jacob=arthur | ¿Qué sueño es este | a ti a tierra?
+21 | h:Rubén=julian | No lo matemos. | No lo matemos.
+26-27 | h:Judá=desmond | ¿Qué provecho | nuestra carne.
+8 | g:hermanos=desmond | ¿Has de reinar | sobre nosotros?
+9 | h:José | He aquí que he soñado | se inclinaban a mí.
+13 | v:Jacob | ¿No están tus hermanos | te enviaré a ellos.
+13 | h:José | Heme aquí. | Heme aquí.
+14 | v:Jacob | Ve ahora | tráeme la respuesta.
+15 | h:hombre=julian | ¿Qué buscas? | ¿Qué buscas?
+16 | h:José | Busco a mis hermanos | sus rebaños.
+17 | h:hombre | Ya se han ido | Vamos a Dotán.
+19-20 | g:hermanos | He aquí viene el soñador; | de sus sueños.
+22 | h:Rubén | No derraméis sangre | mano en él;
+30 | h:Rubén | El joven no aparece | adónde iré yo?
+32 | g:hermanos | Esto hemos hallado | túnica de tu hijo.
+33 | v:Jacob | La túnica de mi hijo es | ha sido despedazado.
+35 | v:Jacob | Porque yo descenderé | hasta la sepultura.

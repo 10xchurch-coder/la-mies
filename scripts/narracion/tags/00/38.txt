@@ -1,0 +1,21 @@
+8 | h:Judá=desmond | Entra a la esposa | a tu hermano.
+11 | h:Judá | Quédate viuda | Sela mi hijo;
+11 | h:Judá | No sea que | también él muera.
+13 | h:mensajero | He aquí tu suegro | sus ovejas.
+16 | h:Judá | Vamos, déjame | allegarme a ti;
+16 | m:Tamar | ¿Qué me darás | allegares a mí?
+17 | h:Judá | Yo te enviaré | del rebaño.
+17 | m:Tamar | ¿Me darás una prenda | lo envíes?
+18 | h:Judá | ¿Qué prenda te daré? | ¿Qué prenda te daré?
+18 | m:Tamar | Tu anillo | en tu mano.
+21 | h:Hira | ¿Dónde está la ramera | junto al camino?
+21 | g:hombres del lugar | Aquí no ha estado ninguna ramera. | Aquí no ha estado ninguna ramera.
+22 | h:Hira | No la he hallado | ha estado aquí.
+23 | h:Judá | Tómeselo para sí | no la hallaste.
+24 | h:mensajero | Tamar tu nuera | las prostituciones.
+24 | h:Judá | Sáquenla | sea quemada.
+25 | m:Tamar | Del varón | estoy encinta.
+25 | m:Tamar | Mira ahora | y el bordón.
+26 | h:Judá | Más justa es que yo | Sela mi hijo.
+28 | m:partera | Este salió primero. | Este salió primero.
+29 | m:partera | ¿Por qué has hecho | rotura?
