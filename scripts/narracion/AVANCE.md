@@ -50,8 +50,8 @@
 - Hecho: 2 Tesalonicenses 1 a 3 (25 nov 2026), 9 pedazos, sin fallas. 2 TESALONICENSES COMPLETO.
 - Hecho: 1 Timoteo 1 a 6 (25 nov 2026), 16 pedazos, sin fallas. 1 TIMOTEO COMPLETO.
 - Hecho: 2 Timoteo 1 a 4 (25 nov 2026), 13 pedazos, sin fallas. 2 TIMOTEO COMPLETO.
-- EN CURSO: Tito 1 a 3 y Filemón, 22:41 UTC (25 nov 2026)
-- Sigue: Tito 1 (libro 55). Los planes de Tito y Filemón (libros 55 y 56) ya están en main y bajados en el sandbox; falta el audio. Hebreos y Apocalipsis hay que mirarlos por si hay diálogo; Santiago a Judas son cartas.
+- Hecho: Tito 1 a 3 y Filemón (25 nov 2026), 11 pedazos, sin fallas. TITO Y FILEMÓN COMPLETOS.
+- Sigue: Hebreos 1 (libro 57). Los planes de Hebreos 1 a 13 ya están en main (sin tags; todavía no bajados en el sandbox); falta el audio. Después Santiago a Judas (cartas, sin tags) y Apocalipsis, que sí lleva tags (Jesús, ángeles, ancianos, voces del cielo).
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
 - Nota: armar.py ahora acepta la misma frase dos veces en un versículo (Lucas 8:45): si el comienzo y el final de la cita son iguales, toma esa frase sola.
@@ -59,5 +59,8 @@
 - Nota: el 25 nov dos corridas de la tarea A se pisaron (una tardó más de una hora) y las dos hicieron Marcos 9 a 12. Para que no pase más: antes de generar un grupo, anotar acá una línea "- EN CURSO: libro y capítulos, hora UTC" y subirla; borrarla al terminar el grupo. Si al empezar hay una línea EN CURSO de hace menos de 70 minutos, seguir con el grupo que viene después y no tocar esa línea.
 - Nota: para no copiar a mano los nombres de los resultados: mkdir -p /home/claude/nombres; después de cada generate_audio_batch correr `cd /home/claude/nombres && python3 /home/claude/la-mies/scripts/narracion/probar.py LL-CC INDICE_INICIAL id1 id2 ...` (los job_id de la tanda, en orden; busca solo los archivos ya terminados y los anota en LL-CC.txt; si dice FALTAN, mirar esos con jobs_wait). Al terminar el capítulo: `bash /home/claude/la-mies/scripts/narracion/unir.sh LL CC` (llama a juntar.py con los nombres en orden).
 - Nota: para pedir de nuevo solo algunos pedazos, generate_audio_batch acepta una lista con `{"index": N, "params": {"ref": "sandbox:~/nar/LL-CC.json#/batches/T/P/params"}}` (T = N entre 8, P = el resto).
-- Créditos que quedan: 1140 (25 nov 2026, después de Efesios 6).
 - Nota: en esta máquina la rama local main puede estar vieja; trabajar en una rama nueva hecha desde origin/main y subir con `git push origin HEAD:main`.
+- Créditos que quedan: 549 (25 nov 2026, después de Filemón). Filipenses a Filemón gastaron unos 210 créditos entre las cuatro tareas. Con menos de 100 hay que parar.
+- Nota: para las cartas (pocos pedazos por capítulo) se junta un libro entero en un solo pedido: en el sandbox `cd nar && ./a_grp.sh a_gLL LL-01 LL-02 ...` deja a_gLL.json con tandas de 8 e index corrido; se pide con `{"ref": "sandbox:~/nar/a_gLL.json#/t/N"}`; acá `probar.py GLL INDICE id...` y después `python3 /home/claude/la-mies/scripts/narracion/repartir.py GLL LL-01 LL-02 ...` (dentro de /home/claude/nombres) reparte los nombres por capítulo para unir.sh. `fin.sh "Hecho" "EN CURSO" "Sigue" "mensaje"` corre subir.sh, anota y sube.
+- Nota: si generate_audio_batch da "Bad Gateway", no pedir de nuevo sin mirar: la tanda de Tito sí había salido completa (se ve con show_generations y se empareja por el texto).
+- Nota: Hebreos va sin tags, igual que Romanos: todo lo que "dice" Dios ahí son citas del Antiguo Testamento, que según LEEME lee el narrador.
