@@ -1,0 +1,10 @@
+1 | h:Josué=desmond | Andad, reconoced la tierra, y a Jericó. | Andad, reconoced la tierra, y a Jericó.
+2 | g:aviso=julian | He aquí que hombres de los hijos | a espiar la tierra.
+3 | h:rey de Jericó=arthur | Saca fuera los hombres | a espiar toda la tierra.
+4-5 | m:Rahab=elena | Verdad que hombres vinieron a mí | seguidlos aprisa y los alcanzaréis.
+9-13 | m:Rahab | Yo sé que Jehová os ha dado | libraréis nuestras vidas de la muerte.
+14 | g:espías=sterling | Nuestra alma por vosotros | misericordia y verdad.
+16 | m:Rahab | Marchaos a la montaña | seguiréis vuestro camino.
+17-20 | g:espías | Nosotros quedaremos libres | con que nos has hecho jurar.
+21 | m:Rahab | Sea así como habéis dicho. | Sea así como habéis dicho.
+24 | g:espías | Ciertamente Jehová ha entregado | desmayan delante de nosotros.

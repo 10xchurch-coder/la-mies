@@ -1,0 +1,7 @@
+2 | dios | Hazte cuchillos afilados | a los hijos de Israel.
+9 | dios | Hoy he quitado de vosotros | el oprobio de Egipto
+13 | h:Josué=desmond | ¿Eres de los nuestros, o de nuestros enemigos? | ¿Eres de los nuestros, o de nuestros enemigos?
+# El capitán del ejército de Jehová va con la voz de los ángeles.
+14 | angel | No; sino que he venido | capitán del ejército de Jehová.
+14 | h:Josué | ¿Qué dice mi Señor a su siervo? | ¿Qué dice mi Señor a su siervo?
+15 | angel | Quita las sandalias de tus pies | donde estás es santo.

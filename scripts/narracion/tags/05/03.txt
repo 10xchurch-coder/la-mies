@@ -1,0 +1,6 @@
+3-4 | g:oficiales=julian | Cuando viereis el arca | pasado antes por este camino.
+5 | h:Josué=desmond | Santificaos, porque mañana | maravillas entre vosotros.
+6 | h:Josué | Tomad el arca del pacto, y pasad delante del pueblo. | Tomad el arca del pacto, y pasad delante del pueblo.
+7-8 | dios | Desde este día comenzaré | pararéis en el Jordán.
+9 | h:Josué | Llegaos acá, y escuchad | de Jehová vuestro Dios.
+10-13 | h:Josué | En esto conoceréis | se detendrán en un montón.
