@@ -35,5 +35,6 @@
 - Hecho: Números 9 a 12 (25 nov 2026), 54 pedazos, sin fallas (dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar).
 - Hecho: Números 13 a 16 (25 nov 2026), 75 pedazos, sin fallas (dos pedazos de Números 13 quedaron trabados y se volvieron a pedir; cinco pedidos rechazados por el límite de 8 a la vez se volvieron a mandar).
 - Hecho: Números 17 a 20 (25 nov 2026), 37 pedazos, sin fallas (ocho pedidos rechazados por el límite de 8 a la vez se volvieron a mandar). 18 y 19 todo narrador; el rey de Edom es desmond.
-- Sigue: Números 21 (tags y planes de Números 21 a 24 ya están subidos y bajados en el sandbox). Falta leer y etiquetar desde Números 25. Voces a mantener: Moisés h:Moisés=sterling, Aarón h:Aarón=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, los espías julian, Balaam h:Balaam=julian, Balac h:Balac=desmond, el asna m:asna=elena, el Ángel de Jehová "angel"; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
-- Créditos que quedan: 5142 (25 nov 2026).
+- Hecho: Números 21 y 22 (25 nov 2026), 60 pedazos, sin fallas (cuatro pedidos rechazados por el límite de 8 a la vez se volvieron a mandar).
+- Sigue: Números 23 (tags y planes de Números 23 a 32 ya están subidos; 26 y 28 a 30 son censo y leyes, sin tags). Falta leer y etiquetar desde Números 33. Voces a mantener: Moisés h:Moisés=sterling, Eleazar h:Eleazar=julian, Josué y Caleb desmond, el pueblo g:pueblo=arthur, Balaam h:Balaam=julian, Balac h:Balac=desmond, las hijas de Zelofehad m:hijas de Zelofehad=elena, Gad y Rubén desmond, el Ángel de Jehová "angel"; Dios es "dios". Ojo: poner la voz fija (=voz) en los grupos.
+- Créditos que quedan: 5060 (25 nov 2026).

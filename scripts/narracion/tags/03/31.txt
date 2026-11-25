@@ -1,0 +1,6 @@
+2 | dios | Haz la venganza | recogido a tu pueblo.
+3-4 | h:Moisés=sterling | Armaos algunos de vosotros | enviaréis a la guerra.
+15-20 | h:Moisés | ¿Todas las mujeres habéis reservado? | todo vaso de madera.
+21-24 | h:Eleazar=julian | Esta es la ordenanza | entraréis en el campamento.
+26-30 | dios | Toma la cuenta de la presa | la guarda del tabernáculo de Jehová.
+49-50 | g:capitanes=desmond | Tus siervos han tomado razón | almas delante de Jehová.
