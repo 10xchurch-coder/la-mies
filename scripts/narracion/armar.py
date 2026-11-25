@@ -75,6 +75,7 @@ def main(libro, cap):
         desde = todo.find(a, ini[v1 - 1], ini[v1 - 1] + len(versos[v1 - 1]) + 1)
         fin_v = ini[v2 - 1] + len(versos[v2 - 1])
         hasta = todo.rfind(b, max(desde, ini[v2 - 1] - len(b)), fin_v)
+        if a == b and desde >= 0: hasta = desde   # la cita es esa frase sola: no buscar otra igual más adelante en el versículo
         if desde < 0 or hasta < 0: raise SystemExit(f'{f} línea {n}: no encuentro "{a if desde < 0 else b}"')
         marcas.append((desde, hasta + len(b), voz(quien)))
     marcas.sort()

@@ -1,0 +1,19 @@
+4 | jesus | Boga mar adentro | redes para pescar.
+5 | h:Pedro=desmond | Maestro, hemos trabajado | echaré la red.
+8 | h:Pedro | Apártate de mí | soy hombre pecador.
+10 | jesus | No temas; desde ahora | pescarás hombres.
+12 | h:leproso | Señor, si quieres, puedes limpiarme. | Señor, si quieres, puedes limpiarme.
+13 | jesus | Quiero; sé limpio. | Quiero; sé limpio.
+14 | jesus | pero ve, | pero ve,
+14 | jesus | muéstrate al sacerdote | testimonio a ellos.
+20 | jesus | Hombre, tus pecados | te son perdonados.
+21 | g:escribas y fariseos | ¿Quién es Éste que habla blasfemias? | sino sólo Dios?
+22-24 | jesus | ¿Qué pensáis en vuestros corazones? | potestad en la tierra de perdonar pecados
+24 | jesus | A ti digo, levántate | vete a tu casa.
+26 | g:todos | Hoy hemos visto maravillas. | Hoy hemos visto maravillas.
+27 | jesus | Sígueme. | Sígueme.
+30 | g:escribas y fariseos | ¿Por qué coméis y bebéis | publicanos y pecadores?
+31-32 | jesus | Los que están sanos | pecadores al arrepentimiento.
+33 | g:escribas y fariseos | ¿Por qué los discípulos de Juan | los tuyos comen y beben?
+34-35 | jesus | ¿Podéis hacer que | en aquellos días ayunarán.
+36-39 | jesus | Nadie pone remiendo | El añejo es mejor.

@@ -1,0 +1,22 @@
+5-8 | jesus | El sembrador salió a sembrar | fruto a ciento por uno.
+8 | jesus | El que tiene oídos para oír, oiga. | El que tiene oídos para oír, oiga.
+9 | g:discipulos | ¿Qué significa esta parábola? | ¿Qué significa esta parábola?
+10-18 | jesus | A vosotros os es dado | le será quitado.
+20 | h:uno que avisa | Tu madre y tus hermanos | y quieren verte.
+21 | jesus | Mi madre y mis hermanos | la ponen por obra.
+22 | jesus | Pasemos al otro lado del lago. | Pasemos al otro lado del lago.
+24 | g:discipulos | ¡Maestro, Maestro, que perecemos! | ¡Maestro, Maestro, que perecemos!
+25 | jesus | ¿Dónde está vuestra fe? | ¿Dónde está vuestra fe?
+25 | g:discipulos | ¿Qué clase de hombre es Éste | y le obedecen?
+28 | h:endemoniado | ¿Qué tengo yo contigo | que no me atormentes.
+30 | jesus | ¿Cómo te llamas? | ¿Cómo te llamas?
+30 | h:endemoniado | Legión. | Legión.
+39 | jesus | Vuélvete a tu casa | ha hecho Dios contigo.
+45 | jesus | ¿Quién me ha tocado? | ¿Quién me ha tocado?
+45 | h:Pedro=desmond | Maestro, la multitud te aprieta | ¿Quién me ha tocado?
+46 | jesus | Alguien me ha tocado | ha salido poder de mí.
+48 | jesus | Hija, ten buen ánimo | ve en paz.
+49 | h:uno de casa de Jairo | Tu hija ha muerto | no molestes al Maestro.
+50 | jesus | No temas; cree solamente | y será sanada.
+52 | jesus | No lloréis; no está muerta, sino duerme. | No lloréis; no está muerta, sino duerme.
+54 | jesus | Muchacha, levántate. | Muchacha, levántate.
