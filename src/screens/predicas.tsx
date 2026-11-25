@@ -5,7 +5,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Empty, Loading, Tag } from '@/components/ui';
+import { Button, Empty, Loading, Tag } from '@/components/ui';
+import { IfOn } from '@/components/IfOn';
 import { listSermons } from '@/lib/api';
 import { fmtDateOnly, youtubeId } from '@/lib/format';
 import { useAuth } from '@/store/auth';
@@ -37,6 +38,7 @@ export default function Predicas() {
       />
       {rows === null ? <Loading /> : (
         <Screen>
+          <IfOn feature="predica_notas"><Button title={tx('Mis notas de prédicas')} icon="edit-3" variant="outline" small onPress={() => router.push('/predica/mis-notas' as never)} /></IfOn>
           {!rows.length ? <Empty icon="mic" title={tx('Todavía no hay prédicas')} text={isStaff ? tx('Tocá + para cargar la de esta semana: el link de YouTube y el audio.') : tx('Cuando se carguen, van a aparecer acá.')} /> : null}
           {rows.map((s) => {
             const yt = youtubeId(s.youtube_url);

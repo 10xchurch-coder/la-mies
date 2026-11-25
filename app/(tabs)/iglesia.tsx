@@ -183,8 +183,6 @@ export default function Iglesia() {
         { icon: 'book-open', label: tx('Plan de lectura'), to: '/plan-lectura' as Href, show: true },
         { icon: 'heart', label: tx('Oración'), to: '/oracion', show: !tabs.includes('oracion') },
         { icon: 'play-circle', label: tx('Prédicas'), to: '/predicas' as Href, show: !tabs.includes('predicas') },
-        { icon: 'edit-3', label: tx('Mis notas de prédicas'), to: '/predica/mis-notas' as Href, show: true },
-        { icon: 'sun', label: tx('Oraciones respondidas'), to: '/oraciones-respondidas' as Href, show: true },
         { icon: 'help-circle', label: tx('Preguntas'), to: '/preguntas' as Href, show: true },
         { icon: 'book-open', label: isLeader ? tx('Clases') : tx('Mis clases'), to: '/clases', show: isLeader || hasClasses },
         { icon: 'music', label: tx('Cancionero'), to: '/canciones' as Href, show: true },
