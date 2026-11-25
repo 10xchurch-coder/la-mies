@@ -1,0 +1,26 @@
+2-4 | v:Abraham | Pon ahora tu mano | mi hijo Isaac.
+5 | v:siervo | Quizá la mujer | de donde saliste?
+6-8 | v:Abraham | Guárdate | allá a mi hijo.
+12-14 | v:siervo | Oh Jehová | con mi señor.
+17 | v:siervo | Te ruego que me des | de tu cántaro.
+18 | m:Rebeca | Bebe, señor mío; | Bebe, señor mío;
+19 | m:Rebeca | También para tus camellos | acaben de beber.
+23 | v:siervo | ¿De quién eres hija? | donde posemos?
+24 | m:Rebeca | Soy hija de Betuel | a Nacor.
+25 | m:Rebeca | También hay | para posar.
+27 | v:siervo | Bendito sea Jehová | de mi amo.
+30 | m:Rebeca | Así me habló aquel hombre | Así me habló aquel hombre
+31 | h:Labán | Ven, bendito | para los camellos.
+33 | v:siervo | No comeré | mi mensaje.
+33 | h:Labán | Habla. | Habla.
+34-49 | v:siervo | Yo soy siervo | a la izquierda.
+50-51 | h:Labán | De Jehová ha salido | lo ha dicho.
+54 | v:siervo | Enviadme a mi señor. | Enviadme a mi señor.
+55 | h:Labán | Espere la doncella | después irá.
+56 | v:siervo | No me detengáis | a mi señor.
+57 | h:Labán | Llamemos | preguntémosle.
+58 | h:Labán | ¿Irás tú | este varón?
+58 | m:Rebeca | Sí, iré. | Sí, iré.
+60 | h:Labán | Nuestra hermana eres | sus enemigos.
+65 | m:Rebeca | ¿Quién es este varón | hacia nosotros?
+65 | v:siervo | Este es mi señor. | Este es mi señor.
