@@ -13,6 +13,6 @@
 - Hecho: Génesis 39 a 42 (25 nov 2026), 93 pedazos, sin fallas. Faraón es desmond, el copero julian.
 - Hecho: Génesis 43 a 46 (25 nov 2026), 80 pedazos, sin fallas. El mayordomo de José es arthur, los hermanos en grupo julian.
 - Hecho: Génesis 47 a 50 (25 nov 2026), 82 pedazos, sin fallas. Génesis completo.
-- En curso (corrida que empezó 12:44 UTC del 25 nov): Éxodo 1 a 4 (tags y planes ya subidos). Si otra corrida de B empieza antes de las 13:30 UTC, no repetir estos.
-- Sigue: Éxodo 1. Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón desmond, Jetro/Reuel arthur, Aarón julian.
-- Créditos que quedan: unos 8400 (25 nov 2026).
+- Hecho: Éxodo 1 a 4 (25 nov 2026), 101 pedazos, sin fallas (un pedazo de Éxodo 4 quedó trabado y se volvió a pedir; dos pedidos rechazados por el límite de 8 a la vez se volvieron a mandar).
+- Sigue: Éxodo 5 (falta escribir los tags). Mantener en Éxodo: Moisés h:Moisés=sterling, Faraón h:Faraón=desmond, Jetro/Reuel arthur, Aarón julian; Dios es "dios" aunque el texto diga "el Ángel de Jehová" en la zarza.
+- Créditos que quedan: 8327 (25 nov 2026).
