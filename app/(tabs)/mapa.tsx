@@ -1,4 +1,5 @@
 // Pantalla principal: el mapa de veredas cubiertas, los hermanos en vivo y el botón de salir.
+import { askLocation } from '@/lib/locConsent';
 import { liveMemberActions } from '@/lib/directions';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Linking, Modal, Platform, Pressable, ScrollView, Share, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -145,8 +146,8 @@ export default function Mapa() {
       // En la demostración el mapa abre en el centro de Posadas, donde está ubicada la iglesia de ejemplo (no pide la ubicación).
       if (isDemoNow()) { const r = regionAround(DEMO_CENTER, 650); setRegion(r); loadArea(r); return; }
       try {
-        const perm = await Location.requestForegroundPermissionsAsync();
-        if (perm.status === 'granted') {
+        const perm = await askLocation('mapa', { quiet: true });
+        if (perm.fg) {
           const here = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
           const r = regionAround({ lat: here.coords.latitude, lng: here.coords.longitude }, 500);
           setRegion(r);

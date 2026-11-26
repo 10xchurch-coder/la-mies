@@ -1,5 +1,6 @@
 // Dónde estoy y hacia dónde miro, para el punto azul del mapa (como en Google Maps).
 // La ubicación solo se usa en la pantalla: no se guarda ni se comparte (eso pasa únicamente durante una salida).
+import { askLocation } from './locConsent';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
@@ -65,7 +66,7 @@ export function useMyLocation(active = true): {
     (async () => {
       try {
         const perm = await Location.getForegroundPermissionsAsync();
-        const ok = perm.status === 'granted' || (await Location.requestForegroundPermissionsAsync()).status === 'granted';
+        const ok = perm.status === 'granted' || (await askLocation('mapa', { quiet: true })).fg;
         if (!ok || !alive) return;
         posSub = await Location.watchPositionAsync({ accuracy: Location.Accuracy.High, distanceInterval: 2, timeInterval: 2000 }, (l) => {
           if (alive) setPos({ lat: l.coords.latitude, lng: l.coords.longitude, accuracy: l.coords.accuracy ?? null });

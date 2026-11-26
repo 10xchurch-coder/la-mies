@@ -9,10 +9,11 @@ import { colors } from '@/theme';
 import { tx, txList } from '@/lib/i18n';
 
 export const RULES = txList([
-  'Tratá a todos con respeto y amor. Nada ofensivo, burlas, insultos ni contenido sexual o violento.',
+  'No se tolera ningún contenido ofensivo ni ningún usuario abusivo. Tratá a todos con respeto y amor: nada de burlas, insultos, ni contenido sexual o violento.',
   'No publiques datos privados de otras personas (teléfono, dirección, problemas personales) sin su permiso.',
   'Los pedidos de oración son para orar, no para comentar ni contar a otros.',
-  'Si ves algo que no corresponde, denuncialo (menú "Denunciar o bloquear"). El pastor lo revisa dentro de las 24 horas y lo borra si no cumple estas normas.',
+  'Si ves algo que no corresponde, denuncialo (menú "Denunciar o bloquear"): deja de verse en tu teléfono al instante. El pastor lo revisa dentro de las 24 horas, lo borra y le quita el acceso a quien lo publicó si no cumple estas normas.',
+  'Todo lo que se publica lleva el nombre de quien lo escribe. La app filtra las malas palabras.',
   'Podés bloquear a cualquier persona: dejás de ver lo que publica.',
   'Quien no cumpla las normas puede perder el acceso a la app.',
 ]);

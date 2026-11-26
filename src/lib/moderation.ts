@@ -1,5 +1,7 @@
 // Denunciar una publicación y bloquear personas (normas de Apple para contenido de usuarios).
+import { useSyncExternalStore } from 'react';
 import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showActions } from '@/components/ActionSheet';
 import { supabase, errorMessage } from './supabase';
 import { tx } from './i18n';
@@ -13,6 +15,22 @@ async function report(kind: ReportKind, targetId: string, authorId: string | nul
   const church = (await supabase.from('profiles').select('church_id').eq('id', u.user?.id ?? '').maybeSingle()).data?.church_id;
   const { error } = await supabase.from('content_reports').insert({ church_id: church, kind, target_id: targetId, author_id: authorId, excerpt: excerpt.slice(0, 300), reason });
   if (error) throw error;
+}
+
+// Lo que denuncié deja de verse en mi teléfono al instante (el pastor decide después si lo borra para todos).
+const HIDDEN_KEY = 'lamies.denunciado';
+let hidden = new Set<string>();
+const subs = new Set<() => void>();
+AsyncStorage.getItem(HIDDEN_KEY).then((v) => { if (v) { hidden = new Set(JSON.parse(v) as string[]); subs.forEach((f) => f()); } }).catch(() => undefined);
+function hide(id: string) {
+  hidden = new Set([...hidden, id].slice(-500));
+  AsyncStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden])).catch(() => undefined);
+  subs.forEach((f) => f());
+}
+/** Para las listas: devuelve una función que dice si esa publicación la escondí al denunciarla. */
+export function useHidden(): (id: string) => boolean {
+  const set = useSyncExternalStore((f) => { subs.add(f); return () => { subs.delete(f); }; }, () => hidden, () => hidden);
+  return (id: string) => set.has(id);
 }
 
 export async function blockUser(userId: string): Promise<void> {
@@ -34,7 +52,7 @@ export function moderate(opts: { kind: ReportKind; targetId: string; authorId: s
     showActions(tx('¿Por qué la denunciás?'), tx('Le llega al pastor y a la secretaría. Quien la publicó no sabe quién la denunció.'), REASONS.map((r) => ({
       text: tx(r),
       onPress: () => report(opts.kind, opts.targetId, opts.authorId, opts.excerpt, r)
-        .then(() => Alert.alert(tx('Gracias'), tx('La denuncia le llegó al pastor. La va a revisar pronto.')))
+        .then(() => { hide(opts.targetId); opts.onChange?.(); Alert.alert(tx('Gracias'), tx('Ya no vas a ver esa publicación. La denuncia le llegó al pastor, que la revisa dentro de las 24 horas.')); })
         .catch((e) => Alert.alert(tx('No se pudo'), errorMessage(e))),
     })));
   const doBlock = () =>

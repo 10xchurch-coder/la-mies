@@ -23,7 +23,7 @@ import {
 import { currentPlace, startLiveShare, stopLiveShare } from '@/lib/chatLive';
 import { downloadUrl, pickChatDocument, pickChatImage, signedUrl, uploadChatVoice, type ChatAttachment } from '@/lib/files';
 import { VoiceBubble, VoiceRecorder, isVoice, voiceAvailable } from '@/components/ChatVoice';
-import { moderate } from '@/lib/moderation';
+import { moderate, useHidden } from '@/lib/moderation';
 import { errorMessage, supabase } from '@/lib/supabase';
 import { fmtRelativeDay, fmtTime } from '@/lib/format';
 import { useRefreshOnResume } from '@/lib/useRefreshOnResume';
@@ -56,6 +56,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
 }) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const isHidden = useHidden();
   const { isStaff, church, profile } = useAuth();
   const ref: RoomRef = useMemo(() => ({ room, ministryId }), [room, ministryId]);
   const key = roomKey(ref);
@@ -316,7 +317,7 @@ export function ChatRoom({ room, ministryId = null, canAnnounce = false, empty, 
       ) : (
         <FlatList
           inverted
-          data={rows}
+          data={rows ? rows.filter((m) => !isHidden(m.id)) : rows}
           keyExtractor={(m) => m.id}
           extraData={[polls, receipts, rx.map]}
           onEndReached={loadOlder}

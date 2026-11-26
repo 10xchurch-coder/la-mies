@@ -18,7 +18,7 @@ import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { Contact, Duty, Ministry, MinistryMember, MinistryMessage, MinistryPerson, Profile } from '@/types';
 
-import { moderate } from '@/lib/moderation';
+import { moderate, useHidden } from '@/lib/moderation';
 import { showActions } from '@/components/ActionSheet';
 import { ReactionChips } from '@/components/ReactionChips';
 import { REACTIONS, myReaction, useReactions } from '@/lib/reactions';
@@ -29,6 +29,7 @@ type Tab = 'chat' | 'duties' | 'people' | 'tips';
 export default function MinisterioDetalle() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const isHidden = useHidden();
   const { profile, isStaff } = useAuth();
   const [m, setM] = useState<Ministry | null | undefined>(undefined);
   const [members, setMembers] = useState<MinistryMember[]>([]);
@@ -169,7 +170,7 @@ export default function MinisterioDetalle() {
             ) : (
             <FlatList
               ref={listRef}
-              data={chat}
+              data={chat.filter((x) => !isHidden(x.id))}
               inverted
               keyExtractor={(x) => x.id}
               extraData={rx.map}

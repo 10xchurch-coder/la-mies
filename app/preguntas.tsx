@@ -5,7 +5,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Empty, Field, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
+import { Button, Card, Empty, Field, Loading, SectionTitle, Tag } from '@/components/ui';
 import { answerQuestion, askQuestion, questionsList, removeQuestion, type QuestionRow } from '@/lib/culto';
 import { fmtRelativeDay } from '@/lib/format';
 import { errorMessage } from '@/lib/supabase';
@@ -18,7 +18,7 @@ export default function Preguntas() {
   const pastor = can('com.moderar');
   const [rows, setRows] = useState<QuestionRow[] | null>(null);
   const [body, setBody] = useState('');
-  const [anon, setAnon] = useState(false);
+  const anon = false; // las preguntas le llegan al pastor siempre con el nombre
   const [busy, setBusy] = useState(false);
   const [replyFor, setReplyFor] = useState<string | null>(null);
   const [reply, setReply] = useState('');
@@ -35,7 +35,7 @@ export default function Preguntas() {
       setBody('');
       load();
       Alert.alert(tx('¡Gracias!'), anon ? tx('Tu pregunta le llegó al pastor, sin tu nombre. Cuando la responda para todos, la vas a ver acá abajo.') : tx('Tu pregunta le llegó al pastor.'));
-      setAnon(false);
+
     } catch (e) {
       Alert.alert(tx('No se pudo enviar'), errorMessage(e));
     } finally {
@@ -105,7 +105,6 @@ export default function Preguntas() {
       <Screen>
         <Card style={{ gap: 10 }}>
           <Field label={tx('Tu pregunta')} value={body} onChangeText={setBody} multiline maxLength={1000} placeholder={tx('¿Qué quiere decir…?')} />
-          <Toggle label={tx('Enviar sin mi nombre')} hint={tx('Nadie va a saber que fuiste vos, ni el pastor. Por eso no te puede contestar en privado.')} value={anon} onChange={setAnon} />
           <Button title={tx('Enviar al pastor')} icon="send" onPress={send} loading={busy && !replyFor} disabled={body.trim().length < 5} />
         </Card>
         {rows === null ? <Loading /> : !all.length ? <Empty icon="help-circle" title={tx('Todavía no hay preguntas')} text={tx('Las respuestas del pastor para toda la iglesia aparecen acá.')} /> : null}

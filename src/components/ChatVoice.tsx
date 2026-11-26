@@ -70,7 +70,7 @@ export function VoiceRecorder({ onSend, onCancel }: { onSend: (uri: string, seco
     setState('sending');
     try {
       await recorder.stop();
-      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true }).catch(() => undefined);
+      await setAudioModeAsync({ allowsRecording: false, playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
       const uri = recorder.uri;
       if (send && uri && secs >= 1) await onSend(uri, secs);
       else if (send) Alert.alert(tx('Muy corto'), tx('Mantené la grabación al menos un segundo.'));

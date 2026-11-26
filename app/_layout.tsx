@@ -38,6 +38,9 @@ import { loadTabs } from '@/lib/tabsPref';
 import { loadMenu } from '@/lib/menuPref';
 import { useOtaUpdates } from '@/lib/otaUpdates';
 import { startOfflineSync } from '@/lib/offline';
+import { bgAudioMode } from '@/lib/bgAudio';
+
+bgAudioMode(); // prédicas, radio y Biblia narrada siguen sonando con la pantalla bloqueada
 import { startNetSync } from '@/lib/netFetch';
 import { registerWebShell } from '@/lib/webShell';
 import { OfflineBadge } from '@/components/OfflineBadge';

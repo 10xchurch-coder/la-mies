@@ -1,6 +1,8 @@
 // La Biblia narrada (grabaciones con varias voces). Se van sumando de a capítulos.
 // La lista de lo que ya está grabado se baja una vez; si un capítulo no está, la app lo lee con la voz del teléfono.
+import { lockScreenOn } from './bgAudio';
 import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import { tx } from './i18n';
 
 const BASE = 'https://raw.githubusercontent.com/10xchurch-coder/la-mies/audio-rvg/';
 let index: Record<string, Set<string>> | null = null;
@@ -38,5 +40,6 @@ export function playNarration(url: string, onEnd: () => void): void {
     player = p;
     p.addListener('playbackStatusUpdate', (s) => { if (s.didJustFinish && player === p) { stopNarration(); onEnd(); } });
     p.play();
+    lockScreenOn(p, tx('La Biblia'));
   } catch { stopNarration(); onEnd(); }
 }

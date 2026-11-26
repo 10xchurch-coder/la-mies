@@ -6,6 +6,7 @@
 //  · "abierta": mientras la app está abierta (versiones anteriores y la web).
 // Convive con las otras tareas de GPS (salida, colectivo, chat en vivo): cada una tiene su nombre y no se tocan.
 // Gasta poca batería: precisión media, un punto cada ~100 m o cada varios minutos, y los puntos llegan en tandas.
+import { askLocation } from './locConsent';
 import { useSyncExternalStore } from 'react';
 import { Alert, Platform } from 'react-native';
 import Constants from 'expo-constants';
@@ -143,22 +144,6 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(FAMILY_TASK)) {
   });
 }
 
-function disclosure(): Promise<boolean> {
-  return new Promise((resolve) => {
-    Alert.alert(
-      tx('Compartir tu ubicación'),
-      canBackground
-        ? tx('La Mies recopila la ubicación de este teléfono, incluso con la app cerrada o la pantalla apagada, para que las personas que vos elegiste vean dónde estás y por dónde anduviste en los últimos 30 días. Podés pausarlo o apagarlo cuando quieras; al apagarlo se borra el historial. En el aviso que sigue elegí "Permitir todo el tiempo" (en iPhone, "Siempre").')
-        : tx('La Mies usa la ubicación de este aparato para que las personas que vos elegiste vean dónde estás en el mapa, mientras tenés la app abierta. Podés pausarlo o apagarlo cuando quieras.'),
-      [
-        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
-        { text: tx('Continuar'), onPress: () => resolve(true) },
-      ],
-      { cancelable: false },
-    );
-  });
-}
-
 async function startTask(): Promise<boolean> {
   if (!canBackground) return false;
   try {
@@ -196,12 +181,8 @@ async function startTask(): Promise<boolean> {
 export async function startDevice(): Promise<DeviceMode> {
   const user = await currentUser();
   if (!user) throw new Error(tx('Tenés que entrar a la app.'));
-  const already = await Location.getForegroundPermissionsAsync().catch(() => null);
-  const needsBg = canBackground && (await Location.getBackgroundPermissionsAsync().catch(() => null))?.status !== 'granted';
-  if ((already?.status !== 'granted' || needsBg) && !(await disclosure())) throw new Error(tx('Sin el permiso de ubicación no se puede compartir.'));
-  const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error(tx('Falta el permiso de ubicación. Lo podés dar en los Ajustes del teléfono.'));
-  if (needsBg) await Location.requestBackgroundPermissionsAsync().catch(() => undefined);
+  const perm = await askLocation('familia', { background: canBackground });
+  if (!perm.fg) throw new Error(tx('Falta el permiso de ubicación. Lo podés dar en los Ajustes del teléfono.'));
   await AsyncStorage.setItem(KEY, JSON.stringify({ userId: user }));
   await AsyncStorage.removeItem(LAST);
   const mode: DeviceMode = (await startTask()) ? 'fondo' : 'abierta';
@@ -259,8 +240,7 @@ export async function watchWhileOpen(): Promise<() => void> {
 /** Mi posición de ahora, para "Pedir ayuda" y para guardar un lugar. */
 export async function hereNow(): Promise<{ lat: number; lng: number } | null> {
   try {
-    const perm = await Location.requestForegroundPermissionsAsync();
-    if (perm.status !== 'granted') return null;
+    if (!(await askLocation('familia')).fg) return null;
     const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
     return { lat: loc.coords.latitude, lng: loc.coords.longitude };
   } catch {

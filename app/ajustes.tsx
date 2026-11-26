@@ -1,6 +1,6 @@
 // Ajustes: perfil, cómo comparto, Face ID, ubicación, cuenta.
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
@@ -160,6 +160,7 @@ export default function Ajustes() {
         <Card style={{ padding: 0 }}>
           {isStaff ? <RowLink title={tx('Denuncias')} subtitle={tx('Comentarios o pedidos que alguien denunció')} icon="flag" onPress={() => router.push('/admin/denuncias' as never)} /> : null}
           <RowLink title={tx('Normas de la comunidad')} subtitle={tx('Respeto, privacidad y denuncias')} icon="book" onPress={() => Alert.alert(tx('Normas de la comunidad'), RULES.map((r, i) => `${i + 1}. ${r}`).join('\n\n'))} />
+          <RowLink title={tx('Avisar de un problema o un abuso')} subtitle={tx('Escribinos a info@iglesiavictoria.com. Respondemos dentro de las 24 horas.')} icon="mail" onPress={() => Linking.openURL('mailto:info@iglesiavictoria.com?subject=' + encodeURIComponent(tx('La Mies: aviso de un problema')))} />
           <RowLink
             title={tx('Personas bloqueadas')}
             subtitle={blocked.length ? blocked.map((b) => b.name).join(', ') : tx('No bloqueaste a nadie')}

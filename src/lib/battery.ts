@@ -51,10 +51,9 @@ export async function ensureNoBatteryOptimization(): Promise<void> {
 export async function ensureAlwaysLocationIOS(): Promise<void> {
   if (Platform.OS !== 'ios') return;
   try {
-    const fg = await Location.requestForegroundPermissionsAsync();
+    const fg = await Location.getForegroundPermissionsAsync();
     if (fg.status !== 'granted') return; // la salida misma va a pedir el permiso y explicar
-    let bg = await Location.getBackgroundPermissionsAsync();
-    if (bg.status !== 'granted') bg = await Location.requestBackgroundPermissionsAsync();
+    const bg = await Location.getBackgroundPermissionsAsync();
     if (bg.status === 'granted') return;
   } catch {
     return;

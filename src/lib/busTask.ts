@@ -1,5 +1,6 @@
 // Colectivo en vivo: el teléfono del jefe de la ruta (o del chofer elegido) manda dónde está el colectivo,
 // también con la pantalla apagada, hasta que toca "Llegamos" (o pasa una hora sin moverse).
+import { askLocation } from './locConsent';
 import { Alert, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -59,28 +60,11 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(BUS_TASK)) {
   });
 }
 
-function disclosure(): Promise<boolean> {
-  return new Promise((resolve) => {
-    Alert.alert(
-      tx('Ubicación del colectivo'),
-      tx('La Mies recopila la ubicación de este teléfono para que los hermanos de la ruta vean dónde está el colectivo en el mapa, incluso con la app cerrada o la pantalla apagada. Solo se usa mientras el colectivo está en camino y se detiene cuando tocás "Llegamos". En el siguiente aviso elegí "Permitir todo el tiempo".'),
-      [
-        { text: tx('Ahora no'), style: 'cancel', onPress: () => resolve(false) },
-        { text: tx('Continuar'), onPress: () => resolve(true) },
-      ],
-      { cancelable: false },
-    );
-  });
-}
-
 /** "Salimos": avisa a los de la ruta y empieza a mandar la ubicación. */
 export async function startBus(groupId: string, name: string): Promise<void> {
   if (Platform.OS === 'web') throw new Error(tx('El colectivo en vivo se prende desde el teléfono.'));
-  const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error(tx('Necesitamos el permiso de ubicación para mostrar el colectivo.'));
-  const already = await Location.getBackgroundPermissionsAsync();
-  if (already.status !== 'granted' && !(await disclosure())) throw new Error(tx('Sin el permiso de ubicación "todo el tiempo", el colectivo solo se ve con la app abierta.'));
-  if (already.status !== 'granted') await Location.requestBackgroundPermissionsAsync();
+  const perm = await askLocation('colectivo', { background: true });
+  if (!perm.fg) throw new Error(tx('Necesitamos el permiso de ubicación para mostrar el colectivo.'));
   const here = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null);
   const { data, error } = await supabase.rpc('start_bus_run', { p_group: groupId, p_lat: here?.coords.latitude ?? null, p_lng: here?.coords.longitude ?? null });
   if (error) throw error;

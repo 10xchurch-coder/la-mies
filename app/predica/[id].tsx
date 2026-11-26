@@ -17,6 +17,7 @@ import { colors } from '@/theme';
 import type { Sermon } from '@/types';
 import { tx } from '@/lib/i18n';
 import { IfOn } from '@/components/IfOn';
+import { lockScreenOn } from '@/lib/bgAudio';
 import { GuideView } from '@/components/GroupGuide';
 
 function mmss(sec: number): string {
@@ -27,9 +28,10 @@ function mmss(sec: number): string {
   return `${h ? `${h}:` : ''}${h && m < 10 ? '0' : ''}${m}:${r < 10 ? '0' : ''}${r}`;
 }
 
-function AudioPlayer({ url }: { url: string }) {
+function AudioPlayer({ url, title, artist }: { url: string; title: string; artist?: string | null }) {
   const player = useAudioPlayer({ uri: url });
   const st = useAudioPlayerStatus(player);
+  useEffect(() => { if (st.playing) lockScreenOn(player, title, artist ?? undefined); }, [st.playing, player, title, artist]);
   const jump = (d: number) => player.seekTo(Math.max(0, Math.min((st.duration || 0) - 1, (st.currentTime || 0) + d)));
   const pct = st.duration ? Math.min(1, (st.currentTime || 0) / st.duration) : 0;
   return (
@@ -206,7 +208,7 @@ export default function PredicaVer() {
           </>
         ) : null}
         {s.audio_path ? <SectionTitle>{tx('Escuchar')}</SectionTitle> : null}
-        {audio ? <AudioPlayer url={audio} /> : s.audio_path ? <Loading /> : null}
+        {audio ? <AudioPlayer url={audio} title={s.title} artist={s.preacher} /> : s.audio_path ? <Loading /> : null}
         {s.audio_path ? <Button title={tx('Descargar el audio')} icon="download" variant="outline" onPress={download} /> : null}
         {s.group_guide?.trim() ? (
           <IfOn feature="grupos">

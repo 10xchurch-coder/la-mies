@@ -33,7 +33,7 @@ import { useAuth } from '@/store/auth';
 import { useKeyboardHeight } from '@/lib/keyboard';
 import { colors, themed } from '@/theme';
 import type { DailyComment, DailyContent, DailySocial, ReadingStreak } from '@/types';
-import { moderate } from '@/lib/moderation';
+import { moderate, useHidden } from '@/lib/moderation';
 import { tx } from '@/lib/i18n';
 
 type Slide = 'verse' | 'phrase' | 'reading' | 'full';
@@ -635,6 +635,7 @@ function ReaderSheet({ visible, item, label, social, onShare, onComments, onClos
 function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
   visible: boolean; date: string; today: string; isStaff: boolean; onClose: () => void; onCount: (n: number) => void;
 }) {
+  const isHidden = useHidden();
   const insets = useSafeAreaInsets();
   const kb = useKeyboardHeight();
   const [rows, setRows] = useState<DailyComment[] | null>(null);
@@ -707,7 +708,7 @@ function CommentsSheet({ visible, date, today, isStaff, onClose, onCount }: {
           </View>
         ) : (
           <FlatList
-            data={rows}
+            data={(rows ?? []).filter((c) => !isHidden(c.id))}
             keyExtractor={(c) => c.id}
             contentContainerStyle={{ padding: 16, gap: 14 }}
             renderItem={({ item: c }) => (

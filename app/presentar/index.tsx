@@ -405,7 +405,7 @@ function Operator({ setId, churchId, churchName, onClose }: { setId: string; chu
     setSound(null);
   }, []);
   useEffect(() => {
-    if (Platform.OS !== 'web') setAudioModeAsync({ playsInSilentMode: true }).catch(() => undefined);
+    if (Platform.OS !== 'web') setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true }).catch(() => undefined);
     return () => { try { player.current?.pause(); player.current?.remove(); } catch { /* nada */ } };
   }, []);
   const playSound = async (id: string, media: MediaRef) => {

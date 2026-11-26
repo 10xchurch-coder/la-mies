@@ -4,6 +4,7 @@ import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { lockScreenOn } from '@/lib/bgAudio';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Loading } from '@/components/ui';
 import { churchLinks } from '@/lib/api';
@@ -24,6 +25,7 @@ function Stream({ link }: { link: ChurchLink }) {
 function Playing({ link, onStop }: { link: ChurchLink; onStop: () => void }) {
   const player = useAudioPlayer({ uri: link.url ?? '' });
   const st = useAudioPlayerStatus(player);
+  useEffect(() => { if (st.playing) lockScreenOn(player, link.title ?? tx('Radio')); }, [st.playing, player, link.title]);
   useEffect(() => { try { player.play(); } catch { /* sin señal */ } return () => { try { player.pause(); } catch { /* ya cerrado */ } }; }, [player]);
   return (
     <View style={{ gap: 8 }}>

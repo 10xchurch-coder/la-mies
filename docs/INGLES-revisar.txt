@@ -33,8 +33,8 @@ app/presentar/index.tsx:729  [palabra suelta en minúscula (¿texto o clave?)]  
 app/seguridad.tsx:46  [va a la base: no se tocó]  La Mies …
 src/components/BaptismCertificate.tsx:17  [texto fuera de una función (se crea una sola vez al abrir la app)]  Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó de los muertos por la gloria del Padre, así también nos
 src/components/BibleWordsSheet.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0.
-src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
-src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
+src/components/ChatRoom.tsx:397  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
+src/components/ChatRoom.tsx:397  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
 src/lib/api.ts:1238  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
 src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
@@ -143,7 +143,7 @@ src/lib/files.ts:325  [texto fuera de una función (se crea una sola vez al abri
 src/lib/files.ts:326  [texto fuera de una función (se crea una sola vez al abrir la app)]  El video
 src/lib/files.ts:327  [texto fuera de una función (se crea una sola vez al abrir la app)]  El audio
 src/lib/menuPref.ts:15  [texto fuera de una función (se crea una sola vez al abrir la app)]  Favoritos
-src/lib/moderation.ts:9  [lista de textos fuera de una función (¿se muestran o son valores?)]  Ofensivo o irrespetuoso | Contenido inapropiado | Información privada de otra persona | Spam o engaño | Otro motivo
+src/lib/moderation.ts:11  [lista de textos fuera de una función (¿se muestran o son valores?)]  Ofensivo o irrespetuoso | Contenido inapropiado | Información privada de otra persona | Spam o engaño | Otro motivo
 src/lib/nfc.ts:66  [palabra suelta en minúscula (¿texto o clave?)]  vacío
 src/lib/password.ts:28  [palabra suelta en minúscula (¿texto o clave?)]  débil
 src/lib/password.ts:53  [texto fuera de una función (se crea una sola vez al abrir la app)]  Esa contraseña apareció en filtraciones de internet. Elegí otra que no uses en ningún otro lado.

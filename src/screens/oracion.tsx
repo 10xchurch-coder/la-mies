@@ -5,7 +5,7 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter, type Href } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
-import { Button, Card, Choice, Empty, Field, Loading, Tag, Toggle } from '@/components/ui';
+import { Button, Card, Choice, Empty, Field, Loading, Tag } from '@/components/ui';
 import { addPrayer, deletePrayer, listProfiles, prayerList, setPrayed } from '@/lib/api';
 import { markAnswered } from '@/lib/culto';
 import { fmtRelativeDay } from '@/lib/format';
@@ -13,7 +13,7 @@ import { errorMessage } from '@/lib/supabase';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import type { PrayerRow, Profile } from '@/types';
-import { moderate } from '@/lib/moderation';
+import { moderate, useHidden } from '@/lib/moderation';
 import { tx } from '@/lib/i18n';
 import { IfOn } from '@/components/IfOn';
 
@@ -32,7 +32,8 @@ export default function Oracion() {
   const [body, setBody] = useState('');
   const [vis, setVis] = useState<PrayerRow['visibility']>('church');
   const [chosen, setChosen] = useState<string[]>([]);
-  const [anon, setAnon] = useState(false);
+  const anon = false; // los pedidos van siempre con el nombre (Apple no permite publicar sin nombre)
+  const isHidden = useHidden();
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
@@ -52,7 +53,7 @@ export default function Oracion() {
     setBusy(true);
     try {
       await addPrayer(body.trim(), vis, vis === 'people' ? chosen : [], anon);
-      setBody(''); setChosen([]); setAnon(false); setVis('church'); setWriting(false);
+      setBody(''); setChosen([]); setVis('church'); setWriting(false);
       load();
     } catch (e) {
       Alert.alert(tx('No se pudo enviar'), errorMessage(e));
@@ -105,7 +106,6 @@ export default function Oracion() {
                 })}
               </View>
             ) : null}
-            {vis !== 'pastor' ? <Toggle label={tx('Sin mi nombre')} hint={tx('Los demás no ven quién lo pidió')} value={anon} onChange={setAnon} /> : null}
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button title={tx('Cancelar')} variant="ghost" onPress={() => setWriting(false)} style={{ flex: 1 }} />
               <Button title={tx('Enviar')} onPress={send} loading={busy} disabled={body.trim().length < 2} style={{ flex: 2 }} />
@@ -116,7 +116,7 @@ export default function Oracion() {
         )}
         <IfOn feature="oracion_respondidas"><Button title={tx('Oraciones respondidas')} icon="sun" variant="outline" small onPress={() => router.push('/oraciones-respondidas' as Href)} /></IfOn>
         {rows === null ? <Loading /> : !rows.length ? <Empty icon="heart" title={tx('No hay pedidos')} text={tx('Cuando alguien pida oración, aparece acá.')} /> : null}
-        {(rows ?? []).map((r) => (
+        {(rows ?? []).filter((r) => !isHidden(r.id)).map((r) => (
           <Card key={r.id} style={{ gap: 8, padding: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={{ flex: 1, fontSize: 13, fontWeight: '800', color: colors.text }}>{r.author ?? tx('Un hermano')} · <Text style={{ fontWeight: '500', color: colors.muted }}>{fmtRelativeDay(r.created_at)}</Text></Text>

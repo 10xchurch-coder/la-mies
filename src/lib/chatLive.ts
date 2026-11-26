@@ -1,6 +1,7 @@
 // Ubicación en tiempo real en un chat (15, 30 o 60 minutos), también con la pantalla apagada.
 // Funciona como el colectivo en vivo: una tarea de fondo manda la posición a cada mensaje "en vivo" mío que siga vigente,
 // y se apaga sola cuando se vence el tiempo o la persona toca "Dejar de compartir".
+import { askLocation } from './locConsent';
 import { Alert, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
@@ -52,8 +53,8 @@ if (Platform.OS !== 'web' && !TaskManager.isTaskDefined(CHAT_LIVE_TASK)) {
 }
 
 async function ensurePermission(): Promise<void> {
-  const fg = await Location.requestForegroundPermissionsAsync();
-  if (fg.status !== 'granted') throw new Error(tx('Necesitamos el permiso de ubicación para mandar dónde estás.'));
+  const perm = await askLocation('chat');
+  if (!perm.fg) throw new Error(tx('Necesitamos el permiso de ubicación para mandar dónde estás.'));
 }
 
 /** Dónde estoy ahora (para mandar una ubicación). */
@@ -81,14 +82,14 @@ function disclosure(minutes: number): Promise<boolean> {
 
 /** Empieza a compartir. Devuelve el id del mensaje o null si la persona se arrepintió. */
 export async function startLiveShare(r: RoomRef, minutes: 15 | 30 | 60): Promise<string | null> {
+  // Primero el aviso destacado y el permiso del teléfono; después se confirma el tiempo.
+  if (Platform.OS !== 'web' && !(await askLocation('chat', { background: true })).fg) throw new Error(tx('Necesitamos el permiso de ubicación para mandar dónde estás.'));
   if (!(await disclosure(minutes))) return null;
   const here = await currentPlace();
   const id = await chatSendLocation(r, here.lat, here.lng, minutes);
   if (Platform.OS === 'web') return id; // en la web solo sale la posición de ahora
   const list = await getLiveShares();
   await save([...list, { id, room: r.room, until: Date.now() + minutes * 60_000 }]);
-  const bg = await Location.getBackgroundPermissionsAsync();
-  if (bg.status !== 'granted') await Location.requestBackgroundPermissionsAsync().catch(() => undefined);
   await Location.startLocationUpdatesAsync(CHAT_LIVE_TASK, {
     accuracy: Location.Accuracy.High,
     timeInterval: 10_000,
