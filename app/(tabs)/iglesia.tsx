@@ -213,7 +213,7 @@ export default function Iglesia() {
     {
       title: tx('Personas y seguimiento'), tone: 'amber',
       tiles: [
-        { icon: 'users', label: tx('Personas'), to: '/(tabs)/personas' as Href, show: !tabs.includes('personas'), strong: true },
+        { icon: 'users', label: tx('Personas'), to: '/personas' as Href, show: !tabs.includes('personas'), strong: true },
         { icon: 'user-check', label: tx('Para seguir'), to: '/seguimiento', show: true },
         { icon: 'book-open', label: tx('Discipulado'), to: '/discipulado' as Href, show: isLeader },
         { icon: 'heart', label: tx('Decisiones'), to: '/decisiones' as Href, show: isLeader },

@@ -183,7 +183,7 @@ export default function Panel() {
             {open && !open.user ? list(open.metric) : null}
 
             {t.pending_pickups > 0 ? (
-              <Pressable onPress={() => router.push('/(tabs)/personas')} accessibilityRole="button" style={styles.pending}>
+              <Pressable onPress={() => router.push('/personas')} accessibilityRole="button" style={styles.pending}>
                 <Text style={{ fontSize: 26, fontWeight: '800', color: colors.amberText }}>{t.pending_pickups}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 14, fontWeight: '700', color: colors.amberText }}>{tx('Prometieron venir y todavía no vinieron')}</Text>

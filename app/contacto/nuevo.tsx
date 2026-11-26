@@ -101,7 +101,7 @@ export default function NuevoContacto() {
         Alert.alert(tx('Guardado en el teléfono'), tx('No hay señal. El contacto quedó guardado y se sube solo cuando vuelva la señal.'));
       }
       router.dismissAll();
-      router.replace(outing.active ? '/salida' : '/(tabs)/personas');
+      router.replace(outing.active ? '/salida' : '/personas');
     } catch (e) {
       Alert.alert(tx('No se pudo guardar'), errorMessage(e));
     } finally {

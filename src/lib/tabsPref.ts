@@ -27,7 +27,7 @@ export const DEFAULT_TABS: TabKey[] = ['mapa', 'biblia', 'iglesia', 'chat', 'yo'
 const OLD_DEFAULT: TabKey[] = ['mapa', 'personas', 'iglesia', 'chat', 'yo'];
 export const upgradeTabs = (list: TabKey[]): TabKey[] => (list.join() === OLD_DEFAULT.join() ? DEFAULT_TABS : list);
 /** Nombre del archivo de cada pestaña: las que también son pantallas sueltas usan una copia "t-…" para no mezclarse. */
-export const tabRoute = (k: TabKey): string => (['chat', 'eventos', 'oracion', 'directorio', 'crecimiento', 'predicas', 'biblia'].includes(k) ? `t-${k}` : k);
+export const tabRoute = (k: TabKey): string => (['chat', 'eventos', 'oracion', 'directorio', 'crecimiento', 'predicas', 'biblia', 'personas'].includes(k) ? `t-${k}` : k);
 export const tabKeyOfRoute = (r: string): TabKey | null => ALL_TABS.find((k) => tabRoute(k) === r) ?? null;
 export const tabInfo = (k: TabKey) => TAB_OPTIONS.find((t) => t.key === k)!;
 
