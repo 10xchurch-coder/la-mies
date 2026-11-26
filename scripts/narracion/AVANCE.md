@@ -1,3 +1,4 @@
+TERMINADO (26 nov 2026): la tarea A narró Mateo a Apocalipsis completo, los 260 capítulos están en la rama audio-rvg.
 # Avance de la narración (RVG) — tarea A: Mateo a Apocalipsis
 - Hecho: Mateo 1 y 2 (24 nov 2026).
 - Hecho: Mateo 3 a 8 (25 nov 2026), 84 pedazos, sin fallas. Gastó unos 69 créditos.
