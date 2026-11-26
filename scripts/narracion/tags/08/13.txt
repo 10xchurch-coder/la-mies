@@ -1,0 +1,6 @@
+3 | h:Saúl=desmond | Que oigan los hebreos. | Que oigan los hebreos.
+9 | h:Saúl | Traedme un holocausto y ofrendas de paz. | Traedme un holocausto y ofrendas de paz.
+11 | v:Samuel=arthur | ¿Qué has hecho? | ¿Qué has hecho?
+11-12 | h:Saúl | Porque vi que el pueblo | ofrecí holocausto.
+13-14 | v:Samuel | Locamente has hecho | lo que Jehová te mandó.
+19 | g:filisteos=julian | Para que los hebreos no hagan espada o lanza. | Para que los hebreos no hagan espada o lanza.

@@ -1,0 +1,29 @@
+1 | h:Jonatán=julian | Ven, y pasemos a la guarnición | que está al otro lado.
+6 | h:Jonatán | Ven, pasemos a la guarnición de estos incircuncisos | con muchos o con pocos.
+7 | h:paje=sterling | Haz todo lo que tienes | a tu voluntad.
+8-10 | h:Jonatán | He aquí, nosotros pasaremos | nos será por señal.
+11 | g:filisteos=arthur | He aquí los hebreos | se habían escondido.
+12 | g:filisteos | Subid a nosotros, y os haremos saber una cosa. | Subid a nosotros, y os haremos saber una cosa.
+12 | h:Jonatán | Sube tras mí | en la mano de Israel.
+17 | h:Saúl=desmond | Reconoced luego | de los nuestros.
+18 | h:Saúl | Trae el arca de Dios. | Trae el arca de Dios.
+19 | h:Saúl | Detén tu mano. | Detén tu mano.
+24 | h:Saúl | Cualquiera que comiere pan | sea maldito.
+28 | h:uno=sterling | Tu padre ha hecho jurar | comiere hoy manjar.
+29-30 | h:Jonatán | Mi padre ha turbado el país. | mayor estrago en los filisteos?
+33 | g:avisan=sterling | El pueblo peca contra Jehová comiendo con sangre. | El pueblo peca contra Jehová comiendo con sangre.
+33 | h:Saúl | Vosotros habéis prevaricado | una piedra grande.
+34 | h:Saúl | Esparcíos por el pueblo | comiendo con sangre.
+36 | h:Saúl | Descendamos de noche | de ellos ninguno.
+36 | g:pueblo=arthur | Haz lo que bien te pareciere. | Haz lo que bien te pareciere.
+36 | h:sacerdote=sterling | Acerquémonos aquí a Dios. | Acerquémonos aquí a Dios.
+37 | h:Saúl | ¿Descenderé tras los filisteos? | en mano de Israel?
+38-39 | h:Saúl | Acercaos acá todos | él morirá de cierto.
+40 | h:Saúl | Vosotros estaréis a un lado | estaremos al otro lado.
+40 | g:pueblo | Haz lo que bien te pareciere. | Haz lo que bien te pareciere.
+41 | h:Saúl | Da suerte perfecta. | Da suerte perfecta.
+42 | h:Saúl | Echad suertes entre mí y Jonatán mi hijo. | Echad suertes entre mí y Jonatán mi hijo.
+43 | h:Saúl | Declárame qué has hecho. | Declárame qué has hecho.
+43 | h:Jonatán | Cierto que probé | debo morir.
+44 | h:Saúl | Así me haga Dios | morirás, Jonatán.
+45 | g:pueblo | ¿Ha de morir Jonatán | hoy con Dios.
