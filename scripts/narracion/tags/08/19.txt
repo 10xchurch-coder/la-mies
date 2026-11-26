@@ -1,0 +1,11 @@
+2-3 | h:Jonatán=julian | Saúl mi padre procura matarte | te lo haré saber.
+4-5 | h:Jonatán | No peque el rey | matando a David sin causa?
+6 | h:Saúl=desmond | Vive Jehová, que no morirá. | Vive Jehová, que no morirá.
+11 | m:Mical=naomi | Si no salvas tu vida esta noche, mañana serás muerto. | Si no salvas tu vida esta noche, mañana serás muerto.
+14 | m:Mical | Está enfermo. | Está enfermo.
+15 | h:Saúl | Traédmelo en la cama para que lo mate. | Traédmelo en la cama para que lo mate.
+17 | h:Saúl | ¿Por qué me has así engañado | a mi enemigo?
+17 | m:Mical | Porque él me dijo | yo te mataré.
+19 | g:aviso=arthur | He aquí que David está en Naiot en Ramá. | He aquí que David está en Naiot en Ramá.
+22 | h:Saúl | ¿Dónde están Samuel y David? | ¿Dónde están Samuel y David?
+22 | h:uno=arthur | He aquí están en Naiot en Ramá. | He aquí están en Naiot en Ramá.

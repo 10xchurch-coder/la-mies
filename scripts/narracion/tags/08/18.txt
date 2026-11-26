@@ -1,0 +1,12 @@
+7 | m:mujeres=soraya | Saúl mató a sus miles, y David a sus diez miles. | Saúl mató a sus miles, y David a sus diez miles.
+8 | h:Saúl=desmond | A David dieron diez miles | más que el reino.
+11 | h:Saúl | Enclavaré a David en la pared. | Enclavaré a David en la pared.
+17 | h:Saúl | He aquí yo te daré a Merab | las batallas de Jehová.
+17 | h:Saúl | No será mi mano contra él | será contra él.
+18 | h:David=sterling | ¿Quién soy yo | yerno del rey?
+21 | h:Saúl | Yo se la daré | sea contra él.
+21 | h:Saúl | Hoy serás mi yerno en una de las dos. | Hoy serás mi yerno en una de las dos.
+22 | h:Saúl | Hablad en secreto a David | yerno del rey.
+23 | h:David | ¿Parece a vosotros | de ninguna estima?
+24 | g:criados=julian | Tales palabras ha dicho David. | Tales palabras ha dicho David.
+25 | h:Saúl | Decid así a David | enemigos del rey.
