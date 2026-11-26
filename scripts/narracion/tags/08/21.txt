@@ -1,0 +1,9 @@
+1 | v:Ahimelec=arthur | ¿Por qué vienes tú solo, y nadie contigo? | ¿Por qué vienes tú solo, y nadie contigo?
+2-3 | h:David=sterling | El rey me encomendó un asunto | o lo que tengas.
+4 | v:Ahimelec | No tengo pan común | a lo menos de mujeres.
+5 | h:David | A la verdad las mujeres | santificados sus vasos!
+8 | h:David | ¿No tienes aquí a mano | era apremiante.
+9 | v:Ahimelec | La espada de Goliat | otra sino esa.
+9 | h:David | ¡Ninguna como ella! ¡Dámela! | ¡Ninguna como ella! ¡Dámela!
+11 | g:siervos=julian | ¿No es este David, el rey de la tierra? | David a sus diez miles?
+14-15 | h:Aquís=desmond | He aquí estáis viendo | a mi casa?

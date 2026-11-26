@@ -1,0 +1,12 @@
+5-8 | h:David=sterling | Subid al Carmelo | a tu hijo David.
+10-11 | h:Nabal=desmond | ¿Quién es David? | no sé de dónde son?
+13 | h:David | Cíñase cada uno su espada. | Cíñase cada uno su espada.
+14-17 | h:criado=julian | He aquí David envió mensajeros | quien pueda hablarle.
+19 | m:Abigail=helena | Id delante de mí, que yo os seguiré luego. | Id delante de mí, que yo os seguiré luego.
+21-22 | h:David | Ciertamente en vano he guardado | los que le pertenecen.
+24-31 | m:Abigail | Señor mío, sobre mí sea el pecado | acuérdate de tu sierva.
+32-34 | h:David | Bendito sea Jehová, el Dios de Israel, que te envió | meante a la pared.
+35 | h:David | Sube en paz a tu casa | te he tenido respeto.
+39 | h:David | Bendito sea Jehová que juzgó | sobre su propia cabeza.
+40 | g:siervos=arthur | David nos ha enviado a ti | por su esposa.
+41 | m:Abigail | He aquí tu sierva | siervos de mi señor.

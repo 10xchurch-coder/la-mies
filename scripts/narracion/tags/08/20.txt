@@ -1,0 +1,21 @@
+1 | h:David=sterling | ¿Qué he hecho yo? | busque mi vida?
+2 | h:Jonatán=julian | En ninguna manera | No será así.
+3 | h:David | Tu padre sabe claramente | entre mí y la muerte.
+4 | h:Jonatán | Lo que tu alma desee, eso haré por ti. | Lo que tu alma desee, eso haré por ti.
+5-8 | h:David | He aquí que mañana será nueva luna | hasta tu padre.
+9 | h:Jonatán | Nunca tal te acontezca | avisaría yo?
+10 | h:David | ¿Quién me dará aviso? | respondiere ásperamente?
+11 | h:Jonatán | Ven, salgamos al campo. | Ven, salgamos al campo.
+12-15 | h:Jonatán | Oh Jehová, Dios de Israel | enemigos de David de la tierra.
+16 | h:Jonatán | Que Jehová lo requiera | enemigos de David.
+18-23 | h:Jonatán | Mañana es luna nueva | entre nosotros para siempre.
+26 | h:Saúl=desmond | Le habrá acontecido algo | no se ha purificado.
+27 | h:Saúl | ¿Por qué no ha venido | hoy ni ayer?
+28-29 | h:Jonatán | David me pidió encarecidamente | a la mesa del rey.
+30-31 | h:Saúl | Hijo de la perversa y rebelde | porque ha de morir.
+32 | h:Jonatán | ¿Por qué morirá? ¿Qué ha hecho? | ¿Por qué morirá? ¿Qué ha hecho?
+36 | h:Jonatán | Corre y busca las saetas que yo tirare. | Corre y busca las saetas que yo tirare.
+37 | h:Jonatán | ¿No está la saeta más allá de ti? | ¿No está la saeta más allá de ti?
+38 | h:Jonatán | Date prisa, aligera, no te detengas. | Date prisa, aligera, no te detengas.
+40 | h:Jonatán | Vete y llévalas a la ciudad. | Vete y llévalas a la ciudad.
+42 | h:Jonatán | Vete en paz | para siempre.

@@ -1,0 +1,7 @@
+1 | g:aviso=julian | He aquí que David está en el desierto de Engadi. | He aquí que David está en el desierto de Engadi.
+4 | g:hombres=arthur | He aquí, el día que te ha dicho Jehová | como bien te pareciere.
+6 | h:David=sterling | Guárdeme Jehová | porque es el ungido de Jehová.
+8 | h:David | ¡Mi señor el rey! | ¡Mi señor el rey!
+9-15 | h:David | ¿Por qué oyes las palabras | me defienda de tu mano.
+16 | h:Saúl=desmond | ¿No es esta la voz tuya, hijo mío David? | ¿No es esta la voz tuya, hijo mío David?
+17-21 | h:Saúl | Más justo eres tú que yo | casa de mi padre.

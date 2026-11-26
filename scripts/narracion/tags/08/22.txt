@@ -1,0 +1,12 @@
+3 | h:David=sterling | Yo te ruego que mi padre | Dios hará de mí.
+5 | v:Gad=arthur | No te quedes en la fortaleza | tierra de Judá.
+7-8 | h:Saúl=desmond | Oíd ahora, hijos de Benjamín | según hace hoy día?
+9-10 | h:Doeg=julian | Yo vi al hijo de Isaí | Goliat el filisteo.
+12 | h:Saúl | Oye ahora, hijo de Ahitob. | Oye ahora, hijo de Ahitob.
+12 | v:Ahimelec=arthur | Heme aquí, señor mío. | Heme aquí, señor mío.
+13 | h:Saúl | ¿Por qué habéis conspirado | como lo hace hoy día?
+14-15 | v:Ahimelec | ¿Y quién entre todos tus siervos | grande ni chica.
+16 | h:Saúl | Sin duda morirás | casa de tu padre.
+17 | h:Saúl | Cercad y matad | no me lo descubrieron.
+18 | h:Saúl | Vuelve tú, y arremete contra los sacerdotes. | Vuelve tú, y arremete contra los sacerdotes.
+22-23 | h:David | Yo sabía que estando allí | estarás seguro.

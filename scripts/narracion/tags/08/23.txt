@@ -1,0 +1,15 @@
+1 | g:aviso=julian | He aquí que los filisteos combaten | roban las eras.
+2 | h:David=sterling | ¿Iré a herir a estos filisteos? | ¿Iré a herir a estos filisteos?
+2 | dios | Ve, hiere a los filisteos, y libra a Keila. | Ve, hiere a los filisteos, y libra a Keila.
+3 | g:hombres=arthur | He aquí que nosotros | ejército de los filisteos?
+4 | dios | Levántate, desciende a Keila | a los filisteos.
+7 | h:Saúl=desmond | Dios lo ha traído a mis manos | puertas y cerraduras.
+9 | h:David | Trae el efod. | Trae el efod.
+10-11 | h:David | Oh Jehová, Dios de Israel, tu siervo | lo declares a tu siervo.
+11 | dios | Sí, descenderá. | Sí, descenderá.
+12 | h:David | ¿Me entregarán los hombres de Keila a mí | en manos de Saúl?
+12 | dios | Te entregarán. | Te entregarán.
+17 | h:Jonatán=julian | No temas | así lo sabe.
+19-20 | g:zifeos=arthur | ¿No está David escondido | en la mano del rey.
+21-23 | h:Saúl | Benditos seáis vosotros | millares de Judá.
+27 | h:mensajero=julian | Date prisa y ven | invadido el país.
