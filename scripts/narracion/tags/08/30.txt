@@ -1,0 +1,11 @@
+7 | h:David=sterling | Yo te ruego que me acerques el efod. | Yo te ruego que me acerques el efod.
+8 | h:David | ¿Seguiré esta tropa? ¿La podré alcanzar? | ¿Seguiré esta tropa? ¿La podré alcanzar?
+8 | dios | Síguela que de cierto | recobrarás todo.
+13 | h:David | ¿De quién eres tú? ¿Y de dónde eres? | ¿De quién eres tú? ¿Y de dónde eres?
+13-14 | h:egipcio=julian | Yo soy siervo de un amalecita | fuego a Siclag.
+15 | h:David | ¿Me llevarás tú a esa tropa? | ¿Me llevarás tú a esa tropa?
+15 | h:egipcio | Júrame por Dios | a esa gente.
+20 | g:pueblo=arthur | Este es el botín de David. | Este es el botín de David.
+22 | g:perversos=desmond | Porque no fueron con nosotros | y se vayan.
+23-24 | h:David | No hagáis eso, hermanos míos | repartan por igual.
+26 | h:David | He aquí un presente para vosotros | enemigos de Jehová.

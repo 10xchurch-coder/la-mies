@@ -1,0 +1,6 @@
+3 | g:príncipes=julian | ¿Qué hacen aquí estos hebreos? | ¿Qué hacen aquí estos hebreos?
+3 | h:Aquís=desmond | ¿No es este David, el siervo de Saúl | hasta hoy?
+4-5 | g:príncipes | Envía a este hombre | David a sus diez miles?
+6-7 | h:Aquís | Vive Jehová, que tú has sido recto | príncipes de los filisteos.
+8 | h:David=sterling | ¿Qué he hecho? | mi señor el rey?
+9-10 | h:Aquís | Yo sé que tú eres bueno | al amanecer, partid.

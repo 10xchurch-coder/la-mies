@@ -1,0 +1,20 @@
+1 | h:Aquís=desmond | Sabe de cierto | tú y tus hombres.
+2 | h:David=sterling | Ciertamente tú sabrás lo que tu siervo puede hacer. | Ciertamente tú sabrás lo que tu siervo puede hacer.
+2 | h:Aquís | Por tanto, te haré guarda | para siempre.
+7 | h:Saúl=desmond | Buscadme a una mujer pitonisa | por medio de ella pregunte.
+7 | g:siervos=julian | He aquí hay una mujer en Endor | espíritu de pitonisa.
+8 | h:Saúl | Yo te ruego que me adivines | yo te dijere.
+9 | m:pitonisa=soraya | He aquí tú sabes | hacerme morir?
+10 | h:Saúl | Vive Jehová, que ningún mal te vendrá por esto. | Vive Jehová, que ningún mal te vendrá por esto.
+11 | m:pitonisa | ¿A quién te haré venir? | ¿A quién te haré venir?
+11 | h:Saúl | Hazme venir a Samuel. | Hazme venir a Samuel.
+12 | m:pitonisa | ¿Por qué me has engañado? Pues tú eres Saúl. | ¿Por qué me has engañado? Pues tú eres Saúl.
+13 | h:Saúl | No temas: ¿Qué has visto? | No temas: ¿Qué has visto?
+13 | m:pitonisa | He visto dioses que suben de la tierra. | He visto dioses que suben de la tierra.
+14 | h:Saúl | ¿Cuál es su forma? | ¿Cuál es su forma?
+14 | m:pitonisa | Un hombre anciano viene, cubierto de un manto. | Un hombre anciano viene, cubierto de un manto.
+15 | v:Samuel=arthur | ¿Por qué me has inquietado haciéndome venir? | ¿Por qué me has inquietado haciéndome venir?
+15 | h:Saúl | Estoy muy congojado | qué tengo que hacer.
+16-19 | v:Samuel | ¿Y por qué me preguntas a mí | en manos de los filisteos.
+21-22 | m:pitonisa | He aquí que tu sierva ha obedecido | sigas tu camino.
+23 | h:Saúl | No comeré. | No comeré.
