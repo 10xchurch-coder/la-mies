@@ -115,3 +115,9 @@ test('un capítulo fuera del plan no tilda nada', () => {
   assert.deepEqual(chapterDays('new30', 0, 1), []);
   assert.deepEqual(daysCompletedBy('new30', 0, 1, new Set([chapterKey(0, 1)]), []), []);
 });
+
+test('el enlace de un versículo abre ese lugar en esa versión', async () => {
+  const { verseLink } = await import('../src/lib/bible');
+  const rvg = VERSIONS.find((v) => v.id === 'rvg')!;
+  assert.equal(verseLink('https://x.test/la-mies', rvg, 42, 3, 16), 'https://x.test/la-mies/biblia/leer?libro=42&cap=3&ver=16&v=rvg');
+});

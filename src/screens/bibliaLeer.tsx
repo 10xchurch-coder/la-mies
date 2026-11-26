@@ -1,6 +1,6 @@
 // Leer la Biblia, limpio como un libro: el texto corre seguido, con el número chiquito de cada versículo.
 // Arriba: el libro y capítulo (abre la lista de libros) y la versión. Abajo flotan anterior, escuchar y siguiente.
-// Arriba a la derecha (los tres puntos) se elige letra, tamaño, fondo y espacio entre líneas; el parlante lo lee en voz alta.
+// Arriba a la derecha (los tres puntos) se elige letra, tamaño, fondo y espacio entre líneas; el botón de play reproduce la grabación de la Biblia Gómez (RVG).
 // Al tocar versículos quedan subrayados con puntitos y abajo se abre la barra: color para resaltar, nota, copiar, compartir y guardar.
 // Lo que se marca va por libro, capítulo y versículo, así se ve igual en cualquier versión. Lo leído se anota solo en el plan de lectura.
 // "Referencias" abre los versículos relacionados con el que se tocó. La versión (español o inglés) se cambia en los tres puntos.
@@ -16,7 +16,7 @@ import { BibleRefsSheet } from '@/components/BibleRefsSheet';
 import { BibleWordsSheet, wordsTitle } from '@/components/BibleWordsSheet';
 import { Button } from '@/components/ui';
 import { myBiblePlan, type BiblePlanRow } from '@/lib/api';
-import { OT_COUNT, allowedVersions, bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, neighbor, shareVerses, versionOf } from '@/lib/bible';
+import { OT_COUNT, allowedVersions, bookName, bookNameIn, chapterDays, chapterKey, chapterText, chaptersIn, neighbor, shareVerses, verseLink, versionOf } from '@/lib/bible';
 import { BOOKS } from '@/lib/biblePlan';
 import { alignVerses, compareColumns, compareNotice, compareVersion, COMPARE_WIDE } from '@/lib/bibleCompare';
 import { loadBibleFont } from '@/lib/bibleFonts';
@@ -25,8 +25,7 @@ import { BIBLE_FONTS, BIBLE_THEMES, MARK_COLORS, SPACINGS, fontOf, markBg, spaci
 import { chapterMarks, setMarks, type BibleMark } from '@/lib/bibleMarks';
 import { markChapterRead, loadRead, onPlanMarked, recentPlanNote } from '@/lib/bibleRead';
 import { DEFAULT_PREFS, SIZES, loadBiblePrefs, saveBiblePrefs } from '@/lib/bibleStore';
-import { shareText } from '@/lib/share';
-import { speakAvailable, speakParts, stopSpeaking } from '@/lib/speak';
+import { WEB_URL, shareText } from '@/lib/share';
 import { loadNarrated, narratedUrl, playNarration, stopNarration } from '@/lib/bibleAudio';
 import { useFeatures } from '@/lib/useFeatures';
 import { colors, getThemeMode } from '@/theme';
@@ -71,7 +70,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState('');
   const [speaking, setSpeaking] = useState(-1);
-  // La grabación con varias voces, si este capítulo ya la tiene. Si no, lee la voz del teléfono.
+  // La grabación con varias voces, si este capítulo ya la tiene.
   const [narrReady, setNarrReady] = useState(0);
   useEffect(() => { loadNarrated().then(() => setNarrReady((n) => n + 1)); }, []);
   const [plan, setPlan] = useState<BiblePlanRow | null>(null);
@@ -127,7 +126,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
     setCopied(false);
     setMarksState({});
     chapterMarks(book, chapter).then(setMarksState).catch(() => undefined);
-    return () => { stopSpeaking(); stopNarration(); setSpeaking(-1); };
+    return () => { stopNarration(); setSpeaking(-1); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book, chapter]);
   // El plan de lectura de la persona (si tiene uno) y lo que ya leyó de él.
@@ -164,7 +163,10 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
     setSize(SIZES[Math.max(0, Math.min(SIZES.length - 1, (i < 0 ? 3 : i) + dir))]);
   };
   const toggle = (n: number) => { setCopied(false); setPicked((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n])); };
-  const text = () => shareVerses(version, book, chapter, picked);
+  const text = () => {
+    const t = shareVerses(version, book, chapter, picked);
+    return t ? `${t}\n${verseLink(WEB_URL, version, book, chapter, Math.min(...picked))}` : t;
+  };
   const sorted = [...picked].sort((a, b) => a - b);
 
   /** Guarda un cambio (color, nota o guardado) en los versículos tocados. Se ve al instante; si falla, vuelve atrás. */
@@ -181,12 +183,11 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
   const allSaved = sorted.length > 0 && sorted.every((v) => marks[v]?.saved);
   const openNote = () => { setNoteText(marks[sorted[0]]?.note ?? ''); setNoteOpen(true); };
 
+  // Solo se escucha la grabación de la Biblia Gómez (RVG). La voz del teléfono se sacó: sonaba mal.
   const listen = () => {
-    if (speaking >= 0) { stopSpeaking(); stopNarration(); setSpeaking(-1); return; }
+    if (speaking >= 0) { stopNarration(); setSpeaking(-1); return; }
     const url = narrReady ? narratedUrl(version.id, book, chapter) : null;
-    if (url && !sorted.length) { setSpeaking(0); playNarration(url, () => setSpeaking(-1)); return; }
-    const from = sorted.length ? sorted[0] - 1 : 0;
-    speakParts(verses.slice(from), (i) => setSpeaking(i < 0 ? -1 : from + i + 1));
+    if (url) { setSpeaking(0); playNarration(url, () => setSpeaking(-1)); }
   };
 
   const family = (bold = false) => (font.regular ? { fontFamily: bold ? font.bold : font.regular } : bold ? { fontWeight: '800' as const } : null);
@@ -266,7 +267,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
               const on = picked.includes(n);
               const m = marks[n];
               const bg = speaking === n ? (look.dark ? '#3A4A2A' : '#E4F3D8') : markBg(m?.color, look.dark);
-              const deco = on ? { textDecorationLine: 'underline' as const, textDecorationStyle: 'dotted' as const, textDecorationColor: look.accent } : null;
+              const deco = on ? { textDecorationLine: 'underline' as const, textDecorationStyle: 'solid' as const, textDecorationColor: look.accent } : null;
               const fsB = twoCols ? fs : Math.round(fs * 0.9);
               const lhB = twoCols ? lh : Math.round(lh * 0.9);
               // Lo que se marca, copia y comparte es de la versión que se lee: si ahí no está ese número, no se puede tocar.
@@ -310,7 +311,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
                 <Text key={n} onPress={() => toggle(n)} accessibilityLabel={tx('Versículo {n}. {t}', { n, t })} suppressHighlighting>
                   {byLine && i ? '\n' : null}
                   <Text style={{ fontSize: Math.round(fs * 0.62), color: look.muted }}>{n}{'\u00A0'}</Text>
-                  <Text style={[bg ? { backgroundColor: bg } : null, on ? { textDecorationLine: 'underline', textDecorationStyle: 'dotted', textDecorationColor: look.accent } : null]}>{t}</Text>
+                  <Text style={[bg ? { backgroundColor: bg } : null, on ? { textDecorationLine: 'underline', textDecorationStyle: 'solid', textDecorationColor: look.accent } : null]}>{t}</Text>
                   {m?.note ? <Text style={{ color: look.accent }}>{' ✎'}</Text> : null}
                   {m?.saved ? <Text style={{ color: look.accent }}>{' ★'}</Text> : null}
                   {' '}
@@ -337,7 +338,7 @@ export function BibleReader({ start, embedded }: { start: ReaderStart; embedded?
       {!picked.length ? (
         <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: (embedded ? 0 : insets.bottom) + 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 22 }}>
           {roundBtn('chevron-left', tx('Capítulo anterior'), () => prev && open(prev), false, !prev)}
-          {(speakAvailable || (narrReady > 0 && !!narratedUrl(version.id, book, chapter))) && fOn('biblia_audio') ? roundBtn(speaking >= 0 ? 'square' : 'play', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, true) : <View />}
+          {narrReady > 0 && !!narratedUrl(version.id, book, chapter) && fOn('biblia_audio') ? roundBtn(speaking >= 0 ? 'square' : 'play', speaking >= 0 ? tx('Parar la lectura') : tx('Escuchar el capítulo'), listen, true) : <View />}
           {roundBtn('chevron-right', tx('Capítulo siguiente'), goNext, false, !next)}
         </View>
       ) : null}

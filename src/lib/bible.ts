@@ -138,6 +138,11 @@ export function shareVerses(version: BibleVersion, book: number, chapter: number
   return `“${body}”\n— ${ref} (${version.short})`;
 }
 
+/** El enlace a un versículo: abre La Mies (la web) justo en ese lugar, en esa versión. */
+export function verseLink(webUrl: string, version: BibleVersion, book: number, chapter: number, verse: number): string {
+  return `${webUrl}/biblia/leer?libro=${book}&cap=${chapter}&ver=${verse}&v=${version.id}`;
+}
+
 /** El capítulo anterior (-1) o siguiente (+1), pasando de un libro al otro. null al principio o al final de la Biblia. */
 export function neighbor(book: number, chapter: number, dir: 1 | -1): { book: number; chapter: number } | null {
   if (dir === 1) {
