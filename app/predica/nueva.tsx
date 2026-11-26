@@ -12,10 +12,12 @@ import { addDays, fmtBytes, fmtDateShort, isoDate, youtubeId } from '@/lib/forma
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
 import { tx } from '@/lib/i18n';
+import { IfOn } from '@/components/IfOn';
+import { draftGuide } from '@/lib/groupGuide';
 
 export default function NuevaPredica() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, guia } = useLocalSearchParams<{ id?: string; guia?: string }>();
   const { church, profile } = useAuth();
   const [title, setTitle] = useState('');
   const [preacher, setPreacher] = useState(profile?.display_name ?? '');
@@ -23,6 +25,7 @@ export default function NuevaPredica() {
   const [description, setDescription] = useState('');
   const [summary, setSummary] = useState('');
   const [outline, setOutline] = useState('');
+  const [guide, setGuide] = useState('');
   const [youtube, setYoutube] = useState('');
   const [date, setDate] = useState(isoDate(new Date()));
   const [file, setFile] = useState<PickedFile | null>(null);
@@ -39,6 +42,7 @@ export default function NuevaPredica() {
       setDescription(s.description ?? '');
       setSummary(s.summary ?? '');
       setOutline(s.notes_outline ?? '');
+      setGuide(s.group_guide ?? '');
       setYoutube(s.youtube_url ?? '');
       setDate(s.preached_on);
       setExistingAudio(s.audio_name ?? (s.audio_path ? tx('Audio cargado') : null));
@@ -61,7 +65,7 @@ export default function NuevaPredica() {
     try {
       const row: Record<string, unknown> = {
         title: title.trim(), preacher: preacher.trim() || null, passage: passage.trim() || null, description: description.trim() || null,
-        summary: summary.trim() || null, notes_outline: outline.trim() || null,
+        summary: summary.trim() || null, notes_outline: outline.trim() || null, group_guide: guide.trim() || null,
         youtube_url: youtube.trim() || null, preached_on: date,
       };
       if (file) {
@@ -99,6 +103,22 @@ export default function NuevaPredica() {
         <Field label={tx('Resumen')} hint={tx('(opcional, se ve debajo del video)')} value={summary} onChangeText={setSummary} multiline placeholder={tx('Los puntos principales del mensaje…')} />
         <Field label={tx('Bosquejo para completar')} hint={tx('(opcional)')} value={outline} onChangeText={setOutline} multiline
           placeholder={tx('Un renglón por punto. Poné ___ donde va la palabra que completan.\nEj: 1. Jesús vino a buscar y a ___ lo que se había perdido (Lucas 19:10)')} />
+        <IfOn feature="grupos">
+          <Card style={[{ gap: 8 }, guia ? { borderColor: colors.green, borderWidth: 2 } : null]}>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: colors.text }}>{tx('Guía para los grupos pequeños')}</Text>
+            <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 18 }}>
+              {tx('Las preguntas que los líderes usan en la semana para repasar este mensaje. Si la dejás vacía, los grupos ven unas preguntas armadas con el bosquejo.')}
+            </Text>
+            <Button title={guide.trim() ? tx('Volver a armar con el bosquejo') : tx('Armar un borrador con el bosquejo')} icon="zap" variant="outline" small
+              onPress={() => {
+                const make = () => setGuide(draftGuide({ title: title || tx('el domingo'), passage, notes_outline: outline }));
+                if (!guide.trim()) make();
+                else Alert.alert(tx('Reemplazar la guía'), tx('Se cambia lo que escribiste por un borrador nuevo.'), [{ text: tx('Cancelar'), style: 'cancel' }, { text: tx('Reemplazar'), onPress: make }]);
+              }} />
+            <Field label={tx('Preguntas')} value={guide} onChangeText={setGuide} multiline style={{ minHeight: 180 }}
+              placeholder={tx('# Para empezar\n- ¿Qué te quedó del mensaje?\n# Para esta semana\n- ¿Qué vas a hacer distinto?')} />
+          </Card>
+        </IfOn>
         <Button title={tx('Guardar')} onPress={save} loading={busy} />
         {busy && file ? <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center' }}>{tx('Subiendo el audio… puede tardar un par de minutos.')}</Text> : null}
       </Screen>

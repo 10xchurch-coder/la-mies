@@ -1,7 +1,7 @@
 Textos que el programa scripts/i18n-codemod.mjs NO tocó porque no está seguro. Hay que mirarlos a mano.
 Si un texto de acá se ve en pantalla, se puede envolver a mano con tx(...) donde se muestra.
 
-   87  el tipo es una lista cerrada de valores
+   88  el tipo es una lista cerrada de valores
    31  texto fuera de una función (se crea una sola vez al abrir la app)
    10  lista de textos fuera de una función (¿se muestran o son valores?)
     8  ese texto se compara en algún archivo (===, case, includes o una expresión regular)
@@ -35,7 +35,7 @@ src/components/BaptismCertificate.tsx:17  [texto fuera de una función (se crea 
 src/components/BibleWordsSheet.tsx:22  [texto fuera de una función (se crea una sola vez al abrir la app)]  Palabras originales: STEP Bible (www.STEPBible.org), con datos de Tyndale House, Cambridge. Licencia CC BY 4.0.
 src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Visto por
 src/components/ChatRoom.tsx:396  [ese texto se compara en algún archivo (===, case, includes o una expresión regular)]  Entregado a
-src/lib/api.ts:1211  [va a la base: no se tocó]  Lista del culto
+src/lib/api.ts:1238  [va a la base: no se tocó]  Lista del culto
 src/lib/backup.ts:64  [palabra suelta en minúscula (¿texto o clave?)]  sí
 src/lib/bible.ts:33  [en otro lado se busca "Dominio" con startsWith/includes]  Reina-Valera 1909 · Dominio público
 src/lib/bible.ts:35  [en otro lado se busca "Dominio" con startsWith/includes]  King James Version · Dominio público
@@ -100,7 +100,7 @@ src/lib/features.ts:131  [el tipo es una lista cerrada de valores]  Reuniones y 
 src/lib/features.ts:135  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
 src/lib/features.ts:139  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
 src/lib/features.ts:143  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
-src/lib/features.ts:149  [el tipo es una lista cerrada de valores]  La Biblia y crecer
+src/lib/features.ts:147  [el tipo es una lista cerrada de valores]  Reuniones y enseñanza
 src/lib/features.ts:153  [el tipo es una lista cerrada de valores]  La Biblia y crecer
 src/lib/features.ts:157  [el tipo es una lista cerrada de valores]  La Biblia y crecer
 src/lib/features.ts:161  [el tipo es una lista cerrada de valores]  La Biblia y crecer
@@ -111,7 +111,7 @@ src/lib/features.ts:177  [el tipo es una lista cerrada de valores]  La Biblia y 
 src/lib/features.ts:181  [el tipo es una lista cerrada de valores]  La Biblia y crecer
 src/lib/features.ts:185  [el tipo es una lista cerrada de valores]  La Biblia y crecer
 src/lib/features.ts:189  [el tipo es una lista cerrada de valores]  La Biblia y crecer
-src/lib/features.ts:195  [el tipo es una lista cerrada de valores]  Comunidad
+src/lib/features.ts:193  [el tipo es una lista cerrada de valores]  La Biblia y crecer
 src/lib/features.ts:199  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:203  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:207  [el tipo es una lista cerrada de valores]  Comunidad
@@ -133,11 +133,12 @@ src/lib/features.ts:267  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:271  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:275  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:279  [el tipo es una lista cerrada de valores]  Comunidad
-src/lib/features.ts:285  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:283  [el tipo es una lista cerrada de valores]  Comunidad
 src/lib/features.ts:289  [el tipo es una lista cerrada de valores]  Dinero e informes
 src/lib/features.ts:293  [el tipo es una lista cerrada de valores]  Dinero e informes
 src/lib/features.ts:297  [el tipo es una lista cerrada de valores]  Dinero e informes
-src/lib/features.ts:303  [lista de textos fuera de una función (¿se muestran o son valores?)]  Evangelismo y visitas | Reuniones y enseñanza | La Biblia y crecer | Comunidad | Dinero e informes
+src/lib/features.ts:301  [el tipo es una lista cerrada de valores]  Dinero e informes
+src/lib/features.ts:307  [lista de textos fuera de una función (¿se muestran o son valores?)]  Evangelismo y visitas | Reuniones y enseñanza | La Biblia y crecer | Comunidad | Dinero e informes
 src/lib/files.ts:325  [texto fuera de una función (se crea una sola vez al abrir la app)]  La foto
 src/lib/files.ts:326  [texto fuera de una función (se crea una sola vez al abrir la app)]  El video
 src/lib/files.ts:327  [texto fuera de una función (se crea una sola vez al abrir la app)]  El audio

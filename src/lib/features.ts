@@ -8,7 +8,7 @@ export type FeatureKey =
   | 'evangelismo' | 'evang_zonas' | 'evang_tablero' | 'seguimiento' | 'colectivo' | 'colectivo_vivo' | 'colectivo_paradas'
   | 'discipulado' | 'decisiones' | 'bienvenida' | 'tarjeta_visita' | 'clase_miembros'
   | 'asistencia' | 'asistencia_chips' | 'ausencias' | 'fidelidad'
-  | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'clase_lecciones' | 'clase_versiculos' | 'ministerios'
+  | 'culto' | 'preguntas' | 'ninos' | 'clases' | 'grupos' | 'clase_lecciones' | 'clase_versiculos' | 'ministerios'
   | 'predicas' | 'predica_notas' | 'vivo' | 'presentar'
   | 'devocional' | 'biblia' | 'biblia_buscar' | 'biblia_referencias' | 'biblia_originales' | 'biblia_audio' | 'biblia_imagen' | 'biblia_marcas'
   | 'plan_lectura' | 'crecimiento' | 'biblioteca'
@@ -124,6 +124,10 @@ export const FEATURES: Feature[] = [
     get hint() { return tx('El maestro arma la lista y tilda qué chico aprendió cada versículo.'); },
     get hides() { return tx('Los versículos de memoria dentro de cada clase.'); },
     routes: ['/clase/versiculos'] },
+  { key: 'grupos', get label() { return tx('Grupos pequeños'); }, group: 'Reuniones y enseñanza',
+    get hint() { return tx('Grupos en las casas durante la semana: sus líderes, quiénes van, la asistencia y la guía para repasar la prédica del domingo o un estudio propio.'); },
+    get hides() { return tx('"Grupos pequeños", la guía para los grupos en cada prédica y los avisos de "quiero sumarme".'); },
+    routes: ['/grupos', '/grupo'] },
   { key: 'ministerios', get label() { return tx('Ministerios y turnos'); }, group: 'Reuniones y enseñanza',
     get hint() { return tx('Los grupos de servicio de la iglesia, con su chat y sus turnos.'); },
     get hides() { return tx('"Ministerios", los turnos y el aviso de "mañana servís".'); },

@@ -5,7 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { Button, Card, Empty, Tag } from '@/components/ui';
-import { classSchedule, classTeachers, listClasses, listMaterials, listProfiles, scheduleName } from '@/lib/api';
+import { classSchedule, classTeachers, listMaterials, listProfiles, listSchoolClasses, scheduleName } from '@/lib/api';
 import { addDays, fmtDateShort, isoDate } from '@/lib/format';
 import { useAuth } from '@/store/auth';
 import { colors } from '@/theme';
@@ -24,7 +24,7 @@ export default function Clases() {
   useFocusEffect(
     useCallback(() => {
       const today = isoDate(new Date());
-      Promise.all([listClasses(), classTeachers(), classSchedule(null, today, isoDate(addDays(new Date(), 8))), listProfiles(), listMaterials()])
+      Promise.all([listSchoolClasses(), classTeachers(), classSchedule(null, today, isoDate(addDays(new Date(), 8))), listProfiles(), listMaterials()])
         .then(([c, t, s, p, m]) => {
           setClasses(c);
           setTeachers(t);
@@ -42,8 +42,9 @@ export default function Clases() {
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Header title={isLeader ? tx('Clases') : tx('Mis clases')} subtitle={tx('Escuela dominical · sábado y domingo')} back />
       <Screen>
+        {can('ens.editar') ? <Button title={tx('Nueva clase')} icon="plus" onPress={() => router.push('/clase/editar' as never)} /> : null}
         {can('ens.editar') ? <Button title={tx('Planificar el mes (sugerencia automática)')} icon="shuffle" variant="outline" onPress={() => router.push('/clase/planificar')} /> : null}
-        {classes && !classes.length ? <Empty icon="book" title={tx('No hay clases cargadas')} text={tx('El pastor o la secretaría las crea desde Primeros pasos o desde Clases.')} /> : null}
+        {classes && !classes.length ? <Empty icon="book" title={tx('No hay clases cargadas')} text={can('ens.editar') ? tx('Tocá “Nueva clase” para crear la primera: por ejemplo Niños, Jóvenes o Adultos.') : tx('El pastor o la secretaría las crea desde acá.')} /> : null}
         {(classes ?? []).map((k) => {
           const mine = teachers.some((t) => t.class_id === k.id && t.profile_id === profile?.id);
           const next = sched.filter((s) => s.class_id === k.id);

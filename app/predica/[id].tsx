@@ -17,6 +17,7 @@ import { colors } from '@/theme';
 import type { Sermon } from '@/types';
 import { tx } from '@/lib/i18n';
 import { IfOn } from '@/components/IfOn';
+import { GuideView } from '@/components/GroupGuide';
 
 function mmss(sec: number): string {
   const s = Math.max(0, Math.floor(sec || 0));
@@ -207,6 +208,12 @@ export default function PredicaVer() {
         {s.audio_path ? <SectionTitle>{tx('Escuchar')}</SectionTitle> : null}
         {audio ? <AudioPlayer url={audio} /> : s.audio_path ? <Loading /> : null}
         {s.audio_path ? <Button title={tx('Descargar el audio')} icon="download" variant="outline" onPress={download} /> : null}
+        {s.group_guide?.trim() ? (
+          <IfOn feature="grupos">
+            <SectionTitle>{tx('Para los grupos pequeños')}</SectionTitle>
+            <GuideView text={s.group_guide} />
+          </IfOn>
+        ) : null}
         <IfOn feature="predica_notas"><SermonNotes sermonId={s.id} outline={s.notes_outline ?? null} /></IfOn>
         {isStaff ? (
           <View style={{ flexDirection: 'row', gap: 8 }}>

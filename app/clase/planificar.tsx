@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import { Header, Screen } from '@/components/Screen';
 import { PickerModal } from '@/components/Picker';
 import { Button, Card, Empty, Loading, SectionTitle, Tag, Toggle } from '@/components/ui';
-import { classSchedule, classTeachers, listClasses, listMembers, listProfiles, saveSchedule } from '@/lib/api';
+import { classSchedule, classTeachers, listSchoolClasses, listMembers, listProfiles, saveSchedule } from '@/lib/api';
 import { supabase, errorMessage } from '@/lib/supabase';
 import { fmtDateShort } from '@/lib/format';
 import { planMonth, type RotaSlot } from '@/lib/rota';
@@ -40,7 +40,7 @@ export default function Planificar() {
   const to = `${ym.y}-${pad(ym.m + 1)}-${pad(new Date(ym.y, ym.m + 1, 0).getDate())}`;
 
   useEffect(() => {
-    Promise.all([listClasses(), classTeachers(), listProfiles(), listMembers(), supabase.from('teacher_prefs').select('profile_id, per_month')])
+    Promise.all([listSchoolClasses(), classTeachers(), listProfiles(), listMembers(), supabase.from('teacher_prefs').select('profile_id, per_month')])
       .then(([c, t, p, mem, prefs]) => {
         setClasses(c);
         setTeachers(t);

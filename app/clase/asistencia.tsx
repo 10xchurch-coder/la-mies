@@ -16,7 +16,7 @@ import { useLayout } from '@/lib/layout';
 import type { ClassAttendance, ClassRow, Contact } from '@/types';
 import { tx } from '@/lib/i18n';
 
-const DOW: Record<string, number> = { sun: 0, sat: 6 };
+const DOW: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
 
 export default function AsistenciaClase() {
   const { id, date: d0 } = useLocalSearchParams<{ id: string; date: string }>();
@@ -80,7 +80,9 @@ export default function AsistenciaClase() {
       <Header title={k?.name ?? tx('Clase')} subtitle={tx('{present} presentes · {fmtDateShort}', { present, fmtDateShort: fmtDateShort(date) })} back />
       <Screen>
         <DateChips dates={dates} value={date} onChange={setDate} format={(d) => (d === isoDate(new Date()) ? tx('Hoy') : fmtDateShort(d))} />
-        {!students.length ? <Empty icon="users" title={tx('Esta clase no tiene alumnos')} text={tx('Agregalos desde la pantalla de la clase.')} /> : null}
+        {!students.length ? (k?.kind === 'grupo'
+          ? <Empty icon="users" title={tx('El grupo todavía no tiene integrantes')} text={tx('Agregalos desde la pantalla del grupo.')} />
+          : <Empty icon="users" title={tx('Esta clase no tiene alumnos')} text={tx('Agregalos desde la pantalla de la clase.')} />) : null}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {ordered.map((c) => {
           const a = att[c.id];
@@ -101,7 +103,7 @@ export default function AsistenciaClase() {
                 value={notes[c.id] ?? ''}
                 onChangeText={(t) => setNotes((n) => ({ ...n, [c.id]: t }))}
                 onEndEditing={() => { if ((notes[c.id] ?? '') !== (a?.note ?? '')) save(c, on, notes[c.id] ?? ''); }}
-                placeholder={tx('Nota (ej: recitó el versículo, vino con la abuela)')}
+                placeholder={k?.kind === 'grupo' ? tx('Nota (ej: pidió oración, trajo a un amigo)') : tx('Nota (ej: recitó el versículo, vino con la abuela)')}
                 placeholderTextColor="#8B918C"
                 style={{ minHeight: 40, borderRadius: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: '#FFF', paddingHorizontal: 10, fontSize: 14 }}
                 multiline

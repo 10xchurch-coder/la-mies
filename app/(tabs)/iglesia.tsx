@@ -68,6 +68,7 @@ export default function Iglesia() {
   const [logo, setLogo] = useState<string | null>(null);
   const [myMinistries, setMyMinistries] = useState<Ministry[]>([]);
   const [hasClasses, setHasClasses] = useState(false);
+  const [hasGroups, setHasGroups] = useState(false);
   const [news, setNews] = useState<Announcement[]>([]);
   const [bdays, setBdays] = useState<{ contact_id: string; name: string; photo_path: string | null; turns: number | null; is_me: boolean }[]>([]);
   const [askBday, setAskBday] = useState(false);
@@ -119,7 +120,7 @@ export default function Iglesia() {
       // Mis ministerios: donde estoy o que lidero (el servidor ya solo manda esos, salvo a los líderes)
       setMyMinistries(ms.filter((m) => m.leader_id === profile?.id || mm.some((x) => x.ministry_id === m.id && x.profile_id === profile?.id)));
     }).catch(() => undefined);
-    listClasses().then((k) => setHasClasses(k.length > 0)).catch(() => undefined);
+    listClasses().then((k) => { setHasClasses(k.some((c) => (c.kind ?? 'escuela') === 'escuela')); setHasGroups(k.some((c) => c.kind === 'grupo')); }).catch(() => undefined);
     liveState().then((st) => setLive(st?.live_video_id ? { id: st.live_video_id, title: st.live_title } : null)).catch(() => undefined);
     // Anuncios de las últimas dos semanas, arriba de todo.
     supabase.rpc('today_birthdays').then(({ data }) => setBdays((data ?? []) as typeof bdays));
@@ -185,6 +186,7 @@ export default function Iglesia() {
         { icon: 'play-circle', label: tx('Prédicas'), to: '/predicas' as Href, show: !tabs.includes('predicas') },
         { icon: 'help-circle', label: tx('Preguntas'), to: '/preguntas' as Href, show: true },
         { icon: 'book-open', label: isLeader ? tx('Clases') : tx('Mis clases'), to: '/clases', show: isLeader || hasClasses },
+        { icon: 'home', label: tx('Grupos pequeños'), to: '/grupos' as Href, show: isLeader || hasGroups },
         { icon: 'music', label: tx('Cancionero'), to: '/canciones' as Href, show: true },
         { icon: 'headphones', label: tx('Música'), to: '/musica' as Href, show: true },
         { icon: 'radio', label: tx('Radio'), to: '/radio' as Href, show: true },

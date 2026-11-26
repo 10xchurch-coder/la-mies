@@ -254,7 +254,14 @@ export type ChurchService = { id: string; church_id: string; name: string; dow: 
 /** Una fecha en que una reunión (service_id) o una actividad semanal del calendario (event_id) no se hizo. */
 export type Cancellation = { id: string; on_date: string; service_id: string | null; event_id: string | null; note: string | null };
 
-export type ClassRow = { id: string; church_id: string; name: string; age_min: number | null; age_max: number | null; days: string[]; active: boolean; sort_order: number };
+export type ClassRow = {
+  id: string; church_id: string; name: string; age_min: number | null; age_max: number | null; days: string[]; active: boolean; sort_order: number;
+  /** 'escuela' = clase de la escuela dominical; 'grupo' = grupo pequeño. */
+  kind?: 'escuela' | 'grupo';
+  /** Grupo pequeño: 'predica' = repasan la prédica del domingo; 'material' = estudio propio. */
+  study?: 'predica' | 'material';
+  meet_time?: string | null; place?: string | null; about?: string | null; series?: string | null; current_material?: string | null;
+};
 /** Maestro o ayudante de una clase: alguien con la app (profile_id) o un hermano que no la tiene (contact_id). */
 export type ClassTeacher = { class_id: string; profile_id: string | null; contact_id?: string | null; is_helper: boolean };
 export type ClassSchedule = {
@@ -292,6 +299,8 @@ export type NotificationRow = { id: string; kind: string; title: string; body: s
 export type Sermon = {
   summary?: string | null;
   notes_outline?: string | null;
+  /** La guía para los grupos pequeños ('# Título' y '- pregunta'). */
+  group_guide?: string | null;
   id: string; church_id: string; title: string; preacher: string | null; preached_on: string; passage: string | null; description: string | null;
   youtube_url: string | null; audio_path: string | null; audio_name: string | null; created_at: string;
 };

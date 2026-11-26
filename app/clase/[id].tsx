@@ -273,6 +273,7 @@ export default function Clase() {
           <Text style={{ fontSize: 13, color: colors.muted }}>{tx('La lista de alumnos la ven los maestros de la clase y los líderes.')}</Text>
         )}
         {isTeacher ? <Tag text={tx('Sos maestro de esta clase')} tone="green" /> : null}
+        {canManage ? <Button title={tx('Cambiar nombre, días o edades')} icon="settings" variant="ghost" onPress={() => router.push({ pathname: '/clase/editar', params: { id } } as never)} /> : null}
       </Screen>
 
       <PickerModal visible={picker === 'teacher' || picker === 'helper'} title={picker === 'helper' ? tx('Elegí el ayudante') : tx('Elegí el maestro')}

@@ -58,6 +58,7 @@ export const DESK_NAV: DeskGroup[] = [
   ] },
   { get title() { return tx('Crecer'); }, tone: 'blue', items: [
     { key: 'clases', get label() { return tx('Clases'); }, icon: 'book-open', to: '/clases', perms: ['ens.ver', 'ens.editar'] },
+    { key: 'grupos', get label() { return tx('Grupos pequeños'); }, icon: 'home', to: '/grupos', perms: ['ens.ver', 'ens.editar'] },
     { key: 'devocionales', get label() { return tx('Devocionales'); }, icon: 'sunrise', to: '/admin/devocionales', perms: ['devocional.editar'] },
     { key: 'cancionero', get label() { return tx('Cancionero'); }, icon: 'music', to: '/canciones', perms: [] },
     { key: 'preguntas', get label() { return tx('Preguntas'); }, icon: 'help-circle', to: '/preguntas', perms: ['com.moderar'] },

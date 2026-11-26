@@ -265,6 +265,33 @@ export async function myUpcoming(days = 21): Promise<UpcomingItem[]> {
 export async function listClasses(): Promise<ClassRow[]> {
   return ok(await supabase.from('classes').select('*').eq('active', true).order('sort_order')) ?? [];
 }
+/** Solo las clases de la escuela dominical (sin los grupos pequeños). */
+export async function listSchoolClasses(): Promise<ClassRow[]> {
+  return (await listClasses()).filter((k) => (k.kind ?? 'escuela') === 'escuela');
+}
+/** Los grupos pequeños de la iglesia. */
+export async function listSmallGroups(): Promise<ClassRow[]> {
+  return (await listClasses()).filter((k) => k.kind === 'grupo');
+}
+/** Los grupos donde estoy como integrante. */
+export async function myGroupIds(): Promise<string[]> {
+  return ((ok(await supabase.rpc('my_group_ids')) ?? []) as (string | { my_group_ids: string })[]).map((r) => (typeof r === 'string' ? r : r.my_group_ids));
+}
+/** "Quiero sumarme": avisa a los líderes. Devuelve a cuántos les llegó. */
+export async function groupJoinRequest(classId: string): Promise<number> {
+  return (ok(await supabase.rpc('group_join_request', { p_class: classId })) as number | null) ?? 0;
+}
+export async function groupSetLesson(classId: string, materialId: string | null): Promise<void> {
+  ok(await supabase.rpc('group_set_lesson', { p_class: classId, p_material: materialId }));
+}
+/** Las lecciones propias de un grupo (estudio propio). */
+export async function groupLessons(classId: string): Promise<Material[]> {
+  return ok(await supabase.from('materials').select('*').eq('class_id', classId).order('chapter_order')) ?? [];
+}
+/** Las últimas prédicas hasta una fecha (para la guía del grupo). */
+export async function sermonsUntil(date: string, limit = 6): Promise<Sermon[]> {
+  return ok(await supabase.from('sermons').select('*').lte('preached_on', date).order('preached_on', { ascending: false }).limit(limit)) ?? [];
+}
 export async function classTeachers(classId?: string): Promise<ClassTeacher[]> {
   let q = supabase.from('class_teachers').select('*');
   if (classId) q = q.eq('class_id', classId);
