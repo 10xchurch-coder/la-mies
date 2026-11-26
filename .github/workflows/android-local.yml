@@ -34,9 +34,10 @@ jobs:
         run: |
           eas build --platform android --profile production --local --non-interactive --output la-mies.aab
           ls -la la-mies.aab
-      - name: Dejar el AAB en la rama tienda
+      # El archivo pesa más de 100 MB y GitHub no lo acepta en una rama: se deja como archivo de la publicación "tienda".
+      - name: Dejar el AAB en la publicación tienda
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir tienda && cp la-mies.aab tienda/ && cd tienda && git init -q
-          git config user.name "la-mies-bot"; git config user.email "bot@users.noreply.github.com"
-          git checkout -q -b tienda && git add la-mies.aab && git commit -qm "AAB para Google Play"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" tienda
+          gh release view tienda >/dev/null 2>&1 || gh release create tienda --title "AAB para Google Play" --notes "El último archivo para subir a Google Play." --prerelease
+          gh release upload tienda la-mies.aab --clobber
