@@ -1,0 +1,22 @@
+8-9 | h:Goliat=arthur | ¿Para qué salís a dar batalla? | y nos serviréis.
+10 | h:Goliat | Hoy yo desafío | que pelee conmigo.
+17-18 | v:Isaí=julian | Toma ahora para tus hermanos | toma prendas de ellos.
+25 | g:israelitas=julian | ¿No habéis visto | de su padre en Israel.
+26 | h:David=sterling | ¿Qué harán al hombre | del Dios viviente?
+27 | g:pueblo=julian | Así se hará al hombre que lo venciere. | Así se hará al hombre que lo venciere.
+28 | h:Eliab=desmond | ¿Para qué has descendido acá? | has venido.
+29 | h:David | ¿Qué he hecho yo ahora? | ¿Acaso no hay una causa?
+32 | h:David | No desmaye el corazón | con este filisteo.
+33 | h:Saúl=desmond | No podrás tú ir | desde su juventud.
+34-36 | h:David | Tu siervo era pastor | del Dios viviente.
+37 | h:David | Jehová que me ha librado | de la mano de este filisteo.
+37 | h:Saúl | Ve, y Jehová sea contigo. | Ve, y Jehová sea contigo.
+39 | h:David | Yo no puedo andar con esto | nunca las he probado.
+43 | h:Goliat | ¿Soy yo perro para que vengas a mí con palos? | ¿Soy yo perro para que vengas a mí con palos?
+44 | h:Goliat | Ven a mí | a las bestias del campo.
+45-47 | h:David | Tú vienes a mí con espada | en nuestras manos.
+55 | h:Saúl | Abner, ¿de quién es hijo ese joven? | Abner, ¿de quién es hijo ese joven?
+55 | h:Abner=julian | Vive tu alma, oh rey, que no lo sé. | Vive tu alma, oh rey, que no lo sé.
+56 | h:Saúl | Pregunta de quién es hijo ese joven. | Pregunta de quién es hijo ese joven.
+58 | h:Saúl | Joven, ¿de quién eres hijo? | Joven, ¿de quién eres hijo?
+58 | h:David | Yo soy hijo de tu siervo Isaí de Belén. | Yo soy hijo de tu siervo Isaí de Belén.

@@ -1,0 +1,19 @@
+1 | dios | ¿Hasta cuándo has tú de llorar | me he provisto de rey.
+2 | v:Samuel=arthur | ¿Cómo iré? | me matará.
+2-3 | dios | Toma contigo una becerra | al que yo te diga.
+4 | g:ancianos=desmond | ¿Es pacífica tu venida? | ¿Es pacífica tu venida?
+5 | v:Samuel | Sí, vengo a ofrecer | conmigo al sacrificio.
+6 | v:Samuel | De cierto delante de Jehová está su ungido. | De cierto delante de Jehová está su ungido.
+7 | dios | No mires a su parecer | Jehová mira el corazón.
+8 | v:Samuel | Ni a este ha elegido Jehová. | Ni a este ha elegido Jehová.
+9 | v:Samuel | Tampoco a este ha elegido Jehová. | Tampoco a este ha elegido Jehová.
+10 | v:Samuel | Jehová no ha elegido a estos. | Jehová no ha elegido a estos.
+11 | v:Samuel | ¿Están aquí todos tus hijos? | ¿Están aquí todos tus hijos?
+11 | v:Isaí=julian | Aún queda el menor, que apacienta las ovejas. | Aún queda el menor, que apacienta las ovejas.
+11 | v:Samuel | Envía por él | él venga aquí.
+12 | dios | Levántate y úngelo, porque este es. | Levántate y úngelo, porque este es.
+15-16 | g:criados=sterling | He aquí ahora, que el espíritu malo | tendrás alivio.
+17 | h:Saúl=desmond | provéanme ahora un hombre | traédmelo.
+18 | h:criado=julian | He aquí yo he visto | Jehová está con él.
+19 | h:Saúl | Envíame a David tu hijo | con las ovejas.
+22 | h:Saúl | Yo te ruego que esté David | gracia en mis ojos.
