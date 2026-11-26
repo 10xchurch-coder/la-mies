@@ -85,7 +85,7 @@ function useNotificationLinks() {
 // Pantallas que se pueden ver sin haber entrado.
 // 'e' = la página pública de un evento: se abre sin cuenta. 'visita' = la tarjeta de visita del QR de la puerta.
 // 'empezar' = una iglesia nueva se anota sola. 'demo' = la puerta de la iglesia de ejemplo: entra sola con una cuenta que no puede guardar nada.
-const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita', 'empezar', 'demo']);
+const PUBLIC = new Set(['login', 'registro', 'registro-enviado', 'recuperar', 'e', 'visita', 'empezar', 'demo', 'verso']);
 installDemo();
 
 /** Sin sesión no se ve nada de la iglesia: siempre a Entrar. Con sesión pero sin iglesia: a unirse.
