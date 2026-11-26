@@ -1,0 +1,15 @@
+1 | g:zifeos=arthur | ¿No está David escondido | frente a Jesimón?
+6 | h:David=sterling | ¿Quién descenderá conmigo a Saúl al campamento? | ¿Quién descenderá conmigo a Saúl al campamento?
+6 | h:Abisai=arthur | Yo descenderé contigo. | Yo descenderé contigo.
+8 | h:Abisai | Hoy ha entregado Dios | no segundaré.
+9 | h:David | No le mates | será inocente?
+10-11 | h:David | Vive Jehová, que Jehová lo herirá | y vámonos.
+14 | h:David | ¿No respondes, Abner? | ¿No respondes, Abner?
+14 | h:Abner=julian | ¿Quién eres tú que gritas al rey? | ¿Quién eres tú que gritas al rey?
+15-16 | h:David | ¿No eres tú un hombre valiente? | estaba a su cabecera.
+17 | h:Saúl=desmond | ¿No es esta tu voz, hijo mío David? | ¿No es esta tu voz, hijo mío David?
+17 | h:David | Mi voz es, rey señor mío. | Mi voz es, rey señor mío.
+18-20 | h:David | ¿Por qué persigue así | perdiz por los montes.
+21 | h:Saúl | He pecado | errado en gran manera.
+22-24 | h:David | He aquí la lanza del rey | de toda aflicción.
+25 | h:Saúl | Bendito eres tú | y prevalecerás.

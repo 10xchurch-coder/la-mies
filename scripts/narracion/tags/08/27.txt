@@ -1,0 +1,6 @@
+1 | h:David=sterling | Al fin seré muerto | de sus manos.
+5 | h:David | Si he hallado ahora gracia | ciudad real?
+10 | h:Aquís=desmond | ¿Contra quién habéis invadido hoy? | ¿Contra quién habéis invadido hoy?
+10 | h:David | Contra el sur de Judá | sur de los cineos.
+11 | h:David | Porque no den aviso de nosotros, diciendo: Esto hizo David. | Porque no den aviso de nosotros, diciendo: Esto hizo David.
+12 | h:Aquís | Él ha hecho que su pueblo | siervo para siempre.
