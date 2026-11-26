@@ -54,6 +54,7 @@
 - Hecho: Hebreos 1 a 13 (25 nov 2026), 49 pedazos, sin fallas. HEBREOS COMPLETO.
 - Hecho: Santiago, 1 y 2 Pedro, 1, 2 y 3 Juan y Judas (25 nov 2026), 74 pedazos, sin fallas (un pedazo salió con "Out of credits" habiendo créditos y se pidió de nuevo). SANTIAGO A JUDAS COMPLETOS.
 - Hecho: Apocalipsis 1 a 8 (25 nov 2026), 66 pedazos, sin fallas (tres pedazos rechazados por el límite de 8 trabajos se pidieron de nuevo).
+- EN CURSO: Apocalipsis 9 a 16, 00:31 UTC del 26 nov
 - Sigue: Apocalipsis 9 (libro 65). Los tags y planes de Apocalipsis 9 a 22 ya están en main y bajados en el sandbox (grupos a_g65b = 9 a 16, 63 pedazos; a_g65c = 17 a 22, 70 pedazos); falta solo el audio. Al terminar Apocalipsis 22 escribir TERMINADO arriba.
 - Nota: en el sandbox están nar/a_pick.sh y nar/a_mix.sh (tarea A) para volver a pedir solo los pedazos que el límite de 8 trabajos rechazó; los index de un mismo pedido no se pueden repetir.
 - Nota: no dejar citas de una sola palabrita suelta entre dos citas (como "y:"); la voz falla con pedazos tan cortos. Mejor una sola cita que abarque todo.
