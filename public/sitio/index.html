@@ -198,6 +198,10 @@ footer .c{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center}footer na
 [data-r="zoom"]{transform:scale(.9) translateY(30px)}
 [data-r].in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){[data-r]{opacity:1;transform:none;transition:none}.hero-fig .fono,.granos i,.cinta div,.sello i{animation:none}html{scroll-behavior:auto}}
+.cerca{background:#0E2A27;color:#fff;padding:84px 0}.cerca h2{font-family:'Lora',serif;font-size:clamp(30px,4vw,46px);line-height:1.1;margin:0 0 12px}.cerca h2 em{color:#F2C879;font-style:italic}.cerca .lead{color:rgba(255,255,255,.82);max-width:640px;font-size:18px;line-height:1.5;margin:0 0 40px}
+.cerca-g{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}.cerca-g figure{margin:0}.cerca-g .fono{border-radius:30px;padding:7px}.cerca-g .fono img,.cerca-g .fono video{border-radius:24px;display:block}.cerca-g figcaption{margin-top:16px;font-size:15px;line-height:1.45;color:rgba(255,255,255,.8)}.cerca-g figcaption b{display:block;color:#fff;font-size:17px;margin-bottom:4px}
+.cerca-ley{display:flex;flex-wrap:wrap;gap:10px 22px;margin:0 0 34px;font-size:15px;color:rgba(255,255,255,.9)}.cerca-ley i{display:inline-block;width:26px;height:6px;border-radius:3px;margin-right:8px;vertical-align:middle}
+@media(max-width:900px){.cerca-g{grid-template-columns:repeat(2,1fr);gap:18px}.cerca{padding:60px 0}}
 </style>
 </head>
 <body>
@@ -271,6 +275,20 @@ footer .c{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center}footer na
       <ul class="lista"><li data-r style="--d:0ms">Ves qué calles ya se visitaron y cuáles faltan</li><li data-r style="--d:90ms">Cada contacto queda guardado con su dirección</li><li data-r style="--d:180ms">Equipos, zonas y resultados de cada salida</li></ul>
     </div>
     <div class="fig" data-r="zoom"><span class="halo"></span><div class="fono" data-p="0.06"><img loading="lazy" src="img/mapa.jpg" alt="" width="640" height="1387"></div></div>
+  </div>
+</section>
+<section class="cerca" id="de-cerca">
+  <div class="c" style="display:block">
+    <div class="kicker" data-r style="color:#7FE0D8">El mapa, de cerca</div>
+    <h2 data-r>Así se ve <em>una salida de verdad.</em></h2>
+    <p class="lead" data-r>Cada color cuenta algo. De un vistazo se sabe qué se hizo, cuándo y qué falta.</p>
+    <div class="cerca-ley" data-r><span><i style="background:#1F6B45"></i>Evangelismo de esta semana</span><span><i style="background:#2563EB"></i>Este mes</span><span><i style="background:#9CA3AF"></i>Hace más de un mes</span><span><i style="background:#E8590C"></i>Volantes</span></div>
+    <div class="cerca-g">
+      <figure data-r style="--d:0ms"><div class="fono"><video src="img/salida.mp4" poster="img/mapa-salida.jpg" muted loop playsinline autoplay preload="metadata"></video></div><figcaption><b>Un toque y empieza</b>Mientras se camina, la app cuenta el tiempo, los metros, los contactos y las promesas.</figcaption></figure>
+      <figure data-r style="--d:90ms"><div class="fono"><img loading="lazy" src="img/mapa-veredas.jpg" alt="" width="640" height="1387"></div><figcaption><b>Cada vereda, por separado</b>Se ve si se hicieron los dos lados de la calle o solo uno.</figcaption></figure>
+      <figure data-r style="--d:180ms"><div class="fono"><img loading="lazy" src="img/mapa-volantes.jpg" alt="" width="640" height="1387"></div><figcaption><b>Volantes y evangelismo</b>Naranja donde se repartieron invitaciones. Verde donde ya se volvió a tocar puertas.</figcaption></figure>
+      <figure data-r style="--d:270ms"><div class="fono"><img loading="lazy" src="img/mapa-equipo.jpg" alt="" width="640" height="1387"></div><figcaption><b>El equipo, en vivo</b>Se ve por dónde va cada hermano mientras dura la salida.</figcaption></figure>
+    </div>
   </div>
 </section>
 <section class="feat inv" id="seguimiento" style="--a:var(--ambar)">
