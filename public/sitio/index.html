@@ -2,15 +2,26 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>La Mies · La app para el evangelismo y la vida de tu iglesia</title>
-<meta name="description" content="La Mies es la app para iglesias: evangelismo con mapa, seguimiento de visitas, asistencia, finanzas, escuela dominical, grupos pequeños, Biblia y devocional. 4 meses gratis.">
-<meta property="og:title" content="La Mies · La app para el evangelismo y la vida de tu iglesia">
-<meta property="og:description" content="Evangelismo con mapa, seguimiento, asistencia, finanzas, Biblia y más, en una sola app. 4 meses gratis.">
+<meta name="description" content="La Mies es la app para iglesias: evangelismo con un mapa que se marca solo, seguimiento de visitas, asistencia, finanzas, escuela dominical, grupos pequeños, Biblia y devocional. 4 meses gratis, sin tarjeta.">
+<link rel="canonical" href="https://lamies.app/">
 <meta property="og:type" content="website">
-<meta property="og:image" content="img/recorrido.jpg">
-<meta name="theme-color" content="#143826">
-<link rel="icon" href="img/icono.png">
+<meta property="og:locale" content="es_LA">
+<meta property="og:site_name" content="La Mies">
+<meta property="og:url" content="https://lamies.app/">
+<meta property="og:title" content="La Mies · El evangelismo y la vida de tu iglesia, en una sola app">
+<meta property="og:description" content="Un mapa que se marca solo cuando la iglesia sale a evangelizar. Seguimiento, asistencia, finanzas, Biblia y más. 4 meses gratis.">
+<meta property="og:image" content="https://lamies.app/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0D2A1C">
+<link rel="icon" href="img/icono.png?v=1c207381">
+<link rel="apple-touch-icon" href="img/icono.png?v=1c207381">
+<link rel="preload" href="f/fraunces.woff2?v=f012d70e" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="f/figtree.woff2?v=8395d4f3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="v/salida.webp?v=5fbfc989" fetchpriority="high">
 
 <!-- ==========================================================================
      CONFIGURACIÓN  ·  ÚNICO LUGAR PARA CAMBIAR LOS DATOS
@@ -18,493 +29,987 @@
 <script>
 window.LA_MIES = {
   // A dónde lleva el botón "Sumar mi iglesia" (la hoja para anotar una iglesia nueva).
-  registro: "https://10xchurch-coder.github.io/la-mies/empezar",
-  entrar: "https://10xchurch-coder.github.io/la-mies/login",
+  registro: "https://lamies.app/empezar",
+  entrar: "https://lamies.app/entrar",
+  // La iglesia de ejemplo: se entra sin registrarse y no se guarda nada.
+  demo: "https://lamies.app/demo",
+  demoHermano: "https://lamies.app/demo-hermano",
   email: "info@lamies.app",
   // WhatsApp con código de país, solo dígitos (ej.: "5493760000000"). Vacío = no se muestra.
   whatsapp: "",
   mensajeWhatsApp: "Buen día. Quisiera saber más sobre La Mies para mi iglesia.",
-  privacidad: "https://10xchurch-coder.github.io/la-mies/privacidad.html",
+  privacidad: "https://lamies.app/privacidad",
   // Cuando la app esté en las tiendas, pega aquí los enlaces: los botones aparecen solos.
   appStore: "",
   googlePlay: ""
 };
 </script>
 <!-- ======================= FIN DE LA CONFIGURACIÓN ========================= -->
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"La Mies","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":["es","en"],"url":"https://lamies.app/","description":"App para iglesias: evangelismo con mapa, seguimiento de visitas, asistencia, finanzas, clases, grupos pequeños, Biblia y devocional.","offers":{"@type":"AggregateOffer","priceCurrency":"USD","lowPrice":"29","highPrice":"300","offerCount":"5"},"publisher":{"@type":"Organization","name":"Iglesia Bautista Victoria","address":{"@type":"PostalAddress","addressLocality":"Posadas","addressRegion":"Misiones","addressCountry":"AR"}}}</script>
 <style>
-:root{--verde:#2F7A4D;--verde-o:#1F6B45;--noche:#0F2E1F;--noche2:#143826;--azul:#3460B4;--violeta:#6848BE;--ambar:#C47024;--teal:#1E7D78;--rosa:#B8437A;--trigo:#EDBE4F;--crema:#F6F0E3;--papel:#FBF8F1;--tinta:#17231C;--gris:#56635A;--linea:rgba(23,35,28,.12);
---serif:'Lora',Georgia,'Times New Roman',serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;--ancho:1160px}
-*{box-sizing:border-box}[hidden]{display:none!important}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;font-family:var(--sans);color:var(--tinta);background:var(--papel);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-img,video{max-width:100%;height:auto;display:block}a{color:inherit}
-h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.02em;line-height:1.08;margin:0;text-wrap:balance}
-h1{font-size:clamp(2.6rem,6.4vw,4.9rem);line-height:1}h2{font-size:clamp(2rem,4.4vw,3.3rem)}
-em{font-style:italic;font-weight:500;color:var(--a,var(--verde))}p{margin:0;text-wrap:pretty}
-.c{max-width:var(--ancho);margin:0 auto;padding:0 24px}
-.kicker{font-size:.78rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--a,#A76A18);margin-bottom:14px}
-.lead{font-size:clamp(1.08rem,1.6vw,1.26rem);color:var(--gris);line-height:1.55;max-width:34em}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 28px;border-radius:999px;font-weight:700;font-size:1.02rem;text-decoration:none;border:2px solid transparent;transition:transform .18s,box-shadow .18s,background .18s;white-space:nowrap}
-.btn:hover{transform:translateY(-3px)}
-.btn-p{background:var(--trigo);color:#1B1606;box-shadow:0 12px 30px rgba(237,190,79,.38)}.btn-p:hover{box-shadow:0 18px 40px rgba(237,190,79,.5)}
-.btn-s{border-color:var(--linea);background:#fff;color:var(--tinta)}.btn-w{background:#fff;color:var(--noche)}
-.btn-o{border-color:rgba(255,255,255,.4);color:#fff}
+@font-face{font-family:'Fraunces';src:url(f/fraunces.woff2?v=f012d70e) format('woff2');font-weight:400 700;font-style:normal;font-display:swap}
+@font-face{font-family:'Fraunces';src:url(f/fraunces-i.woff2?v=a84e3cc3) format('woff2');font-weight:400 600;font-style:italic;font-display:swap}
+@font-face{font-family:'Figtree';src:url(f/figtree.woff2?v=8395d4f3) format('woff2');font-weight:400 800;font-style:normal;font-display:swap}
+:root{
+  --campo:#0D2A1C;--campo2:#123524;--mies:#1F6B45;--mies-c:#52C98A;--trigo:#EDBE4F;
+  --papel:#F4F5EF;--papel2:#E9EDE2;--tinta:#13201A;--gris:#55625A;--calle:#CBD2C8;--linea:rgba(19,32,26,.12);
+  --azul:#2563EB;--naranja:#E8590C;--viejo:#9CA3AF;
+  --teal:#1B7A74;--ambar:#B8651B;--rosa:#B03A72;--violeta:#6344B8;--mar:#2F58AE;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;--sans:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --ancho:1200px;
+}
+*,*:before,*:after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:86px}
+body{margin:0;font-family:var(--sans);font-size:1.0625rem;line-height:1.6;color:var(--tinta);background:var(--papel);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,video,svg{display:block;max-width:100%}
+img,video{height:auto}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);font-weight:580;letter-spacing:-.022em;line-height:1.04;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.55rem,6.1vw,5.1rem);letter-spacing:-.03em;line-height:.98}
+h2{font-size:clamp(2.05rem,4.3vw,3.5rem)}
+h3{font-size:1.4rem;line-height:1.15;letter-spacing:-.015em}
+p{margin:0;text-wrap:pretty}
+ul,ol{margin:0;padding:0;list-style:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--trigo);outline-offset:3px;border-radius:8px}
+.c{width:min(100% - 44px,var(--ancho));margin-inline:auto}
+.lead{font-size:clamp(1.1rem,1.45vw,1.28rem);line-height:1.55;color:var(--gris);max-width:33em}
+.sec{padding:clamp(76px,9vw,132px) 0;position:relative}
+.osc{background:var(--campo);color:#fff}
+.osc .lead{color:rgba(255,255,255,.8)}
+.b2{background:#fff}
+.rot{display:flex;align-items:center;gap:10px;font-weight:700;font-size:.96rem;color:var(--a,var(--mies));margin-bottom:18px}
+.rot:before{content:"";flex:none;width:26px;height:5px;border-radius:3px;background:currentColor}
+.osc .rot{color:var(--a,var(--mies-c))}
+.tildes{display:grid;gap:13px;margin-top:26px}
+.tildes li{display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;font-weight:560}
+.tildes li:before{content:"";width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--a,var(--mies)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/14px no-repeat}
+
+/* botones */
+.b{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 26px;border-radius:15px;font:700 1.03rem/1 var(--sans);text-decoration:none;border:2px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .16s ease,box-shadow .16s ease,background-color .16s ease,border-color .16s ease}
+.b:active{transform:translateY(1px)}
+.b svg{width:20px;height:20px;flex:none}
+.b-trigo{background:var(--trigo);color:#231B05;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 14px 30px -12px rgba(237,190,79,.85)}
+.b-trigo:hover{background:#F5CE69;transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 20px 36px -12px rgba(237,190,79,.95)}
+.b-claro{border-color:rgba(255,255,255,.4);color:#fff}
+.b-claro:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.7)}
+.b-tinta{border-color:rgba(19,32,26,.22);color:var(--tinta);background:#fff}
+.b-tinta:hover{border-color:var(--tinta);transform:translateY(-2px)}
+.b-verde{background:var(--mies);color:#fff}
+.b-verde:hover{background:#185A39;transform:translateY(-2px)}
+.fila{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* el teléfono */
+.tel{position:relative;background:#0A0F0C;border-radius:13.5% / 6.3%;padding:3.1%;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.17),0 0 0 1px #000,0 44px 80px -28px rgba(8,22,14,.55),0 18px 34px -20px rgba(8,22,14,.5)}
+.tel>img,.tel>video,.tel>.pant{display:block;width:100%;aspect-ratio:430/932;object-fit:cover;border-radius:10.6% / 4.9%;background:#fff}
+
 /* barra de avance y cabecera */
 #avance{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--trigo);transform-origin:0 50%;transform:scaleX(0);z-index:60}
-.top{position:fixed;inset:0 0 auto 0;z-index:50;transition:background .3s,box-shadow .3s}
-.top .c{display:flex;align-items:center;gap:26px;height:70px}
-.marca{display:flex;align-items:center;gap:11px;font-family:var(--serif);font-weight:600;font-size:1.35rem;text-decoration:none;color:#fff;transition:color .3s}
-.marca img{width:36px;height:36px;border-radius:9px}
-.top nav{display:flex;gap:26px;margin-left:auto}.top nav a{text-decoration:none;font-weight:600;font-size:.95rem;color:rgba(255,255,255,.85);transition:color .3s}
-.top .btn{padding:11px 20px;font-size:.93rem}
-.top.s{background:rgba(251,248,241,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--linea)}
-.top.s .marca{color:var(--tinta)}.top.s nav a{color:var(--gris)}
-@media(max-width:860px){.top nav{display:none}.top .btn{margin-left:auto}}
+.cab{position:fixed;inset:0 0 auto 0;z-index:50;transition:background-color .25s,box-shadow .25s}
+.cab .c{display:flex;align-items:center;gap:20px;height:72px}
+.marca{display:flex;align-items:center;gap:10px;font:600 1.32rem/1 var(--serif);letter-spacing:-.01em;color:#fff;text-decoration:none}
+.marca img{width:34px;height:34px;border-radius:9px}
+.cab nav{display:flex;gap:2px;margin-left:auto}
+.cab nav a{padding:10px 12px;border-radius:10px;text-decoration:none;font-weight:600;font-size:.95rem;color:rgba(255,255,255,.86);transition:background-color .15s}
+.cab nav a:hover{background:rgba(255,255,255,.1)}
+.cab .acc{display:flex;gap:10px;align-items:center}
+.cab .b{min-height:44px;padding:0 17px;font-size:.94rem;border-radius:12px}
+.cab.s{background:rgba(244,245,239,.9);-webkit-backdrop-filter:saturate(1.5) blur(16px);backdrop-filter:saturate(1.5) blur(16px);box-shadow:0 1px 0 var(--linea)}
+.cab.s .marca{color:var(--tinta)}
+.cab.s nav a{color:var(--gris)}
+.cab.s nav a:hover{background:rgba(19,32,26,.06)}
+.cab.s .b-claro{border-color:rgba(19,32,26,.25);color:var(--tinta)}
+.cab.s .b-claro:hover{background:rgba(19,32,26,.05)}
+.menu-b{display:none;width:46px;height:46px;flex:none;border:0;border-radius:12px;background:rgba(255,255,255,.12);cursor:pointer;position:relative}
+.menu-b i,.menu-b:before,.menu-b:after{content:"";position:absolute;left:13px;right:13px;height:2.5px;border-radius:2px;background:#fff;transition:transform .25s,opacity .2s,background-color .2s}
+.menu-b i{top:22px}.menu-b:before{top:15px}.menu-b:after{top:29px}
+.cab.s .menu-b{background:rgba(19,32,26,.07)}
+.cab.s .menu-b i,.cab.s .menu-b:before,.cab.s .menu-b:after{background:var(--tinta)}
+.cab.ab .menu-b i{opacity:0}.cab.ab .menu-b:before{transform:translateY(7px) rotate(45deg)}.cab.ab .menu-b:after{transform:translateY(-7px) rotate(-45deg)}
+.cab nav .solo-m{display:none}
+@media(max-width:1020px){
+  .menu-b{display:block}
+  .cab .c{gap:10px}
+  .cab .acc{margin-left:auto}
+  .cab nav{display:none;position:absolute;left:0;right:0;top:100%;margin:0;padding:6px 22px 20px;background:var(--papel);box-shadow:0 30px 40px -24px rgba(19,32,26,.5);border-top:1px solid var(--linea);max-height:calc(100vh - 64px);max-height:calc(100svh - 64px);overflow:auto}
+  .cab.ab nav{display:grid}
+  .cab nav a,.cab.s nav a{color:var(--tinta);font-size:1.16rem;font-weight:650;padding:15px 4px;border-radius:0;border-bottom:1px solid var(--linea)}
+  .cab nav .solo-m{display:block}
+  .cab nav a.b,.cab.s nav a.b{display:flex;margin-top:16px;padding:0 20px;border:0;color:#231B05;justify-content:center;align-items:center;min-height:54px;font-size:1.05rem;border-radius:14px}
+}
+@media(max-width:560px){.cab .acc .b-claro{display:none}.cab .c{height:64px}}
+@media(max-width:400px){.cab .b{padding:0 12px;font-size:.88rem}.marca{font-size:1.18rem;gap:8px}.menu-b{width:42px;height:42px}.menu-b i,.menu-b:before,.menu-b:after{left:11px;right:11px}.menu-b i{top:20px}.menu-b:before{top:13px}.menu-b:after{top:27px}}
+
 /* hero */
-.hero{position:relative;background:radial-gradient(120% 90% at 15% 0%,#2A6E47 0%,var(--noche2) 45%,var(--noche) 100%);color:#fff;padding:150px 0 0;overflow:hidden}
-.hero .c{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center;position:relative;z-index:2}
-.hero em{color:var(--trigo)}.hero .lead{color:rgba(255,255,255,.84);margin:24px 0 32px}
-.sello{display:inline-flex;align-items:center;gap:9px;background:rgba(237,190,79,.16);border:1px solid rgba(237,190,79,.5);color:var(--trigo);font-weight:800;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-radius:999px;margin-bottom:22px}
-.sello i{width:8px;height:8px;border-radius:50%;background:var(--trigo);animation:pulso 1.8s infinite}
+.hero{position:relative;background:radial-gradient(90% 70% at 78% 30%,#1A4A31 0%,var(--campo) 62%);color:#fff;overflow:hidden;isolation:isolate}
+.hero-mapa{position:absolute;inset:0 0 0 30%;z-index:-1;-webkit-mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.3) 24%,#000 48%,#000 84%,rgba(0,0,0,.55) 100%);mask-image:linear-gradient(to right,transparent 0,rgba(0,0,0,.3) 24%,#000 48%,#000 84%,rgba(0,0,0,.55) 100%)}
+.plano{position:absolute;left:56%;top:54%;width:min(1500px,150%);aspect-ratio:1000/760;transform:translate(-50%,-50%) perspective(1700px) rotateX(50deg) rotateZ(-24deg)}
+.plano svg{width:100%;height:100%;overflow:visible}
+.hero-g{position:relative;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:40px;align-items:center;min-height:min(100svh,960px);padding:118px 0 96px}
+.sello{display:inline-flex;align-items:center;gap:10px;background:rgba(237,190,79,.14);border:1px solid rgba(237,190,79,.5);color:var(--trigo);font-weight:700;font-size:.92rem;padding:8px 14px 8px 12px;border-radius:999px;margin-bottom:24px}
+.sello i{width:9px;height:9px;border-radius:50%;background:var(--trigo);animation:pulso 2s infinite}
 @keyframes pulso{0%{box-shadow:0 0 0 0 rgba(237,190,79,.7)}100%{box-shadow:0 0 0 12px rgba(237,190,79,0)}}
-.acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.mini{margin-top:18px;font-size:.92rem;color:rgba(255,255,255,.7)}
-.hero-fig{position:relative;height:640px}
-.fono{background:#0B120E;border-radius:38px;padding:9px;box-shadow:0 40px 90px rgba(0,0,0,.45),0 0 0 1.5px rgba(255,255,255,.14);will-change:transform}
-.fono img,.fono video{border-radius:30px;width:100%}
-.hero-fig .fono{position:absolute;width:290px}
-.hero-fig .h1{left:4%;top:20px;animation:flota 7s ease-in-out infinite}
-.hero-fig .h2{right:0;top:120px;animation:flota 8s ease-in-out -3s infinite}
-@keyframes flota{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -18px;rotate:-1.5deg}}
-.hero-fig .h2{--r:4deg}.hero-fig .h2{animation-name:flota2}
-@keyframes flota2{0%,100%{translate:0 0;rotate:4deg}50%{translate:0 -22px;rotate:2.5deg}}
-.granos{position:absolute;inset:0;pointer-events:none;z-index:1}
-.granos i{position:absolute;bottom:-20px;width:6px;height:6px;border-radius:50%;background:var(--trigo);opacity:0;animation:sube linear infinite}
-@keyframes sube{0%{transform:translateY(0) scale(.6);opacity:0}12%{opacity:.55}100%{transform:translateY(-105vh) scale(1.2);opacity:0}}
-.hero-trigo{position:absolute;right:-8%;top:-10%;width:720px;opacity:.06;filter:brightness(0) invert(1);pointer-events:none}
-.hero:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:90px;background:linear-gradient(to bottom right,transparent 49.5%,var(--papel) 50%);z-index:3}
-@media(max-width:900px){.hero{padding-top:112px}.hero .c{grid-template-columns:1fr}.hero-fig{height:470px;max-width:440px;margin:10px auto 0;width:100%}.hero-fig .fono{width:215px}}
-/* cinta */
-.cinta{background:var(--trigo);color:#2A2108;overflow:hidden;padding:13px 0;font-weight:800;letter-spacing:.06em;text-transform:uppercase;font-size:.84rem;white-space:nowrap}
-.cinta div{display:inline-block;animation:corre 38s linear infinite}
-@keyframes corre{to{transform:translateX(-50%)}}
-section{padding:clamp(72px,10vw,130px) 0;position:relative}
-/* origen + cambio */
-.origen{text-align:center;padding-bottom:0}
-.origen p.o{font-family:var(--serif);font-size:clamp(1.3rem,2.6vw,1.9rem);line-height:1.4;max-width:26em;margin:0 auto}
-.cambio{text-align:center}
-.cambio h2{max-width:16em;margin:0 auto}
-.antes{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:38px auto 0;max-width:820px;list-style:none;padding:0}
-.antes li{background:#fff;border:1px solid var(--linea);border-radius:999px;padding:11px 20px;font-weight:600;color:var(--gris)}
-.flecha{width:2px;height:70px;background:linear-gradient(var(--linea),var(--verde));margin:26px auto 22px}
-.una{display:inline-flex;align-items:center;gap:14px;background:var(--noche2);color:#fff;border-radius:22px;padding:18px 26px;font-family:var(--serif);font-size:1.5rem;box-shadow:0 22px 50px rgba(20,56,38,.3)}
-.una img{width:52px;height:52px;border-radius:13px}
-/* panorama */
-.pano{background:var(--crema)}
-.pano-g{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px}
-.tile{background:#fff;border:1px solid var(--linea);border-radius:20px;padding:24px 20px;text-decoration:none;display:flex;flex-direction:column;gap:14px;transition:transform .25s,box-shadow .25s,border-color .25s}
-.tile svg{width:42px;height:42px;padding:9px;border-radius:12px;color:#fff;background:var(--a)}
-.tile b{font-size:1.02rem;line-height:1.25}
-.tile:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(23,35,28,.12);border-color:var(--a)}
-@media(max-width:900px){.pano-g{grid-template-columns:repeat(2,1fr)}}
-/* recorrido (video) */
-.tour{background:var(--noche);color:#fff;overflow:hidden}
-.tour em{color:var(--trigo)}.tour .lead{color:rgba(255,255,255,.78)}
-.tour .c{display:grid;grid-template-columns:1fr 340px 1fr;gap:44px;align-items:center}
-.tour .fono{width:100%;position:relative}
-.tour ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.tour li{padding:12px 16px;border-radius:14px;cursor:pointer;opacity:.5;transition:all .3s;border-left:3px solid transparent}
-.tour li b{display:block;font-size:1.05rem}.tour li span{font-size:.93rem;color:rgba(255,255,255,.75)}
-.tour li.on{opacity:1;background:rgba(255,255,255,.08);border-left-color:var(--trigo)}
-@media(max-width:980px){.tour .c{grid-template-columns:1fr;gap:28px}.tour .fono{max-width:300px;margin:0 auto}.tour ol{grid-template-columns:1fr 1fr}}
-/* funciones */
-.feat{padding:clamp(64px,8vw,110px) 0;overflow:hidden}
-.feat .c{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}
-.feat.inv .txt{order:2}
-.num{font-family:var(--serif);font-size:4.6rem;line-height:.9;font-weight:600;color:var(--a);opacity:.22;margin-bottom:8px}
-.feat .lead{margin:18px 0 24px}
-.lista{list-style:none;padding:0;margin:0;display:grid;gap:13px}
-.lista li{display:grid;grid-template-columns:28px 1fr;gap:12px;font-weight:550}
-.lista li:before{content:"";width:26px;height:26px;border-radius:50%;background:var(--a) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/15px no-repeat}
-.fig{position:relative;min-height:600px;display:flex;justify-content:center;align-items:center}
-.fig .fono{width:min(78%,310px);position:relative;z-index:2}
-.fig.dos .f1{position:absolute;left:4%;top:0;width:min(58%,280px);rotate:-4deg}
-.fig.dos .f2{position:absolute;right:2%;bottom:0;width:min(58%,280px);rotate:3deg;z-index:3}
-.halo{position:absolute;width:86%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--a) 34%,transparent),transparent 68%);z-index:1}
-@media(max-width:860px){.feat .c{grid-template-columns:1fr}.feat.inv .txt{order:0}.fig{min-height:520px}}
-/* banda */
-.band{background:linear-gradient(120deg,var(--verde-o),var(--noche2));color:#fff;padding:44px 0}
-.band .c{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
-.band h3{font-size:clamp(1.4rem,2.6vw,2rem)}.band em{color:var(--trigo)}.band p{color:rgba(255,255,255,.8);margin-top:6px}
+.hero .lead{color:rgba(255,255,255,.84);margin:26px 0 32px;max-width:28em}
+.tres{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:22px;font-size:.95rem;color:rgba(255,255,255,.8);font-weight:560}
+.tres li{display:flex;align-items:center;gap:8px}
+.tres li:before{content:"";width:18px;height:18px;border-radius:50%;background:rgba(82,201,138,.22) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2352C98A' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/11px no-repeat}
+.hero-f{position:relative;justify-self:center;width:min(100%,318px);width:min(100%,318px,max(226px,calc((100svh - 214px) * .4615)))}
+.hero-f .tel{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.2),0 0 0 1px #000,0 60px 100px -30px rgba(0,0,0,.75),0 0 90px -10px rgba(82,201,138,.25)}
+.pie-v{position:absolute;left:50%;bottom:-20px;transform:translateX(-50%);background:#fff;color:var(--tinta);font-weight:700;font-size:.93rem;line-height:1.25;padding:10px 16px;border-radius:13px;box-shadow:0 14px 30px -10px rgba(0,0,0,.5);white-space:nowrap;transition:opacity .25s}
+.pie-v b{display:inline-block;width:8px;height:8px;border-radius:50%;background:#E5484D;margin-right:9px;animation:pulso-r 1.6s infinite}
+@keyframes pulso-r{0%,100%{opacity:1}50%{opacity:.25}}
+.hud{position:absolute;left:0;bottom:24px;display:flex;align-items:center;background:rgba(9,30,20,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:999px;padding:9px 6px 9px 16px;font-size:.9rem;font-weight:600;color:rgba(255,255,255,.76);white-space:nowrap}
+.hud small{display:flex;align-items:center;gap:9px;font-size:.84rem;font-weight:700;color:var(--mies-c);padding-right:14px}
+.hud small:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--mies-c);animation:pulso-v 1.8s infinite}
+@keyframes pulso-v{0%{box-shadow:0 0 0 0 rgba(82,201,138,.7)}100%{box-shadow:0 0 0 10px rgba(82,201,138,0)}}
+.hud div{display:flex;align-items:baseline;gap:7px;padding:0 14px;border-left:1px solid rgba(255,255,255,.16)}
+.hud b{font:600 1.22rem/1 var(--serif);color:#fff;font-variant-numeric:tabular-nums;min-width:1.25em;text-align:right}
+@media(min-width:901px) and (max-height:820px){.hero-g{padding:100px 0 86px}.hero h1{font-size:clamp(2.55rem,min(6.1vw,9.4vh),5.1rem)}.hero .lead{margin:20px 0 26px}.sello{margin-bottom:18px}}
+@media(max-width:900px){
+  .hero-g{grid-template-columns:1fr;gap:34px;padding:104px 0 78px;min-height:0}
+  .hero-mapa{inset:38% 0 0 0;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30%);mask-image:linear-gradient(to bottom,transparent 0,#000 30%)}
+  .plano{width:210%}
+  .hero-f{width:min(72%,290px)}
+  .hud{display:none}
+}
+
+/* origen */
+.origen{padding:clamp(56px,7vw,96px) 0;background:var(--papel)}
+.origen-g{display:grid;grid-template-columns:1.25fr .75fr;gap:clamp(30px,6vw,90px);align-items:center}
+.origen-t{font:480 clamp(1.45rem,2.7vw,2.25rem)/1.24 var(--serif);letter-spacing:-.015em}
+.origen-l{display:grid;gap:16px}
+.origen-l li{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:center;font-weight:600;line-height:1.3}
+.origen-l svg{width:44px;height:44px;padding:11px;border-radius:13px;background:#fff;border:1px solid var(--linea);color:var(--mies)}
+.origen-l small{display:block;font-weight:500;color:var(--gris);font-size:.92rem}
+@media(max-width:820px){.origen-g{grid-template-columns:1fr}}
+
+/* problema: todo disperso -> una sola app */
+.prob{height:230vh;position:relative;background:var(--papel)}
+.prob-s{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;display:grid;grid-template-rows:auto 1fr;padding-top:104px}
+.prob-c{text-align:center}
+.prob-c .rot{justify-content:center}
+.prob-c .lead{margin:20px auto 0}
+.prob-e{position:relative}
+.papelito{--tx:var(--x);--ty:var(--y);position:absolute;left:50%;top:46%;width:clamp(190px,20.5vw,286px);margin:-36px 0 0 calc(clamp(190px,20.5vw,286px) / -2);background:#fff;border:1px solid var(--linea);border-radius:16px;padding:16px 18px;display:grid;grid-template-columns:38px 1fr;gap:13px;align-items:center;font-weight:650;line-height:1.2;font-size:clamp(1.02rem,1.25vw,1.2rem);box-shadow:0 20px 34px -20px rgba(19,32,26,.45);transform:translate(calc(var(--tx) * var(--q,1)),calc(var(--ty) * var(--q,1))) rotate(calc(var(--r) * var(--q,1))) scale(calc(.3 + .7 * var(--q,1)));opacity:calc(var(--q,1) * 3.2);will-change:transform}
+.papelito svg{width:38px;height:38px;padding:8px;border-radius:10px;background:rgba(19,32,26,.07);color:var(--gris)}
+.papelito.am{background:#FFF7D6}.papelito.ro{background:#FFEDEA}.papelito.ce{background:#EAF3FF}
+.una{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) scale(calc(.6 + .4 * var(--u,0)));opacity:var(--u,0);display:flex;align-items:center;gap:16px;background:var(--campo);color:#fff;border-radius:24px;padding:20px 28px 20px 20px;font:560 clamp(1.25rem,2.4vw,1.8rem)/1.1 var(--serif);box-shadow:0 30px 60px -24px rgba(13,42,28,.7);white-space:nowrap}
+.una img{width:60px;height:60px;border-radius:15px;flex:none}
+.una:after{content:"";position:absolute;inset:-14px;border-radius:34px;border:2px solid var(--mies);opacity:calc(.5 * var(--u,0))}
+.una-l{position:absolute;left:50%;top:calc(46% + 78px);transform:translate(-50%,calc(26px * (1 - var(--w,0))));opacity:var(--w,0);display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:min(92vw,760px)}
+.una-l li{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--linea);border-radius:999px;padding:9px 16px 9px 10px;font-weight:650;font-size:.98rem;box-shadow:0 10px 22px -16px rgba(19,32,26,.5)}
+.una-l li:before{content:"";width:22px;height:22px;border-radius:50%;background:var(--mies) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/13px no-repeat}
+@media(max-width:700px){.prob-s{padding-top:84px}.papelito{--tx:var(--xm);--ty:var(--ym);top:40%;width:158px;margin:-28px 0 0 -79px;font-size:.88rem;padding:11px 12px;grid-template-columns:28px 1fr;gap:9px;border-radius:13px}.papelito svg{width:28px;height:28px;padding:6px}.una{top:40%;padding:13px 18px 13px 13px;gap:12px;font-size:1.16rem}.una img{width:44px;height:44px;flex:none}.una-l{top:calc(40% + 58px);gap:8px}.una-l li{font-size:.86rem;padding:7px 12px 7px 8px}.una-l li:before{width:19px;height:19px}}
+
+/* la semana */
+.sem{background:var(--papel2)}
+.sem-via{position:relative;height:5px;border-radius:3px;background:var(--calle);margin:54px 0 0}
+.sem-via i{position:absolute;inset:0;border-radius:3px;background:var(--mies);transform-origin:0 50%;transform:scaleX(0);transition:transform 2.2s cubic-bezier(.3,.6,.2,1)}
+.sem.v .sem-via i{transform:scaleX(1)}
+.sem-g{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:-13px}
+.dia{position:relative;display:flex;flex-direction:column;height:100%;padding:38px 20px 0;text-decoration:none;border-radius:22px;background:#fff;border:1px solid var(--linea);overflow:hidden;transition:transform .25s ease,box-shadow .25s ease}
+.dia:before{content:"";position:absolute;left:20px;top:-1px;width:22px;height:22px;border-radius:50%;background:#fff;border:5px solid var(--calle);transform:translateY(-1px);transition:border-color .4s ease var(--d,0s)}
+.sem.v .dia:before{border-color:var(--mies)}
+.dia-n{font:600 .98rem/1 var(--sans);color:var(--mies)}
+.dia b{display:block;font:580 1.55rem/1.06 var(--serif);letter-spacing:-.02em;margin:10px 0 10px}
+.dia-t{font-size:.95rem;line-height:1.45;color:var(--gris)}
+.dia-f{margin:22px -4px 0;border-radius:18px 18px 0 0;overflow:hidden;height:190px;background:#0A0F0C;padding:6px 6px 0;box-shadow:0 -1px 0 var(--linea);transition:transform .35s ease;transform:translateY(10px);margin-top:auto}
+.dia-f img{border-radius:13px 13px 0 0;width:100%}
+.dia-m{display:block;margin-bottom:22px}
+.dia:hover{transform:translateY(-6px);box-shadow:0 26px 44px -26px rgba(19,32,26,.45)}
+.dia:hover .dia-f{transform:none}
+@media(max-width:1020px){
+  .sem-via{display:none}
+  .sem-g{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:34px -22px 0;padding:14px 22px 20px;scrollbar-width:none}
+  .sem-g::-webkit-scrollbar{display:none}
+  .sem-g li{flex:0 0 min(74%,290px);scroll-snap-align:center}
+}
+
+/* recorrido en video */
+.rec{background:#fff}
+.rec-g{display:grid;grid-template-columns:1fr 316px 1fr;gap:clamp(28px,4.4vw,64px);align-items:center}
+.rec .lead{margin-top:20px}
+.rec-l{display:grid;gap:4px}
+.rec-l button{display:block;width:100%;text-align:left;background:none;border:0;border-left:4px solid transparent;border-radius:0 14px 14px 0;padding:11px 16px;cursor:pointer;opacity:.5;transition:opacity .25s,background-color .25s,border-color .25s}
+.rec-l b{display:block;font-size:1.05rem}
+.rec-l span{font-size:.94rem;color:var(--gris)}
+.rec-l button.on{opacity:1;background:var(--papel);border-left-color:var(--mies)}
+.rec-l button:hover{opacity:1}
+.rec .mini-cta{margin-top:26px;font-weight:600}
+.rec .mini-cta a{color:var(--mies);font-weight:700}
+@media(max-width:1020px){
+  .rec-g{grid-template-columns:minmax(0,1fr);gap:22px}
+  .rec .tel{width:min(74%,300px);margin:0 auto;order:3}
+  .rec-l{order:2;display:flex;gap:8px;overflow-x:auto;margin:0 -22px;padding:4px 22px 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-padding:0 22px}
+  .rec-l::-webkit-scrollbar{display:none}
+  .rec-l button{flex:none;width:auto;opacity:1;background:#fff;border:1.5px solid rgba(19,32,26,.2);border-radius:999px;padding:10px 17px;min-height:44px}
+  .rec-l button.on{background:var(--mies);border-color:var(--mies);color:#fff}
+  .rec-l b{font-size:.98rem;white-space:nowrap}
+  .rec-l span{display:none}
+}
+
+/* evangelismo */
+.ev{padding-bottom:clamp(70px,8vw,110px)}
+.ev-cab{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:end}
+.ev-cab .lead{margin-top:20px}
+.ley{display:grid;gap:9px;font-size:.96rem;color:rgba(255,255,255,.86);font-weight:560}
+.ley li{display:flex;align-items:center;gap:12px}
+.ley i{flex:none;width:34px;height:6px;border-radius:3px;background:var(--k)}
+.ley .sin i{background:none;border-top:2px dashed rgba(255,255,255,.4);height:0}
+.ev-g{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:clamp(40px,7vw,104px);margin-top:20px}
+.paso{min-height:74vh;display:flex;align-items:center;opacity:.32;transition:opacity .45s ease}
+.paso.on{opacity:1}
+.paso-n{font:600 .95rem/1 var(--sans);color:var(--mies-c);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.paso-n:after{content:"";width:40px;height:2px;background:rgba(255,255,255,.2)}
+.paso h3{font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.04}
+.paso p{margin-top:16px;font-size:1.14rem;line-height:1.55;color:rgba(255,255,255,.8);max-width:27em}
+.paso-f{display:none}
+.ev-fijo{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:center;padding:86px 0 26px}
+.ev-fijo .tel{width:min(100%,calc((100vh - 112px) * .4615))}
+.pila{position:relative}
+.pila img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s ease}
+.pila img.on{opacity:1}
+.ev-res{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px}
+.res{display:grid;grid-template-columns:104px 1fr;gap:18px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:16px 20px 16px 16px}
+.res-f{height:132px;border-radius:12px;overflow:hidden;background:#fff}
+.res h3{font-size:1.25rem}
+.res p{font-size:.95rem;line-height:1.45;color:rgba(255,255,255,.74);margin-top:6px}
+.banda{margin-top:clamp(40px,5vw,70px);display:flex;flex-wrap:wrap;gap:20px 30px;align-items:center;justify-content:space-between;background:var(--mies);border-radius:26px;padding:clamp(24px,3.4vw,40px)}
+.banda h3{font-size:clamp(1.5rem,2.6vw,2.1rem)}
+.banda p{color:rgba(255,255,255,.85);margin-top:6px}
+@media(max-width:960px){
+  .ev-cab{grid-template-columns:1fr}
+  .ev-g{display:block;margin:34px -22px 0}
+  .ev-fijo{display:none}
+  .ev-pasos{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 22px 24px;scrollbar-width:none}
+  .ev-pasos::-webkit-scrollbar{display:none}
+  .paso{flex:0 0 min(80%,330px);scroll-snap-align:center;min-height:0;opacity:1;display:flex;flex-direction:column-reverse;align-items:stretch;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:26px;padding:18px 18px 22px}
+  .paso-f{display:block;width:100%;margin:0 auto 18px}
+  .paso h3{font-size:1.5rem}
+  .paso p{font-size:1rem;margin-top:10px}
+  .ev-res{grid-template-columns:1fr}
+}
+
+/* el camino de cada persona */
+.cam{background:var(--papel);--a:var(--ambar)}
+.cam-cab{max-width:760px}
+.cam-cab .lead{margin-top:20px}
+.cam-g{position:relative;margin-top:clamp(40px,6vw,80px)}
+.cam-linea{position:absolute;left:50%;top:10px;bottom:10px;width:6px;margin-left:-3px;border-radius:3px;background:var(--calle);overflow:hidden}
+.cam-linea i{position:absolute;inset:0;background:var(--mies);transform-origin:50% 0;transform:scaleY(var(--p,0))}
+.est{display:grid;grid-template-columns:1fr 84px 1fr;align-items:center;min-height:500px}
+.est-n{grid-column:2;grid-row:1;justify-self:center;width:46px;height:46px;border-radius:50%;background:var(--papel);border:6px solid var(--calle);display:grid;place-items:center;font:700 1rem/1 var(--sans);color:var(--gris);position:relative;z-index:1;transition:border-color .4s,background-color .4s,color .4s,transform .4s}
+.est.on .est-n{border-color:var(--mies);background:var(--mies);color:#fff;transform:scale(1.08)}
+.est-t{grid-column:1;grid-row:1;justify-self:end;text-align:right;max-width:400px;padding-right:12px}
+.est-f{grid-column:3;grid-row:1;justify-self:start;width:236px;margin:26px 0 26px 12px;transition:transform .6s cubic-bezier(.2,.7,.2,1),opacity .6s;transform:translateY(34px);opacity:.25}
+.est.on .est-f{transform:none;opacity:1}
+.est:nth-child(even) .est-t{grid-column:3;justify-self:start;text-align:left;padding:0 0 0 12px}
+.est:nth-child(even) .est-f{grid-column:1;justify-self:end;margin:26px 12px 26px 0}
+.est-k{font-weight:700;font-size:.95rem;color:var(--ambar);margin-bottom:10px}
+.est h3{font-size:clamp(1.6rem,2.5vw,2.15rem);line-height:1.06}
+.est p{margin-top:12px;color:var(--gris);font-size:1.08rem;line-height:1.5}
+@media(max-width:860px){
+  .cam-linea{left:23px}
+  .est,.est:nth-child(even){grid-template-columns:46px 1fr;gap:0 18px;min-height:0;padding-bottom:46px;align-items:start}
+  .est-n{grid-column:1}
+  .est .est-t,.est:nth-child(even) .est-t{grid-column:2;grid-row:1;justify-self:start;text-align:left;padding:4px 0 0;max-width:none}
+  .est .est-f,.est:nth-child(even) .est-f{grid-column:2;grid-row:2;justify-self:start;width:min(78%,264px);margin:20px 0 0;max-height:372px;overflow:hidden;border-radius:36px 36px 0 0;padding-bottom:0;box-shadow:none;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
+  .est{padding-bottom:30px}
+}
+
+/* asistencia: se toca */
+.asi{background:var(--papel2)}
+.asi-g{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,90px);align-items:center}
+.asi .lead{margin-top:20px}
+.asi-f{position:relative;display:flex;justify-content:center;min-height:640px;align-items:center}
+.asi-f .real{position:absolute;right:0;top:20px;width:236px;transform:rotate(5deg);opacity:.96}
+.asi-f .juego{position:relative;width:300px;z-index:2;margin-right:120px}
+.pant{display:flex;flex-direction:column;font-family:var(--sans);color:#17231C;overflow:hidden;-webkit-user-select:none;user-select:none}
+.pant-c{padding:12% 6% 0}
+.pant-c b{display:block;font-weight:800;font-size:1.22rem;letter-spacing:-.01em;line-height:1.1}
+.pant-c span{font-size:.74rem;color:#56635A}
+.cuenta{margin:5% 6% 0;background:#E3F1E7;border-radius:12px;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:600;color:#1F6B45}
+.cuenta b{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums;min-width:1.4em;text-align:center}
+.caras{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:5% 6% 0}
+.cara{border:0;background:#F1F3EE;border-radius:13px;padding:10px 2px 8px;display:grid;justify-items:center;gap:5px;cursor:pointer;transition:background-color .18s,transform .12s;-webkit-tap-highlight-color:transparent}
+.cara:active{transform:scale(.94)}
+.cara i{position:relative;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:800 1.05rem/1 var(--sans);font-style:normal;color:#56635A;background:#fff;border:2.5px solid transparent;transition:border-color .18s,color .18s}
+.cara i:after{content:"";position:absolute;right:-5px;bottom:-4px;width:19px;height:19px;border-radius:50%;background:#1F6B45 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/11px no-repeat;border:2px solid #E3F1E7;transform:scale(0);transition:transform .22s cubic-bezier(.3,1.6,.5,1)}
+.cara span{font-size:.66rem;font-weight:700;line-height:1.1}
+.cara.si{background:#E3F1E7}
+.cara.si i{border-color:#1F6B45;color:#1F6B45}
+.cara.si i:after{transform:scale(1)}
+.pant-p{margin:auto 6% 7%;text-align:center;font-size:.76rem;font-weight:700;color:#1F6B45;background:#fff;border:1.5px dashed #9CC5AC;border-radius:11px;padding:8px}
+.asi-nota{position:absolute;left:0;bottom:26px;z-index:3;background:var(--tinta);color:#fff;font-weight:700;font-size:.95rem;padding:11px 16px;border-radius:13px;box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
+.asi-nota:after{content:"";position:absolute;left:54px;top:-7px;width:16px;height:16px;background:var(--tinta);transform:rotate(45deg);border-radius:3px}
+@media(max-width:900px){.asi-g{grid-template-columns:1fr}.asi-f{min-height:0;padding:10px 0 60px}.asi-f .real{display:none}.asi-f .juego{margin:0;width:min(78%,300px)}.asi-nota{left:50%;transform:translateX(-50%);bottom:6px;white-space:nowrap}.asi-nota:after{left:50%;margin-left:-8px}}
+
+/* funciones, una tras otra */
+.fx{padding:clamp(64px,8vw,116px) 0;overflow:hidden}
+.fx-g{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,6vw,96px);align-items:center}
+.fx.inv .fx-t{order:2}
+.fx .lead{margin-top:20px}
+.fx-f{position:relative;min-height:600px;display:flex;justify-content:center;align-items:center}
+.fx-f:before{content:"";position:absolute;width:82%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--a) 26%,transparent),transparent 68%)}
+.fx-f .tel{will-change:transform}
+.fx-f.uno .tel{width:min(74%,300px)}
+.fx-f.dos .t1{position:absolute;left:5%;top:2%;width:min(54%,266px);rotate:-4deg}
+.fx-f.dos .t2{position:absolute;right:4%;bottom:0;width:min(54%,266px);rotate:3deg}
+.fx-f.tres .tel{position:absolute;width:min(42%,222px)}
+.fx-f.tres .t1{left:0;top:15%;rotate:-6deg}
+.fx-f.tres .t2{left:50%;margin-left:calc(min(42%,222px) / -2);top:1%;z-index:2;width:min(46%,246px);margin-left:calc(min(46%,246px) / -2)}
+.fx-f.tres .t3{right:0;top:15%;rotate:6deg}
+@media(max-width:900px){
+  .fx-g{grid-template-columns:1fr}
+  .fx.inv .fx-t{order:0}
+  .fx-f{min-height:0;aspect-ratio:1/1.12;margin-top:6px}
+  .fx-f.uno{aspect-ratio:auto;padding:10px 0}
+}
+
 /* escritorio */
-.desk{background:var(--crema);text-align:center}
-.pc{margin:44px auto 0;max-width:980px;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 40px 90px rgba(23,35,28,.25)}
-.pc:before{content:"";display:block;height:36px;background:#E9E4D8 radial-gradient(circle at 22px 18px,#D8635A 6px,transparent 7px),#E9E4D8;background-image:radial-gradient(circle at 22px 18px,#D8635A 6px,transparent 7px),radial-gradient(circle at 42px 18px,#E2B04A 6px,transparent 7px),radial-gradient(circle at 62px 18px,#6FB36A 6px,transparent 7px)}
-.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;list-style:none;padding:0;margin:36px auto 0;max-width:900px}
-.chips li{border:1px solid var(--linea);background:#fff;border-radius:999px;padding:9px 16px;font-weight:600;font-size:.94rem}
+.esc{background:var(--papel2);text-align:center}
+.esc .rot{justify-content:center}
+.esc .lead{margin:20px auto 0}
+.pest{display:inline-flex;gap:4px;padding:5px;border-radius:15px;background:rgba(19,32,26,.08);margin-top:34px}
+.pest button{border:0;background:none;padding:10px 18px;border-radius:11px;font-weight:700;font-size:.97rem;cursor:pointer;color:var(--gris);transition:background-color .2s,color .2s}
+.pest button[aria-selected=true]{background:#fff;color:var(--tinta);box-shadow:0 2px 8px -2px rgba(19,32,26,.25)}
+.pc{position:relative;margin:26px auto 0;max-width:1040px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px var(--linea),0 50px 90px -40px rgba(19,32,26,.5);overflow:hidden}
+.pc-b{display:flex;align-items:center;gap:7px;height:40px;padding:0 15px;background:#E7EAE0}
+.pc-b i{width:11px;height:11px;border-radius:50%;background:#C8CEC2}
+.pc-b span{margin:0 auto;font-size:.8rem;color:var(--gris);font-weight:600;background:#fff;border-radius:8px;padding:4px 40px}
+.pc-p{position:relative;aspect-ratio:1600/1000}
+.pc-p img{position:absolute;inset:0;width:100%;height:100%;opacity:0;transition:opacity .35s}
+.pc-p img.on{opacity:1}
+@media(max-width:640px){.pest button{padding:9px 12px;font-size:.9rem}.pc-b span{display:none}}
+
+/* y además: la pared de pantallas */
+.ade{background:var(--campo);color:#fff;overflow:hidden;padding-bottom:clamp(70px,8vw,110px)}
+.ade-cab{display:grid;grid-template-columns:1fr 1fr;gap:30px 60px;align-items:end}
+.ade .lead{color:rgba(255,255,255,.8)}
+.cinta{display:flex;gap:16px;width:max-content;margin-top:44px;animation:corre 70s linear infinite}
+.cinta.dos{animation-direction:reverse;animation-duration:84s;margin-top:16px}
+.cinta:hover{animation-play-state:paused}
+@keyframes corre{to{transform:translateX(-50%)}}
+.cinta figure{margin:0;width:178px;flex:none}
+.cinta .tel{border-radius:26px;padding:5px}
+.cinta .tel img{border-radius:21px;aspect-ratio:320/520;object-position:top}
+.cinta figcaption{margin-top:9px;font-size:.88rem;font-weight:650;color:rgba(255,255,255,.82);text-align:center}
+.mas{display:flex;flex-wrap:wrap;gap:9px;margin-top:44px}
+.mas li{border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:8px 15px;font-weight:600;font-size:.94rem;color:rgba(255,255,255,.9)}
+@media(max-width:820px){.ade-cab{grid-template-columns:1fr}.cinta figure{width:140px}}
+
+/* para cada uno */
+.rol{background:var(--papel)}
+.rol-g{display:grid;grid-template-columns:330px 1fr;gap:clamp(24px,4vw,60px);margin-top:44px;align-items:start}
+.rol-l{display:grid;gap:8px}
+.rol-l button{display:grid;gap:3px;text-align:left;border:1px solid var(--linea);background:#fff;border-radius:18px;padding:16px 20px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.rol-l button b{font:580 1.3rem/1.1 var(--serif);letter-spacing:-.015em}
+.rol-l button span{font-size:.94rem;color:var(--gris)}
+.rol-l button[aria-selected=true]{border-color:var(--mies);box-shadow:0 0 0 2px var(--mies),0 18px 30px -20px rgba(19,32,26,.5)}
+.rol-l button:hover{transform:translateX(4px)}
+.rol-p{background:#fff;border:1px solid var(--linea);border-radius:26px;padding:clamp(22px,3vw,40px);display:grid;grid-template-columns:1fr 212px;gap:30px;align-items:center;min-height:470px}
+.rol-p h3{font-size:clamp(1.5rem,2.4vw,2rem)}
+.rol-p .tildes{margin-top:22px}
+@media(max-width:900px){.rol-g{grid-template-columns:1fr}.rol-l{grid-template-columns:1fr 1fr}.rol-l button span{display:none}.rol-l button b{font-size:1.08rem}.rol-p{grid-template-columns:1fr;min-height:0}.rol-p .tel{width:min(60%,220px);margin:0 auto}}
+
+/* demostración */
+.dem{background:var(--mies);color:#fff;overflow:hidden}
+.dem-g{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.dem h2{font-size:clamp(2.3rem,5.4vw,4.4rem)}
+.dem .lead{color:rgba(255,255,255,.88);margin:22px 0 30px}
+.dem small{display:block;margin-top:16px;color:rgba(255,255,255,.75);font-size:.94rem}
+.dem-f{position:relative;height:440px}
+.dem-f .tel{position:absolute;width:228px}
+.dem-f .t1{left:8%;top:30px;rotate:-7deg}
+.dem-f .t2{right:8%;top:70px;rotate:6deg}
+.b-blanco{background:#fff;color:var(--campo)}
+.b-blanco:hover{transform:translateY(-2px);box-shadow:0 16px 30px -14px rgba(0,0,0,.5)}
+@media(max-width:900px){.dem-g{grid-template-columns:1fr}.dem-f{height:330px;margin-bottom:-110px}.dem-f .tel{width:178px}}
+
 /* precios */
-.precios{background:var(--noche);color:#fff;overflow:hidden}
-.precios em{color:var(--trigo)}
-.gratis{text-align:center;position:relative}
-.gratis .big{font-family:var(--serif);font-weight:700;font-size:clamp(4.5rem,15vw,11rem);line-height:.9;color:var(--trigo);letter-spacing:-.04em}
-.gratis .big small{display:block;font-size:.3em;letter-spacing:0;color:#fff;font-weight:600;margin-top:.25em}
-.gratis p{color:rgba(255,255,255,.82);font-size:1.2rem;margin:22px auto 30px;max-width:30em}
-.oferta{margin:70px auto 0;max-width:760px;text-align:center;border:1.5px dashed rgba(237,190,79,.6);border-radius:22px;padding:22px 26px;background:rgba(237,190,79,.08)}
-.oferta b{font-family:var(--serif);font-size:1.6rem;color:var(--trigo)}.oferta span{display:block;color:rgba(255,255,255,.8);margin-top:4px}
-.tabla{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:30px}
-.plan{background:#fff;color:var(--tinta);border-radius:22px;padding:26px 20px 22px;display:flex;flex-direction:column;gap:4px;position:relative;transition:transform .25s}
-.plan:hover{transform:translateY(-8px)}
-.plan h3{font-family:var(--sans);font-weight:800;font-size:1.08rem;color:var(--verde-o)}.gente{font-size:.92rem;color:var(--gris)}
-.mes{font-family:var(--serif);font-size:3.3rem;font-weight:700;line-height:1;margin-top:12px}.mes sup{font-size:.45em;vertical-align:top;position:relative;top:.25em}.mes small{font-family:var(--sans);font-size:.9rem;font-weight:500;color:var(--gris)}
-.xp{font-size:.86rem;color:var(--gris)}
-.anio{margin:16px 0 14px;padding:14px 12px 12px;border-radius:14px;background:#F3F8F1;border:1px solid #CFE3D2;position:relative;font-size:.92rem;display:grid;gap:2px}
-.anio .tag{position:absolute;right:-8px;top:-12px;background:#C73D2C;color:#fff;font-weight:800;font-size:.8rem;padding:4px 9px;border-radius:999px;rotate:6deg}
-.anio s{color:#C73D2C;font-weight:600}.anio strong{font-family:var(--serif);font-size:1.5rem;color:var(--verde-o)}.anio em{font-style:normal;font-weight:700;font-size:.86rem;color:var(--verde-o)}
-.plan .btn{margin-top:auto;padding:12px 10px;font-size:.92rem}
-.plan.dest{outline:3px solid var(--trigo);outline-offset:0}
-.pnota{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
-.pnota div{border:1px solid rgba(255,255,255,.16);border-radius:18px;padding:18px 20px;color:rgba(255,255,255,.85);font-size:.96rem}
-.pnota b{display:block;color:#fff;font-size:1.05rem;margin-bottom:4px}
-@media(max-width:1060px){.tabla{grid-template-columns:repeat(2,1fr)}.pnota{grid-template-columns:1fr}}@media(max-width:560px){.tabla{grid-template-columns:1fr}}
-/* pasos, seguridad, faq, final */
-.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:44px;counter-reset:p;list-style:none;padding:0}
-.pasos li{counter-increment:p;background:#fff;border:1px solid var(--linea);border-radius:22px;padding:28px 24px}
-.pasos li:before{content:counter(p);display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:var(--verde-o);color:#fff;font-family:var(--serif);font-size:1.5rem;margin-bottom:16px}
-.pasos h3{font-size:1.3rem}.pasos p{color:var(--gris);margin-top:8px;font-size:.98rem}
-@media(max-width:860px){.pasos{grid-template-columns:1fr}}
-.verso{background:var(--noche2);color:#fff;text-align:center}
-.verso q{display:block;font-family:var(--serif);font-style:italic;font-size:clamp(1.4rem,3vw,2.3rem);line-height:1.35;max-width:24em;margin:0 auto;quotes:"“" "”"}
-.verso cite{display:block;margin-top:20px;font-style:normal;font-weight:800;letter-spacing:.1em;color:var(--trigo);font-size:.9rem}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:26px 30px;margin-top:40px}
-.seg div{border-left:3px solid var(--verde);padding-left:16px}.seg h3{font-size:1.18rem}.seg p{color:var(--gris);font-size:.97rem;margin-top:4px}
-@media(max-width:860px){.seg{grid-template-columns:1fr}}
-.faq{background:var(--crema)}.faq .c{max-width:860px}
-details{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:18px 22px;margin-top:10px}
-summary{font-weight:700;cursor:pointer;font-size:1.05rem}details p{color:var(--gris);margin-top:10px}
-.final{background:radial-gradient(120% 100% at 50% 0%,#2A6E47,var(--noche));color:#fff;text-align:center;overflow:hidden}
-.final h2{font-size:clamp(2.3rem,6vw,4.2rem);max-width:14em;margin:0 auto}.final em{color:var(--trigo)}
-.final .lead{color:rgba(255,255,255,.82);margin:22px auto 34px}.final .acc{justify-content:center}
-.final .nota{margin-top:26px;font-size:.95rem;color:rgba(255,255,255,.7)}
-footer{background:#0A2015;color:rgba(255,255,255,.7);padding:30px 0;font-size:.9rem}
-footer .c{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center}footer nav{margin-left:auto;display:flex;gap:20px;flex-wrap:wrap}footer .marca{font-size:1.1rem}footer .marca img{width:28px;height:28px}
+.pre{overflow:hidden}
+.gratis{text-align:center}
+.gratis .rot{justify-content:center;color:var(--trigo)}
+.gratis-n{font:640 clamp(4.6rem,15vw,11.5rem)/.86 var(--serif);letter-spacing:-.045em;color:var(--trigo)}
+.gratis-n small{display:block;font-size:.27em;letter-spacing:-.02em;color:#fff;font-weight:560;margin-top:.3em}
+.gratis p{color:rgba(255,255,255,.84);font-size:1.2rem;margin:26px auto 30px;max-width:30em}
+.ruta{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin:clamp(50px,6vw,80px) 0 0;position:relative;text-align:left}
+.ruta:before{content:"";position:absolute;left:10px;right:10px;top:10px;height:4px;border-radius:2px;background:rgba(255,255,255,.16)}
+.ruta:after{content:"";position:absolute;left:10px;right:10px;top:10px;height:4px;border-radius:2px;background:var(--trigo);transform-origin:0 50%;transform:scaleX(0);transition:transform 2.4s cubic-bezier(.3,.6,.2,1) .2s}
+.ruta.v:after{transform:scaleX(1)}
+.ruta li{position:relative;padding:40px 22px 0 0}
+.ruta li:before{content:"";position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--campo);border:5px solid rgba(255,255,255,.28);z-index:1;transition:border-color .4s ease var(--d,0s)}
+.ruta.v li:before{border-color:var(--trigo)}
+.ruta b{display:block;font:580 1.35rem/1.1 var(--serif);color:var(--trigo)}
+.ruta span{display:block;margin-top:8px;color:rgba(255,255,255,.82);font-size:.98rem;line-height:1.45}
+.calc{margin-top:clamp(54px,7vw,96px);background:#fff;color:var(--tinta);border-radius:30px;padding:clamp(22px,3.6vw,48px);display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,4vw,56px);align-items:center}
+.calc h3{font-size:clamp(1.6rem,2.6vw,2.2rem)}
+.calc-q{margin-top:8px;color:var(--gris)}
+.calc-n{display:flex;align-items:baseline;gap:12px;margin-top:26px}
+.calc-n output{font:640 clamp(3rem,6vw,4.6rem)/1 var(--serif);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--mies)}
+.calc-n span{font-weight:650;color:var(--gris)}
+.calc input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;background:none;margin-top:12px;cursor:pointer}
+.calc input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:linear-gradient(to right,var(--mies) var(--pc,10%),var(--calle) var(--pc,10%))}
+.calc input[type=range]::-moz-range-track{height:10px;border-radius:5px;background:var(--calle)}
+.calc input[type=range]::-moz-range-progress{height:10px;border-radius:5px;background:var(--mies)}
+.calc input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;margin-top:-12px;border-radius:50%;background:#fff;border:6px solid var(--mies);box-shadow:0 6px 14px -4px rgba(19,32,26,.5)}
+.calc input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:6px solid var(--mies);box-shadow:0 6px 14px -4px rgba(19,32,26,.5)}
+.calc-e{display:flex;justify-content:space-between;font-size:.82rem;color:var(--gris);font-weight:600;margin-top:2px}
+.calc-nota{margin-top:20px;font-size:.93rem;color:var(--gris)}
+.plan{background:var(--papel);border-radius:24px;padding:clamp(20px,2.6vw,32px);position:relative}
+.plan-k{font-weight:700;color:var(--mies)}
+.plan-m{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.plan-m b{font:640 clamp(3.4rem,6vw,4.8rem)/1 var(--serif);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.plan-m span{font-weight:650;color:var(--gris)}
+.plan-x{font-size:.94rem;color:var(--gris);margin-top:4px}
+.anual{margin-top:22px;background:#fff;border:2px solid var(--mies);border-radius:18px;padding:18px 18px 16px;position:relative}
+.anual-t{position:absolute;right:-12px;top:-22px;background:#C73D2C;color:#fff;font:800 1.5rem/1 var(--sans);letter-spacing:-.01em;padding:10px 15px 10px;border-radius:14px;rotate:4deg;box-shadow:0 10px 20px -6px rgba(199,61,44,.75)}
+.anual-t small{display:block;font-size:.72rem;font-weight:700;letter-spacing:0;margin-top:2px;text-align:center}
+.anual-k{font-weight:700;padding-right:96px}
+.anual-p{display:flex;align-items:baseline;gap:12px;margin-top:4px;flex-wrap:wrap}
+.anual-p s{color:#C73D2C;font-weight:700;font-size:1.5rem;text-decoration-thickness:2.5px}
+.anual-p b{font:640 2.7rem/1 var(--serif);letter-spacing:-.02em;color:var(--mies);font-variant-numeric:tabular-nums}
+.anual-p span{font-weight:650;color:var(--gris)}
+.anual-a{font-weight:700;color:var(--mies);font-size:.95rem;margin-top:4px}
+.plan .b{width:100%;margin-top:20px}
+.plan-esp{text-align:center;padding:20px 6px}
+.plan-esp b{display:block;font:580 1.7rem/1.1 var(--serif)}
+.plan-esp p{color:var(--gris);margin:10px 0 0}
+.notas{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.notas div{border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:20px 22px;color:rgba(255,255,255,.84);font-size:.97rem;line-height:1.5}
+.notas b{display:block;color:#fff;font-size:1.06rem;margin-bottom:5px}
+.notas a{color:var(--trigo);font-weight:700}
+.fino{margin-top:22px;font-size:.88rem;color:rgba(255,255,255,.62);text-align:center}
+.fino a{color:rgba(255,255,255,.85)}
+@media(max-width:900px){.calc{grid-template-columns:1fr}.notas{grid-template-columns:1fr}.ruta{grid-template-columns:1fr;gap:26px}.ruta:before,.ruta:after{left:10px;right:auto;top:10px;bottom:10px;width:4px;height:auto}.ruta:after{transform-origin:50% 0;transform:scaleY(0)}.ruta.v:after{transform:scaleY(1)}.ruta li{padding:0 0 0 44px}}
+
+/* cómo empezar */
+.emp .pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px;counter-reset:p}
+.emp .pasos li{counter-increment:p;background:#fff;border:1px solid var(--linea);border-radius:24px;padding:30px 26px}
+.emp .pasos li:before{content:counter(p);display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:var(--mies);color:#fff;font:600 1.6rem/1 var(--serif);margin-bottom:18px}
+.emp .pasos p{color:var(--gris);margin-top:10px}
+.emp .fila{justify-content:center;margin-top:36px}
+@media(max-width:860px){.emp .pasos{grid-template-columns:1fr}}
+
+/* seguridad */
+.seg-g{display:grid;grid-template-columns:repeat(3,1fr);gap:30px 34px;margin-top:44px}
+.seg-g div{border-top:4px solid var(--mies);padding-top:16px}
+.seg-g h3{font-size:1.22rem}
+.seg-g p{color:var(--gris);font-size:.98rem;margin-top:6px}
+@media(max-width:860px){.seg-g{grid-template-columns:1fr 1fr;gap:24px 20px}}
+@media(max-width:520px){.seg-g{grid-template-columns:1fr}}
+
+/* preguntas */
+.faq{background:var(--papel2)}
+.faq-g{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(24px,5vw,80px);align-items:start}
+.faq-i{position:sticky;top:110px}
+.faq-i .lead{margin-top:18px}
+.faq-i .b{margin-top:24px}
+details{background:#fff;border:1px solid var(--linea);border-radius:18px;margin-bottom:10px;transition:box-shadow .2s}
+details[open]{box-shadow:0 18px 30px -24px rgba(19,32,26,.5)}
+summary{list-style:none;cursor:pointer;font-weight:700;font-size:1.08rem;line-height:1.3;padding:19px 56px 19px 22px;position:relative}
+summary::-webkit-details-marker{display:none}
+summary:after{content:"";position:absolute;right:20px;top:50%;width:24px;height:24px;margin-top:-12px;border-radius:50%;background:var(--papel2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2313201A' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center/12px no-repeat;transition:transform .25s}
+details[open] summary:after{transform:rotate(45deg)}
+details p{color:var(--gris);padding:0 22px 20px}
+details a{color:var(--mies);font-weight:700}
+@media(max-width:860px){.faq-g{grid-template-columns:1fr}.faq-i{position:static}}
+
+/* versículo y cierre */
+.fin{position:relative;overflow:hidden;isolation:isolate;text-align:center;padding:0}
+.fin-mapa{position:absolute;inset:0;z-index:-1;opacity:.5;-webkit-mask-image:radial-gradient(70% 62% at 50% 55%,transparent 30%,#000 100%);mask-image:radial-gradient(70% 62% at 50% 55%,transparent 30%,#000 100%)}
+.fin-mapa svg{position:absolute;left:50%;top:50%;width:max(1500px,130%);transform:translate(-50%,-50%) rotate(-8deg)}
+.verso{padding:clamp(80px,10vw,140px) 0 0}
+.verso q{display:block;font:italic 460 clamp(1.5rem,3.3vw,2.6rem)/1.3 var(--serif);max-width:23em;margin:0 auto;quotes:"“" "”";letter-spacing:-.01em}
+.verso cite{display:block;margin-top:22px;font-style:normal;font-weight:700;color:var(--trigo)}
+.cierre{padding:clamp(70px,9vw,120px) 0 clamp(80px,10vw,130px)}
+.cierre h2{font-size:clamp(2.4rem,6.2vw,4.9rem);max-width:13em;margin:0 auto}
+.cierre .lead{margin:24px auto 34px;color:rgba(255,255,255,.84)}
+.cierre .fila{justify-content:center}
+.cierre .correo{margin-top:26px;color:rgba(255,255,255,.72);font-size:.97rem}
+footer{background:#081C12;color:rgba(255,255,255,.72);padding:34px 0 110px;font-size:.93rem}
+footer .c{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:center}
+footer nav{margin-left:auto;display:flex;gap:6px 22px;flex-wrap:wrap}
+footer a{text-decoration:none}
+footer a:hover{color:#fff;text-decoration:underline}
+footer .marca{font-size:1.12rem}
+footer .marca img{width:28px;height:28px}
+@media(min-width:701px){footer{padding-bottom:34px}}
+
+/* botón fijo en el teléfono */
 .fijo{display:none}
-@media(max-width:700px){.fijo{display:flex;position:fixed;left:12px;right:12px;bottom:12px;z-index:55;transform:translateY(140%);transition:transform .35s}.fijo.s{transform:none}.fijo .btn{flex:1;box-shadow:0 14px 34px rgba(0,0,0,.35)}body{padding-bottom:0}}
-/* aparecer al bajar */
-[data-r]{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.2,.7,.2,1) var(--d,0ms),transform .8s cubic-bezier(.2,.7,.2,1) var(--d,0ms)}
-[data-r="zoom"]{transform:scale(.9) translateY(30px)}
-[data-r].in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){[data-r]{opacity:1;transform:none;transition:none}.hero-fig .fono,.granos i,.cinta div,.sello i{animation:none}html{scroll-behavior:auto}}
-.cerca{background:#0E2A27;color:#fff;padding:84px 0}.cerca h2{font-family:'Lora',serif;font-size:clamp(30px,4vw,46px);line-height:1.1;margin:0 0 12px}.cerca h2 em{color:#F2C879;font-style:italic}.cerca .lead{color:rgba(255,255,255,.82);max-width:640px;font-size:18px;line-height:1.5;margin:0 0 40px}
-.cerca-g{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}.cerca-g figure{margin:0}.cerca-g .fono{border-radius:30px;padding:7px}.cerca-g .fono img,.cerca-g .fono video{border-radius:24px;display:block}.cerca-g figcaption{margin-top:16px;font-size:15px;line-height:1.45;color:rgba(255,255,255,.8)}.cerca-g figcaption b{display:block;color:#fff;font-size:17px;margin-bottom:4px}
-.cerca-ley{display:flex;flex-wrap:wrap;gap:10px 22px;margin:0 0 34px;font-size:15px;color:rgba(255,255,255,.9)}.cerca-ley i{display:inline-block;width:26px;height:6px;border-radius:3px;margin-right:8px;vertical-align:middle}
-@media(max-width:900px){.cerca-g{grid-template-columns:repeat(2,1fr);gap:18px}.cerca{padding:60px 0}}
+@media(max-width:700px){
+  .fijo{display:flex;gap:10px;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:55;padding:8px;border-radius:20px;background:rgba(13,42,28,.86);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 18px 40px -10px rgba(0,0,0,.6);transform:translateY(160%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+  .fijo.s{transform:none}
+  .fijo .b{flex:1;min-height:50px;padding:0 12px;font-size:.98rem}
+  .fijo .b-claro{flex:0 0 auto;border-color:rgba(255,255,255,.3)}
+}
+
+/* aparecer al bajar (solo imágenes y tarjetas; el texto está siempre) */
+[data-v]{opacity:0;transform:translateY(30px) scale(.985);transition:opacity .7s cubic-bezier(.2,.7,.2,1) var(--d,0s),transform .9s cubic-bezier(.2,.7,.2,1) var(--d,0s)}
+[data-v].v{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  [data-v]{opacity:1;transform:none;transition:none}
+  .sello i,.pie-v b,.cinta,.hud small:before{animation:none}
+  .cinta{flex-wrap:wrap;width:auto;justify-content:center}
+  .cinta [aria-hidden]{display:none}
+  .prob{height:auto}.prob-s{position:static;height:auto;padding-bottom:90px}.prob-e{height:690px}.papelito{top:33%}.una{top:79%}.una-l{top:calc(79% + 70px)}
+  .est-f{transform:none;opacity:1}.paso{opacity:1}
+  .sem-via i,.ruta:after{transition:none}
+}
+
+/* páginas sueltas (condiciones, 404) */
+.hoja{max-width:800px;margin:0 auto;padding:120px 22px 90px}
+.hoja h1{font-size:clamp(2.2rem,5vw,3.4rem);color:var(--tinta)}
+.hoja .lead{margin-top:14px}
+.hoja section{background:#fff;border:1px solid var(--linea);border-radius:20px;padding:24px 26px;margin-top:14px}
+.hoja h2{font-size:1.45rem;margin-bottom:12px}
+.hoja ul{display:grid;gap:9px;padding-left:20px;list-style:disc;color:var(--gris)}
+.hoja ul b{color:var(--tinta)}
+.hoja .pie{font-size:.92rem;color:var(--gris);margin-top:24px}
+
 </style>
 </head>
 <body>
 <div id="avance"></div>
-<header class="top" id="top">
+<header class="cab" id="cab">
   <div class="c">
-    <a class="marca" href="#inicio"><img src="img/icono.png" alt="" width="36" height="36">La Mies</a>
-    <nav aria-label="Secciones"><a href="#todo">Qué hace</a><a href="#recorrido">Video</a><a href="#precios">Precios</a><a href="#preguntas">Preguntas</a><a data-cfg="entrar" href="#">Entrar</a></nav>
-    <a class="btn btn-p" data-cfg="registro" href="#">Sumar mi iglesia</a>
+    <a class="marca" href="#inicio"><img src="img/logo.png?v=77b87123" alt="" width="34" height="34">La Mies</a>
+    <nav aria-label="Secciones" id="menuN"><a href="#todo">Qué hace</a><a href="#evangelismo">Evangelismo</a><a class="solo-m" href="#camino">Seguimiento de visitas</a><a href="#precios">Precios</a><a href="#preguntas">Preguntas</a><a data-cfg="entrar" href="#">Entrar</a><a class="solo-m b b-trigo" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a></nav>
+    <div class="acc"><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia</a></div>
+    <button class="menu-b" id="menuB" type="button" aria-expanded="false" aria-controls="menuN" aria-label="Abrir el menú"><i></i></button>
   </div>
 </header>
 
 <main>
 <div class="hero" id="inicio">
-  <img class="hero-trigo" src="img/trigo.png" alt="" width="512" height="512">
-  <div class="granos" aria-hidden="true"><i style="left:1%;animation-duration:9s;animation-delay:-0s;width:4px;height:4px"></i><i style="left:38%;animation-duration:14s;animation-delay:-3s;width:5px;height:5px"></i><i style="left:75%;animation-duration:10s;animation-delay:-6s;width:6px;height:6px"></i><i style="left:15%;animation-duration:15s;animation-delay:-9s;width:7px;height:7px"></i><i style="left:52%;animation-duration:11s;animation-delay:-1s;width:4px;height:4px"></i><i style="left:89%;animation-duration:16s;animation-delay:-4s;width:5px;height:5px"></i><i style="left:29%;animation-duration:12s;animation-delay:-7s;width:6px;height:6px"></i><i style="left:66%;animation-duration:17s;animation-delay:-10s;width:7px;height:7px"></i><i style="left:6%;animation-duration:13s;animation-delay:-2s;width:4px;height:4px"></i><i style="left:43%;animation-duration:9s;animation-delay:-5s;width:5px;height:5px"></i><i style="left:80%;animation-duration:14s;animation-delay:-8s;width:6px;height:6px"></i><i style="left:20%;animation-duration:10s;animation-delay:-0s;width:7px;height:7px"></i><i style="left:57%;animation-duration:15s;animation-delay:-3s;width:4px;height:4px"></i><i style="left:94%;animation-duration:11s;animation-delay:-6s;width:5px;height:5px"></i><i style="left:34%;animation-duration:16s;animation-delay:-9s;width:6px;height:6px"></i><i style="left:71%;animation-duration:12s;animation-delay:-1s;width:7px;height:7px"></i><i style="left:11%;animation-duration:17s;animation-delay:-4s;width:4px;height:4px"></i><i style="left:48%;animation-duration:13s;animation-delay:-7s;width:5px;height:5px"></i></div>
-  <div class="c">
-    <div>
-      <div class="sello"><i></i>4 meses gratis para iglesias nuevas</div>
-      <h1>El evangelismo y la vida de tu iglesia, <em>en una sola app.</em></h1>
+  <div class="hero-mapa" aria-hidden="true"><div class="plano"><svg id="ciudad" viewBox="0 0 1000 760" preserveAspectRatio="xMidYMid meet"></svg></div></div>
+  <div class="c hero-g">
+    <div class="hero-t">
+      <p class="sello"><i></i>4 meses gratis para iglesias nuevas</p>
+      <h1>El evangelismo y la vida de tu iglesia, en una sola app.</h1>
       <p class="lead">La Mies ayuda a tu iglesia a salir a evangelizar, a no perder a ninguna visita y a ordenar toda la semana: asistencia, finanzas, clases, Biblia y mucho más.</p>
-      <div class="acc"><a class="btn btn-p" data-cfg="registro" href="#">Sumar mi iglesia gratis</a><a class="btn btn-o" href="#recorrido">▶ Verla en 30 segundos</a></div>
-      <p class="mini">Sin tarjeta · Lista en 5 minutos · iPhone, Android y computadora</p>
-      <div class="acc" style="margin-top:16px"><a class="btn btn-o" data-cfg="appStore" href="#" hidden>App Store</a><a class="btn btn-o" data-cfg="googlePlay" href="#" hidden>Google Play</a></div>
+      <div class="fila"><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia gratis</a><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a></div>
+      <ul class="tres"><li>Sin tarjeta</li><li>Lista en 5 minutos</li><li>iPhone, Android y computadora</li></ul>
+      <div class="fila" style="margin-top:18px"><a class="b b-claro" data-cfg="appStore" href="#" hidden>App Store</a><a class="b b-claro" data-cfg="googlePlay" href="#" hidden>Google Play</a></div>
     </div>
-    <div class="hero-fig" aria-hidden="true">
-      <div class="fono h1"><img src="img/mapa.jpg" alt="" width="640" height="1387"></div>
-      <div class="fono h2"><img src="img/asistencia.jpg" alt="" width="640" height="1387"></div>
+    <div class="hud" aria-hidden="true">
+      <small>Salida de ejemplo</small>
+      <div><b id="hudC">0</b><span>cuadras marcadas</span></div>
+      <div><b id="hudK">0</b><span>contactos</span></div>
+      <div><b id="hudE">0</b><span>oyeron el evangelio</span></div>
+    </div>
+    <div class="hero-f">
+      <div class="tel"><video id="vHero" muted loop playsinline preload="none" poster="v/salida.webp?v=5fbfc989" data-src="v/salida.mp4?v=a016133d" data-src-m="v/salida-m.mp4?v=a06eeb97" width="600" height="1300" aria-label="Grabación de una salida a evangelizar en la app: se toca Iniciar salida, el mapa marca las cuadras caminadas y se anota un contacto."></video></div>
+      <p class="pie-v" id="pie"><b></b><span>Una salida de verdad, en la app</span></p>
     </div>
   </div>
 </div>
-<div class="cinta" aria-hidden="true"><div>Evangelismo · Seguimiento · Asistencia · Informes · Finanzas · Escuela dominical · Grupos pequeños · Biblia · Devocional · Prédicas · Eventos · Niños · Transporte · Modo presentación · Evangelismo · Seguimiento · Asistencia · Informes · Finanzas · Escuela dominical · Grupos pequeños · Biblia · Devocional · Prédicas · Eventos · Niños · Transporte · Modo presentación · Evangelismo · Seguimiento · Asistencia · Informes · Finanzas · Escuela dominical · Grupos pequeños · Biblia · Devocional · Prédicas · Eventos · Niños · Transporte · Modo presentación · Evangelismo · Seguimiento · Asistencia · Informes · Finanzas · Escuela dominical · Grupos pequeños · Biblia · Devocional · Prédicas · Eventos · Niños · Transporte · Modo presentación · </div></div>
-
 <section class="origen">
-  <div class="c"><p class="o" data-r>Hecha por la <em>Iglesia Bautista Victoria</em>, de Posadas, Misiones, Argentina, y usada primero por sus propios hermanos. Nació del trabajo de cada semana, no de una oficina.</p></div>
-</section>
-
-<section class="cambio">
-  <div class="c">
-    <div class="kicker" data-r>¿Te suena?</div>
-    <h2 data-r>Mucho trabajo fiel. <em>Todo disperso.</em></h2>
-    <ul class="antes"><li data-r style="--d:0ms">Mapas de papel</li><li data-r style="--d:70ms">El cuaderno de contactos</li><li data-r style="--d:140ms">Planillas de asistencia</li><li data-r style="--d:210ms">Diez grupos de WhatsApp</li><li data-r style="--d:280ms">Carpetas de recibos</li><li data-r style="--d:350ms">Formularios sueltos</li></ul>
-    <div class="flecha" data-r></div>
-    <div class="una" data-r="zoom"><img src="img/icono.png" alt="" width="52" height="52">Con La Mies: una sola app.</div>
+  <div class="c origen-g">
+    <p class="origen-t">Hecha por la Iglesia Bautista Victoria, de Posadas, Misiones, Argentina, y usada primero por sus propios hermanos. Nació del trabajo de cada semana, no de una oficina.</p>
+    <ul class="origen-l">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg><span>En español y en inglés<small>Cada persona elige su idioma.</small></span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v11H3zM8 21h8M12 16v5"/><path d="M15 9h3v6h-3z"/></svg><span>iPhone, Android y computadora<small>Los mismos datos, en todos lados.</small></span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg><span>Cada iglesia enciende solo lo que usa<small>Lo que apagas se esconde y no molesta.</small></span></li>
+    </ul>
   </div>
 </section>
-
-<section class="pano" id="todo">
-  <div class="c">
-    <div class="kicker" data-r>De un vistazo</div>
-    <h2 data-r>Todo lo que tu iglesia hace en la semana, <em>en un solo lugar.</em></h2>
-    <div class="pano-g"><a class="tile" data-r href="#evangelismo" style="--a:var(--teal);--d:0ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 20l-5-2V5l5 2 6-2 5 2v13l-5-2-6 2zM9 7v13M15 5v13"/></svg><b>Evangelismo con mapa</b></a><a class="tile" data-r href="#seguimiento" style="--a:var(--ambar);--d:45ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/></svg><b>Seguimiento de visitas</b></a><a class="tile" data-r href="#asistencia" style="--a:var(--verde);--d:90ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><b>Asistencia</b></a><a class="tile" data-r href="#informes" style="--a:var(--rosa);--d:135ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"/></svg><b>Informes</b></a><a class="tile" data-r href="#finanzas" style="--a:var(--azul);--d:180ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><b>Finanzas</b></a><a class="tile" data-r href="#grupos" style="--a:var(--violeta);--d:225ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10"/></svg><b>Clases y grupos pequeños</b></a><a class="tile" data-r href="#biblia" style="--a:var(--verde);--d:270ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg><b>Biblia y devocional</b></a><a class="tile" data-r href="#comunidad" style="--a:var(--teal);--d:315ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.2-5.1A8.4 8.4 0 1 1 21 11.5z"/></svg><b>Anuncios, chat y oración</b></a><a class="tile" data-r href="#eventos" style="--a:var(--ambar);--d:360ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18v15H3zM16 3v6M8 3v6M3 11h18"/></svg><b>Eventos con QR</b></a><a class="tile" data-r href="#ninos" style="--a:var(--rosa);--d:405ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg><b>Niños y transporte</b></a><a class="tile" data-r href="#presentar" style="--a:var(--azul);--d:450ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h20v13H2zM8 21h8M12 17v4"/></svg><b>Modo presentación</b></a><a class="tile" data-r href="#escritorio" style="--a:var(--verde);--d:495ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h20v12H2zM7 20h10M12 16v4"/></svg><b>En la computadora</b></a></div>
-  </div>
-</section>
-
-<section class="tour" id="recorrido">
-  <div class="c">
-    <div><div class="kicker" style="color:var(--trigo)" data-r>Mírala funcionando</div><h2 data-r>Así se ve <em>por dentro.</em></h2><p class="lead" style="margin-top:18px" data-r>Un recorrido real por la app, con una iglesia de ejemplo. Toca cualquier parte de la lista para ir a ese momento.</p></div>
-    <div class="fono" data-r="zoom"><video id="vid" src="img/recorrido.mp4" poster="img/recorrido.jpg" muted loop playsinline preload="metadata"></video></div>
-    <ol id="caps"><li data-t="0"><b>Inicio</b><span>El versículo del día y los anuncios.</span></li><li data-t="5.4"><b>Asistencia</b><span>Tocas las caras de quienes vinieron.</span></li><li data-t="10.3"><b>Faltaron</b><span>Quién faltó, con el WhatsApp listo.</span></li><li data-t="13.3"><b>Informe</b><span>La semana, ya armada.</span></li><li data-t="18.1"><b>Finanzas</b><span>Fondos, ingresos y gastos.</span></li><li data-t="20.7"><b>Grupos pequeños</b><span>La prédica con sus preguntas.</span></li><li data-t="25.8"><b>La Biblia</b><span>Para leer y escuchar.</span></li></ol>
-  </div>
-</section>
-
-<section class="feat" id="evangelismo" style="--a:var(--teal)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>01</div>
-      <div class="kicker" data-r>Evangelismo</div>
-      <h2 data-r>El mapa de tu ciudad, <em>marcado solo.</em></h2>
-      <p class="lead" data-r>Sales a evangelizar y la app marca cada cuadra que caminas. Se acabó el mapa de papel y el “¿por acá ya pasamos?”.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Ves qué calles ya se visitaron y cuáles faltan</li><li data-r style="--d:90ms">Cada contacto queda guardado con su dirección</li><li data-r style="--d:180ms">Equipos, zonas y resultados de cada salida</li></ul>
+<section class="prob" id="problema" aria-labelledby="prob-h">
+  <div class="prob-s">
+    <div class="c prob-c">
+      <p class="rot" style="--a:var(--ambar)">¿Te suena?</p>
+      <h2 id="prob-h">Mucho trabajo fiel. Todo disperso.</h2>
+      <p class="lead">La mayoría de las iglesias no tiene un problema de ganas. Tiene papeles, planillas y grupos por todos lados. Y cuando la información está dispersa, las personas se pierden.</p>
     </div>
-    <div class="fig" data-r="zoom"><span class="halo"></span><div class="fono" data-p="0.06"><img loading="lazy" src="img/mapa.jpg" alt="" width="640" height="1387"></div></div>
-  </div>
-</section>
-<section class="cerca" id="de-cerca">
-  <div class="c" style="display:block">
-    <div class="kicker" data-r style="color:#7FE0D8">El mapa, de cerca</div>
-    <h2 data-r>Así se ve <em>una salida de verdad.</em></h2>
-    <p class="lead" data-r>Cada color cuenta algo. De un vistazo se sabe qué se hizo, cuándo y qué falta.</p>
-    <div class="cerca-ley" data-r><span><i style="background:#1F6B45"></i>Evangelismo de esta semana</span><span><i style="background:#2563EB"></i>Este mes</span><span><i style="background:#9CA3AF"></i>Hace más de un mes</span><span><i style="background:#E8590C"></i>Volantes</span></div>
-    <div class="cerca-g">
-      <figure data-r style="--d:0ms"><div class="fono"><video src="img/salida.mp4" poster="img/mapa-salida.jpg" muted loop playsinline autoplay preload="metadata"></video></div><figcaption><b>Un toque y empieza</b>Mientras se camina, la app cuenta el tiempo, los metros, los contactos y las promesas.</figcaption></figure>
-      <figure data-r style="--d:90ms"><div class="fono"><img loading="lazy" src="img/mapa-veredas.jpg" alt="" width="640" height="1387"></div><figcaption><b>Cada vereda, por separado</b>Se ve si se hicieron los dos lados de la calle o solo uno.</figcaption></figure>
-      <figure data-r style="--d:180ms"><div class="fono"><img loading="lazy" src="img/mapa-volantes.jpg" alt="" width="640" height="1387"></div><figcaption><b>Volantes y evangelismo</b>Naranja donde se repartieron invitaciones. Verde donde ya se volvió a tocar puertas.</figcaption></figure>
-      <figure data-r style="--d:270ms"><div class="fono"><img loading="lazy" src="img/mapa-equipo.jpg" alt="" width="640" height="1387"></div><figcaption><b>El equipo, en vivo</b>Se ve por dónde va cada hermano mientras dura la salida.</figcaption></figure>
+    <div class="prob-e">
+      <div class="papelito am" style="--x:-33vw;--y:-10vh;--r:-8deg;--xm:-23vw;--ym:-17vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 20l-5-2V5l5 2 6-2 5 2v13l-5-2-6 2zM9 7v13M15 5v13"/></svg>Mapas de papel</div>
+      <div class="papelito" style="--x:-12vw;--y:-17vh;--r:5deg;--xm:23vw;--ym:-15vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6zM3 7h3M3 12h3M3 17h3M10 8h5M10 12h5"/></svg>El cuaderno de contactos</div>
+      <div class="papelito ce" style="--x:13vw;--y:-16vh;--r:-4deg;--xm:-24vw;--ym:-2vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18v16H3zM3 10h18M3 15h18M9 4v16M15 4v16"/></svg>Planillas de asistencia</div>
+      <div class="papelito" style="--x:33vw;--y:-8vh;--r:7deg;--xm:24vw;--ym:0vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20l1.2-5.1A8.4 8.4 0 1 1 21 11.5z"/></svg>Diez grupos de WhatsApp</div>
+      <div class="papelito ro" style="--x:-21vw;--y:13vh;--r:6deg;--xm:-22vw;--ym:13vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h14v20l-3-2-2 2-2-2-2 2-2-2-3 2zM9 7h6M9 11h6M9 15h3"/></svg>Carpetas de recibos</div>
+      <div class="papelito am" style="--x:21vw;--y:14vh;--r:-7deg;--xm:23vw;--ym:15vh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14v18H5zM9 8h1M13 8h3M9 12h1M13 12h3M9 16h1M13 16h3"/></svg>Formularios sueltos</div>
+      <div class="una"><img src="img/logo.png?v=77b87123" alt="" width="60" height="60">Con La Mies: una sola app.</div>
+      <ul class="una-l"><li>El mapa</li><li>Los contactos</li><li>La asistencia</li><li>El chat y los avisos</li><li>Las finanzas</li><li>Las inscripciones</li></ul>
     </div>
   </div>
 </section>
-<section class="feat inv" id="seguimiento" style="--a:var(--ambar)">
+<section class="sec sem" id="todo">
   <div class="c">
-    <div class="txt">
-      <div class="num" data-r>02</div>
-      <div class="kicker" data-r>Seguimiento</div>
-      <h2 data-r>Que nadie <em>se pierda.</em></h2>
-      <p class="lead" data-r>La app te dice quién faltó y a quién hay que escribir o visitar esta semana. El mensaje de WhatsApp ya está listo.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Lista de quienes faltaron 1, 2 o 3 semanas</li><li data-r style="--d:90ms">Visitas nuevas: bienvenida, regalo y visita a su casa</li><li data-r style="--d:180ms">Cada líder ve a quién le toca seguir</li></ul>
+    <p class="rot">De un vistazo</p>
+    <h2>Toda la semana de tu iglesia, en un solo lugar.</h2>
+    <div class="sem-via" aria-hidden="true"><i></i></div>
+    <ol class="sem-g">
+      <li data-v style="--d:0s"><a class="dia" href="#evangelismo" style="--d:.2s"><span class="dia-m"><span class="dia-n">Sábado</span><b>Salen a evangelizar</b><span class="dia-t">La app marca cada cuadra que caminan y guarda cada contacto.</span></span><span class="dia-f"><img loading="lazy" src="img/t-mapa-veredas.webp?v=c1d65463" alt="" width="320" height="694"></span></a></li>
+      <li data-v style="--d:.08s"><a class="dia" href="#asistencia" style="--d:.65s"><span class="dia-m"><span class="dia-n">Domingo</span><b>Llega la gente</b><span class="dia-t">Tocas las caras y la asistencia queda lista. Los niños entran con su etiqueta.</span></span><span class="dia-f"><img loading="lazy" src="img/t-asistencia.webp?v=eb2d52bb" alt="" width="320" height="694"></span></a></li>
+      <li data-v style="--d:.16s"><a class="dia" href="#camino" style="--d:1.1s"><span class="dia-m"><span class="dia-n">Lunes</span><b>Nadie se pierde</b><span class="dia-t">La app te dice quién faltó y a quién escribir. El informe ya está armado.</span></span><span class="dia-f"><img loading="lazy" src="img/t-faltaron.webp?v=71e686d7" alt="" width="320" height="694"></span></a></li>
+      <li data-v style="--d:.24s"><a class="dia" href="#palabra" style="--d:1.5s"><span class="dia-m"><span class="dia-n">Entre semana</span><b>La iglesia sigue unida</b><span class="dia-t">Devocional cada mañana, grupos pequeños, anuncios y oración.</span></span><span class="dia-f"><img loading="lazy" src="img/t-grupo.webp?v=c1c5acf9" alt="" width="320" height="694"></span></a></li>
+      <li data-v style="--d:.32s"><a class="dia" href="#finanzas" style="--d:1.9s"><span class="dia-m"><span class="dia-n">Fin de mes</span><b>Las cuentas claras</b><span class="dia-t">Fondos, comprobantes e informes. Y el progreso de la iglesia, mes a mes.</span></span><span class="dia-f"><img loading="lazy" src="img/t-finanzas.webp?v=cfa830c6" alt="" width="320" height="694"></span></a></li>
+    </ol>
+  </div>
+</section>
+<section class="sec rec" id="recorrido">
+  <div class="c rec-g">
+    <div>
+      <p class="rot">Mírala funcionando</p>
+      <h2>Así se ve por dentro.</h2>
+      <p class="lead">Un recorrido real por la app, con una iglesia de ejemplo. Toca cualquier parte de la lista para ir a ese momento.</p>
+      <p class="mini-cta">¿Prefieres tocarla tú? <a data-cfg="demo" href="#" target="_blank" rel="noopener">Entra a la demostración</a>.</p>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/faltaron.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/seguimiento.jpg" alt="" width="640" height="1387"></div></div>
-  </div>
-</section>
-<section class="feat" id="asistencia" style="--a:var(--verde)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>03</div>
-      <div class="kicker" data-r>Asistencia</div>
-      <h2 data-r>Tocas las caras <em>y listo.</em></h2>
-      <p class="lead" data-r>Tomar asistencia lleva un minuto desde el teléfono. Sin planillas y sin pasar nada en limpio el lunes.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Por reunión y por clase</li><li data-r style="--d:90ms">Anotas a las visitas nuevas ahí mismo</li><li data-r style="--d:180ms">También con credenciales con chip, para iglesias grandes</li></ul>
+    <div class="tel" data-v><video id="vRec" muted loop playsinline preload="none" data-poster="v/recorrido.webp?v=cd581f4a" data-src="v/recorrido.mp4?v=85ba8d5a" data-src-m="v/recorrido-m.mp4?v=280e5e7e" width="540" height="1170" aria-label="Recorrido por la app: inicio, mapa, asistencia, quiénes faltaron, informe, finanzas, grupos pequeños y Biblia."></video></div>
+    <div class="rec-l" id="caps">
+      <button type="button" data-t="0"><b>Inicio</b><span>El versículo del día y los anuncios.</span></button>
+      <button type="button" data-t="5.4"><b>Mapa</b><span>Las calles que ya se caminaron.</span></button>
+      <button type="button" data-t="10.1"><b>Asistencia</b><span>Tocas las caras de quienes vinieron.</span></button>
+      <button type="button" data-t="13.8"><b>Faltaron</b><span>Quién faltó, con el WhatsApp listo.</span></button>
+      <button type="button" data-t="17"><b>Informe</b><span>La semana, ya armada.</span></button>
+      <button type="button" data-t="20.8"><b>Finanzas</b><span>Fondos, ingresos y gastos.</span></button>
+      <button type="button" data-t="23.9"><b>Grupos pequeños</b><span>La prédica con sus preguntas.</span></button>
+      <button type="button" data-t="27.7"><b>La Biblia</b><span>Para leer y escuchar.</span></button>
     </div>
-    <div class="fig" data-r="zoom"><span class="halo"></span><div class="fono" data-p="0.06"><img loading="lazy" src="img/asistencia.jpg" alt="" width="640" height="1387"></div></div>
   </div>
 </section>
-<div class="band" data-r><div class="c"><div><h3>Empieza hoy. <em>Los primeros 4 meses son gratis.</em></h3><p>Todas las funciones, sin tarjeta.</p></div><a class="btn btn-w" data-cfg="registro" href="#">Sumar mi iglesia</a></div></div>
-<section class="feat inv" id="informes" style="--a:var(--rosa)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>04</div>
-      <div class="kicker" data-r>Informes</div>
-      <h2 data-r>El informe de la semana, <em>ya armado.</em></h2>
-      <p class="lead" data-r>Asistencia, visitas, evangelismo y clases, en una hoja lista para compartir. Y el progreso de la iglesia, mes a mes.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Se arma solo con lo que la iglesia ya cargó</li><li data-r style="--d:90ms">Lo mandas por WhatsApp o por correo</li><li data-r style="--d:180ms">Ves si la iglesia crece, con números reales</li></ul>
+<section class="sec ev osc" id="evangelismo">
+  <div class="c ev-cab">
+    <div>
+      <p class="rot">Evangelismo</p>
+      <h2>El mapa de tu ciudad, marcado solo.</h2>
+      <p class="lead">Sales a evangelizar y la app marca cada cuadra que caminas. Se acabó el mapa de papel y el “¿por acá ya pasamos?”.</p>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/informe.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/progreso.jpg" alt="" width="640" height="1387"></div></div>
+    <ul class="ley" aria-label="Qué significa cada color del mapa">
+      <li style="--k:#3E9B6A"><i></i>Verde: evangelismo de esta semana</li>
+      <li style="--k:#5B8DEF"><i></i>Azul: este mes</li>
+      <li style="--k:#9CA3AF"><i></i>Gris: hace más de un mes</li>
+      <li style="--k:#F07F3C"><i></i>Naranja: volantes</li>
+      <li class="sin"><i></i>Sin línea: todavía no se visitó</li>
+    </ul>
   </div>
-</section>
-<section class="feat" id="finanzas" style="--a:var(--azul)">
+  <div class="c ev-g">
+    <ol class="ev-pasos" id="pasos">
+      <li class="paso on"><div><p class="paso-n">Paso 1</p><h3>Un toque y empieza.</h3><p>Eliges si la salida es de evangelismo o de volantes. La app marca el camino sola mientras caminas<span data-tiendas="si" hidden>, aunque el teléfono esté bloqueado</span>.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa-elegir.webp?v=03496fe6" alt="La app pregunta qué salida es: evangelismo o volantes." width="720" height="1560"></div></li>
+      <li class="paso"><div><p class="paso-n">Paso 2</p><h3>Cada vereda, por separado.</h3><p>Se ve si se hicieron los dos lados de la calle o solo uno. Cada cuadra guarda quién pasó y cuándo.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa-veredas.webp?v=e429536b" alt="Mapa de cerca: calles con las dos veredas marcadas en verde y otras con una sola." width="720" height="1560"></div></li>
+      <li class="paso"><div><p class="paso-n">Paso 3</p><h3>El equipo, en vivo.</h3><p>Se ve por dónde va cada hermano mientras dura la salida. La ubicación se comparte solo en ese rato.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa-equipo.webp?v=4cb09fee" alt="Mapa con cuatro hermanos del equipo y el camino que va haciendo cada uno." width="720" height="1560"></div></li>
+      <li class="paso"><div><p class="paso-n">Paso 4</p><h3>Cada contacto, en su puerta.</h3><p>Anotas el nombre, si se le presentó el evangelio y si prometió venir. Queda guardado con su dirección para volver a visitarlo.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa-contacto.webp?v=4bdc981d" alt="Pantalla para anotar un contacto nuevo durante la salida." width="720" height="1560"></div></li>
+      <li class="paso"><div><p class="paso-n">Paso 5</p><h3>Volantes primero. Puertas después.</h3><p>Naranja donde se repartieron invitaciones. Verde donde ya se volvió a tocar puertas. Se ve qué falta de cada cosa.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa-volantes.webp?v=c97cdc17" alt="Mapa con un barrio en naranja (volantes) y una parte en verde (evangelismo)." width="720" height="1560"></div></li>
+      <li class="paso"><div><p class="paso-n">Paso 6</p><h3>Y el mapa de la ciudad queda al día.</h3><p>Toda la iglesia ve qué barrios ya se hicieron, cuándo, y cuáles faltan. Sin preguntar a nadie.</p></div><div class="tel paso-f"><img loading="lazy" src="img/mapa.webp?v=60cb943f" alt="Mapa general: un barrio en verde, otro en azul, otro en gris y una zona todavía sin caminar." width="720" height="1560"></div></li>
+    </ol>
+    <div class="ev-fijo" aria-hidden="true"><div class="tel"><div class="pant pila" id="pila"></div></div></div>
+  </div>
   <div class="c">
-    <div class="txt">
-      <div class="num" data-r>05</div>
-      <div class="kicker" data-r>Finanzas</div>
-      <h2 data-r>Las cuentas de la iglesia, <em>claras y al día.</em></h2>
-      <p class="lead" data-r>Ofrendas, gastos y fondos en un solo lugar, con la foto de cada comprobante. Solo lo ven las personas autorizadas.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Fondos separados: general, misiones, construcción</li><li data-r style="--d:90ms">Cada gasto con su comprobante guardado</li><li data-r style="--d:180ms">Informes por mes, listos para presentar</li></ul>
+    <ul class="ev-res">
+      <li class="res" data-v><div class="res-f"><img loading="lazy" src="img/t-zonas.webp?v=011e27da" alt="" width="320" height="694"></div><div><h3>Zonas</h3><p>Divides la ciudad en zonas y ves cuánto se recorrió de cada una.</p></div></li>
+      <li class="res" data-v style="--d:.08s"><div class="res-f"><img loading="lazy" src="img/t-tablero.webp?v=827ba91e" alt="" width="320" height="694"></div><div><h3>Resultados</h3><p>Casas, contactos, presentaciones del evangelio y promesas de cada equipo.</p></div></li>
+      <li class="res" data-v style="--d:.16s"><div class="res-f"><img loading="lazy" src="img/t-salidas.webp?v=1ca8420c" alt="" width="320" height="694"></div><div><h3>Cada salida, guardada</h3><p>Cuánto duró, cuánto se caminó y qué pasó. Lista para el informe.</p></div></li>
+    </ul>
+    <div class="banda">
+      <div><h3>Tu iglesia puede salir con el mapa este sábado.</h3><p>Los primeros 4 meses son gratis. Sin tarjeta.</p></div>
+      <div class="fila"><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia</a><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a></div>
     </div>
-    <div class="fig" data-r="zoom"><span class="halo"></span><div class="fono" data-p="0.06"><img loading="lazy" src="img/finanzas.jpg" alt="" width="640" height="1387"></div></div>
   </div>
 </section>
-<section class="feat inv" id="grupos" style="--a:var(--violeta)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>06</div>
-      <div class="kicker" data-r>Escuela dominical y grupos pequeños</div>
-      <h2 data-r>Enseñar es <em>más fácil.</em></h2>
-      <p class="lead" data-r>Cada clase con sus maestros, sus alumnos y su lección. Y grupos pequeños que repasan la prédica del domingo con las preguntas listas.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Turnos de maestros y asistencia por clase</li><li data-r style="--d:90ms">El líder abre el grupo y ya tiene la guía</li><li data-r style="--d:180ms">La gente pide sumarse a un grupo desde la app</li></ul>
+<section class="sec cam" id="camino">
+  <div class="c cam-cab">
+    <p class="rot">Seguimiento</p>
+    <h2>Que nadie se pierda.</h2>
+    <p class="lead">Desde la primera puerta hasta que la persona sirve en la iglesia, la app te muestra el próximo paso de cada uno.</p>
+  </div>
+  <div class="c cam-g" id="cam">
+    <div class="cam-linea" aria-hidden="true"><i></i></div>
+    <ol>
+      <li class="est"><div class="est-n">1</div><div class="est-t"><p class="est-k">En la puerta</p><h3>El contacto queda guardado.</h3><p>Con su dirección, su interés y si prometió venir. El domingo sabes a quién pasar a buscar.</p></div><div class="tel est-f"><img loading="lazy" src="img/personas.webp?v=7fc764ed" alt="Lista de contactos de la calle, con su interés y lo que prometieron." width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">2</div><div class="est-t"><p class="est-k">Su primera visita</p><h3>Deja sus datos con un código QR.</h3><p>Un cartel en la entrada: la visita lo lee con su teléfono y se anota sola. O la anotas tú al tomar asistencia.</p></div><div class="tel est-f"><img loading="lazy" src="img/tarjeta.webp?v=b93ebd68" alt="Cartel con código QR para las visitas: ¿Es tu primera vez?" width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">3</div><div class="est-t"><p class="est-k">La primera semana</p><h3>Bienvenida, regalo y visita a su casa.</h3><p>La app te recuerda cada paso y a quién le toca. El mensaje de WhatsApp ya está escrito.</p></div><div class="tel est-f"><img loading="lazy" src="img/seguimiento.webp?v=69551722" alt="Lista de contactos para seguir esta semana, con el botón de WhatsApp." width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">4</div><div class="est-t"><p class="est-k">Si deja de venir</p><h3>Te enteras a la primera semana.</h3><p>La lista de quienes faltaron 1, 2 o 3 semanas, para escribirles o visitarlos antes de que se alejen.</p></div><div class="tel est-f"><img loading="lazy" src="img/faltaron.webp?v=efdc38e3" alt="Lista de quienes faltaron el fin de semana: 1 semana, 2 semanas, 3 o más." width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">5</div><div class="est-t"><p class="est-k">Su decisión</p><h3>Cada decisión, anotada.</h3><p>Quién recibió a Cristo, quién se bautizó y quién se hizo miembro. Con su fecha.</p></div><div class="tel est-f"><img loading="lazy" src="img/decisiones.webp?v=009091de" alt="Pantalla para anotar decisiones: fue salvo, se bautizó, se hizo miembro." width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">6</div><div class="est-t"><p class="est-k">Su crecimiento</p><h3>Quién discipula a quién.</h3><p>Y por qué lección va cada uno. También la clase para miembros nuevos.</p></div><div class="tel est-f"><img loading="lazy" src="img/discipulado.webp?v=952ad437" alt="Discipulado: cada persona con quien la enseña y la lección por la que va." width="720" height="1560"></div></li>
+      <li class="est"><div class="est-n">7</div><div class="est-t"><p class="est-k">Su fidelidad</p><h3>Ves quién se está alejando.</h3><p>Cuánto viene cada uno y en qué paso está de su camino en la iglesia.</p></div><div class="tel est-f"><img loading="lazy" src="img/fidelidad.webp?v=d84e7709" alt="Fidelidad: porcentaje de asistencia de cada persona en los últimos meses." width="720" height="1560"></div></li>
+    </ol>
+  </div>
+</section>
+<section class="sec asi" id="asistencia">
+  <div class="c asi-g">
+    <div>
+      <p class="rot">Asistencia</p>
+      <h2>Tocas las caras y listo.</h2>
+      <p class="lead">Tomar asistencia lleva un minuto desde el teléfono. Sin planillas y sin pasar nada en limpio el lunes.</p>
+      <ul class="tildes">
+        <li>Por reunión y por clase</li>
+        <li>Anotas a las visitas nuevas ahí mismo</li>
+        <li>También con chip: cada persona marca su asistencia sola al llegar</li>
+      </ul>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/grupo.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/clases.jpg" alt="" width="640" height="1387"></div></div>
-  </div>
-</section>
-<div class="band" data-r><div class="c"><div><h3>Tu iglesia puede estar usando esto <em>este domingo.</em></h3><p>Anotarla lleva 5 minutos.</p></div><a class="btn btn-w" data-cfg="registro" href="#">Sumar mi iglesia</a></div></div>
-<section class="feat" id="biblia" style="--a:var(--verde)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>07</div>
-      <div class="kicker" data-r>La Palabra</div>
-      <h2 data-r>La Biblia y el devocional, <em>cada día.</em></h2>
-      <p class="lead" data-r>Toda la iglesia leyendo lo mismo cada mañana. La Biblia completa para leer y escuchar, y las prédicas para volver a oír.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Versículo del día y devocional de tu iglesia</li><li data-r style="--d:90ms">Biblia con audio, notas y planes de lectura</li><li data-r style="--d:180ms">Prédicas con video, audio y bosquejo para completar</li></ul>
+    <div class="asi-f">
+      <div class="tel real" aria-hidden="true"><img loading="lazy" src="img/asistencia.webp?v=47c6b20f" alt="" width="720" height="1560"></div>
+      <div class="tel juego">
+        <div class="pant" id="juego">
+          <div class="pant-c"><b>Asistencia</b><span>Culto del domingo · hoy</span></div>
+          <div class="cuenta" aria-live="polite"><b id="cuenta">0</b><span>presentes de 12 en la lista</span></div>
+          <div class="caras" id="caras"></div>
+          <div class="pant-p">Esto es una muestra. Toca las caras.</div>
+        </div>
+      </div>
+      <p class="asi-nota" id="asiNota">Pruébalo: toca las caras</p>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/devocional.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/biblia.jpg" alt="" width="640" height="1387"></div></div>
   </div>
 </section>
-<section class="feat inv" id="comunidad" style="--a:var(--teal)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>08</div>
-      <div class="kicker" data-r>Comunidad</div>
-      <h2 data-r>Toda la iglesia, <em>en un solo lugar.</em></h2>
-      <p class="lead" data-r>Los anuncios del pastor, el chat de la iglesia y los pedidos de oración, ordenados. Ya no se pierde nada entre diez grupos de WhatsApp.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Anuncios a toda la iglesia o a un grupo</li><li data-r style="--d:90ms">Chat con mensajes de voz</li><li data-r style="--d:180ms">Pedidos de oración y oraciones respondidas</li></ul>
+<section class="fx b2" id="informes" style="--a:var(--rosa)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Informes</p>
+      <h2>El informe de la semana, ya armado.</h2>
+      <p class="lead">Asistencia, visitas, evangelismo y clases, en una hoja lista para compartir. Y el progreso de la iglesia, mes a mes.</p>
+      <ul class="tildes"><li>Se arma solo con lo que la iglesia ya cargó</li><li>Lo mandas por WhatsApp o por correo</li><li>Ves si la iglesia crece, con números reales</li></ul>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/m-inicio.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/chat.jpg" alt="" width="640" height="1387"></div></div>
+    <div class="fx-f dos" data-v><div class="tel t1" data-p=".09"><img loading="lazy" src="img/informe.webp?v=0dafb290" alt="Informe semanal: salidas, casas, contactos, asistencias y visitas." width="720" height="1560"></div><div class="tel t2" data-p="-.05"><img loading="lazy" src="img/progreso.webp?v=b302b460" alt="Progreso de la iglesia: asistencia promedio, miembros y bautismos, mes a mes." width="720" height="1560"></div></div>
   </div>
 </section>
-<section class="feat" id="eventos" style="--a:var(--ambar)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>09</div>
-      <div class="kicker" data-r>Eventos</div>
-      <h2 data-r>Un evento, <em>de la inscripción a la puerta.</em></h2>
-      <p class="lead" data-r>Planificas el evento, la gente se anota desde una página y entra con su código. Sabes cuántos vienen antes de que lleguen.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Página pública para anotarse</li><li data-r style="--d:90ms">Entradas con código QR y control en la puerta</li><li data-r style="--d:180ms">Programa, oradores, voluntarios y tareas</li></ul>
+<section class="fx inv" id="finanzas" style="--a:var(--mar)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Finanzas</p>
+      <h2>Las cuentas de la iglesia, claras y al día.</h2>
+      <p class="lead">Ofrendas, gastos y fondos en un solo lugar, con la foto de cada comprobante. Solo lo ven las personas autorizadas.</p>
+      <ul class="tildes"><li>Fondos separados: general, misiones, construcción</li><li>Cada gasto con su comprobante guardado</li><li>Informes por mes, listos para presentar</li><li>Si tu iglesia quiere, cada hermano ve sus propias ofrendas del año</li></ul>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/evento.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/eventos.jpg" alt="" width="640" height="1387"></div></div>
+    <div class="fx-f tres" data-v><div class="tel t1" data-p=".06"><img loading="lazy" src="img/finanzas2.webp?v=9f4afb9c" alt="Movimientos, comprobantes e informes de finanzas." width="720" height="1560"></div><div class="tel t2" data-p="-.04"><img loading="lazy" src="img/finanzas.webp?v=5aaeafc2" alt="Finanzas: caja, banco y los fondos de la iglesia." width="720" height="1560"></div><div class="tel t3" data-p=".09"><img loading="lazy" src="img/ofrendas.webp?v=8f11ca24" alt="Mis ofrendas: lo que la tesorería anotó a nombre de un hermano." width="720" height="1560"></div></div>
   </div>
 </section>
-<div class="band" data-r><div class="c"><div><h3>Una sola app para toda la semana de tu iglesia.</h3><p>4 meses gratis para empezar.</p></div><a class="btn btn-w" data-cfg="registro" href="#">Sumar mi iglesia</a></div></div>
-<section class="feat inv" id="ninos" style="--a:var(--rosa)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>10</div>
-      <div class="kicker" data-r>Niños y transporte</div>
-      <h2 data-r>Los chicos, <em>bien cuidados.</em></h2>
-      <p class="lead" data-r>Cada niño entra con su etiqueta y solo se retira con el adulto que lo trajo. Y el bus de la iglesia avisa cuando está por llegar.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Entrada y retiro de niños con código</li><li data-r style="--d:90ms">Lista de pasajeros de cada ruta</li><li data-r style="--d:180ms">Aviso de “llegamos en 10 minutos” por WhatsApp</li></ul>
+<section class="fx b2" id="grupos" style="--a:var(--violeta)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Escuela dominical y grupos pequeños</p>
+      <h2>Enseñar es más fácil.</h2>
+      <p class="lead">Cada clase con sus maestros, sus alumnos y su lección. Y grupos pequeños que repasan la prédica del domingo con las preguntas listas.</p>
+      <ul class="tildes"><li>Turnos de maestros y asistencia por clase</li><li>El líder abre el grupo y ya tiene la guía</li><li>La gente pide sumarse a un grupo desde la app</li><li>Versículos de memoria para los niños</li></ul>
     </div>
-    <div class="fig dos" data-r="zoom"><span class="halo"></span><div class="fono f1" data-p="0.09"><img loading="lazy" src="img/ninos.jpg" alt="" width="640" height="1387"></div><div class="fono f2" data-p="-0.05"><img loading="lazy" src="img/colectivo.jpg" alt="" width="640" height="1387"></div></div>
+    <div class="fx-f dos" data-v><div class="tel t1" data-p=".09"><img loading="lazy" src="img/grupo.webp?v=0f49ce32" alt="Un grupo pequeño con la prédica de la semana y la guía de preguntas." width="720" height="1560"></div><div class="tel t2" data-p="-.05"><img loading="lazy" src="img/clases.webp?v=e771fd64" alt="Las clases de la escuela dominical con sus maestros." width="720" height="1560"></div></div>
   </div>
 </section>
-<section class="feat" id="presentar" style="--a:var(--azul)">
-  <div class="c">
-    <div class="txt">
-      <div class="num" data-r>11</div>
-      <div class="kicker" data-r>Modo presentación</div>
-      <h2 data-r>Las letras y la Biblia, <em>en el proyector.</em></h2>
-      <p class="lead" data-r>Armas la lista del culto y la app muestra las canciones, los pasajes y los anuncios en la pantalla. Se maneja desde el teléfono.</p>
-      <ul class="lista"><li data-r style="--d:0ms">Canciones, versículos, fotos y videos</li><li data-r style="--d:90ms">Vista para el escenario y control remoto</li><li data-r style="--d:180ms">Sin programas aparte</li></ul>
+<section class="fx inv" id="palabra" style="--a:var(--mies)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">La Palabra</p>
+      <h2>La Biblia y el devocional, cada día.</h2>
+      <p class="lead">Toda la iglesia leyendo lo mismo cada mañana. La Biblia completa para leer y escuchar, y las prédicas para volver a oír.</p>
+      <ul class="tildes"><li>Versículo del día y devocional de tu iglesia</li><li>Biblia sin internet, con audio, notas y planes de lectura</li><li>Prédicas con video, audio y bosquejo para completar</li></ul>
     </div>
-    <div class="fig" data-r="zoom"><span class="halo"></span><div class="fono" data-p="0.06"><img loading="lazy" src="img/presentar.jpg" alt="" width="640" height="1387"></div></div>
+    <div class="fx-f tres" data-v><div class="tel t1" data-p=".06"><img loading="lazy" src="img/plan.webp?v=a755b0a9" alt="Planes de lectura de la Biblia." width="720" height="1560"></div><div class="tel t2" data-p="-.04"><img loading="lazy" src="img/devocional.webp?v=9705cc38" alt="El versículo del día." width="720" height="1560"></div><div class="tel t3" data-p=".09"><img loading="lazy" src="img/biblia.webp?v=1eec0173" alt="La Biblia en la app, con un versículo resaltado." width="720" height="1560"></div></div>
   </div>
 </section>
-
-<section class="desk" id="escritorio">
+<div class="sec" style="padding:0 0 clamp(40px,5vw,70px);background:var(--papel)"><div class="c"><div class="banda" style="margin-top:0;color:#fff" data-v>
+  <div><h3>Empieza hoy. Los primeros 4 meses son gratis.</h3><p>Todas las funciones, sin tarjeta.</p></div>
+  <div class="fila"><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia</a><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a></div>
+</div></div></div>
+<section class="fx b2" id="comunidad" style="--a:var(--teal)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Comunidad</p>
+      <h2>Toda la iglesia, en un solo lugar.</h2>
+      <p class="lead">Los anuncios del pastor, el chat de la iglesia y los pedidos de oración, ordenados. Ya no se pierde nada entre diez grupos de WhatsApp.</p>
+      <ul class="tildes"><li>Anuncios a toda la iglesia o a un grupo</li><li>Chat con mensajes de voz</li><li>Pedidos de oración y oraciones respondidas</li><li>Cada ministerio con su chat y sus turnos</li></ul>
+    </div>
+    <div class="fx-f tres" data-v><div class="tel t1" data-p=".06"><img loading="lazy" src="img/chat.webp?v=1b36f0ba" alt="El chat de la iglesia." width="720" height="1560"></div><div class="tel t2" data-p="-.04"><img loading="lazy" src="img/m-inicio.webp?v=05ff91fd" alt="El inicio de un hermano: versículo, anuncios y sus turnos." width="720" height="1560"></div><div class="tel t3" data-p=".09"><img loading="lazy" src="img/oracion.webp?v=7f49797d" alt="Pedidos de oración de la iglesia." width="720" height="1560"></div></div>
+  </div>
+</section>
+<section class="fx inv" id="eventos" style="--a:var(--ambar)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Eventos</p>
+      <h2>Un evento, de la inscripción a la puerta.</h2>
+      <p class="lead">Planificas el evento, la gente se anota desde una página y entra con su código. Sabes cuántos vienen antes de que lleguen.</p>
+      <ul class="tildes"><li>Página pública para anotarse</li><li>Entradas con código QR y control en la puerta</li><li>Programa, oradores, voluntarios y tareas</li></ul>
+    </div>
+    <div class="fx-f dos" data-v><div class="tel t1" data-p=".09"><img loading="lazy" src="img/evento.webp?v=e9bf8146" alt="Planificador de un evento: inscriptos, entradas, programa y equipo." width="720" height="1560"></div><div class="tel t2" data-p="-.05"><img loading="lazy" src="img/calendario.webp?v=845cefe5" alt="El calendario de la iglesia con los eventos que vienen." width="720" height="1560"></div></div>
+  </div>
+</section>
+<section class="fx b2" id="ninos" style="--a:var(--rosa)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">Niños y transporte</p>
+      <h2>Los niños, bien cuidados.</h2>
+      <p class="lead">Cada niño entra con su etiqueta y el adulto se lleva otra igual: sin esa etiqueta, el niño no se entrega. Y el bus de la iglesia avisa cuando está por llegar.</p>
+      <ul class="tildes"><li>Entrada y retiro de niños con código</li><li>Lista de pasajeros de cada ruta</li><li>Aviso de “llegamos en 10 minutos” por WhatsApp</li></ul>
+    </div>
+    <div class="fx-f dos" data-v><div class="tel t1" data-p=".09"><img loading="lazy" src="img/ninos.webp?v=5c749c81" alt="Entrada y retiro de los niños." width="720" height="1560"></div><div class="tel t2" data-p="-.05"><img loading="lazy" src="img/colectivo.webp?v=1c0ce3cb" alt="El bus de la iglesia: ruta, pasajeros y avisos." width="720" height="1560"></div></div>
+  </div>
+</section>
+<section class="fx inv" id="culto" style="--a:var(--mar)">
+  <div class="c fx-g">
+    <div class="fx-t">
+      <p class="rot">El culto</p>
+      <h2>Las letras y la Biblia, en el proyector.</h2>
+      <p class="lead">Armas la lista del culto y la app muestra las canciones, los pasajes y los anuncios en la pantalla. Se maneja desde el teléfono.</p>
+      <ul class="tildes"><li>Canciones, versículos, fotos y videos</li><li>Vista para el escenario y control remoto</li><li>Orden del culto: quién hace cada parte, con aviso el día antes</li><li>Sin programas aparte</li></ul>
+    </div>
+    <div class="fx-f tres" data-v><div class="tel t1" data-p=".06"><img loading="lazy" src="img/culto.webp?v=ca0128de" alt="Orden del culto: quién predica y quién dirige las canciones." width="720" height="1560"></div><div class="tel t2" data-p="-.04"><img loading="lazy" src="img/presentar.webp?v=f6668774" alt="Modo presentación: listas del culto y pantallas de salida." width="720" height="1560"></div><div class="tel t3" data-p=".09"><img loading="lazy" src="img/cancionero.webp?v=b24cbb28" alt="El cancionero de la iglesia." width="720" height="1560"></div></div>
+  </div>
+</section>
+<section class="sec esc" id="escritorio">
   <div class="c">
-    <div class="kicker" data-r>En la computadora</div>
-    <h2 data-r>Para el pastor y la secretaría, <em>en pantalla grande.</em></h2>
-    <p class="lead" style="margin:18px auto 0" data-r>La misma app, con un escritorio pensado para trabajar cómodo: personas, asistencia, finanzas e informes.</p>
-    <div class="pc" data-r="zoom"><img loading="lazy" src="img/escritorio.jpg" alt="El escritorio de La Mies en una computadora" width="1600" height="1000"></div>
-    <div class="kicker" style="margin-top:70px" data-r>Y además</div>
-    <ul class="chips"><li data-r style="--d:0ms">Cumpleaños con saludo listo</li><li data-r style="--d:40ms">Culto en vivo</li><li data-r style="--d:80ms">Cancionero</li><li data-r style="--d:120ms">Radio de la iglesia</li><li data-r style="--d:160ms">Sorteos</li><li data-r style="--d:200ms">Certificados de bautismo</li><li data-r style="--d:240ms">Misioneros</li><li data-r style="--d:280ms">Directorio de la iglesia</li><li data-r style="--d:320ms">Ubicación en familia</li><li data-r style="--d:360ms">Mensajes privados al pastor</li><li data-r style="--d:400ms">Importar desde Excel</li><li data-r style="--d:440ms">En español y en inglés</li><li data-r style="--d:480ms">Roles y permisos</li><li data-r style="--d:520ms">Cada iglesia enciende solo lo que usa</li></ul>
+    <p class="rot">En la computadora</p>
+    <h2>Para el pastor y la secretaría, en pantalla grande.</h2>
+    <p class="lead">La misma app, con un escritorio pensado para trabajar cómodo: personas, asistencia, finanzas e informes.</p>
+    <div class="pest" role="tablist" aria-label="Pantallas del escritorio" id="pcTabs">
+      <button type="button" role="tab" aria-selected="true" data-i="0">Inicio</button>
+      <button type="button" role="tab" aria-selected="false" data-i="1">Personas</button>
+      <button type="button" role="tab" aria-selected="false" data-i="2">Asistencia del día</button>
+    </div>
+    <div class="pc" data-v>
+      <div class="pc-b" aria-hidden="true"><i></i><i></i><i></i><span>Escritorio · La Mies</span></div>
+      <div class="pc-p" id="pcImgs">
+        <img class="on" loading="lazy" src="img/d-inicio.webp?v=fb12d4ca" alt="El escritorio: asistencia de la semana, quiénes faltaron y qué hay para atender." width="1600" height="1000">
+        <img loading="lazy" src="img/d-personas2.webp?v=759395cb" alt="La lista de personas en la computadora, con su asistencia, para bajar a Excel o importar." width="1600" height="1000">
+        <img loading="lazy" src="img/d-asistencia2.webp?v=af46bdec" alt="La asistencia del día en la computadora: presentes, miembros, visitas y clases." width="1600" height="1000">
+      </div>
+    </div>
   </div>
 </section>
-
-<section class="precios" id="precios">
+<section class="sec ade" id="ademas">
+  <div class="c ade-cab">
+    <div><p class="rot">Y además</p><h2>Más de 60 funciones. Tu iglesia enciende solo las que usa.</h2></div>
+    <p class="lead">Lo que apagas se esconde del menú y no molesta. Si más adelante lo necesitas, lo enciendes y está todo como lo dejaste.</p>
+  </div>
+  <div class="cinta una-f"><figure><div class="tel"><img loading="lazy" src="img/t-cumples.webp?v=03b9f1bb" alt="Pantalla de Cumpleaños" width="320" height="694"></div><figcaption>Cumpleaños</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-misioneros.webp?v=3e876420" alt="Pantalla de Misioneros" width="320" height="694"></div><figcaption>Misioneros</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-sorteos.webp?v=4bad63a3" alt="Pantalla de Sorteos" width="320" height="694"></div><figcaption>Sorteos</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-directorio.webp?v=fe562b9f" alt="Pantalla de Directorio" width="320" height="694"></div><figcaption>Directorio</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-preguntas.webp?v=28d717c4" alt="Pantalla de Caja de preguntas" width="320" height="694"></div><figcaption>Caja de preguntas</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-sugerencias.webp?v=9d9e895b" alt="Pantalla de Sugerencias" width="320" height="694"></div><figcaption>Sugerencias</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-respondidas.webp?v=283755fa" alt="Pantalla de Oraciones respondidas" width="320" height="694"></div><figcaption>Oraciones respondidas</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-ministerios.webp?v=08a00803" alt="Pantalla de Ministerios y turnos" width="320" height="694"></div><figcaption>Ministerios y turnos</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-cumples.webp?v=03b9f1bb" alt="" width="320" height="694"></div><figcaption>Cumpleaños</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-misioneros.webp?v=3e876420" alt="" width="320" height="694"></div><figcaption>Misioneros</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-sorteos.webp?v=4bad63a3" alt="" width="320" height="694"></div><figcaption>Sorteos</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-directorio.webp?v=fe562b9f" alt="" width="320" height="694"></div><figcaption>Directorio</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-preguntas.webp?v=28d717c4" alt="" width="320" height="694"></div><figcaption>Caja de preguntas</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-sugerencias.webp?v=9d9e895b" alt="" width="320" height="694"></div><figcaption>Sugerencias</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-respondidas.webp?v=283755fa" alt="" width="320" height="694"></div><figcaption>Oraciones respondidas</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-ministerios.webp?v=08a00803" alt="" width="320" height="694"></div><figcaption>Ministerios y turnos</figcaption></figure></div>
+  <div class="cinta dos"><figure><div class="tel"><img loading="lazy" src="img/t-avisos.webp?v=f861fd15" alt="Pantalla de Avisos" width="320" height="694"></div><figcaption>Avisos</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-chips.webp?v=96e6f93a" alt="Pantalla de Entrada con chip" width="320" height="694"></div><figcaption>Entrada con chip</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-crecimiento.webp?v=730d0830" alt="Pantalla de Para crecer" width="320" height="694"></div><figcaption>Para crecer</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-bienvenida.webp?v=88573974" alt="Pantalla de Visitas nuevas" width="320" height="694"></div><figcaption>Visitas nuevas</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-ofrendar.webp?v=25d5177f" alt="Pantalla de Ofrendar" width="320" height="694"></div><figcaption>Ofrendar</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-panel.webp?v=d8b3750f" alt="Pantalla de Panel del pastor" width="320" height="694"></div><figcaption>Panel del pastor</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-predicas.webp?v=bcd33c88" alt="Pantalla de Prédicas" width="320" height="694"></div><figcaption>Prédicas</figcaption></figure><figure><div class="tel"><img loading="lazy" src="img/t-menu.webp?v=c94a4c1c" alt="Pantalla de Todo a un toque" width="320" height="694"></div><figcaption>Todo a un toque</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-avisos.webp?v=f861fd15" alt="" width="320" height="694"></div><figcaption>Avisos</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-chips.webp?v=96e6f93a" alt="" width="320" height="694"></div><figcaption>Entrada con chip</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-crecimiento.webp?v=730d0830" alt="" width="320" height="694"></div><figcaption>Para crecer</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-bienvenida.webp?v=88573974" alt="" width="320" height="694"></div><figcaption>Visitas nuevas</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-ofrendar.webp?v=25d5177f" alt="" width="320" height="694"></div><figcaption>Ofrendar</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-panel.webp?v=d8b3750f" alt="" width="320" height="694"></div><figcaption>Panel del pastor</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-predicas.webp?v=bcd33c88" alt="" width="320" height="694"></div><figcaption>Prédicas</figcaption></figure><figure aria-hidden="true"><div class="tel"><img loading="lazy" src="img/t-menu.webp?v=c94a4c1c" alt="" width="320" height="694"></div><figcaption>Todo a un toque</figcaption></figure></div>
+  <div class="c"><ul class="mas"><li>Cumpleaños con saludo listo</li><li>Culto en vivo</li><li>Cancionero</li><li>Radio de la iglesia</li><li>Sorteos</li><li>Certificados de bautismo</li><li>Misioneros</li><li>Directorio de la iglesia</li><li>Ubicación en familia</li><li>Mensajes privados al pastor</li><li>Caja de preguntas</li><li>Planes de lectura</li><li>Importar desde Excel</li><li>Roles y permisos</li></ul></div>
+</section>
+<section class="sec rol" id="para-quien">
+  <div class="c">
+    <p class="rot">Para cada uno</p>
+    <h2>Cada uno ve lo que necesita.</h2>
+    <p class="lead" style="margin-top:20px">Con roles y permisos, cada persona encuentra lo suyo y nada más.</p>
+    <div class="rol-g">
+      <div class="rol-l" role="tablist" aria-label="Quién usa la app" id="rolTabs">
+        <button type="button" role="tab" aria-selected="true" data-i="0"><b>El pastor</b><span>Sabe cómo viene la iglesia sin pedir planillas.</span></button>
+        <button type="button" role="tab" aria-selected="false" data-i="1"><b>La secretaría</b><span>Menos planillas. Más orden.</span></button>
+        <button type="button" role="tab" aria-selected="false" data-i="2"><b>Maestros y líderes</b><span>Cada uno con lo de su grupo.</span></button>
+        <button type="button" role="tab" aria-selected="false" data-i="3"><b>La congregación</b><span>Su iglesia, en el bolsillo.</span></button>
+      </div>
+      <div id="rolPan">
+        <div class="rol-p" role="tabpanel">
+          <div><h3>Sabe cómo viene la iglesia sin pedir planillas.</h3><ul class="tildes"><li>El informe semanal, ya armado</li><li>Quiénes faltaron y desde cuándo</li><li>El progreso de la iglesia, mes a mes</li><li>Anuncios a toda la iglesia</li><li>Mensajes privados de los hermanos</li><li>Decide qué funciones se encienden</li></ul></div>
+          <div class="tel"><img loading="lazy" src="img/panel.webp?v=274d41ec" alt="El panel del pastor con los números de evangelismo de la semana." width="720" height="1560"></div>
+        </div>
+        <div class="rol-p" role="tabpanel" hidden>
+          <div><h3>Menos planillas. Más orden.</h3><ul class="tildes"><li>Escritorio en la computadora</li><li>Las personas, con su foto y su familia</li><li>Importar desde Excel y bajar a Excel</li><li>Asistencia de reuniones y clases</li><li>Calendario, eventos y cumpleaños</li><li>Finanzas, si tiene permiso</li></ul></div>
+          <div class="tel"><img loading="lazy" src="img/cumples.webp?v=33ba7aba" alt="Los cumpleaños de los próximos días, con el saludo listo." width="720" height="1560"></div>
+        </div>
+        <div class="rol-p" role="tabpanel" hidden>
+          <div><h3>Cada uno con lo de su grupo.</h3><ul class="tildes"><li>Maestros: su clase, sus alumnos y su asistencia</li><li>Líderes de grupos pequeños: la guía de la semana</li><li>Líderes de ministerio: el chat y los turnos de su grupo</li><li>Equipo de evangelismo: el mapa, las zonas y los contactos</li><li>Encargados de niños: entrada y retiro con código</li></ul></div>
+          <div class="tel"><img loading="lazy" src="img/ministerios.webp?v=cb7a2de9" alt="Los ministerios de la iglesia, cada uno con sus integrantes y su líder." width="720" height="1560"></div>
+        </div>
+        <div class="rol-p" role="tabpanel" hidden>
+          <div><h3>Su iglesia, en el bolsillo.</h3><ul class="tildes"><li>Versículo y devocional de cada día</li><li>La Biblia, sin internet</li><li>Prédicas en video y audio</li><li>Pedidos de oración</li><li>Eventos, anuncios y sus turnos para servir</li><li>El chat de la iglesia y de su ministerio</li></ul></div>
+          <div class="tel"><img loading="lazy" src="img/avisos.webp?v=51585d72" alt="Avisos de un hermano: su turno del domingo y quiénes oran por su pedido." width="720" height="1560"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="sec dem" id="demostracion">
+  <div class="c dem-g">
+    <div>
+      <h2>Entra y toca todo.</h2>
+      <p class="lead">Abrimos una iglesia inventada para que mires la app por dentro. No pide registrarte, y nada de lo que toques se guarda.</p>
+      <div class="fila"><a class="b b-blanco" data-cfg="demo" href="#" target="_blank" rel="noopener">Entrar como pastor</a><a class="b b-claro" data-cfg="demoHermano" href="#" target="_blank" rel="noopener">Entrar como hermano</a></div>
+      <small>Se abre en el navegador de tu teléfono o de tu computadora.</small>
+    </div>
+    <div class="dem-f" aria-hidden="true">
+      <div class="tel t1" data-p=".07"><img loading="lazy" src="img/inicio.webp?v=b17bda85" alt="" width="720" height="1560"></div>
+      <div class="tel t2" data-p="-.05"><img loading="lazy" src="img/menu.webp?v=9a07195c" alt="" width="720" height="1560"></div>
+    </div>
+  </div>
+</section>
+<section class="sec pre osc" id="precios">
   <div class="c">
     <div class="gratis">
-      <div class="kicker" style="color:var(--trigo)" data-r>Para empezar</div>
-      <div class="big" data-r="zoom">4 meses<small>totalmente gratis</small></div>
-      <p data-r>Todas las funciones, para toda tu iglesia. Sin tarjeta y sin compromiso. Primero ves los resultados; después decides.</p>
-      <div data-r><a class="btn btn-p" data-cfg="registro" href="#">Empezar mis 4 meses gratis</a></div>
+      <p class="rot">Para empezar</p>
+      <div class="gratis-n">4 meses<small>totalmente gratis</small></div>
+      <p>Todas las funciones, para toda tu iglesia. Sin tarjeta y sin compromiso. Primero ves los resultados; después decides.</p>
+      <a class="b b-trigo" data-cfg="registro" href="#">Empezar mis 4 meses gratis</a>
     </div>
-    <div class="oferta" data-r><b>Y después, 20% menos si pagas el año junto.</b><span>Es como recibir más de dos meses de regalo cada año.</span></div>
-    <div class="tabla"><div class="plan" data-r style="--d:0ms">
-<h3>Hasta 100</h3><div class="gente">personas activas</div>
-<div class="mes"><sup>$</sup>29<small>/mes</small></div><div class="xp">Unos $0,29 por persona</div>
-<div class="anio"><span class="tag">−20%</span><b>Todo el año junto</b><div><s>$348</s> <strong>$278</strong></div><em>Ahorras $70</em></div>
-<a class="btn btn-s" data-cfg="registro" href="#">Empezar gratis</a></div><div class="plan dest" data-r style="--d:70ms">
-<h3>Hasta 300</h3><div class="gente">personas activas</div>
-<div class="mes"><sup>$</sup>59<small>/mes</small></div><div class="xp">Unos $0,20 por persona</div>
-<div class="anio"><span class="tag">−20%</span><b>Todo el año junto</b><div><s>$708</s> <strong>$566</strong></div><em>Ahorras $142</em></div>
-<a class="btn btn-s" data-cfg="registro" href="#">Empezar gratis</a></div><div class="plan" data-r style="--d:140ms">
-<h3>Hasta 600</h3><div class="gente">personas activas</div>
-<div class="mes"><sup>$</sup>99<small>/mes</small></div><div class="xp">Unos $0,17 por persona</div>
-<div class="anio"><span class="tag">−20%</span><b>Todo el año junto</b><div><s>$1.188</s> <strong>$950</strong></div><em>Ahorras $238</em></div>
-<a class="btn btn-s" data-cfg="registro" href="#">Empezar gratis</a></div><div class="plan" data-r style="--d:210ms">
-<h3>Hasta 1.000</h3><div class="gente">personas activas</div>
-<div class="mes"><sup>$</sup>150<small>/mes</small></div><div class="xp">Unos $0,15 por persona</div>
-<div class="anio"><span class="tag">−20%</span><b>Todo el año junto</b><div><s>$1.800</s> <strong>$1.440</strong></div><em>Ahorras $360</em></div>
-<a class="btn btn-s" data-cfg="registro" href="#">Empezar gratis</a></div><div class="plan" data-r style="--d:280ms">
-<h3>Hasta 3.000</h3><div class="gente">personas activas</div>
-<div class="mes"><sup>$</sup>300<small>/mes</small></div><div class="xp">Unos $0,10 por persona</div>
-<div class="anio"><span class="tag">−20%</span><b>Todo el año junto</b><div><s>$3.600</s> <strong>$2.880</strong></div><em>Ahorras $720</em></div>
-<a class="btn btn-s" data-cfg="registro" href="#">Empezar gratis</a></div></div>
-    <div class="pnota">
-      <div data-r><b>Todo incluido en todos los planes</b>Lo único que cambia es el tamaño de tu iglesia.</div>
-      <div data-r style="--d:80ms"><b>Los niños y las visitas no cuentan</b>Solo cuentan los miembros y asistentes de 13 años o más que están activos.</div>
-      <div data-r style="--d:160ms"><b>¿Iglesia recién plantada o más de 3.000?</b>Tenemos un plan especial. <a data-cfg="mailto" href="#">Escríbenos</a>.</div>
-    </div>
-    <p data-r style="margin-top:20px;font-size:.86rem;color:rgba(255,255,255,.6);text-align:center">Precios en dólares por mes. Se pueden pagar en pesos al valor del dólar del día.</p>
-  </div>
-</section>
-
-<section id="empezar">
-  <div class="c">
-    <div class="kicker" data-r>Cómo empezar</div>
-    <h2 data-r>Tres pasos. <em>Cinco minutos.</em></h2>
-    <ol class="pasos">
-      <li data-r><h3>Anota tu iglesia</h3><p>Llenas una hoja con el nombre de la iglesia y tus datos. La iglesia queda creada en el momento, sin esperar a nadie.</p></li>
-      <li data-r style="--d:100ms"><h3>Trae a tu gente</h3><p>Subes tu lista desde Excel o la cargas a mano. La app te guía paso a paso y eliges qué funciones usar.</p></li>
-      <li data-r style="--d:200ms"><h3>Invita a los hermanos</h3><p>Compartes el código de la iglesia por WhatsApp o con un cartel con QR. Cada uno entra desde su teléfono.</p></li>
+    <ol class="ruta" id="ruta">
+      <li style="--d:.2s"><b>Hoy</b><span>Tu iglesia queda creada, con todas las funciones.</span></li>
+      <li style="--d:.9s"><b>A los 2 meses</b><span>Te mandamos un resumen de lo que la app ya registró.</span></li>
+      <li style="--d:1.6s"><b>A los 3 meses</b><span>Te decimos qué plan le toca a tu iglesia y cuánto cuesta.</span></li>
+      <li style="--d:2.3s"><b>Al cuarto mes</b><span>Decides si sigues. Si no, no pagas nada.</span></li>
     </ol>
-    <div style="text-align:center;margin-top:38px" data-r><a class="btn btn-p" data-cfg="registro" href="#">Sumar mi iglesia</a></div>
+
+    <div class="calc" id="calc">
+      <div>
+        <h3>Y después, ¿cuánto costaría?</h3>
+        <p class="calc-q">Mueve la barra hasta la cantidad de personas activas de tu iglesia.</p>
+        <div class="calc-n"><output id="cN" for="cR">120</output><span id="cNt">personas activas</span></div>
+        <input type="range" id="cR" min="0" max="100" step="1" value="22" aria-label="Personas activas de tu iglesia">
+        <div class="calc-e" aria-hidden="true"><span>10</span><span>100</span><span>300</span><span>600</span><span>1.000</span><span>3.000</span></div>
+        <p class="calc-nota">Solo cuentan los miembros y asistentes de 13 años o más que estuvieron activos en los últimos 90 días. Los niños y las visitas no cuentan.</p>
+      </div>
+      <div class="plan" aria-live="polite">
+        <div id="cPlan">
+          <p class="plan-k" id="cK">Plan hasta 300 personas activas</p>
+          <p class="plan-m"><b id="cM">$59</b><span>por mes</span></p>
+          <p class="plan-x" id="cX">Unos $0,49 por persona</p>
+          <div class="anual">
+            <span class="anual-t">−20%<small>pagando el año</small></span>
+            <p class="anual-k">Si pagas el año junto</p>
+            <p class="anual-p"><s id="cS">$708</s><b id="cA">$566</b><span>por año</span></p>
+            <p class="anual-a" id="cAh">Ahorras $142. Son más de dos meses de regalo.</p>
+          </div>
+        </div>
+        <div class="plan-esp" id="cEsp" hidden><b>Armamos un plan a tu medida.</b><p>Para iglesias de más de 3.000 personas, redes de iglesias y convenciones.</p><a class="b b-tinta" data-cfg="mailto" href="#">Escribirnos</a></div>
+        <a class="b b-trigo" id="cBtn" data-cfg="registro" href="#">Empezar gratis</a>
+      </div>
+    </div>
+    <div class="notas">
+      <div><b>Todo incluido en todos los planes</b>Lo único que cambia es el tamaño de tu iglesia.</div>
+      <div><b>Tu gente no paga nada</b>Paga la iglesia. Para cada hermano, la app es gratis.</div>
+      <div><b>¿Iglesia recién plantada?</b>Tenemos un plan especial. <a data-cfg="mailto" href="#">Escríbenos</a>.</div>
+    </div>
+    <p class="fino">Precios en dólares por mes. Se pueden pagar en pesos al valor del dólar del día. <a href="condiciones.html">Ver las condiciones</a>.</p>
   </div>
 </section>
-
-<section class="verso">
-  <div class="c"><div class="kicker" style="color:var(--trigo)" data-r>De ahí viene el nombre</div>
-  <q data-r>Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos. Rogad, pues, al Señor de la mies, que envíe obreros a su mies.</q><cite data-r>Mateo 9:37-38 (RV1960)</cite></div>
-</section>
-
-<section id="seguridad">
+<section class="sec emp" id="empezar">
   <div class="c">
-    <div class="kicker" data-r>Seguridad y privacidad</div>
-    <h2 data-r>Los datos de tu iglesia, <em>solo para tu iglesia.</em></h2>
-    <div class="seg">
-      <div data-r><h3>Cada iglesia ve solo lo suyo</h3><p>Nadie de otra iglesia puede ver tus personas, tus finanzas ni tus informes.</p></div>
-      <div data-r style="--d:80ms"><h3>Roles y permisos</h3><p>Tú decides quién ve cada cosa. Las finanzas, solo las personas autorizadas.</p></div>
-      <div data-r style="--d:160ms"><h3>Verificación en dos pasos</h3><p>Y bloqueo de la app con huella o con la cara.</p></div>
-      <div data-r><h3>Sin publicidad</h3><p>La app no muestra anuncios ni vende datos.</p></div>
-      <div data-r style="--d:80ms"><h3>Tus datos son tuyos</h3><p>El pastor puede bajar una copia de todos los datos de su iglesia.</p></div>
-      <div data-r style="--d:160ms"><h3>Ubicación con permiso</h3><p>Solo se usa cuando la persona la enciende, y la app lo explica antes.</p></div>
+    <p class="rot">Cómo empezar</p>
+    <h2>Tres pasos. Cinco minutos.</h2>
+    <ol class="pasos">
+      <li data-v><h3>Anota tu iglesia</h3><p>Llenas una hoja con el nombre de la iglesia y tus datos. La iglesia queda creada en el momento, sin esperar a nadie.</p></li>
+      <li data-v style="--d:.1s"><h3>Trae a tu gente</h3><p>Subes tu lista desde Excel o la cargas a mano. La app te guía paso a paso y eliges qué funciones usar.</p></li>
+      <li data-v style="--d:.2s"><h3>Invita a los hermanos</h3><p>Compartes el código de la iglesia por WhatsApp o con un cartel con QR. Cada uno entra desde su teléfono.</p></li>
+    </ol>
+    <div class="fila"><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia</a><a class="b b-tinta" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a></div>
+  </div>
+</section>
+<section class="sec b2" id="seguridad">
+  <div class="c">
+    <p class="rot">Seguridad y privacidad</p>
+    <h2>Los datos de tu iglesia, solo para tu iglesia.</h2>
+    <div class="seg-g">
+      <div><h3>Cada iglesia ve solo lo suyo</h3><p>Nadie de otra iglesia puede ver tus personas, tus finanzas ni tus informes.</p></div>
+      <div><h3>Roles y permisos</h3><p>Tú decides quién ve cada cosa. Las finanzas, solo las personas autorizadas.</p></div>
+      <div><h3>Verificación en dos pasos</h3><p>Un código extra al entrar, además de la contraseña.<span data-tiendas="si" hidden> Y bloqueo de la app con huella o con la cara.</span></p></div>
+      <div><h3>Sin publicidad</h3><p>La app no muestra anuncios ni vende datos.</p></div>
+      <div><h3>Tus datos son tuyos</h3><p>El pastor puede bajar una copia de todos los datos de su iglesia.</p></div>
+      <div><h3>Ubicación con permiso</h3><p>Solo se usa cuando la persona la enciende, y la app lo explica antes.</p></div>
     </div>
   </div>
 </section>
-
-<section class="faq" id="preguntas">
-  <div class="c">
-    <div class="kicker" data-r>Preguntas frecuentes</div>
-    <h2 data-r>Respuestas <em>claras.</em></h2>
-    <div style="margin-top:30px">
+<section class="sec faq" id="preguntas">
+  <div class="c faq-g">
+    <div class="faq-i">
+      <p class="rot">Preguntas frecuentes</p>
+      <h2>Respuestas claras.</h2>
+      <p class="lead">¿No está tu pregunta? Escríbenos y te respondemos personalmente.</p>
+      <a class="b b-tinta" data-cfg="mailto" href="#">Tengo otra pregunta</a>
+    </div>
+    <div>
       <details open><summary>¿Cómo empiezo?</summary><p>Tocas “Sumar mi iglesia”, llenas una hoja de 5 minutos y tu iglesia queda creada. <span data-tiendas="no">Se usa desde el navegador de cualquier teléfono o computadora, y la app para iPhone y Android está por salir en las tiendas.</span><span data-tiendas="si" hidden>Se usa con la app de App Store o Google Play, y también desde el navegador de una computadora.</span></p></details>
+      <details><summary>¿Puedo probarla antes de anotar mi iglesia?</summary><p>Sí. <a data-cfg="demo" href="#" target="_blank" rel="noopener">Entra a la iglesia de ejemplo</a> y toca todo. No pide registrarte y no se guarda nada.</p></details>
       <details><summary>¿Cuánto cuesta?</summary><p>Los primeros 4 meses son gratis. Después, desde $29 por mes para iglesias de hasta 100 personas activas, con 20% de descuento si pagas el año junto. <a href="#precios">Ver los planes</a>.</p></details>
+      <details><summary>¿Qué pasa cuando terminan los 4 meses?</summary><p>Te avisamos antes, con el plan que le toca a tu iglesia y su precio. Como no pedimos tarjeta, no hay cobros sorpresa. Si decides no seguir, puedes ver y bajar tus datos, y no se borra nada durante 12 meses.</p></details>
+      <details><summary>¿Mi gente tiene que pagar algo?</summary><p>No. Paga la iglesia, según cuántas personas activas tiene. Para cada hermano, la app es gratis.</p></details>
       <details><summary>¿Los niños y las visitas cuentan en el precio?</summary><p>No. Solo cuentan los miembros y asistentes regulares de 13 años o más que estuvieron activos en los últimos 90 días.</p></details>
       <details><summary>¿Sirve para una iglesia pequeña?</summary><p>Sí. Cada iglesia enciende solo las funciones que usa. Lo que apagas se esconde y no molesta.</p></details>
       <details><summary>¿Tenemos que cargar a todos de nuevo?</summary><p>No. Las personas se importan desde una planilla de Excel. Si quieres, las cargamos nosotros.</p></details>
@@ -514,55 +1019,374 @@ footer .c{display:flex;flex-wrap:wrap;gap:14px 26px;align-items:center}footer na
     </div>
   </div>
 </section>
-
-<section class="final" id="contacto">
-  <div class="granos" aria-hidden="true"><i style="left:1%;animation-duration:10s;animation-delay:-0s"></i><i style="left:42%;animation-duration:15s;animation-delay:-4s"></i><i style="left:83%;animation-duration:12s;animation-delay:-8s"></i><i style="left:27%;animation-duration:17s;animation-delay:-1s"></i><i style="left:68%;animation-duration:14s;animation-delay:-5s"></i><i style="left:12%;animation-duration:11s;animation-delay:-9s"></i><i style="left:53%;animation-duration:16s;animation-delay:-2s"></i><i style="left:94%;animation-duration:13s;animation-delay:-6s"></i><i style="left:38%;animation-duration:10s;animation-delay:-10s"></i><i style="left:79%;animation-duration:15s;animation-delay:-3s"></i><i style="left:23%;animation-duration:12s;animation-delay:-7s"></i><i style="left:64%;animation-duration:17s;animation-delay:-0s"></i></div>
-  <div class="c" style="position:relative;z-index:2">
-    <h2 data-r>La mies es mucha. <em>Que tu iglesia no pierda a nadie.</em></h2>
-    <p class="lead" data-r>Suma tu iglesia hoy. Los primeros 4 meses son gratis.</p>
-    <div class="acc" data-r><a class="btn btn-p" data-cfg="registro" href="#">Sumar mi iglesia gratis</a><a class="btn btn-o" data-cfg="whatsapp" href="#" hidden>Escribir por WhatsApp</a><a class="btn btn-o" data-cfg="mailto" href="#">Tengo una pregunta</a></div>
-    <p class="nota" data-r><a data-cfg="mailto-texto" href="#"></a></p>
+<section class="fin osc" id="contacto">
+  <div class="fin-mapa" aria-hidden="true"><svg id="ciudad2" viewBox="0 0 1000 760" preserveAspectRatio="xMidYMid slice"></svg></div>
+  <div class="c verso">
+    <p class="rot" style="justify-content:center;color:var(--trigo)">De ahí viene el nombre</p>
+    <q>Entonces dijo a sus discípulos: A la verdad la mies es mucha, mas los obreros pocos. Rogad, pues, al Señor de la mies, que envíe obreros a su mies.</q>
+    <cite>Mateo 9:37-38 (RV1960)</cite>
+  </div>
+  <div class="c cierre">
+    <h2>La mies es mucha. Que tu iglesia no pierda a nadie.</h2>
+    <p class="lead">Suma tu iglesia hoy. Los primeros 4 meses son gratis.</p>
+    <div class="fila"><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia gratis</a><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar la demostración</a><a class="b b-claro" data-cfg="whatsapp" href="#" hidden>Escribir por WhatsApp</a></div>
+    <p class="correo">¿Una pregunta? Escríbenos a <a data-cfg="mailto-texto" href="#"></a></p>
   </div>
 </section>
+
 </main>
 
 <footer><div class="c">
-  <a class="marca" href="#inicio"><img src="img/icono.png" alt="" width="28" height="28">La Mies</a>
-  <span>Hecha por la Iglesia Bautista Victoria · Posadas, Misiones, Argentina</span>
-  <nav><a data-cfg="entrar" href="#">Entrar</a><a href="condiciones.html">Condiciones</a><a data-cfg="privacidad" href="#">Privacidad</a></nav>
+  <a class="marca" href="#inicio"><img src="img/logo.png?v=77b87123" alt="" width="28" height="28">La Mies</a>
+  <span>Hecha por la Iglesia Bautista Victoria. Posadas, Misiones, Argentina.</span>
+  <nav aria-label="Enlaces"><a data-cfg="entrar" href="#">Entrar</a><a data-cfg="demo" href="#" target="_blank" rel="noopener">Demostración</a><a href="condiciones.html">Condiciones</a><a data-cfg="privacidad" href="#">Privacidad</a><a data-cfg="mailto-texto" href="#"></a></nav>
 </div></footer>
-<div class="fijo" id="fijo"><a class="btn btn-p" data-cfg="registro" href="#">Sumar mi iglesia</a></div>
+<div class="fijo" id="fijo"><a class="b b-claro" data-cfg="demo" href="#" target="_blank" rel="noopener">Probar</a><a class="b b-trigo" data-cfg="registro" href="#">Sumar mi iglesia gratis</a></div>
 
 <script>
 (function(){
-  var c=window.LA_MIES||{},q=function(s){return [].slice.call(document.querySelectorAll(s))};
-  q('[data-cfg="registro"]').forEach(function(e){e.href=c.registro});
-  q('[data-cfg="entrar"]').forEach(function(e){e.href=c.entrar});
-  q('[data-cfg="privacidad"]').forEach(function(e){e.href=c.privacidad});
-  q('[data-cfg="mailto"]').forEach(function(e){e.href='mailto:'+c.email+'?subject='+encodeURIComponent('Pregunta sobre La Mies')});
-  q('[data-cfg="mailto-texto"]').forEach(function(e){e.href='mailto:'+c.email;e.textContent=c.email});
-  var n=(c.whatsapp||'').replace(/\D/g,'');
-  q('[data-cfg="whatsapp"]').forEach(function(e){if(n){e.href='https://wa.me/'+n+'?text='+encodeURIComponent(c.mensajeWhatsApp||'');e.hidden=false}});
-  ['appStore','googlePlay'].forEach(function(k){q('[data-cfg="'+k+'"]').forEach(function(e){if(c[k]){e.href=c[k];e.hidden=false}})});
-  if(c.appStore||c.googlePlay){q('[data-tiendas="no"]').forEach(function(e){e.hidden=true});q('[data-tiendas="si"]').forEach(function(e){e.hidden=false})}
+  'use strict';
+  var c = window.LA_MIES || {}, doc = document;
+  var q = function(s, r){ return [].slice.call((r || doc).querySelectorAll(s)); };
+  var $ = function(id){ return doc.getElementById(id); };
+  var quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var clamp = function(v, a, b){ return v < a ? a : v > b ? b : v; };
+  var suave = function(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
 
-  // aparecer al bajar
-  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.14,rootMargin:'0px 0px -6% 0px'});
-  q('[data-r]').forEach(function(e){io.observe(e)});
+  /* ---------- enlaces de la configuración ---------- */
+  ['registro', 'entrar', 'privacidad', 'demo', 'demoHermano'].forEach(function(k){
+    q('[data-cfg="' + k + '"]').forEach(function(e){ if (c[k]) e.href = c[k]; });
+  });
+  q('[data-cfg="mailto"]').forEach(function(e){ e.href = 'mailto:' + c.email + '?subject=' + encodeURIComponent('Pregunta sobre La Mies'); });
+  q('[data-cfg="mailto-texto"]').forEach(function(e){ e.href = 'mailto:' + c.email; e.textContent = c.email; });
+  var wa = (c.whatsapp || '').replace(/\D/g, '');
+  q('[data-cfg="whatsapp"]').forEach(function(e){ if (wa){ e.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent(c.mensajeWhatsApp || ''); e.hidden = false; } });
+  ['appStore', 'googlePlay'].forEach(function(k){ q('[data-cfg="' + k + '"]').forEach(function(e){ if (c[k]){ e.href = c[k]; e.hidden = false; } }); });
+  if (c.appStore || c.googlePlay){ q('[data-tiendas="no"]').forEach(function(e){ e.hidden = true; }); q('[data-tiendas="si"]').forEach(function(e){ e.hidden = false; }); }
 
-  // barra de avance, cabecera, botón fijo y teléfonos que se mueven con la página
-  var av=document.getElementById('avance'),top=document.getElementById('top'),fijo=document.getElementById('fijo'),par=q('[data-p]'),quieto=matchMedia('(prefers-reduced-motion: reduce)').matches,t=false;
-  function paso(){t=false;var y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
-    av.style.transform='scaleX('+(h>0?y/h:0)+')';top.classList.toggle('s',y>60);fijo.classList.toggle('s',y>innerHeight*.8&&y<h-500);
-    if(!quieto)par.forEach(function(e){var r=e.parentNode.getBoundingClientRect();if(r.bottom<-200||r.top>innerHeight+200)return;var d=(r.top+r.height/2-innerHeight/2)*parseFloat(e.dataset.p);e.style.translate='0 '+d.toFixed(1)+'px'})}
-  addEventListener('scroll',function(){if(!t){t=true;requestAnimationFrame(paso)}},{passive:true});paso();
+  /* ---------- aparecer al bajar ---------- */
+  var ver = function(sel, cls, opt){
+    var els = typeof sel === 'string' ? q(sel) : sel;
+    if (!('IntersectionObserver' in window)){ els.forEach(function(e){ e.classList.add(cls); }); return; }
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add(cls); io.unobserve(e.target); } }); }, opt || { threshold: .12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(function(e){ io.observe(e); });
+  };
+  ver('[data-v]', 'v');
+  ver('.sem', 'v', { threshold: .3 });
+  ver('#ruta', 'v', { threshold: .5 });
+  ver('.est', 'on', { threshold: 0, rootMargin: '0px 0px -34% 0px' });
 
-  // el video: se reproduce cuando se ve, y la lista sigue lo que muestra
-  var v=document.getElementById('vid'),li=q('#caps li');
-  if(v){new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var p=v.play();if(p&&p.catch)p.catch(function(){})}else v.pause()})},{threshold:.35}).observe(v);
-    v.addEventListener('timeupdate',function(){var k=0;li.forEach(function(e,i){if(v.currentTime>=parseFloat(e.dataset.t)-.05)k=i});li.forEach(function(e,i){e.classList.toggle('on',i===k)})});
-    li.forEach(function(e){e.addEventListener('click',function(){v.currentTime=parseFloat(e.dataset.t)+.1;v.play()})});li[0].classList.add('on')}
+  /* ---------- lo que se mueve con la página ---------- */
+  var av = $('avance'), cab = $('cab'), fijo = $('fijo'), par = q('[data-p]'), prob = q('.prob')[0], probE = q('.prob-e')[0], cam = $('cam'), camL = q('.cam-linea i')[0], enCola = false;
+  function paso(){
+    enCola = false;
+    var y = window.scrollY, vh = window.innerHeight, h = doc.documentElement.scrollHeight - vh;
+    av.style.transform = 'scaleX(' + (h > 0 ? y / h : 0) + ')';
+    cab.classList.toggle('s', y > 40 || cab.classList.contains('ab'));
+    fijo.classList.toggle('s', y > vh * .7 && y < h - 520);
+    if (prob && !quieto){
+      var r = prob.getBoundingClientRect(), tot = r.height - vh;
+      if (r.bottom > -100 && r.top < vh + 100){
+        var p = clamp(-r.top / tot, 0, 1);
+        probE.style.setProperty('--q', (1 - suave(clamp(p / .6, 0, 1))).toFixed(4));
+        probE.style.setProperty('--u', suave(clamp((p - .3) / .3, 0, 1)).toFixed(4));
+        probE.style.setProperty('--w', suave(clamp((p - .56) / .2, 0, 1)).toFixed(4));
+      }
+    }
+    if (cam){
+      var rc = cam.getBoundingClientRect();
+      if (rc.bottom > 0 && rc.top < vh) camL.style.setProperty('--p', clamp((vh * .64 - rc.top) / rc.height, 0, 1).toFixed(4));
+    }
+    if (!quieto) par.forEach(function(e){
+      var rr = e.parentNode.getBoundingClientRect();
+      if (rr.bottom < -200 || rr.top > vh + 200) return;
+      e.style.translate = '0 ' + ((rr.top + rr.height / 2 - vh / 2) * parseFloat(e.dataset.p)).toFixed(1) + 'px';
+    });
+  }
+  addEventListener('scroll', function(){ if (!enCola){ enCola = true; requestAnimationFrame(paso); } }, { passive: true });
+
+  /* ---------- menú del teléfono ---------- */
+  var mb = $('menuB');
+  if (mb){
+    var menu = function(ab){ cab.classList.toggle('ab', ab); mb.setAttribute('aria-expanded', ab ? 'true' : 'false'); mb.setAttribute('aria-label', ab ? 'Cerrar el menú' : 'Abrir el menú'); paso(); };
+    mb.addEventListener('click', function(){ menu(!cab.classList.contains('ab')); });
+    q('#menuN a').forEach(function(a){ a.addEventListener('click', function(){ menu(false); }); });
+    addEventListener('keydown', function(e){ if (e.key === 'Escape' && cab.classList.contains('ab')){ menu(false); mb.focus(); } });
+    doc.addEventListener('click', function(e){ if (cab.classList.contains('ab') && !cab.contains(e.target)) menu(false); });
+  }
+  addEventListener('resize', paso);
+  if (quieto && probE){ probE.style.setProperty('--q', '1'); probE.style.setProperty('--u', '1'); probE.style.setProperty('--w', '1'); }
+  paso();
+
+  /* ---------- videos: se cargan al acercarse y se reproducen cuando se ven ---------- */
+  var chico = innerWidth < 700 || (navigator.connection && navigator.connection.saveData);
+  function video(v){
+    if (!v || !('IntersectionObserver' in window)) return;
+    var cargar = function(){ if (v.dataset.poster && !v.poster) v.poster = v.dataset.poster; if (!v.getAttribute('src')){ v.src = (chico && v.dataset.srcM) || v.dataset.src; v.load(); } };
+    var tocar = function(){ var pr = v.play(); if (pr && pr.catch) pr.catch(function(e){ if (e && e.name === 'NotAllowedError') v.controls = true; }); };   /* si el teléfono no deja que arranque solo (modo ahorro), aparece el botón de reproducir */
+    v._cargar = cargar;
+    new IntersectionObserver(function(es){ if (es[0].isIntersecting) cargar(); }, { rootMargin: '900px' }).observe(v);
+    new IntersectionObserver(function(es){
+      var e = es[es.length - 1];
+      if (e.isIntersecting && !quieto){ cargar(); tocar(); } else if (!v.paused) v.pause();
+    }, { threshold: .3 }).observe(v);
+    if (quieto) v.controls = true;
+  }
+  var vh0 = $('vHero'), pie = q('#pie span')[0];
+  video(vh0);
+  var PIES = [[0, 'Una salida de verdad, en la app'], [2.3, 'Un toque para empezar'], [4.7, '¿Evangelismo o volantes?'], [5.9, 'El mapa marca cada cuadra caminada'], [11.9, 'El equipo se ve en vivo'], [16, 'Cada contacto queda anotado'], [22.6, 'El reloj y los metros corren solos'], [27.5, 'Contactos y promesas: se cuentan solos'], [35.9, 'Y queda marcado para toda la iglesia']];
+  if (vh0 && pie) vh0.addEventListener('timeupdate', function(){
+    var t = vh0.currentTime, k = 0;
+    for (var i = 0; i < PIES.length; i++) if (t >= PIES[i][0]) k = i;
+    if (pie.textContent !== PIES[k][1]) pie.textContent = PIES[k][1];
+  });
+  var vr = $('vRec'), caps = q('#caps button'), capK = -1;
+  video(vr);
+  if (vr && caps.length){
+    vr.addEventListener('timeupdate', function(){
+      var k = 0; caps.forEach(function(e, i){ if (vr.currentTime >= parseFloat(e.dataset.t) - .05) k = i; });
+      if (k === capK) return; capK = k;
+      caps.forEach(function(e, i){ e.classList.toggle('on', i === k); });
+      var fila = caps[k].parentNode;   /* en teléfono la lista es una fila: se corre sola hasta el botón activo */
+      if (fila.scrollWidth > fila.clientWidth + 4) fila.scrollTo({ left: caps[k].offsetLeft - (fila.clientWidth - caps[k].offsetWidth) / 2, behavior: quieto ? 'auto' : 'smooth' });
+    });
+    caps.forEach(function(e){ e.addEventListener('click', function(){
+      vr._cargar && vr._cargar();
+      var ir = function(){ vr.currentTime = parseFloat(e.dataset.t) + .1; var pr = vr.play(); if (pr && pr.catch) pr.catch(function(){}); };
+      if (vr.readyState >= 1) ir(); else vr.addEventListener('loadedmetadata', ir, { once: true });
+    }); });
+    caps[0].classList.add('on');
+  }
+
+  /* ---------- evangelismo: el teléfono queda quieto y la pantalla cambia ---------- */
+  var pasos = q('#pasos .paso'), pila = $('pila');
+  if (pila && pasos.length){
+    var caps2 = pasos.map(function(p, i){
+      var o = p.querySelector('img'), im = new Image();
+      im.alt = ''; im.loading = 'lazy'; im.decoding = 'async'; im.src = o.getAttribute('src'); im.width = 720; im.height = 1560;
+      if (i === 0) im.className = 'on';
+      pila.appendChild(im); return im;
+    });
+    var activo = function(k){ pasos.forEach(function(p, i){ p.classList.toggle('on', i === k); }); caps2.forEach(function(im, i){ im.classList.toggle('on', i === k); }); };
+    if ('IntersectionObserver' in window){
+      var ioP = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting && matchMedia('(min-width:961px)').matches) activo(pasos.indexOf(e.target)); }); }, { rootMargin: '-46% 0px -46% 0px', threshold: 0 });
+      pasos.forEach(function(p){ ioP.observe(p); });
+    }
+  }
+
+  /* ---------- asistencia: se puede tocar ---------- */
+  var caras = $('caras'), cuenta = $('cuenta'), nota = $('asiNota');
+  if (caras){
+    var GENTE = ['Daniel', 'Nicolás', 'Lucía', 'Mateo', 'Sofía', 'Abril', 'Hugo', 'Marta', 'Lautaro', 'Raúl', 'Valentina', 'Diego'], tocado = false;
+    var contar = function(){ cuenta.textContent = q('.cara.si', caras).length; };
+    GENTE.forEach(function(n){
+      var b = doc.createElement('button'); b.type = 'button'; b.className = 'cara'; b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<i>' + n.charAt(0) + '</i><span>' + n + '</span>';
+      b.addEventListener('click', function(ev){
+        if (ev.isTrusted && !tocado){ tocado = true; nota.textContent = 'Así de fácil'; }
+        var si = b.classList.toggle('si'); b.setAttribute('aria-pressed', si ? 'true' : 'false'); contar();
+      });
+      caras.appendChild(b);
+    });
+    if (!quieto && 'IntersectionObserver' in window){
+      var ioA = new IntersectionObserver(function(es){ es.forEach(function(e){
+        if (!e.isIntersecting) return; ioA.disconnect();
+        [0, 2, 3, 6, 10].forEach(function(k, n){ setTimeout(function(){ if (!tocado) caras.children[k].click(); }, 500 + n * 380); });
+        setTimeout(function(){ if (!tocado) nota.textContent = 'Ahora tú: toca las caras'; }, 2700);
+      }); }, { threshold: .55 });
+      ioA.observe(caras);
+    }
+  }
+
+  /* ---------- pestañas ---------- */
+  function pestanas(lista, paneles, alCambiar){
+    if (!lista) return;
+    var bs = q('[role=tab]', lista);
+    var ir = function(k, foco){
+      bs.forEach(function(b, i){ b.setAttribute('aria-selected', i === k ? 'true' : 'false'); b.tabIndex = i === k ? 0 : -1; });
+      alCambiar(k); if (foco) bs[k].focus();
+    };
+    bs.forEach(function(b, i){
+      b.addEventListener('click', function(){ ir(i); });
+      b.addEventListener('keydown', function(e){
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){ e.preventDefault(); ir((i + 1) % bs.length, true); }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp'){ e.preventDefault(); ir((i + bs.length - 1) % bs.length, true); }
+      });
+    });
+    ir(0);
+  }
+  var pcI = q('#pcImgs img');
+  var pcListo = false;   /* la foto de una pestaña se pide recién cuando alguien la toca (no al abrir la página) */
+  pestanas($('pcTabs'), null, function(k){ pcI.forEach(function(im, i){ im.classList.toggle('on', i === k); if (i === k && pcListo) im.loading = 'eager'; }); });
+  pcListo = true;
+  var rolP = q('#rolPan .rol-p');
+  pestanas($('rolTabs'), null, function(k){ rolP.forEach(function(p, i){ p.hidden = i !== k; }); });
+
+  /* ---------- precios: la cuenta ---------- */
+  var R = $('cR');
+  if (R){
+    var PLANES = [[100, 29, 278, 348], [300, 59, 566, 708], [600, 99, 950, 1188], [1000, 150, 1440, 1800], [3000, 300, 2880, 3600]];
+    var TR = [[0, 10], [20, 100], [40, 300], [60, 600], [80, 1000], [97, 3000]];
+    var miles = function(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+    var gente = function(v){
+      if (v > 97) return 3001;
+      for (var i = 1; i < TR.length; i++) if (v <= TR[i][0]){
+        var a = TR[i - 1], b = TR[i], n = a[1] + (b[1] - a[1]) * (v - a[0]) / (b[0] - a[0]);
+        var paso = n < 100 ? 5 : n < 300 ? 10 : n < 1000 ? 20 : 100;
+        return Math.round(n / paso) * paso;
+      }
+      return 3000;
+    };
+    var calc = function(){
+      var v = +R.value, n = gente(v), mas = n > 3000;
+      R.style.setProperty('--pc', v + '%');
+      $('cN').textContent = mas ? 'Más de 3.000' : miles(n);
+      $('cPlan').hidden = mas; $('cEsp').hidden = !mas; $('cBtn').hidden = mas;
+      if (mas) return;
+      var p = PLANES.filter(function(x){ return n <= x[0]; })[0];
+      $('cK').textContent = 'Plan hasta ' + miles(p[0]) + ' personas activas';
+      $('cM').textContent = '$' + miles(p[1]);
+      $('cX').textContent = 'Unos $' + (p[1] / n).toFixed(2).replace('.', ',') + ' por persona';
+      $('cS').textContent = '$' + miles(p[3]);
+      $('cA').textContent = '$' + miles(p[2]);
+      $('cAh').textContent = 'Ahorras $' + miles(p[3] - p[2]) + '. Son más de dos meses de regalo.';
+    };
+    R.addEventListener('input', calc); calc();
+  }
+
+  /* ---------- el mapa: una ciudad que se va marcando ---------- */
+  function ciudad(svg, vivo){
+    if (!svg) return null;
+    var NS = 'http://www.w3.org/2000/svg', COLS = 13, ROWS = 10, X0 = -52, Y0 = -66, CW = 85, CH = 87, PAD = 8;
+    var X = function(i){ return X0 + i * CW; }, Y = function(j){ return Y0 + j * CH; };
+    var el = function(t, a, padre){ var e = doc.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); (padre || g).appendChild(e); return e; };
+    var g = doc.createElementNS(NS, 'g'); g.setAttribute('transform', 'rotate(-8 500 380)'); svg.appendChild(g);
+    var d = '', i, j;
+    for (i = 0; i <= COLS; i++) d += 'M' + X(i) + ' ' + Y(0) + 'V' + Y(ROWS);
+    for (j = 0; j <= ROWS; j++) d += 'M' + X(0) + ' ' + Y(j) + 'H' + X(COLS);
+    el('path', { d: d, fill: 'none', stroke: 'rgba(255,255,255,.11)', 'stroke-width': 10 });
+    el('path', { d: 'M' + X(0) + ' ' + Y(6) + 'H' + X(COLS), fill: 'none', stroke: 'rgba(255,255,255,.075)', 'stroke-width': 20 });
+    el('rect', { x: X(6) + 11, y: Y(3) + 11, width: CW - 22, height: CH - 22, rx: 8, fill: 'rgba(82,201,138,.14)' });
+    var capas = { volantes: el('g', {}), viejo: el('g', {}), mes: el('g', {}), semana: el('g', {}) };
+    var COLOR = { semana: '#52C98A', mes: '#6B9BFF', viejo: '#8D9A92', volantes: '#F58A45' }, hechas = {};
+    // una vereda: tipo 'h' u 'v', esquina (i,j), lado s (+1 / -1), dirección dir (+1 / -1)
+    function vereda(capa, tipo, i, j, s, dir, fuera){
+      var k = capa + tipo + i + '_' + j + '_' + s;
+      if (hechas[k]) return hechas[k];
+      var o = (fuera ? 6.6 : 3.4) * s, a, b;
+      if (tipo === 'h'){ a = [X(i) + PAD, Y(j) + o]; b = [X(i + 1) - PAD, Y(j) + o]; } else { a = [X(i) + o, Y(j) + PAD]; b = [X(i) + o, Y(j + 1) - PAD]; }
+      if (dir < 0){ var t = a; a = b; b = t; }
+      var L = (tipo === 'h' ? CW : CH) - 2 * PAD;
+      var ln = el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: COLOR[capa], 'stroke-width': 3, 'stroke-linecap': 'round', 'stroke-dasharray': L, 'stroke-dashoffset': L }, capas[capa]);
+      ln._L = L; return (hechas[k] = ln);
+    }
+    function barrio(c0, c1, r0, r1){
+      var s = [], a, b;
+      for (b = r0; b <= r1 + 1; b++) for (a = c0; a <= c1; a++) s.push(['h', a, b]);
+      for (a = c0; a <= c1 + 1; a++) for (b = r0; b <= r1; b++) s.push(['v', a, b]);
+      return s;
+    }
+    function pintar(capa, zona, espera, fuera){
+      var cx = (X(zona[0]) + X(zona[1] + 1)) / 2, cy = (Y(zona[2]) + Y(zona[3] + 1)) / 2;
+      barrio.apply(null, zona).forEach(function(sg){
+        var mx = sg[0] === 'h' ? X(sg[1]) + CW / 2 : X(sg[1]), my = sg[0] === 'h' ? Y(sg[2]) : Y(sg[2]) + CH / 2;
+        [1, -1].forEach(function(s){
+          var ln = vereda(capa, sg[0], sg[1], sg[2], s, 1, fuera);
+          if (!vivo || quieto){ ln.setAttribute('stroke-dashoffset', 0); return; }
+          ln.style.transition = 'stroke-dashoffset .9s ease ' + (espera + Math.hypot(mx - cx, my - cy) * .0022).toFixed(2) + 's';
+          requestAnimationFrame(function(){ requestAnimationFrame(function(){ ln.style.strokeDashoffset = 0; }); });
+        });
+      });
+    }
+    if (!vivo){ pintar('semana', [0, COLS - 1, 0, ROWS - 1], 0); return null; }
+    pintar('viejo', [9, 12, 0, 2], .5);
+    pintar('mes', [0, 2, 2, 5], .2);
+    pintar('volantes', [5, 12, 6, 9], .8, true);
+    if (quieto){ pintar('semana', [3, 8, 2, 5], 0); return null; }
+
+    // los equipos: caminan en serpentina; cada uno va marcando las dos veredas
+    function serpH(c0, c1, r0, r1, alReves){
+      var s = [], adel = !alReves, a, b;
+      for (b = r0; b <= r1; b++){
+        if (adel) for (a = c0; a <= c1; a++) s.push(['h', a, b, 1]); else for (a = c1; a >= c0; a--) s.push(['h', a, b, -1]);
+        if (b < r1) s.push(['v', adel ? c1 + 1 : c0, b, 1]);
+        adel = !adel;
+      }
+      return s;
+    }
+    function serpV(c0, c1, r0, r1){
+      var s = [], abajo = true, a, b;
+      for (a = c0; a <= c1; a++){
+        if (abajo) for (b = r0; b <= r1; b++) s.push(['v', a, b, 1]); else for (b = r1; b >= r0; b--) s.push(['v', a, b, -1]);
+        if (a < c1) s.push(['h', a, abajo ? r1 + 1 : r0, 1]);
+        abajo = !abajo;
+      }
+      return s;
+    }
+    var marcas = el('g', {}), pines = el('g', {});
+    function equipo(ruta, vel, cada){
+      var m = [1, -1].map(function(){ return el('circle', { r: 5, fill: '#fff', stroke: '#0D2A1C', 'stroke-width': 2, cx: -99, cy: -99 }, marcas); });
+      var largo = ruta.map(function(sg){ return sg[0] === 'h' ? CW : CH; }), total = largo.reduce(function(a, b){ return a + b; }, 0);
+      return { ruta: ruta, m: m, largo: largo, total: total, vel: vel, s: 0, k: -1, cada: cada, prox: cada * .6, fin: false };
+    }
+    var hud = { c: $('hudC'), k: $('hudK'), e: $('hudE') }, nC = 0, nK = 0;
+    var E = [
+      equipo(serpH(3, 7, 2, 6).concat([['v', 8, 6, 1]], serpH(3, 7, 7, 8, true)), 64, 250),
+      equipo(serpV(3, 8, 2, 5), 56, 330),
+      equipo(serpH(9, 11, 3, 6, true), 52, 290)
+    ];
+    function mover(e, dt){
+      if (e.fin) return;
+      e.s = Math.min(e.total, e.s + e.vel * dt);
+      var acum = 0, k = 0;
+      while (k < e.ruta.length - 1 && acum + e.largo[k] < e.s){ acum += e.largo[k]; k++; }
+      for (var n = Math.max(0, e.k); n <= k; n++){
+        var sg = e.ruta[n], L = e.largo[n], av = n < k ? L : e.s - (acum);
+        [1, -1].forEach(function(sd){
+          var ln = vereda('semana', sg[0], sg[1], sg[2], sd, sg[3]);
+          var off = ln._L * (1 - clamp((av - PAD) / ln._L, 0, 1));
+          if (off < parseFloat(ln.getAttribute('stroke-dashoffset'))) ln.setAttribute('stroke-dashoffset', off.toFixed(1));
+        });
+        if (n < k && n >= e.k && n !== e._cont){ e._cont = n; nC++; if (hud.c) hud.c.textContent = nC; }
+      }
+      e.k = k;
+      var sg2 = e.ruta[k], t = clamp((e.s - acum) / e.largo[k], 0, 1), dir = sg2[3], px, py;
+      if (sg2[0] === 'h'){ px = dir > 0 ? X(sg2[1]) + CW * t : X(sg2[1] + 1) - CW * t; py = Y(sg2[2]); e.m[0].setAttribute('cx', px); e.m[0].setAttribute('cy', py - 5); e.m[1].setAttribute('cx', px); e.m[1].setAttribute('cy', py + 5); }
+      else { px = X(sg2[1]); py = dir > 0 ? Y(sg2[2]) + CH * t : Y(sg2[2] + 1) - CH * t; e.m[0].setAttribute('cx', px - 5); e.m[0].setAttribute('cy', py); e.m[1].setAttribute('cx', px + 5); e.m[1].setAttribute('cy', py); }
+      if (e.s >= e.prox && t > .25 && t < .75){
+        e.prox += e.cada; nK++;
+        var lado = nK % 2 ? 12 : -12, cx = sg2[0] === 'h' ? px : px + lado, cy = sg2[0] === 'h' ? py + lado : py;
+        var onda = el('circle', { cx: cx, cy: cy, r: 4, fill: 'none', stroke: '#EDBE4F', 'stroke-width': 2 }, pines);
+        el('circle', { cx: cx, cy: cy, r: 3.8, fill: '#EDBE4F', stroke: '#0D2A1C', 'stroke-width': 1.4 }, pines);
+        if (onda.animate) onda.animate([{ r: 4, opacity: .9 }, { r: 22, opacity: 0 }], { duration: 1300, easing: 'ease-out', fill: 'forwards' });
+        if (hud.k) hud.k.textContent = nK;
+        if (hud.e) hud.e.textContent = Math.ceil(nK * .72);
+      }
+      if (e.s >= e.total) e.fin = true;
+    }
+    var antes = 0, anda = false, visible = true, empezo = 0;
+    function cuadro(ahora){
+      if (!anda) return;
+      if (!empezo) empezo = ahora;
+      var dt = Math.min(.05, (ahora - (antes || ahora)) / 1000); antes = ahora;
+      if (ahora - empezo > 900) E.forEach(function(e){ mover(e, dt); });
+      if (E.every(function(e){ return e.fin; })){ anda = false; return; }
+      requestAnimationFrame(cuadro);
+    }
+    function arrancar(){ if (!anda && visible && !doc.hidden && !E.every(function(e){ return e.fin; })){ anda = true; antes = 0; requestAnimationFrame(cuadro); } }
+    if ('IntersectionObserver' in window) new IntersectionObserver(function(es){ visible = es[0].isIntersecting; if (visible) arrancar(); else anda = false; }, { threshold: .05 }).observe(svg);
+    doc.addEventListener('visibilitychange', function(){ if (doc.hidden) anda = false; else arrancar(); });
+    arrancar();
+    return E;
+  }
+  ciudad($('ciudad'), true);
+  var c2 = $('ciudad2');
+  if (c2){
+    if ('IntersectionObserver' in window){ var io2 = new IntersectionObserver(function(es){ if (es[0].isIntersecting){ io2.disconnect(); ciudad(c2, false); } }, { rootMargin: '300px' }); io2.observe(c2); }
+    else ciudad(c2, false);
+  }
 })();
+
 </script>
 </body>
 </html>
