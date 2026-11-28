@@ -30,6 +30,7 @@ export default function Predicas() {
       <Header
         title={tx('Prédicas')}
         subtitle={tx('Mirá o escuchá cuando quieras')}
+        back
         right={isStaff ? (
           <Pressable onPress={() => router.push('/predica/nueva')} accessibilityRole="button" accessibilityLabel={tx('Subir prédica')} style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: colors.green, alignItems: 'center', justifyContent: 'center' }}>
             <Feather name="plus" size={22} color="#FFF" />
